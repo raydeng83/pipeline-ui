@@ -9,7 +9,7 @@ import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 export function PullForm({ environments }: { environments: Environment[] }) {
   const [environment, setEnvironment] = useState(environments[0]?.name ?? "");
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
-  const { logs, running, exitCode, run, abort } = useStreamingLogs();
+  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +57,7 @@ export function PullForm({ environments }: { environments: Environment[] }) {
         </div>
       </form>
 
-      <LogViewer logs={logs} running={running} exitCode={exitCode} />
+      <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
     </div>
   );
 }

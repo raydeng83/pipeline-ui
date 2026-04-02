@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LogEntry } from "@/hooks/useStreamingLogs";
 import { cn } from "@/lib/utils";
 
@@ -8,10 +8,24 @@ interface LogViewerProps {
   logs: LogEntry[];
   running: boolean;
   exitCode: number | null;
+  onClear?: () => void;
 }
 
-export function LogViewer({ logs, running, exitCode }: LogViewerProps) {
+export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const text = logs
+      .map((e) =>
+        e.type === "exit" ? `\n[Process exited with code ${e.code}]` : e.data
+      )
+      .join("");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,6 +63,24 @@ export function LogViewer({ logs, running, exitCode }: LogViewerProps) {
           <span className="inline-block w-2 h-2 rounded-full bg-slate-500" />
         )}
         <span className={cn("text-xs font-mono", statusColor)}>{statusText}</span>
+        {logs.length > 0 && (
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={handleCopy}
+              className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+            {!running && (
+              <button
+                onClick={onClear}
+                className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto bg-slate-900 rounded-b-md p-3 font-mono text-xs min-h-[300px] max-h-[500px]">

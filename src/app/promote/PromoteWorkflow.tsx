@@ -24,7 +24,7 @@ export function PromoteWorkflow({ environments }: { environments: Environment[] 
   const [environment, setEnvironment] = useState(environments[0]?.name ?? "");
   const [activeSubcommand, setActiveSubcommand] = useState<PromoteSubcommand | null>(null);
   const [confirmDanger, setConfirmDanger] = useState<PromoteSubcommand | null>(null);
-  const { logs, running, exitCode, run, abort } = useStreamingLogs();
+  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
 
   const handleRun = (subcommand: PromoteSubcommand) => {
     const def = PROMOTE_SUBCOMMANDS.find((s) => s.value === subcommand)!;
@@ -125,7 +125,7 @@ export function PromoteWorkflow({ environments }: { environments: Environment[] 
       </div>
 
       {/* Log output */}
-      <LogViewer logs={logs} running={running} exitCode={exitCode} />
+      <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
     </div>
   );
 }

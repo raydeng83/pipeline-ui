@@ -73,5 +73,10 @@ export function useStreamingLogs() {
     setRunning(false);
   }, []);
 
-  return { logs, running, exitCode, run, abort };
+  const clear = useCallback(() => {
+    setLogs([]);
+    setExitCode(null);
+  }, []);
+
+  return { logs, running, exitCode, run, abort, clear };
 }

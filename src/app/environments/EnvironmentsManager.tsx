@@ -288,12 +288,12 @@ export function EnvironmentsManager({
                         Tenant Base URL <span className="text-red-500">*</span>
                       </label>
                       <p className="text-xs text-slate-400">
-                        The AM endpoint of the tenant, ending in <code className="bg-slate-100 px-1 rounded">/am</code>
+                        Root URL of the tenant — do <strong>not</strong> include <code className="bg-slate-100 px-1 rounded">/am</code> (the CLI appends it automatically).
                       </p>
                       <input
                         value={form.TENANT_BASE_URL}
                         onChange={(e) => setF("TENANT_BASE_URL", e.target.value)}
-                        placeholder="https://your-tenant.forgeblocks.com/am"
+                        placeholder="https://your-tenant.forgeblocks.com"
                         className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>

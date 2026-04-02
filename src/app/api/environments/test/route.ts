@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "TENANT_BASE_URL is not set" }, { status: 400 });
   }
 
-  // Normalise: strip trailing /am or /am/ so we can build the right URL
-  const base = tenantBaseUrl.replace(/\/am\/?$/, "");
+  // TENANT_BASE_URL is the root domain (no /am suffix); append the health path directly
+  const base = tenantBaseUrl.replace(/\/$/, "");
   const healthUrl = `${base}/am/json/health/live`;
 
   try {

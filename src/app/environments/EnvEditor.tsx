@@ -25,9 +25,9 @@ const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
       {
         key: "TENANT_BASE_URL",
         label: "Tenant Base URL",
-        description: "The AM URL of the tenant, e.g. https://tenant.forgeblocks.com/am",
+        description: "Root URL of the tenant — do NOT include /am (the CLI appends that). e.g. https://tenant.forgeblocks.com",
         required: true,
-        placeholder: "https://your-tenant.forgeblocks.com/am",
+        placeholder: "https://your-tenant.forgeblocks.com",
       },
       {
         key: "SERVICE_ACCOUNT_CLIENT_ID",
