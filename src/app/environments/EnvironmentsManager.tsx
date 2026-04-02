@@ -28,6 +28,7 @@ interface NewEnvForm {
   SERVICE_ACCOUNT_ID: string;
   SERVICE_ACCOUNT_KEY: string;
   CONFIG_DIR: string;
+  REALMS: string;
   SCRIPT_PREFIXES: string;
 }
 
@@ -39,6 +40,7 @@ const EMPTY_FORM: NewEnvForm = {
   SERVICE_ACCOUNT_ID: "",
   SERVICE_ACCOUNT_KEY: "",
   CONFIG_DIR: "./config",
+  REALMS: '["alpha"]',
   SCRIPT_PREFIXES: '[""]',
 };
 
@@ -48,6 +50,7 @@ function buildEnvContent(form: NewEnvForm): string {
     `SERVICE_ACCOUNT_ID=${form.SERVICE_ACCOUNT_ID}`,
     `SERVICE_ACCOUNT_KEY=${form.SERVICE_ACCOUNT_KEY}`,
     `CONFIG_DIR=${form.CONFIG_DIR}`,
+    `REALMS=${form.REALMS}`,
     `SCRIPT_PREFIXES=${form.SCRIPT_PREFIXES}`,
   ];
   return lines.join("\n") + "\n";
@@ -351,10 +354,24 @@ export function EnvironmentsManager({
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium text-slate-700">
+                        Realms <span className="text-red-500">*</span>
+                      </label>
+                      <p className="text-xs text-slate-400">
+                        JSON array of realm names to manage, e.g. <code className="bg-slate-100 px-1 rounded">{`["alpha"]`}</code>
+                      </p>
+                      <input
+                        value={form.REALMS}
+                        onChange={(e) => setF("REALMS", e.target.value)}
+                        placeholder='["alpha"]'
+                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-slate-700">
                         Script Prefixes <span className="text-red-500">*</span>
                       </label>
                       <p className="text-xs text-slate-400">
-                        JSON array of script name prefixes to include, e.g. <code className="bg-slate-100 px-1 rounded">{`["MyOrg-"]`}</code>
+                        JSON array of script name prefixes to include, e.g. <code className="bg-slate-100 px-1 rounded">{`["MyOrg-"]`}</code>. Use <code className="bg-slate-100 px-1 rounded">{`[""]`}</code> to include all.
                       </p>
                       <input
                         value={form.SCRIPT_PREFIXES}

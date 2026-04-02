@@ -53,9 +53,10 @@ export function serializeEnvFile(
 
   const lines: string[] = [];
   for (const [key, value] of Object.entries(fields)) {
-    // Quote values that contain spaces or special chars
-    const needsQuotes = /[\s#"'\\]/.test(value);
-    lines.push(`${key}=${needsQuotes ? `"${value.replace(/"/g, '\\"')}"` : value}`);
+    // Only quote values that contain spaces or # (not quotes — JSON arrays/objects
+    // like ["alpha"] must be written unquoted so the CLI receives valid JSON)
+    const needsQuotes = /[\s#]/.test(value) && !value.startsWith("[") && !value.startsWith("{");
+    lines.push(`${key}=${needsQuotes ? `"${value}"` : value}`);
   }
 
   if (extraLines.length > 0) {

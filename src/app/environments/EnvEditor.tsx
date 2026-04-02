@@ -58,9 +58,17 @@ const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
         type: "path",
       },
       {
+        key: "REALMS",
+        label: "Realms",
+        description: 'JSON array of realm names to manage, e.g. ["alpha"] or ["alpha","bravo"]. Required by fr-config-pull.',
+        required: true,
+        placeholder: '["alpha"]',
+        type: "json-array",
+      },
+      {
         key: "SCRIPT_PREFIXES",
         label: "Script Prefixes",
-        description: 'JSON array of script name prefixes to include, e.g. ["MyOrg-"]',
+        description: 'JSON array of script name prefixes to include, e.g. ["MyOrg-"]. Use [""] to include all scripts.',
         required: true,
         placeholder: '["MyOrg-"]',
         type: "json-array",
@@ -70,14 +78,6 @@ const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
   {
     title: "Optional Config Files",
     fields: [
-      {
-        key: "REALMS",
-        label: "Realms",
-        description: 'JSON array of realm names to manage. Defaults to all realms if omitted.',
-        required: false,
-        placeholder: '["alpha","bravo"]',
-        type: "json-array",
-      },
       {
         key: "AGENTS_CONFIG_FILE",
         label: "Agents Config File",
