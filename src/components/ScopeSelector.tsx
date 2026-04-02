@@ -10,7 +10,6 @@ interface ScopeSelectorProps {
   disabled?: boolean;
 }
 
-// Group scopes by their group field
 const GROUPS = CONFIG_SCOPES.reduce<Record<string, typeof CONFIG_SCOPES>>((acc, scope) => {
   (acc[scope.group] ??= []).push(scope);
   return acc;
@@ -27,30 +26,25 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
   const allSelected = selected.length === CONFIG_SCOPES.length;
 
   const toggle = (value: ConfigScope) => {
-    if (selected.includes(value)) {
-      onChange(selected.filter((s) => s !== value));
-    } else {
-      onChange([...selected, value]);
-    }
+    onChange(
+      selected.includes(value)
+        ? selected.filter((s) => s !== value)
+        : [...selected, value]
+    );
   };
 
   const toggleGroup = (groupScopes: typeof CONFIG_SCOPES) => {
     const groupValues = groupScopes.map((s) => s.value);
     const allGroupSelected = groupValues.every((v) => selected.includes(v));
-    if (allGroupSelected) {
-      onChange(selected.filter((s) => !groupValues.includes(s)));
-    } else {
-      const toAdd = groupValues.filter((v) => !selected.includes(v));
-      onChange([...selected, ...toAdd]);
-    }
+    onChange(
+      allGroupSelected
+        ? selected.filter((s) => !groupValues.includes(s))
+        : [...selected, ...groupValues.filter((v) => !selected.includes(v))]
+    );
   };
 
   const toggleAll = () => {
-    if (allSelected) {
-      onChange([]);
-    } else {
-      onChange(CONFIG_SCOPES.map((s) => s.value));
-    }
+    onChange(allSelected ? [] : CONFIG_SCOPES.map((s) => s.value));
   };
 
   return (
@@ -69,9 +63,7 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
               disabled={disabled}
               className={cn(
                 "px-2 py-0.5 transition-colors capitalize disabled:opacity-40",
-                mode === m
-                  ? "bg-sky-600 text-white"
-                  : "text-slate-500 hover:bg-slate-100"
+                mode === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100"
               )}
             >
               {m}
@@ -88,7 +80,6 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
           {allSelected ? "Deselect all" : "Select all"}
         </button>
 
-        {/* Collapse / expand */}
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
@@ -112,9 +103,9 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
             </p>
           )}
 
-          {/* Basic mode: one checkbox per group */}
+          {/* Basic mode: one pill per group */}
           {mode === "basic" && (
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="flex flex-wrap gap-2">
               {GROUP_NAMES.map((groupName) => {
                 const scopes = GROUPS[groupName];
                 const groupValues = scopes.map((s) => s.value);
@@ -122,39 +113,36 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
                 const someGroupSelected = groupValues.some((v) => selected.includes(v));
 
                 return (
-                  <label
+                  <button
                     key={groupName}
+                    type="button"
+                    onClick={() => toggleGroup(scopes)}
+                    disabled={disabled}
                     className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded border text-xs cursor-pointer select-none transition-colors",
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors select-none disabled:opacity-40",
                       allGroupSelected
-                        ? "bg-sky-50 border-sky-300 text-sky-800"
+                        ? "bg-sky-600 border-sky-600 text-white"
                         : someGroupSelected
-                        ? "bg-sky-50/50 border-sky-200 text-sky-700"
-                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300",
-                      disabled && "opacity-40 cursor-not-allowed"
+                        ? "bg-sky-100 border-sky-400 text-sky-800"
+                        : "bg-white border-slate-300 text-slate-600 hover:border-sky-400 hover:text-sky-700"
                     )}
                   >
-                    <input
-                      type="checkbox"
-                      checked={allGroupSelected}
-                      ref={(el) => { if (el) el.indeterminate = someGroupSelected && !allGroupSelected; }}
-                      onChange={() => toggleGroup(scopes)}
-                      disabled={disabled}
-                      className="accent-sky-600 shrink-0"
-                    />
-                    <span className="font-medium">{groupName}</span>
+                    {groupName}
                     {someGroupSelected && (
-                      <span className="ml-auto text-slate-400 font-normal">
+                      <span className={cn(
+                        "text-[10px] font-normal",
+                        allGroupSelected ? "text-sky-200" : "text-sky-600"
+                      )}>
                         {groupValues.filter((v) => selected.includes(v)).length}/{scopes.length}
                       </span>
                     )}
-                  </label>
+                  </button>
                 );
               })}
             </div>
           )}
 
-          {/* Advanced mode: individual scopes per group */}
+          {/* Advanced mode: pills per scope, grouped */}
           {mode === "advanced" && (
             <div className="space-y-3">
               {Object.entries(GROUPS).map(([groupName, scopes]) => {
@@ -164,51 +152,44 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
 
                 return (
                   <div key={groupName}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <button
-                        type="button"
-                        onClick={() => toggleGroup(scopes)}
-                        disabled={disabled}
-                        className={cn(
-                          "text-xs font-semibold uppercase tracking-wide transition-colors disabled:opacity-40",
-                          allGroupSelected
-                            ? "text-sky-700"
-                            : someGroupSelected
-                            ? "text-sky-500"
-                            : "text-slate-400 hover:text-slate-600"
-                        )}
-                      >
-                        {groupName}
-                      </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(scopes)}
+                      disabled={disabled}
+                      className={cn(
+                        "text-xs font-semibold uppercase tracking-wide mb-1.5 transition-colors disabled:opacity-40",
+                        allGroupSelected
+                          ? "text-sky-700"
+                          : someGroupSelected
+                          ? "text-sky-500"
+                          : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
+                      {groupName}
                       {someGroupSelected && !allGroupSelected && (
-                        <span className="text-xs text-slate-400">
+                        <span className="ml-1.5 font-normal normal-case tracking-normal text-slate-400">
                           ({groupValues.filter((v) => selected.includes(v)).length}/{scopes.length})
                         </span>
                       )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4">
+                    </button>
+                    <div className="flex flex-wrap gap-1.5">
                       {scopes.map(({ value, label }) => {
                         const checked = selected.includes(value);
                         return (
-                          <label
+                          <button
                             key={value}
+                            type="button"
+                            onClick={() => toggle(value)}
+                            disabled={disabled}
                             className={cn(
-                              "flex items-center gap-2 px-2 py-1.5 rounded border text-xs cursor-pointer select-none transition-colors",
+                              "px-2.5 py-0.5 rounded-full text-xs border transition-colors select-none disabled:opacity-40",
                               checked
-                                ? "bg-sky-50 border-sky-300 text-sky-800"
-                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300",
-                              disabled && "opacity-40 cursor-not-allowed"
+                                ? "bg-sky-600 border-sky-600 text-white"
+                                : "bg-white border-slate-300 text-slate-600 hover:border-sky-400 hover:text-sky-700"
                             )}
                           >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggle(value)}
-                              disabled={disabled}
-                              className="accent-sky-600 shrink-0"
-                            />
                             {label}
-                          </label>
+                          </button>
                         );
                       })}
                     </div>
