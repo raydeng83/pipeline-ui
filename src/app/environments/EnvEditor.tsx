@@ -16,7 +16,7 @@ interface FieldDef {
   required: boolean;
   sensitive?: boolean;
   placeholder?: string;
-  type?: "text" | "json-array" | "path";
+  type?: "text" | "json-array" | "path" | "scope-tags";
 }
 
 const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
@@ -47,9 +47,10 @@ const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
       {
         key: "SERVICE_ACCOUNT_SCOPE",
         label: "Service Account Scope",
-        description: "OAuth2 scope(s) requested by the service account, space-separated.",
+        description: "OAuth2 scope(s) requested by the service account. Add each scope as a pill.",
         required: true,
-        placeholder: "fr:am* fr:idm:* fr:idc:esv:* fr:idc:direct-configuration:session:*",
+        placeholder: "fr:idm:*",
+        type: "scope-tags",
       },
       {
         key: "SERVICE_ACCOUNT_KEY",
@@ -197,6 +198,84 @@ function getMissingRequired(values: Record<string, string>): string[] {
     .map((f) => f.label);
 }
 
+// ── Scope tags input ─────────────────────────────────────────────────────────
+
+function ScopeTagsInput({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}) {
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const tags = value ? value.trim().split(/\s+/) : [];
+
+  const addTag = (raw: string) => {
+    const tag = raw.trim();
+    if (!tag || tags.includes(tag)) return;
+    onChange([...tags, tag].join(" "));
+  };
+
+  const removeTag = (tag: string) => {
+    onChange(tags.filter((t) => t !== tag).join(" "));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === " " || e.key === "Tab") {
+      e.preventDefault();
+      addTag(input);
+      setInput("");
+    } else if (e.key === "Backspace" && input === "" && tags.length > 0) {
+      removeTag(tags[tags.length - 1]);
+    }
+  };
+
+  return (
+    <div
+      onClick={() => inputRef.current?.focus()}
+      className={cn(
+        "flex flex-wrap gap-1.5 min-h-[38px] w-full rounded border border-slate-300 px-2 py-1.5 focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-sky-500 cursor-text",
+        disabled && "opacity-50 cursor-not-allowed bg-slate-50"
+      )}
+    >
+      {tags.map((tag) => (
+        <span
+          key={tag}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-sky-100 border border-sky-300 text-sky-800 font-mono"
+        >
+          {tag}
+          {!disabled && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); removeTag(tag); }}
+              className="text-sky-500 hover:text-sky-800 leading-none"
+              aria-label={`Remove ${tag}`}
+            >
+              ×
+            </button>
+          )}
+        </span>
+      ))}
+      <input
+        ref={inputRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => { if (input.trim()) { addTag(input); setInput(""); } }}
+        disabled={disabled}
+        placeholder={tags.length === 0 ? placeholder : ""}
+        className="flex-1 min-w-[120px] text-xs font-mono outline-none bg-transparent placeholder:text-slate-400"
+      />
+    </div>
+  );
+}
+
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 function FieldInput({
@@ -213,6 +292,17 @@ function FieldInput({
   const [visible, setVisible] = useState(false);
   const isTextArea =
     field.sensitive || (field.type === "json-array" && value.length > 60);
+
+  if (field.type === "scope-tags") {
+    return (
+      <ScopeTagsInput
+        value={value}
+        onChange={onChange}
+        placeholder={field.placeholder}
+        disabled={disabled}
+      />
+    );
+  }
 
   if (field.sensitive || field.key === "SERVICE_ACCOUNT_KEY") {
     return (
