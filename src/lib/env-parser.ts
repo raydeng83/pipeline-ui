@@ -11,12 +11,12 @@ export function parseEnvFile(content: string): Record<string, string> {
     const key = trimmed.slice(0, eqIdx).trim();
     const raw = trimmed.slice(eqIdx + 1).trim();
     // Strip surrounding quotes if present
-    const value =
+    const unquoted =
       (raw.startsWith('"') && raw.endsWith('"')) ||
       (raw.startsWith("'") && raw.endsWith("'"))
         ? raw.slice(1, -1)
         : raw;
-    result[key] = value;
+    result[key] = unquoted.replace(/\\n/g, "\n");
   }
   return result;
 }
@@ -53,10 +53,12 @@ export function serializeEnvFile(
 
   const lines: string[] = [];
   for (const [key, value] of Object.entries(fields)) {
+    // Escape actual newlines so multi-line values (e.g. PEM keys) stay on one line
+    const escaped = value.replace(/\n/g, "\\n");
     // Only quote values that contain spaces or # (not quotes — JSON arrays/objects
     // like ["alpha"] must be written unquoted so the CLI receives valid JSON)
-    const needsQuotes = /[\s#]/.test(value) && !value.startsWith("[") && !value.startsWith("{");
-    lines.push(`${key}=${needsQuotes ? `"${value}"` : value}`);
+    const needsQuotes = /[ \t#]/.test(escaped) && !escaped.startsWith("[") && !escaped.startsWith("{");
+    lines.push(`${key}=${needsQuotes ? `"${escaped}"` : escaped}`);
   }
 
   if (extraLines.length > 0) {

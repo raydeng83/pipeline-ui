@@ -30,11 +30,25 @@ const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
         placeholder: "https://your-tenant.forgeblocks.com/am",
       },
       {
+        key: "SERVICE_ACCOUNT_CLIENT_ID",
+        label: "Service Account Client ID",
+        description: "OAuth2 client ID for the service account (SERVICE_ACCOUNT_CLIENT_ID).",
+        required: true,
+        placeholder: "service-account-client-id",
+      },
+      {
         key: "SERVICE_ACCOUNT_ID",
         label: "Service Account ID",
-        description: "UUID of the service account used for API access.",
+        description: "UUID of the service account, used as the JWT issuer (SERVICE_ACCOUNT_ID).",
         required: true,
         placeholder: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      },
+      {
+        key: "SERVICE_ACCOUNT_SCOPE",
+        label: "Service Account Scope",
+        description: "OAuth2 scope(s) requested by the service account, space-separated.",
+        required: true,
+        placeholder: "fr:am* fr:idm:* fr:idc:esv:* fr:idc:direct-configuration:session:*",
       },
       {
         key: "SERVICE_ACCOUNT_KEY",
@@ -230,7 +244,9 @@ function TestConnectionButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           TENANT_BASE_URL: liveValues["TENANT_BASE_URL"],
+          SERVICE_ACCOUNT_CLIENT_ID: liveValues["SERVICE_ACCOUNT_CLIENT_ID"],
           SERVICE_ACCOUNT_ID: liveValues["SERVICE_ACCOUNT_ID"],
+          SERVICE_ACCOUNT_SCOPE: liveValues["SERVICE_ACCOUNT_SCOPE"],
           SERVICE_ACCOUNT_KEY: liveValues["SERVICE_ACCOUNT_KEY"],
         }),
       });

@@ -25,7 +25,9 @@ interface NewEnvForm {
   label: string;
   color: Environment["color"];
   TENANT_BASE_URL: string;
+  SERVICE_ACCOUNT_CLIENT_ID: string;
   SERVICE_ACCOUNT_ID: string;
+  SERVICE_ACCOUNT_SCOPE: string;
   SERVICE_ACCOUNT_KEY: string;
   CONFIG_DIR: string;
   REALMS: string;
@@ -37,7 +39,9 @@ const EMPTY_FORM: NewEnvForm = {
   label: "",
   color: "green",
   TENANT_BASE_URL: "",
+  SERVICE_ACCOUNT_CLIENT_ID: "",
   SERVICE_ACCOUNT_ID: "",
+  SERVICE_ACCOUNT_SCOPE: "fr:am* fr:idm:* fr:idc:esv:* fr:idc:direct-configuration:session:*",
   SERVICE_ACCOUNT_KEY: "",
   CONFIG_DIR: "./config",
   REALMS: '["alpha"]',
@@ -47,7 +51,9 @@ const EMPTY_FORM: NewEnvForm = {
 function buildEnvContent(form: NewEnvForm): string {
   const lines = [
     `TENANT_BASE_URL=${form.TENANT_BASE_URL}`,
+    `SERVICE_ACCOUNT_CLIENT_ID=${form.SERVICE_ACCOUNT_CLIENT_ID}`,
     `SERVICE_ACCOUNT_ID=${form.SERVICE_ACCOUNT_ID}`,
+    `SERVICE_ACCOUNT_SCOPE=${form.SERVICE_ACCOUNT_SCOPE}`,
     `SERVICE_ACCOUNT_KEY=${form.SERVICE_ACCOUNT_KEY}`,
     `CONFIG_DIR=${form.CONFIG_DIR}`,
     `REALMS=${form.REALMS}`,
@@ -293,13 +299,37 @@ export function EnvironmentsManager({
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium text-slate-700">
+                        Service Account Client ID <span className="text-red-500">*</span>
+                      </label>
+                      <p className="text-xs text-slate-400">OAuth2 client ID for the service account.</p>
+                      <input
+                        value={form.SERVICE_ACCOUNT_CLIENT_ID}
+                        onChange={(e) => setF("SERVICE_ACCOUNT_CLIENT_ID", e.target.value)}
+                        placeholder="service-account-client-id"
+                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-slate-700">
                         Service Account ID <span className="text-red-500">*</span>
                       </label>
-                      <p className="text-xs text-slate-400">UUID of the service account.</p>
+                      <p className="text-xs text-slate-400">UUID of the service account (JWT issuer).</p>
                       <input
                         value={form.SERVICE_ACCOUNT_ID}
                         onChange={(e) => setF("SERVICE_ACCOUNT_ID", e.target.value)}
                         placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-slate-700">
+                        Service Account Scope <span className="text-red-500">*</span>
+                      </label>
+                      <p className="text-xs text-slate-400">OAuth2 scope(s) requested, space-separated.</p>
+                      <input
+                        value={form.SERVICE_ACCOUNT_SCOPE}
+                        onChange={(e) => setF("SERVICE_ACCOUNT_SCOPE", e.target.value)}
+                        placeholder="fr:am* fr:idm:* fr:idc:esv:* fr:idc:direct-configuration:session:*"
                         className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>
