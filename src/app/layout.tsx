@@ -49,6 +49,9 @@ export default function RootLayout({
                   <Link href="/configs" className="px-3 py-1.5 rounded text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                     Configs
                   </Link>
+                  <Link href="/compare" className="px-3 py-1.5 rounded text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                    Compare
+                  </Link>
                   <Link href="/environments" className="px-3 py-1.5 rounded text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                     Environments
                   </Link>

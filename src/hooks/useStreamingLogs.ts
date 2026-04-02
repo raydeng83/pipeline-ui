@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import type { CompareReport } from "@/lib/diff-types";
+
+export type { CompareReport };
 
 export interface LogEntry {
-  type: "stdout" | "stderr" | "exit" | "error" | "scope-start" | "scope-end";
+  type: "stdout" | "stderr" | "exit" | "error" | "scope-start" | "scope-end" | "report";
   data?: string;
   code?: number;
   scope?: string;
@@ -14,11 +17,13 @@ export function useStreamingLogs() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [running, setRunning] = useState(false);
   const [exitCode, setExitCode] = useState<number | null>(null);
+  const [report, setReport] = useState<CompareReport | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
 
   const run = useCallback(async (url: string, body: object) => {
     setLogs([]);
     setExitCode(null);
+    setReport(null);
     setRunning(true);
 
     try {
@@ -49,9 +54,11 @@ export function useStreamingLogs() {
           if (!line.trim()) continue;
           try {
             const entry: LogEntry = JSON.parse(line);
-            setLogs((prev) => [...prev, entry]);
-            if (entry.type === "exit") {
-              setExitCode(entry.code ?? null);
+            if (entry.type === "report") {
+              if (entry.data) setReport(JSON.parse(entry.data) as CompareReport);
+            } else {
+              setLogs((prev) => [...prev, entry]);
+              if (entry.type === "exit") setExitCode(entry.code ?? null);
             }
           } catch {
             // ignore malformed lines
@@ -77,7 +84,8 @@ export function useStreamingLogs() {
   const clear = useCallback(() => {
     setLogs([]);
     setExitCode(null);
+    setReport(null);
   }, []);
 
-  return { logs, running, exitCode, run, abort, clear };
+  return { logs, running, exitCode, report, run, abort, clear };
 }

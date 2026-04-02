@@ -51,21 +51,30 @@ export function deleteEnvFolder(environmentName: string): void {
   }
 }
 
+export function getConfigDir(environmentName: string): string | null {
+  const filePath = getEnvFilePath(environmentName);
+  if (!fs.existsSync(filePath)) return null;
+  const vars = parseEnvFile(fs.readFileSync(filePath, "utf-8"));
+  const configDirRaw = vars.CONFIG_DIR ?? "./config";
+  const envDir = path.join(ENVIRONMENTS_DIR, environmentName);
+  return path.resolve(envDir, configDirRaw);
+}
+
 /** Load an env file and merge its values into process.env for a child process. */
-function buildEnv(environmentName: string): NodeJS.ProcessEnv {
+function buildEnv(environmentName: string, overrides?: Record<string, string>): NodeJS.ProcessEnv {
   const filePath = getEnvFilePath(environmentName);
   const fileVars = fs.existsSync(filePath)
     ? parseEnvFile(fs.readFileSync(filePath, "utf-8"))
     : {};
-  return { ...process.env, ...fileVars };
+  return { ...process.env, ...fileVars, ...overrides };
 }
 
-export function spawnFrConfig(options: RunOptions): {
+export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<string, string> }): {
   stream: ReadableStream<string>;
   abort: () => void;
 } {
-  const { command, environment, scopes } = options;
-  const env = buildEnv(environment);
+  const { command, environment, scopes, envOverrides } = options;
+  const env = buildEnv(environment, envOverrides);
 
   // No scopes = run `all`; otherwise run each scope as its own subcommand sequentially
   const subcommands: string[] =
@@ -79,6 +88,8 @@ export function spawnFrConfig(options: RunOptions): {
       const encode = (data: string, type: "stdout" | "stderr") => {
         controller.enqueue(JSON.stringify({ type, data, ts: Date.now() }) + "\n");
       };
+
+      let anyFailed = false;
 
       for (const sub of subcommands) {
         if (aborted) break;
@@ -106,17 +117,11 @@ export function spawnFrConfig(options: RunOptions): {
           JSON.stringify({ type: "scope-end", scope: sub, code: exitCode, ts: Date.now() }) + "\n"
         );
 
-        if (exitCode !== 0) {
-          controller.enqueue(
-            JSON.stringify({ type: "exit", code: exitCode, ts: Date.now() }) + "\n"
-          );
-          controller.close();
-          return;
-        }
+        if (exitCode !== 0) anyFailed = true;
       }
 
       controller.enqueue(
-        JSON.stringify({ type: "exit", code: aborted ? 130 : 0, ts: Date.now() }) + "\n"
+        JSON.stringify({ type: "exit", code: aborted ? 130 : (anyFailed ? 1 : 0), ts: Date.now() }) + "\n"
       );
       controller.close();
     },

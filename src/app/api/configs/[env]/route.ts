@@ -1,25 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
-import { getEnvFilePath } from "@/lib/fr-config";
-import { parseEnvFile } from "@/lib/env-parser";
-
-const ENVIRONMENTS_DIR = path.join(process.cwd(), "environments");
+import { getConfigDir } from "@/lib/fr-config";
 
 export interface FileNode {
   name: string;
   relativePath: string;
   type: "file" | "dir";
   children?: FileNode[];
-}
-
-function resolveConfigDir(envName: string): string | null {
-  const envFile = getEnvFilePath(envName);
-  if (!fs.existsSync(envFile)) return null;
-  const vars = parseEnvFile(fs.readFileSync(envFile, "utf-8"));
-  const configDirRaw = vars.CONFIG_DIR ?? "./config";
-  const envDir = path.join(ENVIRONMENTS_DIR, envName);
-  return path.resolve(envDir, configDirRaw);
 }
 
 function buildTree(dir: string, base: string): FileNode[] {
@@ -44,7 +32,7 @@ export async function GET(
   { params }: { params: Promise<{ env: string }> }
 ) {
   const { env } = await params;
-  const configDir = resolveConfigDir(env);
+  const configDir = getConfigDir(env);
   if (!configDir) return NextResponse.json({ error: "Environment not found" }, { status: 404 });
   if (!fs.existsSync(configDir)) return NextResponse.json({ tree: [], configDir });
   const tree = buildTree(configDir, configDir);
