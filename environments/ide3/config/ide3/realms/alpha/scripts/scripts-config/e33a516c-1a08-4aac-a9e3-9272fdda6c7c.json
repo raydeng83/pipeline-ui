@@ -1,0 +1,16 @@
+{
+  "_id": "e33a516c-1a08-4aac-a9e3-9272fdda6c7c",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319429540,
+  "default": false,
+  "description": "This script is used to read locale value from cookie.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950804387,
+  "name": "KYID.Journey.ForgotPassword.ReadLocale",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ForgotPassword.ReadLocale.js"
+  }
+}

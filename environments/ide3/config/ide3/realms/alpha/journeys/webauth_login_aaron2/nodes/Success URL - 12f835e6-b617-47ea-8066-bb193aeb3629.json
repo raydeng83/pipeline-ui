@@ -1,0 +1,17 @@
+{
+  "_id": "12f835e6-b617-47ea-8066-bb193aeb3629",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-239096315",
+  "_type": {
+    "_id": "SetSuccessUrlNode",
+    "collection": true,
+    "name": "Success URL",
+    "version": "1.0"
+  },
+  "successUrl": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/enduser/?realm=alpha#/auth-devices"
+}

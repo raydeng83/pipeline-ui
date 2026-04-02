@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/aaron_test5_endpoint",
+  "description": "POC endpoint to test relationship query preRequisiteTypeId/recordState on real managed object",
+  "file": "aaron_test5_endpoint.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

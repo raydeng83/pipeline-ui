@@ -7,6 +7,7 @@ export type { CompareReport };
 
 export interface LogEntry {
   type: "stdout" | "stderr" | "exit" | "error" | "scope-start" | "scope-end" | "report";
+  side?: "source" | "target";
   data?: string;
   code?: number;
   scope?: string;
@@ -17,12 +18,16 @@ export function useStreamingLogs() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [running, setRunning] = useState(false);
   const [exitCode, setExitCode] = useState<number | null>(null);
+  const [sourceExitCode, setSourceExitCode] = useState<number | null>(null);
+  const [targetExitCode, setTargetExitCode] = useState<number | null>(null);
   const [report, setReport] = useState<CompareReport | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
 
   const run = useCallback(async (url: string, body: object) => {
     setLogs([]);
     setExitCode(null);
+    setSourceExitCode(null);
+    setTargetExitCode(null);
     setReport(null);
     setRunning(true);
 
@@ -58,7 +63,11 @@ export function useStreamingLogs() {
               if (entry.data) setReport(JSON.parse(entry.data) as CompareReport);
             } else {
               setLogs((prev) => [...prev, entry]);
-              if (entry.type === "exit") setExitCode(entry.code ?? null);
+              if (entry.type === "exit") {
+                if (entry.side === "source") setSourceExitCode(entry.code ?? null);
+                else if (entry.side === "target") setTargetExitCode(entry.code ?? null);
+                else setExitCode(entry.code ?? null);
+              }
             }
           } catch {
             // ignore malformed lines
@@ -84,8 +93,10 @@ export function useStreamingLogs() {
   const clear = useCallback(() => {
     setLogs([]);
     setExitCode(null);
+    setSourceExitCode(null);
+    setTargetExitCode(null);
     setReport(null);
   }, []);
 
-  return { logs, running, exitCode, report, run, abort, clear };
+  return { logs, running, exitCode, sourceExitCode, targetExitCode, report, run, abort, clear };
 }

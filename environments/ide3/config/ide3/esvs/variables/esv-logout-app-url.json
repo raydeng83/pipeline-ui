@@ -1,0 +1,6 @@
+{
+  "_id": "esv-logout-app-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_LOGOUT_APP_URL}"
+}

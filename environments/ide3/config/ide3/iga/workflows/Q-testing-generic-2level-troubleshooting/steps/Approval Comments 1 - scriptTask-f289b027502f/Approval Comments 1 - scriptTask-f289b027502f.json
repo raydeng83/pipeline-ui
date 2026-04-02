@@ -1,0 +1,18 @@
+{
+  "displayName": "Approval Comments 1",
+  "name": "scriptTask-f289b027502f",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "scriptTask-05efed9a34f3"
+      }
+    ],
+    "script": {
+      "file": "Approval Comments 1 - scriptTask-f289b027502f.js"
+    }
+  },
+  "type": "scriptTask"
+}

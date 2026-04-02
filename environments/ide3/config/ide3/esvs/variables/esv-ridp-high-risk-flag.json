@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ridp-high-risk-flag",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_RIDP_HIGH_RISK_FLAG}"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-esv-retry-limit",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ESV_RETRY_LIMIT}"
+}

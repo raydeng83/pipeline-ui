@@ -1,0 +1,36 @@
+{
+  "_id": "ded5806f-032c-4e69-a8ac-b94a4a3eb706",
+  "_outcomes": [
+    {
+      "displayName": "mfaRequired",
+      "id": "mfaRequired"
+    },
+    {
+      "displayName": "mfaNotRequired",
+      "id": "mfaNotRequired"
+    },
+    {
+      "displayName": "registrationRequired",
+      "id": "registrationRequired"
+    }
+  ],
+  "_rev": "485834789",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "mfaRequired",
+    "mfaNotRequired",
+    "registrationRequired"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "e1dba338-29b6-4c00-b3e7-b0c0123d7a28"
+}

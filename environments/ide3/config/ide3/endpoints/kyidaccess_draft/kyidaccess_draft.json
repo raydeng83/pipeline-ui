@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/kyidaccess_draft",
+  "description": "",
+  "file": "kyidaccess_draft.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

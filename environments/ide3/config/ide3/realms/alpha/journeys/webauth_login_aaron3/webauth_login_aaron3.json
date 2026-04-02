@@ -1,0 +1,65 @@
+{
+  "_id": "webauth_login_aaron3",
+  "_rev": "2035994138",
+  "enabled": true,
+  "entryNodeId": "a9a418f7-1ce8-491c-aa4a-77927cc64382",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "3a8db1e7-0633-4ea7-89b0-dbee362fe812": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 530,
+      "y": 231
+    },
+    "a9a418f7-1ce8-491c-aa4a-77927cc64382": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "noDevice": "3a8db1e7-0633-4ea7-89b0-dbee362fe812",
+        "success": "d6a76549-cffa-4e51-a3a0-058b7c347f7c",
+        "unsupported": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "WebAuthn Authentication Node",
+      "nodeType": "WebAuthnAuthenticationNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 155
+    },
+    "d6a76549-cffa-4e51-a3a0-058b7c347f7c": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 530,
+      "y": 80
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 794,
+      "y": 124.33333333333334
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 794,
+      "y": 252.16666666666666
+    },
+    "startNode": {
+      "x": 70,
+      "y": 221.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

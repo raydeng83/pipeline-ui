@@ -1,0 +1,26 @@
+{
+  "_id": "dbeee632-280d-403b-af65-b79136bc056a",
+  "_outcomes": [
+    {
+      "displayName": "TransactionSessionOver",
+      "id": "TransactionSessionOver"
+    }
+  ],
+  "_rev": "-606131980",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "TransactionSessionOver"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "6088731c-d32e-4a96-bd36-2bc255e95bd9"
+}

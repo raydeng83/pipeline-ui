@@ -1,0 +1,6 @@
+{
+  "_id": "esv-adfailedauthenticationmsg-es",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ADFAILEDAUTHENTICATIONMSG_ES}"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "192acf2a-e594-4750-a0f0-47b7dbd57886",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1756113477518,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950812432,
+  "name": "KYID.2B1.RegistrationAcceptance.userInput.v2.UserInvitation",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.RegistrationAcceptance.userInput.v2.UserInvitation.js"
+  }
+}

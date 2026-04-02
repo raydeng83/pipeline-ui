@@ -1,0 +1,78 @@
+{
+  "name": "alpha_kyid_deltausers",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "name",
+      "restrictedKOGID",
+      "restrictedEmail"
+    ],
+    "properties": {
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "restrictedEmail": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "EmailIDs"
+          ],
+          "properties": {
+            "EmailIDs": {
+              "searchable": false,
+              "title": "Email IDs",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": false,
+        "title": "Restricted Email Ids",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "restrictedKOGID": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "KOGID"
+          ],
+          "properties": {
+            "KOGID": {
+              "searchable": false,
+              "title": "KOGID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": false,
+        "title": "Restricted KOGID",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "alpha_kyid_deltausers",
+    "type": "object"
+  }
+}

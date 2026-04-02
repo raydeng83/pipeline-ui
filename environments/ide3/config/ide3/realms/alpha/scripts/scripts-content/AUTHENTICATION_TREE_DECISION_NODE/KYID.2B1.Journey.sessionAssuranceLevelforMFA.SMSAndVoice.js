@@ -1,0 +1,169 @@
+logger.debug("**********start sessionAssuranceLevelforMFA****************")
+var auditLib = require("KYID.2B1.Library.AuditLogger")
+var dateTime = new Date().toISOString();
+
+
+// Node Config
+var nodeConfig = {
+    begin: "Beginning Node Execution",
+    node: "Node",
+    nodeName: "MFA Authentication sessionAssuranceLevelforMFA SMS and Voice",
+    script: "Script",
+    scriptName: "KYID.2B1.Journey.sessionAssuranceLevelforMFA.SMSAndVoice",
+    timestamp: dateTime,
+    end: "Node Execution Completed"
+};
+
+var NodeOutcome = {
+    SUCCESS: "true"
+};
+
+/**
+   * Logging function
+   * @type {Function}
+   */
+var nodeLogger = {
+    // Logs detailed debug messages for troubleshooting  
+    debug: function (message) {
+        logger.debug(message);
+    },
+    // Logs Error that can impact Application functionality
+    error: function (message) {
+        logger.error(message);
+    }
+};
+/* if(nodeState.get("userId")){
+userId = nodeState.get("userId");
+}
+else if(typeof existingSession != 'undefined'){
+ userId = existingSession.get("UserId")
+}
+*/
+
+var headerName = "X-Real-IP";
+var headerValues = requestHeaders.get(headerName); 
+var ipAdress = String(headerValues.toArray()[0].split(",")[0]);
+
+var browser = requestHeaders.get("user-agent"); 
+var os = requestHeaders.get("sec-ch-ua-platform"); 
+var userId = null;
+var eventDetails = {};
+var requesteduserId = null;
+eventDetails["IP"] = ipAdress;
+eventDetails["Browser"] = browser;
+eventDetails["OS"] = os;
+eventDetails["applicationName"] = nodeState.get("appName") || systemEnv.getProperty("esv.kyid.portal.name");
+eventDetails["applicationLogo"] = nodeState.get("appLogo") || ""
+eventDetails["OTPDeliveryMethod"] = nodeState.get("otpDeliveryMethod") || "";
+eventDetails["MFATYPE"] = "Phone";
+
+
+               //MFAReporting
+               // Retrieve journey purpose based on journey name
+                var purpose = "";
+            var journeyName = nodeState.get("journeyName");
+            var alternateJourneyName = nodeState.get("journeyNameReporting");
+            var journeyPurposeMapping = systemEnv.getProperty("esv.mfapurpose.mapper");
+            var parsedjourneyPurposeMapping = JSON.parse(journeyPurposeMapping)
+            logger.error("the journey name in KYID.2B1.Journey.VerifyPrimaryEmailOTP:: "+nodeState.get("journeyName"))
+            if (journeyName) {
+                logger.error("the journeyPurposeMapping esv is "+JSON.stringify(journeyPurposeMapping))
+                logger.error("the journeyPurposeMapping esv is parsedjourneyPurposeMapping "+parsedjourneyPurposeMapping[journeyName])
+               
+                if (parsedjourneyPurposeMapping) {
+                    if (parsedjourneyPurposeMapping.hasOwnProperty(journeyName)) {
+                        logger.error("Journey Name: " + journeyName + ", Purpose: " + parsedjourneyPurposeMapping[journeyName]);
+                        purpose = parsedjourneyPurposeMapping[journeyName];
+                    } else {
+                        logger.error("No purpose mapping found for Journey Name: " + journeyName);
+                        if (alternateJourneyName && parsedjourneyPurposeMapping.hasOwnProperty(alternateJourneyName)) {
+                            logger.error("Trying alternate Journey Name: " + alternateJourneyName + ", Purpose: " + parsedjourneyPurposeMapping[alternateJourneyName]);
+                            purpose = parsedjourneyPurposeMapping[alternateJourneyName];
+                        }
+                        }
+                    }
+                } else if (alternateJourneyName) {
+                    logger.error("the journeyPurposeMapping esv is "+JSON.stringify(journeyPurposeMapping))
+                    logger.error("the journeyPurposeMapping esv is parsedjourneyPurposeMapping "+parsedjourneyPurposeMapping[alternateJourneyName])
+                    if (parsedjourneyPurposeMapping) {
+                        if (parsedjourneyPurposeMapping.hasOwnProperty(alternateJourneyName)) {
+                            logger.error("Alternate Journey Name: " + alternateJourneyName + ", Purpose: " + parsedjourneyPurposeMapping[alternateJourneyName]);
+                            purpose = parsedjourneyPurposeMapping[alternateJourneyName];
+                        } else {
+                            logger.error("No purpose mapping found for Alternate Journey Name: " + alternateJourneyName);
+                        }
+                    }
+                }
+                    
+                
+                eventDetails["purpose"] = purpose || ""
+
+                if(nodeState.get("journeyName") === "PasswordRecovery"
+                   || nodeState.get("journeyName") === "BSPUserVerification"
+                   || nodeState.get("journeyName") === "MyAccountUpdate"
+                   || nodeState.get("journeyNameReporting") === "MFARecovery"
+                   || nodeState.get("journeyName") === "accountRecovery"
+                   || nodeState.get("journeyNameReporting") === "StepUpApplicationLogin"
+                   || nodeState.get("journeyName") === "ApplicationLogin"
+                   || nodeState.get("journeyNameReporting") === "FirstTimeLoginJourney"
+                   || nodeState.get("journeyNameReporting") === "loginPrerequisite"
+                   || nodeState.get("journeyNameReporting") === "ApplicationEnrollment"
+                   || nodeState.get("journeyName") === "createAccount"
+                   || nodeState.get("journeyNameReporting") === "RiskBased"){
+                    eventDetails["action"] = "MFA Performed"
+                }
+
+           eventDetails["mfastatus"] = "Successful"
+                
+           if(nodeState.get("otpDeliveryMethod") && nodeState.get("otpDeliveryMethod").indexOf("SMS") > -1){
+            eventDetails["mfatype"] = "Mobile Phone OTP SMS"
+           } else {
+            eventDetails["mfatype"] = "Mobile Phone OTP Voice"
+           }
+           logger.error("the resendsmsretryCountforReporting:::"+nodeState.get("resendsmsretryCountforReporting"))
+           if(nodeState.get("resendsmsretryCountforReporting")){
+               var resendsmsretryCountforReporting = parseInt(nodeState.get("resendsmsretryCountforReporting")) - 1
+               eventDetails["NumberofResendCodes"] = resendsmsretryCountforReporting
+           } else {
+               eventDetails["NumberofResendCodes"] = 0
+           }
+
+var userEmail = nodeState.get("primaryEmail") || nodeState.get("mail") || "";
+nodeState.putShared("nextStep",null)
+nodeState.putShared("nextStep","Phone");
+
+if (userEmail){
+    var userQueryResult = openidm.query("managed/alpha_user", {
+    _queryFilter: 'mail eq "' + userEmail + '"'
+    }, ["_id"]);
+userId = userQueryResult.result[0]._id;
+}
+var requesterUserId = null;
+if (typeof existingSession != 'undefined') {
+            requesterUserId = existingSession.get("UserId")
+}
+        
+
+var sessionDetails = {}
+var sessionDetail = null
+if(nodeState.get("sessionRefId")){
+    sessionDetail = nodeState.get("sessionRefId") 
+    sessionDetails["sessionRefId"] = sessionDetail
+}else if(typeof existingSession != 'undefined'){
+    sessionDetail = existingSession.get("sessionRefId")
+    sessionDetails["sessionRefId"] = sessionDetail
+}else{
+     sessionDetails = {"sessionRefId": ""}
+}
+logger.debug("sessionRefId is " +JSON.stringify(sessionDetails));
+var transactionId = requestHeaders.get("X-ForgeRock-TransactionId")[0];
+auditLib.auditLogger("VER004",sessionDetails,"Mobile OTP Validation", eventDetails, requesterUserId || userId, userId, transactionId, userEmail , eventDetails.applicationName, sessionDetails.sessionRefId, requestHeaders);
+
+ if(nodeState.get("isMasterLogin") === "true"){
+    nodeState.putShared("MFAMethod","MOBILE")
+    logger.debug("**********end sessionAssuranceLevelforMFA Mobile****************")
+    action.goTo(NodeOutcome.SUCCESS).putSessionProperty("sessionAssuranceLevelforMFA", "4");
+ } else {
+    action.goTo(NodeOutcome.SUCCESS)
+ }
+

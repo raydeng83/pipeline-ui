@@ -1,0 +1,16 @@
+{
+  "_id": "f0526321-5af6-49b3-a574-19257c232bd8",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "creationDate": 1774418968810,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1774946087267,
+  "name": "KYID.2B1.Journey.IDProofing.FARS.GetContext.v2",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.FARS.GetContext.v2.js"
+  }
+}

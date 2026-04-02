@@ -1,0 +1,15 @@
+{
+  "_id": "",
+  "_rev": "-548140764",
+  "_type": {
+    "_id": "session",
+    "collection": false,
+    "name": "Session"
+  },
+  "dynamic": {
+    "maxCachingTime": 3,
+    "maxIdleTime": 480,
+    "maxSessionTime": 480,
+    "quotaLimit": 5
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "_id": "a5e2abd4-f3b7-4c56-8f69-7df117e89899",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "AnotherMethod",
+      "id": "AnotherMethod"
+    },
+    {
+      "displayName": "singlesymantec",
+      "id": "singlesymantec"
+    },
+    {
+      "displayName": "EmptyCode",
+      "id": "EmptyCode"
+    }
+  ],
+  "_rev": "-272258105",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "false",
+    "AnotherMethod",
+    "singlesymantec",
+    "EmptyCode"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "041bd67f-4e98-4adb-b93c-4903e1232574"
+}

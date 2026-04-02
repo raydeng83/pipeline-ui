@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-first-time-login-enabled",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_KYID_FIRST_TIME_LOGIN_ENABLED}"
+}

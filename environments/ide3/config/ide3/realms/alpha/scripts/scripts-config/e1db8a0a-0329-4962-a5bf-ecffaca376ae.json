@@ -1,0 +1,16 @@
+{
+  "_id": "e1db8a0a-0329-4962-a5bf-ecffaca376ae",
+  "context": "OIDC_CLAIMS",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "Used by endUserUIClient",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950812996,
+  "name": "Alpha endUserUIClient OIDC Claims Script",
+  "script": {
+    "file": "scripts-content/OIDC_CLAIMS/Alpha endUserUIClient OIDC Claims Script.js"
+  }
+}

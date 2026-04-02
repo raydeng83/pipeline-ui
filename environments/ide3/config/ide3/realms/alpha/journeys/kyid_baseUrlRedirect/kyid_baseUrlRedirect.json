@@ -1,0 +1,40 @@
+{
+  "_id": "kyid_baseUrlRedirect",
+  "_rev": "1826401868",
+  "enabled": true,
+  "entryNodeId": "237dc6d3-fc4d-4c26-9102-bd2fd203c8ac",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "237dc6d3-fc4d-4c26-9102-bd2fd203c8ac": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Setting Failure URL",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 273,
+      "y": 289
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 662,
+      "y": 150
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 713,
+      "y": 424
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

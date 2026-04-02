@@ -1,0 +1,16 @@
+{
+  "_id": "94face11-09be-4f75-8a9c-ec00f8afb391",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319427913,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950803253,
+  "name": "KYID.Journey.MFAAuthentication.TwilioVerificationCheck.SMS",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAAuthentication.TwilioVerificationCheck.SMS.js"
+  }
+}

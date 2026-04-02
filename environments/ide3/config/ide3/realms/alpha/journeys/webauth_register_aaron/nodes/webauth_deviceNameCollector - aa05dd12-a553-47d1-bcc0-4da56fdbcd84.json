@@ -1,0 +1,32 @@
+{
+  "_id": "aa05dd12-a553-47d1-bcc0-4da56fdbcd84",
+  "_outcomes": [
+    {
+      "displayName": "save",
+      "id": "save"
+    },
+    {
+      "displayName": "skip",
+      "id": "skip"
+    }
+  ],
+  "_rev": "829373576",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*",
+    "webauthnDeviceData"
+  ],
+  "outcomes": [
+    "save",
+    "skip"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "3553b7cb-ae5f-45b7-a5d2-f9426b687862"
+}

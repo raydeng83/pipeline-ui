@@ -1,0 +1,16 @@
+{
+  "_id": "7a2fc3e4-4c4d-46b9-a70c-83eb64c78ed5",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319425879,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950796842,
+  "name": "KYID.Journey.CheckOldJWTQueryParam",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.CheckOldJWTQueryParam.js"
+  }
+}

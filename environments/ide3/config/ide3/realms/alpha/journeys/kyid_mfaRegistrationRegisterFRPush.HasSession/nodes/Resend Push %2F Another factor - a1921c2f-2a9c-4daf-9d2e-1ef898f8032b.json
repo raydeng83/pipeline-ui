@@ -1,0 +1,26 @@
+{
+  "_id": "a1921c2f-2a9c-4daf-9d2e-1ef898f8032b",
+  "_outcomes": [
+    {
+      "displayName": "Resend Push",
+      "id": "Resend Push"
+    },
+    {
+      "displayName": "Another Factor?",
+      "id": "Another Factor?"
+    }
+  ],
+  "_rev": "-2046330642",
+  "_type": {
+    "_id": "ChoiceCollectorNode",
+    "collection": true,
+    "name": "Choice Collector",
+    "version": "1.0"
+  },
+  "choices": [
+    "Resend Push",
+    "Another Factor?"
+  ],
+  "defaultChoice": "Resend Push",
+  "prompt": "Select your choice!"
+}

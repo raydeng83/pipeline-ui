@@ -1,0 +1,25 @@
+{
+  "_id": "9b9896d9-0782-48f9-9a8d-8115cec6a8c5",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1294113709",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User_Not_Found"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

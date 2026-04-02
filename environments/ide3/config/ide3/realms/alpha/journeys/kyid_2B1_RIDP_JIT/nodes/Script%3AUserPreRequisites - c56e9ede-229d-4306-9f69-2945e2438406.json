@@ -1,0 +1,46 @@
+{
+  "_id": "c56e9ede-229d-4306-9f69-2945e2438406",
+  "_outcomes": [
+    {
+      "displayName": "success",
+      "id": "success"
+    },
+    {
+      "displayName": "failure",
+      "id": "failure"
+    },
+    {
+      "displayName": "missingMandatoryConfig",
+      "id": "missingMandatoryConfig"
+    },
+    {
+      "displayName": "noprerequistesfound",
+      "id": "noprerequistesfound"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-1435939921",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "success",
+    "failure",
+    "missingMandatoryConfig",
+    "noprerequistesfound",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "3bf14415-e102-4560-afa3-e85f25985e22"
+}

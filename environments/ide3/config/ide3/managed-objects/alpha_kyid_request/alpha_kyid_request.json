@@ -1,0 +1,300 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_request",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "contextid",
+      "type",
+      "requester",
+      "status",
+      "startdate",
+      "enddate",
+      "createdate",
+      "updatedate",
+      "sequence",
+      "requestId",
+      "approleid",
+      "expiryaction",
+      "expirydate",
+      "prereqenrollsaveinput",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "approleid": {
+        "description": "Stores role id that grants access to application",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Application Role ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "contextid": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Context ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "Created By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [],
+        "searchable": true,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "enddate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [
+          {
+            "params": {
+              "maxLength": "100"
+            },
+            "policyId": "maximum-length"
+          }
+        ],
+        "searchable": true,
+        "title": "Complete Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "expiryaction": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Expiry Action",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "expirydate": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Expiry Date",
+        "type": "number",
+        "userEditable": false,
+        "viewable": true
+      },
+      "prereqenrollsaveinput": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Prerequisite Enroll Save Input Data",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "requestId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [
+          {
+            "params": {
+              "maxLength": "50"
+            },
+            "policyId": "maximum-length"
+          }
+        ],
+        "searchable": true,
+        "title": "Workflow Role Request ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "requester": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [
+          {
+            "params": {
+              "minLength": "1"
+            },
+            "policyId": "minimum-length"
+          },
+          {
+            "params": {
+              "maxLength": "100"
+            },
+            "policyId": "maximum-length"
+          }
+        ],
+        "searchable": true,
+        "title": "Requester",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "sequence": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Sequence Number",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "startdate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [],
+        "searchable": true,
+        "title": "Start Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "status": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [
+          {
+            "params": {
+              "maxLength": "100"
+            },
+            "policyId": "maximum-length"
+          },
+          {
+            "params": {
+              "minLength": "1"
+            },
+            "policyId": "minimum-length"
+          }
+        ],
+        "searchable": true,
+        "title": "Status",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [
+          {
+            "params": {
+              "maxLength": "100"
+            },
+            "policyId": "maximum-length"
+          },
+          {
+            "params": {
+              "minLength": "1"
+            },
+            "policyId": "minimum-length"
+          }
+        ],
+        "searchable": true,
+        "title": "Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "Updated By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [],
+        "searchable": true,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "contextid",
+      "type",
+      "requester",
+      "status",
+      "startdate",
+      "sequence"
+    ],
+    "title": "Request",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

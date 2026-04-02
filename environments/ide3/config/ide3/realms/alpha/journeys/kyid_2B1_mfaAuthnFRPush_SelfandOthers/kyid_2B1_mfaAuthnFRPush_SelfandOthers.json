@@ -1,0 +1,164 @@
+{
+  "_id": "kyid_2B1_mfaAuthnFRPush_SelfandOthers",
+  "_rev": "-1170125613",
+  "enabled": true,
+  "entryNodeId": "47d95c49-37e6-421d-b24e-b5a2c3c224a4",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "15092dc3-cfd5-4064-99f4-bd3de2a94c51": {
+      "connections": {
+        "DONE": "5adcce4c-7a3c-4160-9f9d-bf22565e3e5c",
+        "EXITED": "6a224487-0bea-426f-a106-c4fd7bf40da2"
+      },
+      "displayName": "Push Wait Node",
+      "nodeType": "PushWaitNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 569.3333333333334
+    },
+    "47d95c49-37e6-421d-b24e-b5a2c3c224a4": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a9ac84e0-ba32-4853-b1d9-9e066c10fc94"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 120
+    },
+    "5adcce4c-7a3c-4160-9f9d-bf22565e3e5c": {
+      "connections": {
+        "EXPIRED": "e9b02f5a-3e4e-4091-a240-16f98fad6249",
+        "FALSE": "e9b02f5a-3e4e-4091-a240-16f98fad6249",
+        "TRUE": "7a3c8a78-1d70-4d45-9775-6848649a1403",
+        "WAITING": "8cf88624-6789-4c21-88c5-c9009962c211"
+      },
+      "displayName": "Push Result Verifier Node",
+      "nodeType": "PushResultVerifierNode",
+      "version": "1.0",
+      "x": 457,
+      "y": 344
+    },
+    "6a224487-0bea-426f-a106-c4fd7bf40da2": {
+      "connections": {
+        "false": "a6a1e808-a558-44e5-9095-8e506b1502f3",
+        "true": "15092dc3-cfd5-4064-99f4-bd3de2a94c51"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 193,
+      "y": 273
+    },
+    "6b2d1446-81da-4d7a-8b86-a14be97f3373": {
+      "connections": {
+        "DONE": "5adcce4c-7a3c-4160-9f9d-bf22565e3e5c"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 465,
+      "y": 575
+    },
+    "7a3c8a78-1d70-4d45-9775-6848649a1403": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Push Noti",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 733,
+      "y": 80
+    },
+    "8cf88624-6789-4c21-88c5-c9009962c211": {
+      "connections": {
+        "DONE": "5adcce4c-7a3c-4160-9f9d-bf22565e3e5c"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 745,
+      "y": 593
+    },
+    "a6a1e808-a558-44e5-9095-8e506b1502f3": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Choose Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1019,
+      "y": 221.99999999999997
+    },
+    "a9ac84e0-ba32-4853-b1d9-9e066c10fc94": {
+      "connections": {
+        "NOT_REGISTERED": "c51d5298-62cb-49a0-8c2e-31a09cb83d28",
+        "SENT": "5adcce4c-7a3c-4160-9f9d-bf22565e3e5c"
+      },
+      "displayName": "Push Sender",
+      "nodeType": "PushAuthenticationSenderNode",
+      "version": "1.0",
+      "x": 733,
+      "y": 691
+    },
+    "c51d5298-62cb-49a0-8c2e-31a09cb83d28": {
+      "connections": {
+        "failureOutcome": "e9b02f5a-3e4e-4091-a240-16f98fad6249",
+        "successOutcome": "a9ac84e0-ba32-4853-b1d9-9e066c10fc94",
+        "timeoutOutcome": "e9b02f5a-3e4e-4091-a240-16f98fad6249"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1032,
+      "y": 585
+    },
+    "e0086a40-5afe-4764-a6fe-6519e4ee592d": {
+      "connections": {
+        "failureOutcome": "e9b02f5a-3e4e-4091-a240-16f98fad6249",
+        "successOutcome": "a9ac84e0-ba32-4853-b1d9-9e066c10fc94",
+        "timeoutOutcome": "e9b02f5a-3e4e-4091-a240-16f98fad6249"
+      },
+      "displayName": "Push Registration",
+      "nodeType": "PushRegistrationNode",
+      "version": "1.0",
+      "x": 1032,
+      "y": 364
+    },
+    "e9b02f5a-3e4e-4091-a240-16f98fad6249": {
+      "connections": {
+        "false": "a6a1e808-a558-44e5-9095-8e506b1502f3",
+        "true": "a9ac84e0-ba32-4853-b1d9-9e066c10fc94"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 733,
+      "y": 265
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1311,
+      "y": 253.66666666666666
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1311,
+      "y": 316.8333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 415.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

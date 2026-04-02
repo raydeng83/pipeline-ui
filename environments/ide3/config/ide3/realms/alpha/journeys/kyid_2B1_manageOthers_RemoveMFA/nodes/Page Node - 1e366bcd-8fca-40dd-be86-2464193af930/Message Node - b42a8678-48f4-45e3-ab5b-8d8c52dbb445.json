@@ -1,0 +1,25 @@
+{
+  "_id": "b42a8678-48f4-45e3-ab5b-8d8c52dbb445",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-570498383",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "The selected security method has been removed."
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "ade2d73e-7003-48ad-8463-0a383543bf38",
+  "_outcomes": [
+    {
+      "displayName": "FRPUSH",
+      "id": "FRPUSH"
+    },
+    {
+      "displayName": "FRTOTP",
+      "id": "FRTOTP"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    }
+  ],
+  "_rev": "596235695",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "FRPUSH",
+    "FRTOTP",
+    "back"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "71151853-ffd5-4ec2-b6bc-f4056f3ca517"
+}

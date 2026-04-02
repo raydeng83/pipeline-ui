@@ -1,0 +1,60 @@
+{
+  "_id": "03ae24b1-55be-4bad-9138-e5359dc86610",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Remove/Reset MFA Method",
+      "id": "Remove/Reset MFA Method"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "981038784",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "65cc02f7-eb54-498f-b46c-8ea4f59eff72",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "ce9a1b85-a5ab-4829-8f80-f4ce18ecb2c3",
+      "displayName": "Dynamic Choice",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\">Verify identity with a security method</div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.url}\"target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">Verify with one of the following security methods to manage the registered methods.</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\">Verifique con uno de los siguientes métodos de seguridad</div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">Verifique con uno de los siguientes métodos de seguridad para administrar los métodos registrados.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{}}"
+}

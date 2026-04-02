@@ -1,0 +1,99 @@
+{
+  "_id": "ABC_Copy of kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v2_StandAlone_RIDP",
+  "_rev": "1850220659",
+  "description": "Inner Journey for standalone RIDP Flow",
+  "enabled": true,
+  "entryNodeId": "9b7c6054-1168-486c-ae37-a61e20fd5b77",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "55add4d1-228f-408e-acbd-13a6336771e9": {
+      "connections": {
+        "differentMethod": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Retry Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1006,
+      "y": 246.69442749023438
+    },
+    "6befaaf1-f429-4d2f-96d0-9c23c4d2d924": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Identity Proofing Success",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1013,
+      "y": 556.5786895751953
+    },
+    "9b7c6054-1168-486c-ae37-a61e20fd5b77": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a2ec25ca-6ce0-45ab-bd72-3cb6761c12e1"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 117,
+      "y": 361.5
+    },
+    "a2ec25ca-6ce0-45ab-bd72-3cb6761c12e1": {
+      "connections": {
+        "highRisk": "55add4d1-228f-408e-acbd-13a6336771e9",
+        "kbafailed": "55add4d1-228f-408e-acbd-13a6336771e9",
+        "lexMisMatch": "c5d72523-3d28-4924-bf2b-30ffc93dc21e",
+        "mciSearch": "c5d72523-3d28-4924-bf2b-30ffc93dc21e",
+        "notVerified": "55add4d1-228f-408e-acbd-13a6336771e9"
+      },
+      "displayName": "Script: Standalone Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 460,
+      "y": 242.3472137451172
+    },
+    "c5d72523-3d28-4924-bf2b-30ffc93dc21e": {
+      "connections": {
+        "emailsWithVerifiedLexID": "6befaaf1-f429-4d2f-96d0-9c23c4d2d924",
+        "exactMatch": "6befaaf1-f429-4d2f-96d0-9c23c4d2d924",
+        "highRiskTransaction": "55add4d1-228f-408e-acbd-13a6336771e9",
+        "inputLink2TerminatedAccount": "6befaaf1-f429-4d2f-96d0-9c23c4d2d924",
+        "inputNotMatchingVerifiedIdentity": "6befaaf1-f429-4d2f-96d0-9c23c4d2d924",
+        "jitProvisioning": "55add4d1-228f-408e-acbd-13a6336771e9",
+        "lexIdMismatch": "6befaaf1-f429-4d2f-96d0-9c23c4d2d924",
+        "noKOGAccount": "55add4d1-228f-408e-acbd-13a6336771e9",
+        "noKOGAccountFound": "55add4d1-228f-408e-acbd-13a6336771e9",
+        "noMatchPartialMatch": "55add4d1-228f-408e-acbd-13a6336771e9"
+      },
+      "displayName": "Script: MCI Search Standalone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 432,
+      "y": 593.6944274902344
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1734,
+      "y": 864
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1724,
+      "y": 468
+    },
+    "startNode": {
+      "x": 70,
+      "y": 299
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

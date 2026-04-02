@@ -1,0 +1,16 @@
+{
+  "_id": "7a8c6b9a-3e6d-4645-a72a-9561762236a5",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747385363264,
+  "default": false,
+  "description": "Creating a script to set the MFA Context to show the user the registered MFA Options",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798506,
+  "name": "KYID.2B1.Journey.ForgotPassword.SetMFAContext",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ForgotPassword.SetMFAContext.js"
+  }
+}

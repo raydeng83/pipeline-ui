@@ -1,0 +1,260 @@
+{
+  "_id": "kyid_2B1_PTAMaster",
+  "_rev": "1945106191",
+  "enabled": true,
+  "entryNodeId": "84d5bf1b-4ea9-4c91-8768-705b642f8f20",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "02d12bc0-a08f-4bdc-a0a4-4a0a12e67efd": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Successful Login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3281,
+      "y": 323.33333333333337
+    },
+    "10ef5f78-e90c-4e28-ab7c-caf66df3571e": {
+      "connections": {
+        "false": "8f293dce-e763-4525-8dba-b52142537ee9",
+        "true": "1128e516-28a2-410c-9c98-4a3c304dad4d"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 425,
+      "y": 14.833333333333314
+    },
+    "1128e516-28a2-410c-9c98-4a3c304dad4d": {
+      "connections": {
+        "true": "e3371650-cc24-4efa-aea1-0abb6e5718c2"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 1009,
+      "y": 587
+    },
+    "17937579-47ae-4d15-92a3-8b9edaf3fd51": {
+      "connections": {
+        "false": "bb18d560-e370-42c7-9649-cfa7f3b0442b",
+        "true": "b7320030-291a-4249-b3d1-e2350ca9dd8c"
+      },
+      "displayName": "isCaptchaV3success",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1273,
+      "y": 38
+    },
+    "3d72ee34-4857-4e5d-ba72-27f8b6e0975b": {
+      "connections": {
+        "false": "02d12bc0-a08f-4bdc-a0a4-4a0a12e67efd",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3055.333251953125,
+      "y": 58.34721374511719
+    },
+    "3f41d439-b76c-42f7-9bbe-e3a0bee468d8": {
+      "connections": {
+        "False": "a811e12f-6b94-476b-bc43-84552484375e",
+        "True": "10ef5f78-e90c-4e28-ab7c-caf66df3571e"
+      },
+      "displayName": "Script:IsCaptchaEnabled",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 128,
+      "y": 42.5
+    },
+    "5b01c650-a86c-4c25-8c0d-95cfadd39a7b": {
+      "connections": {
+        "back": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "67f461ee-1046-41be-9159-e588a4e578ef"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 723,
+      "y": 581
+    },
+    "61df2feb-2e4a-46d7-b3d8-327705850b6b": {
+      "connections": {
+        "Back": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8",
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "67f461ee-1046-41be-9159-e588a4e578ef"
+      },
+      "displayName": "Password Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 814,
+      "y": 356
+    },
+    "64b0e482-60eb-4cb5-851d-efb01282b59e": {
+      "connections": {
+        "next": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8"
+      },
+      "displayName": "Invalid Password",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2133,
+      "y": 471.08333333333326
+    },
+    "67f461ee-1046-41be-9159-e588a4e578ef": {
+      "connections": {
+        "fail": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "invalidPassword": "64b0e482-60eb-4cb5-851d-efb01282b59e",
+        "passwordExpired": "a0e1915c-7dc5-4205-9ac8-91f432dc5f96",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Authenticate at AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1992,
+      "y": 112.25
+    },
+    "84d5bf1b-4ea9-4c91-8768-705b642f8f20": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8"
+      },
+      "displayName": "Script - isKYID2BJourney",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 128,
+      "y": 305.015625
+    },
+    "8f293dce-e763-4525-8dba-b52142537ee9": {
+      "connections": {
+        "true": "915a19b5-3e91-4869-8f6d-3a108f6289ea"
+      },
+      "displayName": "Script:SetCaptchaValue",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 181,
+      "y": 548
+    },
+    "915a19b5-3e91-4869-8f6d-3a108f6289ea": {
+      "connections": {
+        "authenticate": "17937579-47ae-4d15-92a3-8b9edaf3fd51",
+        "noUser": "dedf2592-f397-4f99-bea5-ba979379bf67"
+      },
+      "displayName": "Check User In AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1036,
+      "y": 33.33333333333337
+    },
+    "a0e1915c-7dc5-4205-9ac8-91f432dc5f96": {
+      "connections": {
+        "next": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8"
+      },
+      "displayName": "Password Expired",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2230,
+      "y": 360.125
+    },
+    "a811e12f-6b94-476b-bc43-84552484375e": {
+      "connections": {
+        "mail": "915a19b5-3e91-4869-8f6d-3a108f6289ea"
+      },
+      "displayName": "Username Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 124,
+      "y": 208.66666666666674
+    },
+    "b22a59f8-5954-4510-9541-14f51f42ad43": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "67f461ee-1046-41be-9159-e588a4e578ef"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 2859.3333740234375,
+      "y": 678.3333282470703
+    },
+    "b7320030-291a-4249-b3d1-e2350ca9dd8c": {
+      "connections": {
+        "Back": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8",
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "67f461ee-1046-41be-9159-e588a4e578ef"
+      },
+      "displayName": "Password Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1551,
+      "y": 45.75
+    },
+    "bb18d560-e370-42c7-9649-cfa7f3b0442b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "67f461ee-1046-41be-9159-e588a4e578ef"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1416,
+      "y": 278
+    },
+    "cca0f5a4-ce0b-4972-b535-dd029afd2fc5": {
+      "connections": {
+        "back": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "67f461ee-1046-41be-9159-e588a4e578ef"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2067,
+      "y": 621.5
+    },
+    "dedf2592-f397-4f99-bea5-ba979379bf67": {
+      "connections": {
+        "tryAgain": "3f41d439-b76c-42f7-9bbe-e3a0bee468d8"
+      },
+      "displayName": "Incorrect Username",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 477,
+      "y": 450
+    },
+    "e3371650-cc24-4efa-aea1-0abb6e5718c2": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "mail": "915a19b5-3e91-4869-8f6d-3a108f6289ea"
+      },
+      "displayName": "Script:CheckMail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 781,
+      "y": 96.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3316,
+      "y": 545
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2746,
+      "y": 498.66666666666674
+    },
+    "startNode": {
+      "x": 70,
+      "y": 476
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

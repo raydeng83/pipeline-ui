@@ -1,0 +1,171 @@
+{
+  "_id": "kyid_2B1_MFA_RegistrationAndAuthentication",
+  "_rev": "-1662891019",
+  "description": "This journey will be used as inner journey in the login journey",
+  "enabled": true,
+  "entryNodeId": "beec3d1e-8562-4483-8433-e3b8f51edc17",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0a72f2d6-68dd-4d56-8a45-e2ef149e50dc": {
+      "connections": {
+        "mfaNotRequired": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "mfaRequired": "7d485dc4-a26b-40d7-bfb4-ef4603cedbcf"
+      },
+      "displayName": "Script:isMFARequired",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1430,
+      "y": 516.3333282470703
+    },
+    "0ad8268c-34cd-48e6-884e-4e1e1afb19c0": {
+      "connections": {
+        "registrationNeeded": "eccb1170-556c-4e56-a609-d156648a01f5",
+        "registrationNotNeeded": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:isRegistrationNeeded",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 466,
+      "y": 604.3333282470703
+    },
+    "1dc0c0c4-820d-41b4-b577-4cacfbc8e7ab": {
+      "connections": {
+        "perfoff": "6a25ff25-50cd-4472-bb07-078943f05026",
+        "perfon": "6a25ff25-50cd-4472-bb07-078943f05026"
+      },
+      "displayName": "Script:isPerfFlagOn",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 492,
+      "y": 46.015625
+    },
+    "2b9701b8-0308-4e2b-8953-18aeb582c641": {
+      "connections": {
+        "MFACheck": "0a72f2d6-68dd-4d56-8a45-e2ef149e50dc",
+        "firstTimeMFACheck": "ded5806f-032c-4e69-a8ac-b94a4a3eb706"
+      },
+      "displayName": "Script:MFACheck",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1105,
+      "y": 368.3333282470703
+    },
+    "5d867479-f7e7-4e49-98f2-0a3dfd8df9ef": {
+      "connections": {
+        "failed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "d353d093-fc64-470c-9ef6-59778aa4f361"
+      },
+      "displayName": "Script:GetAppRequiredMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 127,
+      "y": 354.015625
+    },
+    "6a25ff25-50cd-4472-bb07-078943f05026": {
+      "connections": {
+        "false": "d5498bc7-cebd-47cd-8a59-a84fddcf505e",
+        "true": "d5498bc7-cebd-47cd-8a59-a84fddcf505e"
+      },
+      "displayName": "IJ:EvaluateRiskLevel",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 796,
+      "y": 33.015625
+    },
+    "7d485dc4-a26b-40d7-bfb4-ef4603cedbcf": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0ad8268c-34cd-48e6-884e-4e1e1afb19c0"
+      },
+      "displayName": "IJ:MFA-Auth",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 81,
+      "y": 613.3333282470703
+    },
+    "beec3d1e-8562-4483-8433-e3b8f51edc17": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1dc0c0c4-820d-41b4-b577-4cacfbc8e7ab"
+      },
+      "displayName": "Script:CheckJourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 133,
+      "y": 26.015625
+    },
+    "d353d093-fc64-470c-9ef6-59778aa4f361": {
+      "connections": {
+        "success": "2b9701b8-0308-4e2b-8953-18aeb582c641"
+      },
+      "displayName": "Script:GetUserRegisteredMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 508,
+      "y": 356.015625
+    },
+    "d5498bc7-cebd-47cd-8a59-a84fddcf505e": {
+      "connections": {
+        "User Found": "5d867479-f7e7-4e49-98f2-0a3dfd8df9ef"
+      },
+      "displayName": "Script:GetUserInfo",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1145,
+      "y": 31.333328247070312
+    },
+    "ded5806f-032c-4e69-a8ac-b94a4a3eb706": {
+      "connections": {
+        "mfaNotRequired": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "mfaRequired": "7d485dc4-a26b-40d7-bfb4-ef4603cedbcf",
+        "registrationRequired": "eccb1170-556c-4e56-a609-d156648a01f5"
+      },
+      "displayName": "Script:MFARequiredFirstTime",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1402,
+      "y": 314.3333282470703
+    },
+    "eccb1170-556c-4e56-a609-d156648a01f5": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "IJ:MFA-Reg",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1137,
+      "y": 728.3333282470703
+    },
+    "f335cb31-21fa-4b74-bfd3-79306d8d1c02": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Set MFA Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1739,
+      "y": 425.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1960,
+      "y": 81
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2042,
+      "y": 565
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

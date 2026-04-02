@@ -1,0 +1,351 @@
+{
+  "_id": "kyid_2B1_LoginMain",
+  "_rev": "1322439032",
+  "enabled": true,
+  "entryNodeId": "87056562-425e-47bd-8582-af4fdc92769a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "08fe1632-fd56-4ad4-ae8a-afd9196be386": {
+      "connections": {
+        "Back": "eab048bb-e7e5-4d12-9c22-b846b6f099d0",
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "28381e8d-f5dc-4997-b3d5-d62a8be3f6d8"
+      },
+      "displayName": "Password Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1984,
+      "y": 791
+    },
+    "105461de-15e4-44fd-b75a-7815482a5459": {
+      "connections": {
+        "false": "9c76df8b-eba9-4460-9b09-22ccdcb09d01",
+        "true": "44cacb25-0c54-4e12-9af7-aac780ddad68"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 542,
+      "y": 379.8333333333333
+    },
+    "1e9c0343-7126-45b2-9789-a671dbe79185": {
+      "connections": {
+        "back": "eab048bb-e7e5-4d12-9c22-b846b6f099d0",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b4cce2c0-c07a-436d-a884-6172841a2190"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2576,
+      "y": 391
+    },
+    "20814878-d4f6-41f5-93ce-33a53079b0fc": {
+      "connections": {
+        "false": "ea11a71e-4eab-4469-a5ad-e0194bb10e7e",
+        "true": "6fcffd77-c6f1-4613-a81a-f1ec22c8e7a3"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1984,
+      "y": 80
+    },
+    "28381e8d-f5dc-4997-b3d5-d62a8be3f6d8": {
+      "connections": {
+        "existing": "b4cce2c0-c07a-436d-a884-6172841a2190",
+        "locked": "6cc8389a-151e-4613-a37e-63b2534d375d",
+        "updated": "5fdc7931-32c4-4bdc-a0b5-ef066e296664"
+      },
+      "displayName": "Check IF 2A/2B",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2576,
+      "y": 240
+    },
+    "30764318-06a5-4e03-9499-5bd64544f8dc": {
+      "connections": {
+        "back": "eab048bb-e7e5-4d12-9c22-b846b6f099d0",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "28381e8d-f5dc-4997-b3d5-d62a8be3f6d8"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2280,
+      "y": 675.5
+    },
+    "44cacb25-0c54-4e12-9af7-aac780ddad68": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "mail": "b1b37d88-1c31-4149-8db5-2943f15e7053",
+        "phone": "f5479946-497b-4f48-ab84-4d773741038d"
+      },
+      "displayName": "Script:CheckMailOrPhone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1107,
+      "y": 435.5
+    },
+    "4f4f52c1-289c-4085-81e0-4cca11635e08": {
+      "connections": {
+        "mail": "b1b37d88-1c31-4149-8db5-2943f15e7053",
+        "phone": "f5479946-497b-4f48-ab84-4d773741038d"
+      },
+      "displayName": "Username Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 522,
+      "y": 207.66666666666669
+    },
+    "5fdc7931-32c4-4bdc-a0b5-ef066e296664": {
+      "connections": {
+        "false": "ab5b9cfd-2e21-425d-97ec-335850e1f71c",
+        "true": "fadd98a1-bd07-495f-a6b4-75a90980f2d3"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 2841,
+      "y": 401.625
+    },
+    "63f5f3c2-d187-42fe-a959-8d5fa3b79de5": {
+      "connections": {
+        "fail": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "fadd98a1-bd07-495f-a6b4-75a90980f2d3"
+      },
+      "displayName": "Patch Password",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3393,
+      "y": 448.5
+    },
+    "6cc8389a-151e-4613-a37e-63b2534d375d": {
+      "connections": {
+        "next": "eab048bb-e7e5-4d12-9c22-b846b6f099d0"
+      },
+      "displayName": "User Locked",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2841,
+      "y": 594.0833333333334
+    },
+    "6fcffd77-c6f1-4613-a81a-f1ec22c8e7a3": {
+      "connections": {
+        "Back": "eab048bb-e7e5-4d12-9c22-b846b6f099d0",
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "b4cce2c0-c07a-436d-a884-6172841a2190"
+      },
+      "displayName": "Password Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2280,
+      "y": 449.75
+    },
+    "7ed12182-6e3e-4a62-997f-a91faafd2f5f": {
+      "connections": {
+        "authenticate": "20814878-d4f6-41f5-93ce-33a53079b0fc",
+        "noUser": "e929a114-abb0-4b28-9be0-2268ddf4d90d"
+      },
+      "displayName": "Check User In AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1719,
+      "y": 257.33333333333337
+    },
+    "87056562-425e-47bd-8582-af4fdc92769a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "eab048bb-e7e5-4d12-9c22-b846b6f099d0"
+      },
+      "displayName": "Script - isKYID2BJourney",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 160,
+      "y": 550.015625
+    },
+    "99f417b7-a412-4269-ae46-f7bd0636c327": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 3899,
+      "y": 191.3333282470703
+    },
+    "9a71e321-0761-4b29-9e29-e83c9d350ee1": {
+      "connections": {
+        "next": "eab048bb-e7e5-4d12-9c22-b846b6f099d0"
+      },
+      "displayName": "Password Expired",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3122,
+      "y": 339.125
+    },
+    "9b371c4e-d6ad-4db6-86a3-9e26f85a1cb6": {
+      "connections": {
+        "false": "ef21e7f4-9f90-437c-bc0e-fe60ce1351b9",
+        "true": "08fe1632-fd56-4ad4-ae8a-afd9196be386"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1719,
+      "y": 373.6666666666667
+    },
+    "9c76df8b-eba9-4460-9b09-22ccdcb09d01": {
+      "connections": {
+        "true": "44cacb25-0c54-4e12-9af7-aac780ddad68"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 842,
+      "y": 475
+    },
+    "ab5b9cfd-2e21-425d-97ec-335850e1f71c": {
+      "connections": {
+        "next": "eab048bb-e7e5-4d12-9c22-b846b6f099d0"
+      },
+      "displayName": "Invalid Password",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3122,
+      "y": 473.08333333333326
+    },
+    "b1b37d88-1c31-4149-8db5-2943f15e7053": {
+      "connections": {
+        "false": "7ed12182-6e3e-4a62-997f-a91faafd2f5f",
+        "true": "9b371c4e-d6ad-4db6-86a3-9e26f85a1cb6"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 1427,
+      "y": 257.33333333333337
+    },
+    "b4cce2c0-c07a-436d-a884-6172841a2190": {
+      "connections": {
+        "fail": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "invalidPassword": "ab5b9cfd-2e21-425d-97ec-335850e1f71c",
+        "newUser": "f7a18706-1a3a-47ba-95fd-c4bbc169babf",
+        "passwordExpired": "9a71e321-0761-4b29-9e29-e83c9d350ee1",
+        "success": "63f5f3c2-d187-42fe-a959-8d5fa3b79de5"
+      },
+      "displayName": "Authenticate at AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2841,
+      "y": 155.25
+    },
+    "cee4321d-b9a5-4ab3-b29c-2af4cbe45ec8": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "IJ: Read Claims",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3808,
+      "y": 295.015625
+    },
+    "e929a114-abb0-4b28-9be0-2268ddf4d90d": {
+      "connections": {
+        "tryAgain": "eab048bb-e7e5-4d12-9c22-b846b6f099d0"
+      },
+      "displayName": "Incorrect Username",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1984,
+      "y": 639
+    },
+    "ea11a71e-4eab-4469-a5ad-e0194bb10e7e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1e9c0343-7126-45b2-9789-a671dbe79185"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2280,
+      "y": 111.5
+    },
+    "eab048bb-e7e5-4d12-9c22-b846b6f099d0": {
+      "connections": {
+        "False": "4f4f52c1-289c-4085-81e0-4cca11635e08",
+        "True": "105461de-15e4-44fd-b75a-7815482a5459"
+      },
+      "displayName": "Script:IsCaptchaEnabled",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 269,
+      "y": 335.5
+    },
+    "ef21e7f4-9f90-437c-bc0e-fe60ce1351b9": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "30764318-06a5-4e03-9499-5bd64544f8dc"
+      },
+      "displayName": "v2 Captcha",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1984,
+      "y": 285
+    },
+    "f5479946-497b-4f48-ab84-4d773741038d": {
+      "connections": {
+        "false": "7ed12182-6e3e-4a62-997f-a91faafd2f5f",
+        "true": "9b371c4e-d6ad-4db6-86a3-9e26f85a1cb6"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 1427,
+      "y": 373.6666666666667
+    },
+    "f7a18706-1a3a-47ba-95fd-c4bbc169babf": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "63f5f3c2-d187-42fe-a959-8d5fa3b79de5"
+      },
+      "displayName": " Create User in AIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3122,
+      "y": 188.25
+    },
+    "fadd98a1-bd07-495f-a6b4-75a90980f2d3": {
+      "connections": {
+        "true": "cee4321d-b9a5-4ab3-b29c-2af4cbe45ec8"
+      },
+      "displayName": "Successful Login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3571,
+      "y": 275.33333333333337
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 4089,
+      "y": 341
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3942,
+      "y": 714.6666666666667
+    },
+    "startNode": {
+      "x": 70,
+      "y": 476
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

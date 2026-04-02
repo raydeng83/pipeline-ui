@@ -1,0 +1,64 @@
+{
+  "_id": "8cece460-948f-4952-b125-86f32e874121",
+  "_outcomes": [
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "Remove/Reset MFA Methods",
+      "id": "Remove/Reset MFA Methods"
+    },
+    {
+      "displayName": "Restablecer/Eliminar Métodos MFA",
+      "id": "Restablecer/Eliminar Métodos MFA"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "374886284",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "bebbfac2-9b5d-4c69-a118-d0bd1b717de1",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "76709b4e-02a7-47ed-907f-34d16bd16c80",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Remove Security Method</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.remove.by.email}\"target=\"_blank\">Need Assistance?</a>\n</div>\n",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Eliminar método de seguridad</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.remove.by.email}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"submitButtonText\":{\"en\":\"Continue\",\"es\":\"Continuar\"},\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nBack to Application</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">Volver a la solicitud\\n</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

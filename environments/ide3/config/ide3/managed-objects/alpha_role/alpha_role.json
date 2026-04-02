@@ -1,0 +1,1002 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_role",
+  "onCreate": {
+    "file": "alpha_role.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_role.onUpdate.js",
+    "globals": {
+      "_humanReadableEventName_": "Alpha realm - Role (onUpdate)"
+    },
+    "type": "text/javascript"
+  },
+  "onValidate": {
+    "file": "alpha_role.onValidate.js",
+    "globals": {
+      "_humanReadableEventName_": "alpha role (on Validate)"
+    },
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "alpha_role.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "alpha_role.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-check-square-o",
+    "order": [
+      "_id",
+      "name",
+      "description",
+      "assignments",
+      "condition",
+      "members",
+      "temporalConstraints",
+      "isApprovalRequired",
+      "applications",
+      "approverLevel1",
+      "approverLevel2",
+      "backupApprovalLevel2",
+      "backupApprovalLevel1",
+      "backupApproverL1DateRange",
+      "backupApproverL2DateRange",
+      "content",
+      "tags",
+      "_policy",
+      "roleActionType",
+      "createAccount_enrollmentContent",
+      "createAccount_optionalContent",
+      "requiredMFAMethod",
+      "displayName",
+      "displayDescription",
+      "adGroupName",
+      "adGroupType",
+      "doesProvidePriviledgedAccess",
+      "doesProvideElevatedAccess",
+      "doesProvideFTIAccess",
+      "isDelegable",
+      "isForwardDelegable",
+      "isOrgScopedRole",
+      "accessPolicy",
+      "businessRoleId",
+      "recordState",
+      "businessAppId",
+      "applicationId",
+      "createdBy",
+      "updatedBy",
+      "createDate",
+      "updateDate",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdByID",
+      "updatedByID",
+      "alwaysSendInvitation",
+      "invitationExpiryDuration"
+    ],
+    "properties": {
+      "_id": {
+        "description": "Role ID",
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Role Id",
+        "type": "string",
+        "userEditable": false,
+        "viewable": false
+      },
+      "_policy": {
+        "description": "_policy",
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_role:_policy",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_policy",
+            "notify": false,
+            "path": "managed/alpha_kyid_policy",
+            "query": {
+              "fields": [
+                "policyName"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Policy",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "accessPolicy": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_role:accessPolicy",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_enrollment_access_policy",
+            "notify": false,
+            "path": "managed/alpha_kyid_enrollment_access_policy",
+            "query": {
+              "fields": [
+                "name",
+                "preRequisites",
+                "dependentRole",
+                "mutuallyExclusiveRole",
+                "roleIds",
+                "applicationId"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Accesspolicy",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "adGroupName": {
+        "searchable": false,
+        "title": "Active Directory Group Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "adGroupType": {
+        "searchable": false,
+        "title": "Active Directory Group Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "alwaysSendInvitation": {
+        "searchable": false,
+        "title": "Invitation Required",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "applicationId": {
+        "searchable": false,
+        "title": "Application Id",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "applications": {
+        "description": "Role Applications",
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_role:applications",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Role:applications:items",
+          "notifySelf": true,
+          "properties": {
+            "_ref": {
+              "description": "References a relationship from a managed object",
+              "type": "string"
+            },
+            "_refProperties": {
+              "description": "Supports metadata within the relationship",
+              "properties": {
+                "_accountType": {
+                  "description": "Account type",
+                  "propName": "_accountType",
+                  "required": false,
+                  "type": "string"
+                },
+                "_id": {
+                  "description": "_refProperties object ID",
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "title": "Role Application Items _refProperties",
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Application",
+              "path": "managed/alpha_application",
+              "query": {
+                "fields": [
+                  "name"
+                ],
+                "queryFilter": "true"
+              }
+            }
+          ],
+          "reversePropertyName": "roles",
+          "reverseRelationship": true,
+          "title": "Role Application Items",
+          "type": "relationship",
+          "validate": true
+        },
+        "notifyRelationships": [
+          "members"
+        ],
+        "relationshipGrantTemporalConstraintsEnforced": true,
+        "returnByDefault": false,
+        "searchable": true,
+        "title": "Applications",
+        "type": "array",
+        "userEditable": false,
+        "viewable": true
+      },
+      "approverLevel1": {
+        "searchable": false,
+        "title": "Approver Level 1",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "approverLevel2": {
+        "searchable": false,
+        "title": "Approver Level 2",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "assignments": {
+        "description": "Managed Assignments",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Role:assignments:items",
+          "notifySelf": true,
+          "properties": {
+            "_ref": {
+              "description": "References a relationship from a managed object",
+              "type": "string"
+            },
+            "_refProperties": {
+              "description": "Supports metadata within the relationship",
+              "properties": {
+                "_accountType": {
+                  "description": "Account type",
+                  "type": "string"
+                },
+                "_id": {
+                  "description": "_refProperties object ID",
+                  "type": "string"
+                }
+              },
+              "title": "Managed Assignments Items _refProperties",
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Assignment",
+              "path": "managed/alpha_assignment",
+              "query": {
+                "fields": [
+                  "name"
+                ],
+                "queryFilter": "true"
+              }
+            }
+          ],
+          "reversePropertyName": "roles",
+          "reverseRelationship": true,
+          "title": "Managed Assignments Items",
+          "type": "relationship",
+          "validate": true
+        },
+        "notifyRelationships": [
+          "members"
+        ],
+        "returnByDefault": false,
+        "title": "Managed Assignments",
+        "type": "array",
+        "viewable": true
+      },
+      "backupApprovalLevel1": {
+        "searchable": false,
+        "title": "BackupApprover Level 1",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "backupApprovalLevel2": {
+        "searchable": false,
+        "title": "Backup Approver Level 2",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "backupApproverL1DateRange": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Backup Approver Level1 Date Range",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "backupApproverL2DateRange": {
+        "searchable": false,
+        "title": "Backup Approver Level 2 Date Range",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "businessAppId": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_role:businessAppId",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_businessapplication",
+            "notify": false,
+            "path": "managed/alpha_kyid_businessapplication",
+            "query": {
+              "fields": [
+                "name",
+                "applicationHelpdeskContact"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": "roleAppId",
+        "reverseRelationship": true,
+        "searchable": true,
+        "title": "Businessappid",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "businessRoleId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Business Role Id",
+        "type": [
+          "string",
+          "null"
+        ],
+        "userEditable": true,
+        "viewable": true
+      },
+      "condition": {
+        "description": "A conditional filter for this role",
+        "isConditional": true,
+        "searchable": false,
+        "title": "Condition",
+        "type": "string",
+        "viewable": false
+      },
+      "content": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "name",
+            "description"
+          ],
+          "properties": {
+            "description": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Description",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "name": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "searchable": false,
+              "title": "Name",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "nullable": false,
+        "searchable": false,
+        "title": "Localized Content",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createAccount_enrollmentContent": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "header",
+            "content",
+            "icon"
+          ],
+          "properties": {
+            "content": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Content",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "header": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Header",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "icon": {
+              "searchable": false,
+              "title": "Icon",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "nullable": false,
+        "searchable": false,
+        "title": "Create Account Enrollment Localized Content",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createAccount_optionalContent": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "header",
+            "content",
+            "icon"
+          ],
+          "properties": {
+            "content": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Content",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "header": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Header",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "icon": {
+              "searchable": false,
+              "title": "Icon",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "nullable": false,
+        "searchable": false,
+        "title": "Create Account Optional Localized Content",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "Created By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "description": {
+        "description": "The role description, used for display purposes.",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Role Description",
+        "type": [
+          "string",
+          "null"
+        ],
+        "userEditable": true,
+        "viewable": true
+      },
+      "displayDescription": {
+        "searchable": false,
+        "title": " Business Role Display Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "displayName": {
+        "searchable": false,
+        "title": " Business Role Display Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "doesProvideElevatedAccess": {
+        "searchable": false,
+        "title": "Provides Elevated Access",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "doesProvideFTIAccess": {
+        "searchable": false,
+        "title": "Provides Access to FTI",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "doesProvidePriviledgedAccess": {
+        "searchable": false,
+        "title": "Provides Privileged Access",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "invitationExpiryDuration": {
+        "searchable": false,
+        "title": "Invitation Expiry Duration",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "isApprovalRequired": {
+        "searchable": false,
+        "title": "Is Approva lRequired",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "isDelegable": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Is Business Role Delegable",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "isForwardDelegable": {
+        "searchable": false,
+        "title": "Is Business Role Forward Delegable",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "isOrgScopedRole": {
+        "searchable": false,
+        "title": "Is Role Org Scoped",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "members": {
+        "description": "Role Members",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Role:members:items",
+          "properties": {
+            "_ref": {
+              "description": "References a relationship from a managed object",
+              "type": "string"
+            },
+            "_refProperties": {
+              "description": "Supports metadata within the relationship",
+              "properties": {
+                "_grantType": {
+                  "description": "Grant Type",
+                  "label": "Grant Type",
+                  "type": "string"
+                },
+                "_id": {
+                  "description": "_refProperties object ID",
+                  "type": "string"
+                }
+              },
+              "title": "Role Members Items _refProperties",
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "conditionalAssociation": true,
+              "label": "User",
+              "notify": true,
+              "path": "managed/alpha_user",
+              "query": {
+                "fields": [
+                  "userName",
+                  "givenName",
+                  "sn"
+                ],
+                "queryFilter": "true"
+              }
+            }
+          ],
+          "reversePropertyName": "roles",
+          "reverseRelationship": true,
+          "title": "Role Members Items",
+          "type": "relationship",
+          "validate": true
+        },
+        "relationshipGrantTemporalConstraintsEnforced": true,
+        "returnByDefault": false,
+        "title": "Role Members",
+        "type": "array",
+        "viewable": true
+      },
+      "name": {
+        "description": "The role name, used for display purposes.",
+        "format": null,
+        "isVirtual": false,
+        "policies": [],
+        "searchable": true,
+        "title": "Role Name",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "recordState": {
+        "searchable": false,
+        "title": "Record State",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "requiredMFAMethod": {
+        "searchable": false,
+        "title": "Required MFA Method",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "roleActionType": {
+        "searchable": false,
+        "title": "Role Action Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "tags": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_role:tags",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_role:tags:items",
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_kyid_tag",
+              "notify": false,
+              "path": "managed/alpha_kyid_tag",
+              "query": {
+                "fields": [
+                  "name"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": true,
+        "searchable": true,
+        "title": "Tags",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "temporalConstraints": {
+        "description": "An array of temporal constraints for a role",
+        "isTemporalConstraint": true,
+        "items": {
+          "order": [
+            "duration"
+          ],
+          "properties": {
+            "duration": {
+              "description": "Duration",
+              "type": "string"
+            }
+          },
+          "required": [
+            "duration"
+          ],
+          "title": "Temporal Constraints Items",
+          "type": "object"
+        },
+        "notifyRelationships": [
+          "members"
+        ],
+        "returnByDefault": true,
+        "title": "Temporal Constraints",
+        "type": "array",
+        "viewable": false
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "Updated By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "title": "Alpha realm - Role",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

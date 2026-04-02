@@ -1,0 +1,27 @@
+{
+  "_id": "d3bfe122-72bd-4696-8b46-f9f62a863ffe",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    }
+  ],
+  "_rev": "-2067600941",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*",
+    "webauthnDeviceData"
+  ],
+  "outcomes": [
+    "true"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "webauthn_postcheck_dump_aaron"
+}

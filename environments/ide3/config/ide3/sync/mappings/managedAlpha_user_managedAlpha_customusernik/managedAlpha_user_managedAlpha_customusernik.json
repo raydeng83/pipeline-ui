@@ -1,0 +1,152 @@
+{
+  "displayName": "managedAlpha_user_managedAlpha_customusernik",
+  "enableSync": false,
+  "name": "managedAlpha_user_managedAlpha_customusernik",
+  "policies": [
+    {
+      "action": "EXCEPTION",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "CREATE",
+      "situation": "MISSING"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "DELETE",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "givenName",
+      "target": "FirstName"
+    },
+    {
+      "source": "cn",
+      "target": "MiddleName"
+    },
+    {
+      "source": "sn",
+      "target": "LastName"
+    },
+    {
+      "source": "mail",
+      "target": "EmailAddress"
+    },
+    {
+      "source": "custom_logon",
+      "target": "Logon"
+    },
+    {
+      "source": "frIndexedString1",
+      "target": "UPN"
+    },
+    {
+      "source": "custom_base64KOGId",
+      "target": "KOGID"
+    },
+    {
+      "source": "_id",
+      "target": "KYIDUniqueID"
+    },
+    {
+      "source": "postalAddress",
+      "target": "Address1"
+    },
+    {
+      "source": "custom_postalAddress2",
+      "target": "Address2"
+    },
+    {
+      "source": "city",
+      "target": "City"
+    },
+    {
+      "source": "stateProvince",
+      "target": "State"
+    },
+    {
+      "source": "postalCode",
+      "target": "Zipcode"
+    },
+    {
+      "source": "custom_zipExtension",
+      "target": "ZipcodeExtension"
+    },
+    {
+      "source": "custom_county",
+      "target": "County"
+    },
+    {
+      "source": "custom_secondaryMail",
+      "target": "AlternateEmailAddress"
+    },
+    {
+      "source": "custom_approvalUnit1Code",
+      "target": "ApprovalUnit1"
+    },
+    {
+      "source": "custom_approvalUnit2Code",
+      "target": "ApprovalUnit2"
+    },
+    {
+      "source": "custom_approvalUnit3Code",
+      "target": "ApprovalUnit3"
+    },
+    {
+      "source": "custom_approvalUnit4Code",
+      "target": "ApprovalUnit4"
+    },
+    {
+      "source": "custom_approvalUnit5Code",
+      "target": "ApprovalUnit5"
+    },
+    {
+      "source": "custom_createDateISO",
+      "target": "custom_createDateISO"
+    }
+  ],
+  "runTargetPhase": false,
+  "source": "managed/alpha_user",
+  "target": "managed/alpha_customusernik"
+}

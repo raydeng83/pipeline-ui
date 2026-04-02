@@ -1,0 +1,16 @@
+{
+  "_id": "efb3ba6d-fa5e-4bf7-b442-81a862577dd2",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1756113478653,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950800385,
+  "name": "KYID.2B1.Journey.EnterPrimaryEmailwithCaptcha.UserInvitation",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.EnterPrimaryEmailwithCaptcha.UserInvitation.js"
+  }
+}

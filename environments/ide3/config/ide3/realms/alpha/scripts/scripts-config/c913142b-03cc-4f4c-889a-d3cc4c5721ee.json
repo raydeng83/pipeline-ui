@@ -1,0 +1,16 @@
+{
+  "_id": "c913142b-03cc-4f4c-889a-d3cc4c5721ee",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320023426,
+  "default": false,
+  "description": "This script is used to read RequestURL cookie in a session.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801163,
+  "name": "KYID.Journey.IsRequestURLCookiePresent",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.IsRequestURLCookiePresent.js"
+  }
+}

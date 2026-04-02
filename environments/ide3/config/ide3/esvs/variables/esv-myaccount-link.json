@@ -1,0 +1,6 @@
+{
+  "_id": "esv-myaccount-link",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_MYACCOUNT_LINK}"
+}

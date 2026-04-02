@@ -1,0 +1,24 @@
+{
+  "displayName": "Inclusive Gateway",
+  "name": "inclusiveGateway-77a0e2af0a1c",
+  "scriptTask": {
+    "gatewayType": "inclusive",
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "validationSuccess",
+        "step": "approvalTask-1537d3e3d2e4"
+      },
+      {
+        "condition": "true",
+        "outcome": "validationFailure",
+        "step": "approvalTask-5c9e9b4a0ad5"
+      }
+    ],
+    "script": {
+      "file": "Inclusive Gateway - inclusiveGateway-77a0e2af0a1c.js"
+    }
+  },
+  "type": "scriptTask"
+}

@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/aaron_external_test",
+  "description": "Aaron's endpoint that calls external API using openidm.action",
+  "file": "aaron_external_test.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

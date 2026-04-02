@@ -1,0 +1,1 @@
+<html><head></head><body style="background-color: #324054; color: #5e6d82; padding: 60px; text-align: center;"><h3>Ceci est votre mail d'inscription.</h3><p><a href="{{object.resumeURI}}" style="text-decoration: none; color: #109cf1;">Lien de vérification email</a></p></body></html>

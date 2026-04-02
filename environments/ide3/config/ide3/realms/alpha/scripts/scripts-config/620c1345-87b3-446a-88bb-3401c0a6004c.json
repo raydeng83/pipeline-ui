@@ -1,0 +1,16 @@
+{
+  "_id": "620c1345-87b3-446a-88bb-3401c0a6004c",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4870b1d1-8bd0-426d-9705-22995aa2c630,ou=user,ou=am-config",
+  "creationDate": 1762342423793,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1770441330414,
+  "name": "KYID.2B1.Send.Profile.Updated.Mail.HelpDesk",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Send.Profile.Updated.Mail.HelpDesk.js"
+  }
+}

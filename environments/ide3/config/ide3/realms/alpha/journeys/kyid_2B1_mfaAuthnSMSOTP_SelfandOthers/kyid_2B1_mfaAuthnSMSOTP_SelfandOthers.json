@@ -1,0 +1,179 @@
+{
+  "_id": "kyid_2B1_mfaAuthnSMSOTP_SelfandOthers",
+  "_rev": "-1723101035",
+  "enabled": true,
+  "entryNodeId": "b56c6561-3482-4232-8992-b2452bc8ce49",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0000e522-3953-46bd-9721-634028a36567": {
+      "connections": {
+        "true": "bc01b30b-7340-46c5-ba55-e24efb115d29"
+      },
+      "displayName": "SMS Resend OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1508.3333129882812,
+      "y": 216.3472137451172
+    },
+    "1becd141-c20b-494c-9dde-8bce08b9bcd1": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "f02110eb-2e13-4375-9f54-31f9ed7ec5ec"
+      },
+      "displayName": "Voice: Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1305,
+      "y": 574
+    },
+    "24600993-3ff5-4433-b072-d59d2cf47d31": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor Node State",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1687,
+      "y": 468
+    },
+    "2da66ee0-3e44-40d6-8546-d163b316fbba": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "f02110eb-2e13-4375-9f54-31f9ed7ec5ec"
+      },
+      "displayName": "SMS: BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1502,
+      "y": 382.015625
+    },
+    "404144ef-9b31-4f8c-b9ef-dd77e80d2e58": {
+      "connections": {
+        "Another Factor": "24600993-3ff5-4433-b072-d59d2cf47d31",
+        "false": "d09aba30-8ace-4a88-8964-4ae597a60159",
+        "true": "bc01b30b-7340-46c5-ba55-e24efb115d29"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 514,
+      "y": 295.5
+    },
+    "8e434836-8728-4a96-8296-9d4c299a545c": {
+      "connections": {
+        "AnotherFactor": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "404144ef-9b31-4f8c-b9ef-dd77e80d2e58"
+      },
+      "displayName": "Get Error Message from Node State",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 834,
+      "y": 715.3333282470703
+    },
+    "9a9acb88-e981-4100-a0a2-99dd5f615ae5": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set idp auth type voice",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1675,
+      "y": 98
+    },
+    "a10c2b69-fd3c-4809-93d4-d7d82ec488fb": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "f02110eb-2e13-4375-9f54-31f9ed7ec5ec"
+      },
+      "displayName": "Voice: Expired OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1690,
+      "y": 287
+    },
+    "b56c6561-3482-4232-8992-b2452bc8ce49": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "404144ef-9b31-4f8c-b9ef-dd77e80d2e58"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 208.59375,
+      "y": 359.015625
+    },
+    "bc01b30b-7340-46c5-ba55-e24efb115d29": {
+      "connections": {
+        "MaxSendReached": "d64ee033-8441-4e12-ad9d-2e87db83d4f3",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "f02110eb-2e13-4375-9f54-31f9ed7ec5ec"
+      },
+      "displayName": "Send OTP via SMS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 862,
+      "y": 202.5
+    },
+    "d09aba30-8ace-4a88-8964-4ae597a60159": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "8e434836-8728-4a96-8296-9d4c299a545c"
+      },
+      "displayName": "Send OTP via Voice",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 844,
+      "y": 540.015625
+    },
+    "d64ee033-8441-4e12-ad9d-2e87db83d4f3": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "404144ef-9b31-4f8c-b9ef-dd77e80d2e58"
+      },
+      "displayName": "Error: Max SMS Send Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 817,
+      "y": 380.3333282470703
+    },
+    "f02110eb-2e13-4375-9f54-31f9ed7ec5ec": {
+      "connections": {
+        "BlankOTP": "2da66ee0-3e44-40d6-8546-d163b316fbba",
+        "Choose Another Method": "24600993-3ff5-4433-b072-d59d2cf47d31",
+        "Resend Code": "0000e522-3953-46bd-9721-634028a36567",
+        "Verify": "9a9acb88-e981-4100-a0a2-99dd5f615ae5",
+        "expired": "a10c2b69-fd3c-4809-93d4-d7d82ec488fb",
+        "false": "1becd141-c20b-494c-9dde-8bce08b9bcd1"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1283,
+      "y": 70
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2052,
+      "y": 228.83333333333331
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2056,
+      "y": 384
+    },
+    "startNode": {
+      "x": 70,
+      "y": 375
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

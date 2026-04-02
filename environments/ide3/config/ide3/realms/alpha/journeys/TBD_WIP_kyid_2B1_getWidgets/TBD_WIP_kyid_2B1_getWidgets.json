@@ -1,0 +1,169 @@
+{
+  "_id": "TBD_WIP_kyid_2B1_getWidgets",
+  "_rev": "697577288",
+  "enabled": true,
+  "entryNodeId": "d1070076-a5fe-423f-a36e-d116bf8ddcdc",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "22a9383c-b27f-4044-8873-93fc9a743e58": {
+      "connections": {
+        "true": "e5edf913-80d2-4698-aada-c1bb2c853213"
+      },
+      "displayName": "Error:InvalidJSON",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1136,
+      "y": 683.015625
+    },
+    "4dcb8551-3d19-4a14-b9e0-cbfaedaaeac2": {
+      "connections": {
+        "hasSession": "f4d04a19-c18c-482a-b647-3188fe06589d",
+        "noSession": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:ValidSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 173,
+      "y": 269.3333282470703
+    },
+    "685f7f76-8510-4cdd-94d3-e8cc9d68835a": {
+      "connections": {
+        "true": "d85ea807-4485-40e9-9b12-de0f212de049"
+      },
+      "displayName": "IJ:ManageAccess",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1089,
+      "y": 237.015625
+    },
+    "7f35166e-834c-4aab-9f21-6619c1151999": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 633,
+      "y": 716
+    },
+    "aecb8746-ef78-4805-9135-e58709c3baad": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 652,
+      "y": 845
+    },
+    "bcf797ba-dcf4-476b-81e9-48dcc4c0ff0e": {
+      "connections": {
+        "false": "e5edf913-80d2-4698-aada-c1bb2c853213",
+        "true": "e5edf913-80d2-4698-aada-c1bb2c853213"
+      },
+      "displayName": "Script:myAppsJson",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 469,
+      "y": 78.015625
+    },
+    "cd7ccf44-0287-4c45-b99a-10fb9fc1373a": {
+      "connections": {
+        "Error": "aecb8746-ef78-4805-9135-e58709c3baad",
+        "User Found": "bcf797ba-dcf4-476b-81e9-48dcc4c0ff0e",
+        "User Not Found": "7f35166e-834c-4aab-9f21-6619c1151999"
+      },
+      "displayName": "Script:GetUserID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 395,
+      "y": 682
+    },
+    "d1070076-a5fe-423f-a36e-d116bf8ddcdc": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "4dcb8551-3d19-4a14-b9e0-cbfaedaaeac2"
+      },
+      "displayName": "Script:CheckJourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 125,
+      "y": 59.015625
+    },
+    "d85ea807-4485-40e9-9b12-de0f212de049": {
+      "connections": {
+        "false": "bcf797ba-dcf4-476b-81e9-48dcc4c0ff0e",
+        "true": "bcf797ba-dcf4-476b-81e9-48dcc4c0ff0e",
+        "unexpectederror": "e5edf913-80d2-4698-aada-c1bb2c853213"
+      },
+      "displayName": "GoBack",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1563,
+      "y": 72
+    },
+    "dec8d12b-4b15-4cc1-8994-6a2b2ee322ec": {
+      "connections": {
+        "true": "e5edf913-80d2-4698-aada-c1bb2c853213"
+      },
+      "displayName": "Error:UnexpectedError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1099,
+      "y": 583.015625
+    },
+    "e5edf913-80d2-4698-aada-c1bb2c853213": {
+      "connections": {
+        "error": "dec8d12b-4b15-4cc1-8994-6a2b2ee322ec",
+        "internalerrordatamissing": "dec8d12b-4b15-4cc1-8994-6a2b2ee322ec",
+        "invalidaction": "22a9383c-b27f-4044-8873-93fc9a743e58",
+        "invalidjson": "22a9383c-b27f-4044-8873-93fc9a743e58",
+        "manageaccess": "685f7f76-8510-4cdd-94d3-e8cc9d68835a",
+        "viewappdetails": "ec42c57b-ad48-442c-b17c-3558625a81f7"
+      },
+      "displayName": "Script:myAppsScreen",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 780,
+      "y": 250.015625
+    },
+    "ec42c57b-ad48-442c-b17c-3558625a81f7": {
+      "connections": {
+        "cancel": "e5edf913-80d2-4698-aada-c1bb2c853213"
+      },
+      "displayName": "Script:ViewAppDetails",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 998,
+      "y": 77.015625
+    },
+    "f4d04a19-c18c-482a-b647-3188fe06589d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "cd7ccf44-0287-4c45-b99a-10fb9fc1373a"
+      },
+      "displayName": "Script:GetKOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 164,
+      "y": 452
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2081,
+      "y": 88
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2035,
+      "y": 529
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

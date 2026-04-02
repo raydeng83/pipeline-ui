@@ -1,0 +1,49 @@
+{
+  "_id": "4092205f-6939-412d-ba80-373abec0de12",
+  "_outcomes": [
+    {
+      "displayName": "Empty",
+      "id": "Empty"
+    },
+    {
+      "displayName": "Mismatch",
+      "id": "Mismatch"
+    },
+    {
+      "displayName": "Invalid",
+      "id": "Invalid"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "donotagree",
+      "id": "donotagree"
+    }
+  ],
+  "_rev": "-1985861033",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "4177e0f3-ec28-4154-a47a-dce32339d89e",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "Update_Basic_Information"
+  },
+  "pageHeader": {},
+  "stage": "{\"submitButtonText\":{}}"
+}

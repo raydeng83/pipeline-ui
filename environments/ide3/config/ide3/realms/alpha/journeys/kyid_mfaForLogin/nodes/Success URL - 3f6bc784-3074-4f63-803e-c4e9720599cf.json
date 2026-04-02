@@ -1,0 +1,17 @@
+{
+  "_id": "3f6bc784-3074-4f63-803e-c4e9720599cf",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "126025958",
+  "_type": {
+    "_id": "SetSuccessUrlNode",
+    "collection": true,
+    "name": "Success URL",
+    "version": "1.0"
+  },
+  "successUrl": "https://ide.kog.ky.gov/Account"
+}

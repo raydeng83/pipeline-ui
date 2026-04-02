@@ -1,0 +1,56 @@
+{
+  "_id": "a98f2b8f-f939-4ce6-b8dd-bf07474f4228",
+  "_outcomes": [
+    {
+      "displayName": "Next",
+      "id": "Next"
+    },
+    {
+      "displayName": "Back",
+      "id": "Back"
+    },
+    {
+      "displayName": "Empty",
+      "id": "Empty"
+    },
+    {
+      "displayName": "Mismatch",
+      "id": "Mismatch"
+    },
+    {
+      "displayName": "InValid",
+      "id": "InValid"
+    },
+    {
+      "displayName": "max limit",
+      "id": "max limit"
+    },
+    {
+      "displayName": "False",
+      "id": "False"
+    }
+  ],
+  "_rev": "-1626224202",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "41e34c6e-aa3f-4306-b0a4-f86bb3e6e81d",
+      "displayName": "Accept Terms and Conditions",
+      "nodeType": "AcceptTermsAndConditionsNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "21a769b2-ea9d-4f6e-9059-317fb96fcc6c",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

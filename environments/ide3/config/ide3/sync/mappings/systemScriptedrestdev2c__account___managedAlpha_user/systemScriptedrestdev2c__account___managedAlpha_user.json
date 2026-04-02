@@ -1,0 +1,92 @@
+{
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "all": [
+          "userName"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "systemScriptedrestdev2c__account___managedAlpha_user",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "dev2c ACCOUNT -> sb3 alpha_user",
+  "enableSync": false,
+  "name": "systemScriptedrestdev2c__account___managedAlpha_user",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "userName",
+      "target": "userName"
+    },
+    {
+      "source": "mail",
+      "target": "mail"
+    },
+    {
+      "source": "sn",
+      "target": "sn"
+    },
+    {
+      "source": "givenName",
+      "target": "givenName"
+    }
+  ],
+  "source": "system/scriptedrestDev2c/__ACCOUNT__",
+  "target": "managed/alpha_user"
+}

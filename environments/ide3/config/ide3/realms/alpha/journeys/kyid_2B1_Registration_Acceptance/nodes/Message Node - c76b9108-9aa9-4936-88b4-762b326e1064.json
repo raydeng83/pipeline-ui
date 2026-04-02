@@ -1,0 +1,25 @@
+{
+  "_id": "c76b9108-9aa9-4936-88b4-762b326e1064",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1048457759",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "request_expired"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

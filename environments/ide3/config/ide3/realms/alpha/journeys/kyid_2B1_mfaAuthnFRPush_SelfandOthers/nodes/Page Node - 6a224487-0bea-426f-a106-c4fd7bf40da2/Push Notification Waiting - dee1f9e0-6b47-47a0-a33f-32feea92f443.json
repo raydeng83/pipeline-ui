@@ -1,0 +1,32 @@
+{
+  "_id": "dee1f9e0-6b47-47a0-a33f-32feea92f443",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-455862295",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Haven't received a push notification yet? Try opening the ForgeRock Authenticator App on your phone and click on Resend Notification button.",
+    "es": "¿Aún no ha recibido una notificación push? Intente abrir la aplicación ForgeRock Authenticator en su teléfono y haga clic en el botón Reenviar notificación."
+  },
+  "messageNo": {
+    "en": "Verify with something else",
+    "es": "Verificar con otra cosa"
+  },
+  "messageYes": {
+    "en": "Regenerate push notification",
+    "es": "Regenerar notificación push"
+  }
+}

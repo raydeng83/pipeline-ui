@@ -1,0 +1,31 @@
+{
+  "_id": "1ef668ba-44ee-414a-b8c4-5273ec611093",
+  "_outcomes": [
+    {
+      "displayName": "skipLoginprereqauthz",
+      "id": "skipLoginprereqauthz"
+    },
+    {
+      "displayName": "loginprereqauthz",
+      "id": "loginprereqauthz"
+    }
+  ],
+  "_rev": "939641691",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "skipLoginprereqauthz",
+    "loginprereqauthz"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "cfc90b5d-f174-40a7-bd89-19cdcf11670c"
+}

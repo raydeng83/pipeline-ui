@@ -1,0 +1,17 @@
+{
+  "_id": "25fb1a27-cdc7-403d-8573-aaf2093d0d98",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1815158610",
+  "_type": {
+    "_id": "SetSuccessUrlNode",
+    "collection": true,
+    "name": "Success URL",
+    "version": "1.0"
+  },
+  "successUrl": "&{esv.mfaself.successurl}"
+}

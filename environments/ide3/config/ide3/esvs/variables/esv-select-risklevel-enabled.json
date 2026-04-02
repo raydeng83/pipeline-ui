@@ -1,0 +1,6 @@
+{
+  "_id": "esv-select-risklevel-enabled",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_SELECT_RISKLEVEL_ENABLED}"
+}

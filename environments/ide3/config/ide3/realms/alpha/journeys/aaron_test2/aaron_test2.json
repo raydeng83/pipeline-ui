@@ -1,0 +1,215 @@
+{
+  "_id": "aaron_test2",
+  "_rev": "-1651287525",
+  "enabled": true,
+  "entryNodeId": "a29fcade-95ca-43b6-8a67-521c16739dbc",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1e1a5b0d-b9d4-4be5-99c0-10a160aa46c1": {
+      "connections": {
+        "outcome": "66edcc9b-3174-4c19-97ed-530cc2ce1fad"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "29df80f7-ea10-4246-a997-0107c182fdad": {
+      "connections": {
+        "true": "1e1a5b0d-b9d4-4be5-99c0-10a160aa46c1"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 276,
+      "y": 312.5124969482422
+    },
+    "3114dfac-0b78-4a99-a413-1d5d405f66a4": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "34a52598-666b-482e-a395-d01c0f0017ee": {
+      "connections": {
+        "false": "65a4abc8-66c9-460b-860a-7740be3a1b8e",
+        "true": "3114dfac-0b78-4a99-a413-1d5d405f66a4"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1163,
+      "y": 337.0104064941406
+    },
+    "493ba784-f1a8-40aa-8828-2ff6eb5bf4d2": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "4a91cc3b-d4f0-4ca3-9c3e-536bc9565c3a": {
+      "connections": {
+        "outcome": "c8749542-4f07-4a8e-bc5a-f81041393852"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "4e21d1b6-9190-419a-8dad-bfccc6e17311": {
+      "connections": {
+        "outcome": "dcb3318d-d8dc-44c8-924a-ffa768054f51"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "65a4abc8-66c9-460b-860a-7740be3a1b8e": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "66edcc9b-3174-4c19-97ed-530cc2ce1fad": {
+      "connections": {
+        "false": "fa18bac3-193d-4765-90cf-e75d44a375a3",
+        "true": "e58ceb52-4e05-4094-b270-c08a23174878"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 487,
+      "y": 165.5124969482422
+    },
+    "79f361b8-d4a7-4860-b691-f42ad1ab6ff3": {
+      "connections": {
+        "outcome": "29df80f7-ea10-4246-a997-0107c182fdad"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "a29fcade-95ca-43b6-8a67-521c16739dbc": {
+      "connections": {
+        "false": "cfba3f31-ce8b-4c6b-8cfd-f6b0c804f597",
+        "true": "79f361b8-d4a7-4860-b691-f42ad1ab6ff3"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 127,
+      "y": 139.5124969482422
+    },
+    "c8749542-4f07-4a8e-bc5a-f81041393852": {
+      "connections": {
+        "true": "dd652f1b-9b05-4cd2-a323-6f0d0c1f7022"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 921,
+      "y": 333.0104064941406
+    },
+    "cfba3f31-ce8b-4c6b-8cfd-f6b0c804f597": {
+      "connections": {
+        "outcome": "29df80f7-ea10-4246-a997-0107c182fdad"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "d140a848-63b0-4eed-a4bf-3064b42e45ca": {
+      "connections": {
+        "hasSession": "4e21d1b6-9190-419a-8dad-bfccc6e17311",
+        "noSession": "493ba784-f1a8-40aa-8828-2ff6eb5bf4d2"
+      },
+      "displayName": "Session Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 501,
+      "y": 356.1770782470703
+    },
+    "dcb3318d-d8dc-44c8-924a-ffa768054f51": {
+      "connections": {
+        "outcome": "4a91cc3b-d4f0-4ca3-9c3e-536bc9565c3a"
+      },
+      "displayName": "Get Session Data",
+      "nodeType": "SessionDataNode",
+      "version": "1.0",
+      "x": 775,
+      "y": 83.17707824707031
+    },
+    "dd652f1b-9b05-4cd2-a323-6f0d0c1f7022": {
+      "connections": {
+        "outcome": "34a52598-666b-482e-a395-d01c0f0017ee"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "e58ceb52-4e05-4094-b270-c08a23174878": {
+      "connections": {
+        "outcome": "d140a848-63b0-4eed-a4bf-3064b42e45ca"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "fa18bac3-193d-4765-90cf-e75d44a375a3": {
+      "connections": {
+        "outcome": "d140a848-63b0-4eed-a4bf-3064b42e45ca"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1324,
+      "y": 177
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1509,
+      "y": 578
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

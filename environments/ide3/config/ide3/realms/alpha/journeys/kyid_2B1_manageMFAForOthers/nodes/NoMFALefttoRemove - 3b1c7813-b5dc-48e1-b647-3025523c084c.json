@@ -1,0 +1,25 @@
+{
+  "_id": "3b1c7813-b5dc-48e1-b647-3025523c084c",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1990929786",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "No_MFA_left_to_remove"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

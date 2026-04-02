@@ -1,0 +1,16 @@
+{
+  "_id": "6d739c18-4c69-4ce3-9847-16b2fe92c01f",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320023429,
+  "default": false,
+  "description": "This script is used to route to login main journey.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950809837,
+  "name": "KYID.Journey.loginMainRouterJourney",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.loginMainRouterJourney.js"
+  }
+}

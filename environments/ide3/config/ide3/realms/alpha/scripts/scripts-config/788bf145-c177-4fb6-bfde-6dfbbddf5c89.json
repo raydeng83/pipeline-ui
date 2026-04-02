@@ -1,0 +1,16 @@
+{
+  "_id": "788bf145-c177-4fb6-bfde-6dfbbddf5c89",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319424998,
+  "default": false,
+  "description": "this is used only in MFA for others journey to get the helpdesk user email from existing session",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950804995,
+  "name": "KYID.Journey.SetEmailofHelpdeskUser",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.SetEmailofHelpdeskUser.js"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-prod-gov-basedn",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AD_INTERNAL_PROD_GOV_BASEDN}"
+}

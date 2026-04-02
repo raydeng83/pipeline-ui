@@ -1,0 +1,25 @@
+{
+  "_id": "bc5bdb02-4199-4b03-9bd6-7e47462c2c21",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-276757133",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {},
+  "messageNo": {},
+  "messageYes": {
+    "en": "Hi, this msg node is after scripted decision node"
+  }
+}

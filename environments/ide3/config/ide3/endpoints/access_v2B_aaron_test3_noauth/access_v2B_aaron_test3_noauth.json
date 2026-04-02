@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/access_v2B_aaron_test3_noauth",
+  "description": "access_v2B with validate-endpt-access disabled for testing",
+  "file": "access_v2B_aaron_test3_noauth.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "a734aa07-5f3e-4b06-ac96-b3d7a6f8d133",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "creationDate": 1773051654255,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1773662286282,
+  "name": "KYID.2B1.Journey.IDProofing.LexisNexis.Alternate.Email.Verification",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.LexisNexis.Alternate.Email.Verification.js"
+  }
+}

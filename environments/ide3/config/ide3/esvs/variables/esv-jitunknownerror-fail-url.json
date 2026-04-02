@@ -1,0 +1,6 @@
+{
+  "_id": "esv-jitunknownerror-fail-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_JITUNKNOWNERROR_FAIL_URL}"
+}

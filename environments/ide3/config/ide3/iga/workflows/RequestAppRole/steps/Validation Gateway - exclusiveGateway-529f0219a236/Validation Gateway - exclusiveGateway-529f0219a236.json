@@ -1,0 +1,23 @@
+{
+  "displayName": "Validation Gateway",
+  "name": "exclusiveGateway-529f0219a236",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "approverLevel == \"L1L2\"",
+        "outcome": "validationSuccess",
+        "step": "inclusiveGateway-77a0e2af0a1c"
+      },
+      {
+        "condition": "approverLevel != \"L1L2\"",
+        "outcome": "validationFailure",
+        "step": "approvalTask-2b92a3c6dfeb"
+      }
+    ],
+    "script": {
+      "file": "Validation Gateway - exclusiveGateway-529f0219a236.js"
+    }
+  },
+  "type": "scriptTask"
+}

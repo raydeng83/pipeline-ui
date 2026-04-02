@@ -1,0 +1,138 @@
+{
+  "_id": "kyid_2B1_SelfRegistrationMain",
+  "_rev": "1880917587",
+  "description": "Account Creation with Captcha",
+  "enabled": true,
+  "entryNodeId": "1f44cf6f-f050-49d1-a780-f48600dc826a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1f44cf6f-f050-49d1-a780-f48600dc826a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "912db048-3edf-4aa7-8910-2a437291ff83"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 186,
+      "y": 259
+    },
+    "3c378534-967f-46f7-887b-dddd8aaa1011": {
+      "connections": {
+        "false": "a4a7e80d-48c9-4024-a626-4a38828acc3d",
+        "true": "912db048-3edf-4aa7-8910-2a437291ff83"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 913,
+      "y": 632
+    },
+    "7c934275-1c5a-4740-bad8-871db356f0e0": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "3c378534-967f-46f7-887b-dddd8aaa1011"
+      },
+      "displayName": "Registration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 626,
+      "y": 483.3333282470703
+    },
+    "912db048-3edf-4aa7-8910-2a437291ff83": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "7c934275-1c5a-4740-bad8-871db356f0e0"
+      },
+      "displayName": "Enrollemnt Context Details",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 276,
+      "y": 493
+    },
+    "a4a7e80d-48c9-4024-a626-4a38828acc3d": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "dc5f2780-55aa-4dfd-9cf1-67d6d24f3e57"
+      },
+      "displayName": "Create User in AIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 984,
+      "y": 136
+    },
+    "afd17d84-ced0-461a-aaff-a5bc1dd97915": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1663,
+      "y": 385.015625
+    },
+    "cfb8fd01-e9d2-4c41-a409-c15d67110052": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1611.5555725097656,
+      "y": 533.8159637451172
+    },
+    "d4f033e8-8832-4641-9119-6e772f00a96b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1734,
+      "y": 105
+    },
+    "dc5f2780-55aa-4dfd-9cf1-67d6d24f3e57": {
+      "connections": {
+        "failure": "cfb8fd01-e9d2-4c41-a409-c15d67110052",
+        "success": "e3e76845-cc59-48d7-96cb-91e78042e3d5"
+      },
+      "displayName": "Email: User Account Creation",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1242.5,
+      "y": 121.3125
+    },
+    "e3e76845-cc59-48d7-96cb-91e78042e3d5": {
+      "connections": {
+        "false": "afd17d84-ced0-461a-aaff-a5bc1dd97915",
+        "true": "d4f033e8-8832-4641-9119-6e772f00a96b"
+      },
+      "displayName": "Script:CreateAccountinKOG",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1297,
+      "y": 340.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2149,
+      "y": 741
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2062,
+      "y": 522
+    },
+    "startNode": {
+      "x": 70,
+      "y": 479
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

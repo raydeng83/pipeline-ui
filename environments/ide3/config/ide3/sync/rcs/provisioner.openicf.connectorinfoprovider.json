@@ -1,0 +1,113 @@
+{
+  "_id": "provisioner.openicf.connectorinfoprovider",
+  "connectorsLocation": "connectors",
+  "remoteConnectorClients": [
+    {
+      "enabled": true,
+      "name": "rcs-connector-external-1",
+      "useSSL": true
+    },
+    {
+      "clientId": "RCSClient",
+      "enabled": true,
+      "name": "rcs-connector-external-2",
+      "useSSL": true
+    },
+    {
+      "clientId": "RCSClient",
+      "enabled": true,
+      "name": "rcs-connector-external-4",
+      "useSSL": true
+    },
+    {
+      "enabled": true,
+      "name": "rcs-connector-internal-1",
+      "useSSL": true
+    },
+    {
+      "clientId": "RCSClient",
+      "enabled": true,
+      "name": "rcs-connector-internal-2",
+      "useSSL": true
+    },
+    {
+      "clientId": "RCSClient",
+      "enabled": true,
+      "name": "rcs-connector-internal-3",
+      "useSSL": true
+    },
+    {
+      "clientId": "RCSClient",
+      "enabled": true,
+      "name": "rcs-connector-internal-4",
+      "useSSL": true
+    },
+    {
+      "clientId": "RCSClient",
+      "enabled": true,
+      "name": "rcs-connector-external-3",
+      "useSSL": true
+    },
+    {
+      "enabled": true,
+      "name": "rcs-connector-poc",
+      "useSSL": true
+    },
+    {
+      "enabled": true,
+      "name": "rcs-csv-connector-aaron",
+      "useSSL": true
+    },
+    {
+      "clientId": "km_rcsClient",
+      "enabled": true,
+      "name": "km_rcs-poc-connector",
+      "useSSL": true
+    },
+    {
+      "enabled": true,
+      "name": "rcs-db-connector-aaron",
+      "useSSL": true
+    }
+  ],
+  "remoteConnectorClientsGroups": [
+    {
+      "algorithm": "roundrobin",
+      "name": "rcs-cluster-external",
+      "serversList": [
+        {
+          "name": "rcs-connector-external-1"
+        },
+        {
+          "name": "rcs-connector-external-2"
+        },
+        {
+          "name": "rcs-connector-external-3"
+        },
+        {
+          "name": "rcs-connector-external-4"
+        }
+      ]
+    },
+    {
+      "algorithm": "roundrobin",
+      "name": "rcs-cluster-internal",
+      "serversList": [
+        {
+          "name": "rcs-connector-internal-1"
+        },
+        {
+          "name": "rcs-connector-internal-2"
+        },
+        {
+          "name": "rcs-connector-internal-3"
+        },
+        {
+          "name": "rcs-connector-internal-4"
+        }
+      ]
+    }
+  ],
+  "remoteConnectorServers": [],
+  "remoteConnectorServersGroups": []
+}

@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/kog_db_aaron_test1",
+  "description": "KOG Database Replacement Endpoint - Test Version 1. Unified endpoint for user data retrieval supporting FullData, ProfileOnly, and AuthorizationOnly views.",
+  "file": "kog_db_aaron_test1.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

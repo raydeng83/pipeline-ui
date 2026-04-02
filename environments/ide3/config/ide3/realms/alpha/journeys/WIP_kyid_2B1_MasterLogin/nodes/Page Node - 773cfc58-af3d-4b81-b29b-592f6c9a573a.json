@@ -1,0 +1,32 @@
+{
+  "_id": "773cfc58-af3d-4b81-b29b-592f6c9a573a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "318788982",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "1b59475e-5f39-4e42-93cd-53fd3f845ed4",
+      "displayName": "hasSession-PingOne",
+      "nodeType": "product-PingOneProtectInitializeNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "InitializeRiskLevel"
+  }
+}

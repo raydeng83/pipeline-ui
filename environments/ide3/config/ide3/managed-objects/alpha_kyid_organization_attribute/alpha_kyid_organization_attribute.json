@@ -1,0 +1,283 @@
+{
+  "name": "alpha_kyid_organization_attribute",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "_id",
+      "orgSourceID",
+      "systemName",
+      "displayName",
+      "systemValue",
+      "displayValue",
+      "category",
+      "organizationDetails",
+      "createDate",
+      "updateDate",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdBy",
+      "updatedBy",
+      "createdByID",
+      "updatedByID",
+      "roles",
+      "orgID"
+    ],
+    "properties": {
+      "_id": {
+        "searchable": false,
+        "title": "Organization Attribute ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "category": {
+        "searchable": false,
+        "title": "Org Category",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "Created By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "displayName": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Org Display Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "displayValue": {
+        "searchable": false,
+        "title": "Org Display Value",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "orgID": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_organization_attribute:orgID",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_organization_attribute:orgID:items",
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_organization",
+              "notify": false,
+              "path": "managed/alpha_organization",
+              "query": {
+                "fields": [
+                  "_id"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": true,
+        "searchable": true,
+        "title": "Organization ID",
+        "type": "array",
+        "userEditable": false,
+        "viewable": true
+      },
+      "orgSourceID": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Source organization ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "organizationDetails": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "organizationKey",
+            "organizationName",
+            "organizationStatus"
+          ],
+          "properties": {
+            "organizationKey": {
+              "searchable": false,
+              "title": "Organization Key",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "organizationName": {
+              "searchable": false,
+              "title": "Organization Name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "organizationStatus": {
+              "searchable": false,
+              "title": "Organization Status",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": true,
+        "title": "Organization Details",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "roles": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_organization_attribute:roles",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_organization_attribute:roles:items",
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_role",
+              "notify": false,
+              "path": "managed/alpha_role",
+              "query": {
+                "fields": [
+                  "_id",
+                  "name"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": true,
+        "searchable": true,
+        "title": "Roles",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "systemName": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Org System Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "systemValue": {
+        "searchable": false,
+        "title": "Org System Value",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "Updated By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "alpha_kyid_organization_attribute",
+    "type": "object"
+  }
+}

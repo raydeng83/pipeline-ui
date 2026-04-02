@@ -1,0 +1,273 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_errormessages",
+  "onCreate": {
+    "file": "alpha_kyid_errormessages.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_errormessages.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "alpha_kyid_errormessages.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "alpha_kyid_errormessages.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "This is used to store journey or endpoint error codes and messages for KYID",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "type",
+      "errorcode",
+      "errormsg",
+      "messageId",
+      "messageType",
+      "startTime",
+      "endTime",
+      "messageContent",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "updatedBy",
+      "createdBy",
+      "createDate",
+      "updateDate",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "createdByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "endTime": {
+        "searchable": false,
+        "title": "End Time",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "errorcode": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Error Code",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "errormsg": {
+        "description": null,
+        "isVirtual": false,
+        "order": [
+          "en",
+          "es"
+        ],
+        "properties": {
+          "en": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": false,
+            "title": "English",
+            "type": "string",
+            "userEditable": false,
+            "viewable": true
+          },
+          "es": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": false,
+            "title": "Spanish",
+            "type": "string",
+            "userEditable": false,
+            "viewable": true
+          }
+        },
+        "searchable": true,
+        "title": "Error Message",
+        "type": "object",
+        "userEditable": false,
+        "viewable": true
+      },
+      "messageContent": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "title",
+            "content"
+          ],
+          "properties": {
+            "content": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Content",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "title": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Title",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "nullable": false,
+        "searchable": false,
+        "title": "Message Content",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "messageId": {
+        "searchable": false,
+        "title": "Message ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "messageType": {
+        "searchable": false,
+        "title": "Message Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "startTime": {
+        "searchable": false,
+        "title": "Start Time",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "updatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "alpha_kyid_errormessages",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

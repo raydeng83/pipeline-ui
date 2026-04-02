@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-kogapi-isauthztoken-dev",
+  "description": "Token Endpoint URL for isAuthz call",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_KOGAPI_ISAUTHZTOKEN_DEV}"
+}

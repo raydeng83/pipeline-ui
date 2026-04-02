@@ -1,0 +1,27 @@
+{
+  "_id": "eea59738-00ab-45f2-ba01-141f19ed5750",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-2143670308",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "No device registered."
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Continue"
+  }
+}

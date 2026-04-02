@@ -1,0 +1,71 @@
+{
+  "_id": "a4da0ef6-a099-453b-929b-3e9d3f74828f",
+  "_outcomes": [
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "MCISYNC",
+      "id": "MCISYNC"
+    },
+    {
+      "displayName": "appEnrollRIDPmsg",
+      "id": "appEnrollRIDPmsg"
+    },
+    {
+      "displayName": "displayUser",
+      "id": "displayUser"
+    },
+    {
+      "displayName": "continue",
+      "id": "continue"
+    },
+    {
+      "displayName": "unableToVerify",
+      "id": "unableToVerify"
+    },
+    {
+      "displayName": "forgotEmailSuccess",
+      "id": "forgotEmailSuccess"
+    },
+    {
+      "displayName": "notVerifiedSuccess",
+      "id": "notVerifiedSuccess"
+    },
+    {
+      "displayName": "createAccount",
+      "id": "createAccount"
+    },
+    {
+      "displayName": "firstTimeLogin",
+      "id": "firstTimeLogin"
+    }
+  ],
+  "_rev": "-288053152",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "error",
+    "MCISYNC",
+    "appEnrollRIDPmsg",
+    "displayUser",
+    "continue",
+    "unableToVerify",
+    "forgotEmailSuccess",
+    "notVerifiedSuccess",
+    "createAccount",
+    "firstTimeLogin"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "15010887-baaf-4ff6-89df-da44b032108b"
+}

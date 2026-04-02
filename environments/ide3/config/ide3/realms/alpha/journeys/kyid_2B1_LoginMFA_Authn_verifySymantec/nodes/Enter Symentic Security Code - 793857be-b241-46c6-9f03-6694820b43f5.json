@@ -1,0 +1,46 @@
+{
+  "_id": "793857be-b241-46c6-9f03-6694820b43f5",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "AnotherMethod",
+      "id": "AnotherMethod"
+    },
+    {
+      "displayName": "singlesymantec",
+      "id": "singlesymantec"
+    },
+    {
+      "displayName": "EmptyCode",
+      "id": "EmptyCode"
+    }
+  ],
+  "_rev": "-1430295709",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "e3443f33-c198-45d6-9626-884c7954d96d",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>\nVerify with Symantec VIP</h5>\n</div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.url}\"target=\"_blank\">Need Assistance?</a>\n</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Verificación con Symantec VIP</h5>\n<a href=\"&{esv.kog.help.url}\"target=\"_blank\">¿Necesita ayuda?</a>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{}}"
+}

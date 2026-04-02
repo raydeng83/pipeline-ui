@@ -1,0 +1,25 @@
+{
+  "_id": "4306e1b3-62c5-4b3d-b022-9f6d4191d407",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "993922300",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "An error has occurred while processing the request."
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

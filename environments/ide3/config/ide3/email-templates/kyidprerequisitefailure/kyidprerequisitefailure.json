@@ -1,0 +1,27 @@
+{
+  "_id": "emailTemplate/kyidprerequisitefailure",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "kyidprerequisitefailure",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyidprerequisitefailure.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyidprerequisitefailure.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "kyidprerequisitefailure.css"
+  },
+  "subject": {
+    "en": ""
+  },
+  "templateId": "kyidprerequisitefailure"
+}

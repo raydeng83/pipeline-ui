@@ -1,0 +1,16 @@
+{
+  "_id": "2c77cdb4-0d90-4176-ad36-66f64edea115",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1752238185673,
+  "default": false,
+  "description": "This script is used to remove or add alternate email in KOG using SIH API.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950814985,
+  "name": "KYID.2B1.Journey.AddRemoveAlternateEmailSIHAPI",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.AddRemoveAlternateEmailSIHAPI.js"
+  }
+}

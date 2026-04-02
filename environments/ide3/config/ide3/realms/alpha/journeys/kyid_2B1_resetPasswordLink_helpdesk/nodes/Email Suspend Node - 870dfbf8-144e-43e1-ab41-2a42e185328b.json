@@ -1,0 +1,24 @@
+{
+  "_id": "870dfbf8-144e-43e1-ab41-2a42e185328b",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "1279934315",
+  "_type": {
+    "_id": "EmailSuspendNode",
+    "collection": true,
+    "name": "Email Suspend Node",
+    "version": "1.0"
+  },
+  "emailAttribute": "mail",
+  "emailSuspendMessage": {
+    "en": "An email has been sent to the address you entered. Click the link in that email to proceed."
+  },
+  "emailTemplateName": "kyid2BResetPasswordHelpdesk",
+  "identityAttribute": "mail",
+  "objectLookup": false,
+  "suspendDuration": 1
+}

@@ -1,0 +1,26 @@
+{
+  "name": "alpha_customrolenik",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "RoleName"
+    ],
+    "properties": {
+      "RoleName": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Role Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "customrolenik",
+    "type": "object"
+  }
+}

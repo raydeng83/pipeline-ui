@@ -1,0 +1,231 @@
+{
+  "name": "alpha_kyid_access_profile",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "_id",
+      "name",
+      "displayName",
+      "description",
+      "organizationID",
+      "createDate",
+      "updateDate",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdBy",
+      "updatedBy",
+      "createdByID",
+      "updatedByID",
+      "app_roles",
+      "users"
+    ],
+    "properties": {
+      "_id": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Access Profile ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "app_roles": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_profile:app_roles",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_profile:app_roles:items",
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_role",
+              "notify": false,
+              "path": "managed/alpha_role",
+              "query": {
+                "fields": [
+                  "name",
+                  "_id",
+                  "businessAppId"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": true,
+        "searchable": true,
+        "title": "App_roles",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "Created By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "description": {
+        "searchable": false,
+        "title": "Access Profile Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "displayName": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Access Profile Display Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Access Profile Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "organizationID": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Organization ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "Updated By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "users": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_profile:users",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_profile:users:items",
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_user",
+              "notify": false,
+              "path": "managed/alpha_user",
+              "query": {
+                "fields": [
+                  "_id",
+                  "userName",
+                  "mail"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": true,
+        "searchable": true,
+        "title": "Users",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "alpha_kyid_access_profile",
+    "type": "object"
+  }
+}

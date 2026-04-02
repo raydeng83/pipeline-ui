@@ -1,0 +1,153 @@
+{
+  "_rev": 1,
+  "childType": false,
+  "description": "Q-testing-generic-2level-troubleshooting generic workflow",
+  "displayName": "Q-testing-generic-2level-troubleshooting Workflow",
+  "id": "Q-testing-generic-2level-troubleshooting",
+  "mutable": true,
+  "name": "Q-testing-generic-2level-troubleshooting",
+  "staticNodes": {
+    "endNode": {
+      "_outcomes": [],
+      "connections": {},
+      "displayDetails": {
+        "icon": "checkmark",
+        "value": "Success",
+        "variant": "success"
+      },
+      "displayType": "SingleInput",
+      "hasError": false,
+      "id": "endNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "End",
+      "nodeType": "SingleInput",
+      "schema": null,
+      "template": null,
+      "x": 2511,
+      "y": 355.5
+    },
+    "startNode": {
+      "_outcomes": [
+        {
+          "displayName": "start",
+          "id": "start"
+        }
+      ],
+      "connections": {
+        "start": "scriptTask-70b2da1a0483"
+      },
+      "displayDetails": {
+        "icon": "play_arrow",
+        "value": "Start",
+        "variant": "info"
+      },
+      "displayType": "IconOutcomeNode",
+      "hasError": false,
+      "id": "startNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "Start",
+      "nodeType": "IconOutcomeNode",
+      "schema": null,
+      "template": null,
+      "x": 70,
+      "y": 225.5
+    },
+    "uiConfig": {
+      "approvalTask-95a73e18cff6": {
+        "actors": [],
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 7,
+          "expirationDateType": "duration",
+          "expirationDateVariable": "",
+          "expirationTimeSpan": "day(s)",
+          "reassignedActors": [
+            {
+              "id": ""
+            }
+          ],
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 756,
+        "y": 112.5
+      },
+      "approvalTask-ca89c676a630": {
+        "actors": [],
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 7,
+          "expirationDateType": "duration",
+          "expirationDateVariable": "",
+          "expirationTimeSpan": "day(s)",
+          "reassignedActors": [
+            {
+              "id": ""
+            }
+          ],
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 965,
+        "y": 334.5
+      },
+      "exclusiveGateway-19779330b754": {
+        "x": 752,
+        "y": 478.5
+      },
+      "exclusiveGateway-34047e616c13": {
+        "x": 1785,
+        "y": 345.8333333333333
+      },
+      "exclusiveGateway-63953f0126f4": {
+        "x": 440,
+        "y": 200.5
+      },
+      "exclusiveGateway-7f1777e228ba": {
+        "x": 1771,
+        "y": 126.66666666666667
+      },
+      "scriptTask-05efed9a34f3": {
+        "x": 1448,
+        "y": 192
+      },
+      "scriptTask-37be22411bf7": {
+        "x": 2191,
+        "y": 357
+      },
+      "scriptTask-70b2da1a0483": {
+        "x": 210,
+        "y": 229
+      },
+      "scriptTask-74c5710a88c8": {
+        "x": 2191,
+        "y": 504
+      },
+      "scriptTask-ab1048cb15af": {
+        "x": 1434,
+        "y": 531
+      },
+      "scriptTask-ba0f2a0ca56e": {
+        "x": 454,
+        "y": 516
+      },
+      "scriptTask-ef98df825107": {
+        "x": 2191,
+        "y": 210
+      },
+      "scriptTask-f289b027502f": {
+        "x": 1112,
+        "y": 134
+      }
+    }
+  },
+  "status": "published"
+}

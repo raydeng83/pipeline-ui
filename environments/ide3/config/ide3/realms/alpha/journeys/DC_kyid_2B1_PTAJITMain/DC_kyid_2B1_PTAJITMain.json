@@ -1,0 +1,392 @@
+{
+  "_id": "DC_kyid_2B1_PTAJITMain",
+  "_rev": "-243217052",
+  "enabled": true,
+  "entryNodeId": "82452820-f6b4-4706-98b3-6e176ac0aa07",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0391e02e-6a4c-4bbc-8093-8dff6598d5bc": {
+      "connections": {
+        "next": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "KOG API: Not Found",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2794,
+      "y": 384
+    },
+    "06c84bd8-1130-4c09-a54f-c8f528b7465d": {
+      "connections": {
+        "next": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "KOG API: Invalid",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2794,
+      "y": 232
+    },
+    "1f5072f0-e174-4b6f-9dfc-daacdccb2460": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "bb6c999c-b8fb-444b-a45d-a67fe8edc3dd"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 3288,
+      "y": 58.33333333333333
+    },
+    "285a7a45-f1a9-4078-9fb2-73ac863ffebe": {
+      "connections": {
+        "true": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "User Disabled at AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3585.16650390625,
+      "y": 319.22916412353516
+    },
+    "30791112-3bbe-4463-90cb-f035cbad9543": {
+      "connections": {
+        "False": "507cefe1-3eed-4aee-98d5-5406e110a755",
+        "True": "ff7fa1f4-a815-4b94-ad51-0a8aa61a0990"
+      },
+      "displayName": "Script:IsCaptchaEnabled",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 628,
+      "y": 308
+    },
+    "35d72724-d267-4dbb-8ff5-c0d0f66a6a01": {
+      "connections": {
+        "next": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "KOG API:Failed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2794,
+      "y": 80
+    },
+    "3710ffa4-edff-4f69-bd0c-69bdf016cac9": {
+      "connections": {
+        "Failed": "35d72724-d267-4dbb-8ff5-c0d0f66a6a01",
+        "Invalid": "06c84bd8-1130-4c09-a54f-c8f528b7465d",
+        "StubAccount": "0391e02e-6a4c-4bbc-8093-8dff6598d5bc",
+        "Successful": "792a0a5a-8a75-4a26-8b4f-727117e63961"
+      },
+      "displayName": "KOG:API User info Call",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2496,
+      "y": 281.5
+    },
+    "3a7908f9-a343-47da-bbcc-d191f36518a8": {
+      "connections": {
+        "true": "30791112-3bbe-4463-90cb-f035cbad9543"
+      },
+      "displayName": "Script: Set Request URL",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 609,
+      "y": 602.3333282470703
+    },
+    "460fde1c-ccc2-4507-93a0-dd517985a222": {
+      "connections": {
+        "false": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171",
+        "true": "3710ffa4-edff-4f69-bd0c-69bdf016cac9"
+      },
+      "displayName": "Script : Is Jit Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2204,
+      "y": 308
+    },
+    "4bedf848-8121-4867-b519-e4f01800afac": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "JIT",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 4936,
+      "y": 308
+    },
+    "4d6731d8-9853-4325-b8f7-3c03cb870696": {
+      "connections": {
+        "true": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "Script: NonProd-InternalUserLockout",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4596.666748046875,
+      "y": 65.33332824707031
+    },
+    "507cefe1-3eed-4aee-98d5-5406e110a755": {
+      "connections": {
+        "True": "f5532d61-90e8-499f-bdbc-76a9d1376f5a"
+      },
+      "displayName": "UserName Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 940,
+      "y": 131.66666666666666
+    },
+    "5419a38a-ad6a-4a84-8b3a-9cd7a1ed6a3e": {
+      "connections": {
+        "Error": "9c67ae28-ce14-409f-9ff4-84c7d6b84f24",
+        "User Found": "f7eee0ea-8630-4b83-b075-f54bfecccdfe",
+        "User Not Found": "460fde1c-ccc2-4507-93a0-dd517985a222"
+      },
+      "displayName": "Script: Check user in Ping",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1469,
+      "y": 409
+    },
+    "5d4d54a7-48a4-4d95-aab7-f991a366cd57": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "4bedf848-8121-4867-b519-e4f01800afac"
+      },
+      "displayName": "Script : check jit required or Not",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4619,
+      "y": 308
+    },
+    "60aeb629-dfb9-4b01-968e-b1372e7f9a3c": {
+      "connections": {
+        "next": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "PTA: Connection Fail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4405,
+      "y": 124
+    },
+    "713553d0-924b-4059-ae48-7c2b6295f76d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5d4d54a7-48a4-4d95-aab7-f991a366cd57"
+      },
+      "displayName": "Script: Login Policy Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4283,
+      "y": 266.3333282470703
+    },
+    "792a0a5a-8a75-4a26-8b4f-727117e63961": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "mail": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "Script:CheckMail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2794,
+      "y": 536
+    },
+    "798535f5-901b-40e3-bbbc-743240294d99": {
+      "connections": {
+        "true": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "Script: External User Lockout",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3959,
+      "y": 641.3333282470703
+    },
+    "82452820-f6b4-4706-98b3-6e176ac0aa07": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "9edef0e6-e586-4b29-aa98-17da3f44324b"
+      },
+      "displayName": "Script - isKYID2BJourney",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 217,
+      "y": 306
+    },
+    "9158aae9-b91f-4752-bbc5-622261d9033f": {
+      "connections": {
+        "true": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "PTA: Failed or InActive in AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4330,
+      "y": 602
+    },
+    "981021d8-4271-4663-ab1b-75bf15f0f5e8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5d4d54a7-48a4-4d95-aab7-f991a366cd57"
+      },
+      "displayName": "IJ:ExpiredPassword",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 4260,
+      "y": 442
+    },
+    "9c67ae28-ce14-409f-9ff4-84c7d6b84f24": {
+      "connections": {
+        "next": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "PTA : Something Went Wrong",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3858,
+      "y": 61.33333333333334
+    },
+    "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171": {
+      "connections": {
+        "false": "1f5072f0-e174-4b6f-9dfc-daacdccb2460",
+        "true": "cdf7a27a-75b0-4f45-a283-c313f0297732"
+      },
+      "displayName": "isCaptchaV3success",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3030,
+      "y": 269
+    },
+    "9edef0e6-e586-4b29-aa98-17da3f44324b": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "30791112-3bbe-4463-90cb-f035cbad9543"
+      },
+      "displayName": "Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 466,
+      "y": 92.3125
+    },
+    "a78a5fc2-e5ff-4735-a16c-02d0880de3e6": {
+      "connections": {
+        "true": "5419a38a-ad6a-4a84-8b3a-9cd7a1ed6a3e"
+      },
+      "displayName": "Script:SetCaptchaValue",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1260,
+      "y": 291.5
+    },
+    "bb6c999c-b8fb-444b-a45d-a67fe8edc3dd": {
+      "connections": {
+        "Back": "30791112-3bbe-4463-90cb-f035cbad9543",
+        "False": "9158aae9-b91f-4752-bbc5-622261d9033f",
+        "True": "e7ebe73a-55ac-485d-82dc-d153a15c6a92"
+      },
+      "displayName": "Script:PaswwordOutcome",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3591,
+      "y": 133.015625
+    },
+    "cdf7a27a-75b0-4f45-a283-c313f0297732": {
+      "connections": {
+        "Back": "30791112-3bbe-4463-90cb-f035cbad9543",
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "e7ebe73a-55ac-485d-82dc-d153a15c6a92"
+      },
+      "displayName": "Password Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3360,
+      "y": 446.6666666666667
+    },
+    "d8b1d7f5-61e3-407e-a522-0c1b2e009874": {
+      "connections": {
+        "Error": "9c67ae28-ce14-409f-9ff4-84c7d6b84f24",
+        "False": "9158aae9-b91f-4752-bbc5-622261d9033f",
+        "True": "e7ebe73a-55ac-485d-82dc-d153a15c6a92"
+      },
+      "displayName": "Script : Check User AD Status in Ping",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3666,
+      "y": 486
+    },
+    "e7ebe73a-55ac-485d-82dc-d153a15c6a92": {
+      "connections": {
+        "ExtUserlockout": "798535f5-901b-40e3-bbbc-743240294d99",
+        "IntUserlockout": "fea19c7c-d9b4-48d1-b2f0-79fbd1a901b7",
+        "IntUserlockoutNonProd": "4d6731d8-9853-4325-b8f7-3c03cb870696",
+        "Successful": "713553d0-924b-4059-ae48-7c2b6295f76d",
+        "connFail": "60aeb629-dfb9-4b01-968e-b1372e7f9a3c",
+        "failOrInactive": "9158aae9-b91f-4752-bbc5-622261d9033f",
+        "pwdExpire": "981021d8-4271-4663-ab1b-75bf15f0f5e8",
+        "usrDisabled": "285a7a45-f1a9-4078-9fb2-73ac863ffebe"
+      },
+      "displayName": "Authenticate at AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3976,
+      "y": 260.6666666666667
+    },
+    "f5532d61-90e8-499f-bdbc-76a9d1376f5a": {
+      "connections": {
+        "true": "5419a38a-ad6a-4a84-8b3a-9cd7a1ed6a3e"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1260,
+      "y": 199
+    },
+    "f7eee0ea-8630-4b83-b075-f54bfecccdfe": {
+      "connections": {
+        "External": "460fde1c-ccc2-4507-93a0-dd517985a222",
+        "Internal": "3710ffa4-edff-4f69-bd0c-69bdf016cac9",
+        "NotFound": "460fde1c-ccc2-4507-93a0-dd517985a222"
+      },
+      "displayName": "Script : External or Internal User",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1822,
+      "y": 127
+    },
+    "fea19c7c-d9b4-48d1-b2f0-79fbd1a901b7": {
+      "connections": {
+        "true": "9df51090-dc4d-4dc3-b0ca-75bdd6ea6171"
+      },
+      "displayName": "PTA: Internal User Lockout",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4174,
+      "y": 46
+    },
+    "ff7fa1f4-a815-4b94-ad51-0a8aa61a0990": {
+      "connections": {
+        "false": "a78a5fc2-e5ff-4735-a16c-02d0880de3e6",
+        "true": "5419a38a-ad6a-4a84-8b3a-9cd7a1ed6a3e"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 940,
+      "y": 257.8333333333333
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 5297,
+      "y": 452.1666666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 5303,
+      "y": 100.33333333333331
+    },
+    "startNode": {
+      "x": 70,
+      "y": 336
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-enrollment-defaultdelegationexpiryduration",
+  "description": "",
+  "expressionType": "number",
+  "valueBase64": "${ESV_ENROLLMENT_DEFAULTDELEGATIONEXPIRYDURATION}"
+}

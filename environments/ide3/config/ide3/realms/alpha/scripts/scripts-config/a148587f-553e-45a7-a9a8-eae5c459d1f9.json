@@ -1,0 +1,16 @@
+{
+  "_id": "a148587f-553e-45a7-a9a8-eae5c459d1f9",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319428360,
+  "default": false,
+  "description": "This function is used to update Forgerock AIC user profile based on KOG Profile.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950815865,
+  "name": "KYID.Journey.UpdateUserInPingAIC",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.UpdateUserInPingAIC.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "30b4c5a0-92eb-4d08-ae87-e5013541f86e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320032493,
+  "default": false,
+  "description": "This script is used to count the authentication failure number for each app.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950795382,
+  "name": "KYID.Journey.AppFailureCount",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.AppFailureCount.js"
+  }
+}

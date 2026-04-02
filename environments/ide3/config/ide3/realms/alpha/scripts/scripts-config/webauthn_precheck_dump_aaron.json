@@ -1,0 +1,16 @@
+{
+  "_id": "webauthn_precheck_dump_aaron",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=deeb7cc8-125d-4d1f-9ff4-774077f0dd89,ou=user,ou=am-config",
+  "creationDate": 1772640006304,
+  "default": false,
+  "description": "Pre-registration state dump + request headers for WebAuthn testing",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=deeb7cc8-125d-4d1f-9ff4-774077f0dd89,ou=user,ou=am-config",
+  "lastModifiedDate": 1772640006304,
+  "name": "webauthn_precheck_dump_aaron",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/webauthn_precheck_dump_aaron.js"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "displayName": "Error Handle",
+  "name": "scriptTask-369ebbacb543",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "Error Handle - scriptTask-369ebbacb543.js"
+    }
+  },
+  "type": "scriptTask"
+}

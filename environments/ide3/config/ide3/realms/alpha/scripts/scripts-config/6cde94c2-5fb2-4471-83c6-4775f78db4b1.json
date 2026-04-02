@@ -1,0 +1,16 @@
+{
+  "_id": "6cde94c2-5fb2-4471-83c6-4775f78db4b1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=81073c37-7e92-4460-a48e-7435a1c0a371,ou=user,ou=am-config",
+  "creationDate": 1771991605412,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=81073c37-7e92-4460-a48e-7435a1c0a371,ou=user,ou=am-config",
+  "lastModifiedDate": 1772193240230,
+  "name": "TBD.AuditLogs",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/TBD.AuditLogs.js"
+  }
+}

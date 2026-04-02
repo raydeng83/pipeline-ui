@@ -1,0 +1,180 @@
+{
+  "_id": "kyid_loginOAUTHMain",
+  "_rev": "-1904264762",
+  "enabled": true,
+  "entryNodeId": "bba3bd5e-f6a0-4cc1-9467-b855169ee28a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "00dae74f-071c-4f13-b188-51fbf7fb586e": {
+      "connections": {
+        "false": "b3e39a84-e27b-4641-98b0-d6011404e7c8",
+        "true": "52674749-dba9-4d3f-8736-1bdeb7a1ca72"
+      },
+      "displayName": "IJ03: Just In Time Provisioning",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 824,
+      "y": 133.8948974609375
+    },
+    "148e1633-4261-43f5-8d1f-123c097fd7bd": {
+      "connections": {
+        "true": "bba3bd5e-f6a0-4cc1-9467-b855169ee28a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 180,
+      "y": 116.01040649414062
+    },
+    "28d9e7a4-4abf-4ba5-a4c7-2680f13f9749": {
+      "connections": {
+        "true": "6b1d48ca-f9d3-4f7e-845a-21f39da8e99b"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 971.6666564941406,
+      "y": 257.0104064941406
+    },
+    "466bf380-2d87-4d9f-83e2-27f7f9bb7ade": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Redirection with Locale",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 831,
+      "y": 552.015625
+    },
+    "52674749-dba9-4d3f-8736-1bdeb7a1ca72": {
+      "connections": {
+        "false": "b3e39a84-e27b-4641-98b0-d6011404e7c8",
+        "true": "8ae381ae-62b8-48ea-9015-f85a5ef18c06"
+      },
+      "displayName": "IJ04: Read Claims",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1162,
+      "y": 139.8948974609375
+    },
+    "6b1d48ca-f9d3-4f7e-845a-21f39da8e99b": {
+      "connections": {
+        "false": "b3e39a84-e27b-4641-98b0-d6011404e7c8",
+        "true": "00dae74f-071c-4f13-b188-51fbf7fb586e"
+      },
+      "displayName": "IJ02: Pass Through Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1167,
+      "y": 352.8948974609375
+    },
+    "8ae381ae-62b8-48ea-9015-f85a5ef18c06": {
+      "connections": {
+        "false": "b3e39a84-e27b-4641-98b0-d6011404e7c8",
+        "true": "9fec842a-8ee8-4a35-8670-874c0bf35325"
+      },
+      "displayName": "IJ05: MFA Registration & Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1406,
+      "y": 143.015625
+    },
+    "8dbcfe0d-f4f2-4829-81a8-35e5c6a7d93c": {
+      "connections": {
+        "true": "9247f28d-0b15-4328-9f61-b0298f782069"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 390,
+      "y": 91.01040649414062
+    },
+    "9247f28d-0b15-4328-9f61-b0298f782069": {
+      "connections": {
+        "SetLocaleInURL": "466bf380-2d87-4d9f-83e2-27f7f9bb7ade",
+        "hasSession": "00dae74f-071c-4f13-b188-51fbf7fb586e",
+        "noSession": "28d9e7a4-4abf-4ba5-a4c7-2680f13f9749"
+      },
+      "displayName": "Script: Check Existing Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 502,
+      "y": 226.15625
+    },
+    "9a3871c0-53dc-4017-8298-78a089e6bccd": {
+      "connections": {
+        "false": "b3e39a84-e27b-4641-98b0-d6011404e7c8",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "IJ07: Need KOG Visit Redirection",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1984,
+      "y": 147.3125
+    },
+    "9fec842a-8ee8-4a35-8670-874c0bf35325": {
+      "connections": {
+        "false": "b3e39a84-e27b-4641-98b0-d6011404e7c8",
+        "true": "9a3871c0-53dc-4017-8298-78a089e6bccd"
+      },
+      "displayName": "IJ06: First Time Login",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1744,
+      "y": 147.015625
+    },
+    "b3e39a84-e27b-4641-98b0-d6011404e7c8": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Scripted: Update App Failure Count",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1549,
+      "y": 388.015625
+    },
+    "b9d968ee-bba4-4b19-b715-8b0c7c91e59d": {
+      "connections": {
+        "false": "6b1d48ca-f9d3-4f7e-845a-21f39da8e99b",
+        "true": "00dae74f-071c-4f13-b188-51fbf7fb586e"
+      },
+      "displayName": "IJ01: Kerberos Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 834,
+      "y": 394.15625
+    },
+    "bba3bd5e-f6a0-4cc1-9467-b855169ee28a": {
+      "connections": {
+        "outcome": "9247f28d-0b15-4328-9f61-b0298f782069"
+      },
+      "displayName": "Set Session Properties",
+      "nodeType": "SetSessionPropertiesNode",
+      "version": "1.0",
+      "x": 203,
+      "y": 256.15625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2063,
+      "y": 671
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1689,
+      "y": 670
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Login\"]"
+  }
+}

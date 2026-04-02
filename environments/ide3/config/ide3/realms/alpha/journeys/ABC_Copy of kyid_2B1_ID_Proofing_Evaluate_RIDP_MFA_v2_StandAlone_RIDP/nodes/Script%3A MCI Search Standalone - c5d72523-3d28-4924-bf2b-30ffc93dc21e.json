@@ -1,0 +1,71 @@
+{
+  "_id": "c5d72523-3d28-4924-bf2b-30ffc93dc21e",
+  "_outcomes": [
+    {
+      "displayName": "exactMatch",
+      "id": "exactMatch"
+    },
+    {
+      "displayName": "emailsWithVerifiedLexID",
+      "id": "emailsWithVerifiedLexID"
+    },
+    {
+      "displayName": "inputLink2TerminatedAccount",
+      "id": "inputLink2TerminatedAccount"
+    },
+    {
+      "displayName": "inputNotMatchingVerifiedIdentity",
+      "id": "inputNotMatchingVerifiedIdentity"
+    },
+    {
+      "displayName": "jitProvisioning",
+      "id": "jitProvisioning"
+    },
+    {
+      "displayName": "lexIdMismatch",
+      "id": "lexIdMismatch"
+    },
+    {
+      "displayName": "noKOGAccount",
+      "id": "noKOGAccount"
+    },
+    {
+      "displayName": "noKOGAccountFound",
+      "id": "noKOGAccountFound"
+    },
+    {
+      "displayName": "noMatchPartialMatch",
+      "id": "noMatchPartialMatch"
+    },
+    {
+      "displayName": "highRiskTransaction",
+      "id": "highRiskTransaction"
+    }
+  ],
+  "_rev": "1187854897",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "exactMatch",
+    "emailsWithVerifiedLexID",
+    "inputLink2TerminatedAccount",
+    "inputNotMatchingVerifiedIdentity",
+    "jitProvisioning",
+    "lexIdMismatch",
+    "noKOGAccount",
+    "noKOGAccountFound",
+    "noMatchPartialMatch",
+    "highRiskTransaction"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "f5a10b71-cf74-4393-b8c9-666c588185c2"
+}

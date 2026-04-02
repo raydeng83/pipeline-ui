@@ -1,0 +1,16 @@
+{
+  "_id": "eced3cbf-3528-4620-b4be-4dcd924e72e1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1756731434197,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801423,
+  "name": "KYID.2B1.Journey.CheclFirstTimePasswordResetFlag",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.CheclFirstTimePasswordResetFlag.js"
+  }
+}

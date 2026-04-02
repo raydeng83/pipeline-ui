@@ -138,11 +138,21 @@ function DiffViewer({ lines }: { lines: DiffLine[] }) {
 
 // ── Side-by-side file viewer ──────────────────────────────────────────────────
 
-function SideBySideViewer({ localContent, remoteContent }: { localContent?: string; remoteContent?: string }) {
+function SideBySideViewer({
+  localContent,
+  remoteContent,
+  sourceLabel,
+  targetLabel,
+}: {
+  localContent?: string;
+  remoteContent?: string;
+  sourceLabel: string;
+  targetLabel: string;
+}) {
   return (
     <div className="grid grid-cols-2 divide-x divide-slate-700 bg-slate-950 max-h-[600px] overflow-hidden">
-      <FilePane label="Local" content={localContent} absence="Not present locally" />
-      <FilePane label="Remote" content={remoteContent} absence="Not present remotely" />
+      <FilePane label={sourceLabel} content={localContent} absence={`Not in ${sourceLabel}`} />
+      <FilePane label={targetLabel} content={remoteContent} absence={`Not in ${targetLabel}`} />
     </div>
   );
 }
@@ -178,7 +188,7 @@ const STATUS_STYLES: Record<FileDiff["status"], { badge: string; icon: string }>
   unchanged: { badge: "bg-slate-100 text-slate-500 border border-slate-200",        icon: "=" },
 };
 
-function FileRow({ file }: { file: FileDiff }) {
+function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLabel: string; targetLabel: string }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("diff");
   const s = STATUS_STYLES[file.status];
@@ -243,7 +253,7 @@ function FileRow({ file }: { file: FileDiff }) {
       {open && (
         view === "diff" && file.diffLines
           ? <DiffViewer lines={file.diffLines} />
-          : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} />
+          : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} sourceLabel={sourceLabel} targetLabel={targetLabel} />
       )}
     </div>
   );
@@ -252,12 +262,14 @@ function FileRow({ file }: { file: FileDiff }) {
 // ── Section ───────────────────────────────────────────────────────────────────
 
 function FileSection({
-  title, files, defaultOpen, badgeClass,
+  title, files, defaultOpen, badgeClass, sourceLabel, targetLabel,
 }: {
   title: string;
   files: FileDiff[];
   defaultOpen?: boolean;
   badgeClass: string;
+  sourceLabel: string;
+  targetLabel: string;
 }) {
   const [open, setOpen] = useState(defaultOpen ?? true);
   if (files.length === 0) return null;
@@ -280,7 +292,7 @@ function FileSection({
       </button>
       {open && (
         <div className="space-y-1.5">
-          {files.map((f) => <FileRow key={f.relativePath} file={f} />)}
+          {files.map((f) => <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />)}
         </div>
       )}
     </div>
@@ -296,13 +308,24 @@ export function DiffReport({ report }: { report: CompareReport }) {
   const added    = files.filter((f) => f.status === "added");
   const removed  = files.filter((f) => f.status === "removed");
 
+  const sameEnv = report.source.environment === report.target.environment;
+  const sourceLabel = sameEnv
+    ? `${report.source.environment} (${report.source.mode})`
+    : report.source.environment;
+  const targetLabel = sameEnv
+    ? `${report.target.environment} (${report.target.mode})`
+    : report.target.environment;
+
   return (
     <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-800">
-            Comparison Report — <span className="font-mono">{report.environment}</span>
+            Comparison Report —{" "}
+            <span className="font-mono">{sourceLabel}</span>
+            <span className="mx-1.5 text-slate-400">→</span>
+            <span className="font-mono">{targetLabel}</span>
           </h2>
           <span className="text-xs text-slate-400">{new Date(report.generatedAt).toLocaleString()}</span>
         </div>
@@ -313,25 +336,19 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
           <span className="ml-auto text-xs text-slate-400 self-center">{total} files total</span>
         </div>
-        {report.scopes.length > 0 && (
-          <p className="text-xs text-slate-400">Scopes: {report.scopes.join(", ")}</p>
-        )}
-        <p className="text-xs text-slate-400 font-mono truncate" title={report.localConfigDir}>
-          Local: {report.localConfigDir}
-        </p>
       </div>
 
       {/* Sections */}
       <div className="p-5 space-y-6">
         {summary.modified === 0 && summary.added === 0 && summary.removed === 0 ? (
           <p className="text-sm text-slate-500 text-center py-4">
-            Local config is in sync with remote — no differences found.
+            No differences found — source and target configs are identical.
           </p>
         ) : (
           <>
-            <FileSection title="Modified" files={modified} defaultOpen badgeClass="bg-amber-100 text-amber-700" />
-            <FileSection title="Added in remote" files={added} defaultOpen={added.length <= 10} badgeClass="bg-emerald-100 text-emerald-700" />
-            <FileSection title="Removed from remote" files={removed} defaultOpen={removed.length <= 10} badgeClass="bg-red-100 text-red-700" />
+            <FileSection title="Modified" files={modified} defaultOpen badgeClass="bg-amber-100 text-amber-700" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+            <FileSection title={`Added in target (${targetLabel})`} files={added} defaultOpen={added.length <= 10} badgeClass="bg-emerald-100 text-emerald-700" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+            <FileSection title={`Removed from target (${targetLabel})`} files={removed} defaultOpen={removed.length <= 10} badgeClass="bg-red-100 text-red-700" sourceLabel={sourceLabel} targetLabel={targetLabel} />
           </>
         )}
         {summary.unchanged > 0 && (

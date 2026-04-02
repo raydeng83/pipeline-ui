@@ -1,0 +1,56 @@
+{
+  "_id": "22b1c007-9029-4af4-8fad-fde24b80df77",
+  "_outcomes": [
+    {
+      "displayName": "Successful",
+      "id": "Successful"
+    },
+    {
+      "displayName": "connFail",
+      "id": "connFail"
+    },
+    {
+      "displayName": "pwdExpire",
+      "id": "pwdExpire"
+    },
+    {
+      "displayName": "failOrInactive",
+      "id": "failOrInactive"
+    },
+    {
+      "displayName": "ExtUserlockout",
+      "id": "ExtUserlockout"
+    },
+    {
+      "displayName": "IntUserlockout",
+      "id": "IntUserlockout"
+    },
+    {
+      "displayName": "IntUserlockoutNonProd",
+      "id": "IntUserlockoutNonProd"
+    }
+  ],
+  "_rev": "-119502967",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Successful",
+    "connFail",
+    "pwdExpire",
+    "failOrInactive",
+    "ExtUserlockout",
+    "IntUserlockout",
+    "IntUserlockoutNonProd"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c8755411-bdbb-43ab-966a-950e10c22467"
+}

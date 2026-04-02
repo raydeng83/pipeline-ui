@@ -1,0 +1,31 @@
+{
+  "_id": "915a19b5-3e91-4869-8f6d-3a108f6289ea",
+  "_outcomes": [
+    {
+      "displayName": "authenticate",
+      "id": "authenticate"
+    },
+    {
+      "displayName": "noUser",
+      "id": "noUser"
+    }
+  ],
+  "_rev": "2118012962",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "authenticate",
+    "noUser"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "e5bed1b7-8d3e-44e0-be0b-5c30e7eb3ea5"
+}

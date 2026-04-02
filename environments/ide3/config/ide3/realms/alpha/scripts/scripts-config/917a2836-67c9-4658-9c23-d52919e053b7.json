@@ -1,0 +1,16 @@
+{
+  "_id": "917a2836-67c9-4658-9c23-d52919e053b7",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319424579,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801512,
+  "name": "KYID.Journey.errormessage.EmailSMSVoice.ExpiredOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.errormessage.EmailSMSVoice.ExpiredOTP.js"
+  }
+}

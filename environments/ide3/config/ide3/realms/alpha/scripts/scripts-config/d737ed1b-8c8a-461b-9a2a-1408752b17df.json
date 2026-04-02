@@ -1,0 +1,16 @@
+{
+  "_id": "d737ed1b-8c8a-461b-9a2a-1408752b17df",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1750149583032,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950799842,
+  "name": "KYID.2B1.Journey.RoleorAppWidgetRequest",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.RoleorAppWidgetRequest.js"
+  }
+}

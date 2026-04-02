@@ -1,0 +1,347 @@
+{
+  "name": "alpha_kyid_ridp_config",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "ridp_create_account_version",
+      "ridp_first_time_login_version",
+      "ridp_manage_profile_version",
+      "ridp_organ_donor_version",
+      "ridp_forgot_password_version",
+      "ridp_forgot_mfa_version",
+      "ridp_app_enroll_version",
+      "ridp_forgot_email_version",
+      "ridp_manage_profile_version_bsp",
+      "ridp_user_verification_version_bsp",
+      "ridp_standalone_version_bsp",
+      "ridp_create_account_high_risk",
+      "ridp_first_time_login_high_risk",
+      "ridp_manage_profile_high_risk",
+      "ridp_organ_donor_high_risk",
+      "ridp_forgot_password_high_risk",
+      "ridp_forgot_mfa_high_risk",
+      "ridp_forgot_email_high_risk",
+      "ridp_app_enroll_high_risk",
+      "ridp_manage_profile_retry_limit",
+      "ridp_organ_donor_retry_limit",
+      "ridp_forgot_password_retry_limit",
+      "ridp_forgot_mfa_retry_limit",
+      "ridp_app_enroll_retry_limit",
+      "ridp_manage_profile_retry_limit_bsp",
+      "ridp_organ_donor_profile_retry_limit_bsp",
+      "ridp_forgot_password_retry_limit_bsp",
+      "ridp_forgot_mfa_retry_limit_bsp",
+      "ridp_app_enroll_retry_limit_bsp",
+      "ridp_app_enroll_refresh_limit",
+      "ridp_app_enroll_refresh_limit_bsp",
+      "ridp_shownewdisplay_bsp",
+      "ridp_emailage_high_risk",
+      "ridp_phonefinder_high_risk",
+      "ridp_forgot_password_refresh_limit",
+      "ridp_manage_profile_refresh_limit",
+      "ridp_organ_donor_refresh_limit",
+      "ridp_user_verification_retry_limit",
+      "ridp_user_verification_refresh_limit",
+      "ridp_userIdentity_maxOverrideDays"
+    ],
+    "properties": {
+      "ridp_app_enroll_high_risk": {
+        "searchable": false,
+        "title": "Application Enrollment Refresh Limit",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_app_enroll_refresh_limit": {
+        "searchable": false,
+        "title": "Application Enrollment Refresh Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_app_enroll_refresh_limit_bsp": {
+        "searchable": false,
+        "title": "Application Enrollment Refresh Limit BSP",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_app_enroll_retry_limit": {
+        "searchable": false,
+        "title": "Application Enrollment Retry Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_app_enroll_retry_limit_bsp": {
+        "searchable": false,
+        "title": "Application Enrollment Retry Limit BSP",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_app_enroll_version": {
+        "searchable": false,
+        "title": "Application Enrollment Version",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_create_account_high_risk": {
+        "searchable": false,
+        "title": "Create Account High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_create_account_version": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "RIDP Create Account Version",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "ridp_emailage_high_risk": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Email Age High Risk",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "ridp_first_time_login_high_risk": {
+        "searchable": false,
+        "title": "First Time Login High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_first_time_login_version": {
+        "searchable": false,
+        "title": "First Time Login Version",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_email_high_risk": {
+        "searchable": false,
+        "title": "Forgot Email High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_email_version": {
+        "searchable": false,
+        "title": "Forgot Email Version",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_mfa_high_risk": {
+        "searchable": false,
+        "title": "Forgot MFA High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_mfa_retry_limit": {
+        "searchable": false,
+        "title": "Forgot MFA Retry Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_mfa_retry_limit_bsp": {
+        "searchable": false,
+        "title": "Forgot MFA Retry Limit BSP",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_mfa_version": {
+        "searchable": false,
+        "title": "Forgot MFA Version",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_password_high_risk": {
+        "searchable": false,
+        "title": "Forgot Password High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_password_refresh_limit": {
+        "searchable": false,
+        "title": "Forgot Password refresh Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_password_retry_limit": {
+        "searchable": false,
+        "title": "Forgot Password Retry Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_password_retry_limit_bsp": {
+        "searchable": false,
+        "title": "Forgot Password Retry Limit BSP",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_forgot_password_version": {
+        "searchable": false,
+        "title": "Forgot Password Version",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_manage_profile_high_risk": {
+        "searchable": false,
+        "title": "Mange Profile High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_manage_profile_refresh_limit": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Manage Profile Refresh Limit",
+        "type": "number",
+        "userEditable": false,
+        "viewable": true
+      },
+      "ridp_manage_profile_retry_limit": {
+        "searchable": false,
+        "title": "Manage Profile Retry Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_manage_profile_retry_limit_bsp": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Forgot Password Retry Limit BSP",
+        "type": "number",
+        "userEditable": false,
+        "viewable": true
+      },
+      "ridp_manage_profile_version": {
+        "searchable": false,
+        "title": "Manage Profile Version",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_manage_profile_version_bsp": {
+        "searchable": false,
+        "title": "Manage Profile Version BSP",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_organ_donor_high_risk": {
+        "searchable": false,
+        "title": "Organ Donor High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_organ_donor_profile_retry_limit_bsp": {
+        "searchable": false,
+        "title": "Organ Donor Retry Limit BSP",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_organ_donor_refresh_limit": {
+        "searchable": false,
+        "title": "Organ Donor Refresh Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_organ_donor_retry_limit": {
+        "searchable": false,
+        "title": "Organ Donor Retry Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_organ_donor_version": {
+        "searchable": false,
+        "title": "Organ Donor Version",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_phonefinder_high_risk": {
+        "searchable": false,
+        "title": "Phone Finder High Risk",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_shownewdisplay_bsp": {
+        "default": true,
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Show New Display BSP",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "ridp_standalone_version_bsp": {
+        "searchable": false,
+        "title": "Standalone Verification Version BSP",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_userIdentity_maxOverrideDays": {
+        "searchable": false,
+        "title": "Maximum Number of Days for Identity",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_user_verification_refresh_limit": {
+        "searchable": false,
+        "title": "User Verification Refresh Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_user_verification_retry_limit": {
+        "searchable": false,
+        "title": "User Verification Retry Limit",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "ridp_user_verification_version_bsp": {
+        "searchable": false,
+        "title": "User Verification Version BSP",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "Alpha KYID RIDP Config",
+    "type": "object"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "_id": "ea296083-25b9-4594-931a-d8b7a359d162",
+  "_outcomes": [
+    {
+      "displayName": "Unsupported",
+      "id": "unsupported"
+    },
+    {
+      "displayName": "Success",
+      "id": "success"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failure"
+    },
+    {
+      "displayName": "Client Error",
+      "id": "error"
+    }
+  ],
+  "_rev": "1661267523",
+  "_type": {
+    "_id": "WebAuthnRegistrationNode",
+    "collection": true,
+    "name": "WebAuthn Registration Node",
+    "version": "1.0"
+  },
+  "acceptedSigningAlgorithms": [
+    "ES256",
+    "RS256"
+  ],
+  "asScript": false,
+  "attestationPreference": "NONE",
+  "authenticatorAttachment": "UNSPECIFIED",
+  "enforceRevocationCheck": false,
+  "excludeCredentials": false,
+  "fidoCertificationLevel": "OFF",
+  "generateRecoveryCodes": true,
+  "maxSavedDevices": 0,
+  "origins": [
+    "https://openam-commkentsb3-use1-sandbox.id.forgerock.io"
+  ],
+  "postponeDeviceProfileStorage": false,
+  "relyingPartyDomain": "openam-commkentsb3-use1-sandbox.id.forgerock.io",
+  "relyingPartyName": "ForgeRock",
+  "requiresResidentKey": false,
+  "storeAttestationDataInTransientState": false,
+  "timeout": 60,
+  "trustStoreAlias": "trustalias",
+  "userVerificationRequirement": "PREFERRED",
+  "validateFidoU2fAaguid": true
+}

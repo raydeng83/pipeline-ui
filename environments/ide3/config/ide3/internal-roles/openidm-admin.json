@@ -1,0 +1,2510 @@
+{
+  "_id": "openidm-admin",
+  "_rev": "485ed0ed-7e81-4067-a1b9-dfcad19a1b98-73747",
+  "condition": null,
+  "description": "Administrative access",
+  "name": "openidm-admin",
+  "privileges": [
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationId",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleIds",
+          "readOnly": false
+        },
+        {
+          "attribute": "preRequisites",
+          "readOnly": false
+        },
+        {
+          "attribute": "dependentRole",
+          "readOnly": false
+        },
+        {
+          "attribute": "mutuallyExclusiveRole",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "enrollmentRequestSetting",
+          "readOnly": false
+        },
+        {
+          "attribute": "disEnrollmentRequestSetting",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID Access Policies",
+      "path": "managed/alpha_kyid_enrollment_access_policy",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "localizedContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "daysOfOperation",
+          "readOnly": false
+        },
+        {
+          "attribute": "hoursOfOperation",
+          "readOnly": false
+        },
+        {
+          "attribute": "emailContact",
+          "readOnly": false
+        },
+        {
+          "attribute": "phoneContact",
+          "readOnly": false
+        },
+        {
+          "attribute": "application",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "conversionDate",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID Helpdesk Contacts",
+      "path": "managed/alpha_kyid_helpdeskcontact",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "enrollmentRequestId",
+          "readOnly": false
+        },
+        {
+          "attribute": "id",
+          "readOnly": false
+        },
+        {
+          "attribute": "user",
+          "readOnly": false
+        },
+        {
+          "attribute": "userIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "app",
+          "readOnly": false
+        },
+        {
+          "attribute": "appIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "role",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "orgId",
+          "readOnly": false
+        },
+        {
+          "attribute": "sourceUniqueId",
+          "readOnly": false
+        },
+        {
+          "attribute": "orgType",
+          "readOnly": false
+        },
+        {
+          "attribute": "orgName",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogOrgBusinessKeyId",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyTypeName",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyName",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyValue",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyDescription",
+          "readOnly": false
+        },
+        {
+          "attribute": "originalDelegator",
+          "readOnly": false
+        },
+        {
+          "attribute": "originalDelegatorIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "currentDelegator",
+          "readOnly": false
+        },
+        {
+          "attribute": "currentDelegatorIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "isForwardDelegable",
+          "readOnly": false
+        },
+        {
+          "attribute": "assignmentDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "assignmentDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "audit",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "Accesses",
+      "path": "managed/alpha_kyid_access",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "type",
+          "readOnly": false
+        },
+        {
+          "attribute": "accessCount",
+          "readOnly": false
+        },
+        {
+          "attribute": "successCount",
+          "readOnly": false
+        },
+        {
+          "attribute": "failureCount",
+          "readOnly": false
+        },
+        {
+          "attribute": "firstAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "lastAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "Application Access Data",
+      "path": "managed/alpha_kyid_application_access_data",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "forgerockAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "auth0id",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "needClaims",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogAppUrl",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogDBUrl",
+          "readOnly": false
+        },
+        {
+          "attribute": "environment",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "Alpha realm - KYID APP Metadata",
+      "path": "managed/alpha_kyid_application_metadata",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "eventName",
+          "readOnly": false
+        },
+        {
+          "attribute": "eventDetails",
+          "readOnly": false
+        },
+        {
+          "attribute": "requesterUserId",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestedUserId",
+          "readOnly": false
+        },
+        {
+          "attribute": "transactionId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdTimeinEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "eventCode",
+          "readOnly": false
+        },
+        {
+          "attribute": "sessionDetails",
+          "readOnly": false
+        },
+        {
+          "attribute": "emailId",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationName",
+          "readOnly": false
+        },
+        {
+          "attribute": "sessionId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "Alpha KYID Audit Loggers",
+      "path": "managed/alpha_kyid_audit_logger",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "type",
+          "readOnly": false
+        },
+        {
+          "attribute": "value",
+          "readOnly": false
+        },
+        {
+          "attribute": "recovery_only",
+          "readOnly": false
+        },
+        {
+          "attribute": "createTimestamp",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateTimestamp",
+          "readOnly": false
+        },
+        {
+          "attribute": "users",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "User Authenticators",
+      "path": "managed/alpha_kyid_authenticators",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "members",
+          "readOnly": false
+        },
+        {
+          "attribute": "assignments",
+          "readOnly": false
+        },
+        {
+          "attribute": "applications",
+          "readOnly": false
+        },
+        {
+          "attribute": "condition",
+          "readOnly": false
+        },
+        {
+          "attribute": "temporalConstraints",
+          "readOnly": false
+        },
+        {
+          "attribute": "isApprovalRequired",
+          "readOnly": false
+        },
+        {
+          "attribute": "approverLevel1",
+          "readOnly": false
+        },
+        {
+          "attribute": "approverLevel2",
+          "readOnly": false
+        },
+        {
+          "attribute": "backupApprovalLevel1",
+          "readOnly": false
+        },
+        {
+          "attribute": "backupApprovalLevel2",
+          "readOnly": false
+        },
+        {
+          "attribute": "backupApproverL1DateRange",
+          "readOnly": false
+        },
+        {
+          "attribute": "backupApproverL2DateRange",
+          "readOnly": false
+        },
+        {
+          "attribute": "content",
+          "readOnly": false
+        },
+        {
+          "attribute": "tags",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleActionType",
+          "readOnly": false
+        },
+        {
+          "attribute": "createAccount_enrollmentContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "createAccount_optionalContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "requiredMFAMethod",
+          "readOnly": false
+        },
+        {
+          "attribute": "displayName",
+          "readOnly": false
+        },
+        {
+          "attribute": "displayDescription",
+          "readOnly": false
+        },
+        {
+          "attribute": "adGroupName",
+          "readOnly": false
+        },
+        {
+          "attribute": "adGroupType",
+          "readOnly": false
+        },
+        {
+          "attribute": "doesProvidePriviledgedAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "doesProvideElevatedAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "doesProvideFTIAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "isDelegable",
+          "readOnly": false
+        },
+        {
+          "attribute": "isForwardDelegable",
+          "readOnly": false
+        },
+        {
+          "attribute": "isOrgScopedRole",
+          "readOnly": false
+        },
+        {
+          "attribute": "accessPolicy",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessRoleId",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "Alpha realm - Roles",
+      "path": "managed/alpha_role",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "condition",
+          "readOnly": false
+        },
+        {
+          "attribute": "members",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "Alpha realm - Groups",
+      "path": "managed/alpha_group",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "prereqtypeid",
+          "readOnly": false
+        },
+        {
+          "attribute": "userid",
+          "readOnly": false
+        },
+        {
+          "attribute": "attributeid",
+          "readOnly": false
+        },
+        {
+          "attribute": "value",
+          "readOnly": false
+        },
+        {
+          "attribute": "processid",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdby",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedby",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "Credentials",
+      "path": "managed/alpha_kyid_credentials",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "type",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "content",
+          "readOnly": false
+        },
+        {
+          "attribute": "isFeatured",
+          "readOnly": false
+        },
+        {
+          "attribute": "enrollmentProfile",
+          "readOnly": false
+        },
+        {
+          "attribute": "launchApplicationURL",
+          "readOnly": false
+        },
+        {
+          "attribute": "dynamicContentEndpointId",
+          "readOnly": false
+        },
+        {
+          "attribute": "maintenanceMode",
+          "readOnly": false
+        },
+        {
+          "attribute": "sequenceNumber",
+          "readOnly": false
+        },
+        {
+          "attribute": "logoURL",
+          "readOnly": false
+        },
+        {
+          "attribute": "widgetTags",
+          "readOnly": false
+        },
+        {
+          "attribute": "maintainanceView",
+          "readOnly": false
+        },
+        {
+          "attribute": "myAppsSettings",
+          "readOnly": false
+        },
+        {
+          "attribute": "appLibrarySettings",
+          "readOnly": false
+        },
+        {
+          "attribute": "widgetDisplayOrder",
+          "readOnly": false
+        },
+        {
+          "attribute": "dynamicContentServiceEndpointId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "maintenanceModeSettingsisEnabled",
+          "readOnly": false
+        },
+        {
+          "attribute": "maintenanceModeSettingsmessage",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationId",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleId",
+          "readOnly": false
+        },
+        {
+          "attribute": "widgetId",
+          "readOnly": false
+        },
+        {
+          "attribute": "conversionDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "widgentIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "allowedUserType",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "alpha_kyid_dashboardapplicationwidgets",
+      "path": "managed/alpha_kyid_dashboardapplicationwidget",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "logo",
+          "readOnly": false
+        },
+        {
+          "attribute": "sequence",
+          "readOnly": false
+        },
+        {
+          "attribute": "isVisible",
+          "readOnly": false
+        },
+        {
+          "attribute": "localizedContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "Help Categories",
+      "path": "managed/alpha_kyid_help_category",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "type",
+          "readOnly": false
+        },
+        {
+          "attribute": "errorcode",
+          "readOnly": false
+        },
+        {
+          "attribute": "errormsg",
+          "readOnly": false
+        },
+        {
+          "attribute": "messageId",
+          "readOnly": false
+        },
+        {
+          "attribute": "messageType",
+          "readOnly": false
+        },
+        {
+          "attribute": "startTime",
+          "readOnly": false
+        },
+        {
+          "attribute": "endTime",
+          "readOnly": false
+        },
+        {
+          "attribute": "messageContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "alpha_kyid_errormessages",
+      "path": "managed/alpha_kyid_errormessages",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "displayName",
+          "readOnly": false
+        },
+        {
+          "attribute": "displayDescription",
+          "readOnly": false
+        },
+        {
+          "attribute": "prereqTypeId",
+          "readOnly": false
+        },
+        {
+          "attribute": "prereqTypeName",
+          "readOnly": false
+        },
+        {
+          "attribute": "reverificationDontAllowExpiry",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiry",
+          "readOnly": false
+        },
+        {
+          "attribute": "enrollmentActionSettings",
+          "readOnly": false
+        },
+        {
+          "attribute": "reverificationDontAllow",
+          "readOnly": false
+        },
+        {
+          "attribute": "disenrollmentActionSettings",
+          "readOnly": false
+        },
+        {
+          "attribute": "LoginTriggerCondition",
+          "readOnly": false
+        },
+        {
+          "attribute": "LoginDisplayCriteria",
+          "readOnly": false
+        },
+        {
+          "attribute": "LoginDueCompletion",
+          "readOnly": false
+        },
+        {
+          "attribute": "url",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "prerequisiteId",
+          "readOnly": false
+        },
+        {
+          "attribute": "prerequisiteSourceName",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleId",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationId",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "KYID Enrollment Pre-requisites",
+      "path": "managed/alpha_kyid_enrollment_prerequisite",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "messageId",
+          "readOnly": false
+        },
+        {
+          "attribute": "messageType",
+          "readOnly": false
+        },
+        {
+          "attribute": "messageContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "startTime",
+          "readOnly": false
+        },
+        {
+          "attribute": "endTime",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "alpha_kyid_systemmessages",
+      "path": "managed/alpha_kyid_systemmessages",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "owners",
+          "readOnly": false
+        },
+        {
+          "attribute": "admins",
+          "readOnly": false
+        },
+        {
+          "attribute": "members",
+          "readOnly": false
+        },
+        {
+          "attribute": "parent",
+          "readOnly": false
+        },
+        {
+          "attribute": "children",
+          "readOnly": false
+        },
+        {
+          "attribute": "adminIDs",
+          "readOnly": false
+        },
+        {
+          "attribute": "ownerIDs",
+          "readOnly": false
+        },
+        {
+          "attribute": "parentAdminIDs",
+          "readOnly": false
+        },
+        {
+          "attribute": "parentOwnerIDs",
+          "readOnly": false
+        },
+        {
+          "attribute": "parentIDs",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "Alpha realm - Organizations",
+      "path": "managed/alpha_organization",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "restrictedKeywords",
+          "readOnly": false
+        },
+        {
+          "attribute": "restrictedDomain",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "Restricted Entries",
+      "path": "managed/alpha_kyid_restricted_entries",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "scope",
+          "readOnly": false
+        },
+        {
+          "attribute": "enforceRiskBasedAuthN",
+          "readOnly": false
+        },
+        {
+          "attribute": "enforceAccessAuthZ",
+          "readOnly": false
+        },
+        {
+          "attribute": "enforcePrerequisite",
+          "readOnly": false
+        },
+        {
+          "attribute": "riskBasedAuthNException",
+          "readOnly": false
+        },
+        {
+          "attribute": "accessAuthZException",
+          "readOnly": false
+        },
+        {
+          "attribute": "prerequisiteException",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID Login Policies",
+      "path": "managed/alpha_kyid_login_policy",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationRoles",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestedUserIdentifierAttributeName",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestedUserIdentifierAttributeValue",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestedUserAccountId",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestedUserAccountAttibutes",
+          "readOnly": false
+        },
+        {
+          "attribute": "requesterUserIdentifierAttributeName",
+          "readOnly": false
+        },
+        {
+          "attribute": "requesterUserIdentifierAttributeValue",
+          "readOnly": false
+        },
+        {
+          "attribute": "requesterUserAccountId",
+          "readOnly": false
+        },
+        {
+          "attribute": "returnURL",
+          "readOnly": false
+        },
+        {
+          "attribute": "showConfirmationPage",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "status",
+          "readOnly": false
+        },
+        {
+          "attribute": "transactionId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "audit",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "KYID Enrollment Contexts",
+      "path": "managed/alpha_kyid_enrollment_contextId",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "title",
+          "readOnly": false
+        },
+        {
+          "attribute": "suffix",
+          "readOnly": false
+        },
+        {
+          "attribute": "givenName",
+          "readOnly": false
+        },
+        {
+          "attribute": "middleName",
+          "readOnly": false
+        },
+        {
+          "attribute": "account",
+          "readOnly": false
+        },
+        {
+          "attribute": "sn",
+          "readOnly": false
+        },
+        {
+          "attribute": "gender",
+          "readOnly": false
+        },
+        {
+          "attribute": "dob",
+          "readOnly": false
+        },
+        {
+          "attribute": "addressLine1",
+          "readOnly": false
+        },
+        {
+          "attribute": "addressLine2",
+          "readOnly": false
+        },
+        {
+          "attribute": "city",
+          "readOnly": false
+        },
+        {
+          "attribute": "stateCode",
+          "readOnly": false
+        },
+        {
+          "attribute": "countyCode",
+          "readOnly": false
+        },
+        {
+          "attribute": "countryCode",
+          "readOnly": false
+        },
+        {
+          "attribute": "zip",
+          "readOnly": false
+        },
+        {
+          "attribute": "zipExtension",
+          "readOnly": false
+        },
+        {
+          "attribute": "organDonorRegistrationStatus",
+          "readOnly": false
+        },
+        {
+          "attribute": "assuranceLevel",
+          "readOnly": false
+        },
+        {
+          "attribute": "proofingMethod",
+          "readOnly": false
+        },
+        {
+          "attribute": "lastVerificationDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "uuid",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "languagePreference",
+          "readOnly": false
+        },
+        {
+          "attribute": "KOGID",
+          "readOnly": false
+        },
+        {
+          "attribute": "personalVerificationDetails",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedByID",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID User Identities",
+      "path": "managed/alpha_kyid_user_identity",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationURL",
+          "readOnly": false
+        },
+        {
+          "attribute": "logoURL",
+          "readOnly": false
+        },
+        {
+          "attribute": "application",
+          "readOnly": false
+        },
+        {
+          "attribute": "tags",
+          "readOnly": false
+        },
+        {
+          "attribute": "content",
+          "readOnly": false
+        },
+        {
+          "attribute": "requiredMFAMethod",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleId",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogParentAppName",
+          "readOnly": false
+        },
+        {
+          "attribute": "adminDescription",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationSystemName",
+          "readOnly": false
+        },
+        {
+          "attribute": "softLogoutURL",
+          "readOnly": false
+        },
+        {
+          "attribute": "userName",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationHelpdeskContact",
+          "readOnly": false
+        },
+        {
+          "attribute": "forgerockAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "needClaims",
+          "readOnly": false
+        },
+        {
+          "attribute": "auth0id",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogAppUrl",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogDBUrl",
+          "readOnly": false
+        },
+        {
+          "attribute": "environment",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogClaimsAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "alpha_kyid_businessapplications",
+      "path": "managed/alpha_kyid_businessapplication",
+      "permissions": [
+        "VIEW",
+        "UPDATE",
+        "CREATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "enrollmentRequestId",
+          "readOnly": false
+        },
+        {
+          "attribute": "pingApprovalWorkflowId",
+          "readOnly": false
+        },
+        {
+          "attribute": "preRequisiteId",
+          "readOnly": false
+        },
+        {
+          "attribute": "preRequisiteTypeId",
+          "readOnly": false
+        },
+        {
+          "attribute": "associatedRoleIds",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "completionDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "completionDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "status",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "requesterUserAccountId",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestedUserAccountId",
+          "readOnly": false
+        },
+        {
+          "attribute": "displayOrder",
+          "readOnly": false
+        },
+        {
+          "attribute": "allowReuse",
+          "readOnly": false
+        },
+        {
+          "attribute": "allowReuseIfDaysOld",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "prerequisiteValues",
+          "readOnly": false
+        },
+        {
+          "attribute": "KYIDTransactionId",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleContext",
+          "readOnly": false
+        },
+        {
+          "attribute": "audit",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdByID",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID User Pre-Requisites",
+      "path": "managed/alpha_kyid_enrollment_user_prerequisites",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "pingRequestId",
+          "readOnly": false
+        },
+        {
+          "attribute": "enrollmentContextId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "completionDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "completionDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "status",
+          "readOnly": false
+        },
+        {
+          "attribute": "requesterId",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestedUserId",
+          "readOnly": false
+        },
+        {
+          "attribute": "appSystemName",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleIds",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleContext",
+          "readOnly": false
+        },
+        {
+          "attribute": "conversionDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "audit",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID Enrollment Requests",
+      "path": "managed/alpha_kyid_enrollment_request",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "process",
+          "readOnly": false
+        },
+        {
+          "attribute": "pageHeader",
+          "readOnly": false
+        },
+        {
+          "attribute": "faqTopics",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "FAQ Mapping Object Lists",
+      "path": "managed/alpha_kyid_faq_mapping",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "url",
+          "readOnly": false
+        },
+        {
+          "attribute": "protocol",
+          "readOnly": false
+        },
+        {
+          "attribute": "username",
+          "readOnly": false
+        },
+        {
+          "attribute": "password",
+          "readOnly": false
+        },
+        {
+          "attribute": "clientcertificate",
+          "readOnly": false
+        },
+        {
+          "attribute": "wsdl",
+          "readOnly": false
+        },
+        {
+          "attribute": "bindingType",
+          "readOnly": false
+        },
+        {
+          "attribute": "methodName",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "isWorkflow",
+          "readOnly": false
+        },
+        {
+          "attribute": "isTraining",
+          "readOnly": false
+        },
+        {
+          "attribute": "isAgreement",
+          "readOnly": false
+        },
+        {
+          "attribute": "isOrgType",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "requestTransformationMethod",
+          "readOnly": false
+        },
+        {
+          "attribute": "responseTransformationMethod",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedByID",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID Service Endpoints",
+      "path": "managed/alpha_kyid_enrollment_service_endpoint",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "id",
+          "readOnly": false
+        },
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "header",
+          "readOnly": false
+        },
+        {
+          "attribute": "body",
+          "readOnly": false
+        },
+        {
+          "attribute": "footer",
+          "readOnly": false
+        },
+        {
+          "attribute": "pagenumber",
+          "readOnly": false
+        },
+        {
+          "attribute": "prerequisitetype",
+          "readOnly": false
+        },
+        {
+          "attribute": "onsubmit",
+          "readOnly": false
+        },
+        {
+          "attribute": "onload",
+          "readOnly": false
+        },
+        {
+          "attribute": "pageattributes",
+          "readOnly": false
+        },
+        {
+          "attribute": "links",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "alpha_kyid_prerequisite_types",
+      "path": "managed/alpha_kyid_prerequisite_type",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    },
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "pages",
+          "readOnly": false
+        },
+        {
+          "attribute": "typeName",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "prerequisiteId",
+          "readOnly": false
+        },
+        {
+          "attribute": "prerequisiteSourceName",
+          "readOnly": false
+        },
+        {
+          "attribute": "stgPrerequisiteTypeIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedByID",
+          "readOnly": false
+        }
+      ],
+      "actions": [],
+      "name": "KYID Enrollment Pre-requisite Types",
+      "path": "managed/alpha_kyid_enrollment_prerequisite_type",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    }
+  ],
+  "temporalConstraints": []
+}

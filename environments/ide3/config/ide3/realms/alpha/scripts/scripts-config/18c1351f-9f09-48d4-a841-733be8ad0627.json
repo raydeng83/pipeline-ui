@@ -1,0 +1,16 @@
+{
+  "_id": "18c1351f-9f09-48d4-a841-733be8ad0627",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3c4fd600-5fb3-47b9-ae57-e481f8122dc8,ou=user,ou=am-config",
+  "creationDate": 1750934441526,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=81073c37-7e92-4460-a48e-7435a1c0a371,ou=user,ou=am-config",
+  "lastModifiedDate": 1769087876326,
+  "name": "KYID.2B1.Journey.ForgotPasswordCreateAccountLink",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ForgotPasswordCreateAccountLink.js"
+  }
+}

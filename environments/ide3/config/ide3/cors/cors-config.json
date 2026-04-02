@@ -1,0 +1,116 @@
+{
+  "corsServiceGlobal": {
+    "_id": "",
+    "_rev": "515901845",
+    "_type": {
+      "_id": "CorsService",
+      "collection": false,
+      "name": "CORS Service"
+    },
+    "enabled": true
+  },
+  "corsServices": [
+    {
+      "_id": "kyidam-ide",
+      "_type": {
+        "_id": "configuration",
+        "collection": true,
+        "name": "Cors Configuration"
+      },
+      "acceptedHeaders": [
+        "accept-api-version",
+        "authorization",
+        "content-type",
+        "x-requested-with"
+      ],
+      "acceptedMethods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD"
+      ],
+      "acceptedOrigins": [
+        "https://fed.ide.kyid.ky.gov​​"
+      ],
+      "allowCredentials": true,
+      "enabled": true,
+      "exposedHeaders": [],
+      "maxAge": 600
+    },
+    {
+      "_id": "PortalCorsConfig",
+      "_type": {
+        "_id": "configuration",
+        "collection": true,
+        "name": "Cors Configuration"
+      },
+      "acceptedHeaders": [
+        "accept-api-version",
+        "x-requested-with",
+        "content-type",
+        "authorization"
+      ],
+      "acceptedMethods": [
+        "POST",
+        "GET",
+        "PATCH",
+        "DELETE",
+        "PUT"
+      ],
+      "acceptedOrigins": [
+        "https://ide3.kyid.ky.gov",
+        "https://ide3.support.kyid.ky.gov/"
+      ],
+      "allowCredentials": true,
+      "enabled": true,
+      "exposedHeaders": [],
+      "maxAge": 600
+    },
+    {
+      "_id": "IG-ide",
+      "_type": {
+        "_id": "configuration",
+        "collection": true,
+        "name": "Cors Configuration"
+      },
+      "acceptedHeaders": [
+        "accept-api-version",
+        "authorization",
+        "content-type",
+        "x-requested-with",
+        "Access-Control-Allow-Credentials"
+      ],
+      "acceptedMethods": [
+        "GET",
+        "PUT",
+        "POST",
+        "PATCH",
+        "DELETE",
+        "HEAD"
+      ],
+      "acceptedOrigins": [
+        "https://ig.ide.kyid.ky.gov"
+      ],
+      "allowCredentials": true,
+      "enabled": true,
+      "exposedHeaders": [],
+      "maxAge": 600
+    }
+  ],
+  "idmCorsConfig": {
+    "_id": "servletfilter/cors",
+    "initParams": {
+      "allowCredentials": false,
+      "allowedHeaders": "authorization,accept,content-type,origin,x-requested-with,cache-control,accept-api-version,if-match,if-none-match",
+      "allowedMethods": "GET,POST,PUT,DELETE,PATCH",
+      "allowedOrigins": "*",
+      "chainPreflight": false,
+      "exposedHeaders": "WWW-Authenticate"
+    },
+    "urlPatterns": [
+      "/*"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-pollwaittime-createaccount",
+  "description": "",
+  "expressionType": "int",
+  "valueBase64": "${ESV_POLLWAITTIME_CREATEACCOUNT}"
+}

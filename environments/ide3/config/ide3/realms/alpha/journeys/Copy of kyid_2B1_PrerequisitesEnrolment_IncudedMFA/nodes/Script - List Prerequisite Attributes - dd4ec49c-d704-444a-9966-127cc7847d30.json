@@ -1,0 +1,56 @@
+{
+  "_id": "dd4ec49c-d704-444a-9966-127cc7847d30",
+  "_outcomes": [
+    {
+      "displayName": "Next",
+      "id": "Next"
+    },
+    {
+      "displayName": "Back",
+      "id": "Back"
+    },
+    {
+      "displayName": "No",
+      "id": "No"
+    },
+    {
+      "displayName": "Completed",
+      "id": "Completed"
+    },
+    {
+      "displayName": "Workflow",
+      "id": "Workflow"
+    },
+    {
+      "displayName": "WorkflowStatus",
+      "id": "WorkflowStatus"
+    },
+    {
+      "displayName": "WorkflowReject",
+      "id": "WorkflowReject"
+    }
+  ],
+  "_rev": "841259794",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Next",
+    "Back",
+    "No",
+    "Completed",
+    "Workflow",
+    "WorkflowStatus",
+    "WorkflowReject"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "0a6ecbac-a1f9-421c-a6cb-a92dd31a2f93"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-firsttime-ismfaenable",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_FIRSTTIME_ISMFAENABLE}"
+}

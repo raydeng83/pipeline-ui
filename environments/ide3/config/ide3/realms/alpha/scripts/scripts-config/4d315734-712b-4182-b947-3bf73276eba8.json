@@ -1,0 +1,16 @@
+{
+  "_id": "4d315734-712b-4182-b947-3bf73276eba8",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320028961,
+  "default": false,
+  "description": "This script is used to display error message.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801070,
+  "name": "KYID.Journey.DisplayErrorMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.DisplayErrorMsg.js"
+  }
+}

@@ -1,0 +1,214 @@
+{
+  "_id": "kyid_recoveryMFAHasSession",
+  "_rev": "878636734",
+  "description": "Recovery MFA",
+  "enabled": true,
+  "entryNodeId": "6698c21b-aa57-46cd-88d9-18093cffe6d4",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "2369ff10-7875-4306-8940-e75db74628b2": {
+      "connections": {
+        "False": "f34a7b60-b915-49a2-a52e-ad5b98ab9724",
+        "True": "c3ca79a7-3f19-48bf-8607-61885447f6c1"
+      },
+      "displayName": "Script: No MFA Method Left For Removal",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1823.3333740234375,
+      "y": 433.3333282470703
+    },
+    "28e313ea-e32e-4bac-82e0-aae1f3bb4591": {
+      "connections": {
+        "true": "ef231ce8-15f2-4c03-9e7d-8e0d06cb9012"
+      },
+      "displayName": "Set_isMFAPerformed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 779,
+      "y": 503.015625
+    },
+    "58fd7a30-079b-42a0-a442-11101e6305eb": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "aa6cb1c1-0cd6-4ddd-b178-98915eb12e7e"
+      },
+      "displayName": "IJ: Remove MFA",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1419,
+      "y": 422.3333282470703
+    },
+    "6698c21b-aa57-46cd-88d9-18093cffe6d4": {
+      "connections": {
+        "True": "81fd1410-3d48-4323-988f-afb95b408f37"
+      },
+      "displayName": "Script: Fetch Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 87,
+      "y": 90.015625
+    },
+    "760eac5f-bff3-41d7-acac-5b4a54481353": {
+      "connections": {
+        "false": "28e313ea-e32e-4bac-82e0-aae1f3bb4591",
+        "true": "ea09172c-aaa7-4c6e-a94f-e570f9e9bbd7"
+      },
+      "displayName": "Script: Another Factor?",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 857,
+      "y": 259.015625
+    },
+    "7829a1b7-99f6-431a-89d7-b578d9a88104": {
+      "connections": {
+        "true": "6698c21b-aa57-46cd-88d9-18093cffe6d4"
+      },
+      "displayName": "Script: Blank Message Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 432,
+      "y": 615.9010314941406
+    },
+    "81fd1410-3d48-4323-988f-afb95b408f37": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "ea09172c-aaa7-4c6e-a94f-e570f9e9bbd7"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 134.5,
+      "y": 431.015625
+    },
+    "a3793cd5-c1bc-4aba-8aaf-743717c70761": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "760eac5f-bff3-41d7-acac-5b4a54481353"
+      },
+      "displayName": "IJ: Email",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 634,
+      "y": 101.015625
+    },
+    "aa6cb1c1-0cd6-4ddd-b178-98915eb12e7e": {
+      "connections": {
+        "false": "2369ff10-7875-4306-8940-e75db74628b2",
+        "true": "c3ca79a7-3f19-48bf-8607-61885447f6c1"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1555.3333435058594,
+      "y": 660.3333282470703
+    },
+    "ae6d8799-eabb-4317-8fc2-20e49ad9c96f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "dd10b54f-a591-429e-bf0a-ea3e6266407f"
+      },
+      "displayName": "Register MFA",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1359,
+      "y": 178.015625
+    },
+    "afb367bd-0498-4095-9688-ef23c8599cee": {
+      "connections": {
+        "true": "58fd7a30-079b-42a0-a442-11101e6305eb"
+      },
+      "displayName": "Script: SetJourneyRecoveryMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1095,
+      "y": 646.015625
+    },
+    "c3ca79a7-3f19-48bf-8607-61885447f6c1": {
+      "connections": {
+        "MFA Registration": "ae6d8799-eabb-4317-8fc2-20e49ad9c96f",
+        "Remove/Reset": "afb367bd-0498-4095-9688-ef23c8599cee"
+      },
+      "displayName": "MFA Action",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1121,
+      "y": 278.015625
+    },
+    "dd10b54f-a591-429e-bf0a-ea3e6266407f": {
+      "connections": {
+        "false": "f34a7b60-b915-49a2-a52e-ad5b98ab9724",
+        "true": "c3ca79a7-3f19-48bf-8607-61885447f6c1"
+      },
+      "displayName": "Registration Not Supported",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1575,
+      "y": 198.3333282470703
+    },
+    "e313d460-d27d-4edd-aabb-68c0b10cb335": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "760eac5f-bff3-41d7-acac-5b4a54481353"
+      },
+      "displayName": "IJ: SMS",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 620,
+      "y": 315.015625
+    },
+    "ea09172c-aaa7-4c6e-a94f-e570f9e9bbd7": {
+      "connections": {
+        "Default": "7829a1b7-99f6-431a-89d7-b578d9a88104",
+        "email": "a3793cd5-c1bc-4aba-8aaf-743717c70761",
+        "sms": "e313d460-d27d-4edd-aabb-68c0b10cb335"
+      },
+      "displayName": "MFA Authentication",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 318,
+      "y": 123.015625
+    },
+    "ef231ce8-15f2-4c03-9e7d-8e0d06cb9012": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c3ca79a7-3f19-48bf-8607-61885447f6c1"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 759.5,
+      "y": 595.015625
+    },
+    "f34a7b60-b915-49a2-a52e-ad5b98ab9724": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetJourneyRecoveryMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1862.3333435058594,
+      "y": 245.3333282470703
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2252,
+      "y": 250
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2351,
+      "y": 620
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

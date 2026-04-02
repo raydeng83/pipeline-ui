@@ -1,0 +1,16 @@
+{
+  "_id": "d646c893-7262-4ff6-8cbe-63e059fdd3ca",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3b72fc4d-9aae-4eb9-a34d-3e2328f2584d,ou=user,ou=am-config",
+  "creationDate": 1770974468862,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=3b72fc4d-9aae-4eb9-a34d-3e2328f2584d,ou=user,ou=am-config",
+  "lastModifiedDate": 1770976107038,
+  "name": "kyid.send.email.ridp.recovery",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/kyid.send.email.ridp.recovery.js"
+  }
+}

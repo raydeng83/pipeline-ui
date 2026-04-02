@@ -1,0 +1,299 @@
+{
+  "_id": "kyid_2B1_CreateAccount_RIDP",
+  "_rev": "229283061",
+  "description": "Account Creation with Captcha v2",
+  "enabled": true,
+  "entryNodeId": "297fc2af-034d-4704-8ef6-b6bb3a904372",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0eb1e40c-953a-4024-b1bf-030b69b54414": {
+      "connections": {
+        "errorMessage": "f486c485-55b5-4dc1-8642-c554c89477ae",
+        "failed": "309a97fe-aed0-43e3-aab4-c9640df5af95",
+        "highRisk": "cc80ca61-e81a-4668-a4d0-9b938a5acb49",
+        "noSync": "309a97fe-aed0-43e3-aab4-c9640df5af95",
+        "success": "309a97fe-aed0-43e3-aab4-c9640df5af95"
+      },
+      "displayName": "Script: MCI Sync",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4192,
+      "y": 231
+    },
+    "0f48d4bc-ffa5-43e8-bf90-8bfa68811ac8": {
+      "connections": {
+        "DONE": "1a48f257-1fdb-4011-b28f-4c9a3f67a6c7"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1576,
+      "y": 412.25
+    },
+    "1a48f257-1fdb-4011-b28f-4c9a3f67a6c7": {
+      "connections": {
+        "Reject": "37edfef8-5d7a-43f4-a6f5-16de2ad91811",
+        "Retry": "67411896-9c24-4117-acef-afe1acc6851b"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 1837,
+      "y": 386.4166666666667
+    },
+    "297fc2af-034d-4704-8ef6-b6bb3a904372": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b16b2542-65d1-47e0-ac89-eea0e2915aa2"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 257.5
+    },
+    "2b84ae8e-6fb4-4f59-aba4-b8a182bc5762": {
+      "connections": {
+        "success": "0eb1e40c-953a-4024-b1bf-030b69b54414"
+      },
+      "displayName": "Email: User Account Creation",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3872,
+      "y": 257.5
+    },
+    "309a97fe-aed0-43e3-aab4-c9640df5af95": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Account Creation Success",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 4444,
+      "y": 264
+    },
+    "37edfef8-5d7a-43f4-a6f5-16de2ad91811": {
+      "connections": {
+        "wait": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "KOGAPIERRROR",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2101,
+      "y": 480
+    },
+    "3be67ade-e8ae-4ae3-879a-93d930d5ca6e": {
+      "connections": {
+        "True": "71bcb354-934e-4ba3-b8f4-dce0f18d455f"
+      },
+      "displayName": "Script: Interna Role Provisioning",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2360,
+      "y": 106.83333333333331
+    },
+    "51cf293c-9bae-48d7-abe8-ab7dfa70f38f": {
+      "connections": {
+        "True": "71bcb354-934e-4ba3-b8f4-dce0f18d455f"
+      },
+      "displayName": "Script: Interna Role Provisioning",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2958,
+      "y": 284
+    },
+    "55f219d3-8aa1-475e-8f69-b27fb3066cfe": {
+      "connections": {
+        "False": "51cf293c-9bae-48d7-abe8-ab7dfa70f38f",
+        "True": "51cf293c-9bae-48d7-abe8-ab7dfa70f38f"
+      },
+      "displayName": "CreateUserinPING",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2699,
+      "y": 257.5
+    },
+    "5dc0f62b-7fb8-401b-a023-e9e3154791d3": {
+      "connections": {
+        "true": "55f219d3-8aa1-475e-8f69-b27fb3066cfe"
+      },
+      "displayName": "SetADFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2387,
+      "y": 313.6666666666667
+    },
+    "67411896-9c24-4117-acef-afe1acc6851b": {
+      "connections": {
+        "Error": "0f48d4bc-ffa5-43e8-bf90-8bfa68811ac8",
+        "Failed": "f083b539-a572-47d1-af2d-3954d98707c1",
+        "Successful": "c89b7feb-0947-4c87-96b3-e581c9b91799"
+      },
+      "displayName": "CreateInKOG",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1321,
+      "y": 244
+    },
+    "71bcb354-934e-4ba3-b8f4-dce0f18d455f": {
+      "connections": {
+        "true": "d53dd43c-dd9d-4c19-a0b6-9572fd39c03e"
+      },
+      "displayName": "Script: Update Access MO",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3278,
+      "y": 284
+    },
+    "8c8066ff-263b-454f-9a88-95d0cd57128d": {
+      "connections": {
+        "DONE": "e3073bde-198c-42b8-a534-fd3fa21c5d90"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1837,
+      "y": 93.25
+    },
+    "9f48a285-f6aa-4886-9dfb-2e114b4c7b68": {
+      "connections": {
+        "DONE": "cc2c15cb-ed7d-48b5-b4b9-0c58cfefdfdd"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1843,
+      "y": 223.625
+    },
+    "b16b2542-65d1-47e0-ac89-eea0e2915aa2": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b355835e-d721-4adb-8104-33d1ca7f1fa2"
+      },
+      "displayName": "IJ: Enrollemnt Context Details",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 477,
+      "y": 257.5
+    },
+    "b355835e-d721-4adb-8104-33d1ca7f1fa2": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c917fcb2-7d3a-4160-ae94-774ac51ddfec"
+      },
+      "displayName": "IJ: Registration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 790,
+      "y": 257.5
+    },
+    "c89b7feb-0947-4c87-96b3-e581c9b91799": {
+      "connections": {
+        "Error": "9f48a285-f6aa-4886-9dfb-2e114b4c7b68",
+        "Failed": "9f48a285-f6aa-4886-9dfb-2e114b4c7b68",
+        "Successful": "8c8066ff-263b-454f-9a88-95d0cd57128d"
+      },
+      "displayName": "CheckinAD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1576,
+      "y": 86.5
+    },
+    "c917fcb2-7d3a-4160-ae94-774ac51ddfec": {
+      "connections": {
+        "false": "67411896-9c24-4117-acef-afe1acc6851b",
+        "true": "b16b2542-65d1-47e0-ac89-eea0e2915aa2"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1066,
+      "y": 257.5
+    },
+    "cc2c15cb-ed7d-48b5-b4b9-0c58cfefdfdd": {
+      "connections": {
+        "Reject": "5dc0f62b-7fb8-401b-a023-e9e3154791d3",
+        "Retry": "c89b7feb-0947-4c87-96b3-e581c9b91799"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 2105,
+      "y": 269
+    },
+    "cc80ca61-e81a-4668-a4d0-9b938a5acb49": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: High Risk",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4448.75,
+      "y": 436.7890625
+    },
+    "d53dd43c-dd9d-4c19-a0b6-9572fd39c03e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "2b84ae8e-6fb4-4f59-aba4-b8a182bc5762"
+      },
+      "displayName": "Create User in Identity ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3586,
+      "y": 257.5
+    },
+    "e3073bde-198c-42b8-a534-fd3fa21c5d90": {
+      "connections": {
+        "True": "3be67ade-e8ae-4ae3-879a-93d930d5ca6e"
+      },
+      "displayName": "CreateUserinPING",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2108,
+      "y": 80
+    },
+    "f083b539-a572-47d1-af2d-3954d98707c1": {
+      "connections": {
+        "try again": "67411896-9c24-4117-acef-afe1acc6851b"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1316,
+      "y": 437.1666666666667
+    },
+    "f486c485-55b5-4dc1-8642-c554c89477ae": {
+      "connections": {
+        "true": "0eb1e40c-953a-4024-b1bf-030b69b54414"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4178,
+      "y": 450
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 70,
+      "y": 639
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 4753,
+      "y": 284.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 284.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[\"RIDP\"]"
+  }
+}

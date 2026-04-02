@@ -1,0 +1,24 @@
+{
+  "_id": "1a48f257-1fdb-4011-b28f-4c9a3f67a6c7",
+  "_outcomes": [
+    {
+      "displayName": "Retry",
+      "id": "Retry"
+    },
+    {
+      "displayName": "Reject",
+      "id": "Reject"
+    }
+  ],
+  "_rev": "1566287843",
+  "_type": {
+    "_id": "RetryLimitDecisionNode",
+    "collection": true,
+    "name": "Retry Limit Decision",
+    "version": "1.0"
+  },
+  "incrementUserAttributeOnFailure": false,
+  "retryLimit": {
+    "$int": "&{esv.retrylimit.createaccount}"
+  }
+}

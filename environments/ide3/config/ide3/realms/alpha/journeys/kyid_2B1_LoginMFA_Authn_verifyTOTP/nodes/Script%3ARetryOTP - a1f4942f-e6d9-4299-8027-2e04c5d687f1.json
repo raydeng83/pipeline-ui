@@ -1,0 +1,31 @@
+{
+  "_id": "a1f4942f-e6d9-4299-8027-2e04c5d687f1",
+  "_outcomes": [
+    {
+      "displayName": "reEnterOTP",
+      "id": "reEnterOTP"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    }
+  ],
+  "_rev": "-457228332",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "reEnterOTP",
+    "back"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "131fb95e-4ade-4ca9-bd97-dbde287e5ea9"
+}

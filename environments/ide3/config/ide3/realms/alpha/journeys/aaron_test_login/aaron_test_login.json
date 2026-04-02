@@ -1,0 +1,62 @@
+{
+  "_id": "aaron_test_login",
+  "_rev": "1389703913",
+  "enabled": true,
+  "entryNodeId": "75b1f40a-04ac-4b9d-8196-1cb28bc3b525",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "629a8590-0d7b-43dd-9f6e-d8710d62840f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "ede9c537-bb9d-46c4-a703-d9fe78bbb32c"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 493,
+      "y": 205.88333129882812
+    },
+    "75b1f40a-04ac-4b9d-8196-1cb28bc3b525": {
+      "connections": {
+        "outcome": "629a8590-0d7b-43dd-9f6e-d8710d62840f"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 188,
+      "y": 151.88333129882812
+    },
+    "ede9c537-bb9d-46c4-a703-d9fe78bbb32c": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 848,
+      "y": 191.6125030517578
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1190,
+      "y": 148
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1308,
+      "y": 707
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

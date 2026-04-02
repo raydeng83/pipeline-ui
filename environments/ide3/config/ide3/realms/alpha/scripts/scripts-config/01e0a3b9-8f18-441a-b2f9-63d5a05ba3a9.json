@@ -1,0 +1,16 @@
+{
+  "_id": "01e0a3b9-8f18-441a-b2f9-63d5a05ba3a9",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1756119339129,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801159,
+  "name": "KYID.2B1.Journey.FirstTimeLoginFlagEnabled",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.FirstTimeLoginFlagEnabled.js"
+  }
+}

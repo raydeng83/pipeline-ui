@@ -1,0 +1,16 @@
+{
+  "_id": "6e0a098a-94eb-4f10-b2e9-b5fe4744ef7e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320016089,
+  "default": false,
+  "description": "Retry for invalid input in .List Verified Prerequisites",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801164,
+  "name": "KYID.2B1.Journey.Retry",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Retry.js"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "_id": "webauth_aaron_test1",
+  "_rev": "1011576745",
+  "enabled": true,
+  "entryNodeId": "e1ea63d2-2d46-47d4-98bd-3d464e5e384d",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "18dde466-9bce-4776-a50f-7b699889b44f": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "noDevice": "74698702-884a-43ca-8c2e-f68666c5b130",
+        "success": "4d1eb004-2793-4b9a-8a4f-a57801e14868",
+        "unsupported": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "WebAuthn Authentication Node",
+      "nodeType": "WebAuthnAuthenticationNode",
+      "version": "1.0",
+      "x": 482,
+      "y": 231.01040649414062
+    },
+    "306db834-9909-4445-abee-752a59d869c7": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "18dde466-9bce-4776-a50f-7b699889b44f",
+        "unsupported": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "WebAuthn Registration Node",
+      "nodeType": "WebAuthnRegistrationNode",
+      "version": "1.0",
+      "x": 1358,
+      "y": 322.0104064941406
+    },
+    "3843c3f6-1ced-46bf-b5d3-cfb650f1a7c8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1186,
+      "y": 603.4125022888184
+    },
+    "4d1eb004-2793-4b9a-8a4f-a57801e14868": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 1372.3333435058594,
+      "y": 144.01040649414062
+    },
+    "74698702-884a-43ca-8c2e-f68666c5b130": {
+      "connections": {
+        "outcome": "b0474463-75a0-4127-910e-90c0f06b32d5"
+      },
+      "displayName": "Platform Password",
+      "nodeType": "ValidatedPasswordNode",
+      "version": "1.0",
+      "x": 845,
+      "y": 139.01040649414062
+    },
+    "b0474463-75a0-4127-910e-90c0f06b32d5": {
+      "connections": {
+        "false": "3843c3f6-1ced-46bf-b5d3-cfb650f1a7c8",
+        "true": "306db834-9909-4445-abee-752a59d869c7"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 908,
+      "y": 492.0104064941406
+    },
+    "e1ea63d2-2d46-47d4-98bd-3d464e5e384d": {
+      "connections": {
+        "outcome": "18dde466-9bce-4776-a50f-7b699889b44f"
+      },
+      "displayName": "Platform Username",
+      "nodeType": "ValidatedUsernameNode",
+      "version": "1.0",
+      "x": 199,
+      "y": 265.0104064941406
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1822,
+      "y": 83
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1858,
+      "y": 569
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-workflow-job-client-id",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_WORKFLOW_JOB_CLIENT_ID}"
+}

@@ -1,0 +1,83 @@
+{
+  "consentRequired": false,
+  "displayName": "managedAlpha_role_managedAlpha_assignment_POC",
+  "icon": null,
+  "name": "managedAlpha_role_managedAlpha_assignment_POC",
+  "policies": [
+    {
+      "action": "EXCEPTION",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "MISSING"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "DELETE",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "description",
+      "target": "description"
+    },
+    {
+      "default": "managedAlpha_role_managedAlpha_assignment_POC",
+      "target": "mapping"
+    },
+    {
+      "source": "name",
+      "target": "name"
+    },
+    {
+      "default": "__ENTITLEMENT__",
+      "target": "type"
+    }
+  ],
+  "source": "managed/alpha_role",
+  "sourceQuery": {
+    "_queryFilter": "name eq \"kyidPortal\""
+  },
+  "target": "managed/alpha_assignment"
+}

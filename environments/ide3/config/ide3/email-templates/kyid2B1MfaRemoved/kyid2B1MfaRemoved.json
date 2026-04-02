@@ -1,0 +1,31 @@
+{
+  "_id": "emailTemplate/kyid2B1MfaRemoved",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "KYID_2B1_MFA_REMOVED",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyid2B1MfaRemoved.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyid2B1MfaRemoved.en.md"
+    },
+    "es": {
+      "file": "kyid2B1MfaRemoved.es.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "kyid2B1MfaRemoved.css"
+  },
+  "subject": {
+    "en": "KYID Account Notification: Multi-Factor Authenticator (MFA) method(s) Removed",
+    "es": "Notificación de cuenta KYID: Se eliminaron los métodos de autenticación multifactor (MFA)"
+  },
+  "templateId": "kyid2B1MfaRemoved"
+}

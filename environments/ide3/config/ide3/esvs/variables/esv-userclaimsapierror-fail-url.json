@@ -1,0 +1,6 @@
+{
+  "_id": "esv-userclaimsapierror-fail-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_USERCLAIMSAPIERROR_FAIL_URL}"
+}

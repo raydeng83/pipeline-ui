@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/account_v2B_aaron_test3",
+  "description": "Account v2B with role-based authorization POC",
+  "file": "account_v2B_aaron_test3.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

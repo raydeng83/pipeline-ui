@@ -1,0 +1,115 @@
+{
+  "_id": "kyid_2B1_readClaims",
+  "_rev": "-827093033",
+  "enabled": true,
+  "entryNodeId": "23cfdd76-67cc-4d3a-922a-1db767b42480",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "02fa5f8b-9a93-4d83-8948-47f85a24e61c": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "8db75ffe-2261-4542-8a5d-f1e6f6cd5239"
+      },
+      "displayName": "Script: Get Info from Request",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 102,
+      "y": 43.015625
+    },
+    "1a35c917-a76a-4238-91c7-797824c013ab": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 784,
+      "y": 329.015625
+    },
+    "23cfdd76-67cc-4d3a-922a-1db767b42480": {
+      "connections": {
+        "User Found": "02fa5f8b-9a93-4d83-8948-47f85a24e61c"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 361,
+      "y": 483.015625
+    },
+    "3b118bac-c4e1-4d21-af93-f9834ebbc774": {
+      "connections": {
+        "No": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "Yes": "e30b811d-4287-49fa-97c2-9fcf5401ea83"
+      },
+      "displayName": "Script: Is Claims Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 466,
+      "y": 229.015625
+    },
+    "8db75ffe-2261-4542-8a5d-f1e6f6cd5239": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "3b118bac-c4e1-4d21-af93-f9834ebbc774"
+      },
+      "displayName": "IJ01: Get User Device Info & Claims",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 442,
+      "y": 45.015625
+    },
+    "8ff64c8f-287f-43c7-99e0-1d5698429d5a": {
+      "connections": {
+        "true": "1a35c917-a76a-4238-91c7-797824c013ab"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1063,
+      "y": 193.015625
+    },
+    "b5ceb1ab-cc03-4975-8fd7-b1faf4dafeba": {
+      "connections": {
+        "true": "e30b811d-4287-49fa-97c2-9fcf5401ea83"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 652,
+      "y": 506.015625
+    },
+    "e30b811d-4287-49fa-97c2-9fcf5401ea83": {
+      "connections": {
+        "False": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Get App Claims",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 808,
+      "y": 56.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1174,
+      "y": 68
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1196,
+      "y": 467
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

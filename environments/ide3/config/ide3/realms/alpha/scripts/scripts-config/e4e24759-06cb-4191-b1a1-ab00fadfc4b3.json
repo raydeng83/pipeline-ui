@@ -1,0 +1,16 @@
+{
+  "_id": "e4e24759-06cb-4191-b1a1-ab00fadfc4b3",
+  "context": "LIBRARY",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320028949,
+  "default": false,
+  "description": "To get the access token from KOG",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950803196,
+  "name": "KYID.Library.KOGAPIAccessToken",
+  "script": {
+    "file": "scripts-content/LIBRARY/KYID.Library.KOGAPIAccessToken.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "f3427277-b862-4adc-9806-7305cc4eb12b",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319428429,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798629,
+  "name": "KYID.Journey.MFARegistration.UpdateNodeStateForMFAMethod.SMS",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFARegistration.UpdateNodeStateForMFAMethod.SMS.js"
+  }
+}

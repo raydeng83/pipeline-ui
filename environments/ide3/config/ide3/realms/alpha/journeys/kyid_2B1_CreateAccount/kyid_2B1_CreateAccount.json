@@ -1,0 +1,299 @@
+{
+  "_id": "kyid_2B1_CreateAccount",
+  "_rev": "2082206044",
+  "description": "Account Creation with Captcha v2",
+  "enabled": true,
+  "entryNodeId": "d43aafdd-f430-47e8-b5a8-669562c7bd53",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "11866ec6-aac4-4d9f-92e3-e96593b3e64c": {
+      "connections": {
+        "try again": "82dd2b35-dcbb-4fbc-9a1d-0a255f47d13b"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1607,
+      "y": 465.25
+    },
+    "349fd524-17df-4387-961a-3544bc26ae74": {
+      "connections": {
+        "Reject": "d6f0eda5-51b9-4f86-8dfb-f8c311dd2990",
+        "Retry": "82dd2b35-dcbb-4fbc-9a1d-0a255f47d13b"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 1876,
+      "y": 388.4166666666667
+    },
+    "41df5465-bb49-43d6-a2ad-c509f14d5425": {
+      "connections": {
+        "False": "9058eec5-9a1d-472f-93ee-87e6285afff9",
+        "True": "9058eec5-9a1d-472f-93ee-87e6285afff9"
+      },
+      "displayName": "CreateUserinPING",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2764,
+      "y": 258.5
+    },
+    "4e364f23-c845-4ce9-a211-c1a9d2d444c7": {
+      "connections": {
+        "true": "5a3da412-4591-4c78-8a71-d89473962dd5"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4556,
+      "y": 319.1666666666667
+    },
+    "5a3da412-4591-4c78-8a71-d89473962dd5": {
+      "connections": {
+        "errorMessage": "4e364f23-c845-4ce9-a211-c1a9d2d444c7",
+        "failed": "5c3ab44d-126d-4e67-8fc9-f571a2a2496e",
+        "highRisk": "f0384edb-b991-4990-bda2-1e7bd2001f47",
+        "noSync": "5c3ab44d-126d-4e67-8fc9-f571a2a2496e",
+        "success": "5c3ab44d-126d-4e67-8fc9-f571a2a2496e"
+      },
+      "displayName": "Script: MCI Sync",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4296,
+      "y": 232
+    },
+    "5c3ab44d-126d-4e67-8fc9-f571a2a2496e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 4556,
+      "y": 148.33333333333331
+    },
+    "73ab2b59-bcb6-472a-ba0b-3b7aaa15312b": {
+      "connections": {
+        "false": "82dd2b35-dcbb-4fbc-9a1d-0a255f47d13b",
+        "true": "bfe4cb50-33fe-4c22-8bd6-29a92ce246a9"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1089,
+      "y": 258.5
+    },
+    "81c87f2b-1b7f-4db1-b37a-29b114211f3c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a393342b-891c-4e79-92bb-a5c06bcf895e"
+      },
+      "displayName": "Create User in Identity ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3676,
+      "y": 258.5
+    },
+    "82dd2b35-dcbb-4fbc-9a1d-0a255f47d13b": {
+      "connections": {
+        "Error": "c52c416f-a60c-4ba3-96bb-9d1dd3581a8f",
+        "Failed": "11866ec6-aac4-4d9f-92e3-e96593b3e64c",
+        "Successful": "a3073693-e75e-4eef-acbd-819c9735bf2b"
+      },
+      "displayName": "CreateInKOG",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1348,
+      "y": 245.5
+    },
+    "9058eec5-9a1d-472f-93ee-87e6285afff9": {
+      "connections": {
+        "True": "d449744a-337e-4789-9ba9-1621f1e0dffb"
+      },
+      "displayName": "Script: Interna Role Provisioning",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3036,
+      "y": 285
+    },
+    "940b1cd0-61ad-4557-bfce-faf97c08c1ea": {
+      "connections": {
+        "DONE": "bef7e250-a11a-4f2a-87d5-20d74c76c740"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1876,
+      "y": 238.625
+    },
+    "a3073693-e75e-4eef-acbd-819c9735bf2b": {
+      "connections": {
+        "Error": "940b1cd0-61ad-4557-bfce-faf97c08c1ea",
+        "Failed": "940b1cd0-61ad-4557-bfce-faf97c08c1ea",
+        "Successful": "e4f2300d-d22c-4f96-9fc9-58777fa4844a"
+      },
+      "displayName": "CheckinAD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1607,
+      "y": 86.75
+    },
+    "a393342b-891c-4e79-92bb-a5c06bcf895e": {
+      "connections": {
+        "success": "5a3da412-4591-4c78-8a71-d89473962dd5"
+      },
+      "displayName": "Email: User Account Creation",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3977,
+      "y": 258.5
+    },
+    "a848298b-a714-4f70-8649-54b082133376": {
+      "connections": {
+        "True": "d449744a-337e-4789-9ba9-1621f1e0dffb"
+      },
+      "displayName": "Script: Interna Role Provisioning",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2444,
+      "y": 275
+    },
+    "bef7e250-a11a-4f2a-87d5-20d74c76c740": {
+      "connections": {
+        "Reject": "e6faa08c-489b-4c77-98ad-6c95710399f5",
+        "Retry": "a3073693-e75e-4eef-acbd-819c9735bf2b"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 2160,
+      "y": 437
+    },
+    "bfe4cb50-33fe-4c22-8bd6-29a92ce246a9": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "cd39c99b-e7b7-4621-a925-a97bf61d3d82"
+      },
+      "displayName": "Enrollemnt Context Details",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 486,
+      "y": 258.5
+    },
+    "c52c416f-a60c-4ba3-96bb-9d1dd3581a8f": {
+      "connections": {
+        "DONE": "349fd524-17df-4387-961a-3544bc26ae74"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1607,
+      "y": 314.375
+    },
+    "cd39c99b-e7b7-4621-a925-a97bf61d3d82": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "73ab2b59-bcb6-472a-ba0b-3b7aaa15312b"
+      },
+      "displayName": "Registration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 806,
+      "y": 258.5
+    },
+    "d43aafdd-f430-47e8-b5a8-669562c7bd53": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "bfe4cb50-33fe-4c22-8bd6-29a92ce246a9"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 258.5
+    },
+    "d449744a-337e-4789-9ba9-1621f1e0dffb": {
+      "connections": {
+        "true": "81c87f2b-1b7f-4db1-b37a-29b114211f3c"
+      },
+      "displayName": "Script: Update Access MO",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3356,
+      "y": 285
+    },
+    "d6f0eda5-51b9-4f86-8dfb-f8c311dd2990": {
+      "connections": {
+        "wait": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "KOGAPIERRROR",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2160,
+      "y": 285
+    },
+    "d7dcb7b2-47e9-4ca0-a17b-3b64d1090e7b": {
+      "connections": {
+        "True": "a848298b-a714-4f70-8649-54b082133376"
+      },
+      "displayName": "CreateUserinPING",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2160,
+      "y": 80
+    },
+    "e4f2300d-d22c-4f96-9fc9-58777fa4844a": {
+      "connections": {
+        "DONE": "d7dcb7b2-47e9-4ca0-a17b-3b64d1090e7b"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1876,
+      "y": 93.25
+    },
+    "e6faa08c-489b-4c77-98ad-6c95710399f5": {
+      "connections": {
+        "true": "41df5465-bb49-43d6-a2ad-c509f14d5425"
+      },
+      "displayName": "SetADFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2444,
+      "y": 166
+    },
+    "f0384edb-b991-4990-bda2-1e7bd2001f47": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: High Risk",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4555.515625,
+      "y": 433.5390625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 70,
+      "y": 642
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 4815,
+      "y": 286
+    },
+    "startNode": {
+      "x": 70,
+      "y": 286
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

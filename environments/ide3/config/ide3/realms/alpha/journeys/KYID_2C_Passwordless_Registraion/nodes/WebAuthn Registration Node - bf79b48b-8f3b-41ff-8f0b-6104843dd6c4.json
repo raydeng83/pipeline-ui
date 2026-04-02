@@ -1,0 +1,49 @@
+{
+  "_id": "bf79b48b-8f3b-41ff-8f0b-6104843dd6c4",
+  "_outcomes": [
+    {
+      "displayName": "Unsupported",
+      "id": "unsupported"
+    },
+    {
+      "displayName": "Success",
+      "id": "success"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failure"
+    },
+    {
+      "displayName": "Client Error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-160929267",
+  "_type": {
+    "_id": "WebAuthnRegistrationNode",
+    "collection": true,
+    "name": "WebAuthn Registration Node",
+    "version": "1.0"
+  },
+  "acceptedSigningAlgorithms": [
+    "ES256",
+    "RS256"
+  ],
+  "asScript": true,
+  "attestationPreference": "NONE",
+  "authenticatorAttachment": "UNSPECIFIED",
+  "enforceRevocationCheck": false,
+  "excludeCredentials": false,
+  "fidoCertificationLevel": "OFF",
+  "generateRecoveryCodes": true,
+  "maxSavedDevices": 0,
+  "origins": [],
+  "postponeDeviceProfileStorage": true,
+  "relyingPartyName": "ForgeRock",
+  "requiresResidentKey": true,
+  "storeAttestationDataInTransientState": false,
+  "timeout": 60,
+  "trustStoreAlias": "trustalias",
+  "userVerificationRequirement": "PREFERRED",
+  "validateFidoU2fAaguid": true
+}

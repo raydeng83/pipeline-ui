@@ -1,0 +1,16 @@
+{
+  "_id": "SampleLoginJourney",
+  "_rev": "1973736690",
+  "enabled": true,
+  "entryNodeId": "e301438c-0bd0-429c-ab0c-66126501069a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {},
+  "staticNodes": {},
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

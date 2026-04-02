@@ -1,0 +1,99 @@
+{
+  "consentRequired": false,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "userName"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "managedAlpha_user_systemTestscriptedrestpoc__TEST",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "Scripted Rest Connector Test Account",
+  "enableSync": true,
+  "icon": null,
+  "name": "managedAlpha_user_systemTestscriptedrestpoc__TEST",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "mail",
+      "target": "mail"
+    },
+    {
+      "source": "userName",
+      "target": "userName"
+    },
+    {
+      "source": "sn",
+      "target": "sn"
+    },
+    {
+      "source": "givenName",
+      "target": "givenName"
+    }
+  ],
+  "source": "managed/alpha_user",
+  "target": "system/testscriptedrestPOC/__TESTACCOUNT__",
+  "validSource": {
+    "file": "managedAlpha_user_systemTestscriptedrestpoc__TEST.validSource.js",
+    "globals": {},
+    "type": "text/javascript"
+  }
+}

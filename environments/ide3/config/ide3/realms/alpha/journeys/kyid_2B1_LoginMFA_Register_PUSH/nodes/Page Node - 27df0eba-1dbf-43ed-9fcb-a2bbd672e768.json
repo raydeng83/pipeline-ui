@@ -1,0 +1,37 @@
+{
+  "_id": "27df0eba-1dbf-43ed-9fcb-a2bbd672e768",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    },
+    {
+      "displayName": "Time Out",
+      "id": "timeoutOutcome"
+    }
+  ],
+  "_rev": "2060825909",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "ce2041b2-42db-426b-840f-b403143e5fe2",
+      "displayName": "Push Registration",
+      "nodeType": "PushRegistrationNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "1_setup_PUSH"
+  },
+  "stage": "{\"pageFooter\":{\"en\":\"{\\\"faqTopicId\\\":[\\\"What is this QR code?\\\"]}\"}}"
+}

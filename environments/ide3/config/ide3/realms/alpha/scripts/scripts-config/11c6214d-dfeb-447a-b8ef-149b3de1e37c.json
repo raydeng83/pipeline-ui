@@ -1,0 +1,16 @@
+{
+  "_id": "11c6214d-dfeb-447a-b8ef-149b3de1e37c",
+  "context": "OIDC_CLAIMS",
+  "createdBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "creationDate": 1747636743292,
+  "default": false,
+  "description": "Default alpha realm script for OIDC claims",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950811328,
+  "name": "KYID.2B1.Journey.Alpha.OIDC.Claims.Script",
+  "script": {
+    "file": "scripts-content/OIDC_CLAIMS/KYID.2B1.Journey.Alpha.OIDC.Claims.Script.js"
+  }
+}

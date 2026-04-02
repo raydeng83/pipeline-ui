@@ -1,0 +1,16 @@
+{
+  "_id": "ccef7387-fccb-4fa8-a149-479e6204d074",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=81073c37-7e92-4460-a48e-7435a1c0a371,ou=user,ou=am-config",
+  "creationDate": 1772717194216,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=81073c37-7e92-4460-a48e-7435a1c0a371,ou=user,ou=am-config",
+  "lastModifiedDate": 1772775282380,
+  "name": "KYID.2B1.Journey.CheckDeltaUsersList",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.CheckDeltaUsersList.js"
+  }
+}

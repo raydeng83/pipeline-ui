@@ -1,0 +1,36 @@
+{
+  "_id": "535b640d-2f61-46a5-bd3d-3e14337904f5",
+  "_outcomes": [
+    {
+      "displayName": "Helpdesk",
+      "id": "Helpdesk"
+    },
+    {
+      "displayName": "NotHelpdesk",
+      "id": "NotHelpdesk"
+    },
+    {
+      "displayName": "Helpdesk_Manage",
+      "id": "Helpdesk_Manage"
+    }
+  ],
+  "_rev": "1050770484",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Helpdesk",
+    "NotHelpdesk",
+    "Helpdesk_Manage"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "e0ac418c-0f9f-48e2-9e21-94b2d0e3006c"
+}

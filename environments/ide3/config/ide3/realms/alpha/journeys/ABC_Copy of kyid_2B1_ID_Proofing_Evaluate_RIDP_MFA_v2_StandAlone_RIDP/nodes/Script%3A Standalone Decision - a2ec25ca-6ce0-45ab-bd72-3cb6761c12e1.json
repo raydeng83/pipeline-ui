@@ -1,0 +1,46 @@
+{
+  "_id": "a2ec25ca-6ce0-45ab-bd72-3cb6761c12e1",
+  "_outcomes": [
+    {
+      "displayName": "highRisk",
+      "id": "highRisk"
+    },
+    {
+      "displayName": "notVerified",
+      "id": "notVerified"
+    },
+    {
+      "displayName": "lexMisMatch",
+      "id": "lexMisMatch"
+    },
+    {
+      "displayName": "mciSearch",
+      "id": "mciSearch"
+    },
+    {
+      "displayName": "kbafailed",
+      "id": "kbafailed"
+    }
+  ],
+  "_rev": "1144979795",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "highRisk",
+    "notVerified",
+    "lexMisMatch",
+    "mciSearch",
+    "kbafailed"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "437a649a-5af3-4692-ae11-f858433e40a5"
+}

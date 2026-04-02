@@ -1,0 +1,28 @@
+{
+  "_id": "emailTemplate/kyidprerequisitesuccessOriginalCopy",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "kyidprerequisitesuccess original_copy",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyidprerequisitesuccessOriginalCopy.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyidprerequisitesuccessOriginalCopy.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "name": "kyidprerequisitesuccess",
+  "styles": {
+    "file": "kyidprerequisitesuccessOriginalCopy.css"
+  },
+  "subject": {
+    "en": "KYID : Access Granted {{object.application}}"
+  },
+  "templateId": "kyidprerequisitesuccessOriginalCopy"
+}

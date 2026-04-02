@@ -1,0 +1,16 @@
+{
+  "_id": "041bd67f-4e98-4adb-b93c-4903e1232574",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747400916476,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950799925,
+  "name": "KYID.2B1.Journey.MFAAuthentication.SymantecVIPVerificationCall",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.MFAAuthentication.SymantecVIPVerificationCall.js"
+  }
+}

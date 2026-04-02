@@ -1,0 +1,6 @@
+{
+  "_id": "esv-unspecified-authcontext-uri",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_UNSPECIFIED_AUTHCONTEXT_URI}"
+}

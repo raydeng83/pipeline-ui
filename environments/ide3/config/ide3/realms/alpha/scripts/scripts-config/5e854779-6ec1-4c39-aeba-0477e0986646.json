@@ -1,0 +1,16 @@
+{
+  "_id": "5e854779-6ec1-4c39-aeba-0477e0986646",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=dsameuser,ou=user,dc=openam,dc=forgerock,dc=org",
+  "creationDate": 1433147666269,
+  "default": true,
+  "description": "Script to provide values for a config provider node",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950799131,
+  "name": "Config Provider Node Script",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/Config Provider Node Script.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "c720ac9d-cae1-4356-ab07-72cb14a7b667",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=bc3d9c9d-c058-4f29-8df5-03071b5f3ac4,ou=user,ou=am-config",
+  "creationDate": 1758206912474,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950813394,
+  "name": "KYID.2B1.Send.Mail.RIDP.Failure",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Send.Mail.RIDP.Failure.js"
+  }
+}

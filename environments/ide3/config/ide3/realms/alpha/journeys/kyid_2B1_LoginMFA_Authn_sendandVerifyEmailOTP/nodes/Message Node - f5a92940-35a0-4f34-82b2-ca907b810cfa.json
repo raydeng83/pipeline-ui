@@ -1,0 +1,25 @@
+{
+  "_id": "f5a92940-35a0-4f34-82b2-ca907b810cfa",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1345248073",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Email-IJ"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

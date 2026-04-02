@@ -1,0 +1,256 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "__NAME__"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "UserPingDataLoad",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "UserPingDataLoad",
+  "enableSync": false,
+  "name": "UserPingDataLoad",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "CREATE",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "userName",
+      "target": "__NAME__"
+    },
+    {
+      "source": "custom_base64KOGId",
+      "target": "base64KOGId"
+    },
+    {
+      "source": "mail",
+      "target": "mail"
+    },
+    {
+      "source": "custom_kyidAccountType",
+      "target": "kyidAccountType"
+    },
+    {
+      "source": "frIndexedString1",
+      "target": "UPN"
+    },
+    {
+      "source": "custom_jobClassification",
+      "target": "jobClassification"
+    },
+    {
+      "source": "custom_approvalUnit1Code",
+      "target": "approvalUnit1Code"
+    },
+    {
+      "source": "custom_approvalUnit2Code",
+      "target": "approvalUnit2Code"
+    },
+    {
+      "source": "custom_approvalUnit3Code",
+      "target": "approvalUnit3Code"
+    },
+    {
+      "source": "custom_approvalUnit4Code",
+      "target": "approvalUnit4Code"
+    },
+    {
+      "source": "custom_approvalUnit5Code",
+      "target": "approvalUnit5Code"
+    },
+    {
+      "source": "accountStatus",
+      "target": "accountStatus"
+    },
+    {
+      "source": "custom_onboardingStatus",
+      "target": "onboardingStatus"
+    },
+    {
+      "source": "custom_lastLogonDate",
+      "target": "lastLogonDate"
+    },
+    {
+      "source": "givenName",
+      "target": "givenName"
+    },
+    {
+      "source": "sn",
+      "target": "sn"
+    },
+    {
+      "source": "custom_action",
+      "target": "action"
+    },
+    {
+      "source": "custom_actionPerformedBy",
+      "target": "actionPerformedBy"
+    },
+    {
+      "source": "custom_actionDate",
+      "target": "actionDate"
+    },
+    {
+      "source": "custom_actionExplain",
+      "target": "actionExplain"
+    },
+    {
+      "source": "custom_middleName",
+      "target": "middleName"
+    },
+    {
+      "source": "postalAddress",
+      "target": "postalAddress1"
+    },
+    {
+      "source": "custom_postalAddress2",
+      "target": "postalAddress2"
+    },
+    {
+      "source": "postalCode",
+      "target": "postalCode"
+    },
+    {
+      "source": "country",
+      "target": "country"
+    },
+    {
+      "source": "custom_county",
+      "target": "county"
+    },
+    {
+      "source": "stateProvince",
+      "target": "stateProvince"
+    },
+    {
+      "source": "custom_gender",
+      "target": "gender"
+    },
+    {
+      "default": false,
+      "source": "custom_selfEnrollMFA",
+      "target": "selfEnrollMFA"
+    },
+    {
+      "source": "custom_logon",
+      "target": "logon"
+    },
+    {
+      "source": "custom_alphauserid",
+      "target": "alphaUserId"
+    },
+    {
+      "source": "custom_kogAccountType",
+      "target": "kogAccountType"
+    },
+    {
+      "source": "custom_createDate",
+      "target": "createDate"
+    },
+    {
+      "source": "custom_updateDate",
+      "target": "updateDate"
+    },
+    {
+      "source": "custom_createDateEpoch",
+      "target": "CreateDateEpoch",
+      "transform": {
+        "globals": {},
+        "source": "Math.ceil(source);",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "custom_updatedDateEpoch",
+      "target": "UpdateDateEpoch",
+      "transform": {
+        "globals": {},
+        "source": "Math.ceil(source);",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "custom_createdByID",
+      "target": "CreateUserId"
+    },
+    {
+      "source": "custom_updatedByID",
+      "target": "UpdateUserId"
+    },
+    {
+      "source": "custom_createdBy",
+      "target": "SrcCreateUserId"
+    },
+    {
+      "source": "custom_updatedBy",
+      "target": "SrcUpdateUserId"
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "managed/alpha_user",
+  "target": "system/DBConnector_Ping2DBUser/__ACCOUNT__",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

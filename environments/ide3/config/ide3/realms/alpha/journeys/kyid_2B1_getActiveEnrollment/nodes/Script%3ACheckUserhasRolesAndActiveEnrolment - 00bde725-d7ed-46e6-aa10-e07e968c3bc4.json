@@ -1,0 +1,31 @@
+{
+  "_id": "00bde725-d7ed-46e6-aa10-e07e968c3bc4",
+  "_outcomes": [
+    {
+      "displayName": "hasRoleActiveEnrolment",
+      "id": "hasRoleActiveEnrolment"
+    },
+    {
+      "displayName": "true",
+      "id": "true"
+    }
+  ],
+  "_rev": "291328814",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "hasRoleActiveEnrolment",
+    "true"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c5ba964b-3ab9-4022-9739-d9b07a2d2f64"
+}

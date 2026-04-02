@@ -1,0 +1,16 @@
+{
+  "_id": "c0a91665-eb19-4e14-b225-f6115741501d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=227964d5-9d01-4383-bc8e-5f0e381573b0,ou=user,ou=am-config",
+  "creationDate": 1761251901992,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950802052,
+  "name": "webauth_getUsernameFromEmail_script_aaron",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/webauth_getUsernameFromEmail_script_aaron.js"
+  }
+}

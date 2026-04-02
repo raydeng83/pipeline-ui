@@ -1,0 +1,16 @@
+{
+  "_id": "b4b27c18-5ff5-4908-b150-5f7b93dc3534",
+  "context": "SAML2_IDP_ADAPTER",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319424343,
+  "default": false,
+  "description": "This script is used to read application context information from SSO request.",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950813921,
+  "name": "KYID.SAML2.IDPAdapter.Dec16",
+  "script": {
+    "file": "scripts-content/SAML2_IDP_ADAPTER/KYID.SAML2.IDPAdapter.Dec16.js"
+  }
+}

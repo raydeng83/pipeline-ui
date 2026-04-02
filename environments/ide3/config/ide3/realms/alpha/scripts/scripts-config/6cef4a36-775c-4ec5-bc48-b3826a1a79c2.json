@@ -1,0 +1,16 @@
+{
+  "_id": "6cef4a36-775c-4ec5-bc48-b3826a1a79c2",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320020937,
+  "default": false,
+  "description": "MFA Reg and Auth",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950813711,
+  "name": "KYID.Journey.MFAAuthenticationAndRegistration.AuthenticationORRegistration",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAAuthenticationAndRegistration.AuthenticationORRegistration.js"
+  }
+}

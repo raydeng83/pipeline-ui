@@ -1,0 +1,208 @@
+{
+  "_id": "kyid_2B1_RemoveMFAMethods_Helpdesk",
+  "_rev": "79044528",
+  "enabled": true,
+  "entryNodeId": "60cad2de-640b-46ad-a73b-2bb6002a6398",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "116e965d-3e02-406d-b79b-c87453ce160b": {
+      "connections": {
+        "Error": "d105359a-1188-4ec8-9997-c4c4699d0b4c",
+        "Failed": "fffa4fb0-e23f-4e28-beb5-f43d044e56b1",
+        "Successful": "58d8eb9a-a4d1-4c0c-baa8-f3f3142a52a9"
+      },
+      "displayName": "Script: AddRemoevAlternateEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1253.25,
+      "y": 403.8125
+    },
+    "3a4699e3-a66b-4d4d-a86f-ad84038dd7c0": {
+      "connections": {
+        "next": "7a8dc688-ca1d-45e4-ab9f-9b5e14335835"
+      },
+      "displayName": "Script:ReasonCommentInput",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 435,
+      "y": 205.015625
+    },
+    "54c08d8a-07b3-415a-b454-74f4b6dea4f3": {
+      "connections": {},
+      "displayName": "Script:Success",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1995,
+      "y": 84.015625
+    },
+    "58d8eb9a-a4d1-4c0c-baa8-f3f3142a52a9": {
+      "connections": {
+        "failure": "9e95b31e-7fc3-492a-a3a2-0e5b897a94d1",
+        "success": "54c08d8a-07b3-415a-b454-74f4b6dea4f3"
+      },
+      "displayName": "MFA Removed - Send Mail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1716.3333129882812,
+      "y": 196.67707347869873
+    },
+    "60cad2de-640b-46ad-a73b-2bb6002a6398": {
+      "connections": {
+        "hasSession": "e75da873-135d-424b-9a5e-53647371ee37"
+      },
+      "displayName": "Script:SessionValid",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 153,
+      "y": 34.015625
+    },
+    "7a8dc688-ca1d-45e4-ab9f-9b5e14335835": {
+      "connections": {
+        "False": "90dbe667-c7b3-40f6-93fc-4868bbe104a7",
+        "True": "b31ed3a2-7974-4448-aa43-87cd6e694ea9"
+      },
+      "displayName": "GetAccessToken",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 736,
+      "y": 425.015625
+    },
+    "90dbe667-c7b3-40f6-93fc-4868bbe104a7": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1134,
+      "y": 542.015625
+    },
+    "9e95b31e-7fc3-492a-a3a2-0e5b897a94d1": {
+      "connections": {},
+      "displayName": "Script:Failure",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1969,
+      "y": 358.015625
+    },
+    "ab333df8-41e6-4b62-8603-4a723fd73353": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 2046.3333740234375,
+      "y": 605.34375
+    },
+    "b31ed3a2-7974-4448-aa43-87cd6e694ea9": {
+      "connections": {
+        "email": "116e965d-3e02-406d-b79b-c87453ce160b",
+        "false": "fffa4fb0-e23f-4e28-beb5-f43d044e56b1",
+        "sms": "d029dcb6-376f-4156-83ff-1e8e42570386",
+        "true": "58d8eb9a-a4d1-4c0c-baa8-f3f3142a52a9"
+      },
+      "displayName": "Script: RemoveMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1124,
+      "y": 138.015625
+    },
+    "d029dcb6-376f-4156-83ff-1e8e42570386": {
+      "connections": {
+        "Error": "f4f0df7a-50a6-4806-a7ab-c0c7e8422991",
+        "Failed": "fffa4fb0-e23f-4e28-beb5-f43d044e56b1",
+        "Successful": "58d8eb9a-a4d1-4c0c-baa8-f3f3142a52a9"
+      },
+      "displayName": "Scripted: AddRemoveMobilePhone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1385,
+      "y": 18
+    },
+    "d105359a-1188-4ec8-9997-c4c4699d0b4c": {
+      "connections": {
+        "try again": "116e965d-3e02-406d-b79b-c87453ce160b"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1399,
+      "y": 766.8125
+    },
+    "e18bff6b-3970-4388-b29b-7ebb5541527d": {
+      "connections": {
+        "Success": "3a4699e3-a66b-4d4d-a86f-ad84038dd7c0"
+      },
+      "displayName": "Script:FetchMFAID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 462,
+      "y": 27.015625
+    },
+    "e630edf5-c857-41ad-9b81-a267be6229ea": {
+      "connections": {
+        "User Found": "e18bff6b-3970-4388-b29b-7ebb5541527d"
+      },
+      "displayName": "Script:GetloggedinUserinfo",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 85,
+      "y": 475.015625
+    },
+    "e75da873-135d-424b-9a5e-53647371ee37": {
+      "connections": {
+        "true": "e630edf5-c857-41ad-9b81-a267be6229ea"
+      },
+      "displayName": "Script:getKOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 163,
+      "y": 229.015625
+    },
+    "f4f0df7a-50a6-4806-a7ab-c0c7e8422991": {
+      "connections": {
+        "try again": "d029dcb6-376f-4156-83ff-1e8e42570386"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1503.5,
+      "y": 286.3125
+    },
+    "fffa4fb0-e23f-4e28-beb5-f43d044e56b1": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1867,
+      "y": 479.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2203,
+      "y": 274
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2252,
+      "y": 552
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

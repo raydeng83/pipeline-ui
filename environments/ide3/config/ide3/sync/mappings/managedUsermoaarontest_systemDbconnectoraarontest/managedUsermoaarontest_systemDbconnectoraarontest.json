@@ -1,0 +1,101 @@
+{
+  "consentRequired": false,
+  "correlationQuery": [
+    {
+      "linkQualifier": "default",
+      "source": "var query = {'_queryFilter': '__NAME__ eq \"' + source.userName + '\"'}; query;",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "managedUsermoaarontest_systemDbconnectoraarontest",
+  "enableSync": true,
+  "icon": null,
+  "name": "managedUsermoaarontest_systemDbconnectoraarontest",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "LINK_ONLY"
+    }
+  ],
+  "properties": [
+    {
+      "source": "userName",
+      "target": "__NAME__"
+    },
+    {
+      "source": "email",
+      "target": "email"
+    },
+    {
+      "source": "firstName",
+      "target": "firstName"
+    },
+    {
+      "source": "lastName",
+      "target": "lastName"
+    }
+  ],
+  "queuedSync": {
+    "enabled": true,
+    "maxQueueSize": 1000,
+    "maxRetries": 20,
+    "pageSize": 100,
+    "pollingInterval": 1000,
+    "postRetryAction": "dead-letter-queue",
+    "retryDelay": 5000
+  },
+  "source": "managed/userMOAaronTest",
+  "target": "system/dbConnectorAaronTest/__ACCOUNT__"
+}

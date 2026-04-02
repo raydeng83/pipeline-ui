@@ -1,0 +1,61 @@
+{
+  "_id": "f9bafb9a-3492-4e9b-8289-a8114b0764ef",
+  "_outcomes": [
+    {
+      "displayName": "viewappdetails",
+      "id": "viewappdetails"
+    },
+    {
+      "displayName": "showlargeicon",
+      "id": "showlargeicon"
+    },
+    {
+      "displayName": "removerole",
+      "id": "removerole"
+    },
+    {
+      "displayName": "manageaccess",
+      "id": "manageaccess"
+    },
+    {
+      "displayName": "invalidjson",
+      "id": "invalidjson"
+    },
+    {
+      "displayName": "invalidaction",
+      "id": "invalidaction"
+    },
+    {
+      "displayName": "internalerrordatamissing",
+      "id": "internalerrordatamissing"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "1032190762",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "viewappdetails",
+    "showlargeicon",
+    "removerole",
+    "manageaccess",
+    "invalidjson",
+    "invalidaction",
+    "internalerrordatamissing",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "29b9f80c-355a-4671-81aa-ccdc8ee3dc5a"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "0e78733e-6408-4dd1-9312-f10584f71ecc",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319426709,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798773,
+  "name": "KYID.2B1.Journey.Registration_Acceptance.postadditionalemail.AlternateEmailFlagSetting",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Registration_Acceptance.postadditionalemail.AlternateEmailFlagSetting.js"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "_id": "ca1693c4-919c-4e59-a07d-9a7bb16e7109",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-2141100717",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "d4e93bd1-cef7-4082-8fd5-5511d84f2d5a",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "69f5768d-2634-48e0-8cdb-b2e4192bbe5b",
+      "displayName": "CAPTCHA V2 Verify",
+      "nodeType": "product-CaptchaNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-header'>\n<div class='page-element'>\nVerify with reCAPTCHA\n</div>\n</div>",
+    "es": "<div class='page-header'>\n<div class='page-element'>\nVerificar con reCAPTCHA\n</div>\n</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"submitButtonText\":{\"en\":\"Verify\",\"es\":\"Verificar\"},\"pageFooter\":{\"en\":\"<div style=\\\"text-align:left;\\\">\\n<a href=\\\"\\n&{esv.kyid.sso.url}&authIndexType=service&authIndexValue=kyid_BackToLoginRouterTreeEN\\\">Back\\nto sign in</a>\\n</div>\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element text-align-left'>\\n<a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a>\\n</div>\\n</div>\",\"es\":\"<div style=\\\"text-align:left;\\\">\\n<a href=\\\"&{esv.kyid.sso.url}&authIndexType=service&authIndexValue=kyid_BackToLoginRouterTreeES\\\">Volver a iniciar sesión</a>\\n</div>\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element text-align-left'>\\n<a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a>\\n</div>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

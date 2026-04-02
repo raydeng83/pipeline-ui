@@ -1,0 +1,16 @@
+{
+  "_id": "52a4e291-905d-4bd0-8a3e-efc7a2b07f43",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1756119405160,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950804335,
+  "name": "KYID.2B1.Journey.FirstTimeLogin.AddMFAMethods",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.FirstTimeLogin.AddMFAMethods.js"
+  }
+}

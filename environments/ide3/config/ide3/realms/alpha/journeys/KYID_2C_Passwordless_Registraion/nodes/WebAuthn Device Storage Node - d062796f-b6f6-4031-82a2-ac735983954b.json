@@ -1,0 +1,22 @@
+{
+  "_id": "d062796f-b6f6-4031-82a2-ac735983954b",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "success"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failure"
+    }
+  ],
+  "_rev": "-55028309",
+  "_type": {
+    "_id": "WebAuthnDeviceStorageNode",
+    "collection": true,
+    "name": "WebAuthn Device Storage Node",
+    "version": "1.0"
+  },
+  "generateRecoveryCodes": true,
+  "maxSavedDevices": 0
+}

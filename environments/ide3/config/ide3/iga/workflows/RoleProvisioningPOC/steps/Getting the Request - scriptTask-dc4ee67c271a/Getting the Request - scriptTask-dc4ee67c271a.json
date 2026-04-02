@@ -1,0 +1,18 @@
+{
+  "displayName": "Getting the Request",
+  "name": "scriptTask-dc4ee67c271a",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "scriptTask-85f37b5a334f"
+      }
+    ],
+    "script": {
+      "file": "Getting the Request - scriptTask-dc4ee67c271a.js"
+    }
+  },
+  "type": "scriptTask"
+}

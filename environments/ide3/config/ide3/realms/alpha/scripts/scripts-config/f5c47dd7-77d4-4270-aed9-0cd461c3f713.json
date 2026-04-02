@@ -1,0 +1,16 @@
+{
+  "_id": "f5c47dd7-77d4-4270-aed9-0cd461c3f713",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "creationDate": 1765362696820,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1766146210164,
+  "name": "KYID.2B1.Journey.IDProofing.Manage.Profile.Post.JIT.Provisioning",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.Manage.Profile.Post.JIT.Provisioning.js"
+  }
+}

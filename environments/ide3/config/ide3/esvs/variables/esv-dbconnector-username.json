@@ -1,0 +1,6 @@
+{
+  "_id": "esv-dbconnector-username",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_DBCONNECTOR_USERNAME}"
+}

@@ -1,0 +1,31 @@
+{
+  "_id": "1dc0c0c4-820d-41b4-b577-4cacfbc8e7ab",
+  "_outcomes": [
+    {
+      "displayName": "perfon",
+      "id": "perfon"
+    },
+    {
+      "displayName": "perfoff",
+      "id": "perfoff"
+    }
+  ],
+  "_rev": "1668720686",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "perfon",
+    "perfoff"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "06cfbaa1-cede-48f4-be7a-063b073b9915"
+}

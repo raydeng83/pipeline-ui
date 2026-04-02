@@ -1,0 +1,16 @@
+{
+  "_id": "1235a6e7-8ea6-406f-a82b-e153e7100b77",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1753150660484,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950817350,
+  "name": "KYID.2B1.KOG.GetUserProfileAPI.WithEmailAndUPN",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.KOG.GetUserProfileAPI.WithEmailAndUPN.js"
+  }
+}

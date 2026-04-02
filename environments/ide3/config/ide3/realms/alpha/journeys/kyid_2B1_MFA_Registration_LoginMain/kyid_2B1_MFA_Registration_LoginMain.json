@@ -1,0 +1,82 @@
+{
+  "_id": "kyid_2B1_MFA_Registration_LoginMain",
+  "_rev": "-886197096",
+  "enabled": true,
+  "entryNodeId": "ba346361-4d3e-470c-840d-52c7a942ecf9",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0650f902-7ece-4ee1-a228-3d388f768d73": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:SetSessionAssuranceLevel",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 882,
+      "y": 117.015625
+    },
+    "1ad93faa-e8db-420c-aba7-91ff9bd635e7": {
+      "connections": {
+        "true": "0650f902-7ece-4ee1-a228-3d388f768d73"
+      },
+      "displayName": "IJ:Phoneregistration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 463,
+      "y": 69.33332824707031
+    },
+    "37d8752c-7815-4915-a48f-2f104bf76e78": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:SetSessionAssuranceLevel",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 890,
+      "y": 333.015625
+    },
+    "ba346361-4d3e-470c-840d-52c7a942ecf9": {
+      "connections": {
+        "authenticator": "c85f06ea-33d8-4a7c-a105-a9113f2e8d0e",
+        "failed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "phone": "1ad93faa-e8db-420c-aba7-91ff9bd635e7"
+      },
+      "displayName": "Script:RouteToRegistraion",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 166,
+      "y": 217.3333282470703
+    },
+    "c85f06ea-33d8-4a7c-a105-a9113f2e8d0e": {
+      "connections": {
+        "true": "37d8752c-7815-4915-a48f-2f104bf76e78"
+      },
+      "displayName": "IJ:AuthenticatorRegistration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 596,
+      "y": 332.3333282470703
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1181,
+      "y": 85
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1297,
+      "y": 422
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

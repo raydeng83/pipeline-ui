@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/pocendpoint",
+  "description": "This is POC endpoint to validate SIH request and authorize access",
+  "file": "pocendpoint.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

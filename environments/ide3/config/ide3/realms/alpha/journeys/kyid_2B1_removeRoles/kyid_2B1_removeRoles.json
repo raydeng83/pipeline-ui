@@ -1,0 +1,133 @@
+{
+  "_id": "kyid_2B1_removeRoles",
+  "_rev": "-1924930714",
+  "enabled": true,
+  "entryNodeId": "c9bad865-22fc-4e3d-b588-e19786cc89ab",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1a4e4e5f-fc84-404d-91c5-e53f5a4cc82b": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 851,
+      "y": 432.015625
+    },
+    "1c818ebb-9361-49da-8dfd-99dac6098931": {
+      "connections": {
+        "false": "7b6fe0e6-a2af-42ab-b61e-bba7df10077f",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:RemoveRole",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1170,
+      "y": 33
+    },
+    "22e83c85-ed50-4eab-b7ff-e4843362b4c4": {
+      "connections": {
+        "back": "95138bb8-cac1-4492-be86-9841c36c242f",
+        "confirm": "1c818ebb-9361-49da-8dfd-99dac6098931",
+        "error": "7b6fe0e6-a2af-42ab-b61e-bba7df10077f"
+      },
+      "displayName": "Script:DisplayMessage",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 882,
+      "y": 20
+    },
+    "2da9ed1f-915b-4e6d-8a49-99ba127fe682": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Error:RoleisnotRemovable",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 580,
+      "y": 518.015625
+    },
+    "5ada43f2-59e0-433c-a4a4-e99c34dee84a": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Error:InternalUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 593,
+      "y": 418.015625
+    },
+    "7b6fe0e6-a2af-42ab-b61e-bba7df10077f": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:UnexpectedError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1225,
+      "y": 418.015625
+    },
+    "95138bb8-cac1-4492-be86-9841c36c242f": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:Go Back",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1195,
+      "y": 242
+    },
+    "a15bf489-161b-4b04-9b75-8a8b3f0a47d6": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 825,
+      "y": 280.015625
+    },
+    "c9bad865-22fc-4e3d-b588-e19786cc89ab": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e93a71e3-c717-4532-8291-5348181b4b59"
+      },
+      "displayName": "CheckJourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 115,
+      "y": 327.3333282470703
+    },
+    "e93a71e3-c717-4532-8291-5348181b4b59": {
+      "connections": {
+        "donotremove": "2da9ed1f-915b-4e6d-8a49-99ba127fe682",
+        "error": "7b6fe0e6-a2af-42ab-b61e-bba7df10077f",
+        "internaluser": "5ada43f2-59e0-433c-a4a4-e99c34dee84a",
+        "proceed": "22e83c85-ed50-4eab-b7ff-e4843362b4c4"
+      },
+      "displayName": "Script: Check Before Removal",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 391,
+      "y": 43.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1730,
+      "y": 61
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1764,
+      "y": 399
+    },
+    "startNode": {
+      "x": 35,
+      "y": 253
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

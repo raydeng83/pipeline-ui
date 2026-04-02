@@ -1,0 +1,13 @@
+{
+  "_id": "am.applications.federation.entity.providers.saml2.kyaichostedidp.signing",
+  "_rev": "294643621",
+  "_type": {
+    "_id": "mappings",
+    "collection": true,
+    "name": "Mappings"
+  },
+  "aliases": [
+    "esv-saml-signing-cert"
+  ],
+  "secretId": "am.applications.federation.entity.providers.saml2.kyaichostedidp.signing"
+}

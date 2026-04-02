@@ -1,0 +1,16 @@
+{
+  "_id": "b9123047-ea61-4459-9264-fe27eb08c994",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320018814,
+  "default": false,
+  "description": "This script is used to set authenticated session monitor cookie in browser session.",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950799664,
+  "name": "KYID.Journey.SetAuthnSessionMonitorCookie",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetAuthnSessionMonitorCookie.js"
+  }
+}

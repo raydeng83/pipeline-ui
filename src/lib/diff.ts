@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import type { DiffLine, FileDiff, CompareReport } from "./diff-types";
+import type { DiffLine, FileDiff, CompareReport, CompareEndpoint } from "./diff-types";
 
 const MAX_LINES = 2000;
 const MAX_CONTENT_BYTES = 200_000; // 200 KB per side
@@ -141,19 +141,19 @@ export function compareDirs(
 }
 
 export function buildReport(
-  environment: string,
-  remoteDir: string,
-  localDir: string,
-  scopes: string[]
+  source: CompareEndpoint,
+  sourceDir: string,
+  target: CompareEndpoint,
+  targetDir: string,
 ): CompareReport {
-  const files = compareDirs(remoteDir, localDir, scopes.length > 0 ? scopes : undefined);
+  // targetDir = "new state" (remote), sourceDir = "old state" (local) in diff semantics
+  const files = compareDirs(targetDir, sourceDir);
   const summary = { added: 0, removed: 0, modified: 0, unchanged: 0 };
   for (const f of files) summary[f.status]++;
   return {
-    environment,
+    source,
+    target,
     generatedAt: new Date().toISOString(),
-    scopes,
-    localConfigDir: localDir,
     summary,
     files,
   };

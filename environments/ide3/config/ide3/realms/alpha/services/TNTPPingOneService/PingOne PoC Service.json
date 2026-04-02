@@ -1,0 +1,14 @@
+{
+  "_id": "PingOne PoC Service",
+  "_type": {
+    "_id": "PingOneService",
+    "collection": true,
+    "name": "instance"
+  },
+  "clientIdWorkerApp": "ee2e5d17-297d-4c81-a8f4-d127c1fb5e55",
+  "clientIdWorkerSecret": "bTUvrSnRKKn9sQtvCiVNNBJCBbnQ8x8lPKoCRmX91Gd23hIXvtoTTLONUE3KHBWz",
+  "environmentId": "18a23f10-9f95-4f64-a967-494fefc24fa8",
+  "environmentRegion": "NA",
+  "p1APIKey": "d64a809c-c60e-4ef4-96f0-de68ec672774",
+  "p1APISecret": "tRhW4wK1jDx-SUv.A6u0PSx2m-_TQ~8~Z.LhPMUBDZVZaLno7S6GlCnMtyfH4oJ4"
+}

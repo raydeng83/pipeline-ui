@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-registration-notsupported-es",
+  "description": "Error Message Registration not supported in Spanish",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_REGISTRATION_NOTSUPPORTED_ES}"
+}

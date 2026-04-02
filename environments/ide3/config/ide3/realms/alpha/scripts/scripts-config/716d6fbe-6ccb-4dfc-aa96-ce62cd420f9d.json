@@ -1,0 +1,16 @@
+{
+  "_id": "716d6fbe-6ccb-4dfc-aa96-ce62cd420f9d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1753929509678,
+  "default": false,
+  "description": "This script is used to read the isjitrequiredflag Flag from esv",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950797793,
+  "name": "KYID.2B1.CheckJItFlag",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.CheckJItFlag.js"
+  }
+}

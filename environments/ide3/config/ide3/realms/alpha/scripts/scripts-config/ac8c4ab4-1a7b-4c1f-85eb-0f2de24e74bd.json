@@ -1,0 +1,16 @@
+{
+  "_id": "ac8c4ab4-1a7b-4c1f-85eb-0f2de24e74bd",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1753320780619,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950803196,
+  "name": "KYID.2B1.Journey.CheckMFAoptionsForRegistration",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.CheckMFAoptionsForRegistration.js"
+  }
+}

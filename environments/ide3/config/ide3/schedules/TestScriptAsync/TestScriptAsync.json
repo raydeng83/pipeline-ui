@@ -1,0 +1,23 @@
+{
+  "_id": "schedule/TestScriptAsync",
+  "concurrentExecution": false,
+  "enabled": true,
+  "endTime": null,
+  "invokeContext": {
+    "script": {
+      "file": "TestScriptAsync.js",
+      "globals": {},
+      "type": "text/javascript"
+    }
+  },
+  "invokeLogLevel": "info",
+  "invokeService": "script",
+  "isCron": false,
+  "misfirePolicy": "fireAndProceed",
+  "persisted": true,
+  "recoverable": false,
+  "repeatCount": 1,
+  "repeatInterval": 2592000000,
+  "startTime": "2025-12-02T00:00:00+00:00",
+  "type": "simple"
+}

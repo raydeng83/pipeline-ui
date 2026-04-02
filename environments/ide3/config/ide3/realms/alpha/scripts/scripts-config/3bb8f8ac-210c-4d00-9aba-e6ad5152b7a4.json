@@ -1,0 +1,16 @@
+{
+  "_id": "3bb8f8ac-210c-4d00-9aba-e6ad5152b7a4",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319428752,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950806246,
+  "name": "KYID.2B1.Journey.Dashboard.ManageAccess.Refresh",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Dashboard.ManageAccess.Refresh.js"
+  }
+}

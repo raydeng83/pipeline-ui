@@ -1,0 +1,25 @@
+{
+  "_id": "5c3ab44d-126d-4e67-8fc9-f571a2a2496e",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1869118228",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "user_account_created"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

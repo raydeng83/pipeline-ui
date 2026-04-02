@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-prod-kytc-basedn",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AD_INTERNAL_PROD_KYTC_BASEDN}"
+}

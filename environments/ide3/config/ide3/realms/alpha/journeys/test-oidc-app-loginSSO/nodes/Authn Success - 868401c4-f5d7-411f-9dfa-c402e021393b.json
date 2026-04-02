@@ -1,0 +1,25 @@
+{
+  "_id": "868401c4-f5d7-411f-9dfa-c402e021393b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1854324485",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User login Success"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

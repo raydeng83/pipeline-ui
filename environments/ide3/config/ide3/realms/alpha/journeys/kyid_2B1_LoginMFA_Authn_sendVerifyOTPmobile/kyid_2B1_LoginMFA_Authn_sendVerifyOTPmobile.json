@@ -1,0 +1,212 @@
+{
+  "_id": "kyid_2B1_LoginMFA_Authn_sendVerifyOTPmobile",
+  "_rev": "-402980392",
+  "enabled": true,
+  "entryNodeId": "5acb1402-29ef-445e-8a03-f86a11e25fed",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "00cd031c-812c-4ddc-a9ed-bf30d50003a4": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:GoBack",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1555,
+      "y": 453.015625
+    },
+    "24658b69-1fac-4469-922b-c07a9a60e776": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Invalid Phone No",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 627,
+      "y": 251.6666603088379
+    },
+    "39b48e02-267f-41d2-b270-7a5dd0951282": {
+      "connections": {
+        "true": "c0432eaa-4cdf-4733-9a17-bf6bd7ceec19"
+      },
+      "displayName": "SMS:Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1275,
+      "y": 187
+    },
+    "4ee35c98-4597-449c-8dc3-795ce9193afa": {
+      "connections": {
+        "InvalidNumber": "24658b69-1fac-4469-922b-c07a9a60e776",
+        "MaxSendReached": "6739d38b-f24c-450a-b180-91e84ff6c470",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c0432eaa-4cdf-4733-9a17-bf6bd7ceec19"
+      },
+      "displayName": "Voice Generator",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 359.33333587646484,
+      "y": 283.5555477142334
+    },
+    "5acb1402-29ef-445e-8a03-f86a11e25fed": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "dc212a71-6c61-420c-99c0-bc8a79fecc36"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 8,
+      "y": 562.3333282470703
+    },
+    "6739d38b-f24c-450a-b180-91e84ff6c470": {
+      "connections": {
+        "back": "fc28093d-0d30-4ed0-9121-2582f11fec72",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "maxlimit": "fc28093d-0d30-4ed0-9121-2582f11fec72",
+        "true": "fc28093d-0d30-4ed0-9121-2582f11fec72"
+      },
+      "displayName": "Max Limit Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1233,
+      "y": 509
+    },
+    "6ef766f2-844b-4a65-95cf-c180e0e886b3": {
+      "connections": {
+        "true": "4ee35c98-4597-449c-8dc3-795ce9193afa"
+      },
+      "displayName": "VoiceResend",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1248,
+      "y": 390
+    },
+    "83a323f4-b879-43eb-9726-3acd09109998": {
+      "connections": {
+        "true": "c0432eaa-4cdf-4733-9a17-bf6bd7ceec19"
+      },
+      "displayName": "SMS:BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1247,
+      "y": 50
+    },
+    "c0432eaa-4cdf-4733-9a17-bf6bd7ceec19": {
+      "connections": {
+        "BlankOTP": "83a323f4-b879-43eb-9726-3acd09109998",
+        "Choose Another Method": "00cd031c-812c-4ddc-a9ed-bf30d50003a4",
+        "MaxLimit": "6739d38b-f24c-450a-b180-91e84ff6c470",
+        "Verify": "fc28093d-0d30-4ed0-9121-2582f11fec72",
+        "Via SMS": "ca10561b-deb6-450a-b4be-f36f7f1a9c25",
+        "Via voice": "6ef766f2-844b-4a65-95cf-c180e0e886b3",
+        "backLimit": "e8a47d99-1b81-4ae6-9aa7-4a38fe7046ab",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "expired": "ca99143c-ffd7-49dc-85e9-d0b79af178af",
+        "false": "39b48e02-267f-41d2-b270-7a5dd0951282"
+      },
+      "displayName": "SMS Voice Send OTP",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 896,
+      "y": 142.2
+    },
+    "c1b21cf3-3a55-418e-9922-2779caa2f677": {
+      "connections": {
+        "try again": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Existing Phone No",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 437.125,
+      "y": 526.3333282470703
+    },
+    "ca10561b-deb6-450a-b4be-f36f7f1a9c25": {
+      "connections": {
+        "true": "ec156b62-9df9-44e6-9ed4-a190177dd610"
+      },
+      "displayName": "SMSResend",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1239,
+      "y": 287
+    },
+    "ca99143c-ffd7-49dc-85e9-d0b79af178af": {
+      "connections": {
+        "true": "c0432eaa-4cdf-4733-9a17-bf6bd7ceec19"
+      },
+      "displayName": "SMS: Expired Otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1485,
+      "y": 83.015625
+    },
+    "dc212a71-6c61-420c-99c0-bc8a79fecc36": {
+      "connections": {
+        "sms": "ec156b62-9df9-44e6-9ed4-a190177dd610",
+        "voice": "4ee35c98-4597-449c-8dc3-795ce9193afa"
+      },
+      "displayName": "Check SMS/Voice",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 118,
+      "y": 323.2222137451172
+    },
+    "e8a47d99-1b81-4ae6-9aa7-4a38fe7046ab": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max Retry Limit For Back",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1266,
+      "y": 767.1000061035156
+    },
+    "ec156b62-9df9-44e6-9ed4-a190177dd610": {
+      "connections": {
+        "InvalidNumber": "24658b69-1fac-4469-922b-c07a9a60e776",
+        "MaxSendReached": "6739d38b-f24c-450a-b180-91e84ff6c470",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c0432eaa-4cdf-4733-9a17-bf6bd7ceec19"
+      },
+      "displayName": "SMS Generator",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 328,
+      "y": 26.85714285714286
+    },
+    "fc28093d-0d30-4ed0-9121-2582f11fec72": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:ClearRetryCounts",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1566,
+      "y": 296
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1942,
+      "y": 424.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1861,
+      "y": 197.5
+    },
+    "startNode": {
+      "x": 51,
+      "y": 779.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

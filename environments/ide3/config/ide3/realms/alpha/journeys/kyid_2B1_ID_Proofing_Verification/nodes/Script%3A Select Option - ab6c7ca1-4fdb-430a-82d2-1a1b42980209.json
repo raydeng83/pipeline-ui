@@ -1,0 +1,41 @@
+{
+  "_id": "ab6c7ca1-4fdb-430a-82d2-1a1b42980209",
+  "_outcomes": [
+    {
+      "displayName": "questions",
+      "id": "questions"
+    },
+    {
+      "displayName": "in-person",
+      "id": "in-person"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "pass",
+      "id": "pass"
+    }
+  ],
+  "_rev": "-1939633831",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "questions",
+    "in-person",
+    "back",
+    "pass"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c37d86a8-47cf-4755-80b0-f9f8db7be570"
+}

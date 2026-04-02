@@ -1,0 +1,531 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_access_POC",
+  "onCreate": {
+    "file": "alpha_kyid_access_POC.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_access_POC.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "enrollmentRequestId",
+      "id",
+      "user",
+      "userIdentifier",
+      "app",
+      "appIdentifier",
+      "role",
+      "roleIdentifier",
+      "sourceUniqueId",
+      "orgId",
+      "orgType",
+      "orgName",
+      "kogOrgBusinessKeyId",
+      "businessKeyTypeName",
+      "businessKeyName",
+      "businessKeyValue",
+      "businessKeyDescription",
+      "originalDelegator",
+      "originalDelegatorIdentifier",
+      "currentDelegator",
+      "currentDelegatorIdentifier",
+      "isForwardDelegable",
+      "assignmentDate",
+      "expiryDate",
+      "assignmentDateEpoch",
+      "expiryDateEpoch",
+      "recordState",
+      "recordSource",
+      "createDate",
+      "createDateEpoch",
+      "updateDate",
+      "updateDateEpoch",
+      "createdBy",
+      "updatedBy",
+      "audit",
+      "stgDelegationId"
+    ],
+    "properties": {
+      "app": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_POC:app",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_businessapplication",
+            "notify": false,
+            "path": "managed/alpha_kyid_businessapplication",
+            "query": {
+              "fields": [
+                "name"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": false,
+        "title": "App",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "appIdentifier": {
+        "searchable": false,
+        "title": "App Identifier",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "assignmentDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Assignment Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "assignmentDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Assignment Date in Epoch",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "audit": {
+        "order": [],
+        "properties": {},
+        "searchable": false,
+        "title": "Audit",
+        "type": "object",
+        "userEditable": true,
+        "viewable": true
+      },
+      "businessKeyDescription": {
+        "searchable": false,
+        "title": "Business Key Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "businessKeyName": {
+        "searchable": false,
+        "title": "Organization Business Key Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "businessKeyTypeName": {
+        "searchable": false,
+        "title": "Business Key Type Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "businessKeyValue": {
+        "searchable": false,
+        "title": "Organization Business Key Value",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "currentDelegator": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_POC:currentDelegator",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_user",
+            "notify": false,
+            "path": "managed/alpha_user",
+            "query": {
+              "fields": [
+                "mail",
+                "givenName",
+                "sn"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Current Delegator",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "currentDelegatorIdentifier": {
+        "searchable": false,
+        "title": "Current Delegator ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "enrollmentRequestId": {
+        "searchable": false,
+        "title": "Enrollment Request Id",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "expiryDate": {
+        "searchable": false,
+        "title": "Expiry Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "expiryDateEpoch": {
+        "searchable": false,
+        "title": "Expiry Date in Epoch",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "id": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Identifier",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "isForwardDelegable": {
+        "searchable": false,
+        "title": "Is Forward Delegable",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "kogOrgBusinessKeyId": {
+        "searchable": false,
+        "title": "KOG Organization Business Key ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "orgId": {
+        "searchable": false,
+        "title": "Organization Id",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "orgName": {
+        "searchable": false,
+        "title": "Organization Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "orgType": {
+        "searchable": false,
+        "title": "Organization Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "originalDelegator": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_POC:originalDelegator",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_user",
+            "notify": false,
+            "path": "managed/alpha_user",
+            "query": {
+              "fields": [
+                "mail",
+                "givenName",
+                "sn"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Original Delegator",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "originalDelegatorIdentifier": {
+        "searchable": false,
+        "title": "Original Delegator ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "recordSource": {
+        "searchable": false,
+        "title": "Record Source",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "recordState": {
+        "searchable": false,
+        "title": "Record State",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "role": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_POC:role",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_role",
+            "notify": false,
+            "path": "managed/alpha_role",
+            "query": {
+              "fields": [
+                "name"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": false,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": false,
+        "title": "Role",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "roleIdentifier": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Role Identifier",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "sourceUniqueId": {
+        "searchable": false,
+        "title": "Organization Source Unique Id",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "stgDelegationId": {
+        "searchable": false,
+        "title": "Staging Delegation ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "user": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_access_POC:user",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_user",
+            "notify": false,
+            "path": "managed/alpha_user",
+            "query": {
+              "fields": [
+                "mail",
+                "givenName",
+                "sn"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "User",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "userIdentifier": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "User Identifier",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "isForwardDelegable",
+      "recordState",
+      "recordSource",
+      "createDate",
+      "createDateEpoch",
+      "updateDate",
+      "updateDateEpoch",
+      "createdBy",
+      "updatedBy"
+    ],
+    "title": "Access_POC",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

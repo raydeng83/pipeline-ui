@@ -1,0 +1,1 @@
+logger.error("AARON onError: reconId=" + reconId + " situation=" + situation + " sourceId=" + sourceId + " targetId=" + targetId + " error=" + JSON.stringify(error));

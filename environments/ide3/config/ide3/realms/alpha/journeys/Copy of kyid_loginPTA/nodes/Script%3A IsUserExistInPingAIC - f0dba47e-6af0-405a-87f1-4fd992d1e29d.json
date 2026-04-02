@@ -1,0 +1,46 @@
+{
+  "_id": "f0dba47e-6af0-405a-87f1-4fd992d1e29d",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "True"
+    },
+    {
+      "displayName": "False",
+      "id": "False"
+    },
+    {
+      "displayName": "Failure",
+      "id": "Failure"
+    },
+    {
+      "displayName": "GCaptchaV2WithDisplayName",
+      "id": "GCaptchaV2WithDisplayName"
+    },
+    {
+      "displayName": "GCaptchaV2WithoutDisplayName",
+      "id": "GCaptchaV2WithoutDisplayName"
+    }
+  ],
+  "_rev": "1592480281",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "True",
+    "False",
+    "Failure",
+    "GCaptchaV2WithDisplayName",
+    "GCaptchaV2WithoutDisplayName"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "4792eb8f-5497-41a3-913b-8b320cfc5313"
+}

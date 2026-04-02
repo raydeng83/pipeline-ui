@@ -1,0 +1,46 @@
+{
+  "_id": "0c3b8783-138c-450f-85be-0a1ff8099be7",
+  "_outcomes": [
+    {
+      "displayName": "phone",
+      "id": "phone"
+    },
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "helpdesk",
+      "id": "helpdesk"
+    },
+    {
+      "displayName": "identity_proofing",
+      "id": "identity_proofing"
+    }
+  ],
+  "_rev": "-1095149752",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "phone",
+    "email",
+    "error",
+    "helpdesk",
+    "identity_proofing"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "6ce16126-95f0-42be-941c-e24c762b5676"
+}

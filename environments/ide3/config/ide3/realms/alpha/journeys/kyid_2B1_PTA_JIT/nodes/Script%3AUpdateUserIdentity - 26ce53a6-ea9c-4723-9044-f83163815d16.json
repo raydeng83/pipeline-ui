@@ -1,0 +1,31 @@
+{
+  "_id": "26ce53a6-ea9c-4723-9044-f83163815d16",
+  "_outcomes": [
+    {
+      "displayName": "notfoundidentity",
+      "id": "notfoundidentity"
+    },
+    {
+      "displayName": "success",
+      "id": "success"
+    }
+  ],
+  "_rev": "1541860157",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "notfoundidentity",
+    "success"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "2a3740b3-d02e-4188-ad78-5d0b02efa2a1"
+}

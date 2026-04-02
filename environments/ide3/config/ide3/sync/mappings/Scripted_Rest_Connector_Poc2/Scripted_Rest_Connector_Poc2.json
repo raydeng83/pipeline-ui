@@ -1,0 +1,102 @@
+{
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "all": [
+          "userName"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "Scripted_Rest_Connector_Poc2",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "Scripted_Rest_Connector_Account_Poc2",
+  "enableSync": false,
+  "name": "Scripted_Rest_Connector_Poc2",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "UNLINK",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "mail",
+      "target": "mail"
+    },
+    {
+      "source": "userName",
+      "target": "userName"
+    },
+    {
+      "source": "sn",
+      "target": "sn"
+    },
+    {
+      "source": "givenName",
+      "target": "givenName"
+    }
+  ],
+  "source": "managed/alpha_user",
+  "sourceQuery": {
+    "_queryFilter": "(/mail co \"jerry\" or /mail eq \"sampleide3_0902@maildrop.cc\")"
+  },
+  "target": "system/testscriptedrestPOC2/__ACCOUNT__",
+  "validSource": {
+    "file": "Scripted_Rest_Connector_Poc2.validSource.js",
+    "globals": {
+      "checkOrg": "\"Scripted Rest Org POC 2\""
+    },
+    "type": "text/javascript"
+  }
+}

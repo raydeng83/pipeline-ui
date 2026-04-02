@@ -1,0 +1,16 @@
+{
+  "_id": "9a5c1ca9-9065-4e8c-940c-323351f78f7b",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=3c4fd600-5fb3-47b9-ae57-e481f8122dc8,ou=user,ou=am-config",
+  "creationDate": 1750934440474,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798216,
+  "name": "KYID.2B1.Journey.JITNotFoundErrorFailedURL",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.2B1.Journey.JITNotFoundErrorFailedURL.js"
+  }
+}

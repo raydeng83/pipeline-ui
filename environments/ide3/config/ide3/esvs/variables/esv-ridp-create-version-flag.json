@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ridp-create-version-flag",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_RIDP_CREATE_VERSION_FLAG}"
+}

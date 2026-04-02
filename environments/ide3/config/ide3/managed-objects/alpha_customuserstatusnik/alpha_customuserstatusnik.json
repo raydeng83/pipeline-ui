@@ -1,0 +1,26 @@
+{
+  "name": "alpha_customuserstatusnik",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "userstatus"
+    ],
+    "properties": {
+      "userstatus": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "userstatus",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "customuserstatusnik",
+    "type": "object"
+  }
+}

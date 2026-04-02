@@ -1,0 +1,37 @@
+{
+  "_id": "0744762b-169b-4cb9-b9a3-125f6c12c476",
+  "_outcomes": [
+    {
+      "displayName": "Default Response",
+      "id": "NOMATCHRESPONSE"
+    },
+    {
+      "displayName": "Error",
+      "id": "ERROR"
+    }
+  ],
+  "_rev": "-399264550",
+  "_type": {
+    "_id": "RESTNode",
+    "collection": true,
+    "name": "HTTP Client",
+    "version": "1.0"
+  },
+  "basicAuthn": false,
+  "bodyReturn": "responsebody",
+  "bodyType": "XML",
+  "disableCertChecks": false,
+  "headersMap": {},
+  "jpToOutcomeMapper": {},
+  "jpToSSMapper": {},
+  "payload": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>  <SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:ns3=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:ns1=\"https://schemas.vip.symantec.com/2006/08/vipservice\"> \t<SOAP-ENV:Body> \t\t<ns1:ActivateToken Version=\"3.1\" Id=\"${Id}\"> \t\t\t<ns1:TokenId>${credId}</ns1:TokenId> \t\t\t<ns1:OTP1>${otp1}</ns1:OTP1>  \t\t\t<ns1:OTP2>${otp2}</ns1:OTP2>  \t\t</ns1:ActivateToken> \t</SOAP-ENV:Body> </SOAP-ENV:Envelope>",
+  "privateKey": "&{esv.symantec.private.cert}",
+  "publicCert": "&{esv.symantec.public.cert}",
+  "queryParamsMap": {},
+  "requestMode": "POST",
+  "responseCodes": [],
+  "restURL": "https://services-auth.vip.symantec.com/mgmt/soap",
+  "statusCodeReturn": "responsecode",
+  "timeout": 30,
+  "usemTLS": true
+}

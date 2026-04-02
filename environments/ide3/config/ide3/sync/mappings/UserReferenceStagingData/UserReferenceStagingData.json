@@ -1,0 +1,106 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "__NAME__"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "UserReferenceStagingData",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "UserReferenceStagingData",
+  "enableSync": false,
+  "name": "UserReferenceStagingData",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "CREATE",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "userName",
+      "target": "__NAME__"
+    },
+    {
+      "source": "_id",
+      "target": "KOGID_id"
+    },
+    {
+      "source": "custom_alphauserid",
+      "target": "AlphaUserId"
+    },
+    {
+      "source": "mail",
+      "target": "EmailAddress"
+    },
+    {
+      "source": "custom_logon",
+      "target": "Logon"
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "managed/alpha_user",
+  "sourceQueryFullEntry": true,
+  "target": "system/DBConnector_UserReferenceStaging/__ACCOUNT__",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

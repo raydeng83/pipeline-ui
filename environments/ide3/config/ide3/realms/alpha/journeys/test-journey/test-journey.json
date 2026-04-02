@@ -1,0 +1,77 @@
+{
+  "_id": "test-journey",
+  "_rev": "-684054921",
+  "enabled": true,
+  "entryNodeId": "718667f2-77c5-4fee-abb7-1cee1893aeec",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0f04892d-2b4a-47e1-ae2c-5a76dd05c576": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 930,
+      "y": 414.015625
+    },
+    "53822be3-69c8-4914-8c7a-6eeb80c761c8": {
+      "connections": {
+        "outcome": "718667f2-77c5-4fee-abb7-1cee1893aeec"
+      },
+      "displayName": "Attribute Collector",
+      "nodeType": "AttributeCollectorNode",
+      "version": "1.0",
+      "x": 448,
+      "y": 443.015625
+    },
+    "538e59ba-5855-4237-ba7f-cd0bcd0834d5": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 916,
+      "y": 122.015625
+    },
+    "718667f2-77c5-4fee-abb7-1cee1893aeec": {
+      "connections": {
+        "false": "0f04892d-2b4a-47e1-ae2c-5a76dd05c576",
+        "true": "538e59ba-5855-4237-ba7f-cd0bcd0834d5"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 669,
+      "y": 193.015625
+    },
+    "8d0c42a8-f8c9-4bbb-bc95-adc0809584b7": {
+      "connections": {
+        "outcome": "53822be3-69c8-4914-8c7a-6eeb80c761c8"
+      },
+      "displayName": "Username Collector",
+      "nodeType": "UsernameCollectorNode",
+      "version": "1.0",
+      "x": 219,
+      "y": 305.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1168,
+      "y": 180
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1125,
+      "y": 344
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"test\"]"
+  }
+}

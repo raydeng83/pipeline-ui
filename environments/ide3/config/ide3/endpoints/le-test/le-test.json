@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/le-test",
+  "description": "",
+  "file": "le-test.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

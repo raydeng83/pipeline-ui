@@ -1,0 +1,331 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_login_policy",
+  "onCreate": {
+    "file": "alpha_kyid_login_policy.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_login_policy.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "alpha_kyid_login_policy.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "alpha_kyid_login_policy.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "This managed object maintains the login policy object specifications.",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "name",
+      "description",
+      "scope",
+      "enforceRiskBasedAuthN",
+      "enforceAccessAuthZ",
+      "enforcePrerequisite",
+      "riskBasedAuthNException",
+      "accessAuthZException",
+      "prerequisiteException",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "accessAuthZException": {
+        "description": null,
+        "isVirtual": false,
+        "nullable": false,
+        "order": [
+          "applicationids",
+          "roleids",
+          "userids"
+        ],
+        "properties": {
+          "applicationids": {
+            "description": "This property stores unique identifier of applications that require exception.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": true,
+            "title": "Application Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          },
+          "roleids": {
+            "description": "This property stores unique identifier of roles that require exception. This property is applicable for non-production environments only.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": true,
+            "title": "Role Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          },
+          "userids": {
+            "description": "This property stores unique identifier of users that require exception.This property is applicable for non-production environments only.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": true,
+            "title": "User Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          }
+        },
+        "searchable": false,
+        "title": "Exception - Access Authorization",
+        "type": "object",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "Created By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "description": {
+        "description": "This property stores the name of the  Login Policy.",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Login Policy Description",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "enforceAccessAuthZ": {
+        "description": "This property stores the flag that specify if the authorization is enforced for the platform during login process.",
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enforce Access Authorization",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "enforcePrerequisite": {
+        "description": "This property stores the flag that specify if the pre-requisite is enforced for the platform during login process.",
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enforce Pre-requisite Enforcement",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "enforceRiskBasedAuthN": {
+        "description": "This property stores the flag that specify if the risk based authentication is enabled for the platform during login process.",
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enforce Risk Based Authentication",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "name": {
+        "description": "This property stores the unique Identifier of the Login Policy.",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Login Policy Name",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "prerequisiteException": {
+        "description": null,
+        "isVirtual": false,
+        "nullable": false,
+        "order": [
+          "applicationids",
+          "roleids",
+          "userids"
+        ],
+        "properties": {
+          "applicationids": {
+            "description": "This property stores unique identifier of applications that require exception.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": true,
+            "title": "Application Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          },
+          "roleids": {
+            "description": "This property stores unique identifier of roles that require exception. This property is applicable for non-production environments only.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": true,
+            "title": "Role Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          },
+          "userids": {
+            "items": {
+              "type": "string"
+            },
+            "searchable": false,
+            "title": "User Ids",
+            "type": "array",
+            "userEditable": true,
+            "viewable": true
+          }
+        },
+        "searchable": false,
+        "title": "Exception - Pre-requisite Enforcement",
+        "type": "object",
+        "userEditable": true,
+        "viewable": true
+      },
+      "riskBasedAuthNException": {
+        "description": null,
+        "isVirtual": false,
+        "nullable": false,
+        "order": [
+          "applicationids",
+          "roleids",
+          "userids"
+        ],
+        "properties": {
+          "applicationids": {
+            "description": "This property stores unique identifier of applications that require exception.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": true,
+            "title": "Application Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          },
+          "roleids": {
+            "description": "This property stores unique identifier of roles that require exception. This property is applicable for non-production environments only.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": false,
+            "title": "Role Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          },
+          "userids": {
+            "description": "This property stores unique identifier of users that require exception.This property is applicable for non-production environments only.",
+            "isVirtual": false,
+            "items": {
+              "type": "string"
+            },
+            "searchable": true,
+            "title": "User Ids",
+            "type": "array",
+            "userEditable": false,
+            "viewable": true
+          }
+        },
+        "searchable": false,
+        "title": "Exception - Risk Based Authentication",
+        "type": "object",
+        "userEditable": true,
+        "viewable": true
+      },
+      "scope": {
+        "description": "This property stores the scope (0-Platform | 1- Application) of the  Login Policy.",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Login Policy Scope",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "Updated By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "name",
+      "scope",
+      "enforceRiskBasedAuthN",
+      "enforceAccessAuthZ",
+      "enforcePrerequisite"
+    ],
+    "title": "KYID Login Policy",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

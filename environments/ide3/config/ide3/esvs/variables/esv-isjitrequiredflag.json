@@ -1,0 +1,6 @@
+{
+  "_id": "esv-isjitrequiredflag",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_ISJITREQUIREDFLAG}"
+}

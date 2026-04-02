@@ -1,0 +1,96 @@
+{
+  "_id": "af4547d7-2672-4480-9a18-b19c76c0dd3b",
+  "_outcomes": [
+    {
+      "displayName": "highRisk",
+      "id": "highRisk"
+    },
+    {
+      "displayName": "mciSearch",
+      "id": "mciSearch"
+    },
+    {
+      "displayName": "notVerified",
+      "id": "notVerified"
+    },
+    {
+      "displayName": "kbaFailed",
+      "id": "kbaFailed"
+    },
+    {
+      "displayName": "lexMatch",
+      "id": "lexMatch"
+    },
+    {
+      "displayName": "lexMisMatch",
+      "id": "lexMisMatch"
+    },
+    {
+      "displayName": "highRiskSoftRemove",
+      "id": "highRiskSoftRemove"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "highRiskBSP",
+      "id": "highRiskBSP"
+    },
+    {
+      "displayName": "highRiskSoftRemoveBSP",
+      "id": "highRiskSoftRemoveBSP"
+    },
+    {
+      "displayName": "lexMisMatchBSP",
+      "id": "lexMisMatchBSP"
+    },
+    {
+      "displayName": "kbaFailedBSP",
+      "id": "kbaFailedBSP"
+    },
+    {
+      "displayName": "notVerifiedBSP",
+      "id": "notVerifiedBSP"
+    },
+    {
+      "displayName": "terminated",
+      "id": "terminated"
+    },
+    {
+      "displayName": "terminatedBSP",
+      "id": "terminatedBSP"
+    }
+  ],
+  "_rev": "161087481",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "highRisk",
+    "mciSearch",
+    "notVerified",
+    "kbaFailed",
+    "lexMatch",
+    "lexMisMatch",
+    "highRiskSoftRemove",
+    "error",
+    "highRiskBSP",
+    "highRiskSoftRemoveBSP",
+    "lexMisMatchBSP",
+    "kbaFailedBSP",
+    "notVerifiedBSP",
+    "terminated",
+    "terminatedBSP"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "21846bd6-9f22-4fd8-90d8-65295305d206"
+}

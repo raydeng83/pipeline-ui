@@ -1,0 +1,16 @@
+{
+  "_id": "1d83d71f-28a8-44ae-843e-2f4087acd56b",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=bc3d9c9d-c058-4f29-8df5-03071b5f3ac4,ou=user,ou=am-config",
+  "creationDate": 1758206721244,
+  "default": false,
+  "description": "Send Mail Profile Update",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950800326,
+  "name": "KYID.2B1.Send.Mail.RIDP.Status",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Send.Mail.RIDP.Status.js"
+  }
+}

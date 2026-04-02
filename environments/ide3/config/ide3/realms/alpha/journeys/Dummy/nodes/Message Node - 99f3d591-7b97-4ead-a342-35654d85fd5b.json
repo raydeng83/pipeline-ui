@@ -1,0 +1,25 @@
+{
+  "_id": "99f3d591-7b97-4ead-a342-35654d85fd5b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "2031074358",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "journey start"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

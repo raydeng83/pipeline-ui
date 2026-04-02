@@ -3,5 +3,10 @@
     "name": "ide3",
     "label": "ide3",
     "color": "green"
+  },
+  {
+    "name": "temp-dcc",
+    "label": "temp-dcc",
+    "color": "blue"
   }
 ]

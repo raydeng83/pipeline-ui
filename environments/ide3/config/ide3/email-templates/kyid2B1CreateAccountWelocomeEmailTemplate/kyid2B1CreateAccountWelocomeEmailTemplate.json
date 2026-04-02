@@ -1,0 +1,32 @@
+{
+  "_id": "emailTemplate/kyid2B1CreateAccountWelocomeEmailTemplate",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "KYID_2B1_Create_Account_Welocome_Email_Template",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyid2B1CreateAccountWelocomeEmailTemplate.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyid2B1CreateAccountWelocomeEmailTemplate.en.md"
+    },
+    "es": {
+      "file": "kyid2B1CreateAccountWelocomeEmailTemplate.es.md"
+    }
+  },
+  "mimeType": "text/html",
+  "name": "kyid2B1EmailOtpValidation",
+  "styles": {
+    "file": "kyid2B1CreateAccountWelocomeEmailTemplate.css"
+  },
+  "subject": {
+    "en": "Welcome to KYID - Your account has been created",
+    "es": "Bienvenido a KYID - Su cuenta ha sido creada"
+  },
+  "templateId": "kyid2B1CreateAccountWelocomeEmailTemplate"
+}

@@ -1,0 +1,25 @@
+{
+  "_id": "be22c4b3-c860-48f7-b39f-e8d0020e58c3",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-122631854",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User_not_found"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}
