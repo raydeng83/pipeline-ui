@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CONFIG_SCOPES, ConfigScope } from "@/lib/fr-config-types";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +15,10 @@ const GROUPS = CONFIG_SCOPES.reduce<Record<string, typeof CONFIG_SCOPES>>((acc, 
   return acc;
 }, {});
 
+type Mode = "basic" | "advanced";
+
 export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorProps) {
+  const [mode, setMode] = useState<Mode>("basic");
   const selectedSet = new Set(selected);
   const allSelected = selected.length === CONFIG_SCOPES.length;
 
@@ -43,13 +47,31 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
   return (
     <div className="space-y-2">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-slate-700">Config Scopes</span>
+
+        <div className="flex items-center rounded border border-slate-200 overflow-hidden text-xs">
+          {(["basic", "advanced"] as Mode[]).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              disabled={disabled}
+              className={cn(
+                "px-2 py-0.5 transition-colors capitalize disabled:opacity-40",
+                mode === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100"
+              )}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+
         <button
           type="button"
           onClick={toggleAll}
           disabled={disabled}
-          className="text-xs text-sky-600 hover:text-sky-800 disabled:opacity-40"
+          className="ml-auto text-xs text-sky-600 hover:text-sky-800 disabled:opacity-40"
         >
           {allSelected ? "Deselect all" : "Select all"}
         </button>
@@ -61,7 +83,42 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
         </p>
       )}
 
-      {/* Grouped scope list */}
+      {/* Basic mode: group-level pills */}
+      {mode === "basic" && (
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(GROUPS).map(([groupName, scopes]) => {
+            const groupValues = scopes.map((s) => s.value);
+            const allGroupSelected = groupValues.every((v) => selectedSet.has(v));
+            const someGroupSelected = groupValues.some((v) => selectedSet.has(v));
+            return (
+              <button
+                key={groupName}
+                type="button"
+                onClick={() => toggleGroup(scopes)}
+                disabled={disabled}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors select-none disabled:opacity-40",
+                  allGroupSelected
+                    ? "bg-sky-600 border-sky-600 text-white"
+                    : someGroupSelected
+                    ? "bg-sky-100 border-sky-400 text-sky-800"
+                    : "bg-white border-slate-300 text-slate-600 hover:border-sky-400 hover:text-sky-700"
+                )}
+              >
+                {groupName}
+                {someGroupSelected && (
+                  <span className={cn("text-[10px] font-normal", allGroupSelected ? "text-sky-200" : "text-sky-600")}>
+                    {groupValues.filter((v) => selectedSet.has(v)).length}/{scopes.length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Advanced mode: grouped list with descriptions */}
+      {mode === "advanced" && (
       <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100">
         {Object.entries(GROUPS).map(([groupName, scopes]) => {
           const groupValues = scopes.map((s) => s.value);
@@ -154,6 +211,7 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
           );
         })}
       </div>
+      )}
     </div>
   );
 }
