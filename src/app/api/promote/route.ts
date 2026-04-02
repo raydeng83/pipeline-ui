@@ -1,30 +1,53 @@
 import { NextRequest } from "next/server";
-import { spawnFrConfig, ConfigScope } from "@/lib/fr-config";
+import { spawn } from "child_process";
+import { getEnvFilePath } from "@/lib/fr-config";
+import type { PromoteSubcommand } from "@/lib/fr-config-types";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { environment, targetEnvironment, scopes } = body as {
+  const { environment, subcommand } = body as {
     environment: string;
-    targetEnvironment: string;
-    scopes?: ConfigScope[];
+    subcommand: PromoteSubcommand;
   };
 
-  if (!environment || !targetEnvironment) {
-    return new Response("Missing environment or targetEnvironment", { status: 400 });
+  if (!environment || !subcommand) {
+    return new Response("Missing environment or subcommand", { status: 400 });
   }
 
-  if (environment === targetEnvironment) {
-    return new Response("Source and target environments must differ", { status: 400 });
-  }
+  const envFilePath = getEnvFilePath(environment);
 
-  const { stream } = spawnFrConfig({
-    command: "fr-config-promote",
-    environment,
-    scopes,
-    targetEnvironment,
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      const enc = new TextEncoder();
+      const encode = (data: string, type: "stdout" | "stderr") => {
+        controller.enqueue(enc.encode(JSON.stringify({ type, data, ts: Date.now() }) + "\n"));
+      };
+
+      const proc = spawn("fr-config-promote", [subcommand], {
+        env: { ...process.env, DOTENV_CONFIG_PATH: envFilePath },
+        shell: true,
+      });
+
+      proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
+      proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
+
+      proc.on("close", (code) => {
+        controller.enqueue(
+          enc.encode(JSON.stringify({ type: "exit", code, ts: Date.now() }) + "\n")
+        );
+        controller.close();
+      });
+
+      proc.on("error", (err) => {
+        controller.enqueue(
+          enc.encode(JSON.stringify({ type: "error", data: err.message, ts: Date.now() }) + "\n")
+        );
+        controller.close();
+      });
+    },
   });
 
-  return new Response(stream as unknown as ReadableStream<Uint8Array>, {
+  return new Response(stream, {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",

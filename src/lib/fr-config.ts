@@ -42,60 +42,97 @@ export function saveEnvFile(environmentName: string, content: string): void {
   fs.writeFileSync(getEnvFilePath(environmentName), content);
 }
 
+function spawnOne(
+  command: string,
+  subcommand: string,
+  envFilePath: string
+): Promise<{ code: number | null; kill: () => void }> & { kill: () => void } {
+  let killFn = () => {};
+  const promise = new Promise<{ code: number | null; kill: () => void }>(
+    (resolve) => {
+      const proc = spawn(command, [subcommand], {
+        env: { ...process.env, DOTENV_CONFIG_PATH: envFilePath },
+        shell: true,
+      });
+      killFn = () => proc.kill("SIGTERM");
+      proc.on("close", (code) => resolve({ code, kill: killFn }));
+      proc.on("error", () => resolve({ code: 1, kill: killFn }));
+    }
+  ) as Promise<{ code: number | null; kill: () => void }> & { kill: () => void };
+  promise.kill = () => killFn();
+  return promise;
+}
+
 export function spawnFrConfig(options: RunOptions): {
   stream: ReadableStream<string>;
   abort: () => void;
 } {
-  const { command, environment, scopes, targetEnvironment } = options;
+  const { command, environment, scopes } = options;
   const envFilePath = getEnvFilePath(environment);
 
-  const args: string[] = [];
-  if (scopes && scopes.length > 0) {
-    args.push(...scopes);
-  }
-  if (command === "fr-config-promote" && targetEnvironment) {
-    args.push("--target", getEnvFilePath(targetEnvironment));
-  }
+  // No scopes = run `all`; otherwise run each scope as its own subcommand sequentially
+  const subcommands: string[] =
+    !scopes || scopes.length === 0 ? ["all"] : [...scopes];
 
-  const proc = spawn(command, args, {
-    env: {
-      ...process.env,
-      DOTENV_CONFIG_PATH: envFilePath,
-    },
-    shell: true,
-  });
-
-  let abortCalled = false;
+  let currentProc: ReturnType<typeof spawn> | null = null;
+  let aborted = false;
 
   const stream = new ReadableStream<string>({
-    start(controller) {
+    async start(controller) {
       const encode = (data: string, type: "stdout" | "stderr") => {
-        const line = JSON.stringify({ type, data, ts: Date.now() }) + "\n";
-        controller.enqueue(line);
+        controller.enqueue(JSON.stringify({ type, data, ts: Date.now() }) + "\n");
       };
 
-      proc.stdout.on("data", (chunk) => encode(chunk.toString(), "stdout"));
-      proc.stderr.on("data", (chunk) => encode(chunk.toString(), "stderr"));
+      for (const sub of subcommands) {
+        if (aborted) break;
 
-      proc.on("close", (code) => {
-        const line = JSON.stringify({ type: "exit", code, ts: Date.now() }) + "\n";
-        controller.enqueue(line);
-        controller.close();
-      });
+        if (subcommands.length > 1) {
+          encode(`\n▶ Running: ${command} ${sub}\n`, "stdout");
+        }
 
-      proc.on("error", (err) => {
-        const line = JSON.stringify({ type: "error", data: err.message, ts: Date.now() }) + "\n";
-        controller.enqueue(line);
-        controller.close();
-      });
+        const exitCode = await new Promise<number | null>((resolve) => {
+          const proc = spawn(command, [sub], {
+            env: { ...process.env, DOTENV_CONFIG_PATH: envFilePath },
+            shell: true,
+          });
+          currentProc = proc;
+
+          proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
+          proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
+          proc.on("close", (code) => { currentProc = null; resolve(code); });
+          proc.on("error", (err) => {
+            encode(err.message, "stderr");
+            currentProc = null;
+            resolve(1);
+          });
+        });
+
+        // If a scope fails, stop running further scopes
+        if (exitCode !== 0) {
+          controller.enqueue(
+            JSON.stringify({ type: "exit", code: exitCode, ts: Date.now() }) + "\n"
+          );
+          controller.close();
+          return;
+        }
+      }
+
+      controller.enqueue(
+        JSON.stringify({ type: "exit", code: aborted ? 130 : 0, ts: Date.now() }) + "\n"
+      );
+      controller.close();
     },
     cancel() {
-      if (!abortCalled) {
-        abortCalled = true;
-        proc.kill("SIGTERM");
-      }
+      aborted = true;
+      currentProc?.kill("SIGTERM");
     },
   });
 
-  return { stream, abort: () => proc.kill("SIGTERM") };
+  return {
+    stream,
+    abort: () => {
+      aborted = true;
+      currentProc?.kill("SIGTERM");
+    },
+  };
 }

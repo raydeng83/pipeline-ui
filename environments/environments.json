@@ -1,20 +1,8 @@
 [
   {
-    "name": "dev",
-    "label": "Development",
+    "name": "ide3",
+    "label": "ide3",
     "color": "green",
-    "envFile": "dev.env"
-  },
-  {
-    "name": "staging",
-    "label": "Staging",
-    "color": "yellow",
-    "envFile": "staging.env"
-  },
-  {
-    "name": "prod",
-    "label": "Production",
-    "color": "red",
-    "envFile": "prod.env"
+    "envFile": "ide3.env"
   }
 ]

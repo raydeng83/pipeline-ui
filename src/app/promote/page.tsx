@@ -1,5 +1,5 @@
 import { getEnvironments } from "@/lib/fr-config";
-import { PromoteForm } from "./PromoteForm";
+import { PromoteWorkflow } from "./PromoteWorkflow";
 
 export default function PromotePage() {
   const environments = getEnvironments();
@@ -8,10 +8,10 @@ export default function PromotePage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Promote Config</h1>
         <p className="text-slate-500 mt-1">
-          Migrate configuration from one tenant environment to another.
+          Run promotion workflow operations on a Ping AIC tenant.
         </p>
       </div>
-      <PromoteForm environments={environments} />
+      <PromoteWorkflow environments={environments} />
     </div>
   );
 }
