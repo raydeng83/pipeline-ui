@@ -133,8 +133,7 @@ export function ScopedLogViewer({
       for (const s of sects) {
         if (userManagedRef.current.has(s.scope)) continue;
         if (s.status === "running") next.add(s.scope);
-        else if (s.status === "success") next.delete(s.scope);
-        else if (s.status === "failed") next.add(s.scope);
+        else if (s.status === "success" || s.status === "failed") next.delete(s.scope);
       }
       return next;
     });
@@ -191,15 +190,21 @@ export function ScopedLogViewer({
     failed: "text-red-400",
   }[overallStatus];
 
+  const successCount = sections.length - failedSections.length;
+
   const statusText =
     overallStatus === "running"
-      ? runningSection
-        ? `Running: ${scopeLabel(runningSection.scope)}`
-        : "Starting..."
+      ? sections.length > 1
+        ? `Running (${completedCount + 1}/${sections.length})${runningSection ? ` — ${scopeLabel(runningSection.scope)}` : ""}`
+        : runningSection
+        ? `Running — ${scopeLabel(runningSection.scope)}`
+        : "Starting…"
       : overallStatus === "success"
-      ? `Completed — ${completedCount} scope${completedCount !== 1 ? "s" : ""}`
+      ? `Completed${duration !== null ? ` in ${formatDuration(duration)}` : ""} — ${completedCount} scope${completedCount !== 1 ? "s" : ""}`
       : overallStatus === "failed"
-      ? `Failed — ${failedSections.length} scope${failedSections.length !== 1 ? "s" : ""} with errors`
+      ? failedSections.length < sections.length
+        ? `Completed with errors${duration !== null ? ` in ${formatDuration(duration)}` : ""} — ${successCount} succeeded, ${failedSections.length} failed`
+        : `Failed${duration !== null ? ` in ${formatDuration(duration)}` : ""} — ${failedSections.length} scope${failedSections.length !== 1 ? "s" : ""}`
       : "Ready";
 
   const hasSections = sections.length > 0;
@@ -218,20 +223,10 @@ export function ScopedLogViewer({
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border-b border-slate-700">
-        <span
-          className={cn(
-            "inline-block w-2 h-2 rounded-full shrink-0",
-            statusDotClass
-          )}
-        />
-        <span className={cn("text-xs font-mono", statusTextColor)}>
+        <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", statusDotClass)} />
+        <span className={cn("text-xs font-mono font-medium", statusTextColor)}>
           {statusText}
         </span>
-        {sections.length > 1 && overallStatus === "running" && (
-          <span className="text-xs font-mono text-slate-500">
-            {completedCount}/{sections.length}
-          </span>
-        )}
         {logs.length > 0 && (
           <div className="ml-auto flex items-center gap-3">
             <button
