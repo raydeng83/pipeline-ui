@@ -439,7 +439,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50 gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <EnvironmentBadge env={{ ...env, label, color }} />
-          <span className="text-xs font-mono text-slate-400">{env.name}.env</span>
+          <span className="text-xs font-mono text-slate-400">{env.name}/.env</span>
         </div>
         <div className="flex items-center gap-2">
           {error && <span className="text-xs text-red-600">{error}</span>}

@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
     name: body.name,
     label: body.label,
     color: body.color || "blue",
-    envFile: `${body.name}.env`,
   };
 
   if (envs.find((e) => e.name === newEnv.name)) {

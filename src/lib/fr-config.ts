@@ -27,7 +27,7 @@ export function saveEnvironments(envs: Environment[]): void {
 }
 
 export function getEnvFilePath(environmentName: string): string {
-  return path.join(ENVIRONMENTS_DIR, `${environmentName}.env`);
+  return path.join(ENVIRONMENTS_DIR, environmentName, ".env");
 }
 
 export function getEnvFileContent(environmentName: string): string {
@@ -37,8 +37,9 @@ export function getEnvFileContent(environmentName: string): string {
 }
 
 export function saveEnvFile(environmentName: string, content: string): void {
-  if (!fs.existsSync(ENVIRONMENTS_DIR)) {
-    fs.mkdirSync(ENVIRONMENTS_DIR, { recursive: true });
+  const dir = path.join(ENVIRONMENTS_DIR, environmentName);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
   fs.writeFileSync(getEnvFilePath(environmentName), content);
 }
@@ -80,7 +81,8 @@ export function spawnFrConfig(options: RunOptions): {
         }
 
         const exitCode = await new Promise<number | null>((resolve) => {
-          const proc = spawn(command, [sub], { env, shell: true });
+          const envDir = path.join(ENVIRONMENTS_DIR, environment);
+          const proc = spawn(command, [sub], { env, shell: true, cwd: envDir });
           currentProc = proc;
 
           proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));

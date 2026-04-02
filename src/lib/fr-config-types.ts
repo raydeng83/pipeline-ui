@@ -44,7 +44,6 @@ export interface Environment {
   name: string;
   label: string;
   color: "blue" | "yellow" | "red" | "green";
-  envFile: string;
 }
 
 export interface RunOptions {

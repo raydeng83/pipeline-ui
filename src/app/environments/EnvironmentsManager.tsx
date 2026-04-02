@@ -166,7 +166,7 @@ export function EnvironmentsManager({
             >
               <div className="space-y-0.5 min-w-0">
                 <EnvironmentBadge env={env} />
-                <p className="text-xs text-slate-400 font-mono truncate">{env.name}.env</p>
+                <p className="text-xs text-slate-400 font-mono truncate">{env.name}/.env</p>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); handleDelete(env.name); }}
