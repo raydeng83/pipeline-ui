@@ -82,7 +82,7 @@ export function spawnFrConfig(options: RunOptions): {
 
         const exitCode = await new Promise<number | null>((resolve) => {
           const envDir = path.join(ENVIRONMENTS_DIR, environment);
-          const proc = spawn(command, [sub], { env, shell: true, cwd: envDir });
+          const proc = spawn(command, [sub, "--debug"], { env, shell: true, cwd: envDir });
           currentProc = proc;
 
           proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
