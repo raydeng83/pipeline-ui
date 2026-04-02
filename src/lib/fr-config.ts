@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
+import { parseEnvFile } from "./env-parser";
 export type { FrCommand, ConfigScope, Environment, RunOptions } from "./fr-config-types";
 export { CONFIG_SCOPES } from "./fr-config-types";
 import type { Environment, RunOptions } from "./fr-config-types";
@@ -42,25 +43,13 @@ export function saveEnvFile(environmentName: string, content: string): void {
   fs.writeFileSync(getEnvFilePath(environmentName), content);
 }
 
-function spawnOne(
-  command: string,
-  subcommand: string,
-  envFilePath: string
-): Promise<{ code: number | null; kill: () => void }> & { kill: () => void } {
-  let killFn = () => {};
-  const promise = new Promise<{ code: number | null; kill: () => void }>(
-    (resolve) => {
-      const proc = spawn(command, [subcommand], {
-        env: { ...process.env, DOTENV_CONFIG_PATH: envFilePath },
-        shell: true,
-      });
-      killFn = () => proc.kill("SIGTERM");
-      proc.on("close", (code) => resolve({ code, kill: killFn }));
-      proc.on("error", () => resolve({ code: 1, kill: killFn }));
-    }
-  ) as Promise<{ code: number | null; kill: () => void }> & { kill: () => void };
-  promise.kill = () => killFn();
-  return promise;
+/** Load an env file and merge its values into process.env for a child process. */
+function buildEnv(environmentName: string): NodeJS.ProcessEnv {
+  const filePath = getEnvFilePath(environmentName);
+  const fileVars = fs.existsSync(filePath)
+    ? parseEnvFile(fs.readFileSync(filePath, "utf-8"))
+    : {};
+  return { ...process.env, ...fileVars };
 }
 
 export function spawnFrConfig(options: RunOptions): {
@@ -68,7 +57,7 @@ export function spawnFrConfig(options: RunOptions): {
   abort: () => void;
 } {
   const { command, environment, scopes } = options;
-  const envFilePath = getEnvFilePath(environment);
+  const env = buildEnv(environment);
 
   // No scopes = run `all`; otherwise run each scope as its own subcommand sequentially
   const subcommands: string[] =
@@ -91,10 +80,7 @@ export function spawnFrConfig(options: RunOptions): {
         }
 
         const exitCode = await new Promise<number | null>((resolve) => {
-          const proc = spawn(command, [sub], {
-            env: { ...process.env, DOTENV_CONFIG_PATH: envFilePath },
-            shell: true,
-          });
+          const proc = spawn(command, [sub], { env, shell: true });
           currentProc = proc;
 
           proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
@@ -107,7 +93,6 @@ export function spawnFrConfig(options: RunOptions): {
           });
         });
 
-        // If a scope fails, stop running further scopes
         if (exitCode !== 0) {
           controller.enqueue(
             JSON.stringify({ type: "exit", code: exitCode, ts: Date.now() }) + "\n"

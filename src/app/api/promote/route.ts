@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { spawn } from "child_process";
-import { getEnvFilePath } from "@/lib/fr-config";
+import { getEnvFileContent } from "@/lib/fr-config";
+import { parseEnvFile } from "@/lib/env-parser";
 import type { PromoteSubcommand } from "@/lib/fr-config-types";
 
 export async function POST(req: NextRequest) {
@@ -14,7 +15,8 @@ export async function POST(req: NextRequest) {
     return new Response("Missing environment or subcommand", { status: 400 });
   }
 
-  const envFilePath = getEnvFilePath(environment);
+  const fileVars = parseEnvFile(getEnvFileContent(environment));
+  const env = { ...process.env, ...fileVars };
 
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
@@ -23,10 +25,7 @@ export async function POST(req: NextRequest) {
         controller.enqueue(enc.encode(JSON.stringify({ type, data, ts: Date.now() }) + "\n"));
       };
 
-      const proc = spawn("fr-config-promote", [subcommand], {
-        env: { ...process.env, DOTENV_CONFIG_PATH: envFilePath },
-        shell: true,
-      });
+      const proc = spawn("fr-config-promote", [subcommand], { env, shell: true });
 
       proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
       proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
