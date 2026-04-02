@@ -1,0 +1,20 @@
+[
+  {
+    "name": "dev",
+    "label": "Development",
+    "color": "green",
+    "envFile": "dev.env"
+  },
+  {
+    "name": "staging",
+    "label": "Staging",
+    "color": "yellow",
+    "envFile": "staging.env"
+  },
+  {
+    "name": "prod",
+    "label": "Production",
+    "color": "red",
+    "envFile": "prod.env"
+  }
+]
