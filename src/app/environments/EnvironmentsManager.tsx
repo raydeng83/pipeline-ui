@@ -5,7 +5,7 @@ import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { EnvEditor } from "./EnvEditor";
 import { cn } from "@/lib/utils";
-import { ScopeTagsInput } from "@/components/ScopeTagsInput";
+import { ServiceAccountScopeSelector } from "@/components/ServiceAccountScopeSelector";
 
 const COLOR_OPTIONS: { value: Environment["color"]; label: string }[] = [
   { value: "green", label: "Green" },
@@ -327,11 +327,10 @@ export function EnvironmentsManager({
                       <label className="text-sm font-medium text-slate-700">
                         Service Account Scope <span className="text-red-500">*</span>
                       </label>
-                      <p className="text-xs text-slate-400">OAuth2 scope(s) requested. Press Space or Enter to add each scope.</p>
-                      <ScopeTagsInput
+                      <p className="text-xs text-slate-400">Select the OAuth2 scopes to request for this service account.</p>
+                      <ServiceAccountScopeSelector
                         value={form.SERVICE_ACCOUNT_SCOPE}
                         onChange={(v) => setF("SERVICE_ACCOUNT_SCOPE", v)}
-                        placeholder="fr:am:* fr:idm:* …"
                       />
                     </div>
                     <div className="space-y-1.5">

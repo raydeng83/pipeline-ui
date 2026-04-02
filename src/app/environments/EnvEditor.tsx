@@ -6,7 +6,7 @@ import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { parseEnvFile, serializeEnvFile } from "@/lib/env-parser";
 import { cn } from "@/lib/utils";
 import { LogEntry } from "@/hooks/useStreamingLogs";
-import { ScopeTagsInput } from "@/components/ScopeTagsInput";
+import { ServiceAccountScopeSelector } from "@/components/ServiceAccountScopeSelector";
 
 // ── Field definitions ────────────────────────────────────────────────────────
 
@@ -218,10 +218,9 @@ function FieldInput({
 
   if (field.type === "scope-tags") {
     return (
-      <ScopeTagsInput
+      <ServiceAccountScopeSelector
         value={value}
         onChange={onChange}
-        placeholder={field.placeholder}
         disabled={disabled}
       />
     );
