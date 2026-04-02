@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { parseEnvFile, serializeEnvFile } from "@/lib/env-parser";
 import { cn } from "@/lib/utils";
+import { LogEntry } from "@/hooks/useStreamingLogs";
 
 // ── Field definitions ────────────────────────────────────────────────────────
 
@@ -223,68 +224,137 @@ function FieldInput({
 
 // ── Test Connection ───────────────────────────────────────────────────────────
 
-type TestState = "idle" | "testing" | "ok" | "fail";
-
 function TestConnectionButton({
-  environmentName,
   liveValues,
 }: {
-  environmentName: string;
   liveValues: Record<string, string>;
 }) {
-  const [state, setState] = useState<TestState>("idle");
-  const [message, setMessage] = useState("");
+  const [running, setRunning] = useState(false);
+  const [debug, setDebug] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [exitCode, setExitCode] = useState<number | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
 
-  const test = async () => {
-    setState("testing");
-    setMessage("");
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
+
+  const run = async (isDebug: boolean) => {
+    setLogs([]);
+    setExitCode(null);
+    setRunning(true);
+
     try {
       const res = await fetch("/api/environments/test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          TENANT_BASE_URL: liveValues["TENANT_BASE_URL"],
-          SERVICE_ACCOUNT_CLIENT_ID: liveValues["SERVICE_ACCOUNT_CLIENT_ID"],
-          SERVICE_ACCOUNT_ID: liveValues["SERVICE_ACCOUNT_ID"],
-          SERVICE_ACCOUNT_SCOPE: liveValues["SERVICE_ACCOUNT_SCOPE"],
-          SERVICE_ACCOUNT_KEY: liveValues["SERVICE_ACCOUNT_KEY"],
-        }),
+        body: JSON.stringify({ envVars: liveValues, debug: isDebug }),
       });
-      const data = await res.json();
-      setState(data.ok ? "ok" : "fail");
-      setMessage(data.message || data.error || "");
+
+      if (!res.ok || !res.body) {
+        setLogs([{ type: "error", data: await res.text() || "Request failed", ts: Date.now() }]);
+        setRunning(false);
+        return;
+      }
+
+      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+      readerRef.current = reader;
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += value;
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const entry: LogEntry = JSON.parse(line);
+            setLogs((prev) => [...prev, entry]);
+            if (entry.type === "exit") setExitCode(entry.code ?? null);
+          } catch { /* ignore malformed */ }
+        }
+      }
     } catch (err) {
-      setState("fail");
-      setMessage(String(err));
+      setLogs((prev) => [...prev, { type: "error", data: String(err), ts: Date.now() }]);
+    } finally {
+      setRunning(false);
+      readerRef.current = null;
     }
   };
 
+  const statusColor = exitCode === null
+    ? running ? "text-yellow-400" : "text-slate-400"
+    : exitCode === 0 ? "text-green-400" : "text-red-400";
+
+  const statusDot = running
+    ? "bg-yellow-400 animate-pulse"
+    : exitCode === null ? "bg-slate-400"
+    : exitCode === 0 ? "bg-green-400" : "bg-red-400";
+
   return (
-    <div className="flex items-center gap-3">
-      <button
-        type="button"
-        onClick={test}
-        disabled={state === "testing"}
-        className={cn(
-          "px-3 py-1.5 text-xs font-medium rounded border transition-colors",
-          state === "idle" && "border-slate-300 text-slate-600 hover:bg-slate-50",
-          state === "testing" && "border-slate-300 text-slate-400 cursor-wait",
-          state === "ok" && "border-green-400 bg-green-50 text-green-700",
-          state === "fail" && "border-red-400 bg-red-50 text-red-700"
+    <div className="space-y-2 w-full">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => run(debug)}
+          disabled={running}
+          className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
+        >
+          {running ? "Testing..." : "Test Connection"}
+        </button>
+        <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={debug}
+            onChange={(e) => setDebug(e.target.checked)}
+            disabled={running}
+            className="accent-sky-600"
+          />
+          Debug
+        </label>
+        {logs.length > 0 && !running && (
+          <button
+            type="button"
+            onClick={() => { setLogs([]); setExitCode(null); }}
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            Clear
+          </button>
         )}
-      >
-        {state === "testing"
-          ? "Testing..."
-          : state === "ok"
-          ? "Connected"
-          : state === "fail"
-          ? "Failed — Retry"
-          : "Test Connection"}
-      </button>
-      {message && (
-        <span className={cn("text-xs", state === "ok" ? "text-green-600" : "text-red-600")}>
-          {message}
-        </span>
+      </div>
+
+      {logs.length > 0 && (
+        <div className="rounded-md overflow-hidden border border-slate-700">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border-b border-slate-700">
+            <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", statusDot)} />
+            <span className={cn("text-xs font-mono", statusColor)}>
+              {running ? "Running fr-config-pull test..." : exitCode === 0 ? "Connection successful" : exitCode !== null ? `Failed (exit code ${exitCode})` : ""}
+            </span>
+          </div>
+          <div className="bg-slate-900 p-3 font-mono text-xs max-h-48 overflow-y-auto">
+            {logs.map((entry, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "whitespace-pre-wrap break-all leading-5",
+                  entry.type === "stderr" && "text-yellow-300",
+                  entry.type === "error" && "text-red-400",
+                  entry.type === "exit" && entry.code === 0 && "text-green-400 font-bold",
+                  entry.type === "exit" && entry.code !== 0 && "text-red-400 font-bold",
+                  entry.type === "stdout" && "text-slate-100"
+                )}
+              >
+                {entry.type === "exit"
+                  ? `\n[Process exited with code ${entry.code}]`
+                  : entry.data}
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -410,10 +480,11 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
                 <option value="red">Red (Production)</option>
               </select>
             </div>
-            <TestConnectionButton
-              environmentName={env.name}
-              liveValues={values}
-            />
+          </div>
+
+          {/* Test connection */}
+          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+            <TestConnectionButton liveValues={values} />
           </div>
 
           {/* Tabs */}

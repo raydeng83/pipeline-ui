@@ -1,62 +1,46 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getEnvFileContent } from "@/lib/fr-config";
-import { parseEnvFile } from "@/lib/env-parser";
+import { NextRequest } from "next/server";
+import { spawn } from "child_process";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  // Accept either an environment name (load from disk) or inline fields
-  let tenantBaseUrl: string | undefined;
-  let serviceAccountId: string | undefined;
-  let serviceAccountKey: string | undefined;
+  const { envVars, debug } = body as {
+    envVars: Record<string, string>;
+    debug?: boolean;
+  };
 
-  if (body.environmentName) {
-    const content = getEnvFileContent(body.environmentName);
-    const fields = parseEnvFile(content);
-    tenantBaseUrl = fields["TENANT_BASE_URL"];
-    serviceAccountId = fields["SERVICE_ACCOUNT_ID"];
-    serviceAccountKey = fields["SERVICE_ACCOUNT_KEY"];
-  } else {
-    tenantBaseUrl = body.TENANT_BASE_URL;
-    serviceAccountId = body.SERVICE_ACCOUNT_ID;
-    serviceAccountKey = body.SERVICE_ACCOUNT_KEY;
-  }
+  const args = debug ? ["test", "--debug"] : ["test"];
+  const env = { ...process.env, ...envVars };
 
-  if (!tenantBaseUrl) {
-    return NextResponse.json({ ok: false, error: "TENANT_BASE_URL is not set" }, { status: 400 });
-  }
+  const stream = new ReadableStream<string>({
+    start(controller) {
+      const encode = (data: string, type: string) =>
+        controller.enqueue(JSON.stringify({ type, data, ts: Date.now() }) + "\n");
 
-  // TENANT_BASE_URL is the root domain (no /am suffix); append the health path directly
-  const base = tenantBaseUrl.replace(/\/$/, "");
-  const healthUrl = `${base}/am/json/health/live`;
+      const proc = spawn("fr-config-pull", args, { env, shell: true });
 
-  try {
-    const res = await fetch(healthUrl, {
-      method: "GET",
-      signal: AbortSignal.timeout(8000),
-    });
-
-    if (res.ok || res.status === 401) {
-      // 401 means the endpoint exists but needs auth — tenant is reachable
-      return NextResponse.json({
-        ok: true,
-        status: res.status,
-        message: res.ok ? "Tenant is reachable and healthy." : "Tenant is reachable (auth required).",
-        url: healthUrl,
+      proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
+      proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
+      proc.on("close", (code) => {
+        controller.enqueue(
+          JSON.stringify({ type: "exit", code, ts: Date.now() }) + "\n"
+        );
+        controller.close();
       });
-    }
+      proc.on("error", (err) => {
+        encode(err.message, "stderr");
+        controller.enqueue(
+          JSON.stringify({ type: "exit", code: 1, ts: Date.now() }) + "\n"
+        );
+        controller.close();
+      });
+    },
+  });
 
-    return NextResponse.json({
-      ok: false,
-      status: res.status,
-      error: `Tenant returned HTTP ${res.status}`,
-      url: healthUrl,
-    });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({
-      ok: false,
-      error: `Connection failed: ${message}`,
-      url: healthUrl,
-    });
-  }
+  return new Response(stream as unknown as ReadableStream<Uint8Array>, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
 }
