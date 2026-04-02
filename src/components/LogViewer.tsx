@@ -57,7 +57,7 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border-b border-slate-700 rounded-t-md">
+      <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border-y border-slate-700">
         <span className={cn(
           "inline-block w-2 h-2 rounded-full shrink-0",
           running ? "bg-yellow-400 animate-pulse"

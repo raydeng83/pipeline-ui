@@ -76,9 +76,9 @@ export function spawnFrConfig(options: RunOptions): {
       for (const sub of subcommands) {
         if (aborted) break;
 
-        if (subcommands.length > 1) {
-          encode(`\n▶ Running: ${command} ${sub}\n`, "stdout");
-        }
+        controller.enqueue(
+          JSON.stringify({ type: "scope-start", scope: sub, ts: Date.now() }) + "\n"
+        );
 
         const exitCode = await new Promise<number | null>((resolve) => {
           const envDir = path.join(ENVIRONMENTS_DIR, environment);
@@ -94,6 +94,10 @@ export function spawnFrConfig(options: RunOptions): {
             resolve(1);
           });
         });
+
+        controller.enqueue(
+          JSON.stringify({ type: "scope-end", scope: sub, code: exitCode, ts: Date.now() }) + "\n"
+        );
 
         if (exitCode !== 0) {
           controller.enqueue(

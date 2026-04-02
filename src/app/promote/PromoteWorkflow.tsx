@@ -125,7 +125,11 @@ export function PromoteWorkflow({ environments }: { environments: Environment[] 
       </div>
 
       {/* Log output */}
-      <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+      {(running || logs.length > 0) && (
+        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+          <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+        </div>
+      )}
     </div>
   );
 }

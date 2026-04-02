@@ -3,9 +3,10 @@
 import { useState, useCallback, useRef } from "react";
 
 export interface LogEntry {
-  type: "stdout" | "stderr" | "exit" | "error";
+  type: "stdout" | "stderr" | "exit" | "error" | "scope-start" | "scope-end";
   data?: string;
   code?: number;
+  scope?: string;
   ts: number;
 }
 

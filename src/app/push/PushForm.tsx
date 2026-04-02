@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Environment, ConfigScope } from "@/lib/fr-config-types";
 import { ScopeSelector } from "@/components/ScopeSelector";
-import { LogViewer } from "@/components/LogViewer";
+import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 
 export function PushForm({ environments }: { environments: Environment[] }) {
@@ -20,8 +20,8 @@ export function PushForm({ environments }: { environments: Environment[] }) {
   };
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-slate-200 p-6 space-y-5">
+    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <form onSubmit={handleSubmit} className="p-6 space-y-5">
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-slate-700">Target Environment</label>
           <select
@@ -72,7 +72,7 @@ export function PushForm({ environments }: { environments: Environment[] }) {
         </div>
       </form>
 
-      <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+      <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
     </div>
   );
 }
