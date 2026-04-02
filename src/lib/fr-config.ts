@@ -44,6 +44,13 @@ export function saveEnvFile(environmentName: string, content: string): void {
   fs.writeFileSync(getEnvFilePath(environmentName), content);
 }
 
+export function deleteEnvFolder(environmentName: string): void {
+  const dir = path.join(ENVIRONMENTS_DIR, environmentName);
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 /** Load an env file and merge its values into process.env for a child process. */
 function buildEnv(environmentName: string): NodeJS.ProcessEnv {
   const filePath = getEnvFilePath(environmentName);

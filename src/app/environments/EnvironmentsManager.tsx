@@ -5,6 +5,7 @@ import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { EnvEditor } from "./EnvEditor";
 import { cn } from "@/lib/utils";
+import { ScopeTagsInput } from "@/components/ScopeTagsInput";
 
 const COLOR_OPTIONS: { value: Environment["color"]; label: string }[] = [
   { value: "green", label: "Green" },
@@ -39,9 +40,9 @@ const EMPTY_FORM: NewEnvForm = {
   label: "",
   color: "green",
   TENANT_BASE_URL: "",
-  SERVICE_ACCOUNT_CLIENT_ID: "",
+  SERVICE_ACCOUNT_CLIENT_ID: "service-account",
   SERVICE_ACCOUNT_ID: "",
-  SERVICE_ACCOUNT_SCOPE: "fr:am* fr:idm:* fr:idc:esv:* fr:idc:direct-configuration:session:*",
+  SERVICE_ACCOUNT_SCOPE: "fr:am:* fr:idm:* fr:idc:esv:* fr:idc:direct-configuration:session:*",
   SERVICE_ACCOUNT_KEY: "",
   CONFIG_DIR: "./config",
   REALMS: '["alpha"]',
@@ -49,15 +50,16 @@ const EMPTY_FORM: NewEnvForm = {
 };
 
 function buildEnvContent(form: NewEnvForm): string {
+  const q = (v: string) => (v.includes("\n") ? `'${v}'` : v);
   const lines = [
-    `TENANT_BASE_URL=${form.TENANT_BASE_URL}`,
-    `SERVICE_ACCOUNT_CLIENT_ID=${form.SERVICE_ACCOUNT_CLIENT_ID}`,
-    `SERVICE_ACCOUNT_ID=${form.SERVICE_ACCOUNT_ID}`,
-    `SERVICE_ACCOUNT_SCOPE=${form.SERVICE_ACCOUNT_SCOPE}`,
-    `SERVICE_ACCOUNT_KEY=${form.SERVICE_ACCOUNT_KEY}`,
-    `CONFIG_DIR=${form.CONFIG_DIR}`,
-    `REALMS=${form.REALMS}`,
-    `SCRIPT_PREFIXES=${form.SCRIPT_PREFIXES}`,
+    `TENANT_BASE_URL=${q(form.TENANT_BASE_URL)}`,
+    `SERVICE_ACCOUNT_CLIENT_ID=${q(form.SERVICE_ACCOUNT_CLIENT_ID)}`,
+    `SERVICE_ACCOUNT_ID=${q(form.SERVICE_ACCOUNT_ID)}`,
+    `SERVICE_ACCOUNT_SCOPE=${q(form.SERVICE_ACCOUNT_SCOPE)}`,
+    `SERVICE_ACCOUNT_KEY=${q(form.SERVICE_ACCOUNT_KEY)}`,
+    `CONFIG_DIR=${q(form.CONFIG_DIR)}`,
+    `REALMS=${q(form.REALMS)}`,
+    `SCRIPT_PREFIXES=${q(form.SCRIPT_PREFIXES)}`,
   ];
   return lines.join("\n") + "\n";
 }
@@ -325,12 +327,11 @@ export function EnvironmentsManager({
                       <label className="text-sm font-medium text-slate-700">
                         Service Account Scope <span className="text-red-500">*</span>
                       </label>
-                      <p className="text-xs text-slate-400">OAuth2 scope(s) requested, space-separated.</p>
-                      <input
+                      <p className="text-xs text-slate-400">OAuth2 scope(s) requested. Press Space or Enter to add each scope.</p>
+                      <ScopeTagsInput
                         value={form.SERVICE_ACCOUNT_SCOPE}
-                        onChange={(e) => setF("SERVICE_ACCOUNT_SCOPE", e.target.value)}
-                        placeholder="fr:am* fr:idm:* fr:idc:esv:* fr:idc:direct-configuration:session:*"
-                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        onChange={(v) => setF("SERVICE_ACCOUNT_SCOPE", v)}
+                        placeholder="fr:am:* fr:idm:* …"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -433,11 +434,11 @@ export function EnvironmentsManager({
                 {addStep !== "repo" ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      if (addStep === "meta" && (!form.name || !form.label)) return;
-                      setAddStep(STEPS[stepIdx + 1]);
-                    }}
-                    disabled={addStep === "meta" && (!form.name || !form.label)}
+                    onClick={() => setAddStep(STEPS[stepIdx + 1])}
+                    disabled={
+                      (addStep === "meta" && (!form.name || !form.label)) ||
+                      (addStep === "connection" && !form.TENANT_BASE_URL)
+                    }
                     className="px-4 py-2 text-sm bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50"
                   >
                     Next
@@ -446,7 +447,7 @@ export function EnvironmentsManager({
                   <button
                     type="button"
                     onClick={handleAddEnv}
-                    disabled={saving || !form.TENANT_BASE_URL || !form.CONFIG_DIR}
+                    disabled={saving || !form.CONFIG_DIR || !form.REALMS}
                     className="px-4 py-2 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {saving ? "Creating..." : "Create Environment"}

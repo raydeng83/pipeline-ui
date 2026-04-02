@@ -20,7 +20,6 @@ const GROUP_NAMES = Object.keys(GROUPS);
 type Mode = "basic" | "advanced";
 
 export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorProps) {
-  const [collapsed, setCollapsed] = useState(false);
   const [mode, setMode] = useState<Mode>("basic");
 
   const allSelected = selected.length === CONFIG_SCOPES.length;
@@ -80,24 +79,9 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
           {allSelected ? "Deselect all" : "Select all"}
         </button>
 
-        <button
-          type="button"
-          onClick={() => setCollapsed((c) => !c)}
-          className="text-slate-400 hover:text-slate-600 transition-colors"
-          aria-label={collapsed ? "Expand" : "Collapse"}
-        >
-          <svg
-            className={cn("w-4 h-4 transition-transform", collapsed ? "-rotate-90" : "")}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
       </div>
 
-      {!collapsed && (
-        <>
-          {selected.length === 0 && (
+      {selected.length === 0 && (
             <p className="text-xs text-slate-400">
               No scopes selected — <code className="bg-slate-100 px-1 rounded">all</code> will be used.
             </p>
@@ -198,8 +182,6 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
               })}
             </div>
           )}
-        </>
-      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import {
   saveEnvironments,
   getEnvFileContent,
   saveEnvFile,
+  deleteEnvFolder,
 } from "@/lib/fr-config";
 
 export async function GET(
@@ -49,5 +50,6 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   saveEnvironments(filtered);
+  deleteEnvFolder(name);
   return NextResponse.json({ ok: true });
 }
