@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 type Mode = "local" | "remote";
 
 interface Endpoint {
-  env: string;
+  environment: string;
   mode: Mode;
 }
 
@@ -33,8 +33,8 @@ function EndpointSelector({
     <div className="flex-1 space-y-2.5 p-4 bg-slate-50 rounded-lg border border-slate-200">
       <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{label}</div>
       <select
-        value={value.env}
-        onChange={(e) => onChange({ ...value, env: e.target.value })}
+        value={value.environment}
+        onChange={(e) => onChange({ ...value, environment: e.target.value })}
         disabled={disabled}
         className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
       >
@@ -106,8 +106,8 @@ function PanelHeader({ label }: { label: string }) {
 
 export function CompareForm({ environments }: { environments: Environment[] }) {
   const defaultEnv = environments[0]?.name ?? "";
-  const [source, setSource] = useState<Endpoint>({ env: defaultEnv, mode: "local" });
-  const [target, setTarget] = useState<Endpoint>({ env: defaultEnv, mode: "remote" });
+  const [source, setSource] = useState<Endpoint>({ environment: defaultEnv, mode: "local" });
+  const [target, setTarget] = useState<Endpoint>({ environment: defaultEnv, mode: "remote" });
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
@@ -155,7 +155,7 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
           <button
             type="button"
             onClick={handleCompare}
-            disabled={running || !source.env || !target.env}
+            disabled={running || !source.environment || !target.environment}
             className="px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-md hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {running ? "Comparing…" : "Compare"}
@@ -177,9 +177,9 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
         <div className="rounded-lg border border-slate-700 overflow-hidden grid grid-cols-2 divide-x divide-slate-700">
           {/* Source */}
           <div className="min-w-0 flex flex-col">
-            <PanelHeader label={`Source — ${source.env}${source.mode === "local" ? " (local)" : ""}`} />
+            <PanelHeader label={`Source — ${source.environment}${source.mode === "local" ? " (local)" : ""}`} />
             {source.mode === "local" ? (
-              <LocalPanel envName={source.env} done={sourceExitCode !== null} />
+              <LocalPanel envName={source.environment} done={sourceExitCode !== null} />
             ) : (
               <ScopedLogViewer
                 logs={sourceLogs}
@@ -192,9 +192,9 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
 
           {/* Target */}
           <div className="min-w-0 flex flex-col">
-            <PanelHeader label={`Target — ${target.env}${target.mode === "local" ? " (local)" : ""}`} />
+            <PanelHeader label={`Target — ${target.environment}${target.mode === "local" ? " (local)" : ""}`} />
             {target.mode === "local" ? (
-              <LocalPanel envName={target.env} done={targetExitCode !== null} />
+              <LocalPanel envName={target.environment} done={targetExitCode !== null} />
             ) : (
               <ScopedLogViewer
                 logs={targetLogs}
