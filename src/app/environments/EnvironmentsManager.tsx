@@ -305,7 +305,7 @@ export function EnvironmentsManager({
                       <input
                         value={form.SERVICE_ACCOUNT_CLIENT_ID}
                         onChange={(e) => setF("SERVICE_ACCOUNT_CLIENT_ID", e.target.value)}
-                        placeholder="service-account-client-id"
+                        placeholder="service-account"
                         className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>

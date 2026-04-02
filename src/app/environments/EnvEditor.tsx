@@ -33,9 +33,9 @@ const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
       {
         key: "SERVICE_ACCOUNT_CLIENT_ID",
         label: "Service Account Client ID",
-        description: "OAuth2 client ID for the service account (SERVICE_ACCOUNT_CLIENT_ID).",
+        description: "OAuth2 client ID for the service account. Typically 'service-account'.",
         required: true,
-        placeholder: "service-account-client-id",
+        placeholder: "service-account",
       },
       {
         key: "SERVICE_ACCOUNT_ID",
@@ -87,6 +87,46 @@ const FIELD_GROUPS: { title: string; fields: FieldDef[] }[] = [
         required: true,
         placeholder: '["MyOrg-"]',
         type: "json-array",
+      },
+    ],
+  },
+  {
+    title: "Safety & Behaviour",
+    fields: [
+      {
+        key: "DEPLOYMENT_TYPE",
+        label: "Deployment Type",
+        description: "CLOUD (default), PLATFORM, or AM.",
+        required: false,
+        placeholder: "CLOUD",
+      },
+      {
+        key: "TENANT_READONLY",
+        label: "Tenant Read-only",
+        description: "Set to true to prevent fr-config-push from writing to this tenant.",
+        required: false,
+        placeholder: "false",
+      },
+      {
+        key: "PUSH_NAMED_ONLY",
+        label: "Push Named Only",
+        description: "Set to true to only allow push for explicitly named config.",
+        required: false,
+        placeholder: "false",
+      },
+      {
+        key: "ACTIVE_ONLY_SECRETS",
+        label: "Active Only Secrets",
+        description: "Only pull/push the current active secret version, not all versions.",
+        required: false,
+        placeholder: "true",
+      },
+      {
+        key: "UPDATE_CHANGED_ONLY",
+        label: "Update Changed Only",
+        description: "Only push scripts if they have changed.",
+        required: false,
+        placeholder: "true",
       },
     ],
   },
