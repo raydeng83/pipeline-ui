@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, Fragment } from "react";
+import { useState, useMemo, useCallback, useEffect, Fragment, useRef } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -299,9 +299,116 @@ function Legend() {
   );
 }
 
+// ── Node info drawer ─────────────────────────────────────────────────────────
+
+interface NodePanelData {
+  id: string;
+  label: string;
+  nodeType?: string;
+  outcomes: { outcomeId: string; targetLabel: string }[];
+}
+
+function NodeInfoDrawer({
+  node, open, environment, journeyId, onClose,
+}: {
+  node: NodePanelData | null;
+  open: boolean;
+  environment?: string;
+  journeyId?: string;
+  onClose: () => void;
+}) {
+  const [config, setConfig] = useState<string | null>(null);
+  const [configLoading, setConfigLoading] = useState(false);
+  const isStaticNode = !node || ["startNode", SUCCESS_ID, FAILURE_ID].includes(node.id);
+
+  useEffect(() => {
+    if (!node || !environment || !journeyId || isStaticNode) { setConfig(null); return; }
+    setConfigLoading(true);
+    setConfig(null);
+    const params = new URLSearchParams({ environment, journey: journeyId, nodeId: node.id });
+    fetch(`/api/push/journey-node?${params}`)
+      .then((r) => r.json())
+      .then((d) => {
+        try { setConfig(JSON.stringify(JSON.parse(d.file?.content ?? ""), null, 2)); }
+        catch { setConfig(d.file?.content ?? null); }
+      })
+      .catch(() => setConfig(null))
+      .finally(() => setConfigLoading(false));
+  }, [node?.id, environment, journeyId, isStaticNode]);
+
+  return (
+    <div className={cn(
+      "absolute top-0 right-0 h-full w-72 bg-white border-l border-slate-200 shadow-2xl z-10",
+      "flex flex-col transition-transform duration-300 ease-in-out",
+      open ? "translate-x-0" : "translate-x-full"
+    )}>
+      {node && (
+        <>
+          {/* Header */}
+          <div className="flex items-start gap-2 px-4 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-800 leading-snug break-words">{node.label}</p>
+              {node.nodeType && (
+                <span className="inline-block mt-1.5 text-[10px] font-medium text-sky-700 bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5">
+                  {node.nodeType}
+                </span>
+              )}
+            </div>
+            <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 shrink-0 mt-0.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {/* Outcomes */}
+            {node.outcomes.length > 0 && (
+              <div className="px-4 py-3 border-b border-slate-100">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Outcomes</p>
+                <div className="space-y-2">
+                  {node.outcomes.map(({ outcomeId, targetLabel }) => (
+                    <div key={outcomeId} className="flex items-center gap-2 min-w-0">
+                      <span className="text-[10px] font-mono bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 shrink-0">
+                        {outcomeId}
+                      </span>
+                      <svg className="w-3 h-3 text-slate-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                      <span className="text-[11px] text-slate-700 truncate">{targetLabel}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Config */}
+            {!isStaticNode && (
+              <div className="px-4 py-3">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Configuration</p>
+                {configLoading && <p className="text-[11px] text-slate-400">Loading…</p>}
+                {!configLoading && config && (
+                  <pre className="text-[10px] font-mono text-slate-600 bg-slate-50 border border-slate-100 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+                    {config}
+                  </pre>
+                )}
+                {!configLoading && !config && (
+                  <p className="text-[11px] text-slate-400">No configuration file found</p>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Inner graph ───────────────────────────────────────────────────────────────
 
-function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: number }) {
+function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
+  json: string; fitViewKey?: number; environment?: string; journeyId?: string;
+}) {
   const { fitView, getViewport, setViewport } = useReactFlow();
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
@@ -310,6 +417,7 @@ function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: nu
   const [pinnedEdgeId,   setPinnedEdgeId]   = useState<string | null>(null);
   const [searchQuery,    setSearchQuery]     = useState("");
   const [layoutKey,      setLayoutKey]       = useState(0);
+  const [nodePanel,      setNodePanel]       = useState<NodePanelData | null>(null);
 
   const { dagreNodes, baseEdges } = useMemo(() => {
     const { nodes, edges } = parseJourney(json);
@@ -323,7 +431,27 @@ function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: nu
     setSearchQuery("");
     setHoveredEdgeId(null);
     setPinnedEdgeId(null);
+    setNodePanel(null);
   }, [dagreNodes, setRfNodes]);
+
+  // Escape closes drawer first (capture phase, before fullscreen handler)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && nodePanel) { setNodePanel(null); e.stopPropagation(); }
+    };
+    document.addEventListener("keydown", handler, true);
+    return () => document.removeEventListener("keydown", handler, true);
+  }, [nodePanel]);
+
+  // Map nodeId → display label (for resolving outcome targets)
+  const nodeDisplayMap = useMemo(() => {
+    const map = new Map<string, string>();
+    rfNodes.forEach((n) => map.set(n.id, String(n.data.label ?? n.id)));
+    map.set(SUCCESS_ID, "Success");
+    map.set(FAILURE_ID, "Failure");
+    map.set("startNode", "Start");
+    return map;
+  }, [rfNodes]);
 
   // Fit view when fullscreen toggles
   useEffect(() => {
@@ -407,17 +535,33 @@ function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: nu
     });
   }, [baseEdges, highlighted, hoveredEdgeId, pinnedEdgeId]);
 
-  const handleNodeClick: NodeMouseHandler    = useCallback((_e, node) => setSelectedNodeId((p) => p === node.id ? null : node.id), []);
+  const handleNodeClick: NodeMouseHandler = useCallback((_e, node) => {
+    const isSame = selectedNodeId === node.id;
+    setSelectedNodeId(isSame ? null : node.id);
+    if (isSame) {
+      setNodePanel(null);
+    } else {
+      const d = node.data as { label: string; nodeType?: string; outcomes?: string[] };
+      const outcomes = (d.outcomes ?? []).map((outcomeId) => {
+        const edge = baseEdges.find((e) => e.source === node.id && e.sourceHandle === outcomeId);
+        const targetLabel = edge ? (nodeDisplayMap.get(edge.target) ?? edge.target) : "—";
+        return { outcomeId, targetLabel };
+      });
+      setNodePanel({ id: node.id, label: d.label, nodeType: d.nodeType, outcomes });
+    }
+  }, [selectedNodeId, baseEdges, nodeDisplayMap]);
+
   const handleEdgeMouseEnter: EdgeMouseHandler = useCallback((_e, edge) => setHoveredEdgeId(edge.id), []);
   const handleEdgeMouseLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), []);
-  const handleEdgeClick: EdgeMouseHandler    = useCallback((_e, edge) => setPinnedEdgeId((p) => p === edge.id ? null : edge.id), []);
-  const handlePaneClick                      = useCallback(() => { setSelectedNodeId(null); setPinnedEdgeId(null); }, []);
+  const handleEdgeClick: EdgeMouseHandler      = useCallback((_e, edge) => setPinnedEdgeId((p) => p === edge.id ? null : edge.id), []);
+  const handlePaneClick = useCallback(() => { setSelectedNodeId(null); setPinnedEdgeId(null); setNodePanel(null); }, []);
 
   if (rfNodes.length === 0 && dagreNodes.length === 0) {
     return <div className="flex items-center justify-center h-full text-sm text-slate-400">Unable to parse journey data</div>;
   }
 
   return (
+    <div className="relative w-full h-full">
     <ReactFlow
       nodes={displayNodes}
       edges={displayEdges}
@@ -453,15 +597,24 @@ function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: nu
         zoomable pannable
       />
     </ReactFlow>
+
+    <NodeInfoDrawer
+      node={nodePanel}
+      open={!!nodePanel}
+      environment={environment}
+      journeyId={journeyId}
+      onClose={() => { setNodePanel(null); setSelectedNodeId(null); }}
+    />
+    </div>
   );
 }
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export function JourneyGraph({ json, fitViewKey }: { json: string; fitViewKey?: number }) {
+export function JourneyGraph({ json, fitViewKey, environment, journeyId }: { json: string; fitViewKey?: number; environment?: string; journeyId?: string }) {
   return (
     <ReactFlowProvider>
-      <JourneyGraphInner json={json} fitViewKey={fitViewKey} />
+      <JourneyGraphInner json={json} fitViewKey={fitViewKey} environment={environment} journeyId={journeyId} />
     </ReactFlowProvider>
   );
 }

@@ -511,7 +511,7 @@ function SectionsView({ environment }: { environment: string }) {
                 </div>
               )}
               {!fileLoading && activeFile && selectedScope === "journeys" && col3View === "graph" && (
-                <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} />
+                <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} />
               )}
               {!fileLoading && activeFile && col3View === "json" && (
                 <div className="overflow-auto h-full">
