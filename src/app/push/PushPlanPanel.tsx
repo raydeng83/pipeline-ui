@@ -152,36 +152,27 @@ function ScopeRow({
             visibleItems.map((item) => {
               const checked = allSelected || selectedSet.has(item.id);
               return (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2 py-0.5 group"
-                >
-                  <label className={cn("flex items-center gap-2 flex-1 min-w-0 select-none", entry.selectable ? "cursor-pointer" : "cursor-default")}>
-                    {entry.selectable ? (
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        disabled={!included}
-                        onChange={(e) => onToggleItem(item.id, e.target.checked)}
-                        className="w-3 h-3 accent-sky-600 shrink-0"
-                      />
-                    ) : (
-                      <span className="w-3 h-3 shrink-0" />
-                    )}
-                    <span className={cn("text-[11px] truncate", included && checked ? "text-slate-600" : "text-slate-400")}>
-                      {item.label}
-                    </span>
-                  </label>
+                <div key={item.id} className="flex items-center gap-2 py-0.5">
+                  {entry.selectable ? (
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={!included}
+                      onChange={(e) => onToggleItem(item.id, e.target.checked)}
+                      className="w-3 h-3 accent-sky-600 shrink-0 cursor-pointer"
+                    />
+                  ) : (
+                    <span className="w-3 h-3 shrink-0" />
+                  )}
                   <button
                     type="button"
                     onClick={() => onViewItem(item)}
-                    className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-sky-600 shrink-0 transition-opacity"
-                    title="View file"
+                    className={cn(
+                      "text-[11px] truncate text-left hover:underline hover:text-sky-600 transition-colors",
+                      included && checked ? "text-slate-600" : "text-slate-400"
+                    )}
                   >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    {item.label}
                   </button>
                 </div>
               );
