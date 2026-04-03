@@ -392,7 +392,7 @@ function JourneyGraphInner({ json }: { json: string }) {
       <Panel position="top-left">
         <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} />
       </Panel>
-      <Panel position="bottom-left">
+      <Panel position="top-right">
         <Legend />
       </Panel>
       <Background color="#e2e8f0" gap={20} size={1} />
