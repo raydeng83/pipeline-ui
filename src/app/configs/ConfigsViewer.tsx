@@ -34,6 +34,32 @@ function highlightJson(raw: string): string {
     );
 }
 
+function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean; onToggle: () => void; dark?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      title={fullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+      className={cn(
+        "shrink-0 p-1 rounded transition-colors",
+        dark
+          ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+          : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+      )}
+    >
+      {fullscreen ? (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+        </svg>
+      ) : (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 function FileContent({ content, fileName }: { content: string; fileName: string }) {
   const ext = fileName.split(".").pop()?.toLowerCase();
   const isJson = ext === "json";
@@ -111,6 +137,13 @@ function TreeView({ environment }: { environment: string }) {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   useEffect(() => {
     if (!environment) return;
@@ -166,14 +199,18 @@ function TreeView({ environment }: { environment: string }) {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex flex-col bg-slate-900 rounded-lg border border-slate-200 overflow-hidden">
+      <div className={cn(
+        "flex flex-col bg-slate-900 overflow-hidden",
+        fullscreen ? "fixed inset-0 z-50 rounded-none border-0" : "flex-1 rounded-lg border border-slate-200"
+      )}>
         {selectedFile ? (
           <>
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-700 bg-slate-800 shrink-0">
               <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span className="text-xs font-mono text-slate-300 truncate">{selectedFile}</span>
+              <span className="text-xs font-mono text-slate-300 truncate flex-1">{selectedFile}</span>
+              <FullscreenButton fullscreen={fullscreen} onToggle={() => setFullscreen((f) => !f)} dark />
             </div>
             <div className="flex-1 overflow-auto">
               {fileLoading && <div className="flex items-center justify-center h-full text-sm text-slate-500">Loading…</div>}
@@ -213,6 +250,13 @@ function SectionsView({ environment }: { environment: string }) {
   const [fileLoading, setFileLoading] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
   const [col3View, setCol3View] = useState<"graph" | "json">("graph");
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   // Fetch audit for all scopes when env changes
   useEffect(() => {
@@ -380,7 +424,8 @@ function SectionsView({ environment }: { environment: string }) {
 
       {/* Column 3 — File content / Journey graph */}
       <div className={cn(
-        "flex-1 flex flex-col overflow-hidden min-w-0",
+        "flex flex-col overflow-hidden min-w-0",
+        fullscreen ? "fixed inset-0 z-50" : "flex-1",
         selectedItem && col3View === "graph" && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
       )}>
         {selectedItem ? (
@@ -445,6 +490,12 @@ function SectionsView({ environment }: { environment: string }) {
                   ))}
                 </div>
               )}
+
+              <FullscreenButton
+                fullscreen={fullscreen}
+                onToggle={() => setFullscreen((f) => !f)}
+                dark={!(col3View === "graph" && selectedScope === "journeys")}
+              />
             </div>
 
             {/* Content */}
