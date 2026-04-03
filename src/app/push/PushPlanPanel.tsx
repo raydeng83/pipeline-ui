@@ -54,11 +54,18 @@ function ScopeRow({
   onToggleItem: (item: string, v: boolean) => void;
 }) {
   const [open, setOpen] = useState(true);
+  const [filter, setFilter] = useState("");
+  const filterRef = useRef<HTMLInputElement>(null);
   const hasItems = entry.items.length > 0;
 
   const allSelected = selectedItems === null;
   const selectedSet = new Set(selectedItems ?? []);
   const checkedCount = allSelected ? entry.items.length : selectedSet.size;
+
+  const query = filter.trim().toLowerCase();
+  const visibleItems = query
+    ? entry.items.filter((item) => item.label.toLowerCase().includes(query))
+    : entry.items;
 
   const handleAllItems = () => {
     if (allSelected) onToggleItem("__none__", false);
@@ -100,36 +107,73 @@ function ScopeRow({
         {!hasItems && <span className="text-[10px] text-amber-500">no files</span>}
       </div>
 
+      {/* Filter bar — shown when open and has items */}
+      {open && hasItems && (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border-b border-slate-100">
+          <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            ref={filterRef}
+            type="text"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder={`Filter ${entry.items.length} item${entry.items.length !== 1 ? "s" : ""}…`}
+            className="flex-1 text-[11px] bg-transparent text-slate-700 placeholder-slate-400 outline-none min-w-0"
+          />
+          {filter && (
+            <button
+              type="button"
+              onClick={() => { setFilter(""); filterRef.current?.focus(); }}
+              className="text-slate-400 hover:text-slate-600 shrink-0"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+          {query && (
+            <span className="text-[10px] text-slate-400 tabular-nums shrink-0">
+              {visibleItems.length}/{entry.items.length}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Item list */}
       {open && hasItems && (
         <div className="px-3 pb-2 space-y-0.5 bg-slate-50/60">
-          {entry.items.map((item) => {
-            const checked = allSelected || selectedSet.has(item.id);
-            return (
-              <label
-                key={item.id}
-                className={cn(
-                  "flex items-center gap-2 py-0.5 select-none",
-                  entry.selectable ? "cursor-pointer" : "cursor-default"
-                )}
-              >
-                {entry.selectable ? (
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    disabled={!included}
-                    onChange={(e) => onToggleItem(item.id, e.target.checked)}
-                    className="w-3 h-3 accent-sky-600 shrink-0"
-                  />
-                ) : (
-                  <span className="w-3 h-3 shrink-0" />
-                )}
-                <span className={cn("text-[11px] truncate", included && checked ? "text-slate-600" : "text-slate-400")}>
-                  {item.label}
-                </span>
-              </label>
-            );
-          })}
+          {visibleItems.length === 0 ? (
+            <p className="text-[11px] text-slate-400 py-2 text-center">No matches</p>
+          ) : (
+            visibleItems.map((item) => {
+              const checked = allSelected || selectedSet.has(item.id);
+              return (
+                <label
+                  key={item.id}
+                  className={cn(
+                    "flex items-center gap-2 py-0.5 select-none",
+                    entry.selectable ? "cursor-pointer" : "cursor-default"
+                  )}
+                >
+                  {entry.selectable ? (
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={!included}
+                      onChange={(e) => onToggleItem(item.id, e.target.checked)}
+                      className="w-3 h-3 accent-sky-600 shrink-0"
+                    />
+                  ) : (
+                    <span className="w-3 h-3 shrink-0" />
+                  )}
+                  <span className={cn("text-[11px] truncate", included && checked ? "text-slate-600" : "text-slate-400")}>
+                    {item.label}
+                  </span>
+                </label>
+              );
+            })
+          )}
         </div>
       )}
     </div>
