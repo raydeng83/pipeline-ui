@@ -49,7 +49,7 @@ function ScopeRow({
 }: {
   entry: AuditEntry;
   included: boolean;
-  selectedItems: string[] | null; // null = all
+  selectedItems: string[] | null;
   onToggleScope: (v: boolean) => void;
   onToggleItem: (item: string, v: boolean) => void;
 }) {
@@ -60,80 +60,44 @@ function ScopeRow({
   const selectedSet = new Set(selectedItems ?? []);
   const checkedCount = allSelected ? entry.items.length : selectedSet.size;
 
-  const handleScopeCheck = () => onToggleScope(!included);
-
   const handleAllItems = () => {
-    // If currently all selected, deselect all (empty array)
-    // If partially/none selected, select all (null = all)
-    if (allSelected) {
-      onToggleItem("__none__", false); // signal to set []
-    } else {
-      onToggleItem("__all__", true); // signal to set null
-    }
+    if (allSelected) onToggleItem("__none__", false);
+    else onToggleItem("__all__", true);
   };
 
   return (
     <div className={cn("border-b border-slate-100 last:border-b-0", !included && "opacity-50")}>
       {/* Scope header */}
       <div className="flex items-center gap-2.5 px-3 py-2.5 bg-white">
-        {/* Scope-level checkbox */}
         <input
           type="checkbox"
           checked={included}
-          onChange={handleScopeCheck}
+          onChange={() => onToggleScope(!included)}
           className="w-3.5 h-3.5 accent-emerald-600 shrink-0 cursor-pointer"
         />
-
         <span className="flex-1 text-xs font-medium text-slate-700">{scopeLabel(entry.scope)}</span>
 
-        {/* Item count badge */}
         {included && entry.selectable && hasItems && (
           <span className="text-[10px] text-slate-400 tabular-nums font-mono">
             {checkedCount}/{entry.items.length}
           </span>
         )}
-
-        {/* Selectable: all-items toggle */}
         {included && entry.selectable && hasItems && (
-          <button
-            type="button"
-            onClick={handleAllItems}
-            className="text-[10px] text-sky-600 hover:text-sky-800 shrink-0"
-          >
+          <button type="button" onClick={handleAllItems} className="text-[10px] text-sky-600 hover:text-sky-800 shrink-0">
             {allSelected ? "Deselect all" : "Select all"}
           </button>
         )}
-
-        {/* Non-selectable: badge */}
-        {entry.selectable === false && hasItems && (
-          <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-            all files
-          </span>
+        {!entry.selectable && hasItems && (
+          <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">all files</span>
         )}
-
-        {/* Expand toggle */}
         {hasItems && (
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            className="text-slate-400 hover:text-slate-600"
-            aria-label={open ? "Collapse" : "Expand"}
-          >
-            <svg
-              className={cn("w-3 h-3 transition-transform", open ? "" : "-rotate-90")}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
+          <button type="button" onClick={() => setOpen((o) => !o)} className="text-slate-400 hover:text-slate-600">
+            <svg className={cn("w-3 h-3 transition-transform", open ? "" : "-rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
         )}
-
-        {!hasItems && (
-          <span className="text-[10px] text-amber-500">no files</span>
-        )}
+        {!hasItems && <span className="text-[10px] text-amber-500">no files</span>}
       </div>
 
       {/* Item list */}
@@ -160,12 +124,7 @@ function ScopeRow({
                 ) : (
                   <span className="w-3 h-3 shrink-0" />
                 )}
-                <span
-                  className={cn(
-                    "text-[11px] truncate",
-                    included && checked ? "text-slate-600" : "text-slate-400"
-                  )}
-                >
+                <span className={cn("text-[11px] truncate", included && checked ? "text-slate-600" : "text-slate-400")}>
                   {item.label}
                 </span>
               </label>
@@ -188,12 +147,15 @@ export function PushPlanPanel({
 }: PushPlanPanelProps) {
   const [auditData, setAuditData] = useState<AuditEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [activeScope, setActiveScope] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const scopeRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const scopeKey = scopes.join(",");
 
+  // Fetch audit data
   useEffect(() => {
     if (!scopes.length) { setAuditData(null); return; }
-
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
       setLoading(true);
@@ -205,10 +167,37 @@ export function PushPlanPanel({
         setLoading(false);
       }
     }, 300);
-
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environment, scopeKey]);
+
+  // Track active scope via IntersectionObserver on the scroll container
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container || !auditData) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Pick the topmost intersecting scope
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length > 0) {
+          setActiveScope(visible[0].target.getAttribute("data-scope"));
+        }
+      },
+      { root: container, threshold: 0.1 }
+    );
+
+    for (const el of Object.values(scopeRefs.current)) {
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, [auditData]);
+
+  const scrollToScope = (scope: string) => {
+    scopeRefs.current[scope]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const totalSelected = auditData
     ? auditData.reduce((sum, e) => {
@@ -231,10 +220,11 @@ export function PushPlanPanel({
     if (checked) currentSet.add(item);
     else currentSet.delete(item);
 
-    // If all items are selected, collapse to null (all)
     const allSelected = allIds.every((id) => currentSet.has(id));
     onItemsChange(scope, allSelected ? null : [...currentSet]);
   };
+
+  const displayScopes = loading ? scopes : (auditData?.map((e) => e.scope) ?? scopes);
 
   return (
     <div className="rounded-md border border-slate-200 overflow-hidden">
@@ -248,27 +238,60 @@ export function PushPlanPanel({
         )}
       </div>
 
-      {/* Scope list */}
-      <div className="divide-y divide-slate-100">
-        {loading
-          ? scopes.map((scope) => (
-              <div key={scope} className="flex items-center gap-3 px-3 py-2.5 animate-pulse">
-                <div className="w-3.5 h-3.5 rounded bg-slate-200 shrink-0" />
-                <div className="h-3 flex-1 bg-slate-100 rounded" />
-              </div>
-            ))
-          : auditData?.map((entry) => (
-              <ScopeRow
-                key={entry.scope}
-                entry={entry}
-                included={Object.prototype.hasOwnProperty.call(selections, entry.scope)}
-                selectedItems={selections[entry.scope] ?? null}
-                onToggleScope={(v) => onScopeToggle(entry.scope as ConfigScope, v)}
-                onToggleItem={(item, checked) =>
-                  handleToggleItem(entry.scope as ConfigScope, item, checked)
-                }
-              />
-            ))}
+      {/* Body: nav sidebar + scrollable content */}
+      <div className="flex max-h-[480px] overflow-hidden">
+
+        {/* Left nav */}
+        <div className="w-32 shrink-0 border-r border-slate-200 overflow-y-auto bg-slate-50">
+          {displayScopes.map((scope) => {
+            const isActive = activeScope === scope;
+            const included = Object.prototype.hasOwnProperty.call(selections, scope);
+            return (
+              <button
+                key={scope}
+                type="button"
+                onClick={() => scrollToScope(scope)}
+                className={cn(
+                  "w-full text-left px-2.5 py-1.5 text-[11px] leading-tight transition-colors border-l-2",
+                  isActive
+                    ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
+                    : "border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700",
+                  !included && "opacity-40"
+                )}
+              >
+                {scopeLabel(scope)}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right: scope rows */}
+        <div ref={contentRef} className="flex-1 overflow-y-auto divide-y divide-slate-100 min-w-0">
+          {loading
+            ? scopes.map((scope) => (
+                <div key={scope} className="flex items-center gap-3 px-3 py-2.5 animate-pulse">
+                  <div className="w-3.5 h-3.5 rounded bg-slate-200 shrink-0" />
+                  <div className="h-3 flex-1 bg-slate-100 rounded" />
+                </div>
+              ))
+            : auditData?.map((entry) => (
+                <div
+                  key={entry.scope}
+                  data-scope={entry.scope}
+                  ref={(el) => { scopeRefs.current[entry.scope] = el; }}
+                >
+                  <ScopeRow
+                    entry={entry}
+                    included={Object.prototype.hasOwnProperty.call(selections, entry.scope)}
+                    selectedItems={selections[entry.scope] ?? null}
+                    onToggleScope={(v) => onScopeToggle(entry.scope as ConfigScope, v)}
+                    onToggleItem={(item, checked) =>
+                      handleToggleItem(entry.scope as ConfigScope, item, checked)
+                    }
+                  />
+                </div>
+              ))}
+        </div>
       </div>
     </div>
   );
