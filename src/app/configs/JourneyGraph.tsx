@@ -1,24 +1,44 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
+  Panel,
   Handle,
   Position,
+  useReactFlow,
   type Node,
   type Edge,
   type NodeProps,
+  type NodeMouseHandler,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import dagre from "@dagrejs/dagre";
+import { cn } from "@/lib/utils";
 
-// ── Well-known static node IDs (standard across all AIC journeys) ─────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
+
 const SUCCESS_ID = "e301438c-0bd0-429c-ab0c-66126501069a";
 const FAILURE_ID = "70e691a5-1e33-4ac3-a356-e7b6d60d92e0";
 
+const NODE_W = 170;
+const NODE_H = 64;
+const TERM_SIZE = 60;
+const START_SIZE = 48;
+
+const NODE_DIMS: Record<string, [number, number]> = {
+  journeyNode: [NODE_W, NODE_H],
+  startNode:   [START_SIZE, START_SIZE],
+  successNode: [TERM_SIZE, TERM_SIZE],
+  failureNode: [TERM_SIZE, TERM_SIZE],
+};
+
 // ── Journey JSON shape ────────────────────────────────────────────────────────
+
 interface JourneyJson {
   _id?: string;
   entryNodeId?: string;
@@ -35,58 +55,69 @@ interface JourneyJson {
 // ── Custom node components ────────────────────────────────────────────────────
 
 function JourneyNodeComponent({ data }: NodeProps) {
-  const d = data as { label: string; nodeType?: string };
+  const d = data as { label: string; nodeType?: string; isSelected?: boolean; isSearchMatch?: boolean };
   return (
-    <div className="bg-white border border-slate-300 rounded-lg px-3 py-2 shadow-sm min-w-[130px] max-w-[200px]">
+    <div className={cn(
+      "bg-white border rounded-lg px-3 py-2 shadow-sm transition-all",
+      d.isSelected       ? "border-sky-500 ring-2 ring-sky-300 shadow-sky-100" :
+      d.isSearchMatch    ? "border-amber-400 ring-2 ring-amber-200" :
+                           "border-slate-300"
+    )} style={{ width: NODE_W, minHeight: NODE_H }}>
       <Handle type="target" position={Position.Left} style={{ background: "#94a3b8" }} />
-      <p className="text-[11px] font-medium text-slate-700 leading-snug truncate">{d.label}</p>
-      {d.nodeType && (
-        <p className="text-[9px] text-slate-400 truncate mt-0.5">{d.nodeType}</p>
-      )}
+      <p className="text-[11px] font-medium text-slate-700 leading-snug break-words">{d.label}</p>
+      {d.nodeType && <p className="text-[9px] text-slate-400 mt-0.5 truncate">{d.nodeType}</p>}
       <Handle type="source" position={Position.Right} style={{ background: "#94a3b8" }} />
     </div>
   );
 }
 
-function StartNodeComponent(_: NodeProps) {
+function StartNodeComponent({ data }: NodeProps) {
+  const d = data as { isSearchMatch?: boolean };
   return (
-    <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow text-[9px] font-bold text-white">
+    <div className={cn(
+      "rounded-full flex items-center justify-center shadow font-bold text-white text-[9px]",
+      d.isSearchMatch ? "bg-emerald-400 ring-2 ring-amber-300" : "bg-emerald-500"
+    )} style={{ width: START_SIZE, height: START_SIZE }}>
       <Handle type="source" position={Position.Right} style={{ background: "#059669" }} />
       START
     </div>
   );
 }
 
-function SuccessNodeComponent(_: NodeProps) {
+function SuccessNodeComponent({ data }: NodeProps) {
+  const d = data as { isSelected?: boolean };
   return (
-    <div className="w-14 h-14 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center shadow-sm text-[10px] font-bold text-emerald-700 text-center leading-tight">
+    <div className={cn(
+      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-emerald-700 text-[10px] text-center leading-tight",
+      d.isSelected ? "bg-emerald-100 border-emerald-500 ring-2 ring-emerald-200" : "bg-emerald-50 border-emerald-400"
+    )} style={{ width: TERM_SIZE, height: TERM_SIZE }}>
       <Handle type="target" position={Position.Left} style={{ background: "#34d399" }} />
-      ✓
-      <br />
-      Success
+      ✓<br />OK
     </div>
   );
 }
 
-function FailureNodeComponent(_: NodeProps) {
+function FailureNodeComponent({ data }: NodeProps) {
+  const d = data as { isSelected?: boolean };
   return (
-    <div className="w-14 h-14 rounded-full bg-red-50 border-2 border-red-400 flex items-center justify-center shadow-sm text-[10px] font-bold text-red-700 text-center leading-tight">
+    <div className={cn(
+      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-red-700 text-[10px] text-center leading-tight",
+      d.isSelected ? "bg-red-100 border-red-500 ring-2 ring-red-200" : "bg-red-50 border-red-400"
+    )} style={{ width: TERM_SIZE, height: TERM_SIZE }}>
       <Handle type="target" position={Position.Left} style={{ background: "#f87171" }} />
-      ✗
-      <br />
-      Failure
+      ✗<br />Fail
     </div>
   );
 }
 
 const nodeTypes = {
   journeyNode: JourneyNodeComponent,
-  startNode: StartNodeComponent,
+  startNode:   StartNodeComponent,
   successNode: SuccessNodeComponent,
   failureNode: FailureNodeComponent,
 };
 
-// ── Parser ────────────────────────────────────────────────────────────────────
+// ── Journey parser (no positions yet) ────────────────────────────────────────
 
 function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
   let data: JourneyJson;
@@ -95,24 +126,17 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
   const rfNodes: Node[] = [];
   const rfEdges: Edge[] = [];
 
-  // Static nodes (Start, Success, Failure, unknown terminals)
   for (const [id, pos] of Object.entries(data.staticNodes ?? {})) {
-    if (id === "startNode") {
-      rfNodes.push({ id, type: "startNode", position: { x: pos.x, y: pos.y }, data: { label: "Start" } });
-    } else if (id === SUCCESS_ID) {
-      rfNodes.push({ id, type: "successNode", position: { x: pos.x, y: pos.y }, data: { label: "Success" } });
-    } else if (id === FAILURE_ID) {
-      rfNodes.push({ id, type: "failureNode", position: { x: pos.x, y: pos.y }, data: { label: "Failure" } });
-    } else {
-      // Unknown terminal — render as a neutral success-shaped node
-      rfNodes.push({ id, type: "successNode", position: { x: pos.x, y: pos.y }, data: { label: "End" } });
-    }
+    const type =
+      id === "startNode"  ? "startNode"   :
+      id === SUCCESS_ID   ? "successNode" :
+      id === FAILURE_ID   ? "failureNode" : "successNode";
+    rfNodes.push({ id, type, position: { x: pos.x, y: pos.y }, data: { label: id === "startNode" ? "Start" : id === SUCCESS_ID ? "Success" : id === FAILURE_ID ? "Failure" : "End" } });
   }
 
-  // Synthetic edge: startNode → entryNodeId
   if (data.entryNodeId && data.staticNodes?.["startNode"]) {
     rfEdges.push({
-      id: "__start-entry__",
+      id: "__start__",
       source: "startNode",
       target: data.entryNodeId,
       type: "smoothstep",
@@ -120,7 +144,6 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
     });
   }
 
-  // Regular nodes + their outgoing edges
   for (const [id, node] of Object.entries(data.nodes ?? {})) {
     rfNodes.push({
       id,
@@ -133,8 +156,8 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
     });
 
     for (const [outcomeId, targetId] of Object.entries(node.connections ?? {})) {
-      const isFailure = targetId === FAILURE_ID;
-      const isSuccess = targetId === SUCCESS_ID;
+      const toSuccess = targetId === SUCCESS_ID;
+      const toFailure = targetId === FAILURE_ID;
       rfEdges.push({
         id: `${id}--${outcomeId}`,
         source: id,
@@ -142,7 +165,7 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
         label: outcomeId === "outcome" ? undefined : outcomeId,
         type: "smoothstep",
         style: {
-          stroke: isFailure ? "#f87171" : isSuccess ? "#34d399" : "#94a3b8",
+          stroke: toFailure ? "#f87171" : toSuccess ? "#34d399" : "#94a3b8",
           strokeWidth: 1.5,
         },
         labelStyle: { fontSize: 9, fill: "#64748b" },
@@ -156,12 +179,197 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
   return { nodes: rfNodes, edges: rfEdges };
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Dagre layout ──────────────────────────────────────────────────────────────
 
-export function JourneyGraph({ json }: { json: string }) {
-  const { nodes, edges } = useMemo(() => parseJourney(json), [json]);
+function applyDagreLayout(nodes: Node[], edges: Edge[]): Node[] {
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: "LR", nodesep: 50, ranksep: 90, marginx: 40, marginy: 40 });
 
-  if (nodes.length === 0) {
+  nodes.forEach((n) => {
+    const [w, h] = NODE_DIMS[n.type ?? "journeyNode"] ?? [NODE_W, NODE_H];
+    g.setNode(n.id, { width: w, height: h });
+  });
+  edges.forEach((e) => g.setEdge(e.source, e.target));
+
+  dagre.layout(g);
+
+  return nodes.map((n) => {
+    const { x, y } = g.node(n.id);
+    const [w, h] = NODE_DIMS[n.type ?? "journeyNode"] ?? [NODE_W, NODE_H];
+    return { ...n, position: { x: x - w / 2, y: y - h / 2 } };
+  });
+}
+
+// ── Path tracing helpers ──────────────────────────────────────────────────────
+
+function getConnected(nodeId: string, edges: Edge[]): { ancestors: Set<string>; descendants: Set<string> } {
+  const ancestors = new Set<string>();
+  const descendants = new Set<string>();
+
+  // BFS backwards (ancestors)
+  const queue = [nodeId];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    for (const e of edges) {
+      if (e.target === cur && !ancestors.has(e.source)) {
+        ancestors.add(e.source);
+        queue.push(e.source);
+      }
+    }
+  }
+
+  // BFS forwards (descendants)
+  queue.push(nodeId);
+  while (queue.length) {
+    const cur = queue.shift()!;
+    for (const e of edges) {
+      if (e.source === cur && !descendants.has(e.target)) {
+        descendants.add(e.target);
+        queue.push(e.target);
+      }
+    }
+  }
+
+  return { ancestors, descendants };
+}
+
+// ── Search panel (inside ReactFlow, uses useReactFlow) ────────────────────────
+
+function SearchPanel({
+  query, setQuery, matchCount,
+}: { query: string; setQuery: (q: string) => void; matchCount: number }) {
+  return (
+    <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg shadow-md px-3 py-2">
+      <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+      </svg>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search nodes…"
+        className="text-xs w-36 outline-none text-slate-700 placeholder-slate-400 bg-transparent"
+      />
+      {query && (
+        <>
+          <span className="text-[10px] text-slate-400 tabular-nums shrink-0">
+            {matchCount} match{matchCount !== 1 ? "es" : ""}
+          </span>
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className="text-slate-400 hover:text-slate-600 shrink-0"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Legend ────────────────────────────────────────────────────────────────────
+
+function Legend() {
+  return (
+    <div className="bg-white border border-slate-200 rounded-lg shadow-md px-3 py-2 text-[10px] text-slate-500 space-y-1.5">
+      <p className="font-semibold text-slate-600 text-[11px]">Legend</p>
+      <div className="flex items-center gap-1.5">
+        <span className="w-3 h-0.5 bg-slate-400 inline-block" />
+        <span>Transition</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-3 h-0.5 bg-emerald-400 inline-block" />
+        <span>→ Success</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-3 h-0.5 bg-red-400 inline-block" />
+        <span>→ Failure</span>
+      </div>
+      <p className="pt-0.5 text-slate-400 border-t border-slate-100">Click node to trace path</p>
+    </div>
+  );
+}
+
+// ── Inner graph component (has access to useReactFlow) ────────────────────────
+
+function JourneyGraphInner({ json }: { json: string }) {
+  const { fitView } = useReactFlow();
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Parse + layout (recomputed only when json changes)
+  const { layoutNodes, baseEdges } = useMemo(() => {
+    const { nodes, edges } = parseJourney(json);
+    return { layoutNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
+  }, [json]);
+
+  // Reset selection when journey changes
+  useEffect(() => {
+    setSelectedNodeId(null);
+    setSearchQuery("");
+  }, [json]);
+
+  // Focus search matches
+  const searchMatches = useMemo(() => {
+    if (!searchQuery.trim()) return new Set<string>();
+    const q = searchQuery.toLowerCase();
+    return new Set(layoutNodes.filter((n) => String(n.data.label ?? "").toLowerCase().includes(q)).map((n) => n.id));
+  }, [searchQuery, layoutNodes]);
+
+  useEffect(() => {
+    if (searchMatches.size === 0) return;
+    const ids = [...searchMatches].map((id) => ({ id }));
+    // small delay so fitView runs after render
+    const t = setTimeout(() => fitView({ nodes: ids, duration: 500, padding: 0.4 }), 50);
+    return () => clearTimeout(t);
+  }, [searchMatches, fitView]);
+
+  // Path tracing
+  const { ancestors, descendants } = useMemo(() => {
+    if (!selectedNodeId) return { ancestors: new Set<string>(), descendants: new Set<string>() };
+    return getConnected(selectedNodeId, baseEdges);
+  }, [selectedNodeId, baseEdges]);
+
+  const highlighted = useMemo(() => {
+    if (!selectedNodeId) return null;
+    return new Set([selectedNodeId, ...ancestors, ...descendants]);
+  }, [selectedNodeId, ancestors, descendants]);
+
+  // Apply visual states to nodes
+  const nodes = useMemo<Node[]>(() => layoutNodes.map((n) => {
+    const isSelected    = n.id === selectedNodeId;
+    const isHighlighted = highlighted ? highlighted.has(n.id) : true;
+    const isSearchMatch = searchMatches.has(n.id);
+    return {
+      ...n,
+      data: { ...n.data, isSelected, isSearchMatch },
+      style: { opacity: isHighlighted ? 1 : 0.15, transition: "opacity 0.2s" },
+    };
+  }), [layoutNodes, selectedNodeId, highlighted, searchMatches]);
+
+  // Apply visual states to edges
+  const edges = useMemo<Edge[]>(() => baseEdges.map((e) => {
+    const isOnPath = highlighted
+      ? highlighted.has(e.source) && highlighted.has(e.target)
+      : true;
+    return {
+      ...e,
+      style: { ...e.style, opacity: isOnPath ? 1 : 0.08, transition: "opacity 0.2s" },
+      animated: isOnPath && !!highlighted,
+    };
+  }), [baseEdges, highlighted]);
+
+  const handleNodeClick: NodeMouseHandler = useCallback((_evt, node) => {
+    setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
+  }, []);
+
+  const handlePaneClick = useCallback(() => setSelectedNodeId(null), []);
+
+  if (layoutNodes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-sm text-slate-400">
         Unable to parse journey data
@@ -174,11 +382,19 @@ export function JourneyGraph({ json }: { json: string }) {
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      onNodeClick={handleNodeClick}
+      onPaneClick={handlePaneClick}
       fitView
       fitViewOptions={{ padding: 0.25 }}
-      minZoom={0.15}
+      minZoom={0.1}
       maxZoom={2}
     >
+      <Panel position="top-left">
+        <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} />
+      </Panel>
+      <Panel position="bottom-left">
+        <Legend />
+      </Panel>
       <Background color="#e2e8f0" gap={20} size={1} />
       <Controls />
       <MiniMap
@@ -191,5 +407,15 @@ export function JourneyGraph({ json }: { json: string }) {
         pannable
       />
     </ReactFlow>
+  );
+}
+
+// ── Public export ─────────────────────────────────────────────────────────────
+
+export function JourneyGraph({ json }: { json: string }) {
+  return (
+    <ReactFlowProvider>
+      <JourneyGraphInner json={json} />
+    </ReactFlowProvider>
   );
 }
