@@ -59,20 +59,14 @@ export function PushForm({ environments }: { environments: Environment[] }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (planMode) {
-      const scopeSelections = Object.entries(planSelections).map(([scope, items]) => ({
-        scope: scope as ConfigScope,
-        items: items ?? undefined,
-      }));
-      run("/api/push", { environment, scopeSelections });
-    } else {
-      run("/api/push", { environment, scopes });
-    }
+    const scopeSelections = Object.entries(planSelections).map(([scope, items]) => ({
+      scope: scope as ConfigScope,
+      items: items ?? undefined,
+    }));
+    run("/api/push", { environment, scopeSelections });
   };
 
-  const canSubmit = planMode
-    ? Object.keys(planSelections).length > 0
-    : scopes.length > 0;
+  const canSubmit = Object.keys(planSelections).length > 0;
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -136,14 +130,6 @@ export function PushForm({ environments }: { environments: Environment[] }) {
 
         <div className="flex gap-3 items-center">
           <button
-            type="submit"
-            disabled={running || !environment || !canSubmit || (isProd && !confirmed)}
-            className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {running ? "Pushing..." : planMode ? "Push Plan" : "Push Config"}
-          </button>
-
-          <button
             type="button"
             onClick={handleTogglePlanMode}
             disabled={running || scopes.length === 0}
@@ -155,6 +141,14 @@ export function PushForm({ environments }: { environments: Environment[] }) {
             )}
           >
             {planMode ? "Cancel Plan" : "Plan"}
+          </button>
+
+          <button
+            type="submit"
+            disabled={running || !environment || !planMode || !canSubmit || (isProd && !confirmed)}
+            className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {running ? "Pushing..." : "Push Plan"}
           </button>
 
           {running && (
