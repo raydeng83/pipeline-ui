@@ -24,12 +24,15 @@ import { cn } from "@/lib/utils";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const SUCCESS_ID  = "e301438c-0bd0-429c-ab0c-66126501069a";
-const FAILURE_ID  = "70e691a5-1e33-4ac3-a356-e7b6d60d92e0";
-const NODE_W      = 175;
-const NODE_H      = 64;
-const TERM_SIZE   = 60;
-const START_SIZE  = 48;
+const SUCCESS_ID = "e301438c-0bd0-429c-ab0c-66126501069a";
+const FAILURE_ID = "70e691a5-1e33-4ac3-a356-e7b6d60d92e0";
+const NODE_W     = 175;
+const NODE_H     = 64;
+const TERM_SIZE  = 60;
+const START_SIZE = 48;
+
+// Cycle through these types per outcome index to create visual variety
+const EDGE_TYPE_CYCLE = ["smoothstep", "bezier", "step"] as const;
 
 function journeyNodeHeight(outcomeCount: number): number {
   return Math.max(NODE_H, outcomeCount * 22 + 28);
@@ -46,7 +49,7 @@ function getNodeDims(node: Node): [number, number] {
   return [NODE_W, NODE_H];
 }
 
-// ── Journey JSON shape ────────────────────────────────────────────────────────
+// ── Journey JSON ──────────────────────────────────────────────────────────────
 
 interface JourneyJson {
   _id?: string;
@@ -61,19 +64,7 @@ interface JourneyJson {
   staticNodes?: Record<string, { x: number; y: number }>;
 }
 
-// ── Grip icon ─────────────────────────────────────────────────────────────────
-
-function GripIcon() {
-  return (
-    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
-      <circle cx="4" cy="3" r="1" /><circle cx="8" cy="3" r="1" />
-      <circle cx="4" cy="6" r="1" /><circle cx="8" cy="6" r="1" />
-      <circle cx="4" cy="9" r="1" /><circle cx="8" cy="9" r="1" />
-    </svg>
-  );
-}
-
-// ── Custom node components ────────────────────────────────────────────────────
+// ── Custom nodes ──────────────────────────────────────────────────────────────
 
 function JourneyNodeComponent({ data }: NodeProps) {
   const d = data as {
@@ -82,46 +73,27 @@ function JourneyNodeComponent({ data }: NodeProps) {
     outcomes: string[];
     isSelected?: boolean;
     isSearchMatch?: boolean;
-    dragFree?: boolean;
   };
-  const outcomes  = d.outcomes ?? [];
-  const h         = journeyNodeHeight(outcomes.length);
+  const outcomes = d.outcomes ?? [];
+  const h        = journeyNodeHeight(outcomes.length);
 
   return (
     <div
       className={cn(
-        "bg-white border rounded-lg shadow-sm transition-all overflow-visible",
+        "bg-white border rounded-lg shadow-sm transition-all overflow-visible cursor-grab active:cursor-grabbing",
         d.isSelected    ? "border-sky-500 ring-2 ring-sky-300 shadow-sky-100" :
         d.isSearchMatch ? "border-amber-400 ring-2 ring-amber-200" :
                           "border-slate-300"
       )}
       style={{ width: NODE_W, height: h, position: "relative" }}
     >
-      {/* Drag handle strip — only visible in free-drag mode */}
-      {d.dragFree && (
-        <div
-          className="drag-handle absolute top-0 left-0 right-0 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 hover:bg-slate-50 rounded-t-lg transition-colors"
-          style={{ height: 16 }}
-        >
-          <GripIcon />
-        </div>
-      )}
-
       <Handle type="target" position={Position.Left} style={{ top: "50%", background: "#94a3b8" }} />
 
-      {/* Label */}
-      <div
-        className="px-3 pt-2"
-        style={{
-          paddingTop: d.dragFree ? 20 : 8,
-          paddingRight: outcomes.length > 0 ? 56 : 12,
-        }}
-      >
+      <div className="px-3 pt-2" style={{ paddingRight: outcomes.length > 0 ? 56 : 12 }}>
         <p className="text-[11px] font-medium text-slate-700 leading-snug break-words">{d.label}</p>
         {d.nodeType && <p className="text-[9px] text-slate-400 mt-0.5 truncate">{d.nodeType}</p>}
       </div>
 
-      {/* Per-outcome source handles */}
       {outcomes.length > 0
         ? outcomes.map((outcome, i) => {
             const topPct = `${((i + 0.5) / outcomes.length) * 100}%`;
@@ -149,7 +121,7 @@ function JourneyNodeComponent({ data }: NodeProps) {
 
 function StartNodeComponent(_: NodeProps) {
   return (
-    <div className="rounded-full flex items-center justify-center shadow font-bold text-white text-[9px] bg-emerald-500"
+    <div className="rounded-full flex items-center justify-center shadow font-bold text-white text-[9px] bg-emerald-500 cursor-grab active:cursor-grabbing"
       style={{ width: START_SIZE, height: START_SIZE }}>
       <Handle type="source" position={Position.Right} style={{ background: "#059669" }} />
       START
@@ -161,7 +133,7 @@ function SuccessNodeComponent({ data }: NodeProps) {
   const d = data as { isSelected?: boolean };
   return (
     <div className={cn(
-      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-emerald-700 text-[10px] text-center leading-tight",
+      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-emerald-700 text-[10px] text-center leading-tight cursor-grab active:cursor-grabbing",
       d.isSelected ? "bg-emerald-100 border-emerald-500 ring-2 ring-emerald-200" : "bg-emerald-50 border-emerald-400"
     )} style={{ width: TERM_SIZE, height: TERM_SIZE }}>
       <Handle type="target" position={Position.Left} style={{ background: "#34d399" }} />
@@ -174,7 +146,7 @@ function FailureNodeComponent({ data }: NodeProps) {
   const d = data as { isSelected?: boolean };
   return (
     <div className={cn(
-      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-red-700 text-[10px] text-center leading-tight",
+      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-red-700 text-[10px] text-center leading-tight cursor-grab active:cursor-grabbing",
       d.isSelected ? "bg-red-100 border-red-500 ring-2 ring-red-200" : "bg-red-50 border-red-400"
     )} style={{ width: TERM_SIZE, height: TERM_SIZE }}>
       <Handle type="target" position={Position.Left} style={{ background: "#f87171" }} />
@@ -190,7 +162,7 @@ const nodeTypes = {
   failureNode: FailureNodeComponent,
 };
 
-// ── Journey parser ────────────────────────────────────────────────────────────
+// ── Parser ────────────────────────────────────────────────────────────────────
 
 function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
   let data: JourneyJson;
@@ -218,22 +190,25 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
     rfNodes.push({ id, type: "journeyNode", position: { x: 0, y: 0 },
       data: { label: node.displayName ?? node.nodeType ?? id.slice(0, 8), nodeType: node.nodeType, outcomes } });
 
-    for (const [outcomeId, targetId] of Object.entries(node.connections ?? {})) {
+    const entries = Object.entries(node.connections ?? {});
+    entries.forEach(([outcomeId, targetId], i) => {
       const toSuccess = targetId === SUCCESS_ID;
       const toFailure = targetId === FAILURE_ID;
+      // Terminal edges always bezier; regular edges cycle through types for variety
+      const edgeType = (toSuccess || toFailure) ? "bezier" : EDGE_TYPE_CYCLE[i % EDGE_TYPE_CYCLE.length];
       rfEdges.push({
         id: `${id}--${outcomeId}`,
         source: id, sourceHandle: outcomeId,
         target: targetId,
         label: outcomeId === "outcome" ? undefined : outcomeId,
-        type: "smoothstep",
+        type: edgeType,
         style: { stroke: toFailure ? "#f87171" : toSuccess ? "#34d399" : "#64748b", strokeWidth: 1.5 },
         labelStyle: { fontSize: 9, fill: "#64748b" },
         labelBgStyle: { fill: "#f8fafc", fillOpacity: 0.9 },
         labelBgPadding: [3, 5] as [number, number],
         labelBgBorderRadius: 3,
       });
-    }
+    });
   }
 
   return { nodes: rfNodes, edges: rfEdges };
@@ -279,7 +254,9 @@ function getConnected(nodeId: string, edges: Edge[]) {
 
 // ── Panels ────────────────────────────────────────────────────────────────────
 
-function SearchPanel({ query, setQuery, matchCount }: { query: string; setQuery: (q: string) => void; matchCount: number }) {
+function SearchPanel({
+  query, setQuery, matchCount, onReset,
+}: { query: string; setQuery: (q: string) => void; matchCount: number; onReset: () => void }) {
   return (
     <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg shadow-md px-3 py-2">
       <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -298,57 +275,14 @@ function SearchPanel({ query, setQuery, matchCount }: { query: string; setQuery:
           </button>
         </>
       )}
-    </div>
-  );
-}
-
-function DragControls({ dragFree, onToggle, onReset }: { dragFree: boolean; onToggle: () => void; onReset: () => void }) {
-  return (
-    <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg shadow-md px-2 py-1.5">
-      <button
-        type="button"
-        onClick={onToggle}
-        title={dragFree ? "Lock layout (disable drag)" : "Unlock layout (enable drag)"}
-        className={cn(
-          "flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium transition-colors",
-          dragFree
-            ? "bg-sky-100 text-sky-700 hover:bg-sky-200"
-            : "text-slate-500 hover:bg-slate-100"
-        )}
-      >
-        {dragFree ? (
-          <>
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 0 1 8 0m-4 8v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2z" />
-            </svg>
-            Free
-          </>
-        ) : (
-          <>
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z" />
-            </svg>
-            Locked
-          </>
-        )}
+      <div className="w-px h-4 bg-slate-200 shrink-0" />
+      <button type="button" onClick={onReset} title="Reset to auto layout"
+        className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-700 shrink-0">
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Reset
       </button>
-
-      {dragFree && (
-        <>
-          <div className="w-px h-4 bg-slate-200" />
-          <button
-            type="button"
-            onClick={onReset}
-            title="Reset to auto layout"
-            className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-slate-500 hover:bg-slate-100 transition-colors"
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Reset
-          </button>
-        </>
-      )}
     </div>
   );
 }
@@ -363,42 +297,45 @@ function Legend() {
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-blue-500 inline-block" /><span>Hover edge</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-violet-500 inline-block" /><span>Click edge (pinned)</span></div>
       <p className="pt-1 border-t border-slate-100 text-slate-400">Click node → trace path</p>
+      <p className="text-slate-400">Drag node → rearrange</p>
     </div>
   );
 }
 
 // ── Inner graph ───────────────────────────────────────────────────────────────
 
-function JourneyGraphInner({ json }: { json: string }) {
+function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: number }) {
   const { fitView } = useReactFlow();
 
-  // node positions are managed by RF so drag positions persist
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
-
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredEdgeId,  setHoveredEdgeId]  = useState<string | null>(null);
   const [pinnedEdgeId,   setPinnedEdgeId]   = useState<string | null>(null);
   const [searchQuery,    setSearchQuery]     = useState("");
-  const [dragFree,       setDragFree]        = useState(false);
-  const [layoutKey,      setLayoutKey]       = useState(0); // increment to re-run dagre
+  const [layoutKey,      setLayoutKey]       = useState(0);
 
-  // Parse + dagre — re-runs when json or layoutKey changes
   const { dagreNodes, baseEdges } = useMemo(() => {
     const { nodes, edges } = parseJourney(json);
     return { dagreNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
   }, [json, layoutKey]);
 
-  // Push dagre positions into RF state; reset interaction state
+  // Reset to dagre positions when json or layoutKey changes
   useEffect(() => {
     setRfNodes(dagreNodes);
     setSelectedNodeId(null);
     setSearchQuery("");
     setHoveredEdgeId(null);
     setPinnedEdgeId(null);
-    setDragFree(false);
   }, [dagreNodes, setRfNodes]);
 
-  // Search matches
+  // Fit view when fullscreen toggles
+  useEffect(() => {
+    if (fitViewKey === undefined) return;
+    const t = setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 80);
+    return () => clearTimeout(t);
+  }, [fitViewKey, fitView]);
+
+  // Search
   const searchMatches = useMemo(() => {
     if (!searchQuery.trim()) return new Set<string>();
     const q = searchQuery.toLowerCase();
@@ -422,21 +359,12 @@ function JourneyGraphInner({ json }: { json: string }) {
     return new Set([selectedNodeId, ...ancestors, ...descendants]);
   }, [selectedNodeId, ancestors, descendants]);
 
-  // Styled nodes — apply visual state on top of RF-managed positions
+  // Styled nodes
   const displayNodes = useMemo<Node[]>(() => rfNodes.map((n) => ({
     ...n,
-    data: {
-      ...n.data,
-      isSelected:    n.id === selectedNodeId,
-      isSearchMatch: searchMatches.has(n.id),
-      dragFree,
-    },
-    style: {
-      opacity: highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1,
-      transition: "opacity 0.2s",
-    },
-    draggable: dragFree,
-  })), [rfNodes, selectedNodeId, highlighted, searchMatches, dragFree]);
+    data: { ...n.data, isSelected: n.id === selectedNodeId, isSearchMatch: searchMatches.has(n.id) },
+    style: { opacity: highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1, transition: "opacity 0.2s" },
+  })), [rfNodes, selectedNodeId, highlighted, searchMatches]);
 
   // Styled edges
   const displayEdges = useMemo<Edge[]>(() => {
@@ -448,7 +376,7 @@ function JourneyGraphInner({ json }: { json: string }) {
       const onPath    = highlighted ? (highlighted.has(e.source) && highlighted.has(e.target)) : true;
 
       let opacity = 1;
-      if (activeEdgeId)  opacity = isActive ? 1 : 0.06;
+      if (activeEdgeId)     opacity = isActive ? 1 : 0.06;
       else if (highlighted) opacity = onPath ? 1 : 0.06;
 
       const baseStroke = (e.style?.stroke as string | undefined) ?? "#64748b";
@@ -466,18 +394,11 @@ function JourneyGraphInner({ json }: { json: string }) {
     });
   }, [baseEdges, highlighted, hoveredEdgeId, pinnedEdgeId]);
 
-  const handleNodeClick: NodeMouseHandler = useCallback((_e, node) => {
-    if (!dragFree) setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
-  }, [dragFree]);
-
+  const handleNodeClick: NodeMouseHandler    = useCallback((_e, node) => setSelectedNodeId((p) => p === node.id ? null : node.id), []);
   const handleEdgeMouseEnter: EdgeMouseHandler = useCallback((_e, edge) => setHoveredEdgeId(edge.id), []);
   const handleEdgeMouseLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), []);
-  const handleEdgeClick: EdgeMouseHandler      = useCallback((_e, edge) => setPinnedEdgeId((prev) => (prev === edge.id ? null : edge.id)), []);
-
-  const handlePaneClick = useCallback(() => {
-    setSelectedNodeId(null);
-    setPinnedEdgeId(null);
-  }, []);
+  const handleEdgeClick: EdgeMouseHandler    = useCallback((_e, edge) => setPinnedEdgeId((p) => p === edge.id ? null : edge.id), []);
+  const handlePaneClick                      = useCallback(() => { setSelectedNodeId(null); setPinnedEdgeId(null); }, []);
 
   if (rfNodes.length === 0 && dagreNodes.length === 0) {
     return <div className="flex items-center justify-center h-full text-sm text-slate-400">Unable to parse journey data</div>;
@@ -494,23 +415,22 @@ function JourneyGraphInner({ json }: { json: string }) {
       onEdgeMouseLeave={handleEdgeMouseLeave}
       onEdgeClick={handleEdgeClick}
       onPaneClick={handlePaneClick}
-      nodesDraggable={dragFree}
-      snapToGrid={dragFree}
+      nodesDraggable
+      snapToGrid
       snapGrid={[20, 20]}
       fitView
       fitViewOptions={{ padding: 0.25 }}
       minZoom={0.1}
       maxZoom={2}
     >
-      <Panel position="top-left" className="flex flex-col gap-2">
-        <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} />
-        <DragControls dragFree={dragFree} onToggle={() => setDragFree((f) => !f)} onReset={() => setLayoutKey((k) => k + 1)} />
+      <Panel position="top-left">
+        <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} onReset={() => setLayoutKey((k) => k + 1)} />
       </Panel>
       <Panel position="top-right">
         <Legend />
       </Panel>
       <Background color="#e2e8f0" gap={20} size={1} />
-      <Controls />
+      <Controls showInteractive={false} />
       <MiniMap
         nodeColor={(n) =>
           n.type === "successNode" ? "#34d399" :
@@ -525,10 +445,10 @@ function JourneyGraphInner({ json }: { json: string }) {
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export function JourneyGraph({ json }: { json: string }) {
+export function JourneyGraph({ json, fitViewKey }: { json: string; fitViewKey?: number }) {
   return (
     <ReactFlowProvider>
-      <JourneyGraphInner json={json} />
+      <JourneyGraphInner json={json} fitViewKey={fitViewKey} />
     </ReactFlowProvider>
   );
 }
