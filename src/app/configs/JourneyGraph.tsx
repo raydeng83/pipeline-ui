@@ -349,8 +349,9 @@ function Legend() {
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-slate-500 inline-block" /><span>Transition</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-emerald-400 inline-block" /><span>→ Success</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-red-400 inline-block" /><span>→ Failure</span></div>
-      <p className="pt-1 border-t border-slate-100 text-slate-400">Click node → trace path</p>
-      <p className="text-slate-400">Hover edge → isolate</p>
+      <div className="flex items-center gap-1.5 pt-1 border-t border-slate-100"><span className="w-4 h-0.5 bg-blue-500 inline-block" /><span className="text-slate-400">Hover edge</span></div>
+      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-violet-500 inline-block" /><span className="text-slate-400">Click edge (pinned)</span></div>
+      <p className="text-slate-400">Click node → trace path</p>
     </div>
   );
 }
@@ -361,6 +362,7 @@ function JourneyGraphInner({ json }: { json: string }) {
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredEdgeId,  setHoveredEdgeId]  = useState<string | null>(null);
+  const [pinnedEdgeId,   setPinnedEdgeId]   = useState<string | null>(null);
   const [searchQuery,    setSearchQuery]     = useState("");
 
   const { layoutNodes, baseEdges } = useMemo(() => {
@@ -368,7 +370,7 @@ function JourneyGraphInner({ json }: { json: string }) {
     return { layoutNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
   }, [json]);
 
-  useEffect(() => { setSelectedNodeId(null); setSearchQuery(""); setHoveredEdgeId(null); }, [json]);
+  useEffect(() => { setSelectedNodeId(null); setSearchQuery(""); setHoveredEdgeId(null); setPinnedEdgeId(null); }, [json]);
 
   // Search
   const searchMatches = useMemo(() => {
@@ -408,34 +410,42 @@ function JourneyGraphInner({ json }: { json: string }) {
     },
   })), [layoutNodes, selectedNodeId, highlighted, searchMatches]);
 
-  // Styled edges — hover takes priority over path tracing
-  const edges = useMemo<Edge[]>(() => baseEdges.map((e) => {
-    const isHovered = e.id === hoveredEdgeId;
-    const onPath    = highlighted ? (highlighted.has(e.source) && highlighted.has(e.target)) : true;
+  // Styled edges — hover > pin > path tracing
+  const edges = useMemo<Edge[]>(() => {
+    // The edge currently being isolated: hovered (temporary) or pinned (persistent)
+    const activeEdgeId = hoveredEdgeId ?? pinnedEdgeId;
+    return baseEdges.map((e) => {
+      const isHovered = e.id === hoveredEdgeId;
+      const isPinned  = e.id === pinnedEdgeId;
+      const isActive  = e.id === activeEdgeId;
+      const onPath    = highlighted ? (highlighted.has(e.source) && highlighted.has(e.target)) : true;
 
-    let opacity = 1;
-    if (hoveredEdgeId) {
-      opacity = isHovered ? 1 : 0.06;
-    } else if (highlighted) {
-      opacity = onPath ? 1 : 0.06;
-    }
+      let opacity = 1;
+      if (activeEdgeId) {
+        opacity = isActive ? 1 : 0.06;
+      } else if (highlighted) {
+        opacity = onPath ? 1 : 0.06;
+      }
 
-    return {
-      ...e,
-      style: {
-        ...e.style,
-        opacity,
-        strokeWidth: isHovered ? 3 : 1.5,
-        stroke: isHovered
-          ? "#3b82f6"                           // blue highlight on hover
-          : (e.style?.stroke as string | undefined) ?? "#64748b",
-        transition: "opacity 0.15s, stroke-width 0.15s",
-      },
-      animated: !hoveredEdgeId && onPath && !!highlighted,
-      // suppress label when dimmed to reduce clutter
-      label: opacity < 0.5 ? undefined : e.label,
-    };
-  }), [baseEdges, highlighted, hoveredEdgeId]);
+      const baseStroke = (e.style?.stroke as string | undefined) ?? "#64748b";
+      const stroke = isHovered ? "#3b82f6"   // blue while mouse is over
+                   : isPinned  ? "#7c3aed"   // purple when pinned + mouse elsewhere
+                   : baseStroke;
+
+      return {
+        ...e,
+        style: {
+          ...e.style,
+          opacity,
+          strokeWidth: isActive ? 3 : 1.5,
+          stroke,
+          transition: "opacity 0.15s, stroke-width 0.15s",
+        },
+        animated: !activeEdgeId && onPath && !!highlighted,
+        label: opacity < 0.5 ? undefined : e.label,
+      };
+    });
+  }, [baseEdges, highlighted, hoveredEdgeId, pinnedEdgeId]);
 
   const handleNodeClick: NodeMouseHandler = useCallback((_e, node) => {
     setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
@@ -449,7 +459,14 @@ function JourneyGraphInner({ json }: { json: string }) {
     setHoveredEdgeId(null);
   }, []);
 
-  const handlePaneClick = useCallback(() => setSelectedNodeId(null), []);
+  const handleEdgeClick: EdgeMouseHandler = useCallback((_e, edge) => {
+    setPinnedEdgeId((prev) => (prev === edge.id ? null : edge.id));
+  }, []);
+
+  const handlePaneClick = useCallback(() => {
+    setSelectedNodeId(null);
+    setPinnedEdgeId(null);
+  }, []);
 
   if (layoutNodes.length === 0) {
     return <div className="flex items-center justify-center h-full text-sm text-slate-400">Unable to parse journey data</div>;
@@ -463,6 +480,7 @@ function JourneyGraphInner({ json }: { json: string }) {
       onNodeClick={handleNodeClick}
       onEdgeMouseEnter={handleEdgeMouseEnter}
       onEdgeMouseLeave={handleEdgeMouseLeave}
+      onEdgeClick={handleEdgeClick}
       onPaneClick={handlePaneClick}
       fitView
       fitViewOptions={{ padding: 0.25 }}
