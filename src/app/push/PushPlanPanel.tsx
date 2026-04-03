@@ -6,11 +6,16 @@ import { cn } from "@/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
+interface AuditItem {
+  id: string;
+  label: string;
+}
+
 interface AuditEntry {
   scope: string;
   fileCount: number;
   exists: boolean;
-  items: string[];
+  items: AuditItem[];
   selectable: boolean;
 }
 
@@ -135,10 +140,10 @@ function ScopeRow({
       {open && hasItems && (
         <div className="px-3 pb-2 space-y-0.5 bg-slate-50/60">
           {entry.items.map((item) => {
-            const checked = allSelected || selectedSet.has(item);
+            const checked = allSelected || selectedSet.has(item.id);
             return (
               <label
-                key={item}
+                key={item.id}
                 className={cn(
                   "flex items-center gap-2 py-0.5 select-none",
                   entry.selectable ? "cursor-pointer" : "cursor-default"
@@ -149,7 +154,7 @@ function ScopeRow({
                     type="checkbox"
                     checked={checked}
                     disabled={!included}
-                    onChange={(e) => onToggleItem(item, e.target.checked)}
+                    onChange={(e) => onToggleItem(item.id, e.target.checked)}
                     className="w-3 h-3 accent-sky-600 shrink-0"
                   />
                 ) : (
@@ -157,11 +162,11 @@ function ScopeRow({
                 )}
                 <span
                   className={cn(
-                    "text-[11px] font-mono truncate",
+                    "text-[11px] truncate",
                     included && checked ? "text-slate-600" : "text-slate-400"
                   )}
                 >
-                  {item}
+                  {item.label}
                 </span>
               </label>
             );
@@ -221,12 +226,13 @@ export function PushPlanPanel({
     if (!entry) return;
 
     const current = selections[scope];
-    const currentSet = new Set(current === null ? entry.items : (current ?? []));
+    const allIds = entry.items.map((i) => i.id);
+    const currentSet = new Set(current === null ? allIds : (current ?? []));
     if (checked) currentSet.add(item);
     else currentSet.delete(item);
 
     // If all items are selected, collapse to null (all)
-    const allSelected = entry.items.every((i) => currentSet.has(i));
+    const allSelected = allIds.every((id) => currentSet.has(id));
     onItemsChange(scope, allSelected ? null : [...currentSet]);
   };
 

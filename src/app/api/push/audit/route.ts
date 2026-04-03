@@ -1,26 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
-import { FILENAME_FILTER_SCOPES, NAME_FLAG_SCOPES, ConfigScope } from "@/lib/fr-config-types";
+import { FILENAME_FILTER_SCOPES, NAME_FLAG_SCOPES } from "@/lib/fr-config-types";
 import fs from "fs";
 import path from "path";
 
-/**
- * List selectable items for a scope:
- * - FILENAME_FILTER_SCOPES: top-level JSON filenames
- * - NAME_FLAG_SCOPES: top-level subdirectory names (realm dirs)
- * - others: top-level filenames (display-only, not selectable)
- */
-function listScopeItems(configDir: string, scope: string): string[] {
-  const scopeDir = path.join(configDir, scope);
-  if (!fs.existsSync(scopeDir) || !fs.statSync(scopeDir).isDirectory()) return [];
+// ── Scope → directory mapping ──────────────────────────────────────────────────
 
-  const entries = fs.readdirSync(scopeDir, { withFileTypes: true });
+const SCOPE_DIR: Record<string, string> = {
+  "access-config":        "access-config",
+  "audit":                "audit",
+  "connector-definitions":"sync/connectors",
+  "connector-mappings":   "sync/mappings",
+  "cookie-domains":       "cookie-domains",
+  "cors":                 "cors",
+  "csp":                  "csp",
+  "custom-nodes":         "custom-nodes",
+  "email-provider":       "email-provider",
+  "email-templates":      "email-templates",
+  "endpoints":            "endpoints",
+  "idm-authentication":   "idm-authentication-config",
+  "iga-workflows":        "iga/workflows",
+  "internal-roles":       "internal-roles",
+  "kba":                  "kba",
+  "locales":              "locales",
+  "managed-objects":      "managed-objects",
+  "org-privileges":       "org-privileges",
+  "raw":                  "raw",
+  "remote-servers":       "sync/rcs",
+  "schedules":            "schedules",
+  "secrets":              "esvs/secrets",
+  "service-objects":      "service-objects",
+  "telemetry":            "telemetry",
+  "terms-and-conditions": "terms-conditions",
+  "ui-config":            "ui",
+  "variables":            "esvs/variables",
+};
 
-  if ((NAME_FLAG_SCOPES as readonly string[]).includes(scope)) {
-    return entries.filter((e) => e.isDirectory()).map((e) => e.name).sort();
-  }
+// Realm-based scopes: CONFIG_DIR/realms/<realm>/<subdir>
+const REALM_SCOPE_SUBDIR: Record<string, string> = {
+  "authz-policies":  "authorization",
+  "journeys":        "journeys",
+  "oauth2-agents":   "realm-config/agents",
+  "password-policy": "password-policy",
+  "saml":            "realm-config/saml",
+  "scripts":         "scripts",
+  "secret-mappings": "secret-mappings",
+  "services":        "services",
+  "themes":          "themes",
+};
 
-  return entries.filter((e) => e.isFile()).map((e) => e.name).sort();
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+export interface AuditItem {
+  /** Identifier passed to the CLI (filename or directory name) */
+  id: string;
+  /** Human-readable display name */
+  label: string;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function getRealms(configDir: string): string[] {
+  const realmsDir = path.join(configDir, "realms");
+  if (!fs.existsSync(realmsDir)) return [];
+  return fs.readdirSync(realmsDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort();
 }
 
 function countFiles(dir: string): number {
@@ -32,6 +78,111 @@ function countFiles(dir: string): number {
   }
   return count;
 }
+
+function listEntries(dir: string, filter: "files" | "dirs"): string[] {
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return [];
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .filter((e) => filter === "dirs" ? e.isDirectory() : e.isFile())
+    .map((e) => e.name)
+    .sort();
+}
+
+/** Read the `name` field from a JSON file, falling back to the filename stem. */
+function readJsonName(filePath: string, fallback: string): string {
+  try {
+    const json = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    return (typeof json.name === "string" && json.name) ? json.name : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// ── Item builders ──────────────────────────────────────────────────────────────
+
+/** Scripts: id = UUID filename, label = name from JSON */
+function scriptItems(scriptsDirs: string[]): AuditItem[] {
+  const seen = new Set<string>();
+  const items: AuditItem[] = [];
+  for (const dir of scriptsDirs) {
+    const configDir = path.join(dir, "scripts-config");
+    const target = fs.existsSync(configDir) ? configDir : dir;
+    for (const file of listEntries(target, "files")) {
+      if (seen.has(file)) continue;
+      seen.add(file);
+      const label = readJsonName(path.join(target, file), path.basename(file, ".json"));
+      items.push({ id: file, label });
+    }
+  }
+  return items.sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/** Journeys: id = journey directory name, label = same (dirs are already named) */
+function journeyItems(journeyDirs: string[]): AuditItem[] {
+  const seen = new Set<string>();
+  const items: AuditItem[] = [];
+  for (const dir of journeyDirs) {
+    for (const name of listEntries(dir, "dirs")) {
+      if (seen.has(name)) continue;
+      seen.add(name);
+      items.push({ id: name, label: name });
+    }
+  }
+  return items.sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/** Generic: id = label = filename or dirname */
+function genericItems(dir: string, filter: "files" | "dirs"): AuditItem[] {
+  return listEntries(dir, filter).map((name) => ({ id: name, label: name }));
+}
+
+// ── Scope audit ────────────────────────────────────────────────────────────────
+
+function auditScope(configDir: string, scope: string) {
+  const isFilenameFilter = (FILENAME_FILTER_SCOPES as readonly string[]).includes(scope);
+  const isNameFlag = (NAME_FLAG_SCOPES as readonly string[]).includes(scope);
+  const selectable = isFilenameFilter || isNameFlag;
+
+  // Realm-based scope
+  if (scope in REALM_SCOPE_SUBDIR) {
+    const subdir = REALM_SCOPE_SUBDIR[scope];
+    const realms = getRealms(configDir);
+    const realmDirs = realms
+      .map((r) => path.join(configDir, "realms", r, subdir))
+      .filter((d) => fs.existsSync(d));
+
+    const fileCount = realmDirs.reduce((sum, d) => sum + countFiles(d), 0);
+    const exists = realmDirs.length > 0;
+
+    let items: AuditItem[];
+    if (scope === "scripts") {
+      items = scriptItems(realmDirs);
+    } else if (isNameFlag) {
+      // Journey dirs (and other NAME_FLAG realm scopes): list individual item dirs
+      items = journeyItems(realmDirs);
+    } else {
+      items = realmDirs.flatMap((d) => genericItems(d, "files"));
+    }
+
+    return { scope, fileCount, exists, items, selectable };
+  }
+
+  // Direct scope
+  const dirName = SCOPE_DIR[scope] ?? scope;
+  const scopeDir = path.join(configDir, dirName);
+  const exists = fs.existsSync(scopeDir);
+  const fileCount = countFiles(scopeDir);
+
+  let items: AuditItem[];
+  if (isNameFlag) {
+    items = genericItems(scopeDir, "dirs");
+  } else {
+    items = genericItems(scopeDir, "files");
+  }
+
+  return { scope, fileCount, exists, items, selectable };
+}
+
+// ── Route ──────────────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -48,21 +199,7 @@ export async function GET(req: NextRequest) {
   }
 
   const scopes = scopesParam ? scopesParam.split(",").filter(Boolean) : [];
-
-  const audit = scopes.map((scope) => {
-    const scopeDir = path.join(configDir, scope);
-    const exists = fs.existsSync(scopeDir);
-    const items = listScopeItems(configDir, scope);
-    const selectable = (FILENAME_FILTER_SCOPES as readonly string[]).includes(scope) ||
-                       (NAME_FLAG_SCOPES as readonly string[]).includes(scope);
-    return {
-      scope,
-      fileCount: countFiles(scopeDir),
-      exists,
-      items,
-      selectable,
-    };
-  });
+  const audit = scopes.map((scope) => auditScope(configDir, scope));
 
   return NextResponse.json(audit);
 }
