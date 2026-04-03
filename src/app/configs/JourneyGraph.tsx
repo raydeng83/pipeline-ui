@@ -31,8 +31,6 @@ const NODE_H     = 64;
 const TERM_SIZE  = 60;
 const START_SIZE = 48;
 
-// Cycle through these types per outcome index to create visual variety
-const EDGE_TYPE_CYCLE = ["smoothstep", "bezier", "step"] as const;
 
 function journeyNodeHeight(outcomeCount: number): number {
   return Math.max(NODE_H, outcomeCount * 22 + 28);
@@ -182,7 +180,7 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
 
   if (data.entryNodeId && data.staticNodes?.["startNode"]) {
     rfEdges.push({ id: "__start__", source: "startNode", target: data.entryNodeId,
-      type: "smoothstep", style: { stroke: "#10b981", strokeWidth: 2 } });
+      type: "bezier", style: { stroke: "#10b981", strokeWidth: 2 } });
   }
 
   for (const [id, node] of Object.entries(data.nodes ?? {})) {
@@ -191,11 +189,10 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
       data: { label: node.displayName ?? node.nodeType ?? id.slice(0, 8), nodeType: node.nodeType, outcomes } });
 
     const entries = Object.entries(node.connections ?? {});
-    entries.forEach(([outcomeId, targetId], i) => {
+    entries.forEach(([outcomeId, targetId]) => {
       const toSuccess = targetId === SUCCESS_ID;
       const toFailure = targetId === FAILURE_ID;
-      // Terminal edges always bezier; regular edges cycle through types for variety
-      const edgeType = (toSuccess || toFailure) ? "bezier" : EDGE_TYPE_CYCLE[i % EDGE_TYPE_CYCLE.length];
+      const edgeType = "bezier";
       rfEdges.push({
         id: `${id}--${outcomeId}`,
         source: id, sourceHandle: outcomeId,
