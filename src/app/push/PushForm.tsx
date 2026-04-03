@@ -100,20 +100,27 @@ export function PushForm({ environments }: { environments: Environment[] }) {
           action="push"
         />
 
-        {/* Audit (simple mode) or Plan panel */}
-        {planMode ? (
-          <PushPlanPanel
-            environment={environment}
-            scopes={scopes}
-            selections={planSelections}
-            onScopeToggle={handleScopeToggle}
-            onItemsChange={(scope, items) =>
-              setPlanSelections((prev) => ({ ...prev, [scope]: items }))
-            }
-          />
-        ) : (
-          <PushAudit environment={environment} scopes={scopes} />
-        )}
+        {/* Local files to push */}
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-slate-700">Local Files to Push</label>
+          {planMode ? (
+            <PushPlanPanel
+              environment={environment}
+              scopes={scopes}
+              selections={planSelections}
+              onScopeToggle={handleScopeToggle}
+              onItemsChange={(scope, items) =>
+                setPlanSelections((prev) => ({ ...prev, [scope]: items }))
+              }
+            />
+          ) : scopes.length === 0 ? (
+            <div className="flex items-center justify-center h-32 rounded-md border border-dashed border-slate-200 bg-slate-50">
+              <p className="text-sm text-slate-400">Select scopes above to see local files</p>
+            </div>
+          ) : (
+            <PushAudit environment={environment} scopes={scopes} />
+          )}
+        </div>
 
         {isProd && (
           <label className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 cursor-pointer">
