@@ -6,6 +6,7 @@ import { FileNode } from "@/app/api/configs/[env]/route";
 import type { ViewableFile } from "@/app/api/push/item/route";
 import type { AuditItem } from "@/app/api/push/audit/route";
 import { cn } from "@/lib/utils";
+import { JourneyGraph } from "./JourneyGraph";
 
 // ── JSON syntax highlighter ───────────────────────────────────────────────────
 
@@ -211,6 +212,7 @@ function SectionsView({ environment }: { environment: string }) {
   const [activeTab, setActiveTab] = useState(0);
   const [fileLoading, setFileLoading] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
+  const [col3View, setCol3View] = useState<"graph" | "json">("graph");
 
   // Fetch audit for all scopes when env changes
   useEffect(() => {
@@ -232,6 +234,7 @@ function SectionsView({ environment }: { environment: string }) {
     setFileLoading(true);
     setFiles(null);
     setActiveTab(0);
+    setCol3View(selectedScope === "journeys" ? "graph" : "json");
     const params = new URLSearchParams({ environment, scope: selectedScope, item: selectedItem.id });
     fetch(`/api/push/item?${params}`)
       .then((r) => r.json())
@@ -375,48 +378,99 @@ function SectionsView({ environment }: { environment: string }) {
         )}
       </div>
 
-      {/* Column 3 — File content */}
-      <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden min-w-0">
+      {/* Column 3 — File content / Journey graph */}
+      <div className={cn(
+        "flex-1 flex flex-col overflow-hidden min-w-0",
+        selectedItem && col3View === "graph" && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
+      )}>
         {selectedItem ? (
           <>
-            {/* Tabs */}
-            {files && files.length > 1 && (
-              <div className="flex border-b border-slate-700 bg-slate-800 shrink-0 overflow-x-auto">
-                {files.map((f, i) => (
+            {/* Header bar */}
+            <div className={cn(
+              "flex items-center gap-2 px-4 py-2 border-b shrink-0",
+              col3View === "graph" && selectedScope === "journeys"
+                ? "border-slate-200 bg-white"
+                : "border-slate-700 bg-slate-800"
+            )}>
+              <span className={cn(
+                "text-xs font-medium truncate flex-1",
+                col3View === "graph" && selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
+              )}>
+                {selectedItem.label}
+              </span>
+
+              {/* Graph / JSON toggle — journeys only */}
+              {selectedScope === "journeys" && files && files.length > 0 && (
+                <div className="flex rounded border border-slate-200 overflow-hidden text-[10px] font-medium shrink-0">
                   <button
-                    key={f.name}
                     type="button"
-                    onClick={() => setActiveTab(i)}
+                    onClick={() => setCol3View("graph")}
                     className={cn(
-                      "px-4 py-2 text-xs shrink-0 border-b-2 transition-colors",
-                      i === activeTab
-                        ? "border-sky-500 text-sky-400 bg-slate-800"
-                        : "border-transparent text-slate-500 hover:text-slate-300"
+                      "px-2.5 py-1 transition-colors",
+                      col3View === "graph" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
                     )}
                   >
-                    {f.name}
+                    Graph
                   </button>
-                ))}
-              </div>
-            )}
+                  <button
+                    type="button"
+                    onClick={() => setCol3View("json")}
+                    className={cn(
+                      "px-2.5 py-1 border-l border-slate-200 transition-colors",
+                      col3View === "json" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    JSON
+                  </button>
+                </div>
+              )}
 
-            {/* File header */}
-            {activeFile && (
-              <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-700 bg-slate-800 shrink-0">
-                <span className="text-xs font-mono text-slate-400 truncate">{activeFile.name}</span>
-                <span className="text-[10px] text-slate-600 shrink-0">{activeFile.language}</span>
-              </div>
-            )}
+              {/* File tabs — non-journey multi-file items */}
+              {selectedScope !== "journeys" && files && files.length > 1 && (
+                <div className="flex gap-0 overflow-x-auto">
+                  {files.map((f, i) => (
+                    <button
+                      key={f.name}
+                      type="button"
+                      onClick={() => setActiveTab(i)}
+                      className={cn(
+                        "px-3 py-1 text-[10px] shrink-0 border-b-2 transition-colors",
+                        i === activeTab
+                          ? "border-sky-500 text-sky-400"
+                          : "border-transparent text-slate-500 hover:text-slate-300"
+                      )}
+                    >
+                      {f.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <div className="flex-1 overflow-auto">
+            {/* Content */}
+            <div className="flex-1 overflow-hidden min-h-0">
               {fileLoading && (
-                <div className="flex items-center justify-center h-full text-sm text-slate-500">Loading…</div>
+                <div className={cn("flex items-center justify-center h-full text-sm", col3View === "graph" ? "text-slate-400" : "text-slate-500")}>
+                  Loading…
+                </div>
               )}
               {!fileLoading && files && files.length === 0 && (
-                <div className="flex items-center justify-center h-full text-sm text-slate-500">No files found for this item</div>
+                <div className="flex items-center justify-center h-full text-sm text-slate-500">
+                  No files found for this item
+                </div>
               )}
-              {!fileLoading && activeFile && (
-                <FileContent content={activeFile.content} fileName={activeFile.name} />
+              {!fileLoading && activeFile && selectedScope === "journeys" && col3View === "graph" && (
+                <JourneyGraph json={activeFile.content} />
+              )}
+              {!fileLoading && activeFile && col3View === "json" && (
+                <div className="overflow-auto h-full">
+                  <FileContent content={activeFile.content} fileName={activeFile.name} />
+                </div>
+              )}
+              {!fileLoading && activeFile && selectedScope !== "journeys" && (
+                <div className="overflow-auto h-full">
+                  <FileContent content={activeFile.content} fileName={activeFile.name} />
+                </div>
               )}
             </div>
           </>
