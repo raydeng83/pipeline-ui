@@ -8,6 +8,7 @@ interface ScopeSelectorProps {
   selected: ConfigScope[];
   onChange: (scopes: ConfigScope[]) => void;
   disabled?: boolean;
+  action?: "pull" | "push";
 }
 
 const GROUPS = CONFIG_SCOPES.reduce<Record<string, typeof CONFIG_SCOPES>>((acc, scope) => {
@@ -17,7 +18,7 @@ const GROUPS = CONFIG_SCOPES.reduce<Record<string, typeof CONFIG_SCOPES>>((acc, 
 
 type Mode = "basic" | "advanced";
 
-export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorProps) {
+export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSelectorProps) {
   const [mode, setMode] = useState<Mode>("basic");
   const selectedSet = new Set(selected);
   const allSelected = selected.length === CONFIG_SCOPES.length;
@@ -77,11 +78,9 @@ export function ScopeSelector({ selected, onChange, disabled }: ScopeSelectorPro
         </button>
       </div>
 
-      {selected.length === 0 && (
-        <p className="text-xs text-slate-400">
-          No scopes selected — <code className="bg-slate-100 px-1 rounded">all</code> will be used.
-        </p>
-      )}
+      <p className={cn("text-xs text-slate-400", selected.length > 0 && "invisible")}>
+        {action === "push" ? "Select scopes to push." : "Select scopes to pull."}
+      </p>
 
       {/* Basic mode: group-level pills */}
       {mode === "basic" && (

@@ -35,12 +35,12 @@ export function PullForm({ environments }: { environments: Environment[] }) {
           </select>
         </div>
 
-        <ScopeSelector selected={scopes} onChange={setScopes} disabled={running} />
+        <ScopeSelector selected={scopes} onChange={setScopes} disabled={running} action="pull" />
 
         <div className="flex gap-3">
           <button
             type="submit"
-            disabled={running || !environment}
+            disabled={running || !environment || scopes.length === 0}
             className="px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-md hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {running ? "Pulling..." : "Pull Config"}

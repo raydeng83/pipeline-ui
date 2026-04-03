@@ -2,9 +2,10 @@ import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import { parseEnvFile } from "./env-parser";
-export type { FrCommand, ConfigScope, Environment, RunOptions } from "./fr-config-types";
-export { CONFIG_SCOPES } from "./fr-config-types";
-import type { Environment, RunOptions } from "./fr-config-types";
+export type { FrCommand, ConfigScope, Environment, RunOptions, ScopeSelection } from "./fr-config-types";
+export { CONFIG_SCOPES, FILENAME_FILTER_SCOPES, NAME_FLAG_SCOPES } from "./fr-config-types";
+import type { Environment, RunOptions, ScopeSelection } from "./fr-config-types";
+import { FILENAME_FILTER_SCOPES, NAME_FLAG_SCOPES } from "./fr-config-types";
 
 const ENVIRONMENTS_DIR = path.join(process.cwd(), "environments");
 
@@ -69,16 +70,54 @@ function buildEnv(environmentName: string, overrides?: Record<string, string>): 
   return { ...process.env, ...fileVars, ...overrides };
 }
 
+// ── Subcommand entry ──────────────────────────────────────────────────────────
+
+interface SubEntry {
+  scope: string;
+  extraArgs: string[];
+  extraEnv: Record<string, string>;
+}
+
+/** Convert scopeSelections into a flat list of CLI invocations. */
+function buildSubEntries(scopeSelections: ScopeSelection[]): SubEntry[] {
+  const entries: SubEntry[] = [];
+
+  for (const { scope, items } of scopeSelections) {
+    const hasFilter = items && items.length > 0;
+
+    if (!hasFilter) {
+      // No filter — push everything in this scope
+      entries.push({ scope, extraArgs: [], extraEnv: {} });
+    } else if ((FILENAME_FILTER_SCOPES as readonly string[]).includes(scope)) {
+      // Pass comma-separated filenames via filenameFilter env var (one run)
+      entries.push({ scope, extraArgs: [], extraEnv: { filenameFilter: items!.join(",") } });
+    } else if ((NAME_FLAG_SCOPES as readonly string[]).includes(scope)) {
+      // --name accepts one value — run once per selected item
+      for (const item of items!) {
+        entries.push({ scope, extraArgs: ["--name", item], extraEnv: {} });
+      }
+    } else {
+      // Scope doesn't support item-level filtering — push whole scope
+      entries.push({ scope, extraArgs: [], extraEnv: {} });
+    }
+  }
+
+  return entries;
+}
+
+// ── spawnFrConfig ─────────────────────────────────────────────────────────────
+
 export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<string, string> }): {
   stream: ReadableStream<string>;
   abort: () => void;
 } {
-  const { command, environment, scopes, envOverrides } = options;
-  const env = buildEnv(environment, envOverrides);
+  const { command, environment, scopes, scopeSelections, envOverrides } = options;
+  const baseEnv = buildEnv(environment, envOverrides);
 
-  // No scopes = run `all`; otherwise run each scope as its own subcommand sequentially
-  const subcommands: string[] =
-    !scopes || scopes.length === 0 ? ["all"] : [...scopes];
+  // Build the list of CLI invocations
+  const subEntries: SubEntry[] = scopeSelections
+    ? buildSubEntries(scopeSelections)
+    : (scopes ?? []).map((scope) => ({ scope, extraArgs: [], extraEnv: {} }));
 
   let currentProc: ReturnType<typeof spawn> | null = null;
   let aborted = false;
@@ -91,16 +130,31 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
 
       let anyFailed = false;
 
-      for (const sub of subcommands) {
+      // Group consecutive entries by scope so the log viewer shows one section per scope
+      let currentScope: string | null = null;
+
+      for (const entry of subEntries) {
         if (aborted) break;
 
-        controller.enqueue(
-          JSON.stringify({ type: "scope-start", scope: sub, ts: Date.now() }) + "\n"
-        );
+        if (entry.scope !== currentScope) {
+          if (currentScope !== null) {
+            // Close previous scope section only if switching scopes mid-stream.
+            // (scope-end is emitted when the last entry for a scope finishes below)
+          }
+          currentScope = entry.scope;
+          controller.enqueue(
+            JSON.stringify({ type: "scope-start", scope: entry.scope, ts: Date.now() }) + "\n"
+          );
+        }
 
+        const procEnv = { ...baseEnv, ...entry.extraEnv };
         const exitCode = await new Promise<number | null>((resolve) => {
           const envDir = path.join(ENVIRONMENTS_DIR, environment);
-          const proc = spawn(command, [sub, "--debug"], { env, shell: true, cwd: envDir });
+          const proc = spawn(
+            command,
+            [entry.scope, "--debug", ...entry.extraArgs],
+            { env: procEnv, shell: true, cwd: envDir }
+          );
           currentProc = proc;
 
           proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
@@ -113,11 +167,15 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
           });
         });
 
-        controller.enqueue(
-          JSON.stringify({ type: "scope-end", scope: sub, code: exitCode, ts: Date.now() }) + "\n"
-        );
-
         if (exitCode !== 0) anyFailed = true;
+
+        // Emit scope-end when this scope won't appear again
+        const nextEntry = subEntries[subEntries.indexOf(entry) + 1];
+        if (!nextEntry || nextEntry.scope !== entry.scope) {
+          controller.enqueue(
+            JSON.stringify({ type: "scope-end", scope: entry.scope, code: exitCode, ts: Date.now() }) + "\n"
+          );
+        }
       }
 
       controller.enqueue(

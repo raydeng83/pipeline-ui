@@ -46,11 +46,27 @@ export interface Environment {
   color: "blue" | "yellow" | "red" | "green";
 }
 
+/** Scopes supporting file-level filtering via filenameFilter env var (comma-separated filenames) */
+export const FILENAME_FILTER_SCOPES = ["scripts", "custom-nodes", "endpoints", "schedules"] as const satisfies readonly ConfigScope[];
+
+/** Scopes supporting item-level filtering via --name flag (realm/directory name, one CLI run per item) */
+export const NAME_FLAG_SCOPES = ["journeys", "managed-objects"] as const satisfies readonly ConfigScope[];
+
+/** Union of all scopes that support sub-scope selection */
+export const FILE_SELECTABLE_SCOPES: readonly ConfigScope[] = [...FILENAME_FILTER_SCOPES, ...NAME_FLAG_SCOPES];
+
+export interface ScopeSelection {
+  scope: ConfigScope;
+  /** undefined = push all items; string[] = push only these items */
+  items?: string[];
+}
+
 export interface RunOptions {
   command: FrCommand;
   environment: string;
-  /** Empty/omitted = run `all` subcommand. Multiple = run sequentially. */
   scopes?: ConfigScope[];
+  /** Plan mode: per-scope item selection. Takes precedence over scopes when provided. */
+  scopeSelections?: ScopeSelection[];
 }
 
 export type PromoteSubcommand =
