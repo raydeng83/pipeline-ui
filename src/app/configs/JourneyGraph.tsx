@@ -302,7 +302,7 @@ function Legend() {
 // ── Inner graph ───────────────────────────────────────────────────────────────
 
 function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: number }) {
-  const { fitView } = useReactFlow();
+  const { fitView, getViewport, setViewport } = useReactFlow();
 
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -331,6 +331,22 @@ function JourneyGraphInner({ json, fitViewKey }: { json: string; fitViewKey?: nu
     const t = setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 80);
     return () => clearTimeout(t);
   }, [fitViewKey, fitView]);
+
+  // Arrow key panning
+  useEffect(() => {
+    const PAN = 120;
+    const handler = (e: KeyboardEvent) => {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      e.preventDefault();
+      const vp = getViewport();
+      const dx = e.key === "ArrowLeft" ? PAN : e.key === "ArrowRight" ? -PAN : 0;
+      const dy = e.key === "ArrowUp"   ? PAN : e.key === "ArrowDown"  ? -PAN : 0;
+      setViewport({ x: vp.x + dx, y: vp.y + dy, zoom: vp.zoom }, { duration: 100 });
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [getViewport, setViewport]);
 
   // Search
   const searchMatches = useMemo(() => {
