@@ -47,7 +47,7 @@ export default function RootLayout({
                     Promote
                   </Link>
                   <Link href="/configs" className="px-3 py-1.5 rounded text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
-                    Configs
+                    Browse
                   </Link>
                   <Link href="/compare" className="px-3 py-1.5 rounded text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                     Compare

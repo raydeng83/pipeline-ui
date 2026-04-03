@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Environment } from "@/lib/fr-config-types";
+import { Environment, CONFIG_SCOPES, ConfigScope } from "@/lib/fr-config-types";
 import { FileNode } from "@/app/api/configs/[env]/route";
+import type { ViewableFile } from "@/app/api/push/item/route";
+import type { AuditItem } from "@/app/api/push/audit/route";
 import { cn } from "@/lib/utils";
 
 // ── JSON syntax highlighter ───────────────────────────────────────────────────
@@ -18,13 +20,13 @@ function highlightJson(raw: string): string {
     .replace(
       /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
       (match) => {
-        let color = "#60a5fa"; // number → blue
+        let color = "#60a5fa";
         if (/^"/.test(match)) {
-          color = /:$/.test(match) ? "#94a3b8" : "#86efac"; // key → slate, string → green
+          color = /:$/.test(match) ? "#94a3b8" : "#86efac";
         } else if (/true|false/.test(match)) {
-          color = "#fbbf24"; // boolean → amber
+          color = "#fbbf24";
         } else if (/null/.test(match)) {
-          color = "#f87171"; // null → red
+          color = "#f87171";
         }
         return `<span style="color:${color}">${match}</span>`;
       }
@@ -34,7 +36,6 @@ function highlightJson(raw: string): string {
 function FileContent({ content, fileName }: { content: string; fileName: string }) {
   const ext = fileName.split(".").pop()?.toLowerCase();
   const isJson = ext === "json";
-
   if (isJson) {
     return (
       <pre
@@ -43,7 +44,6 @@ function FileContent({ content, fileName }: { content: string; fileName: string 
       />
     );
   }
-
   return (
     <pre className="text-xs font-mono leading-relaxed p-4 overflow-auto h-full text-slate-300 whitespace-pre-wrap">
       {content}
@@ -51,18 +51,13 @@ function FileContent({ content, fileName }: { content: string; fileName: string 
   );
 }
 
-// ── File tree ─────────────────────────────────────────────────────────────────
+// ── File tree view ────────────────────────────────────────────────────────────
 
 function FileTreeNode({
-  node,
-  selectedFile,
-  onSelect,
-  depth,
+  node, selectedFile, onSelect, depth,
 }: {
-  node: FileNode;
-  selectedFile: string | null;
-  onSelect: (path: string, name: string) => void;
-  depth: number;
+  node: FileNode; selectedFile: string | null;
+  onSelect: (path: string, name: string) => void; depth: number;
 }) {
   const [open, setOpen] = useState(depth < 1);
 
@@ -74,10 +69,7 @@ function FileTreeNode({
           className="flex items-center gap-1.5 w-full text-left px-2 py-1 text-xs text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors"
           style={{ paddingLeft: `${8 + depth * 12}px` }}
         >
-          <svg
-            className={cn("w-3 h-3 shrink-0 transition-transform text-slate-400", open && "rotate-90")}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-          >
+          <svg className={cn("w-3 h-3 shrink-0 transition-transform text-slate-400", open && "rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
           <svg className="w-3.5 h-3.5 shrink-0 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
@@ -86,13 +78,7 @@ function FileTreeNode({
           <span className="truncate font-medium">{node.name}</span>
         </button>
         {open && node.children?.map((child) => (
-          <FileTreeNode
-            key={child.relativePath}
-            node={child}
-            selectedFile={selectedFile}
-            onSelect={onSelect}
-            depth={depth + 1}
-          />
+          <FileTreeNode key={child.relativePath} node={child} selectedFile={selectedFile} onSelect={onSelect} depth={depth + 1} />
         ))}
       </div>
     );
@@ -104,9 +90,7 @@ function FileTreeNode({
       onClick={() => onSelect(node.relativePath, node.name)}
       className={cn(
         "flex items-center gap-1.5 w-full text-left px-2 py-1 text-xs rounded transition-colors truncate",
-        isSelected
-          ? "bg-sky-100 text-sky-800 font-medium"
-          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+        isSelected ? "bg-sky-100 text-sky-800 font-medium" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
       )}
       style={{ paddingLeft: `${8 + depth * 12}px` }}
     >
@@ -118,10 +102,7 @@ function FileTreeNode({
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
-export function ConfigsViewer({ environments }: { environments: Environment[] }) {
-  const [selectedEnv, setSelectedEnv] = useState(environments[0]?.name ?? "");
+function TreeView({ environment }: { environment: string }) {
   const [tree, setTree] = useState<FileNode[]>([]);
   const [treeLoading, setTreeLoading] = useState(false);
   const [configDir, setConfigDir] = useState("");
@@ -130,24 +111,17 @@ export function ConfigsViewer({ environments }: { environments: Environment[] })
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
 
-  const fetchTree = useCallback(async (env: string) => {
+  useEffect(() => {
+    if (!environment) return;
     setTreeLoading(true);
     setTree([]);
     setSelectedFile(null);
     setFileContent(null);
-    try {
-      const res = await fetch(`/api/configs/${env}`);
-      const data = await res.json();
-      setTree(data.tree ?? []);
-      setConfigDir(data.configDir ?? "");
-    } finally {
-      setTreeLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedEnv) fetchTree(selectedEnv);
-  }, [selectedEnv, fetchTree]);
+    fetch(`/api/configs/${environment}`)
+      .then((r) => r.json())
+      .then((data) => { setTree(data.tree ?? []); setConfigDir(data.configDir ?? ""); })
+      .finally(() => setTreeLoading(false));
+  }, [environment]);
 
   const handleFileSelect = async (relativePath: string, name: string) => {
     setSelectedFile(relativePath);
@@ -155,7 +129,7 @@ export function ConfigsViewer({ environments }: { environments: Environment[] })
     setFileContent(null);
     setFileLoading(true);
     try {
-      const res = await fetch(`/api/configs/${selectedEnv}/file?path=${encodeURIComponent(relativePath)}`);
+      const res = await fetch(`/api/configs/${environment}/file?path=${encodeURIComponent(relativePath)}`);
       const data = await res.json();
       setFileContent(data.content ?? "");
     } finally {
@@ -166,48 +140,23 @@ export function ConfigsViewer({ environments }: { environments: Environment[] })
   const fileCount = countFiles(tree);
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-14rem)]">
-      {/* Left panel — file tree */}
+    <div className="flex gap-6 flex-1 min-h-0">
+      {/* Left panel */}
       <div className="w-72 shrink-0 flex flex-col bg-white rounded-lg border border-slate-200 overflow-hidden">
-        {/* Environment selector */}
-        <div className="p-3 border-b border-slate-100">
-          <select
-            value={selectedEnv}
-            onChange={(e) => setSelectedEnv(e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          >
-            {environments.map((env) => (
-              <option key={env.name} value={env.name}>{env.label}</option>
-            ))}
-          </select>
-          {configDir && (
-            <p className="mt-1.5 text-[10px] text-slate-400 font-mono truncate" title={configDir}>
-              {configDir}
-            </p>
-          )}
-        </div>
-
-        {/* Tree */}
+        {configDir && (
+          <div className="px-3 py-2 border-b border-slate-100">
+            <p className="text-[10px] text-slate-400 font-mono truncate" title={configDir}>{configDir}</p>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto p-1">
-          {treeLoading && (
-            <p className="text-xs text-slate-400 text-center py-6">Loading…</p>
-          )}
+          {treeLoading && <p className="text-xs text-slate-400 text-center py-6">Loading…</p>}
           {!treeLoading && tree.length === 0 && (
-            <p className="text-xs text-slate-400 text-center py-6 px-3">
-              No config files found. Pull from this environment first.
-            </p>
+            <p className="text-xs text-slate-400 text-center py-6 px-3">No config files found. Pull from this environment first.</p>
           )}
           {!treeLoading && tree.map((node) => (
-            <FileTreeNode
-              key={node.relativePath}
-              node={node}
-              selectedFile={selectedFile}
-              onSelect={handleFileSelect}
-              depth={0}
-            />
+            <FileTreeNode key={node.relativePath} node={node} selectedFile={selectedFile} onSelect={handleFileSelect} depth={0} />
           ))}
         </div>
-
         {fileCount > 0 && (
           <div className="px-3 py-2 border-t border-slate-100 text-[10px] text-slate-400">
             {fileCount} file{fileCount !== 1 ? "s" : ""}
@@ -215,27 +164,19 @@ export function ConfigsViewer({ environments }: { environments: Environment[] })
         )}
       </div>
 
-      {/* Right panel — file viewer */}
+      {/* Right panel */}
       <div className="flex-1 flex flex-col bg-slate-900 rounded-lg border border-slate-200 overflow-hidden">
         {selectedFile ? (
           <>
-            {/* File header */}
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-700 bg-slate-800 shrink-0">
               <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className="text-xs font-mono text-slate-300 truncate">{selectedFile}</span>
             </div>
-
             <div className="flex-1 overflow-auto">
-              {fileLoading && (
-                <div className="flex items-center justify-center h-full text-sm text-slate-500">
-                  Loading…
-                </div>
-              )}
-              {!fileLoading && fileContent !== null && (
-                <FileContent content={fileContent} fileName={selectedFileName ?? ""} />
-              )}
+              {fileLoading && <div className="flex items-center justify-center h-full text-sm text-slate-500">Loading…</div>}
+              {!fileLoading && fileContent !== null && <FileContent content={fileContent} fileName={selectedFileName ?? ""} />}
             </div>
           </>
         ) : (
@@ -244,6 +185,300 @@ export function ConfigsViewer({ environments }: { environments: Environment[] })
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Sections view ─────────────────────────────────────────────────────────────
+
+interface AuditEntry {
+  scope: string;
+  fileCount: number;
+  exists: boolean;
+  items: AuditItem[];
+  selectable: boolean;
+}
+
+const ALL_SCOPES = CONFIG_SCOPES.map((s) => s.value);
+const GROUPS = Array.from(new Set(CONFIG_SCOPES.map((s) => s.group)));
+
+function SectionsView({ environment }: { environment: string }) {
+  const [auditData, setAuditData] = useState<AuditEntry[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [selectedScope, setSelectedScope] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<AuditItem | null>(null);
+  const [files, setFiles] = useState<ViewableFile[] | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [fileLoading, setFileLoading] = useState(false);
+  const [itemFilter, setItemFilter] = useState("");
+
+  // Fetch audit for all scopes when env changes
+  useEffect(() => {
+    if (!environment) return;
+    setAuditLoading(true);
+    setSelectedScope(null);
+    setSelectedItem(null);
+    setFiles(null);
+    const params = new URLSearchParams({ environment, scopes: ALL_SCOPES.join(",") });
+    fetch(`/api/push/audit?${params}`)
+      .then((r) => r.json())
+      .then((data: AuditEntry[]) => setAuditData(data))
+      .finally(() => setAuditLoading(false));
+  }, [environment]);
+
+  // Fetch file content when item is selected
+  useEffect(() => {
+    if (!selectedScope || !selectedItem) { setFiles(null); return; }
+    setFileLoading(true);
+    setFiles(null);
+    setActiveTab(0);
+    const params = new URLSearchParams({ environment, scope: selectedScope, item: selectedItem.id });
+    fetch(`/api/push/item?${params}`)
+      .then((r) => r.json())
+      .then((data: { files: ViewableFile[] }) => setFiles(data.files ?? []))
+      .catch(() => setFiles([]))
+      .finally(() => setFileLoading(false));
+  }, [environment, selectedScope, selectedItem]);
+
+  const handleSelectScope = (scope: string) => {
+    setSelectedScope(scope);
+    setSelectedItem(null);
+    setFiles(null);
+    setItemFilter("");
+  };
+
+  const scopeEntry = auditData.find((e) => e.scope === selectedScope);
+  const filteredItems = scopeEntry
+    ? itemFilter.trim()
+      ? scopeEntry.items.filter((i) => i.label.toLowerCase().includes(itemFilter.toLowerCase()))
+      : scopeEntry.items
+    : [];
+
+  const activeFile = files?.[activeTab];
+
+  return (
+    <div className="flex flex-1 min-h-0 rounded-lg border border-slate-200 overflow-hidden">
+
+      {/* Column 1 — Scopes */}
+      <div className="w-48 shrink-0 border-r border-slate-200 bg-slate-50 overflow-y-auto">
+        {auditLoading ? (
+          <div className="p-3 space-y-2">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-6 bg-slate-200 rounded animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          GROUPS.map((group) => {
+            const groupScopes = CONFIG_SCOPES.filter((s) => s.group === group);
+            return (
+              <div key={group}>
+                <p className="px-3 pt-3 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{group}</p>
+                {groupScopes.map((s) => {
+                  const entry = auditData.find((e) => e.scope === s.value);
+                  const count = entry?.items.length ?? 0;
+                  const hasFiles = (entry?.fileCount ?? 0) > 0;
+                  return (
+                    <button
+                      key={s.value}
+                      type="button"
+                      onClick={() => handleSelectScope(s.value)}
+                      className={cn(
+                        "w-full flex items-center justify-between gap-2 px-3 py-1.5 text-left text-xs transition-colors border-l-2",
+                        selectedScope === s.value
+                          ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
+                          : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-800",
+                        !hasFiles && "opacity-40"
+                      )}
+                    >
+                      <span className="truncate">{s.label}</span>
+                      {entry && (
+                        <span className="text-[10px] tabular-nums text-slate-400 shrink-0">
+                          {entry.selectable ? count : entry.fileCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Column 2 — Items */}
+      <div className="w-56 shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
+        {selectedScope ? (
+          <>
+            {/* Header */}
+            <div className="px-3 py-2 border-b border-slate-100 shrink-0">
+              <p className="text-xs font-medium text-slate-700 truncate">
+                {CONFIG_SCOPES.find((s) => s.value === selectedScope)?.label ?? selectedScope}
+              </p>
+              {scopeEntry && (
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  {scopeEntry.selectable ? `${scopeEntry.items.length} item${scopeEntry.items.length !== 1 ? "s" : ""}` : `${scopeEntry.fileCount} file${scopeEntry.fileCount !== 1 ? "s" : ""}`}
+                </p>
+              )}
+            </div>
+
+            {/* Filter */}
+            {(scopeEntry?.items.length ?? 0) > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-slate-100 shrink-0">
+                <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                <input
+                  type="text"
+                  value={itemFilter}
+                  onChange={(e) => setItemFilter(e.target.value)}
+                  placeholder="Filter…"
+                  className="flex-1 text-[11px] bg-transparent text-slate-700 placeholder-slate-400 outline-none min-w-0"
+                />
+                {itemFilter && (
+                  <button type="button" onClick={() => setItemFilter("")} className="text-slate-400 hover:text-slate-600 shrink-0">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Item list */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredItems.length === 0 && (
+                <p className="text-[11px] text-slate-400 text-center py-6">
+                  {itemFilter ? "No matches" : "No items"}
+                </p>
+              )}
+              {filteredItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedItem(item)}
+                  className={cn(
+                    "w-full text-left px-3 py-1.5 text-xs transition-colors truncate border-l-2",
+                    selectedItem?.id === item.id
+                      ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
+                      : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-xs text-slate-400 p-4 text-center">
+            Select a scope to browse its items
+          </div>
+        )}
+      </div>
+
+      {/* Column 3 — File content */}
+      <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden min-w-0">
+        {selectedItem ? (
+          <>
+            {/* Tabs */}
+            {files && files.length > 1 && (
+              <div className="flex border-b border-slate-700 bg-slate-800 shrink-0 overflow-x-auto">
+                {files.map((f, i) => (
+                  <button
+                    key={f.name}
+                    type="button"
+                    onClick={() => setActiveTab(i)}
+                    className={cn(
+                      "px-4 py-2 text-xs shrink-0 border-b-2 transition-colors",
+                      i === activeTab
+                        ? "border-sky-500 text-sky-400 bg-slate-800"
+                        : "border-transparent text-slate-500 hover:text-slate-300"
+                    )}
+                  >
+                    {f.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* File header */}
+            {activeFile && (
+              <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-700 bg-slate-800 shrink-0">
+                <span className="text-xs font-mono text-slate-400 truncate">{activeFile.name}</span>
+                <span className="text-[10px] text-slate-600 shrink-0">{activeFile.language}</span>
+              </div>
+            )}
+
+            <div className="flex-1 overflow-auto">
+              {fileLoading && (
+                <div className="flex items-center justify-center h-full text-sm text-slate-500">Loading…</div>
+              )}
+              {!fileLoading && files && files.length === 0 && (
+                <div className="flex items-center justify-center h-full text-sm text-slate-500">No files found for this item</div>
+              )}
+              {!fileLoading && activeFile && (
+                <FileContent content={activeFile.content} fileName={activeFile.name} />
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-sm text-slate-500">
+            {selectedScope ? "Select an item to view its contents" : "Select a scope and item"}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export function ConfigsViewer({ environments }: { environments: Environment[] }) {
+  const [selectedEnv, setSelectedEnv] = useState(environments[0]?.name ?? "");
+  const [view, setView] = useState<"tree" | "sections">("sections");
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-14rem)] gap-4">
+      {/* Toolbar */}
+      <div className="flex items-center gap-4 shrink-0">
+        <select
+          value={selectedEnv}
+          onChange={(e) => setSelectedEnv(e.target.value)}
+          className="rounded border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+        >
+          {environments.map((env) => (
+            <option key={env.name} value={env.name}>{env.label}</option>
+          ))}
+        </select>
+
+        {/* View toggle */}
+        <div className="flex rounded-md border border-slate-200 overflow-hidden text-xs font-medium">
+          <button
+            type="button"
+            onClick={() => setView("sections")}
+            className={cn(
+              "px-3 py-1.5 transition-colors",
+              view === "sections" ? "bg-slate-800 text-white" : "bg-white text-slate-600 hover:bg-slate-50"
+            )}
+          >
+            Sections
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("tree")}
+            className={cn(
+              "px-3 py-1.5 border-l border-slate-200 transition-colors",
+              view === "tree" ? "bg-slate-800 text-white" : "bg-white text-slate-600 hover:bg-slate-50"
+            )}
+          >
+            Tree
+          </button>
+        </div>
+      </div>
+
+      {view === "sections"
+        ? <SectionsView environment={selectedEnv} />
+        : <TreeView environment={selectedEnv} />
+      }
     </div>
   );
 }
