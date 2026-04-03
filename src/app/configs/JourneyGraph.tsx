@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, Fragment, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, Fragment } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -31,15 +31,33 @@ const NODE_H     = 64;
 const TERM_SIZE  = 60;
 const START_SIZE = 48;
 
+// Page group
+const PAGE_GROUP_W   = 199;
+const PAGE_CHILD_W   = 175; // PAGE_GROUP_W - 24
+const PAGE_CHILD_H   = 30;
+const PAGE_GROUP_TOP = 42;  // header height
+const PAGE_GROUP_PAD = 12;
+const PAGE_CHILD_GAP = 6;
 
 function journeyNodeHeight(outcomeCount: number): number {
   return Math.max(NODE_H, outcomeCount * 22 + 28);
+}
+
+function pageGroupHeight(childCount: number): number {
+  return PAGE_GROUP_TOP
+    + childCount * PAGE_CHILD_H
+    + Math.max(0, childCount - 1) * PAGE_CHILD_GAP
+    + PAGE_GROUP_PAD;
 }
 
 function getNodeDims(node: Node): [number, number] {
   if (node.type === "journeyNode") {
     const outcomes = (node.data.outcomes as string[] | undefined) ?? [];
     return [NODE_W, journeyNodeHeight(outcomes.length)];
+  }
+  if (node.type === "pageGroup") {
+    const children = (node.data.children as PageChildConfig[] | undefined) ?? [];
+    return [PAGE_GROUP_W, pageGroupHeight(children.length)];
   }
   if (node.type === "startNode")   return [START_SIZE, START_SIZE];
   if (node.type === "successNode") return [TERM_SIZE,  TERM_SIZE];
@@ -60,6 +78,16 @@ interface JourneyJson {
     y: number;
   }>;
   staticNodes?: Record<string, { x: number; y: number }>;
+}
+
+interface PageChildConfig {
+  _id: string;
+  displayName: string;
+  nodeType: string;
+}
+
+interface PageNodeConfig {
+  nodes?: PageChildConfig[];
 }
 
 // ── Custom nodes ──────────────────────────────────────────────────────────────
@@ -117,6 +145,51 @@ function JourneyNodeComponent({ data }: NodeProps) {
   );
 }
 
+function PageGroupNodeComponent({ data }: NodeProps) {
+  const d = data as {
+    label: string;
+    children: PageChildConfig[];
+    isSelected?: boolean;
+    isSearchMatch?: boolean;
+  };
+  const h = pageGroupHeight(d.children.length);
+
+  return (
+    <div
+      className={cn(
+        "border-2 border-dashed rounded-xl transition-all cursor-grab active:cursor-grabbing",
+        d.isSelected    ? "border-violet-500 bg-violet-50 ring-2 ring-violet-300" :
+        d.isSearchMatch ? "border-amber-400  bg-amber-50  ring-2 ring-amber-200" :
+                          "border-violet-300 bg-violet-50/60"
+      )}
+      style={{ width: PAGE_GROUP_W, height: h, position: "relative" }}
+    >
+      <Handle type="target" position={Position.Left} style={{ top: "50%", background: "#94a3b8" }} />
+
+      {/* Header */}
+      <div className="px-3 pt-2 pb-1 border-b border-violet-200/80">
+        <p className="text-[9px] font-semibold text-violet-500 uppercase tracking-wider">Page Node</p>
+        <p className="text-[11px] font-medium text-slate-700 leading-tight truncate">{d.label}</p>
+      </div>
+
+      <Handle id="outcome" type="source" position={Position.Right} style={{ top: "50%", background: "#94a3b8" }} />
+    </div>
+  );
+}
+
+function PageChildNodeComponent({ data }: NodeProps) {
+  const d = data as { label: string; nodeType: string };
+  return (
+    <div
+      className="bg-white border border-violet-200 rounded-md shadow-sm px-2 flex flex-col justify-center"
+      style={{ width: PAGE_CHILD_W, height: PAGE_CHILD_H }}
+    >
+      <p className="text-[10px] font-medium text-slate-700 leading-tight truncate">{d.label}</p>
+      <p className="text-[9px] text-violet-400 truncate">{d.nodeType}</p>
+    </div>
+  );
+}
+
 function StartNodeComponent(_: NodeProps) {
   return (
     <div className="rounded-full flex items-center justify-center shadow font-bold text-white text-[9px] bg-emerald-500 cursor-grab active:cursor-grabbing"
@@ -155,6 +228,8 @@ function FailureNodeComponent({ data }: NodeProps) {
 
 const nodeTypes = {
   journeyNode: JourneyNodeComponent,
+  pageGroup:   PageGroupNodeComponent,
+  pageChild:   PageChildNodeComponent,
   startNode:   StartNodeComponent,
   successNode: SuccessNodeComponent,
   failureNode: FailureNodeComponent,
@@ -162,7 +237,7 @@ const nodeTypes = {
 
 // ── Parser ────────────────────────────────────────────────────────────────────
 
-function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
+function parseJourney(json: string, pageConfigs?: Map<string, PageNodeConfig>): { nodes: Node[]; edges: Edge[] } {
   let data: JourneyJson;
   try { data = JSON.parse(json); } catch { return { nodes: [], edges: [] }; }
 
@@ -184,21 +259,58 @@ function parseJourney(json: string): { nodes: Node[]; edges: Edge[] } {
   }
 
   for (const [id, node] of Object.entries(data.nodes ?? {})) {
-    const outcomes = Object.keys(node.connections ?? {});
-    rfNodes.push({ id, type: "journeyNode", position: { x: 0, y: 0 },
-      data: { label: node.displayName ?? node.nodeType ?? id.slice(0, 8), nodeType: node.nodeType, outcomes } });
+    const isPageNode  = node.nodeType === "PageNode";
+    const pageConfig  = isPageNode ? pageConfigs?.get(id) : undefined;
 
-    const entries = Object.entries(node.connections ?? {});
-    entries.forEach(([outcomeId, targetId]) => {
+    if (isPageNode && pageConfig) {
+      const children = pageConfig.nodes ?? [];
+      const groupH   = pageGroupHeight(children.length);
+
+      // Group container node
+      rfNodes.push({
+        id,
+        type: "pageGroup",
+        position: { x: 0, y: 0 },
+        style: { width: PAGE_GROUP_W, height: groupH },
+        data: {
+          label: node.displayName ?? "Page Node",
+          nodeType: "PageNode",
+          children,
+          outcomes: Object.keys(node.connections ?? {}),
+        },
+      });
+
+      // Child nodes (positioned relative to parent group)
+      children.forEach((child, i) => {
+        rfNodes.push({
+          id: `${id}__child__${child._id}`,
+          type: "pageChild",
+          position: { x: PAGE_GROUP_PAD, y: PAGE_GROUP_TOP + i * (PAGE_CHILD_H + PAGE_CHILD_GAP) },
+          parentId: id,
+          extent: "parent" as const,
+          draggable: false,
+          selectable: false,
+          focusable: false,
+          style: { width: PAGE_CHILD_W, height: PAGE_CHILD_H },
+          data: { label: child.displayName, nodeType: child.nodeType },
+        });
+      });
+    } else {
+      const outcomes = Object.keys(node.connections ?? {});
+      rfNodes.push({ id, type: "journeyNode", position: { x: 0, y: 0 },
+        data: { label: node.displayName ?? node.nodeType ?? id.slice(0, 8), nodeType: node.nodeType, outcomes } });
+    }
+
+    // Edges (same for both regular and page group nodes)
+    Object.entries(node.connections ?? {}).forEach(([outcomeId, targetId]) => {
       const toSuccess = targetId === SUCCESS_ID;
       const toFailure = targetId === FAILURE_ID;
-      const edgeType = "bezier";
       rfEdges.push({
         id: `${id}--${outcomeId}`,
         source: id, sourceHandle: outcomeId,
         target: targetId,
         label: outcomeId === "outcome" ? undefined : outcomeId,
-        type: edgeType,
+        type: "bezier",
         style: { stroke: toFailure ? "#f87171" : toSuccess ? "#34d399" : "#64748b", strokeWidth: 1.5 },
         labelStyle: { fontSize: 9, fill: "#64748b" },
         labelBgStyle: { fill: "#f8fafc", fillOpacity: 0.9 },
@@ -217,11 +329,19 @@ function applyDagreLayout(nodes: Node[], edges: Edge[]): Node[] {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir: "LR", nodesep: 60, ranksep: 160, marginx: 40, marginy: 40 });
-  nodes.forEach((n) => { const [w, h] = getNodeDims(n); g.setNode(n.id, { width: w, height: h }); });
+
+  // Only layout top-level nodes — children keep relative position inside group
+  nodes.filter((n) => !n.parentId).forEach((n) => {
+    const [w, h] = getNodeDims(n);
+    g.setNode(n.id, { width: w, height: h });
+  });
   edges.forEach((e) => g.setEdge(e.source, e.target));
   dagre.layout(g);
+
   return nodes.map((n) => {
+    if (n.parentId) return n; // child: keep relative position
     const pos = g.node(n.id);
+    if (!pos) return n;
     const [w, h] = getNodeDims(n);
     return { ...n, position: { x: pos.x - w / 2, y: pos.y - h / 2 } };
   });
@@ -293,6 +413,10 @@ function Legend() {
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-red-400 inline-block" /><span>→ Failure</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-blue-500 inline-block" /><span>Hover edge</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-violet-500 inline-block" /><span>Click edge (pinned)</span></div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-4 h-3.5 border-2 border-dashed border-violet-400 rounded inline-block" />
+        <span>Page node</span>
+      </div>
       <p className="pt-1 border-t border-slate-100 text-slate-400">Click node → trace path</p>
       <p className="text-slate-400">Drag node → rearrange</p>
     </div>
@@ -349,7 +473,12 @@ function NodeInfoDrawer({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-slate-800 leading-snug break-words">{node.label}</p>
               {node.nodeType && (
-                <span className="inline-block mt-1.5 text-[10px] font-medium text-sky-700 bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5">
+                <span className={cn(
+                  "inline-block mt-1.5 text-[10px] font-medium rounded px-1.5 py-0.5 border",
+                  node.nodeType === "PageNode"
+                    ? "text-violet-700 bg-violet-50 border-violet-200"
+                    : "text-sky-700 bg-sky-50 border-sky-200"
+                )}>
                   {node.nodeType}
                 </span>
               )}
@@ -418,13 +547,47 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const [searchQuery,    setSearchQuery]     = useState("");
   const [layoutKey,      setLayoutKey]       = useState(0);
   const [nodePanel,      setNodePanel]       = useState<NodePanelData | null>(null);
+  const [pageConfigs,    setPageConfigs]     = useState<Map<string, PageNodeConfig>>(new Map());
+
+  // Detect PageNode IDs in the journey JSON
+  const pageNodeIds = useMemo(() => {
+    try {
+      const data = JSON.parse(json) as JourneyJson;
+      return Object.entries(data.nodes ?? {})
+        .filter(([, n]) => n.nodeType === "PageNode")
+        .map(([id]) => id);
+    } catch { return []; }
+  }, [json]);
+
+  // Fetch PageNode configs
+  useEffect(() => {
+    setPageConfigs(new Map());
+    if (!environment || !journeyId || pageNodeIds.length === 0) return;
+
+    Promise.all(
+      pageNodeIds.map(async (nodeId) => {
+        const params = new URLSearchParams({ environment: environment!, journey: journeyId!, nodeId });
+        const res = await fetch(`/api/push/journey-node?${params}`);
+        if (!res.ok) return null;
+        const d = await res.json();
+        if (!d.file?.content) return null;
+        try { return [nodeId, JSON.parse(d.file.content) as PageNodeConfig] as const; }
+        catch { return null; }
+      })
+    ).then((entries) => {
+      const map = new Map<string, PageNodeConfig>(
+        entries.filter((e): e is [string, PageNodeConfig] => e !== null)
+      );
+      setPageConfigs(map);
+    });
+  }, [environment, journeyId, pageNodeIds]);
 
   const { dagreNodes, baseEdges } = useMemo(() => {
-    const { nodes, edges } = parseJourney(json);
+    const { nodes, edges } = parseJourney(json, pageConfigs.size > 0 ? pageConfigs : undefined);
     return { dagreNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
-  }, [json, layoutKey]);
+  }, [json, layoutKey, pageConfigs]);
 
-  // Reset to dagre positions when json or layoutKey changes
+  // Reset to dagre positions when layout changes
   useEffect(() => {
     setRfNodes(dagreNodes);
     setSelectedNodeId(null);
@@ -446,7 +609,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   // Map nodeId → display label (for resolving outcome targets)
   const nodeDisplayMap = useMemo(() => {
     const map = new Map<string, string>();
-    rfNodes.forEach((n) => map.set(n.id, String(n.data.label ?? n.id)));
+    rfNodes.forEach((n) => { if (!n.parentId) map.set(n.id, String(n.data.label ?? n.id)); });
     map.set(SUCCESS_ID, "Success");
     map.set(FAILURE_ID, "Failure");
     map.set("startNode", "Start");
@@ -476,11 +639,13 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return () => document.removeEventListener("keydown", handler);
   }, [getViewport, setViewport]);
 
-  // Search
+  // Search (exclude child nodes)
   const searchMatches = useMemo(() => {
     if (!searchQuery.trim()) return new Set<string>();
     const q = searchQuery.toLowerCase();
-    return new Set(rfNodes.filter((n) => String(n.data.label ?? "").toLowerCase().includes(q)).map((n) => n.id));
+    return new Set(rfNodes
+      .filter((n) => !n.parentId && String(n.data.label ?? "").toLowerCase().includes(q))
+      .map((n) => n.id));
   }, [searchQuery, rfNodes]);
 
   useEffect(() => {
@@ -489,7 +654,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return () => clearTimeout(t);
   }, [searchMatches, fitView]);
 
-  // Path tracing
+  // Path tracing (top-level nodes only; edges only reference top-level IDs)
   const { ancestors, descendants } = useMemo(() => {
     if (!selectedNodeId) return { ancestors: new Set<string>(), descendants: new Set<string>() };
     return getConnected(selectedNodeId, baseEdges);
@@ -500,12 +665,27 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return new Set([selectedNodeId, ...ancestors, ...descendants]);
   }, [selectedNodeId, ancestors, descendants]);
 
-  // Styled nodes
-  const displayNodes = useMemo<Node[]>(() => rfNodes.map((n) => ({
-    ...n,
-    data: { ...n.data, isSelected: n.id === selectedNodeId, isSearchMatch: searchMatches.has(n.id) },
-    style: { opacity: highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1, transition: "opacity 0.2s" },
-  })), [rfNodes, selectedNodeId, highlighted, searchMatches]);
+  // Styled nodes — children inherit parent opacity
+  const displayNodes = useMemo<Node[]>(() => {
+    const parentOpacity = new Map<string, number>();
+    rfNodes.forEach((n) => {
+      if (!n.parentId) {
+        parentOpacity.set(n.id, highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1);
+      }
+    });
+
+    return rfNodes.map((n) => {
+      if (n.parentId) {
+        const opacity = parentOpacity.get(n.parentId) ?? 1;
+        return { ...n, style: { ...n.style, opacity, transition: "opacity 0.2s" } };
+      }
+      return {
+        ...n,
+        data: { ...n.data, isSelected: n.id === selectedNodeId, isSearchMatch: searchMatches.has(n.id) },
+        style: { ...n.style, opacity: highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1, transition: "opacity 0.2s" },
+      };
+    });
+  }, [rfNodes, selectedNodeId, highlighted, searchMatches]);
 
   // Styled edges
   const displayEdges = useMemo<Edge[]>(() => {
@@ -536,6 +716,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   }, [baseEdges, highlighted, hoveredEdgeId, pinnedEdgeId]);
 
   const handleNodeClick: NodeMouseHandler = useCallback((_e, node) => {
+    if (node.parentId) return; // ignore clicks on page child nodes
     const isSame = selectedNodeId === node.id;
     setSelectedNodeId(isSame ? null : node.id);
     if (isSame) {
@@ -592,7 +773,9 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
         nodeColor={(n) =>
           n.type === "successNode" ? "#34d399" :
           n.type === "failureNode" ? "#f87171" :
-          n.type === "startNode"   ? "#10b981" : "#cbd5e1"
+          n.type === "startNode"   ? "#10b981" :
+          n.type === "pageGroup"   ? "#ddd6fe" :
+          n.type === "pageChild"   ? "#ede9fe" : "#cbd5e1"
         }
         zoomable pannable
       />
