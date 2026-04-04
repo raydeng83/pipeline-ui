@@ -216,7 +216,7 @@ function TreeRow({
           )}
 
           {/* Level badge */}
-          <span className="text-[9px] font-mono text-slate-300 shrink-0 ml-auto pl-2">L{depth + 1}</span>
+          <span className="text-[9px] font-mono text-slate-300 shrink-0">L{depth + 1}</span>
         </div>
       </div>
 
