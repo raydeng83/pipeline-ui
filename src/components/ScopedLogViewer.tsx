@@ -247,6 +247,30 @@ export function ScopedLogViewer({
         )}
       </div>
 
+      {/* ── Git commit banners (pre-pull) ─────────────────────────────── */}
+      {logs.filter((e) => e.type === "git" && e.action?.startsWith("pre-pull")).map((e, i) => {
+        const isError = e.action === "pre-pull-commit-error";
+        return (
+          <div
+            key={`pre-${i}`}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 border-b text-xs font-mono",
+              isError
+                ? "bg-red-950/40 border-red-900/50 text-red-300"
+                : "bg-emerald-950/40 border-emerald-900/50 text-emerald-300"
+            )}
+          >
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {isError
+                ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                : <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />}
+            </svg>
+            <span>{e.message}</span>
+            {e.hash && <code className={cn("ml-auto px-1.5 py-0.5 rounded", isError ? "text-red-400/70 bg-red-950/60" : "text-emerald-400/70 bg-emerald-950/60")}>{e.hash}</code>}
+          </div>
+        );
+      })}
+
       {/* ── Scope sections ───────────────────────────────────────────────── */}
       <div className="bg-slate-900">
         {hasSections ? (
@@ -436,6 +460,33 @@ export function ScopedLogViewer({
           )}
         </div>
       )}
+
+      {/* ── Git commit banners (post-pull) ────────────────────────────── */}
+      {logs.filter((e) => e.type === "git" && e.action?.startsWith("post-pull")).map((e, i) => {
+        const isError = e.action === "post-pull-commit-error";
+        const isClean = e.action === "post-pull-clean";
+        return (
+          <div
+            key={`post-${i}`}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 border-b text-xs font-mono",
+              isError
+                ? "bg-red-950/40 border-red-900/50 text-red-300"
+                : isClean
+                ? "bg-emerald-950/40 border-emerald-900/50 text-emerald-300"
+                : "bg-sky-950/40 border-sky-900/50 text-sky-300"
+            )}
+          >
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {isError
+                ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                : <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />}
+            </svg>
+            <span>{e.message}</span>
+            {e.hash && <code className={cn("ml-auto px-1.5 py-0.5 rounded", isError ? "text-red-400/70 bg-red-950/60" : "text-sky-400/70 bg-sky-950/60")}>{e.hash}</code>}
+          </div>
+        );
+      })}
 
       {/* ── Debug panel (stderr) ──────────────────────────────────────────── */}
       {debugEntries.length > 0 && (

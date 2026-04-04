@@ -6,11 +6,14 @@ import type { CompareReport } from "@/lib/diff-types";
 export type { CompareReport };
 
 export interface LogEntry {
-  type: "stdout" | "stderr" | "exit" | "error" | "scope-start" | "scope-end" | "report";
+  type: "stdout" | "stderr" | "exit" | "error" | "scope-start" | "scope-end" | "report" | "git";
   side?: "source" | "target";
   data?: string;
   code?: number;
   scope?: string;
+  action?: string;
+  hash?: string;
+  message?: string;
   ts: number;
 }
 
