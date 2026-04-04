@@ -414,10 +414,12 @@ function TestConnectionButton({
 
 // ── Main Editor ───────────────────────────────────────────────────────────────
 
-type Tab = "form" | "raw";
+type Section = "fr-config" | "log-api";
+type SubTab = "form" | "raw";
 
 export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (updated: Environment) => void }) {
-  const [tab, setTab] = useState<Tab>("form");
+  const [section, setSection] = useState<Section>("fr-config");
+  const [subTab, setSubTab] = useState<SubTab>("form");
   const [rawContent, setRawContent] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
   const [label, setLabel] = useState(env.label);
@@ -427,7 +429,13 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  // Load .env content on mount / env change
+  // Log API state
+  const [logApiKey, setLogApiKey] = useState("");
+  const [logApiSecret, setLogApiSecret] = useState("");
+  const [logApiKeyVisible, setLogApiKeyVisible] = useState(false);
+  const [logApiSecretVisible, setLogApiSecretVisible] = useState(false);
+
+  // Load .env content + log API creds on mount / env change
   useEffect(() => {
     setLoading(true);
     setSaved(false);
@@ -440,37 +448,43 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
         const content = data.content ?? "";
         setRawContent(content);
         setValues(parseEnvFile(content));
+        setLogApiKey(data.logApi?.apiKey ?? "");
+        setLogApiSecret(data.logApi?.apiSecret ?? "");
         setLoading(false);
       });
   }, [env.name]);
 
-  // Sync form → raw when switching to raw tab
-  const handleTabChange = useCallback(
-    (next: Tab) => {
-      if (next === "raw" && tab === "form") {
+  // Sync form → raw when switching sub-tabs
+  const handleSubTabChange = useCallback(
+    (next: SubTab) => {
+      if (next === "raw" && subTab === "form") {
         setRawContent(serializeEnvFile(values, rawContent));
       }
-      if (next === "form" && tab === "raw") {
+      if (next === "form" && subTab === "raw") {
         setValues(parseEnvFile(rawContent));
       }
-      setTab(next);
+      setSubTab(next);
     },
-    [tab, values, rawContent]
+    [subTab, values, rawContent]
   );
 
   const setField = (key: string, value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  const currentRaw = tab === "form" ? serializeEnvFile(values, rawContent) : rawContent;
+  const currentRaw = subTab === "form" ? serializeEnvFile(values, rawContent) : rawContent;
 
   const handleSave = async () => {
     setSaving(true);
     setError("");
+    const body: Record<string, unknown> = { label, color, envContent: currentRaw };
+    if (logApiKey || logApiSecret) {
+      body.logApi = { apiKey: logApiKey, apiSecret: logApiSecret };
+    }
     const res = await fetch(`/api/environments/${env.name}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label, color, envContent: currentRaw }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       const updated = await res.json();
@@ -491,7 +505,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50 gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <EnvironmentBadge env={{ ...env, label, color }} />
-          <span className="text-xs font-mono text-slate-400">{env.name}/.env</span>
+          <span className="text-xs font-mono text-slate-400">{env.name}</span>
         </div>
         <div className="flex items-center gap-2">
           {error && <span className="text-xs text-red-600">{error}</span>}
@@ -534,99 +548,186 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
             </div>
           </div>
 
-          {/* Test connection */}
-          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-            <TestConnectionButton liveValues={values} />
-          </div>
-
-          {/* Tabs */}
-          <div className="flex border-b border-slate-200">
-            {(["form", "raw"] as Tab[]).map((t) => (
+          {/* ── Section tabs (fr-config / Log API) ──────────────────────── */}
+          <div className="flex border-b border-slate-200 bg-slate-50/50">
+            {([
+              { key: "fr-config" as Section, label: "fr-config" },
+              { key: "log-api" as Section, label: "Log API" },
+            ]).map((s) => (
               <button
-                key={t}
-                onClick={() => handleTabChange(t)}
+                key={s.key}
+                onClick={() => setSection(s.key)}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                  tab === t
+                  "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+                  section === s.key
                     ? "border-sky-500 text-sky-700"
                     : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
                 )}
               >
-                {t === "form" ? "Form" : "Raw .env"}
+                {s.label}
               </button>
             ))}
           </div>
 
-          {/* Validation banner */}
-          {tab === "form" && missing.length > 0 && (
-            <div className="mx-4 mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
-              Required fields missing: {missing.join(", ")}
-            </div>
-          )}
+          {/* ═══════════ fr-config section ═══════════ */}
+          {section === "fr-config" && (
+            <>
+              {/* Test connection */}
+              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+                <TestConnectionButton liveValues={values} />
+              </div>
 
-          {/* Form tab */}
-          {tab === "form" && (
-            <div className="p-4 space-y-6 overflow-y-auto max-h-[600px]">
-              {FIELD_GROUPS.map((group) => (
-                <div key={group.title} className="space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 border-b border-slate-100 pb-1">
-                    {group.title}
-                  </h3>
-                  {group.fields.map((field) => (
-                    <div key={field.key} className="space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <label className="text-sm font-medium text-slate-700">
-                          {field.label}
-                        </label>
-                        {field.required && (
-                          <span className="text-red-500 text-xs">*</span>
-                        )}
-                        {field.sensitive && (
-                          <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">sensitive</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-400">{field.description}</p>
-                      <FieldInput
-                        field={field}
-                        value={values[field.key] ?? ""}
-                        onChange={(v) => setField(field.key, v)}
-                      />
+              {/* Sub-tabs: Form / Raw */}
+              <div className="flex border-b border-slate-200">
+                {(["form", "raw"] as SubTab[]).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => handleSubTabChange(t)}
+                    className={cn(
+                      "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                      subTab === t
+                        ? "border-sky-500 text-sky-700"
+                        : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+                    )}
+                  >
+                    {t === "form" ? "Form" : "Raw .env"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Validation banner */}
+              {subTab === "form" && missing.length > 0 && (
+                <div className="mx-4 mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
+                  Required fields missing: {missing.join(", ")}
+                </div>
+              )}
+
+              {/* Form sub-tab */}
+              {subTab === "form" && (
+                <div className="p-4 space-y-6 overflow-y-auto max-h-[600px]">
+                  {FIELD_GROUPS.map((group) => (
+                    <div key={group.title} className="space-y-3">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 border-b border-slate-100 pb-1">
+                        {group.title}
+                      </h3>
+                      {group.fields.map((field) => (
+                        <div key={field.key} className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <label className="text-sm font-medium text-slate-700">
+                              {field.label}
+                            </label>
+                            {field.required && (
+                              <span className="text-red-500 text-xs">*</span>
+                            )}
+                            {field.sensitive && (
+                              <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">sensitive</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-400">{field.description}</p>
+                          <FieldInput
+                            field={field}
+                            value={values[field.key] ?? ""}
+                            onChange={(v) => setField(field.key, v)}
+                          />
+                        </div>
+                      ))}
                     </div>
                   ))}
-                </div>
-              ))}
 
-              {/* Extra unknown keys */}
-              {Object.entries(values)
-                .filter(([k]) => !ALL_KNOWN_KEYS.has(k))
-                .map(([key, val]) => (
-                  <div key={key} className="space-y-1">
-                    <label className="text-sm font-medium text-slate-700 font-mono">{key}</label>
-                    <p className="text-xs text-slate-400">Custom / unrecognised variable.</p>
-                    <input
-                      type="text"
-                      value={val}
-                      onChange={(e) => setField(key, e.target.value)}
-                      className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    />
-                  </div>
-                ))}
-            </div>
+                  {/* Extra unknown keys */}
+                  {Object.entries(values)
+                    .filter(([k]) => !ALL_KNOWN_KEYS.has(k))
+                    .map(([key, val]) => (
+                      <div key={key} className="space-y-1">
+                        <label className="text-sm font-medium text-slate-700 font-mono">{key}</label>
+                        <p className="text-xs text-slate-400">Custom / unrecognised variable.</p>
+                        <input
+                          type="text"
+                          value={val}
+                          onChange={(e) => setField(key, e.target.value)}
+                          className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        />
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {/* Raw sub-tab */}
+              {subTab === "raw" && (
+                <div>
+                  <p className="text-xs text-slate-400 px-4 pt-3 pb-1">
+                    Direct edit of the .env file. Changes here are reflected in the form view on next switch.
+                  </p>
+                  <textarea
+                    value={rawContent}
+                    onChange={(e) => setRawContent(e.target.value)}
+                    spellCheck={false}
+                    className="w-full h-96 font-mono text-sm p-4 focus:outline-none resize-none text-green-300 bg-slate-900"
+                    placeholder={`TENANT_BASE_URL=https://your-tenant.forgeblocks.com/am\nSERVICE_ACCOUNT_ID=\nSERVICE_ACCOUNT_KEY=\nCONFIG_DIR=./config\nSCRIPT_PREFIXES=[]`}
+                  />
+                </div>
+              )}
+            </>
           )}
 
-          {/* Raw tab */}
-          {tab === "raw" && (
-            <div>
-              <p className="text-xs text-slate-400 px-4 pt-3 pb-1">
-                Direct edit of the .env file. Changes here are reflected in the form view on next switch.
-              </p>
-              <textarea
-                value={rawContent}
-                onChange={(e) => setRawContent(e.target.value)}
-                spellCheck={false}
-                className="w-full h-96 font-mono text-sm p-4 focus:outline-none resize-none text-green-300 bg-slate-900"
-                placeholder={`TENANT_BASE_URL=https://your-tenant.forgeblocks.com/am\nSERVICE_ACCOUNT_ID=\nSERVICE_ACCOUNT_KEY=\nCONFIG_DIR=./config\nSCRIPT_PREFIXES=[]`}
-              />
+          {/* ═══════════ Log API section ═══════════ */}
+          {section === "log-api" && (
+            <div className="p-4 space-y-6 max-w-lg">
+              <div>
+                <p className="text-xs text-slate-500 mb-4">
+                  API key and secret for accessing PingOne Advanced Identity Cloud monitoring logs.
+                  Create these in the AIC admin console under Tenant Settings &gt; Log API Keys.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">API Key</label>
+                <p className="text-xs text-slate-400">The API key ID from the AIC admin console.</p>
+                <div className="relative">
+                  <input
+                    type={logApiKeyVisible ? "text" : "password"}
+                    value={logApiKey}
+                    onChange={(e) => setLogApiKey(e.target.value)}
+                    placeholder="e.g. a1b2c3d4e5f6..."
+                    className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 pr-14 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setLogApiKeyVisible((v) => !v)}
+                    className="absolute top-1.5 right-2 text-xs text-slate-400 hover:text-slate-700"
+                  >
+                    {logApiKeyVisible ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">API Secret</label>
+                <p className="text-xs text-slate-400">The API secret paired with the key above.</p>
+                <div className="relative">
+                  <input
+                    type={logApiSecretVisible ? "text" : "password"}
+                    value={logApiSecret}
+                    onChange={(e) => setLogApiSecret(e.target.value)}
+                    placeholder="e.g. x9y8z7w6v5u4..."
+                    className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 pr-14 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setLogApiSecretVisible((v) => !v)}
+                    className="absolute top-1.5 right-2 text-xs text-slate-400 hover:text-slate-700"
+                  >
+                    {logApiSecretVisible ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <p className="text-xs text-slate-400">
+                  These credentials are stored locally in <code className="font-mono bg-slate-100 px-1 rounded">{env.name}/log-api.json</code> and
+                  are used to query the <code className="font-mono bg-slate-100 px-1 rounded">/monitoring/logs</code> endpoint.
+                </p>
+              </div>
             </div>
           )}
         </>

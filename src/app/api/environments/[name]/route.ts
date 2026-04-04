@@ -5,6 +5,8 @@ import {
   getEnvFileContent,
   saveEnvFile,
   deleteEnvFolder,
+  getLogApiCredentials,
+  saveLogApiCredentials,
 } from "@/lib/fr-config";
 
 export async function GET(
@@ -13,7 +15,8 @@ export async function GET(
 ) {
   const { name } = await params;
   const content = getEnvFileContent(name);
-  return NextResponse.json({ content });
+  const logApi = getLogApiCredentials(name);
+  return NextResponse.json({ content, logApi });
 }
 
 export async function PUT(
@@ -34,6 +37,10 @@ export async function PUT(
 
   if (body.envContent !== undefined) {
     saveEnvFile(name, body.envContent);
+  }
+
+  if (body.logApi !== undefined) {
+    saveLogApiCredentials(name, body.logApi);
   }
 
   return NextResponse.json(envs[idx]);

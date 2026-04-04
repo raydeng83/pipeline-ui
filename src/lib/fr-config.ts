@@ -61,6 +61,33 @@ export function getConfigDir(environmentName: string): string | null {
   return path.resolve(envDir, configDirRaw);
 }
 
+// ── Log API credentials ──────────────────────────────────────────────────────
+
+export interface LogApiCredentials {
+  apiKey: string;
+  apiSecret: string;
+}
+
+function logApiPath(environmentName: string): string {
+  return path.join(ENVIRONMENTS_DIR, environmentName, "log-api.json");
+}
+
+export function getLogApiCredentials(environmentName: string): LogApiCredentials | null {
+  const p = logApiPath(environmentName);
+  if (!fs.existsSync(p)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(p, "utf-8"));
+  } catch {
+    return null;
+  }
+}
+
+export function saveLogApiCredentials(environmentName: string, creds: LogApiCredentials): void {
+  const dir = path.join(ENVIRONMENTS_DIR, environmentName);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(logApiPath(environmentName), JSON.stringify(creds, null, 2));
+}
+
 /** Load an env file and merge its values into process.env for a child process. */
 function buildEnv(environmentName: string, overrides?: Record<string, string>): NodeJS.ProcessEnv {
   const filePath = getEnvFilePath(environmentName);
