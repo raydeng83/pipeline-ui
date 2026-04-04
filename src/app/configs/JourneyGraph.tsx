@@ -773,12 +773,15 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     shouldAdjustViewport.current = false;
     const vp = pendingViewport.current;
     pendingViewport.current = null;
+    // No cleanup return: pageConfigs loading causes a second dagreNodes change
+    // that would cancel the timeout via cleanup before it fires.
+    // The action fires once after the first trigger and is harmless if the
+    // component re-renders again before the 80ms elapses.
     if (vp) {
-      const t = setTimeout(() => setViewport(vp, { duration: 300 }), 50);
-      return () => clearTimeout(t);
+      setTimeout(() => setViewport(vp, { duration: 300 }), 80);
+    } else {
+      setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 80);
     }
-    const t = setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 50);
-    return () => clearTimeout(t);
   }, [dagreNodes, setRfNodes]);
 
   // Escape closes drawer first (capture phase, before fullscreen handler)
