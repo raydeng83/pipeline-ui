@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 // ── Constants (must match JourneyGraph.tsx) ───────────────────────────────────
@@ -12,6 +12,8 @@ const SPECIAL_NODE_BG: Partial<Record<string, string>> = {
   ScriptedDecisionNode:   "bg-violet-50",
   InnerTreeEvaluatorNode: "bg-amber-50",
 };
+
+const EXPAND_ALL = 999;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -54,7 +56,6 @@ function buildTree(
   const isSuccess = nodeId === SUCCESS_ID;
   const isFailure = nodeId === FAILURE_ID;
 
-  // Terminals are always shown as leaves even if reached via multiple paths
   if (!isSuccess && !isFailure && visited.has(nodeId)) {
     return {
       id: nodeId,
@@ -100,20 +101,30 @@ function parseOutline(json: string): TreeNode | null {
   }
 }
 
+function getMaxDepth(node: TreeNode, depth = 0): number {
+  if (node.isBackRef || node.children.length === 0) return depth;
+  return Math.max(...node.children.map((c) => getMaxDepth(c, depth + 1)));
+}
+
 // ── Row component ─────────────────────────────────────────────────────────────
 
 function TreeRow({
   node,
   depth,
-  defaultOpen,
+  targetDepth,
 }: {
   node: TreeNode;
   depth: number;
-  defaultOpen: boolean;
+  targetDepth: number;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(depth < targetDepth);
   const hasChildren = node.children.length > 0 && !node.isBackRef;
   const specialBg = node.nodeType ? (SPECIAL_NODE_BG[node.nodeType] ?? "") : "";
+
+  // Sync open state when global targetDepth changes
+  useEffect(() => {
+    setOpen(depth < targetDepth);
+  }, [targetDepth, depth]);
 
   return (
     <div>
@@ -126,23 +137,19 @@ function TreeRow({
         style={{ paddingLeft: 8 + depth * 16 }}
         onClick={() => hasChildren && setOpen((o) => !o)}
       >
-        {/* Expand / collapse toggle */}
         <span className="w-3 shrink-0 text-[10px] text-slate-400 leading-none">
           {hasChildren ? (open ? "▾" : "▸") : ""}
         </span>
 
-        {/* Outcome badge (which edge led here) */}
         {node.outcomeFromParent && (
           <span className="text-[9px] font-mono bg-slate-100 text-slate-500 rounded px-1 py-0.5 shrink-0 leading-none">
             {node.outcomeFromParent}
           </span>
         )}
 
-        {/* Terminal colour dot */}
         {node.isSuccess && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
         {node.isFailure && <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />}
 
-        {/* Label */}
         <span
           className={cn(
             "text-[11px] leading-snug truncate",
@@ -155,7 +162,6 @@ function TreeRow({
           {node.isBackRef ? `↩ ${node.label}` : node.label}
         </span>
 
-        {/* Node type hint */}
         {node.nodeType && !node.isBackRef && !node.isSuccess && !node.isFailure && (
           <span className="text-[9px] text-slate-400 shrink-0 ml-0.5">{node.nodeType}</span>
         )}
@@ -166,7 +172,7 @@ function TreeRow({
           key={`${child.id}-${i}`}
           node={child}
           depth={depth + 1}
-          defaultOpen={depth + 1 < 2}
+          targetDepth={targetDepth}
         />
       ))}
     </div>
@@ -176,7 +182,13 @@ function TreeRow({
 // ── Public export ─────────────────────────────────────────────────────────────
 
 export function JourneyOutlineView({ json }: { json: string }) {
-  const root = useMemo(() => parseOutline(json), [json]);
+  const root     = useMemo(() => parseOutline(json), [json]);
+  const maxDepth = useMemo(() => (root ? getMaxDepth(root) : 0), [root]);
+
+  const [targetDepth, setTargetDepth] = useState(2);
+
+  // Reset to default depth when a new journey is loaded
+  useEffect(() => { setTargetDepth(2); }, [root]);
 
   if (!root) {
     return (
@@ -187,8 +199,65 @@ export function JourneyOutlineView({ json }: { json: string }) {
   }
 
   return (
-    <div className="overflow-auto h-full py-3 px-2 text-sm">
-      <TreeRow node={root} depth={0} defaultOpen />
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Level toolbar */}
+      <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-200 bg-white shrink-0 flex-wrap">
+        <span className="text-[10px] text-slate-400 mr-0.5">Expand:</span>
+
+        {/* Collapse all */}
+        <button
+          type="button"
+          onClick={() => setTargetDepth(0)}
+          className={cn(
+            "text-[10px] px-2 py-0.5 rounded border transition-colors",
+            targetDepth === 0
+              ? "bg-slate-700 text-white border-slate-700"
+              : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+          )}
+        >
+          None
+        </button>
+
+        <span className="text-slate-200 text-[10px]">|</span>
+
+        {/* Per-level buttons */}
+        {Array.from({ length: maxDepth }, (_, i) => i + 1).map((level) => (
+          <button
+            key={level}
+            type="button"
+            onClick={() => setTargetDepth(level)}
+            className={cn(
+              "text-[10px] px-2 py-0.5 rounded border transition-colors",
+              targetDepth === level
+                ? "bg-slate-700 text-white border-slate-700"
+                : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+            )}
+          >
+            L{level}
+          </button>
+        ))}
+
+        <span className="text-slate-200 text-[10px]">|</span>
+
+        {/* Expand all */}
+        <button
+          type="button"
+          onClick={() => setTargetDepth(EXPAND_ALL)}
+          className={cn(
+            "text-[10px] px-2 py-0.5 rounded border transition-colors",
+            targetDepth === EXPAND_ALL
+              ? "bg-slate-700 text-white border-slate-700"
+              : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+          )}
+        >
+          All
+        </button>
+      </div>
+
+      {/* Tree */}
+      <div className="overflow-auto flex-1 py-3 px-2">
+        <TreeRow node={root} depth={0} targetDepth={targetDepth} />
+      </div>
     </div>
   );
 }
