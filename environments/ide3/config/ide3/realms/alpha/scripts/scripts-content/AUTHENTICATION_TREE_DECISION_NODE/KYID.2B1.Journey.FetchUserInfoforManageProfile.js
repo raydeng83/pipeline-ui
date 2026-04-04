@@ -357,6 +357,16 @@ try {
             //     nodeState.putShared("orig_verificationStatus", userIdenitity.lastVerificationDate);
             // }
 
+           if(typeof existingSession != 'undefined'){
+                var rawSessionRef = existingSession.get("sessionRefId");
+                var sessionObj = JSON.parse(rawSessionRef);
+            
+                // Now you can access the internal key
+                if (sessionObj && sessionObj.sessionRefId) {
+                    nodeState.putShared("sessionRefId", sessionObj.sessionRefId);
+                    logger.debug("Successfully extracted sessionRefId: " + sessionObj.sessionRefId);
+                }
+            }
 
             logger.debug("user found");
             action.goTo(NodeOutcome.FOUND);

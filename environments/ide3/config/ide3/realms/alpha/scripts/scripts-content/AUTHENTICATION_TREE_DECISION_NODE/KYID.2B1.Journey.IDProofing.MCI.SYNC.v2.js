@@ -125,10 +125,34 @@ function updateUserInfo(collectedUserInfo, userAttributes) {
             UpdatedCollectedUserInfo["kogId"] = collectedUserInfo.kogId || "";
             UpdatedCollectedUserInfo["lexId"] = nodeState.get("verifiedLexIdHelpdesk") || nodeState.get("verifiedLexId") || "";
             UpdatedCollectedUserInfo["isLNKbaRequired"] = nodeState.get("isLNKbaRequired") || nodeState.get("isLNKbaRequired") || "";
+
+            UpdatedCollectedUserInfoNoSSN["givenName"] = attrMap["firstname"] || collectedUserInfo.givenName || "";
+            UpdatedCollectedUserInfoNoSSN["middleName"] = attrMap["middlename"] || collectedUserInfo.middleName || "";
+            UpdatedCollectedUserInfoNoSSN["sn"] = attrMap["lastname"] || collectedUserInfo.sn || "";
+            UpdatedCollectedUserInfoNoSSN["suffix"] = attrMap["suffix"] || collectedUserInfo.suffix || "";
+            UpdatedCollectedUserInfoNoSSN["gender"] = attrMap["gender"] || collectedUserInfo.gender || "";
+            UpdatedCollectedUserInfoNoSSN["dob"] = attrMap["dob"] || collectedUserInfo.dob || "";
+            UpdatedCollectedUserInfoNoSSN["isHomeless"] = attrMap["ishomeless"] || collectedUserInfo.isHomeless || "";
+            UpdatedCollectedUserInfoNoSSN["postalAddress"] = attrMap["addressline1"] || collectedUserInfo.postalAddress || "";
+            UpdatedCollectedUserInfoNoSSN["postalAddress2"] = attrMap["addressline2"] || collectedUserInfo.postalAddress2 || "";
+            UpdatedCollectedUserInfoNoSSN["city"] = attrMap["city"] || collectedUserInfo.city || "";
+            UpdatedCollectedUserInfoNoSSN["stateProvince"] = attrMap["state"] || collectedUserInfo.stateProvince || "";
+            UpdatedCollectedUserInfoNoSSN["postalCode"] = attrMap["zipcode"] || collectedUserInfo.postalCode || "";
+            UpdatedCollectedUserInfoNoSSN["postalExtension"] = attrMap["postalextension"] || collectedUserInfo.postalExtension || "";
+            UpdatedCollectedUserInfoNoSSN["county"] = attrMap["county"] || collectedUserInfo.county || "";
+            UpdatedCollectedUserInfoNoSSN["country"] = attrMap["country"] || collectedUserInfo.country || "";
+            UpdatedCollectedUserInfoNoSSN["title"] = attrMap["title"] || collectedUserInfo.title || "";
+            UpdatedCollectedUserInfoNoSSN["telephoneNumber"] = attrMap["telephonenumber"] || collectedUserInfo.telephoneNumber || "";
+            UpdatedCollectedUserInfoNoSSN["mail"] = attrMap["mail"] || collectedUserInfo.mail || nodeState.get("mail") || nodeState.get("EmailAddress") || ""
+            UpdatedCollectedUserInfoNoSSN["DriversLicense"] = attrMap["driverslicense"] || collectedUserInfo.driversLicenseNumber || "";
+            UpdatedCollectedUserInfoNoSSN["kogId"] = collectedUserInfo.kogId || "";
+            UpdatedCollectedUserInfoNoSSN["lexId"] = nodeState.get("verifiedLexIdHelpdesk") || nodeState.get("verifiedLexId") || "";
+            UpdatedCollectedUserInfoNoSSN["isLNKbaRequired"] = nodeState.get("isLNKbaRequired") || nodeState.get("isLNKbaRequired") || "";
         }else{
             UpdatedCollectedUserInfo = collectedUserInfo;
         }
         nodeState.putShared("UpdatedCollectedUserInfo",UpdatedCollectedUserInfo);
+        nodeState.putShared("UpdatedCollectedUserInfoNoSSN",UpdatedCollectedUserInfoNoSSN);
         return UpdatedCollectedUserInfo;
     }catch(error){
         logger.error("Error in catch of updateUserInfo in KYID.2B1.Journey.IDProofing.MCI.SYNC :: " + error)
@@ -223,8 +247,8 @@ function handleUserResponses() {
                     if(patchMCIStatusResponse && patchMCIStatusResponse != null){
                         logger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "MCI Link Status patched successfully in Function handleResponse");
                         var reason = "The user personal verified and/or corrected information details provided by LexisNexis.";
-                        var UpdatedCollectedUserInfo = JSON.parse(nodeState.get("UpdatedCollectedUserInfo"));
-                        auditLog("MCI-000", "Verified and/or corrected user identity record has been updated in MCI.", true , transactionid, flowName, mail, null, null, reason, UpdatedCollectedUserInfo);
+                        var UpdatedCollectedUserInfoNoSSN = JSON.parse(nodeState.get("UpdatedCollectedUserInfoNoSSN"));
+                        auditLog("MCI-000", "Verified and/or corrected user identity record has been updated in MCI.", true , transactionid, flowName, mail, null, null, reason, UpdatedCollectedUserInfoNoSSN);
                         //nodeState.putShared("userInfoJSON", null);
                         nodeState.putShared("userAttributesForTransaction", null);
                         nodeState.putShared("UpdatedCollectedUserInfo", null);

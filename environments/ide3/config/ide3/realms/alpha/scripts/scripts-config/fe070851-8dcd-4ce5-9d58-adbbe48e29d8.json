@@ -8,7 +8,7 @@
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
   "lastModifiedBy": "id=5d34b6b2-4b6f-43a5-9483-506dc6b6ddd8,ou=user,ou=am-config",
-  "lastModifiedDate": 1774382824494,
+  "lastModifiedDate": 1775160788028,
   "name": "le-test-script",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/le-test-script.js"

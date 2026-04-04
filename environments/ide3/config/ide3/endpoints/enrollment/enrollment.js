@@ -169,31 +169,47 @@
                 }
                 else if (response !== null) {
                     if (response.rolePreReq && Array.isArray(response.rolePreReq)) {
-                        var prereqSequence = (response.prereqSequence && Array.isArray(response.prereqSequence)) ? response.prereqSequence : [];
+                        var prereqSequence = response.prereqSequence
+                            ? (Array.isArray(response.prereqSequence)
+                                ? response.prereqSequence
+                                : Object.values(response.prereqSequence))
+                            : [];
 
-                        var completedItems = response.rolePreReq.filter(function(item) {
-                            return item.status && item.status.toUpperCase() === 'COMPLETED';
+                        var statusGroups = ['COMPLETED', 'PENDING_APPROVAL', 'IN_PROGRESS', 'NOT_STARTED'];
+                        var sequenceNames = prereqSequence.map(function(s) { return s.prereqName; });
+                        var sortedSequence = prereqSequence.slice().sort(function(a, b) { return a.displayOrder - b.displayOrder; });
+
+                        function orderGroup(groupItems) {
+                            var sequenced = sortedSequence
+                                .map(function(seq) {
+                                    return groupItems.find(function(item) {
+                                        return item.prereqName === seq.prereqName;
+                                    });
+                                })
+                                .filter(function(item) { return item !== undefined; });
+
+                            var remaining = groupItems
+                                .filter(function(item) {
+                                    return sequenceNames.indexOf(item.prereqName) === -1;
+                                })
+                                .sort(function(a, b) { return a.displayOrder - b.displayOrder; });
+
+                            return sequenced.concat(remaining);
+                        }
+
+                        var orderedItems = [];
+
+                        statusGroups.forEach(function(status) {
+                            var groupItems = response.rolePreReq.filter(function(item) {
+                                return item.status && item.status.toUpperCase() === status;
+                            });
+                            orderedItems = orderedItems.concat(orderGroup(groupItems));
                         });
 
-                        var sequenceNames = prereqSequence.map(function(s) { return s.prereqName; });
-
-                        var sequencedItems = prereqSequence
-                            .slice()
-                            .sort(function(a, b) { return a.displayOrder - b.displayOrder; })
-                            .map(function(seq) {
-                                return response.rolePreReq.find(function(item) {
-                                    return item.prereqName === seq.prereqName && item.status.toUpperCase() !== 'COMPLETED';
-                                });
-                            })
-                            .filter(function(item) { return item !== undefined; });
-
-                        var remainingItems = response.rolePreReq
-                            .filter(function(item) {
-                                return item.status.toUpperCase() !== 'COMPLETED' && sequenceNames.indexOf(item.prereqName) === -1;
-                            })
-                            .sort(function(a, b) { return a.displayOrder - b.displayOrder; });
-
-                        var orderedItems = completedItems.concat(sequencedItems).concat(remainingItems);
+                        var otherItems = response.rolePreReq.filter(function(item) {
+                            return !item.status || statusGroups.indexOf(item.status.toUpperCase()) === -1;
+                        });
+                        orderedItems = orderedItems.concat(orderGroup(otherItems));
 
                         orderedItems.forEach(function(item, index) {
                             item.displayOrder = index + 1;

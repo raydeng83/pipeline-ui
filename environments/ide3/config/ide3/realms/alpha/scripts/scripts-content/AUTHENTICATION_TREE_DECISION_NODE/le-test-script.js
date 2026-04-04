@@ -1,14 +1,20 @@
 /*
- * Copyright 2024-2025 Ping Identity Corporation. All Rights Reserved
- *
- * This code is to be used exclusively in connection with Ping Identity
- * Corporation software or services. Ping Identity Corporation only offers
- * such software or services to legal entities who have entered into a
- * binding license agreement with Ping Identity Corporation.
- */
-/*
-  - Data made available by nodes that have already executed is available in the nodeState variable.
-  - Use the action object to set the outcome of the node.
+  - Data made available by nodes that have already executed are available in the sharedState variable.
+  - The script should set outcome to either "true" or "false".
  */
 
-action.goTo("test");
+// Compute current system timestamp
+var dateTime = new Date().toISOString();
+
+logger.error("rajatlogs::Value fron OOB session node:: "+nodeState.get("rajatemailaddress"))
+
+var mail = null;
+if (typeof existingSession !== 'undefined')
+{
+  mail = existingSession.get("emailaddress");
+ 
+  logger.error("rajatlogs::"+dateTime+"::Email is session is::"+mail);  
+    
+} 
+
+outcome = "True";

@@ -316,16 +316,33 @@ function handleUserResponses() {
     }  
 } 
 
-function removeSSN(response){
-    var attrs = response.userAttributes;
+// function removeSSN(response){
+//     var attrs = response.userAttributes;
     
-    for (var i = attrs.length - 1; i >= 0; i--) {
-        if (attrs[i].attributeName === "SSN") {
-            attrs.splice(i, 1); // remove this element
+//     for (var i = attrs.length - 1; i >= 0; i--) {
+//         if (attrs[i].attributeName === "SSN" || attrs[i].attributeName.toLowercase() === "ssn") {
+//             attrs.splice(i, 1); // remove this element
+//         }
+//     }
+
+//     return response
+// }
+
+function removeSSN(resp) {
+    if (!resp || !resp.userAttributes || !Array.isArray(resp.userAttributes)) return resp;
+
+    var attrs = resp.userAttributes;
+    for (var i = 0; i < attrs.length; i++) {
+        var a = attrs[i];
+        var name = a && a.attributeName;
+        if (typeof name === "string" && name.toLowerCase() === "ssn") {
+            a.correctedValue = "";
+            a.originalValue = "";
+            // a.status = "";
+            break;
         }
     }
-
-    return response
+    return resp;
 }
 
 

@@ -506,13 +506,15 @@ function setRolesinToken(oidcClientID,appName,bearerToken) {
             })
         }
         // roles.push("KYID-Self-Service-Personal")
-        accessToken.setField("roles", roles);
+        //accessToken.setField("roles", roles);
         logger.error("roles are  "+commonRoles)
         if(roles.length>0){
           accessToken.setField("roleCategoryName", roles[0]);  
+          accessToken.setField("roles", roles);    
         }
         else{
             accessToken.setField("roleCategoryName",""); 
+            accessToken.setField("roles", []);
         }
         
         logger.error("Adding Roles to the ACcess Toeken --> " + roles)

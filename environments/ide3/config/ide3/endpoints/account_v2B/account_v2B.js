@@ -2598,7 +2598,8 @@ function getViewAccountInformation(queryFilter) {
                     "transactionDate": "",
                     // "status": "",
                     "riskIndicators": [],
-                    "transactionId": ""
+                    "transactionId": "",
+                     "methodName":""
                 }
                     if (!(mfaMethods[i].MFAMethod.toUpperCase() == "EMAIL") && mfaMethods[i].MFAStatus.toLowerCase() == "active") {
                         let methodUsage = ["MFA"]
@@ -2634,7 +2635,8 @@ function getViewAccountInformation(queryFilter) {
                                 highRiskMFATemplate.transactionDate = mfaMethods[i].updateDate ? mfaMethods[i].updateDate : "",
                                 // highRiskMFATemplate.status = mfaMethods[i].MFAStatus ? mfaMethods[i].MFAStatus : "",
                                 highRiskMFATemplate.riskIndicators = mfaMethods[i].riskIndicator ? mfaMethods[i].riskIndicator : [],
-                                highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : ""
+                                highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : "",
+                                highRiskMFATemplate.methodName = mfaMethods[i].MFAMethod
                                 highRiskMFA.push(highRiskMFATemplate)
                                 accountRecoveryAndMFA.push(accountRecoveryAndMFAItem);
 
@@ -2652,7 +2654,8 @@ function getViewAccountInformation(queryFilter) {
                                 highRiskMFATemplate.transactionDate = mfaMethods[i].updateDate ? mfaMethods[i].updateDate : "",
                                 // highRiskMFATemplate.status = mfaMethods[i].MFAStatus ? mfaMethods[i].MFAStatus : "",
                                 highRiskMFATemplate.riskIndicators = mfaMethods[i].riskIndicator ? mfaMethods[i].riskIndicator : [],
-                                highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : ""
+                                highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : "",
+                                highRiskMFATemplate.methodName = mfaMethods[i].MFAMethod
                             highRiskMFA.push(highRiskMFATemplate)
                           accountRecoveryAndMFA.push(accountRecoveryAndMFAItem);
                         }
@@ -2672,7 +2675,8 @@ function getViewAccountInformation(queryFilter) {
                             highRiskMFATemplate.transactionDate = mfaMethods[i].updateDate ? mfaMethods[i].updateDate : "",
                             // highRiskMFATemplate.status = mfaMethods[i].MFAStatus ? mfaMethods[i].MFAStatus : "",
                             highRiskMFATemplate.riskIndicators = mfaMethods[i].riskIndicator ? mfaMethods[i].riskIndicator : [],
-                            highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : ""
+                            highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : "",
+                            highRiskMFATemplate.methodName = mfaMethods[i].MFAMethod
                         highRiskMFA.push(highRiskMFATemplate)
                     } else if (mfaMethods[i].MFAMethod.toUpperCase() == "EMAIL" && mfaMethods[i].risk && mfaMethods[i].risk.toLowerCase() == "override") {
 
@@ -2687,7 +2691,8 @@ function getViewAccountInformation(queryFilter) {
                             highRiskMFATemplate.transactionDate = mfaMethods[i].updateDate ? mfaMethods[i].updateDate : "",
                             // highRiskMFATemplate.status = mfaMethods[i].MFAStatus ? mfaMethods[i].MFAStatus : "",
                             highRiskMFATemplate.riskIndicators = mfaMethods[i].riskIndicator ? mfaMethods[i].riskIndicator : [],
-                            highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : ""
+                            highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : "",
+                            highRiskMFATemplate.methodName = mfaMethods[i].MFAMethod
                             highRiskMFA.push(highRiskMFATemplate)
 
                     }
@@ -3963,27 +3968,33 @@ function overrideIdentity(input) {
                     "value": payload.overrideDate
                 });
             }
-            if (payload.comment) {
+            // if (payload.comment) {
                 jsonArray.push({
                     "operation": "replace",
                     "field": "overrideComment",
-                    "value": payload.comment
+                    "value": payload.comment || ""
                 });
-            }
-            if (payload.reason) {
+            // }
+            // if (payload.reason) {
                 jsonArray.push({
                     "operation": "replace",
                     "field": "overrideReason",
-                    "value": payload.reason
+                    "value": payload.reason || ""
                 });
-            }
+            // }
             if (payload.requesterId) {
                 jsonArray.push({
                     "operation": "replace",
                     "field": "updatedBy",
                     "value": payload.requesterId
                 });
+                jsonArray.push({
+                    "operation": "replace",
+                    "field": "riskIndicator",
+                    "value": "override"
+                });
             }
+          
 
         } else {
             logger.error("Error in updating the user identity " );
@@ -4121,6 +4132,7 @@ function overrideMFA(input) {
                     "field": "overrideComment",
                     "value": payload.comment ? payload.comment : ""
                 });
+            }
                 jsonArray.push({
                     "operation": "replace",
                     "field": "MFAStatus",
@@ -4148,11 +4160,45 @@ function overrideMFA(input) {
                 });
 
 
-            }
+            
             logger.error("jsonArray for MFA override is --> " + JSON.stringify(jsonArray));
 
             const updateMFAMethod = openidm.patch("managed/alpha_kyid_mfa_methods/" + payload._id, null, jsonArray);
             logger.error("Update MFA Method Response is --> " + updateMFAMethod);
+            if(updateMFAMethod && updateMFAMethod.methodName == "EMAIL"){
+              var query = `MFAMethod eq 'EMAIL' AND MFAStatus eq 'ACTIVE' AND KOGId eq '${updateMFAMethod.KOGId}' AND  !(MFAValue eq '${updateMFAMethod.MFAValue})'`
+              var allEmailMethods =  openidm.query("managed/alpha_kyid_mfa_methods", {
+            "_queryFilter": query
+        });
+              if(allEmailMethods && allEmailMethods.result.length>0){
+               var jsonArray2 = []
+                jsonArray2.push({
+                    "operation": "replace",
+                    "field": "MFAStatus",
+                    "value": "INACTIVE"
+                });
+                jsonArray2.push({
+                    "operation": "replace",
+                    "field": "updateDate",
+                    "value": currentDate
+                });
+                jsonArray2.push({
+                    "operation": "replace",
+                    "field": "updateDateEpoch",
+                    "value": currentTimeinEpoch
+                });
+                jsonArray2.push({
+                    "operation": "replace",
+                    "field": "updatedBy",
+                    "value": payload.requesterId ? payload.requesterId : ""
+                });
+                allEmailMethods.result.forEach(val=>{
+           
+                  const updateMFAMethod = openidm.patch("managed/alpha_kyid_mfa_methods/" + val._id, null, jsonArray2);
+                })
+              }
+            }
+
             returnPayload = {
                 "responseCode": 0,
                 "transactionId": request.content.transactionId,

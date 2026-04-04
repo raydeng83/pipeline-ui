@@ -150,12 +150,12 @@ function auditLogger(eventCode,sessionDetails,eventName, eventDetails, requester
       requesterUserId: requesterUserId || "",
       requestedUserId: requestedUserId || "",
       transactionId: transactionId || "",
-      sessionDetails: sessionDetails ? sessionDetails.sessionRefId : "",  //Defect Fix# 211192 (Unknown Location) - 03/12
+      sessionDetails: (sessionDetails && sessionDetails.sessionRefId) ? sessionDetails.sessionRefId : (typeof sessionDetails === "string" ? sessionDetails : ""),  //Defect Fix# 211192 (Unknown Location) - 03/12
       createdDate: createdDate,
       createdTimeinEpoch: currentTimeinEpoch,
       emailId: emailId || "",
       applicationName: apllicationId || "",
-      sessionId: sessionDetails ? sessionDetails.sessionRefId : "",    //Defect Fix# 211192 (Unknown Location) - 03/12
+      sessionId: (sessionDetails && sessionDetails.sessionRefId) ? sessionDetails.sessionRefId : (typeof sessionDetails === "string" ? sessionDetails : ""),    //Defect Fix# 211192 (Unknown Location) - 03/12
       sspVisibility: sspVisibility || false,
       ridpReferenceId: ridpReferenceId || "",
       //place: requestHeaders.get("x-client-city")?requestHeaders.get("x-client-city")[0]:"",

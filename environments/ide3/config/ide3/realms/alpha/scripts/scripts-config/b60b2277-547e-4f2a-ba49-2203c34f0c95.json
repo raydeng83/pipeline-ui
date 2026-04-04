@@ -7,8 +7,8 @@
   "description": null,
   "evaluatorVersion": "1.0",
   "language": "JAVASCRIPT",
-  "lastModifiedBy": "id=3b72fc4d-9aae-4eb9-a34d-3e2328f2584d,ou=user,ou=am-config",
-  "lastModifiedDate": 1770104458727,
+  "lastModifiedBy": "id=5708fb1a-9d2d-4b8f-a6e0-3c38f1b823f5,ou=user,ou=am-config",
+  "lastModifiedDate": 1775201014534,
   "name": "KYID.2B1.Journey.OAuth2.AccessTokenModificationScript",
   "script": {
     "file": "scripts-content/OAUTH2_ACCESS_TOKEN_MODIFICATION/KYID.2B1.Journey.OAuth2.AccessTokenModificationScript.js"

@@ -162,7 +162,8 @@ function handleUserResponses() {
             if(selectedOutcome === 0){
            
             if(choiceOutcome ===0){
-               nodeState.putShared("journeyName","RIDP_LoginMain")
+               //nodeState.putShared("journeyName","RIDP_LoginMain")
+                 nodeState.putShared("journeyName","MFARecovery")
                nodeState.putShared("journeyIs","RIDP_LoginMain")
                 nodeState.putShared("backfromridploginsecurity",null)
                  nodeState.putShared("isMFARecovery","true")

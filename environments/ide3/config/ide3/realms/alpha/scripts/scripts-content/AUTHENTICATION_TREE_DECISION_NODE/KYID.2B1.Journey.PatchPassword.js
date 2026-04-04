@@ -54,6 +54,7 @@ if (newpassword) {
      //   var patchResult = openidm.patch(identityResource, null, patchOperation);
       //  logger.debug("Patch Operation Successfull:" + JSON.stringify(patchResult));
         nodeState.putShared("validationErrorCode", "password_updated_successfully");
+        auditLib.auditLogger("PWD003", sessionDetails, "Password Reset Successful", eventDetails, userId, userId, transactionId, userEmail, eventDetails.applicationName, sessionDetails.sessionRefId, requestHeaders)
         action.goTo("success")
     } catch (e) {
         logger.error("Error Patching Password: " + e)
