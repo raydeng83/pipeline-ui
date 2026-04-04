@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { JourneyGraph } from "./JourneyGraph";
 import { JourneyOutlineView } from "./JourneyOutlineView";
 import { JourneyTableView } from "./JourneyTableView";
+import { JourneySwimLaneView } from "./JourneySwimLaneView";
 
 // ── JSON syntax highlighter ───────────────────────────────────────────────────
 
@@ -251,7 +252,7 @@ function SectionsView({ environment }: { environment: string }) {
   const [activeTab, setActiveTab] = useState(0);
   const [fileLoading, setFileLoading] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
-  const [col3View, setCol3View] = useState<"graph" | "outline" | "table" | "json">("graph");
+  const [col3View, setCol3View] = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
@@ -281,6 +282,7 @@ function SectionsView({ environment }: { environment: string }) {
     setFiles(null);
     setActiveTab(0);
     setCol3View(selectedScope === "journeys" ? "graph" : "json");
+
     const params = new URLSearchParams({ environment, scope: selectedScope, item: selectedItem.id });
     fetch(`/api/push/item?${params}`)
       .then((r) => r.json())
@@ -428,20 +430,20 @@ function SectionsView({ environment }: { environment: string }) {
       <div className={cn(
         "flex flex-col overflow-hidden min-w-0",
         fullscreen ? "fixed inset-0 z-50" : "flex-1",
-        selectedItem && (col3View === "graph" || col3View === "outline" || col3View === "table") && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
+        selectedItem && (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
       )}>
         {selectedItem ? (
           <>
             {/* Header bar */}
             <div className={cn(
               "flex items-center gap-2 px-4 py-2 border-b shrink-0",
-              (col3View === "graph" || col3View === "outline" || col3View === "table") && selectedScope === "journeys"
+              (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys"
                 ? "border-slate-200 bg-white"
                 : "border-slate-700 bg-slate-800"
             )}>
               <span className={cn(
                 "text-xs font-medium truncate flex-1",
-                (col3View === "graph" || col3View === "outline" || col3View === "table") && selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
+                (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
               )}>
                 {selectedItem.label}
               </span>
@@ -481,6 +483,16 @@ function SectionsView({ environment }: { environment: string }) {
                   </button>
                   <button
                     type="button"
+                    onClick={() => setCol3View("swimlane")}
+                    className={cn(
+                      "px-2.5 py-1 border-l border-slate-200 transition-colors",
+                      col3View === "swimlane" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    Swimlane
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setCol3View("json")}
                     className={cn(
                       "px-2.5 py-1 border-l border-slate-200 transition-colors",
@@ -516,14 +528,14 @@ function SectionsView({ environment }: { environment: string }) {
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
-                dark={!((col3View === "graph" || col3View === "outline" || col3View === "table") && selectedScope === "journeys")}
+                dark={!((col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys")}
               />
             </div>
 
             {/* Content */}
             <div className="flex-1 overflow-hidden min-h-0">
               {fileLoading && (
-                <div className={cn("flex items-center justify-center h-full text-sm", (col3View === "graph" || col3View === "outline" || col3View === "table") ? "text-slate-400" : "text-slate-500")}>
+                <div className={cn("flex items-center justify-center h-full text-sm", (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") ? "text-slate-400" : "text-slate-500")}>
                   Loading…
                 </div>
               )}
@@ -542,6 +554,9 @@ function SectionsView({ environment }: { environment: string }) {
                   </div>
                   <div className={cn("h-full", col3View !== "table" && "hidden")}>
                     <JourneyTableView json={activeFile.content} />
+                  </div>
+                  <div className={cn("h-full", col3View !== "swimlane" && "hidden")}>
+                    <JourneySwimLaneView json={activeFile.content} />
                   </div>
                 </>
               )}
