@@ -671,18 +671,27 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const activeJourneyId = navStack.length > 0 ? navStack[navStack.length - 1].journeyId : journeyId;
 
   // Saved viewport per journey key (to restore when going back)
-  const savedViewports  = useRef<Map<string, { x: number; y: number; zoom: number }>>(new Map());
-  // null = fit view on next layout; non-null = restore this viewport
-  const pendingViewport = useRef<{ x: number; y: number; zoom: number } | null>(null);
+  const savedViewports     = useRef<Map<string, { x: number; y: number; zoom: number }>>(new Map());
+  // null = fit view; non-null = restore this viewport
+  const pendingViewport    = useRef<{ x: number; y: number; zoom: number } | null>(null);
+  // Only adjust viewport when an explicit navigation/layout action occurred,
+  // not when dagreNodes changes due to pageConfigs loading
+  const shouldAdjustViewport = useRef(true); // true for initial load
 
   // Reset stack when the parent selects a different journey
-  useEffect(() => { setNavStack([]); savedViewports.current.clear(); }, [json]);
+  useEffect(() => {
+    setNavStack([]);
+    savedViewports.current.clear();
+    pendingViewport.current = null;
+    shouldAdjustViewport.current = true;
+  }, [json]);
 
   const navigateToTree = useCallback(async (treeId: string) => {
     if (!environment) return;
     // Save current viewport so we can restore it when going back
     savedViewports.current.set(activeJourneyId ?? "root", getViewport());
     pendingViewport.current = null; // signal: fit view on arrival
+    shouldAdjustViewport.current = true;
     setNavLoading(true);
     try {
       const params = new URLSearchParams({ environment, scope: "journeys", item: treeId });
@@ -702,6 +711,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const goToIndex = useCallback((index: number) => {
     const targetKey = index < 0 ? (journeyId ?? "root") : navStack[index].journeyId;
     pendingViewport.current = savedViewports.current.get(targetKey) ?? null;
+    shouldAdjustViewport.current = true;
     setNavStack((prev) => index < 0 ? [] : prev.slice(0, index + 1));
     setNodePanel(null);
     setSelectedNodeId(null);
@@ -745,7 +755,9 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return { dagreNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
   }, [activeJson, layoutKey, pageConfigs]);
 
-  // Reset to dagre positions when layout changes, then fit or restore viewport
+  // Reset to dagre positions when layout changes, then fit or restore viewport.
+  // Only adjusts viewport when an explicit navigation/layout action set shouldAdjustViewport;
+  // pageConfigs loading also changes dagreNodes but must not override the viewport.
   useEffect(() => {
     setRfNodes(dagreNodes);
     setSelectedNodeId(null);
@@ -753,6 +765,8 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     setHoveredEdgeId(null);
     setPinnedEdgeId(null);
     setNodePanel(null);
+    if (!shouldAdjustViewport.current) return;
+    shouldAdjustViewport.current = false;
     const vp = pendingViewport.current;
     pendingViewport.current = null;
     if (vp) {
@@ -928,7 +942,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       maxZoom={2}
     >
       <Panel position="top-left">
-        <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} onReset={() => setLayoutKey((k) => k + 1)} />
+        <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} onReset={() => { shouldAdjustViewport.current = true; setLayoutKey((k) => k + 1); }} />
       </Panel>
       {navStack.length > 0 && (
         <Panel position="top-center">
