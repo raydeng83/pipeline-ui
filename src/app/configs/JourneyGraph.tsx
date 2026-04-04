@@ -92,6 +92,25 @@ interface PageNodeConfig {
 
 // ── Custom nodes ──────────────────────────────────────────────────────────────
 
+const SPECIAL_NODE_THEMES = {
+  ScriptedDecisionNode: {
+    bg:           "bg-violet-50/60",
+    border:       "border-violet-300",
+    selectedRing: "border-violet-500 ring-2 ring-violet-300 shadow-violet-100",
+    accent:       "#7c3aed",
+    labelColor:   "text-violet-900",
+    typeColor:    "text-violet-400",
+  },
+  InnerTreeEvaluatorNode: {
+    bg:           "bg-amber-50/60",
+    border:       "border-amber-300",
+    selectedRing: "border-amber-500 ring-2 ring-amber-300 shadow-amber-100",
+    accent:       "#d97706",
+    labelColor:   "text-amber-900",
+    typeColor:    "text-amber-500",
+  },
+} as const;
+
 function JourneyNodeComponent({ data }: NodeProps) {
   const d = data as {
     label: string;
@@ -102,22 +121,30 @@ function JourneyNodeComponent({ data }: NodeProps) {
   };
   const outcomes = d.outcomes ?? [];
   const h        = journeyNodeHeight(outcomes.length);
+  const theme    = d.nodeType ? SPECIAL_NODE_THEMES[d.nodeType as keyof typeof SPECIAL_NODE_THEMES] ?? null : null;
+  const handleColor = theme?.accent ?? "#94a3b8";
 
   return (
     <div
       className={cn(
-        "bg-white border rounded-lg shadow-sm transition-all overflow-visible cursor-pointer active:cursor-grabbing",
-        d.isSelected    ? "border-sky-500 ring-2 ring-sky-300 shadow-sky-100" :
+        "border rounded-lg shadow-sm transition-all overflow-visible cursor-pointer active:cursor-grabbing",
+        theme ? theme.bg : "bg-white",
+        d.isSelected    ? (theme?.selectedRing ?? "border-sky-500 ring-2 ring-sky-300 shadow-sky-100") :
         d.isSearchMatch ? "border-amber-400 ring-2 ring-amber-200" :
-                          "border-slate-300"
+                          (theme?.border ?? "border-slate-300")
       )}
       style={{ width: NODE_W, height: h, position: "relative" }}
     >
-      <Handle type="target" position={Position.Left} style={{ top: "50%", background: "#94a3b8" }} />
+      {/* Colored left accent bar for special node types */}
+      {theme && (
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-md" style={{ background: theme.accent }} />
+      )}
 
-      <div className="px-3 pt-2" style={{ paddingRight: outcomes.length > 0 ? 56 : 12 }}>
-        <p className="text-[11px] font-medium text-slate-700 leading-snug break-words">{d.label}</p>
-        {d.nodeType && <p className="text-[9px] text-slate-400 mt-0.5 truncate">{d.nodeType}</p>}
+      <Handle type="target" position={Position.Left} style={{ top: "50%", background: handleColor }} />
+
+      <div className="px-3 pt-2" style={{ paddingLeft: theme ? 10 : 12, paddingRight: outcomes.length > 0 ? 56 : 12 }}>
+        <p className={cn("text-[11px] font-medium leading-snug break-words", theme?.labelColor ?? "text-slate-700")}>{d.label}</p>
+        {d.nodeType && <p className={cn("text-[9px] mt-0.5 truncate", theme?.typeColor ?? "text-slate-400")}>{d.nodeType}</p>}
       </div>
 
       {outcomes.length > 0
@@ -127,7 +154,7 @@ function JourneyNodeComponent({ data }: NodeProps) {
               <Fragment key={outcome}>
                 <span style={{
                   position: "absolute", right: 14, top: topPct,
-                  transform: "translateY(-50%)", fontSize: 8, color: "#94a3b8",
+                  transform: "translateY(-50%)", fontSize: 8, color: handleColor,
                   fontFamily: "monospace", whiteSpace: "nowrap",
                   maxWidth: 48, overflow: "hidden", textOverflow: "ellipsis",
                   pointerEvents: "none",
@@ -135,11 +162,11 @@ function JourneyNodeComponent({ data }: NodeProps) {
                   {outcome}
                 </span>
                 <Handle id={outcome} type="source" position={Position.Right}
-                  style={{ top: topPct, background: "#94a3b8" }} />
+                  style={{ top: topPct, background: handleColor }} />
               </Fragment>
             );
           })
-        : <Handle type="source" position={Position.Right} style={{ top: "50%", background: "#94a3b8" }} />
+        : <Handle type="source" position={Position.Right} style={{ top: "50%", background: handleColor }} />
       }
     </div>
   );
@@ -427,6 +454,14 @@ function Legend() {
       <div className="flex items-center gap-1.5">
         <span className="w-4 h-3.5 border-2 border-dashed border-violet-400 rounded inline-block" />
         <span>Page node</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-1 h-3.5 rounded-sm bg-violet-500 inline-block" />
+        <span>Script decision</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="w-1 h-3.5 rounded-sm bg-amber-400 inline-block" />
+        <span>Inner tree</span>
       </div>
       <p className="pt-1 border-t border-slate-100 text-slate-400">Click node → trace path</p>
       <p className="text-slate-400">Drag node → rearrange</p>
@@ -988,11 +1023,13 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       <Controls showInteractive={false} />
       <MiniMap
         nodeColor={(n) =>
-          n.type === "successNode" ? "#34d399" :
-          n.type === "failureNode" ? "#f87171" :
-          n.type === "startNode"   ? "#10b981" :
-          n.type === "pageGroup"   ? "#ddd6fe" :
-          n.type === "pageChild"   ? "#ede9fe" : "#cbd5e1"
+          n.type === "successNode"                                  ? "#34d399" :
+          n.type === "failureNode"                                  ? "#f87171" :
+          n.type === "startNode"                                    ? "#10b981" :
+          n.type === "pageGroup"                                    ? "#ddd6fe" :
+          n.type === "pageChild"                                    ? "#ede9fe" :
+          n.data?.nodeType === "ScriptedDecisionNode"              ? "#c4b5fd" :
+          n.data?.nodeType === "InnerTreeEvaluatorNode"            ? "#fcd34d" : "#cbd5e1"
         }
         zoomable pannable
       />
