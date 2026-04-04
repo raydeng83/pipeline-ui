@@ -443,6 +443,94 @@ interface NodePanelData {
   outcomes: { outcomeId: string; targetLabel: string }[];
 }
 
+const CONFIG_BLOCKLIST = new Set(["_id", "_rev", "_type", "_outcomes"]);
+
+function PropertyValue({ value }: { value: unknown }) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (value === null || value === undefined) {
+    return <span className="text-slate-400 italic text-[10px]">null</span>;
+  }
+  if (typeof value === "boolean") {
+    return (
+      <span className={cn("text-[10px] font-mono font-medium", value ? "text-emerald-600" : "text-rose-500")}>
+        {String(value)}
+      </span>
+    );
+  }
+  if (typeof value === "number") {
+    return <span className="text-[10px] font-mono text-amber-700">{value}</span>;
+  }
+  if (typeof value === "string") {
+    return <span className="text-[10px] font-mono text-slate-700 break-all">{value}</span>;
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 0) return <span className="text-slate-400 italic text-[10px]">[]</span>;
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="text-[10px] text-sky-600 hover:text-sky-800 font-mono"
+        >
+          {expanded ? "▾" : "▸"} [{value.length}]
+        </button>
+        {expanded && (
+          <div className="mt-1 pl-2 border-l border-slate-200 space-y-1">
+            {value.map((item, i) => (
+              <div key={i} className="flex gap-1 items-start">
+                <span className="text-[9px] text-slate-300 font-mono shrink-0 mt-0.5">{i}</span>
+                <PropertyValue value={item} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  if (typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) return <span className="text-slate-400 italic text-[10px]">{"{}"}</span>;
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="text-[10px] text-sky-600 hover:text-sky-800 font-mono"
+        >
+          {expanded ? "▾" : "▸"} {"{…}"}
+        </button>
+        {expanded && (
+          <div className="mt-1 pl-2 border-l border-slate-200 space-y-1.5">
+            {entries.map(([k, v]) => (
+              <div key={k} className="flex gap-1.5 items-start">
+                <span className="text-[9px] text-slate-500 font-medium shrink-0 mt-0.5">{k}:</span>
+                <PropertyValue value={v} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  return <span className="text-[10px] font-mono text-slate-600">{String(value)}</span>;
+}
+
+function PropertyTable({ config }: { config: Record<string, unknown> }) {
+  const entries = Object.entries(config).filter(([k]) => !CONFIG_BLOCKLIST.has(k));
+  if (entries.length === 0) return <p className="text-[11px] text-slate-400">No properties</p>;
+  return (
+    <div className="space-y-2">
+      {entries.map(([key, value]) => (
+        <div key={key}>
+          <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{key}</p>
+          <PropertyValue value={value} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function NodeInfoDrawer({
   node, open, environment, journeyId, onClose,
 }: {
@@ -452,7 +540,7 @@ function NodeInfoDrawer({
   journeyId?: string;
   onClose: () => void;
 }) {
-  const [config, setConfig] = useState<string | null>(null);
+  const [config, setConfig] = useState<Record<string, unknown> | null>(null);
   const [configLoading, setConfigLoading] = useState(false);
   const isStaticNode = !node || ["startNode", SUCCESS_ID, FAILURE_ID].includes(node.id);
 
@@ -464,8 +552,8 @@ function NodeInfoDrawer({
     fetch(`/api/push/journey-node?${params}`)
       .then((r) => r.json())
       .then((d) => {
-        try { setConfig(JSON.stringify(JSON.parse(d.file?.content ?? ""), null, 2)); }
-        catch { setConfig(d.file?.content ?? null); }
+        try { setConfig(JSON.parse(d.file?.content ?? "")); }
+        catch { setConfig(null); }
       })
       .catch(() => setConfig(null))
       .finally(() => setConfigLoading(false));
@@ -527,11 +615,7 @@ function NodeInfoDrawer({
               <div className="px-4 py-3">
                 <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Configuration</p>
                 {configLoading && <p className="text-[11px] text-slate-400">Loading…</p>}
-                {!configLoading && config && (
-                  <pre className="text-[10px] font-mono text-slate-600 bg-slate-50 border border-slate-100 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
-                    {config}
-                  </pre>
-                )}
+                {!configLoading && config && <PropertyTable config={config} />}
                 {!configLoading && !config && (
                   <p className="text-[11px] text-slate-400">No configuration file found</p>
                 )}
