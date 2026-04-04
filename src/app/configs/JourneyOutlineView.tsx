@@ -1,0 +1,194 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
+
+// ── Constants (must match JourneyGraph.tsx) ───────────────────────────────────
+
+const SUCCESS_ID = "e301438c-0bd0-429c-ab0c-66126501069a";
+const FAILURE_ID = "70e691a5-1e33-4ac3-a356-e7b6d60d92e0";
+
+const SPECIAL_NODE_BG: Partial<Record<string, string>> = {
+  ScriptedDecisionNode:   "bg-violet-50",
+  InnerTreeEvaluatorNode: "bg-amber-50",
+};
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface JourneyNode {
+  displayName?: string;
+  nodeType?: string;
+  connections?: Record<string, string>;
+}
+
+interface JourneyJson {
+  entryNodeId?: string;
+  nodes?: Record<string, JourneyNode>;
+}
+
+interface TreeNode {
+  id: string;
+  label: string;
+  nodeType?: string;
+  outcomeFromParent?: string;
+  children: TreeNode[];
+  isBackRef: boolean;
+  isSuccess: boolean;
+  isFailure: boolean;
+}
+
+// ── Tree builder ──────────────────────────────────────────────────────────────
+
+function getLabel(id: string, nodes: Record<string, JourneyNode>): string {
+  if (id === SUCCESS_ID) return "Success";
+  if (id === FAILURE_ID) return "Failure";
+  return nodes[id]?.displayName ?? id.slice(0, 8);
+}
+
+function buildTree(
+  nodeId: string,
+  nodes: Record<string, JourneyNode>,
+  visited: Set<string>,
+  outcomeFromParent?: string,
+): TreeNode {
+  const isSuccess = nodeId === SUCCESS_ID;
+  const isFailure = nodeId === FAILURE_ID;
+
+  // Terminals are always shown as leaves even if reached via multiple paths
+  if (!isSuccess && !isFailure && visited.has(nodeId)) {
+    return {
+      id: nodeId,
+      label: getLabel(nodeId, nodes),
+      nodeType: nodes[nodeId]?.nodeType,
+      outcomeFromParent,
+      children: [],
+      isBackRef: true,
+      isSuccess: false,
+      isFailure: false,
+    };
+  }
+
+  if (!isSuccess && !isFailure) visited.add(nodeId);
+
+  const node = nodes[nodeId];
+  const children =
+    !isSuccess && !isFailure && node?.connections
+      ? Object.entries(node.connections).map(([outcomeId, targetId]) =>
+          buildTree(targetId, nodes, visited, outcomeId)
+        )
+      : [];
+
+  return {
+    id: nodeId,
+    label: getLabel(nodeId, nodes),
+    nodeType: node?.nodeType,
+    outcomeFromParent,
+    children,
+    isBackRef: false,
+    isSuccess,
+    isFailure,
+  };
+}
+
+function parseOutline(json: string): TreeNode | null {
+  try {
+    const data = JSON.parse(json) as JourneyJson;
+    if (!data.entryNodeId || !data.nodes) return null;
+    return buildTree(data.entryNodeId, data.nodes, new Set());
+  } catch {
+    return null;
+  }
+}
+
+// ── Row component ─────────────────────────────────────────────────────────────
+
+function TreeRow({
+  node,
+  depth,
+  defaultOpen,
+}: {
+  node: TreeNode;
+  depth: number;
+  defaultOpen: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const hasChildren = node.children.length > 0 && !node.isBackRef;
+  const specialBg = node.nodeType ? (SPECIAL_NODE_BG[node.nodeType] ?? "") : "";
+
+  return (
+    <div>
+      <div
+        className={cn(
+          "flex items-center gap-1.5 py-[3px] pr-2 rounded",
+          hasChildren ? "cursor-pointer hover:bg-slate-100/80" : "cursor-default",
+          !node.isBackRef && !node.isSuccess && !node.isFailure ? specialBg : "",
+        )}
+        style={{ paddingLeft: 8 + depth * 16 }}
+        onClick={() => hasChildren && setOpen((o) => !o)}
+      >
+        {/* Expand / collapse toggle */}
+        <span className="w-3 shrink-0 text-[10px] text-slate-400 leading-none">
+          {hasChildren ? (open ? "▾" : "▸") : ""}
+        </span>
+
+        {/* Outcome badge (which edge led here) */}
+        {node.outcomeFromParent && (
+          <span className="text-[9px] font-mono bg-slate-100 text-slate-500 rounded px-1 py-0.5 shrink-0 leading-none">
+            {node.outcomeFromParent}
+          </span>
+        )}
+
+        {/* Terminal colour dot */}
+        {node.isSuccess && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
+        {node.isFailure && <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />}
+
+        {/* Label */}
+        <span
+          className={cn(
+            "text-[11px] leading-snug truncate",
+            node.isBackRef ? "text-slate-400 italic" :
+            node.isSuccess ? "text-emerald-600 font-medium" :
+            node.isFailure ? "text-rose-600 font-medium" :
+                             "text-slate-700 font-medium",
+          )}
+        >
+          {node.isBackRef ? `↩ ${node.label}` : node.label}
+        </span>
+
+        {/* Node type hint */}
+        {node.nodeType && !node.isBackRef && !node.isSuccess && !node.isFailure && (
+          <span className="text-[9px] text-slate-400 shrink-0 ml-0.5">{node.nodeType}</span>
+        )}
+      </div>
+
+      {open && node.children.map((child, i) => (
+        <TreeRow
+          key={`${child.id}-${i}`}
+          node={child}
+          depth={depth + 1}
+          defaultOpen={depth + 1 < 2}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Public export ─────────────────────────────────────────────────────────────
+
+export function JourneyOutlineView({ json }: { json: string }) {
+  const root = useMemo(() => parseOutline(json), [json]);
+
+  if (!root) {
+    return (
+      <div className="flex items-center justify-center h-full text-sm text-slate-400">
+        Unable to parse journey outline
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-auto h-full py-3 px-2 text-sm">
+      <TreeRow node={root} depth={0} defaultOpen />
+    </div>
+  );
+}

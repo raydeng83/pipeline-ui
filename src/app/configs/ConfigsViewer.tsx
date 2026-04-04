@@ -7,6 +7,7 @@ import type { ViewableFile } from "@/app/api/push/item/route";
 import type { AuditItem } from "@/app/api/push/audit/route";
 import { cn } from "@/lib/utils";
 import { JourneyGraph } from "./JourneyGraph";
+import { JourneyOutlineView } from "./JourneyOutlineView";
 
 // ── JSON syntax highlighter ───────────────────────────────────────────────────
 
@@ -249,7 +250,7 @@ function SectionsView({ environment }: { environment: string }) {
   const [activeTab, setActiveTab] = useState(0);
   const [fileLoading, setFileLoading] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
-  const [col3View, setCol3View] = useState<"graph" | "json">("graph");
+  const [col3View, setCol3View] = useState<"graph" | "outline" | "json">("graph");
   const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
@@ -444,7 +445,7 @@ function SectionsView({ environment }: { environment: string }) {
                 {selectedItem.label}
               </span>
 
-              {/* Graph / JSON toggle — journeys only */}
+              {/* Graph / Outline / JSON toggle — journeys only */}
               {selectedScope === "journeys" && files && files.length > 0 && (
                 <div className="flex rounded border border-slate-200 overflow-hidden text-[10px] font-medium shrink-0">
                   <button
@@ -456,6 +457,16 @@ function SectionsView({ environment }: { environment: string }) {
                     )}
                   >
                     Graph
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCol3View("outline")}
+                    className={cn(
+                      "px-2.5 py-1 border-l border-slate-200 transition-colors",
+                      col3View === "outline" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    Outline
                   </button>
                   <button
                     type="button"
@@ -512,6 +523,9 @@ function SectionsView({ environment }: { environment: string }) {
               )}
               {!fileLoading && activeFile && selectedScope === "journeys" && col3View === "graph" && (
                 <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} />
+              )}
+              {!fileLoading && activeFile && selectedScope === "journeys" && col3View === "outline" && (
+                <JourneyOutlineView json={activeFile.content} />
               )}
               {!fileLoading && activeFile && col3View === "json" && (
                 <div className="overflow-auto h-full">
