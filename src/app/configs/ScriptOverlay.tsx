@@ -1,78 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { highlightJs } from "@/lib/highlight";
 
-// ── JS syntax highlighter ─────────────────────────────────────────────────────
-
-const JS_KEYWORDS = new Set([
-  "var","let","const","function","return","if","else","for","while","do",
-  "switch","case","break","continue","new","delete","typeof","instanceof",
-  "in","of","class","extends","import","export","default","try","catch",
-  "finally","throw","async","await","yield","this","super","static",
-]);
-const JS_BUILTINS = new Set(["true","false","null","undefined","NaN","Infinity"]);
-
-export function highlightJs(code: string): string {
-  const out: string[] = [];
-  let i = 0;
-
-  function esc(s: string) {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-  function span(color: string, text: string, bold = false) {
-    return `<span style="color:${color}${bold ? ";font-weight:500" : ""}">${esc(text)}</span>`;
-  }
-
-  while (i < code.length) {
-    // Single-line comment
-    if (code[i] === "/" && code[i + 1] === "/") {
-      const end = code.indexOf("\n", i);
-      const text = end === -1 ? code.slice(i) : code.slice(i, end);
-      out.push(span("#6b7280", text));
-      i += text.length;
-    }
-    // Multi-line comment
-    else if (code[i] === "/" && code[i + 1] === "*") {
-      const end = code.indexOf("*/", i + 2);
-      const text = end === -1 ? code.slice(i) : code.slice(i, end + 2);
-      out.push(span("#6b7280", text));
-      i += text.length;
-    }
-    // String (double / single / template)
-    else if (code[i] === '"' || code[i] === "'" || code[i] === "`") {
-      const q = code[i];
-      let j = i + 1;
-      while (j < code.length && code[j] !== q) {
-        if (code[j] === "\\") j++;
-        j++;
-      }
-      out.push(span("#86efac", code.slice(i, j + 1)));
-      i = j + 1;
-    }
-    // Identifier / keyword / builtin
-    else if (/[a-zA-Z_$]/.test(code[i])) {
-      let j = i + 1;
-      while (j < code.length && /[a-zA-Z0-9_$]/.test(code[j])) j++;
-      const word = code.slice(i, j);
-      if (JS_KEYWORDS.has(word))      out.push(span("#c084fc", word, true));
-      else if (JS_BUILTINS.has(word)) out.push(span("#f87171", word));
-      else                            out.push(esc(word));
-      i = j;
-    }
-    // Number
-    else if (/[0-9]/.test(code[i])) {
-      let j = i + 1;
-      while (j < code.length && /[0-9._xXeEbBoO]/.test(code[j])) j++;
-      out.push(span("#fbbf24", code.slice(i, j)));
-      i = j;
-    }
-    else {
-      out.push(esc(code[i]));
-      i++;
-    }
-  }
-  return out.join("");
-}
+export { highlightJs };
 
 // ── Script fullscreen overlay ─────────────────────────────────────────────────
 

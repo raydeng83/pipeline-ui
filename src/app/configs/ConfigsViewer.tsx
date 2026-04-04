@@ -6,37 +6,11 @@ import { FileNode } from "@/app/api/configs/[env]/route";
 import type { ViewableFile } from "@/app/api/push/item/route";
 import type { AuditItem } from "@/app/api/push/audit/route";
 import { cn } from "@/lib/utils";
-import { highlightJs } from "./ScriptOverlay";
+import { highlightJs, highlightJson } from "@/lib/highlight";
 import { JourneyGraph } from "./JourneyGraph";
 import { JourneyOutlineView } from "./JourneyOutlineView";
 import { JourneyTableView } from "./JourneyTableView";
 import { JourneySwimLaneView } from "./JourneySwimLaneView";
-
-// ── JSON syntax highlighter ───────────────────────────────────────────────────
-
-function highlightJson(raw: string): string {
-  let formatted = raw;
-  try { formatted = JSON.stringify(JSON.parse(raw), null, 2); } catch { /* use raw */ }
-
-  return formatted
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(
-      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
-      (match) => {
-        let color = "#60a5fa";
-        if (/^"/.test(match)) {
-          color = /:$/.test(match) ? "#94a3b8" : "#86efac";
-        } else if (/true|false/.test(match)) {
-          color = "#fbbf24";
-        } else if (/null/.test(match)) {
-          color = "#f87171";
-        }
-        return `<span style="color:${color}">${match}</span>`;
-      }
-    );
-}
 
 function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean; onToggle: () => void; dark?: boolean }) {
   return (

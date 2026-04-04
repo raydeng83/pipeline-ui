@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import os from "os";
 import path from "path";
 import fs from "fs";
-import { spawnFrConfig, getConfigDir, ConfigScope } from "@/lib/fr-config";
+import { spawnFrConfig, getConfigDir } from "@/lib/fr-config";
 import { buildReport } from "@/lib/diff";
 import { ScopeSelection } from "@/lib/fr-config-types";
 
@@ -22,13 +22,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Config dir not found" }, { status: 404 });
   }
 
-  const scopes: ConfigScope[] = scopeSelections
-    ? scopeSelections.map((s) => s.scope)
-    : [];
+  // Filter out scopes with no items selected
+  const filteredSelections = (scopeSelections ?? []).filter(
+    (s) => !s.items || s.items.length > 0
+  );
 
-  if (scopes.length === 0) {
-    return NextResponse.json({ error: "No scopes selected" }, { status: 400 });
+  if (filteredSelections.length === 0) {
+    return NextResponse.json({ error: "No items selected" }, { status: 400 });
   }
+
+  const scopeNames = filteredSelections.map((s) => s.scope);
 
   const tempDir = path.join(os.tmpdir(), `fr-dry-run-${Date.now()}`);
   fs.mkdirSync(tempDir, { recursive: true });
@@ -36,7 +39,7 @@ export async function POST(req: NextRequest) {
   const { stream: pullStream } = spawnFrConfig({
     command: "fr-config-pull",
     environment,
-    scopes,
+    scopeSelections: filteredSelections,
     envOverrides: { CONFIG_DIR: tempDir },
   });
 
@@ -48,7 +51,6 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        // Pipe pull stream through to client
         const reader = pullStream.getReader();
         let pullFailed = false;
 
@@ -68,13 +70,12 @@ export async function POST(req: NextRequest) {
         }
 
         if (!pullFailed) {
-          // Build and emit the diff report
           const report = buildReport(
             { environment, mode: "remote" },
             tempDir,
             { environment, mode: "local" },
             localConfigDir,
-            scopes
+            scopeNames
           );
           emit({ type: "report", data: JSON.stringify(report), ts: Date.now() });
         }
