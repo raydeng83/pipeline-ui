@@ -9,6 +9,258 @@ function envRelPath(environment: string): string {
   return path.relative(REPO_ROOT, path.join(ENVIRONMENTS_DIR, environment));
 }
 
+// ── Scope mapping (mirrors the audit route) ──────────────────────────────────
+
+const SCOPE_DIR: Record<string, string> = {
+  "access-config":         "access-config",
+  "audit":                 "audit",
+  "connector-definitions": "sync/connectors",
+  "connector-mappings":    "sync/mappings",
+  "cookie-domains":        "cookie-domains",
+  "cors":                  "cors",
+  "csp":                   "csp",
+  "custom-nodes":          "custom-nodes",
+  "email-provider":        "email-provider",
+  "email-templates":       "email-templates",
+  "endpoints":             "endpoints",
+  "idm-authentication":    "idm-authentication-config",
+  "iga-workflows":         "iga/workflows",
+  "internal-roles":        "internal-roles",
+  "kba":                   "kba",
+  "locales":               "locales",
+  "managed-objects":       "managed-objects",
+  "org-privileges":        "org-privileges",
+  "raw":                   "raw",
+  "remote-servers":        "sync/rcs",
+  "schedules":             "schedules",
+  "secrets":               "esvs/secrets",
+  "service-objects":       "service-objects",
+  "telemetry":             "telemetry",
+  "terms-and-conditions":  "terms-conditions",
+  "ui-config":             "ui",
+  "variables":             "esvs/variables",
+};
+
+const REALM_SCOPE_SUBDIR: Record<string, string> = {
+  "authz-policies":  "authorization",
+  "journeys":        "journeys",
+  "oauth2-agents":   "realm-config/agents",
+  "password-policy": "password-policy",
+  "saml":            "realm-config/saml",
+  "scripts":         "scripts",
+  "secret-mappings": "secret-mappings",
+  "services":        "services",
+  "themes":          "themes",
+};
+
+/** Reverse lookup: given a relative path segment inside a config dir, return the scope name. */
+function dirToScope(relPath: string): string | null {
+  // Check realm-based scopes first: realms/<realm>/<subdir>/...
+  const realmMatch = relPath.match(/^realms\/[^/]+\/(.+)/);
+  if (realmMatch) {
+    const afterRealm = realmMatch[1];
+    for (const [scope, subdir] of Object.entries(REALM_SCOPE_SUBDIR)) {
+      if (afterRealm === subdir || afterRealm.startsWith(subdir + "/")) return scope;
+    }
+  }
+  // Check global scopes
+  for (const [scope, dir] of Object.entries(SCOPE_DIR)) {
+    if (relPath === dir || relPath.startsWith(dir + "/")) return scope;
+  }
+  return null;
+}
+
+// ── Scope labels (matches CONFIG_SCOPES from fr-config-types) ────────────────
+
+const SCOPE_LABELS: Record<string, string> = {
+  "access-config":         "Access Config",
+  "audit":                 "Audit",
+  "authentication":        "Authentication",
+  "authz-policies":        "Authorization Policies",
+  "connector-definitions": "Connector Definitions",
+  "connector-mappings":    "Connector Mappings",
+  "cookie-domains":        "Cookie Domains",
+  "cors":                  "CORS",
+  "csp":                   "CSP",
+  "custom-nodes":          "Custom Nodes",
+  "email-provider":        "Email Provider",
+  "email-templates":       "Email Templates",
+  "endpoints":             "Custom Endpoints",
+  "idm-authentication":    "IDM Authentication",
+  "iga-workflows":         "IGA Workflows",
+  "internal-roles":        "Internal Roles",
+  "journeys":              "Journeys",
+  "kba":                   "KBA",
+  "locales":               "Locales",
+  "managed-objects":       "Managed Objects",
+  "oauth2-agents":         "OAuth2 Agents",
+  "org-privileges":        "Org Privileges",
+  "password-policy":       "Password Policy",
+  "raw":                   "Raw Config",
+  "remote-servers":        "Remote Servers",
+  "saml":                  "SAML Entities",
+  "schedules":             "Schedules",
+  "scripts":               "Scripts",
+  "secret-mappings":       "Secret Mappings",
+  "secrets":               "Secrets",
+  "service-objects":       "Service Objects",
+  "services":              "Services",
+  "telemetry":             "Telemetry",
+  "terms-and-conditions":  "Terms & Conditions",
+  "themes":                "Themes",
+  "ui-config":             "UI Config",
+  "variables":             "Variables (ESVs)",
+};
+
+function scopeLabel(scope: string): string {
+  return SCOPE_LABELS[scope] ?? scope.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// ── Item name extraction ─────────────────────────────────────────────────────
+
+/**
+ * Extract a human-readable item name from a file path relative to the scope directory.
+ * For journeys: the first directory name (journey name).
+ * For scripts: the first directory under scripts-content type dirs, or config filename.
+ * For others: the filename without extension.
+ */
+function extractItemName(scope: string, pathInScope: string): string {
+  const parts = pathInScope.split("/");
+
+  if (scope === "journeys") {
+    // realms/<realm>/journeys/<journeyName>/...
+    return parts[0];
+  }
+  if (scope === "scripts") {
+    // scripts-content/<type>/<scriptName>.js or scripts-config/<uuid>.json
+    if (parts[0] === "scripts-content" && parts.length >= 3) {
+      return parts[2].replace(/\.[^.]+$/, "");
+    }
+    if (parts[0] === "scripts-config" && parts.length >= 2) {
+      return parts[1].replace(/\.[^.]+$/, "");
+    }
+  }
+  // Default: filename without extension
+  return parts[parts.length - 1].replace(/\.[^.]+$/, "");
+}
+
+// ── Change analysis ──────────────────────────────────────────────────────────
+
+interface ScopeChange {
+  scope: string;
+  added: string[];
+  modified: string[];
+  deleted: string[];
+}
+
+/**
+ * Analyze uncommitted changes for an environment directory.
+ * Returns per-scope breakdown with individual item names.
+ */
+function analyzeChanges(environment: string, configDirRel: string): ScopeChange[] {
+  const relPath = envRelPath(environment);
+  const output = execSync(`git status --porcelain -- "${relPath}"`, {
+    cwd: REPO_ROOT,
+    encoding: "utf-8",
+  }).trim();
+
+  if (!output) return [];
+
+  // configPrefix is the path from repo root to the config dir, e.g. "environments/ide3/config/ide3"
+  const configPrefix = path.join(relPath, configDirRel) + "/";
+
+  const scopeMap = new Map<string, { added: Set<string>; modified: Set<string>; deleted: Set<string> }>();
+
+  for (const line of output.split("\n")) {
+    if (!line.trim()) continue;
+    const status = line.substring(0, 2).trim();
+    const filePath = line.substring(3).trim();
+
+    // Only analyze files inside the config dir
+    if (!filePath.startsWith(configPrefix)) continue;
+
+    const relToConfig = filePath.substring(configPrefix.length);
+    const scope = dirToScope(relToConfig);
+    if (!scope) continue;
+
+    // Get path within the scope directory for item name extraction
+    let scopeDir: string;
+    const realmMatch = relToConfig.match(/^realms\/[^/]+\//);
+    if (realmMatch && scope in REALM_SCOPE_SUBDIR) {
+      scopeDir = realmMatch[0] + REALM_SCOPE_SUBDIR[scope] + "/";
+    } else if (scope in SCOPE_DIR) {
+      scopeDir = SCOPE_DIR[scope] + "/";
+    } else {
+      continue;
+    }
+
+    const pathInScope = relToConfig.startsWith(scopeDir)
+      ? relToConfig.substring(scopeDir.length)
+      : relToConfig;
+
+    const itemName = extractItemName(scope, pathInScope);
+
+    if (!scopeMap.has(scope)) {
+      scopeMap.set(scope, { added: new Set(), modified: new Set(), deleted: new Set() });
+    }
+    const entry = scopeMap.get(scope)!;
+
+    if (status === "?" || status === "A") {
+      entry.added.add(itemName);
+    } else if (status === "D") {
+      entry.deleted.add(itemName);
+    } else {
+      entry.modified.add(itemName);
+    }
+  }
+
+  return Array.from(scopeMap.entries())
+    .map(([scope, { added, modified, deleted }]) => ({
+      scope,
+      added: [...added].sort(),
+      modified: [...modified].sort(),
+      deleted: [...deleted].sort(),
+    }))
+    .sort((a, b) => a.scope.localeCompare(b.scope));
+}
+
+// ── Commit message building ──────────────────────────────────────────────────
+
+function buildSummaryLine(title: string, changes: ScopeChange[]): string {
+  const totalFiles = changes.reduce(
+    (sum, s) => sum + s.added.length + s.modified.length + s.deleted.length,
+    0
+  );
+  const scopeNames = changes.map((s) => scopeLabel(s.scope)).join(", ");
+  return `${title} — ${totalFiles} items across ${changes.length} scope${changes.length !== 1 ? "s" : ""} (${scopeNames})`;
+}
+
+function buildDetails(changes: ScopeChange[]): string {
+  const lines: string[] = [];
+  for (const s of changes) {
+    lines.push(`  ${scopeLabel(s.scope)}:`);
+    for (const name of s.added) lines.push(`    + ${name}`);
+    for (const name of s.modified) lines.push(`    ~ ${name}`);
+    for (const name of s.deleted) lines.push(`    - ${name}`);
+  }
+  return lines.join("\n");
+}
+
+export function buildCommitMessage(
+  title: string,
+  environment: string,
+  configDirRel: string
+): string {
+  const changes = analyzeChanges(environment, configDirRel);
+  if (changes.length === 0) return title;
+
+  const summary = buildSummaryLine(title, changes);
+  const details = buildDetails(changes);
+  return `${summary}\n\nDetails:\n${details}`;
+}
+
+// ── Public API ───────────────────────────────────────────────────────────────
+
 /** Check whether an environment directory has uncommitted changes (staged or unstaged, plus untracked). */
 export function hasChanges(environment: string): boolean {
   const relPath = envRelPath(environment);
@@ -22,10 +274,12 @@ export function hasChanges(environment: string): boolean {
 /** Stage and commit all changes in an environment directory. Returns the short commit hash, or null if nothing to commit. */
 export function autoCommit(
   environment: string,
-  message: string
+  title: string,
+  configDirRel: string
 ): string | null {
   if (!hasChanges(environment)) return null;
 
+  const message = buildCommitMessage(title, environment, configDirRel);
   const relPath = envRelPath(environment);
   execSync(`git add -- "${relPath}"`, { cwd: REPO_ROOT });
   execSync(`git commit -m ${JSON.stringify(message)}`, { cwd: REPO_ROOT });

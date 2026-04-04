@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { spawnFrConfig, ConfigScope } from "@/lib/fr-config";
+import { spawnFrConfig, ConfigScope, getEnvFileContent } from "@/lib/fr-config";
+import { parseEnvFile } from "@/lib/env-parser";
 import { autoCommit } from "@/lib/git";
 
 export async function POST(req: NextRequest) {
@@ -16,13 +17,18 @@ export async function POST(req: NextRequest) {
   const scopeLabel = scopes?.length ? scopes.join(", ") : "all";
   const ts = new Date().toISOString().replace(/\.\d+Z$/, "Z");
 
+  // Resolve CONFIG_DIR from .env for change analysis
+  const envVars = parseEnvFile(getEnvFileContent(environment));
+  const configDirRel = envVars.CONFIG_DIR ?? "./config";
+
   // Pre-pull: commit any existing uncommitted changes
   let preHash: string | null = null;
   let preCommitError: string | null = null;
   try {
     preHash = autoCommit(
       environment,
-      `auto: save uncommitted changes for ${environment} before pull`
+      `auto: save uncommitted changes for ${environment} before pull`,
+      configDirRel
     );
   } catch (err) {
     preCommitError = err instanceof Error ? err.message : String(err);
@@ -105,11 +111,11 @@ export async function POST(req: NextRequest) {
 
       // Post-pull: commit the pulled changes (only if pull succeeded)
       if (lastExitCode === 0) {
-        let postCommitError: string | null = null;
         try {
           const postHash = autoCommit(
             environment,
-            `pull(${environment}): ${scopeLabel} @ ${ts}`
+            `pull(${environment}): ${scopeLabel} @ ${ts}`,
+            configDirRel
           );
           if (postHash) {
             emit({
@@ -128,7 +134,7 @@ export async function POST(req: NextRequest) {
             });
           }
         } catch (err) {
-          postCommitError = err instanceof Error ? err.message : String(err);
+          const postCommitError = err instanceof Error ? err.message : String(err);
           emit({
             type: "git",
             action: "post-pull-commit-error",
