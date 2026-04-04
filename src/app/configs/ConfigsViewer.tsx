@@ -427,20 +427,20 @@ function SectionsView({ environment }: { environment: string }) {
       <div className={cn(
         "flex flex-col overflow-hidden min-w-0",
         fullscreen ? "fixed inset-0 z-50" : "flex-1",
-        selectedItem && col3View === "graph" && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
+        selectedItem && (col3View === "graph" || col3View === "outline") && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
       )}>
         {selectedItem ? (
           <>
             {/* Header bar */}
             <div className={cn(
               "flex items-center gap-2 px-4 py-2 border-b shrink-0",
-              col3View === "graph" && selectedScope === "journeys"
+              (col3View === "graph" || col3View === "outline") && selectedScope === "journeys"
                 ? "border-slate-200 bg-white"
                 : "border-slate-700 bg-slate-800"
             )}>
               <span className={cn(
                 "text-xs font-medium truncate flex-1",
-                col3View === "graph" && selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
+                (col3View === "graph" || col3View === "outline") && selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
               )}>
                 {selectedItem.label}
               </span>
@@ -505,14 +505,14 @@ function SectionsView({ environment }: { environment: string }) {
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
-                dark={!(col3View === "graph" && selectedScope === "journeys")}
+                dark={!((col3View === "graph" || col3View === "outline") && selectedScope === "journeys")}
               />
             </div>
 
             {/* Content */}
             <div className="flex-1 overflow-hidden min-h-0">
               {fileLoading && (
-                <div className={cn("flex items-center justify-center h-full text-sm", col3View === "graph" ? "text-slate-400" : "text-slate-500")}>
+                <div className={cn("flex items-center justify-center h-full text-sm", (col3View === "graph" || col3View === "outline") ? "text-slate-400" : "text-slate-500")}>
                   Loading…
                 </div>
               )}
