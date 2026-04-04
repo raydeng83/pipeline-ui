@@ -540,6 +540,121 @@ function PropertyTable({ config }: { config: Record<string, unknown> }) {
   );
 }
 
+// ── JS syntax highlighter ─────────────────────────────────────────────────────
+
+const JS_KEYWORDS = new Set([
+  "var","let","const","function","return","if","else","for","while","do",
+  "switch","case","break","continue","new","delete","typeof","instanceof",
+  "in","of","class","extends","import","export","default","try","catch",
+  "finally","throw","async","await","yield","this","super","static",
+]);
+const JS_BUILTINS = new Set(["true","false","null","undefined","NaN","Infinity"]);
+
+function highlightJs(code: string): string {
+  const out: string[] = [];
+  let i = 0;
+
+  function esc(s: string) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function span(color: string, text: string, bold = false) {
+    return `<span style="color:${color}${bold ? ";font-weight:500" : ""}">${esc(text)}</span>`;
+  }
+
+  while (i < code.length) {
+    // Single-line comment
+    if (code[i] === "/" && code[i + 1] === "/") {
+      const end = code.indexOf("\n", i);
+      const text = end === -1 ? code.slice(i) : code.slice(i, end);
+      out.push(span("#6b7280", text));
+      i += text.length;
+    }
+    // Multi-line comment
+    else if (code[i] === "/" && code[i + 1] === "*") {
+      const end = code.indexOf("*/", i + 2);
+      const text = end === -1 ? code.slice(i) : code.slice(i, end + 2);
+      out.push(span("#6b7280", text));
+      i += text.length;
+    }
+    // String (double / single / template)
+    else if (code[i] === '"' || code[i] === "'" || code[i] === "`") {
+      const q = code[i];
+      let j = i + 1;
+      while (j < code.length && code[j] !== q) {
+        if (code[j] === "\\") j++;
+        j++;
+      }
+      out.push(span("#86efac", code.slice(i, j + 1)));
+      i = j + 1;
+    }
+    // Identifier / keyword / builtin
+    else if (/[a-zA-Z_$]/.test(code[i])) {
+      let j = i + 1;
+      while (j < code.length && /[a-zA-Z0-9_$]/.test(code[j])) j++;
+      const word = code.slice(i, j);
+      if (JS_KEYWORDS.has(word))      out.push(span("#c084fc", word, true));
+      else if (JS_BUILTINS.has(word)) out.push(span("#f87171", word));
+      else                            out.push(esc(word));
+      i = j;
+    }
+    // Number
+    else if (/[0-9]/.test(code[i])) {
+      let j = i + 1;
+      while (j < code.length && /[0-9._xXeEbBoO]/.test(code[j])) j++;
+      out.push(span("#fbbf24", code.slice(i, j)));
+      i = j;
+    }
+    else {
+      out.push(esc(code[i]));
+      i++;
+    }
+  }
+  return out.join("");
+}
+
+// ── Script fullscreen overlay ─────────────────────────────────────────────────
+
+function ScriptOverlay({ name, content, onClose }: { name: string; content: string; onClose: () => void }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  const highlighted = useMemo(() => highlightJs(content), [content]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-950">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900 shrink-0">
+        <svg className="w-4 h-4 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+        </svg>
+        <span className="text-sm font-mono font-medium text-slate-200 flex-1 truncate">{name}</span>
+        <button
+          type="button"
+          onClick={onClose}
+          title="Close (Esc)"
+          className="text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      {/* Code */}
+      <div className="flex-1 overflow-auto">
+        <pre
+          className="text-xs font-mono leading-relaxed p-5 text-slate-300 min-h-full"
+          dangerouslySetInnerHTML={{ __html: highlighted }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── Node info drawer ──────────────────────────────────────────────────────────
+
 function NodeInfoDrawer({
   node, open, environment, journeyId, onNavigate, onClose,
 }: {
@@ -552,8 +667,22 @@ function NodeInfoDrawer({
 }) {
   const [config, setConfig] = useState<Record<string, unknown> | null>(null);
   const [configLoading, setConfigLoading] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<"config" | "script">("config");
+  const [scriptContent, setScriptContent] = useState<string | null>(null);
+  const [scriptName, setScriptName] = useState<string>("");
+  const [scriptLoading, setScriptLoading] = useState(false);
+  const [scriptFullscreen, setScriptFullscreen] = useState(false);
   const isStaticNode = !node || ["startNode", SUCCESS_ID, FAILURE_ID].includes(node.id);
+  const isScriptedDecision = node?.nodeType === "ScriptedDecisionNode";
 
+  // Reset tab + script when node changes
+  useEffect(() => {
+    setDrawerTab("config");
+    setScriptContent(null);
+    setScriptName("");
+  }, [node?.id]);
+
+  // Fetch node config
   useEffect(() => {
     if (!node || !environment || !journeyId || isStaticNode) { setConfig(null); return; }
     setConfigLoading(true);
@@ -569,89 +698,198 @@ function NodeInfoDrawer({
       .finally(() => setConfigLoading(false));
   }, [node?.id, environment, journeyId, isStaticNode]);
 
+  // Fetch script content when script tab is active
+  useEffect(() => {
+    if (drawerTab !== "script") return;
+    const scriptId = typeof config?.script === "string" ? config.script : null;
+    if (!scriptId || !environment || scriptContent !== null) return;
+    setScriptLoading(true);
+    const params = new URLSearchParams({ environment, scriptId });
+    fetch(`/api/push/script?${params}`)
+      .then((r) => r.json())
+      .then((d) => {
+        setScriptName(d.name ?? scriptId);
+        setScriptContent(d.content ?? null);
+      })
+      .catch(() => setScriptContent(null))
+      .finally(() => setScriptLoading(false));
+  }, [drawerTab, config, environment, scriptContent]);
+
+  const scriptHighlighted = useMemo(
+    () => (scriptContent ? highlightJs(scriptContent) : null),
+    [scriptContent],
+  );
+
   return (
-    <div className={cn(
-      "absolute top-0 right-0 h-full w-72 bg-white border-l border-slate-200 shadow-2xl z-10",
-      "flex flex-col transition-transform duration-300 ease-in-out",
-      open ? "translate-x-0" : "translate-x-full"
-    )}>
-      {node && (
-        <>
-          {/* Header */}
-          <div className="flex items-start gap-2 px-4 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-800 leading-snug break-words">{node.label}</p>
-              {node.nodeType && (
-                <span className={cn(
-                  "inline-block mt-1.5 text-[10px] font-medium rounded px-1.5 py-0.5 border",
-                  node.nodeType === "PageNode"
-                    ? "text-violet-700 bg-violet-50 border-violet-200"
-                    : "text-sky-700 bg-sky-50 border-sky-200"
-                )}>
-                  {node.nodeType}
-                </span>
-              )}
-            </div>
-            <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 shrink-0 mt-0.5">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+    <>
+      {scriptFullscreen && scriptContent && (
+        <ScriptOverlay
+          name={scriptName}
+          content={scriptContent}
+          onClose={() => setScriptFullscreen(false)}
+        />
+      )}
 
-          <div className="flex-1 overflow-y-auto">
-            {/* Outcomes */}
-            {node.outcomes.length > 0 && (
-              <div className="px-4 py-3 border-b border-slate-100">
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Outcomes</p>
-                <div className="space-y-2">
-                  {node.outcomes.map(({ outcomeId, targetLabel }) => (
-                    <div key={outcomeId} className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-mono bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 shrink-0">
-                        {outcomeId}
-                      </span>
-                      <svg className="w-3 h-3 text-slate-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                      <span className="text-[11px] text-slate-700 truncate">{targetLabel}</span>
-                    </div>
-                  ))}
-                </div>
+      <div className={cn(
+        "absolute top-0 right-0 h-full w-72 bg-white border-l border-slate-200 shadow-2xl z-10",
+        "flex flex-col transition-transform duration-300 ease-in-out",
+        open ? "translate-x-0" : "translate-x-full"
+      )}>
+        {node && (
+          <>
+            {/* Header */}
+            <div className="flex items-start gap-2 px-4 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-800 leading-snug break-words">{node.label}</p>
+                {node.nodeType && (
+                  <span className={cn(
+                    "inline-block mt-1.5 text-[10px] font-medium rounded px-1.5 py-0.5 border",
+                    node.nodeType === "PageNode"
+                      ? "text-violet-700 bg-violet-50 border-violet-200"
+                      : "text-sky-700 bg-sky-50 border-sky-200"
+                  )}>
+                    {node.nodeType}
+                  </span>
+                )}
               </div>
-            )}
+              <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 shrink-0 mt-0.5">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
-            {/* Jump to inner tree */}
-            {node?.nodeType === "InnerTreeEvaluatorNode" && !!config?.tree && (
-              <div className="px-4 py-3 border-b border-slate-100">
+            {/* Tab bar — only for ScriptedDecisionNode */}
+            {isScriptedDecision && (
+              <div className="flex border-b border-slate-200 bg-white shrink-0">
                 <button
                   type="button"
-                  onClick={() => onNavigate?.(String(config.tree), node!.id)}
-                  className="w-full flex items-center gap-2 text-[11px] font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg px-3 py-2 transition-colors"
+                  onClick={() => setDrawerTab("config")}
+                  className={cn(
+                    "flex-1 py-1.5 text-[11px] font-medium transition-colors border-b-2",
+                    drawerTab === "config"
+                      ? "border-sky-500 text-sky-700"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  )}
                 >
-                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                  <span className="flex-1 text-left">Open inner tree</span>
-                  <span className="font-mono text-[10px] text-sky-400 truncate max-w-[110px]">{String(config.tree)}</span>
+                  Config
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDrawerTab("script")}
+                  className={cn(
+                    "flex-1 py-1.5 text-[11px] font-medium transition-colors border-b-2",
+                    drawerTab === "script"
+                      ? "border-sky-500 text-sky-700"
+                      : "border-transparent text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  Script
                 </button>
               </div>
             )}
 
-            {/* Config */}
-            {!isStaticNode && (
-              <div className="px-4 py-3">
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Configuration</p>
-                {configLoading && <p className="text-[11px] text-slate-400">Loading…</p>}
-                {!configLoading && config && <PropertyTable config={config} />}
-                {!configLoading && !config && (
-                  <p className="text-[11px] text-slate-400">No configuration file found</p>
-                )}
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+            <div className="flex-1 overflow-y-auto">
+              {/* ── Config tab ── */}
+              {drawerTab === "config" && (
+                <>
+                  {/* Outcomes */}
+                  {node.outcomes.length > 0 && (
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Outcomes</p>
+                      <div className="space-y-2">
+                        {node.outcomes.map(({ outcomeId, targetLabel }) => (
+                          <div key={outcomeId} className="flex items-center gap-2 min-w-0">
+                            <span className="text-[10px] font-mono bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 shrink-0">
+                              {outcomeId}
+                            </span>
+                            <svg className="w-3 h-3 text-slate-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                            <span className="text-[11px] text-slate-700 truncate">{targetLabel}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Jump to inner tree */}
+                  {node?.nodeType === "InnerTreeEvaluatorNode" && !!config?.tree && (
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => onNavigate?.(String(config.tree), node!.id)}
+                        className="w-full flex items-center gap-2 text-[11px] font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg px-3 py-2 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                        <span className="flex-1 text-left">Open inner tree</span>
+                        <span className="font-mono text-[10px] text-sky-400 truncate max-w-[110px]">{String(config.tree)}</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Config properties */}
+                  {!isStaticNode && (
+                    <div className="px-4 py-3">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Configuration</p>
+                      {configLoading && <p className="text-[11px] text-slate-400">Loading…</p>}
+                      {!configLoading && config && <PropertyTable config={config} />}
+                      {!configLoading && !config && (
+                        <p className="text-[11px] text-slate-400">No configuration file found</p>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ── Script tab ── */}
+              {drawerTab === "script" && (
+                <div className="flex flex-col h-full">
+                  {scriptLoading && (
+                    <p className="px-4 py-3 text-[11px] text-slate-400">Loading script…</p>
+                  )}
+                  {!scriptLoading && scriptContent === null && !configLoading && (
+                    <p className="px-4 py-3 text-[11px] text-slate-400">
+                      {typeof config?.script === "string" ? "Script file not found" : "No script linked"}
+                    </p>
+                  )}
+                  {!scriptLoading && scriptContent !== null && (
+                    <>
+                      {/* Script name + expand button */}
+                      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-slate-50 shrink-0">
+                        <svg className="w-3.5 h-3.5 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                        </svg>
+                        <span className="text-[10px] font-mono text-slate-600 truncate flex-1">{scriptName}</span>
+                        <button
+                          type="button"
+                          title="View fullscreen"
+                          onClick={() => setScriptFullscreen(true)}
+                          className="text-slate-400 hover:text-slate-600 shrink-0"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                          </svg>
+                        </button>
+                      </div>
+                      {/* Code preview */}
+                      <div className="flex-1 overflow-auto bg-slate-950">
+                        <pre
+                          className="text-[10px] font-mono leading-relaxed p-3 text-slate-300"
+                          dangerouslySetInnerHTML={{ __html: scriptHighlighted! }}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
