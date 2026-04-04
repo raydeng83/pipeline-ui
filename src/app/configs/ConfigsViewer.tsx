@@ -521,11 +521,15 @@ function SectionsView({ environment }: { environment: string }) {
                   No files found for this item
                 </div>
               )}
-              {!fileLoading && activeFile && selectedScope === "journeys" && col3View === "graph" && (
-                <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} />
-              )}
-              {!fileLoading && activeFile && selectedScope === "journeys" && col3View === "outline" && (
-                <JourneyOutlineView json={activeFile.content} />
+              {!fileLoading && activeFile && selectedScope === "journeys" && (
+                <>
+                  <div className={cn("h-full", col3View !== "graph" && "hidden")}>
+                    <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} />
+                  </div>
+                  <div className={cn("h-full", col3View !== "outline" && "hidden")}>
+                    <JourneyOutlineView json={activeFile.content} />
+                  </div>
+                </>
               )}
               {!fileLoading && activeFile && col3View === "json" && (
                 <div className="overflow-auto h-full">
