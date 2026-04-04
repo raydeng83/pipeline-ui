@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, Fragment } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, Fragment } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -106,7 +106,7 @@ function JourneyNodeComponent({ data }: NodeProps) {
   return (
     <div
       className={cn(
-        "bg-white border rounded-lg shadow-sm transition-all overflow-visible cursor-grab active:cursor-grabbing",
+        "bg-white border rounded-lg shadow-sm transition-all overflow-visible cursor-pointer active:cursor-grabbing",
         d.isSelected    ? "border-sky-500 ring-2 ring-sky-300 shadow-sky-100" :
         d.isSearchMatch ? "border-amber-400 ring-2 ring-amber-200" :
                           "border-slate-300"
@@ -159,7 +159,7 @@ function PageGroupNodeComponent({ data }: NodeProps) {
   return (
     <div
       className={cn(
-        "border-2 border-dashed rounded-xl transition-all cursor-grab active:cursor-grabbing",
+        "border-2 border-dashed rounded-xl transition-all cursor-pointer active:cursor-grabbing",
         d.isSelected    ? "border-violet-500 bg-violet-50 ring-2 ring-violet-300" :
         d.isSearchMatch ? "border-amber-400  bg-amber-50  ring-2 ring-amber-200" :
                           "border-violet-300 bg-violet-50/60"
@@ -203,7 +203,7 @@ function PageChildNodeComponent({ data }: NodeProps) {
 
 function StartNodeComponent(_: NodeProps) {
   return (
-    <div className="rounded-full flex items-center justify-center shadow font-bold text-white text-[9px] bg-emerald-500 cursor-grab active:cursor-grabbing"
+    <div className="rounded-full flex items-center justify-center shadow font-bold text-white text-[9px] bg-emerald-500 cursor-pointer active:cursor-grabbing"
       style={{ width: START_SIZE, height: START_SIZE }}>
       <Handle type="source" position={Position.Right} style={{ background: "#059669" }} />
       START
@@ -215,7 +215,7 @@ function SuccessNodeComponent({ data }: NodeProps) {
   const d = data as { isSelected?: boolean };
   return (
     <div className={cn(
-      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-emerald-700 text-[10px] text-center leading-tight cursor-grab active:cursor-grabbing",
+      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-emerald-700 text-[10px] text-center leading-tight cursor-pointer active:cursor-grabbing",
       d.isSelected ? "bg-emerald-100 border-emerald-500 ring-2 ring-emerald-200" : "bg-emerald-50 border-emerald-400"
     )} style={{ width: TERM_SIZE, height: TERM_SIZE }}>
       <Handle type="target" position={Position.Left} style={{ background: "#34d399" }} />
@@ -228,7 +228,7 @@ function FailureNodeComponent({ data }: NodeProps) {
   const d = data as { isSelected?: boolean };
   return (
     <div className={cn(
-      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-red-700 text-[10px] text-center leading-tight cursor-grab active:cursor-grabbing",
+      "rounded-full border-2 flex items-center justify-center shadow-sm font-bold text-red-700 text-[10px] text-center leading-tight cursor-pointer active:cursor-grabbing",
       d.isSelected ? "bg-red-100 border-red-500 ring-2 ring-red-200" : "bg-red-50 border-red-400"
     )} style={{ width: TERM_SIZE, height: TERM_SIZE }}>
       <Handle type="target" position={Position.Left} style={{ background: "#f87171" }} />
@@ -670,11 +670,19 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const activeJson      = navStack.length > 0 ? navStack[navStack.length - 1].json      : json;
   const activeJourneyId = navStack.length > 0 ? navStack[navStack.length - 1].journeyId : journeyId;
 
+  // Saved viewport per journey key (to restore when going back)
+  const savedViewports  = useRef<Map<string, { x: number; y: number; zoom: number }>>(new Map());
+  // null = fit view on next layout; non-null = restore this viewport
+  const pendingViewport = useRef<{ x: number; y: number; zoom: number } | null>(null);
+
   // Reset stack when the parent selects a different journey
-  useEffect(() => { setNavStack([]); }, [json]);
+  useEffect(() => { setNavStack([]); savedViewports.current.clear(); }, [json]);
 
   const navigateToTree = useCallback(async (treeId: string) => {
     if (!environment) return;
+    // Save current viewport so we can restore it when going back
+    savedViewports.current.set(activeJourneyId ?? "root", getViewport());
+    pendingViewport.current = null; // signal: fit view on arrival
     setNavLoading(true);
     try {
       const params = new URLSearchParams({ environment, scope: "journeys", item: treeId });
@@ -689,13 +697,15 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     } finally {
       setNavLoading(false);
     }
-  }, [environment]);
+  }, [environment, activeJourneyId, getViewport]);
 
   const goToIndex = useCallback((index: number) => {
+    const targetKey = index < 0 ? (journeyId ?? "root") : navStack[index].journeyId;
+    pendingViewport.current = savedViewports.current.get(targetKey) ?? null;
     setNavStack((prev) => index < 0 ? [] : prev.slice(0, index + 1));
     setNodePanel(null);
     setSelectedNodeId(null);
-  }, []);
+  }, [navStack, journeyId]);
 
   // Detect PageNode IDs in the active journey JSON
   const pageNodeIds = useMemo(() => {
@@ -735,7 +745,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return { dagreNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
   }, [activeJson, layoutKey, pageConfigs]);
 
-  // Reset to dagre positions when layout changes, then fit view
+  // Reset to dagre positions when layout changes, then fit or restore viewport
   useEffect(() => {
     setRfNodes(dagreNodes);
     setSelectedNodeId(null);
@@ -743,6 +753,12 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     setHoveredEdgeId(null);
     setPinnedEdgeId(null);
     setNodePanel(null);
+    const vp = pendingViewport.current;
+    pendingViewport.current = null;
+    if (vp) {
+      const t = setTimeout(() => setViewport(vp, { duration: 300 }), 50);
+      return () => clearTimeout(t);
+    }
     const t = setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 50);
     return () => clearTimeout(t);
   }, [dagreNodes, setRfNodes]);
