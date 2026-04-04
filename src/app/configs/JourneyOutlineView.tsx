@@ -14,6 +14,7 @@ const SPECIAL_NODE_BG: Partial<Record<string, string>> = {
 };
 
 const EXPAND_ALL = 999;
+const GUIDE_W    = 16; // px per indent level
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -122,71 +123,116 @@ function TreeRow({
   node,
   depth,
   targetDepth,
+  isLast,
+  lineGuides,
 }: {
   node: TreeNode;
   depth: number;
   targetDepth: number;
+  isLast: boolean;
+  // lineGuides[i] = true means draw a vertical continuation line at ancestor level i
+  lineGuides: boolean[];
 }) {
   const [open, setOpen] = useState(depth < targetDepth);
   const hasChildren = node.children.length > 0 && !node.isBackRef;
-  const specialBg = node.nodeType ? (SPECIAL_NODE_BG[node.nodeType] ?? "") : "";
+  const isStart     = node.id === "startNode";
+  const specialBg   = node.nodeType ? (SPECIAL_NODE_BG[node.nodeType] ?? "") : "";
 
-  // Sync open state when global targetDepth changes
   useEffect(() => {
     setOpen(depth < targetDepth);
   }, [targetDepth, depth]);
 
   return (
     <div>
-      <div
-        className={cn(
-          "flex items-center gap-1.5 py-[3px] pr-2 rounded",
-          hasChildren ? "cursor-pointer hover:bg-slate-100/80" : "cursor-default",
-          !node.isBackRef && !node.isSuccess && !node.isFailure ? specialBg : "",
+      {/* Row */}
+      <div className="flex items-stretch min-h-[22px]">
+
+        {/* Ancestor guide lines */}
+        {lineGuides.map((hasLine, i) => (
+          <div key={i} className="relative shrink-0" style={{ width: GUIDE_W }}>
+            {hasLine && (
+              <div className="absolute inset-y-0 bg-slate-200" style={{ left: GUIDE_W / 2 - 0.5, width: 1 }} />
+            )}
+          </div>
+        ))}
+
+        {/* Connector (├─ or └─) — not shown for root */}
+        {depth > 0 && (
+          <div className="relative shrink-0" style={{ width: GUIDE_W }}>
+            {/* Vertical segment going up to parent */}
+            <div className="absolute bg-slate-200" style={{ left: GUIDE_W / 2 - 0.5, width: 1, top: 0, bottom: "50%" }} />
+            {/* Vertical segment going down to next sibling */}
+            {!isLast && (
+              <div className="absolute bg-slate-200" style={{ left: GUIDE_W / 2 - 0.5, width: 1, top: "50%", bottom: 0 }} />
+            )}
+            {/* Horizontal segment to node */}
+            <div className="absolute bg-slate-200" style={{ left: GUIDE_W / 2, right: 0, top: "50%", height: 1 }} />
+          </div>
         )}
-        style={{ paddingLeft: 8 + depth * 16 }}
-        onClick={() => hasChildren && setOpen((o) => !o)}
-      >
-        <span className="w-3 shrink-0 text-[10px] text-slate-400 leading-none">
-          {hasChildren ? (open ? "▾" : "▸") : ""}
-        </span>
 
-        {node.outcomeFromParent && (
-          <span className="text-[9px] font-mono bg-slate-100 text-slate-500 rounded px-1 py-0.5 shrink-0 leading-none">
-            {node.outcomeFromParent}
-          </span>
-        )}
-
-        {node.id === "startNode" && <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />}
-        {node.isSuccess && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
-        {node.isFailure && <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />}
-
-        <span
+        {/* Node content */}
+        <div
           className={cn(
-            "text-[11px] leading-snug truncate",
-            node.isBackRef      ? "text-slate-400 italic" :
-            node.id === "startNode" ? "text-emerald-700 font-semibold" :
-            node.isSuccess      ? "text-emerald-600 font-medium" :
-            node.isFailure      ? "text-rose-600 font-medium" :
-                                  "text-slate-700 font-medium",
+            "flex items-center gap-1.5 py-[3px] pr-2 flex-1 min-w-0 rounded-sm",
+            hasChildren ? "cursor-pointer hover:bg-slate-100/80" : "cursor-default",
+            !node.isBackRef && !node.isSuccess && !node.isFailure ? specialBg : "",
           )}
+          onClick={() => hasChildren && setOpen((o) => !o)}
         >
-          {node.isBackRef ? `↩ ${node.label}` : node.label}
-        </span>
+          {/* Expand / collapse indicator */}
+          <span className="w-3 shrink-0 text-[10px] text-slate-400 leading-none font-mono select-none">
+            {hasChildren ? (open ? "−" : "+") : ""}
+          </span>
 
-        {node.nodeType && !node.isBackRef && !node.isSuccess && !node.isFailure && (
-          <span className="text-[9px] text-slate-400 shrink-0 ml-0.5">{node.nodeType}</span>
-        )}
+          {/* Outcome badge */}
+          {node.outcomeFromParent && (
+            <span className="text-[9px] font-mono bg-slate-100 text-slate-500 rounded px-1 py-0.5 shrink-0 leading-none">
+              {node.outcomeFromParent}
+            </span>
+          )}
+
+          {/* Terminal / start colour dot */}
+          {isStart        && <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />}
+          {node.isSuccess && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
+          {node.isFailure && <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />}
+
+          {/* Label */}
+          <span
+            className={cn(
+              "text-[11px] leading-snug truncate",
+              node.isBackRef ? "text-slate-400 italic" :
+              isStart        ? "text-emerald-700 font-semibold" :
+              node.isSuccess ? "text-emerald-600 font-medium" :
+              node.isFailure ? "text-rose-600 font-medium" :
+                               "text-slate-700 font-medium",
+            )}
+          >
+            {node.isBackRef ? `↩ ${node.label}` : node.label}
+          </span>
+
+          {/* Node type hint */}
+          {node.nodeType && !node.isBackRef && !node.isSuccess && !node.isFailure && (
+            <span className="text-[9px] text-slate-400 shrink-0 ml-0.5">{node.nodeType}</span>
+          )}
+        </div>
       </div>
 
-      {open && node.children.map((child, i) => (
-        <TreeRow
-          key={`${child.id}-${i}`}
-          node={child}
-          depth={depth + 1}
-          targetDepth={targetDepth}
-        />
-      ))}
+      {/* Children */}
+      {open && node.children.map((child, i) => {
+        const childIsLast  = i === node.children.length - 1;
+        // Guides for the child: inherit current guides + whether THIS node has more siblings
+        const childGuides  = depth === 0 ? [] : [...lineGuides, !isLast];
+        return (
+          <TreeRow
+            key={`${child.id}-${i}`}
+            node={child}
+            depth={depth + 1}
+            targetDepth={targetDepth}
+            isLast={childIsLast}
+            lineGuides={childGuides}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -199,7 +245,6 @@ export function JourneyOutlineView({ json }: { json: string }) {
 
   const [targetDepth, setTargetDepth] = useState(2);
 
-  // Reset to default depth when a new journey is loaded
   useEffect(() => { setTargetDepth(2); }, [root]);
 
   if (!root) {
@@ -216,7 +261,6 @@ export function JourneyOutlineView({ json }: { json: string }) {
       <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-200 bg-white shrink-0 flex-wrap">
         <span className="text-[10px] text-slate-400 mr-0.5">Expand:</span>
 
-        {/* Collapse all */}
         <button
           type="button"
           onClick={() => setTargetDepth(0)}
@@ -232,7 +276,6 @@ export function JourneyOutlineView({ json }: { json: string }) {
 
         <span className="text-slate-200 text-[10px]">|</span>
 
-        {/* Per-level buttons */}
         {Array.from({ length: maxDepth }, (_, i) => i + 1).map((level) => (
           <button
             key={level}
@@ -251,7 +294,6 @@ export function JourneyOutlineView({ json }: { json: string }) {
 
         <span className="text-slate-200 text-[10px]">|</span>
 
-        {/* Expand all */}
         <button
           type="button"
           onClick={() => setTargetDepth(EXPAND_ALL)}
@@ -268,7 +310,13 @@ export function JourneyOutlineView({ json }: { json: string }) {
 
       {/* Tree */}
       <div className="overflow-auto flex-1 py-3 px-2">
-        <TreeRow node={root} depth={0} targetDepth={targetDepth} />
+        <TreeRow
+          node={root}
+          depth={0}
+          targetDepth={targetDepth}
+          isLast
+          lineGuides={[]}
+        />
       </div>
     </div>
   );
