@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Environment, PROMOTE_SUBCOMMANDS, PromoteSubcommand } from "@/lib/fr-config-types";
 import { LogViewer } from "@/components/LogViewer";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
+import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
 
 const VARIANT_STYLES = {
@@ -25,6 +26,9 @@ export function PromoteWorkflow({ environments }: { environments: Environment[] 
   const [activeSubcommand, setActiveSubcommand] = useState<PromoteSubcommand | null>(null);
   const [confirmDanger, setConfirmDanger] = useState<PromoteSubcommand | null>(null);
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
+  const { setBusy } = useBusyState();
+
+  useEffect(() => { setBusy(running); }, [running, setBusy]);
 
   const handleRun = (subcommand: PromoteSubcommand) => {
     const def = PROMOTE_SUBCOMMANDS.find((s) => s.value === subcommand)!;

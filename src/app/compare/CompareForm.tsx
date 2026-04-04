@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
+import { useBusyState } from "@/hooks/useBusyState";
 import { DiffReport } from "./DiffReport";
 import { cn } from "@/lib/utils";
 
@@ -111,6 +112,9 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
+  const { setBusy } = useBusyState();
+
+  useEffect(() => { setBusy(running); }, [running, setBusy]);
 
   const sourceLogs = logs.filter((l) => l.side === "source");
   const targetLogs = logs.filter((l) => l.side === "target");

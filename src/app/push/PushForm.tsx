@@ -5,6 +5,7 @@ import { Environment, ConfigScope } from "@/lib/fr-config-types";
 import { ScopeSelector } from "@/components/ScopeSelector";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
+import { useBusyState } from "@/hooks/useBusyState";
 import { PushAudit } from "./PushAudit";
 import { PushPlanPanel, PlanSelections } from "./PushPlanPanel";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,9 @@ export function PushForm({ environments }: { environments: Environment[] }) {
   const [planMode, setPlanMode] = useState(false);
   const [planSelections, setPlanSelections] = useState<PlanSelections>({});
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
+  const { setBusy } = useBusyState();
+
+  useEffect(() => { setBusy(running); }, [running, setBusy]);
 
   const isProd = environments.find((e) => e.name === environment)?.color === "red";
 

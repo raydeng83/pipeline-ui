@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Environment, ConfigScope } from "@/lib/fr-config-types";
 import { ScopeSelector } from "@/components/ScopeSelector";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
+import { useBusyState } from "@/hooks/useBusyState";
 
 export function PullForm({ environments }: { environments: Environment[] }) {
   const [environment, setEnvironment] = useState(environments[0]?.name ?? "");
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
+  const { setBusy } = useBusyState();
+
+  useEffect(() => { setBusy(running); }, [running, setBusy]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
