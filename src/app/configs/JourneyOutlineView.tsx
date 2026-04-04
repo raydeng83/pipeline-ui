@@ -246,9 +246,9 @@ export function JourneyOutlineView({ json }: { json: string }) {
   const root     = useMemo(() => parseOutline(json), [json]);
   const maxDepth = useMemo(() => (root ? getMaxDepth(root) : 0), [root]);
 
-  const [targetDepth, setTargetDepth] = useState(2);
+  const [targetDepth, setTargetDepth] = useState(1);
 
-  useEffect(() => { setTargetDepth(2); }, [root]);
+  useEffect(() => { setTargetDepth(1); }, [root]);
 
   if (!root) {
     return (
@@ -264,29 +264,14 @@ export function JourneyOutlineView({ json }: { json: string }) {
       <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-200 bg-white shrink-0 flex-wrap">
         <span className="text-[10px] text-slate-400 mr-0.5">Expand:</span>
 
-        <button
-          type="button"
-          onClick={() => setTargetDepth(0)}
-          className={cn(
-            "text-[10px] px-2 py-0.5 rounded border transition-colors",
-            targetDepth === 0
-              ? "bg-slate-700 text-white border-slate-700"
-              : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-          )}
-        >
-          None
-        </button>
-
-        <span className="text-slate-200 text-[10px]">|</span>
-
         {Array.from({ length: maxDepth }, (_, i) => i + 1).map((level) => (
           <button
             key={level}
             type="button"
-            onClick={() => setTargetDepth(level)}
+            onClick={() => setTargetDepth(level - 1)}
             className={cn(
               "text-[10px] px-2 py-0.5 rounded border transition-colors",
-              targetDepth === level
+              targetDepth === level - 1
                 ? "bg-slate-700 text-white border-slate-700"
                 : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
             )}
@@ -294,8 +279,6 @@ export function JourneyOutlineView({ json }: { json: string }) {
             L{level}
           </button>
         ))}
-
-        <span className="text-slate-200 text-[10px]">|</span>
 
         <button
           type="button"
