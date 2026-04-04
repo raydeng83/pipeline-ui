@@ -8,6 +8,7 @@ import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { PushAudit } from "./PushAudit";
 import { PushPlanPanel, PlanSelections } from "./PushPlanPanel";
+import { DiffReport } from "../compare/DiffReport";
 import { cn } from "@/lib/utils";
 
 export function PushForm({ environments }: { environments: Environment[] }) {
@@ -16,10 +17,14 @@ export function PushForm({ environments }: { environments: Environment[] }) {
   const [confirmed, setConfirmed] = useState(false);
   const [planMode, setPlanMode] = useState(false);
   const [planSelections, setPlanSelections] = useState<PlanSelections>({});
-  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
+  const push = useStreamingLogs();
+  const dryRun = useStreamingLogs();
   const { setBusy } = useBusyState();
 
-  useEffect(() => { setBusy(running); }, [running, setBusy]);
+  const running = push.running;
+  const dryRunning = dryRun.running;
+
+  useEffect(() => { setBusy(running || dryRunning); }, [running, dryRunning, setBusy]);
 
   const isProd = environments.find((e) => e.name === environment)?.color === "red";
 
@@ -29,20 +34,26 @@ export function PushForm({ environments }: { environments: Environment[] }) {
     setPlanSelections((prev) => {
       const next: PlanSelections = {};
       for (const scope of scopes) {
-        next[scope] = Object.prototype.hasOwnProperty.call(prev, scope) ? prev[scope] : null;
+        next[scope] = Object.prototype.hasOwnProperty.call(prev, scope) ? prev[scope] : [];
       }
       return next;
     });
   }, [scopes, planMode]);
 
+  // Clear dry run report when selections change
+  useEffect(() => {
+    if (dryRun.report) dryRun.clear();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planSelections, environment]);
+
   const handleTogglePlanMode = () => {
     if (!planMode) {
-      // Activate: initialise selections with all scopes = all items
       const initial: PlanSelections = {};
-      for (const s of scopes) initial[s] = null;
+      for (const s of scopes) initial[s] = [];
       setPlanSelections(initial);
     } else {
       setPlanSelections({});
+      dryRun.clear();
     }
     setPlanMode((m) => !m);
   };
@@ -50,7 +61,7 @@ export function PushForm({ environments }: { environments: Environment[] }) {
   const handleScopeToggle = (scope: ConfigScope, included: boolean) => {
     if (included) {
       setScopes((prev) => (prev.includes(scope) ? prev : [...prev, scope]));
-      setPlanSelections((prev) => ({ ...prev, [scope]: null }));
+      setPlanSelections((prev) => ({ ...prev, [scope]: [] }));
     } else {
       setScopes((prev) => prev.filter((s) => s !== scope));
       setPlanSelections((prev) => {
@@ -61,114 +72,166 @@ export function PushForm({ environments }: { environments: Environment[] }) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const scopeSelections = Object.entries(planSelections).map(([scope, items]) => ({
+  const buildScopeSelections = () =>
+    Object.entries(planSelections).map(([scope, items]) => ({
       scope: scope as ConfigScope,
       items: items ?? undefined,
     }));
-    run("/api/push", { environment, scopeSelections });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    push.run("/api/push", { environment, scopeSelections: buildScopeSelections() });
   };
 
-  const canSubmit = Object.keys(planSelections).length > 0;
+  const handleDryRun = () => {
+    dryRun.run("/api/push/dry-run", { environment, scopeSelections: buildScopeSelections() });
+  };
+
+  const canSubmit = Object.values(planSelections).some(
+    (items) => items === null || (items && items.length > 0)
+  );
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-      <form onSubmit={handleSubmit} className="p-6 space-y-5">
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-700">Target Environment</label>
-          <select
-            value={environment}
-            onChange={(e) => { setEnvironment(e.target.value); setConfirmed(false); }}
-            disabled={running}
-            className="block w-full sm:w-64 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
-          >
-            {environments.map((env) => (
-              <option key={env.name} value={env.name}>
-                {env.label}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Target Environment</label>
+            <select
+              value={environment}
+              onChange={(e) => { setEnvironment(e.target.value); setConfirmed(false); }}
+              disabled={running || dryRunning}
+              className="block w-full sm:w-64 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
+            >
+              {environments.map((env) => (
+                <option key={env.name} value={env.name}>
+                  {env.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <ScopeSelector
-          selected={scopes}
-          onChange={setScopes}
-          disabled={running || planMode}
-          action="push"
-        />
+          <ScopeSelector
+            selected={scopes}
+            onChange={setScopes}
+            disabled={running || dryRunning || planMode}
+            action="push"
+          />
 
-        {/* Local files to push */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-700">Local Files to Push</label>
-          {planMode ? (
-            <PushPlanPanel
-              environment={environment}
-              scopes={scopes}
-              selections={planSelections}
-              onScopeToggle={handleScopeToggle}
-              onItemsChange={(scope, items) =>
-                setPlanSelections((prev) => ({ ...prev, [scope]: items }))
-              }
-            />
-          ) : scopes.length === 0 ? (
-            <div className="flex items-center justify-center h-32 rounded-md border border-dashed border-slate-200 bg-slate-50">
-              <p className="text-sm text-slate-400">Select scopes above to see local files</p>
-            </div>
-          ) : (
-            <PushAudit environment={environment} scopes={scopes} />
-          )}
-        </div>
-
-        {isProd && (
-          <label className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(e) => setConfirmed(e.target.checked)}
-              className="accent-red-600"
-            />
-            I understand this will push to <strong>Production</strong>
-          </label>
-        )}
-
-        <div className="flex gap-3 items-center">
-          <button
-            type="button"
-            onClick={handleTogglePlanMode}
-            disabled={running || scopes.length === 0}
-            className={cn(
-              "px-4 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-              planMode
-                ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                : "bg-white border border-slate-300 text-slate-600 hover:border-sky-400 hover:text-sky-700"
+          {/* Local files to push */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">Local Files to Push</label>
+            {planMode ? (
+              <PushPlanPanel
+                environment={environment}
+                scopes={scopes}
+                selections={planSelections}
+                onScopeToggle={handleScopeToggle}
+                onItemsChange={(scope, items) =>
+                  setPlanSelections((prev) => ({ ...prev, [scope]: items }))
+                }
+              />
+            ) : scopes.length === 0 ? (
+              <div className="flex items-center justify-center h-32 rounded-md border border-dashed border-slate-200 bg-slate-50">
+                <p className="text-sm text-slate-400">Select scopes above to see local files</p>
+              </div>
+            ) : (
+              <PushAudit environment={environment} scopes={scopes} />
             )}
-          >
-            {planMode ? "Cancel Plan" : "Plan"}
-          </button>
+          </div>
 
-          <button
-            type="submit"
-            disabled={running || !environment || !planMode || !canSubmit || (isProd && !confirmed)}
-            className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {running ? "Pushing..." : "Push Plan"}
-          </button>
+          {isProd && (
+            <label className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(e) => setConfirmed(e.target.checked)}
+                className="accent-red-600"
+              />
+              I understand this will push to <strong>Production</strong>
+            </label>
+          )}
 
-          {running && (
+          <div className="flex gap-3 items-center">
             <button
               type="button"
-              onClick={abort}
-              className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-md hover:bg-red-200 transition-colors"
+              onClick={handleTogglePlanMode}
+              disabled={running || dryRunning || scopes.length === 0}
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                planMode
+                  ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  : "bg-white border border-slate-300 text-slate-600 hover:border-sky-400 hover:text-sky-700"
+              )}
             >
-              Abort
+              {planMode ? "Cancel Plan" : "Plan"}
             </button>
-          )}
-        </div>
-      </form>
 
-      <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+            <button
+              type="button"
+              onClick={handleDryRun}
+              disabled={!planMode || !canSubmit || running || dryRunning}
+              className="px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-md hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {dryRunning ? "Running Dry Run…" : "Dry Run"}
+            </button>
+
+            <button
+              type="submit"
+              disabled={running || dryRunning || !environment || !planMode || !canSubmit || (isProd && !confirmed)}
+              className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {running ? "Pushing..." : "Push Plan"}
+            </button>
+
+            {(running || dryRunning) && (
+              <button
+                type="button"
+                onClick={running ? push.abort : dryRun.abort}
+                className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-md hover:bg-red-200 transition-colors"
+              >
+                Abort
+              </button>
+            )}
+          </div>
+        </form>
+
+        {/* Dry run console — shown when dry run has logs */}
+        {dryRun.logs.length > 0 && (
+          <ScopedLogViewer
+            logs={dryRun.logs}
+            running={dryRunning}
+            exitCode={dryRun.exitCode}
+            onClear={!dryRunning ? dryRun.clear : undefined}
+          />
+        )}
+
+        {/* Push console — shown when push has logs */}
+        {push.logs.length > 0 && (
+          <ScopedLogViewer
+            logs={push.logs}
+            running={running}
+            exitCode={push.exitCode}
+            onClear={!running ? push.clear : undefined}
+          />
+        )}
+      </div>
+
+      {/* Dry run diff report */}
+      {dryRun.report && !dryRunning && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-700">Dry Run Results — Changes That Will Be Applied</h2>
+            <button
+              onClick={dryRun.clear}
+              className="text-xs text-slate-500 hover:text-slate-700"
+            >
+              Dismiss
+            </button>
+          </div>
+          <DiffReport report={dryRun.report} />
+        </div>
+      )}
     </div>
   );
 }
-
