@@ -149,9 +149,11 @@ function PageGroupNodeComponent({ data }: NodeProps) {
   const d = data as {
     label: string;
     children: PageChildConfig[];
+    outcomes?: string[];
     isSelected?: boolean;
     isSearchMatch?: boolean;
   };
+  const outcomes = d.outcomes ?? [];
   const h = pageGroupHeight(d.children.length);
 
   return (
@@ -172,7 +174,16 @@ function PageGroupNodeComponent({ data }: NodeProps) {
         <p className="text-[11px] font-medium text-slate-700 leading-tight truncate">{d.label}</p>
       </div>
 
-      <Handle id="outcome" type="source" position={Position.Right} style={{ top: "50%", background: "#94a3b8" }} />
+      {outcomes.length > 0
+        ? outcomes.map((outcome, i) => {
+            const topPct = `${((i + 0.5) / outcomes.length) * 100}%`;
+            return (
+              <Handle key={outcome} id={outcome} type="source" position={Position.Right}
+                style={{ top: topPct, background: "#94a3b8" }} />
+            );
+          })
+        : <Handle type="source" position={Position.Right} style={{ top: "50%", background: "#94a3b8" }} />
+      }
     </div>
   );
 }
