@@ -104,6 +104,7 @@ function JourneyNodeComponent({ data }: NodeProps) {
     outcomes: string[];
     isSelected?: boolean;
     isSearchMatch?: boolean;
+    isFlashing?: boolean;
   };
   const outcomes = d.outcomes ?? [];
   const h        = journeyNodeHeight(outcomes.length);
@@ -114,6 +115,7 @@ function JourneyNodeComponent({ data }: NodeProps) {
       className={cn(
         "border rounded-lg shadow-sm transition-all overflow-visible cursor-pointer active:cursor-grabbing",
         specialBg,
+        d.isFlashing    ? "border-sky-400 ring-4 ring-sky-300 ring-opacity-100 animate-pulse" :
         d.isSelected    ? "border-sky-500 ring-2 ring-sky-300 shadow-sky-100" :
         d.isSearchMatch ? "border-amber-400 ring-2 ring-amber-200" :
                           "border-slate-300"
@@ -545,7 +547,7 @@ function NodeInfoDrawer({
   open: boolean;
   environment?: string;
   journeyId?: string;
-  onNavigate?: (treeId: string) => void;
+  onNavigate?: (treeId: string, sourceNodeId: string) => void;
   onClose: () => void;
 }) {
   const [config, setConfig] = useState<Record<string, unknown> | null>(null);
@@ -623,7 +625,7 @@ function NodeInfoDrawer({
               <div className="px-4 py-3 border-b border-slate-100">
                 <button
                   type="button"
-                  onClick={() => onNavigate?.(String(config.tree))}
+                  onClick={() => onNavigate?.(String(config.tree), node!.id)}
                   className="w-full flex items-center gap-2 text-[11px] font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg px-3 py-2 transition-colors"
                 >
                   <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -670,8 +672,9 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const [pageConfigs,    setPageConfigs]     = useState<Map<string, PageNodeConfig>>(new Map());
 
   // ── Inner-tree navigation stack ───────────────────────────────────────────
-  const [navStack,   setNavStack]   = useState<{ journeyId: string; json: string }[]>([]);
+  const [navStack,   setNavStack]   = useState<{ journeyId: string; json: string; sourceNodeId: string }[]>([]);
   const [navLoading, setNavLoading] = useState(false);
+  const [flashNodeId, setFlashNodeId] = useState<string | null>(null);
 
   // Derive active journey from top of stack (falls back to props)
   const activeJson      = navStack.length > 0 ? navStack[navStack.length - 1].json      : json;
@@ -693,7 +696,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     shouldAdjustViewport.current = true;
   }, [json]);
 
-  const navigateToTree = useCallback(async (treeId: string) => {
+  const navigateToTree = useCallback(async (treeId: string, sourceNodeId: string) => {
     if (!environment) return;
     // Save current viewport so we can restore it when going back
     savedViewports.current.set(activeJourneyId ?? "root", getViewport());
@@ -707,7 +710,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       const data = await res.json() as { files: Array<{ content: string }> };
       const newJson = data.files?.[0]?.content;
       if (!newJson) return;
-      setNavStack((prev) => [...prev, { journeyId: treeId, json: newJson }]);
+      setNavStack((prev) => [...prev, { journeyId: treeId, json: newJson, sourceNodeId }]);
       setNodePanel(null);
       setSelectedNodeId(null);
     } finally {
@@ -719,11 +722,14 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     const targetKey = index < 0 ? (journeyId ?? "root") : navStack[index].journeyId;
     pendingViewport.current = savedViewports.current.get(targetKey) ?? null;
     shouldAdjustViewport.current = true;
+    // Flash the node in the parent that linked to the child we're leaving
+    const flashTarget = navStack[index + 1]?.sourceNodeId ?? null;
     // Drop saved viewports for trees being removed from the path
     for (let i = index + 1; i < navStack.length; i++) {
       savedViewports.current.delete(navStack[i].journeyId);
     }
     setNavStack((prev) => index < 0 ? [] : prev.slice(0, index + 1));
+    setFlashNodeId(flashTarget);
     setNodePanel(null);
     setSelectedNodeId(null);
   }, [navStack, journeyId]);
@@ -790,6 +796,13 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 80);
     }
   }, [dagreNodes, setRfNodes]);
+
+  // Clear flash after animation completes
+  useEffect(() => {
+    if (!flashNodeId) return;
+    const t = setTimeout(() => setFlashNodeId(null), 1200);
+    return () => clearTimeout(t);
+  }, [flashNodeId]);
 
   // Escape closes drawer first (capture phase, before fullscreen handler)
   useEffect(() => {
@@ -875,11 +888,11 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       }
       return {
         ...n,
-        data: { ...n.data, isSelected: n.id === selectedNodeId, isSearchMatch: searchMatches.has(n.id) },
+        data: { ...n.data, isSelected: n.id === selectedNodeId, isSearchMatch: searchMatches.has(n.id), isFlashing: n.id === flashNodeId },
         style: { ...n.style, opacity: highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1, transition: "opacity 0.2s" },
       };
     });
-  }, [rfNodes, selectedNodeId, highlighted, searchMatches]);
+  }, [rfNodes, selectedNodeId, highlighted, searchMatches, flashNodeId]);
 
   // Styled edges
   const displayEdges = useMemo<Edge[]>(() => {
