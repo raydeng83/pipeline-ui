@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { ScriptOverlay } from "./ScriptOverlay";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -103,7 +104,7 @@ function TypeBadge({ type }: { type: string }) {
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export function JourneyTableView({ json }: { json: string }) {
+export function JourneyTableView({ json, environment, journeyId }: { json: string; environment?: string; journeyId?: string }) {
   const allRows = useMemo(() => parseTable(json), [json]);
 
   const nodeTypes = useMemo(
@@ -115,6 +116,33 @@ export function JourneyTableView({ json }: { json: string }) {
   const [typeFilter, setTypeFilter] = useState("All");
   const [sortCol,   setSortCol]   = useState<SortCol>("name");
   const [sortDir,   setSortDir]   = useState<SortDir>("asc");
+
+  const [scriptOverlay, setScriptOverlay] = useState<{ name: string; content: string } | null>(null);
+  const [scriptLoading, setScriptLoading] = useState<string | null>(null); // nodeId being loaded
+
+  const handleViewScript = useCallback(async (nodeId: string) => {
+    if (!environment || !journeyId || scriptLoading) return;
+    setScriptLoading(nodeId);
+    try {
+      const nodeParams = new URLSearchParams({ environment, journey: journeyId, nodeId });
+      const nodeRes = await fetch(`/api/push/journey-node?${nodeParams}`);
+      const nodeData = await nodeRes.json();
+      const config = JSON.parse(nodeData.file?.content ?? "{}");
+      const scriptId = typeof config.script === "string" ? config.script : null;
+      if (!scriptId) return;
+
+      const scriptParams = new URLSearchParams({ environment, scriptId });
+      const scriptRes = await fetch(`/api/push/script?${scriptParams}`);
+      const scriptData = await scriptRes.json();
+      if (scriptData.content) {
+        setScriptOverlay({ name: scriptData.name ?? scriptId, content: scriptData.content });
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setScriptLoading(null);
+    }
+  }, [environment, journeyId, scriptLoading]);
 
   const rows = useMemo(() => {
     let r = allRows;
@@ -130,6 +158,13 @@ export function JourneyTableView({ json }: { json: string }) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-slate-50">
+      {scriptOverlay && (
+        <ScriptOverlay
+          name={scriptOverlay.name}
+          content={scriptOverlay.content}
+          onClose={() => setScriptOverlay(null)}
+        />
+      )}
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-slate-200 bg-white shrink-0">
         {/* Search */}
@@ -204,7 +239,26 @@ export function JourneyTableView({ json }: { json: string }) {
               >
                 {/* Name */}
                 <td className="px-4 py-2 font-medium text-slate-700 max-w-0">
-                  <span className="truncate block">{row.name}</span>
+                  {row.nodeType === "ScriptedDecisionNode" && environment && journeyId ? (
+                    <button
+                      type="button"
+                      onClick={() => handleViewScript(row.id)}
+                      disabled={scriptLoading === row.id}
+                      className="truncate block text-left text-violet-600 hover:text-violet-800 hover:underline disabled:opacity-40 transition-colors w-full"
+                    >
+                      {scriptLoading === row.id ? (
+                        <span className="flex items-center gap-1">
+                          <svg className="w-3 h-3 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                          </svg>
+                          {row.name}
+                        </span>
+                      ) : row.name}
+                    </button>
+                  ) : (
+                    <span className="truncate block">{row.name}</span>
+                  )}
                 </td>
 
                 {/* Type */}

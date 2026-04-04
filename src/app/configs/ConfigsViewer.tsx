@@ -6,6 +6,7 @@ import { FileNode } from "@/app/api/configs/[env]/route";
 import type { ViewableFile } from "@/app/api/push/item/route";
 import type { AuditItem } from "@/app/api/push/audit/route";
 import { cn } from "@/lib/utils";
+import { highlightJs } from "./ScriptOverlay";
 import { JourneyGraph } from "./JourneyGraph";
 import { JourneyOutlineView } from "./JourneyOutlineView";
 import { JourneyTableView } from "./JourneyTableView";
@@ -65,12 +66,19 @@ function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean;
 
 function FileContent({ content, fileName }: { content: string; fileName: string }) {
   const ext = fileName.split(".").pop()?.toLowerCase();
-  const isJson = ext === "json";
-  if (isJson) {
+  if (ext === "json") {
     return (
       <pre
         className="text-xs font-mono leading-relaxed p-4 overflow-auto h-full text-slate-300"
         dangerouslySetInnerHTML={{ __html: highlightJson(content) }}
+      />
+    );
+  }
+  if (ext === "js") {
+    return (
+      <pre
+        className="text-xs font-mono leading-relaxed p-4 overflow-auto h-full text-slate-300"
+        dangerouslySetInnerHTML={{ __html: highlightJs(content) }}
       />
     );
   }
@@ -141,6 +149,7 @@ function TreeView({ environment }: { environment: string }) {
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
@@ -213,6 +222,28 @@ function TreeView({ environment }: { environment: string }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className="text-xs font-mono text-slate-300 truncate flex-1">{selectedFile}</span>
+              <button
+                type="button"
+                title="Copy content"
+                onClick={() => {
+                  if (!fileContent) return;
+                  navigator.clipboard.writeText(fileContent).then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  });
+                }}
+                className="shrink-0 p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors"
+              >
+                {copied ? (
+                  <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                  </svg>
+                )}
+              </button>
               <FullscreenButton fullscreen={fullscreen} onToggle={() => setFullscreen((f) => !f)} dark />
             </div>
             <div className="flex-1 overflow-auto">
@@ -254,6 +285,7 @@ function SectionsView({ environment }: { environment: string }) {
   const [itemFilter, setItemFilter] = useState("");
   const [col3View, setCol3View] = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   const [fullscreen, setFullscreen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
@@ -483,16 +515,6 @@ function SectionsView({ environment }: { environment: string }) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setCol3View("swimlane")}
-                    className={cn(
-                      "px-2.5 py-1 border-l border-slate-200 transition-colors",
-                      col3View === "swimlane" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
-                    )}
-                  >
-                    Swimlane
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setCol3View("json")}
                     className={cn(
                       "px-2.5 py-1 border-l border-slate-200 transition-colors",
@@ -525,6 +547,34 @@ function SectionsView({ environment }: { environment: string }) {
                 </div>
               )}
 
+              {activeFile && (
+                <button
+                  type="button"
+                  title="Copy content"
+                  onClick={() => {
+                    navigator.clipboard.writeText(activeFile.content).then(() => {
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    });
+                  }}
+                  className={cn(
+                    "shrink-0 p-1 rounded transition-colors",
+                    (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys"
+                      ? "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                  )}
+                >
+                  {copied ? (
+                    <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                    </svg>
+                  )}
+                </button>
+              )}
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
@@ -553,7 +603,7 @@ function SectionsView({ environment }: { environment: string }) {
                     <JourneyOutlineView json={activeFile.content} />
                   </div>
                   <div className={cn("h-full", col3View !== "table" && "hidden")}>
-                    <JourneyTableView json={activeFile.content} />
+                    <JourneyTableView json={activeFile.content} environment={environment} journeyId={selectedItem?.id} />
                   </div>
                   <div className={cn("h-full", col3View !== "swimlane" && "hidden")}>
                     <JourneySwimLaneView json={activeFile.content} />
