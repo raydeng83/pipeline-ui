@@ -3,7 +3,7 @@ import { spawnFrConfig, ConfigScope, getEnvFileContent } from "@/lib/fr-config";
 import { parseEnvFile } from "@/lib/env-parser";
 import { autoCommit, analyzeChanges, scopeLabel as getScopeLabel } from "@/lib/git";
 import { appendHistory, createHistoryRecord } from "@/lib/history";
-import type { ScopeDetail } from "@/lib/history";
+import type { ScopeDetail, LogEntry } from "@/lib/history";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -77,7 +77,11 @@ export async function POST(req: NextRequest) {
 
   const stream = new ReadableStream<string>({
     async start(controller) {
+      const collectedLogs: LogEntry[] = [];
+
       const emit = (data: object) => {
+        const entry = data as LogEntry;
+        collectedLogs.push(entry);
         controller.enqueue(JSON.stringify(data) + "\n");
       };
 
@@ -106,21 +110,37 @@ export async function POST(req: NextRequest) {
         const { done, value } = await reader.read();
         if (done) break;
         controller.enqueue(value);
-        // Capture exit code from the pull stream
-        try {
-          const parsed = JSON.parse(value.trim().split("\n").pop()!);
-          if (parsed.type === "exit") lastExitCode = parsed.code;
-        } catch {
-          // not JSON or parse error — ignore
+        // Parse and collect log entries
+        for (const line of value.split("\n")) {
+          if (!line.trim()) continue;
+          try {
+            const parsed = JSON.parse(line);
+            collectedLogs.push(parsed);
+            if (parsed.type === "exit") lastExitCode = parsed.code;
+          } catch {
+            // ignore
+          }
         }
       }
 
       // Post-pull: commit and record history
+      let scopeDetails: Record<string, ScopeDetail> = {};
+      let summary = "Pull failed";
+      let postHash: string | null = null;
+
       if (lastExitCode === 0) {
         // Capture changes BEFORE commit (commit cleans the working tree)
         const changes = analyzeChanges(environment, configDirRel);
 
-        let postHash: string | null = null;
+        for (const c of changes) {
+          scopeDetails[c.scope] = { added: c.added, modified: c.modified, deleted: c.deleted };
+        }
+        const totalItems = changes.reduce((s, c) => s + c.added.length + c.modified.length + c.deleted.length, 0);
+        const scopeNames = changes.map((c) => getScopeLabel(c.scope)).join(", ");
+        summary = totalItems > 0
+          ? `${totalItems} items across ${changes.length} scope${changes.length !== 1 ? "s" : ""} (${scopeNames})`
+          : "No changes";
+
         try {
           postHash = autoCommit(
             environment,
@@ -152,50 +172,23 @@ export async function POST(req: NextRequest) {
             ts: Date.now(),
           });
         }
+      }
 
-        // Append history
-        try {
-          const details: Record<string, ScopeDetail> = {};
-          for (const c of changes) {
-            details[c.scope] = { added: c.added, modified: c.modified, deleted: c.deleted };
-          }
-          const totalItems = changes.reduce((s, c) => s + c.added.length + c.modified.length + c.deleted.length, 0);
-          const scopeNames = changes.map((c) => getScopeLabel(c.scope)).join(", ");
-          const summary = totalItems > 0
-            ? `${totalItems} items across ${changes.length} scope${changes.length !== 1 ? "s" : ""} (${scopeNames})`
-            : "No changes";
-
-          appendHistory(createHistoryRecord({
-            type: "pull",
-            environment,
-            scopes: scopesList.length ? scopesList : ["all"],
-            status: "success",
-            commitHash: postHash,
-            startedAt,
-            startTime,
-            summary,
-            details,
-          }));
-        } catch {
-          // history append failed — don't break the stream
-        }
-      } else {
-        // Failed pull — still record in history
-        try {
-          appendHistory(createHistoryRecord({
-            type: "pull",
-            environment,
-            scopes: scopesList.length ? scopesList : ["all"],
-            status: "failed",
-            commitHash: null,
-            startedAt,
-            startTime,
-            summary: "Pull failed",
-            details: {},
-          }));
-        } catch {
-          // ignore
-        }
+      // Append history with detail
+      try {
+        const record = createHistoryRecord({
+          type: "pull",
+          environment,
+          scopes: scopesList.length ? scopesList : ["all"],
+          status: lastExitCode === 0 ? "success" : "failed",
+          commitHash: postHash,
+          startedAt,
+          startTime,
+          summary,
+        });
+        appendHistory(record, { scopeDetails, logs: collectedLogs });
+      } catch {
+        // history append failed — don't break the stream
       }
 
       controller.close();

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Environment } from "@/lib/fr-config-types";
-import type { HistoryRecord } from "@/lib/history";
+import type { HistoryRecord, HistoryDetail, ScopeDetail } from "@/lib/history";
 import { cn } from "@/lib/utils";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ function formatTimestamp(iso: string): string {
 
 // ── Filter bar ───────────────────────────────────────────────────────────────
 
-type TypeFilter = "all" | "pull" | "push";
+type TypeFilter = "all" | "pull" | "push" | "compare";
 
 function FilterBar({
   environments,
@@ -71,7 +71,7 @@ function FilterBar({
       </select>
 
       <div className="flex rounded-md border border-slate-300 overflow-hidden">
-        {(["all", "pull", "push"] as TypeFilter[]).map((t) => (
+        {(["all", "pull", "push", "compare"] as TypeFilter[]).map((t) => (
           <button
             key={t}
             onClick={() => onTypeChange(t)}
@@ -90,27 +90,20 @@ function FilterBar({
   );
 }
 
-// ── Detail panel ─────────────────────────────────────────────────────────────
+// ── Scope detail panel ───────────────────────────────────────────────────────
 
-function DetailPanel({ record }: { record: HistoryRecord }) {
-  const scopes = Object.entries(record.details);
-  if (scopes.length === 0) {
-    return (
-      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 text-sm text-slate-400">
-        No item-level details available.
-      </div>
-    );
-  }
+function ScopeDetailPanel({ scopeDetails }: { scopeDetails: Record<string, ScopeDetail> }) {
+  const scopes = Object.entries(scopeDetails);
+  if (scopes.length === 0) return null;
 
   return (
-    <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 space-y-3">
+    <div className="space-y-3">
+      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Scope Changes</div>
       {scopes.map(([scope, detail]) => {
         const hasItems = detail.added.length + detail.modified.length + detail.deleted.length > 0;
         return (
           <div key={scope}>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-              {scope}
-            </div>
+            <div className="text-xs font-semibold text-slate-600 mb-1">{scope}</div>
             {hasItems ? (
               <div className="font-mono text-xs space-y-0.5 pl-2">
                 {detail.added.map((name) => (
@@ -133,7 +126,162 @@ function DetailPanel({ record }: { record: HistoryRecord }) {
   );
 }
 
+// ── Compare summary panel ────────────────────────────────────────────────────
+
+function CompareDetailPanel({ detail }: { detail: HistoryDetail }) {
+  const report = detail.compareReport;
+  if (!report) return <div className="text-xs text-slate-400">No compare data available.</div>;
+
+  const { summary, files } = report;
+  const changedFiles = files.filter((f) => f.status !== "unchanged");
+
+  return (
+    <div className="space-y-3">
+      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Compare Results</div>
+      <div className="flex gap-4 text-xs">
+        <span className="text-emerald-600 font-medium">{summary.added} added</span>
+        <span className="text-red-500 font-medium">{summary.removed} removed</span>
+        <span className="text-amber-600 font-medium">{summary.modified} modified</span>
+        <span className="text-slate-400">{summary.unchanged} unchanged</span>
+      </div>
+      {changedFiles.length > 0 && (
+        <div className="font-mono text-xs space-y-0.5 pl-2 max-h-64 overflow-y-auto">
+          {changedFiles.map((f) => (
+            <div
+              key={f.relativePath}
+              className={cn(
+                f.status === "added" && "text-emerald-600",
+                f.status === "removed" && "text-red-500",
+                f.status === "modified" && "text-amber-600"
+              )}
+            >
+              {f.status === "added" ? "+" : f.status === "removed" ? "-" : "~"} {f.relativePath}
+              {f.linesAdded || f.linesRemoved ? (
+                <span className="text-slate-400 ml-2">
+                  (+{f.linesAdded ?? 0} -{f.linesRemoved ?? 0})
+                </span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Log panel ────────────────────────────────────────────────────────────────
+
+function LogPanel({ detail }: { detail: HistoryDetail }) {
+  const [open, setOpen] = useState(false);
+  const logs = detail.logs;
+  if (!logs || logs.length === 0) return null;
+
+  return (
+    <div className="border-t border-slate-200">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-2 px-0 py-2 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+      >
+        <svg
+          className={cn("w-3 h-3 transition-transform shrink-0", open ? "" : "-rotate-90")}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+        Logs ({logs.length} entries)
+      </button>
+      {open && (
+        <div className="font-mono text-xs bg-slate-900 rounded p-3 max-h-64 overflow-y-auto space-y-0.5">
+          {logs.map((entry, i) => {
+            if (entry.type === "stdout") {
+              return <div key={i} className="text-slate-300 whitespace-pre-wrap break-all">{entry.data}</div>;
+            }
+            if (entry.type === "stderr" || entry.type === "error") {
+              return <div key={i} className="text-red-400 whitespace-pre-wrap break-all">{entry.data}</div>;
+            }
+            if (entry.type === "git") {
+              return <div key={i} className="text-emerald-400">{entry.message}</div>;
+            }
+            if (entry.type === "scope-start") {
+              return <div key={i} className="text-sky-400 mt-1">▶ {entry.scope}</div>;
+            }
+            if (entry.type === "scope-end") {
+              return <div key={i} className={entry.code === 0 ? "text-green-400" : "text-red-400"}>■ {entry.scope} — exit {entry.code}</div>;
+            }
+            return null;
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Expanded detail (fetches on demand) ──────────────────────────────────────
+
+function ExpandedDetail({ record }: { record: HistoryRecord }) {
+  const [detail, setDetail] = useState<HistoryDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fetched = useRef(false);
+
+  const fetchDetail = useCallback(async () => {
+    if (fetched.current) return;
+    fetched.current = true;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/history/${record.id}`);
+      if (!res.ok) throw new Error("Not found");
+      setDetail(await res.json());
+    } catch {
+      setError("Could not load details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [record.id]);
+
+  // Fetch on first render
+  if (!fetched.current && !loading && !error) {
+    fetchDetail();
+  }
+
+  if (loading) {
+    return (
+      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 text-xs text-slate-400">
+        Loading details…
+      </div>
+    );
+  }
+  if (error || !detail) {
+    return (
+      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 text-xs text-slate-400">
+        {error ?? "No details available."}
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 space-y-4">
+      {/* Scope details for pull/push */}
+      {detail.scopeDetails && Object.keys(detail.scopeDetails).length > 0 && (
+        <ScopeDetailPanel scopeDetails={detail.scopeDetails} />
+      )}
+
+      {/* Compare report */}
+      {record.type === "compare" && <CompareDetailPanel detail={detail} />}
+
+      {/* Logs */}
+      <LogPanel detail={detail} />
+    </div>
+  );
+}
+
 // ── Record row ───────────────────────────────────────────────────────────────
+
+const TYPE_BADGE: Record<string, { bg: string; label: string }> = {
+  pull: { bg: "bg-sky-100 text-sky-700", label: "Pull" },
+  push: { bg: "bg-emerald-100 text-emerald-700", label: "Push" },
+  compare: { bg: "bg-violet-100 text-violet-700", label: "Compare" },
+};
 
 function RecordRow({
   record,
@@ -153,6 +301,8 @@ function RecordRow({
     red: "bg-red-100 text-red-800",
   };
 
+  const badge = TYPE_BADGE[record.type] ?? TYPE_BADGE.pull;
+
   return (
     <div className="border-b border-slate-200 last:border-b-0">
       <div
@@ -160,15 +310,8 @@ function RecordRow({
         onClick={onToggle}
       >
         {/* Type badge */}
-        <span
-          className={cn(
-            "shrink-0 px-2 py-0.5 rounded text-xs font-medium",
-            record.type === "pull"
-              ? "bg-sky-100 text-sky-700"
-              : "bg-emerald-100 text-emerald-700"
-          )}
-        >
-          {record.type === "pull" ? "Pull" : "Push"}
+        <span className={cn("shrink-0 px-2 py-0.5 rounded text-xs font-medium", badge.bg)}>
+          {badge.label}
         </span>
 
         {/* Environment badge */}
@@ -233,7 +376,7 @@ function RecordRow({
         </svg>
       </div>
 
-      {expanded && <DetailPanel record={record} />}
+      {expanded && <ExpandedDetail record={record} />}
     </div>
   );
 }
@@ -253,7 +396,7 @@ export function HistoryView({
 
   const filtered = useMemo(() => {
     let records = history;
-    if (envFilter) records = records.filter((r) => r.environment === envFilter);
+    if (envFilter) records = records.filter((r) => r.environment.includes(envFilter));
     if (typeFilter !== "all") records = records.filter((r) => r.type === typeFilter);
     return records;
   }, [history, envFilter, typeFilter]);

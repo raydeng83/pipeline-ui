@@ -8,7 +8,7 @@ interface ScopeSelectorProps {
   selected: ConfigScope[];
   onChange: (scopes: ConfigScope[]) => void;
   disabled?: boolean;
-  action?: "pull" | "push";
+  action?: "pull" | "push" | "compare";
 }
 
 const GROUPS = CONFIG_SCOPES.reduce<Record<string, typeof CONFIG_SCOPES>>((acc, scope) => {
@@ -79,7 +79,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
       </div>
 
       <p className={cn("text-xs text-slate-400", selected.length > 0 && "invisible")}>
-        {action === "push" ? "Select scopes to push." : "Select scopes to pull."}
+        {action === "push" ? "Select scopes to push." : action === "compare" ? "Select scopes to compare." : "Select scopes to pull."}
       </p>
 
       {/* Basic mode: group-level pills */}

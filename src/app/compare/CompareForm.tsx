@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Environment } from "@/lib/fr-config-types";
+import { Environment, ConfigScope } from "@/lib/fr-config-types";
+import { ScopeSelector } from "@/components/ScopeSelector";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
@@ -109,6 +110,7 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
   const defaultEnv = environments[0]?.name ?? "";
   const [source, setSource] = useState<Endpoint>({ environment: defaultEnv, mode: "local" });
   const [target, setTarget] = useState<Endpoint>({ environment: defaultEnv, mode: "remote" });
+  const [scopes, setScopes] = useState<ConfigScope[]>([]);
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
@@ -124,7 +126,7 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
   const showConsole = logs.length > 0 || running;
 
   const handleCompare = () => {
-    run("/api/compare", { source, target });
+    run("/api/compare", { source, target, scopes });
   };
 
   return (
@@ -155,11 +157,13 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
           />
         </div>
 
+        <ScopeSelector selected={scopes} onChange={setScopes} disabled={running} action="compare" />
+
         <div className="flex gap-3">
           <button
             type="button"
             onClick={handleCompare}
-            disabled={running || !source.environment || !target.environment}
+            disabled={running || !source.environment || !target.environment || scopes.length === 0}
             className="px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-md hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {running ? "Comparing…" : "Compare"}

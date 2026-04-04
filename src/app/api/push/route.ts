@@ -3,7 +3,7 @@ import { spawnFrConfig, ConfigScope } from "@/lib/fr-config";
 import { ScopeSelection } from "@/lib/fr-config-types";
 import { scopeLabel as getScopeLabel } from "@/lib/git";
 import { appendHistory, createHistoryRecord } from "@/lib/history";
-import type { ScopeDetail } from "@/lib/history";
+import type { ScopeDetail, LogEntry } from "@/lib/history";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -26,9 +26,10 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
   const startedAt = new Date(startTime).toISOString();
 
-  // Wrap the push stream to capture exit code and record history
+  // Wrap the push stream to capture logs and record history
   const stream = new ReadableStream<string>({
     async start(controller) {
+      const collectedLogs: LogEntry[] = [];
       const reader = pushStream.getReader();
       let lastExitCode = 0;
 
@@ -36,30 +37,34 @@ export async function POST(req: NextRequest) {
         const { done, value } = await reader.read();
         if (done) break;
         controller.enqueue(value);
-        try {
-          const parsed = JSON.parse(value.trim().split("\n").pop()!);
-          if (parsed.type === "exit") lastExitCode = parsed.code;
-        } catch {
-          // ignore
+        for (const line of value.split("\n")) {
+          if (!line.trim()) continue;
+          try {
+            const parsed = JSON.parse(line);
+            collectedLogs.push(parsed);
+            if (parsed.type === "exit") lastExitCode = parsed.code;
+          } catch {
+            // ignore
+          }
         }
       }
 
-      // Record history from request data
+      // Record history
       try {
         const scopeList = scopeSelections
           ? scopeSelections.map((s) => s.scope)
           : scopes ?? [];
 
-        const details: Record<string, ScopeDetail> = {};
+        const scopeDetails: Record<string, ScopeDetail> = {};
         let totalItems = 0;
 
         if (scopeSelections) {
           for (const { scope, items } of scopeSelections) {
             if (items && items.length > 0) {
-              details[scope] = { added: [], modified: items, deleted: [] };
+              scopeDetails[scope] = { added: [], modified: items, deleted: [] };
               totalItems += items.length;
             } else {
-              details[scope] = { added: [], modified: [], deleted: [] };
+              scopeDetails[scope] = { added: [], modified: [], deleted: [] };
             }
           }
         }
@@ -69,7 +74,7 @@ export async function POST(req: NextRequest) {
           ? `${totalItems} items across ${scopeList.length} scope${scopeList.length !== 1 ? "s" : ""} (${scopeNames})`
           : `${scopeList.length} scope${scopeList.length !== 1 ? "s" : ""} (${scopeNames})`;
 
-        appendHistory(createHistoryRecord({
+        const record = createHistoryRecord({
           type: "push",
           environment,
           scopes: scopeList,
@@ -78,8 +83,8 @@ export async function POST(req: NextRequest) {
           startedAt,
           startTime,
           summary,
-          details,
-        }));
+        });
+        appendHistory(record, { scopeDetails, logs: collectedLogs });
       } catch {
         // history append failed — don't break the stream
       }

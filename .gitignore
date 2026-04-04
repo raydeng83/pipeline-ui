@@ -35,6 +35,7 @@ yarn-error.log*
 
 # operation history (local-only)
 environments/history.json
+environments/history/
 
 # vercel
 .vercel

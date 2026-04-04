@@ -145,9 +145,10 @@ export function buildReport(
   sourceDir: string,
   target: CompareEndpoint,
   targetDir: string,
+  scopes?: string[],
 ): CompareReport {
   // targetDir = "new state" (remote), sourceDir = "old state" (local) in diff semantics
-  const files = compareDirs(targetDir, sourceDir);
+  const files = compareDirs(targetDir, sourceDir, scopes);
   const summary = { added: 0, removed: 0, modified: 0, unchanged: 0 };
   for (const f of files) summary[f.status]++;
   return {

@@ -2,13 +2,19 @@ import { NextRequest } from "next/server";
 import os from "os";
 import path from "path";
 import fs from "fs";
-import { spawnFrConfig, getConfigDir } from "@/lib/fr-config";
+import { spawnFrConfig, getConfigDir, ConfigScope } from "@/lib/fr-config";
 import { buildReport } from "@/lib/diff";
 import type { CompareEndpoint } from "@/lib/diff-types";
+import { appendHistory, createHistoryRecord } from "@/lib/history";
+import type { LogEntry } from "@/lib/history";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { source, target } = body as { source: CompareEndpoint; target: CompareEndpoint };
+  const { source, target, scopes } = body as {
+    source: CompareEndpoint;
+    target: CompareEndpoint;
+    scopes?: ConfigScope[];
+  };
 
   if (!source?.environment || !target?.environment) {
     return new Response("Missing source or target", { status: 400 });
@@ -47,11 +53,18 @@ export async function POST(req: NextRequest) {
     }
   };
 
+  const startTime = Date.now();
+  const startedAt = new Date(startTime).toISOString();
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
-      const enqueue = (obj: object) =>
+      const collectedLogs: LogEntry[] = [];
+
+      const enqueue = (obj: object) => {
+        collectedLogs.push(obj as LogEntry);
         controller.enqueue(enc.encode(JSON.stringify(obj) + "\n"));
+      };
 
       const pullSide = async (side: "source" | "target", endpoint: CompareEndpoint, tempDir: string | null) => {
         if (endpoint.mode === "local") {
@@ -62,7 +75,7 @@ export async function POST(req: NextRequest) {
         const { stream: pullStream, abort } = spawnFrConfig({
           command: "fr-config-pull",
           environment: endpoint.environment,
-          scopes: [], // all scopes
+          scopes: scopes ?? [],
           envOverrides: { CONFIG_DIR: tempDir! },
         });
 
@@ -90,17 +103,64 @@ export async function POST(req: NextRequest) {
         }
       };
 
+      let failed = false;
       try {
         await Promise.all([
           pullSide("source", source, sourceTempDir),
           pullSide("target", target, targetTempDir),
         ]);
 
-        const report = buildReport(source, sourceConfigDir, target, targetConfigDir);
+        const report = buildReport(source, sourceConfigDir, target, targetConfigDir, scopes);
         enqueue({ type: "report", data: JSON.stringify(report), ts: Date.now() });
         enqueue({ type: "exit", code: 0, ts: Date.now() });
+
+        // Record history with full compare report
+        try {
+          const { summary } = report;
+          const summaryText = `${summary.added} added, ${summary.removed} removed, ${summary.modified} modified across ${report.files.length} files`;
+          const scopeList = scopes ?? [];
+
+          const record = createHistoryRecord({
+            type: "compare",
+            environment: `${source.environment} → ${target.environment}`,
+            source,
+            target,
+            scopes: scopeList.length ? scopeList : ["all"],
+            status: "success",
+            commitHash: null,
+            startedAt,
+            startTime,
+            summary: summaryText,
+          });
+          appendHistory(record, { compareReport: report, logs: collectedLogs });
+        } catch {
+          // ignore
+        }
+      } catch {
+        failed = true;
+        // Record failed compare
+        try {
+          const record = createHistoryRecord({
+            type: "compare",
+            environment: `${source.environment} → ${target.environment}`,
+            source,
+            target,
+            scopes: scopes ?? ["all"],
+            status: "failed",
+            commitHash: null,
+            startedAt,
+            startTime,
+            summary: "Compare failed",
+          });
+          appendHistory(record, { logs: collectedLogs });
+        } catch {
+          // ignore
+        }
       } finally {
         cleanup();
+        if (failed) {
+          enqueue({ type: "exit", code: 1, ts: Date.now() });
+        }
         controller.close();
       }
     },
