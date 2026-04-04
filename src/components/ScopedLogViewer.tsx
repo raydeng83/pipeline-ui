@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { LogEntry } from "@/hooks/useStreamingLogs";
 import { CONFIG_SCOPES } from "@/lib/fr-config-types";
 import { cn } from "@/lib/utils";
@@ -60,18 +60,65 @@ function formatDuration(ms: number): string {
   return `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
+// ── Search helpers ───────────────────────────────────────────────────────────
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightMatches(text: string, query: string): React.ReactNode {
+  if (!query || !text) return text;
+  const regex = new RegExp(`(${escapeRegex(query)})`, "gi");
+  const parts = text.split(regex);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="bg-yellow-400/30 text-yellow-200 rounded-sm px-0.5">{part}</mark>
+    ) : (
+      part
+    )
+  );
+}
+
+function lineMatches(entry: LogEntry, query: string): boolean {
+  if (!query) return true;
+  const lower = query.toLowerCase();
+  return (entry.data ?? "").toLowerCase().includes(lower);
+}
+
+function countMatches(lines: LogEntry[], query: string): number {
+  if (!query) return 0;
+  const lower = query.toLowerCase();
+  let count = 0;
+  for (const l of lines) {
+    const data = l.data ?? "";
+    let idx = 0;
+    while (true) {
+      idx = data.toLowerCase().indexOf(lower, idx);
+      if (idx === -1) break;
+      count++;
+      idx += lower.length;
+    }
+  }
+  return count;
+}
+
 // ── SectionDetails — auto-scrolls as new lines arrive ────────────────────────
 
-function SectionDetails({ lines }: { lines: LogEntry[] }) {
+function SectionDetails({ lines, search, filterMode }: { lines: LogEntry[]; search: string; filterMode: boolean }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [lines.length]);
 
+  const visibleLines = filterMode && search
+    ? lines.filter((l) => lineMatches(l, search))
+    : lines;
+
   return (
     <div className="border-t border-slate-800 bg-slate-950/60 px-4 py-2 font-mono text-xs overflow-y-auto max-h-64">
-      {lines.map((entry, i) => (
+      {visibleLines.map((entry, i) => (
         <div
           key={i}
           className={cn(
@@ -79,9 +126,12 @@ function SectionDetails({ lines }: { lines: LogEntry[] }) {
             entry.type === "error" ? "text-red-400" : "text-slate-300"
           )}
         >
-          {entry.data}
+          {search ? highlightMatches(entry.data ?? "", search) : entry.data}
         </div>
       ))}
+      {filterMode && search && visibleLines.length === 0 && (
+        <div className="text-slate-600 py-2">No matching lines</div>
+      )}
       <div ref={bottomRef} />
     </div>
   );
@@ -106,6 +156,10 @@ export function ScopedLogViewer({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [debugOpen, setDebugOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [filterMode, setFilterMode] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const sections = buildSections(logs);
   const debugEntries = logs.filter((e) => e.type === "stderr");
@@ -116,12 +170,29 @@ export function ScopedLogViewer({
   const duration =
     firstStartTs !== null && exitTs !== null ? exitTs - firstStartTs : null;
 
+  // Total match count
+  const allLines = useMemo(() => sections.flatMap((s) => s.lines), [sections]);
+  const matchCount = useMemo(() => countMatches(allLines, search), [allLines, search]);
+
+  // Sections with matches (for badge display)
+  const sectionMatchCounts = useMemo(() => {
+    if (!search) return new Map<string, number>();
+    const map = new Map<string, number>();
+    for (const s of sections) {
+      const c = countMatches(s.lines, search);
+      if (c > 0) map.set(s.scope, c);
+    }
+    return map;
+  }, [sections, search]);
+
   // Reset when logs are cleared
   useEffect(() => {
     if (logs.length === 0) {
       userManagedRef.current = new Set();
       setExpanded(new Set());
       setDebugOpen(false);
+      setSearch("");
+      setSearchOpen(false);
     }
   }, [logs.length]);
 
@@ -138,6 +209,11 @@ export function ScopedLogViewer({
       return next;
     });
   }, [logs]);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
 
   const toggleSection = (scope: string) => {
     userManagedRef.current.add(scope);
@@ -161,6 +237,15 @@ export function ScopedLogViewer({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleToggleSearch = () => {
+    if (searchOpen) {
+      setSearch("");
+      setSearchOpen(false);
+    } else {
+      setSearchOpen(true);
+    }
   };
 
   const completedCount = sections.filter((s) => s.status !== "running").length;
@@ -229,6 +314,19 @@ export function ScopedLogViewer({
         </span>
         {logs.length > 0 && (
           <div className="ml-auto flex items-center gap-3">
+            {/* Search toggle */}
+            <button
+              onClick={handleToggleSearch}
+              className={cn(
+                "text-xs transition-colors",
+                searchOpen ? "text-sky-400 hover:text-sky-300" : "text-slate-400 hover:text-slate-200"
+              )}
+              title="Search logs"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
             <button
               onClick={handleCopy}
               className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
@@ -246,6 +344,49 @@ export function ScopedLogViewer({
           </div>
         )}
       </div>
+
+      {/* ── Search bar ───────────────────────────────────────────────────── */}
+      {searchOpen && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border-b border-slate-700">
+          <svg className="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Escape") handleToggleSearch(); }}
+            placeholder="Search logs…"
+            className="flex-1 bg-transparent text-xs font-mono text-slate-200 placeholder-slate-600 outline-none"
+          />
+          {search && (
+            <span className="text-[10px] font-mono text-slate-500 shrink-0">
+              {matchCount} match{matchCount !== 1 ? "es" : ""}
+            </span>
+          )}
+          <button
+            onClick={() => setFilterMode((f) => !f)}
+            className={cn(
+              "text-[10px] px-1.5 py-0.5 rounded transition-colors shrink-0",
+              filterMode
+                ? "bg-sky-600 text-white"
+                : "text-slate-500 hover:text-slate-300"
+            )}
+            title={filterMode ? "Showing only matching lines" : "Showing all lines with highlights"}
+          >
+            Filter
+          </button>
+          <button
+            onClick={() => { setSearch(""); searchInputRef.current?.focus(); }}
+            className="text-slate-500 hover:text-slate-300 shrink-0"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* ── Git commit banners (pre-pull) ─────────────────────────────── */}
       {logs.filter((e) => e.type === "git" && e.action?.startsWith("pre-pull")).map((e, i) => {
@@ -281,6 +422,7 @@ export function ScopedLogViewer({
               section.endTs !== null
                 ? section.endTs - section.startTs
                 : null;
+            const sectionMatches = sectionMatchCounts.get(section.scope);
 
             return (
               <div
@@ -343,6 +485,13 @@ export function ScopedLogViewer({
                     {scopeLabel(section.scope)}
                   </span>
 
+                  {/* Search match count badge */}
+                  {sectionMatches !== undefined && sectionMatches > 0 && (
+                    <span className="text-[10px] font-mono text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded">
+                      {sectionMatches}
+                    </span>
+                  )}
+
                   {/* Duration badge */}
                   {sectionDuration !== null && (
                     <span className="text-xs text-slate-600 font-mono tabular-nums">
@@ -390,7 +539,9 @@ export function ScopedLogViewer({
                 </div>
 
                 {/* Expanded output with auto-scroll */}
-                {isOpen && hasLines && <SectionDetails lines={section.lines} />}
+                {isOpen && hasLines && (
+                  <SectionDetails lines={section.lines} search={search} filterMode={filterMode} />
+                )}
               </div>
             );
           })
@@ -407,7 +558,7 @@ export function ScopedLogViewer({
                       entry.type === "error" ? "text-red-400" : "text-slate-200"
                     )}
                   >
-                    {entry.data}
+                    {search ? highlightMatches(entry.data ?? "", search) : entry.data}
                   </div>
                 ))}
               </div>
@@ -523,7 +674,7 @@ export function ScopedLogViewer({
                   key={i}
                   className="whitespace-pre-wrap break-all leading-5 text-yellow-300/80"
                 >
-                  {entry.data}
+                  {search ? highlightMatches(entry.data ?? "", search) : entry.data}
                 </div>
               ))}
             </div>

@@ -169,12 +169,46 @@ function CompareDetailPanel({ detail }: { detail: HistoryDetail }) {
   );
 }
 
+// ── Log search helpers ───────────────────────────────────────────────────────
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightMatches(text: string, query: string): React.ReactNode {
+  if (!query || !text) return text;
+  const regex = new RegExp(`(${escapeRegex(query)})`, "gi");
+  const parts = text.split(regex);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="bg-yellow-400/30 text-yellow-200 rounded-sm px-0.5">{part}</mark>
+    ) : (
+      part
+    )
+  );
+}
+
 // ── Log panel ────────────────────────────────────────────────────────────────
 
 function LogPanel({ detail }: { detail: HistoryDetail }) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const logs = detail.logs;
   if (!logs || logs.length === 0) return null;
+
+  const query = search.trim().toLowerCase();
+  const filteredLogs = query
+    ? logs.filter((e) => {
+        const text = e.data ?? e.message ?? e.scope ?? "";
+        return text.toLowerCase().includes(query);
+      })
+    : logs;
+
+  function renderText(text: string | undefined) {
+    if (!text) return null;
+    return search ? highlightMatches(text, search) : text;
+  }
 
   return (
     <div className="border-t border-slate-200">
@@ -191,25 +225,55 @@ function LogPanel({ detail }: { detail: HistoryDetail }) {
         Logs ({logs.length} entries)
       </button>
       {open && (
-        <div className="font-mono text-xs bg-slate-900 rounded p-3 max-h-64 overflow-y-auto space-y-0.5">
-          {logs.map((entry, i) => {
-            if (entry.type === "stdout") {
-              return <div key={i} className="text-slate-300 whitespace-pre-wrap break-all">{entry.data}</div>;
-            }
-            if (entry.type === "stderr" || entry.type === "error") {
-              return <div key={i} className="text-red-400 whitespace-pre-wrap break-all">{entry.data}</div>;
-            }
-            if (entry.type === "git") {
-              return <div key={i} className="text-emerald-400">{entry.message}</div>;
-            }
-            if (entry.type === "scope-start") {
-              return <div key={i} className="text-sky-400 mt-1">▶ {entry.scope}</div>;
-            }
-            if (entry.type === "scope-end") {
-              return <div key={i} className={entry.code === 0 ? "text-green-400" : "text-red-400"}>■ {entry.scope} — exit {entry.code}</div>;
-            }
-            return null;
-          })}
+        <div className="space-y-0">
+          {/* Search input */}
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-t">
+            <svg className="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search logs…"
+              className="flex-1 bg-transparent text-xs font-mono text-slate-200 placeholder-slate-600 outline-none"
+            />
+            {search && (
+              <>
+                <span className="text-[10px] font-mono text-slate-500 shrink-0">
+                  {filteredLogs.length} result{filteredLogs.length !== 1 ? "s" : ""}
+                </span>
+                <button onClick={() => setSearch("")} className="text-slate-500 hover:text-slate-300 shrink-0">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+          <div className="font-mono text-xs bg-slate-900 rounded-b p-3 max-h-64 overflow-y-auto space-y-0.5">
+            {filteredLogs.map((entry, i) => {
+              if (entry.type === "stdout") {
+                return <div key={i} className="text-slate-300 whitespace-pre-wrap break-all">{renderText(entry.data)}</div>;
+              }
+              if (entry.type === "stderr" || entry.type === "error") {
+                return <div key={i} className="text-red-400 whitespace-pre-wrap break-all">{renderText(entry.data)}</div>;
+              }
+              if (entry.type === "git") {
+                return <div key={i} className="text-emerald-400">{renderText(entry.message)}</div>;
+              }
+              if (entry.type === "scope-start") {
+                return <div key={i} className="text-sky-400 mt-1">▶ {renderText(entry.scope)}</div>;
+              }
+              if (entry.type === "scope-end") {
+                return <div key={i} className={entry.code === 0 ? "text-green-400" : "text-red-400"}>■ {renderText(entry.scope)} — exit {entry.code}</div>;
+              }
+              return null;
+            })}
+            {query && filteredLogs.length === 0 && (
+              <div className="text-slate-600 py-2">No matching log entries</div>
+            )}
+          </div>
         </div>
       )}
     </div>
