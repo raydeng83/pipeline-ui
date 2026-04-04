@@ -95,7 +95,17 @@ function parseOutline(json: string): TreeNode | null {
   try {
     const data = JSON.parse(json) as JourneyJson;
     if (!data.entryNodeId || !data.nodes) return null;
-    return buildTree(data.entryNodeId, data.nodes, new Set());
+    const entryTree = buildTree(data.entryNodeId, data.nodes, new Set());
+    return {
+      id: "startNode",
+      label: "Start",
+      nodeType: undefined,
+      outcomeFromParent: undefined,
+      children: [entryTree],
+      isBackRef: false,
+      isSuccess: false,
+      isFailure: false,
+    };
   } catch {
     return null;
   }
@@ -147,16 +157,18 @@ function TreeRow({
           </span>
         )}
 
+        {node.id === "startNode" && <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />}
         {node.isSuccess && <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />}
         {node.isFailure && <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />}
 
         <span
           className={cn(
             "text-[11px] leading-snug truncate",
-            node.isBackRef ? "text-slate-400 italic" :
-            node.isSuccess ? "text-emerald-600 font-medium" :
-            node.isFailure ? "text-rose-600 font-medium" :
-                             "text-slate-700 font-medium",
+            node.isBackRef      ? "text-slate-400 italic" :
+            node.id === "startNode" ? "text-emerald-700 font-semibold" :
+            node.isSuccess      ? "text-emerald-600 font-medium" :
+            node.isFailure      ? "text-rose-600 font-medium" :
+                                  "text-slate-700 font-medium",
           )}
         >
           {node.isBackRef ? `↩ ${node.label}` : node.label}
