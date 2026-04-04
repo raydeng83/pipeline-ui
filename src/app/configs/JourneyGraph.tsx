@@ -712,6 +712,10 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     const targetKey = index < 0 ? (journeyId ?? "root") : navStack[index].journeyId;
     pendingViewport.current = savedViewports.current.get(targetKey) ?? null;
     shouldAdjustViewport.current = true;
+    // Drop saved viewports for trees being removed from the path
+    for (let i = index + 1; i < navStack.length; i++) {
+      savedViewports.current.delete(navStack[i].journeyId);
+    }
     setNavStack((prev) => index < 0 ? [] : prev.slice(0, index + 1));
     setNodePanel(null);
     setSelectedNodeId(null);
