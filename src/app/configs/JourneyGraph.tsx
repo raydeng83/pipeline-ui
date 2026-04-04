@@ -735,7 +735,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return { dagreNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
   }, [activeJson, layoutKey, pageConfigs]);
 
-  // Reset to dagre positions when layout changes
+  // Reset to dagre positions when layout changes, then fit view
   useEffect(() => {
     setRfNodes(dagreNodes);
     setSelectedNodeId(null);
@@ -743,6 +743,8 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     setHoveredEdgeId(null);
     setPinnedEdgeId(null);
     setNodePanel(null);
+    const t = setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 50);
+    return () => clearTimeout(t);
   }, [dagreNodes, setRfNodes]);
 
   // Escape closes drawer first (capture phase, before fullscreen handler)
