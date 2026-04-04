@@ -214,6 +214,9 @@ function TreeRow({
           {node.nodeType && !node.isBackRef && !node.isSuccess && !node.isFailure && (
             <span className="text-[9px] text-slate-400 shrink-0 ml-0.5">{node.nodeType}</span>
           )}
+
+          {/* Level badge */}
+          <span className="text-[9px] font-mono text-slate-300 shrink-0 ml-auto pl-2">L{depth + 1}</span>
         </div>
       </div>
 
