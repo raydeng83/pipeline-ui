@@ -112,7 +112,7 @@ const SCOPE_LABELS: Record<string, string> = {
   "variables":             "Variables (ESVs)",
 };
 
-function scopeLabel(scope: string): string {
+export function scopeLabel(scope: string): string {
   return SCOPE_LABELS[scope] ?? scope.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -146,7 +146,7 @@ function extractItemName(scope: string, pathInScope: string): string {
 
 // ── Change analysis ──────────────────────────────────────────────────────────
 
-interface ScopeChange {
+export interface ScopeChange {
   scope: string;
   added: string[];
   modified: string[];
@@ -157,7 +157,7 @@ interface ScopeChange {
  * Analyze uncommitted changes for an environment directory.
  * Returns per-scope breakdown with individual item names.
  */
-function analyzeChanges(environment: string, configDirRel: string): ScopeChange[] {
+export function analyzeChanges(environment: string, configDirRel: string): ScopeChange[] {
   const relPath = envRelPath(environment);
   const output = execSync(`git status --porcelain -- "${relPath}"`, {
     cwd: REPO_ROOT,

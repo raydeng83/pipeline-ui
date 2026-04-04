@@ -1,7 +1,9 @@
 import { NextRequest } from "next/server";
 import { spawnFrConfig, ConfigScope, getEnvFileContent } from "@/lib/fr-config";
 import { parseEnvFile } from "@/lib/env-parser";
-import { autoCommit } from "@/lib/git";
+import { autoCommit, analyzeChanges, scopeLabel as getScopeLabel } from "@/lib/git";
+import { appendHistory, createHistoryRecord } from "@/lib/history";
+import type { ScopeDetail } from "@/lib/history";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -14,7 +16,8 @@ export async function POST(req: NextRequest) {
     return new Response("Missing environment", { status: 400 });
   }
 
-  const scopeLabel = scopes?.length ? scopes.join(", ") : "all";
+  const scopesList = scopes ?? [];
+  const scopeLabel = scopesList.length ? scopesList.join(", ") : "all";
   const ts = new Date().toISOString().replace(/\.\d+Z$/, "Z");
 
   // Resolve CONFIG_DIR from .env for change analysis
@@ -69,6 +72,9 @@ export async function POST(req: NextRequest) {
   });
 
   // Wrap the pull stream to inject git events before and after
+  const startTime = Date.now();
+  const startedAt = new Date(startTime).toISOString();
+
   const stream = new ReadableStream<string>({
     async start(controller) {
       const emit = (data: object) => {
@@ -109,10 +115,14 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Post-pull: commit the pulled changes (only if pull succeeded)
+      // Post-pull: commit and record history
       if (lastExitCode === 0) {
+        // Capture changes BEFORE commit (commit cleans the working tree)
+        const changes = analyzeChanges(environment, configDirRel);
+
+        let postHash: string | null = null;
         try {
-          const postHash = autoCommit(
+          postHash = autoCommit(
             environment,
             `pull(${environment}): ${scopeLabel} @ ${ts}`,
             configDirRel
@@ -141,6 +151,50 @@ export async function POST(req: NextRequest) {
             message: `Git commit failed after pull: ${postCommitError}`,
             ts: Date.now(),
           });
+        }
+
+        // Append history
+        try {
+          const details: Record<string, ScopeDetail> = {};
+          for (const c of changes) {
+            details[c.scope] = { added: c.added, modified: c.modified, deleted: c.deleted };
+          }
+          const totalItems = changes.reduce((s, c) => s + c.added.length + c.modified.length + c.deleted.length, 0);
+          const scopeNames = changes.map((c) => getScopeLabel(c.scope)).join(", ");
+          const summary = totalItems > 0
+            ? `${totalItems} items across ${changes.length} scope${changes.length !== 1 ? "s" : ""} (${scopeNames})`
+            : "No changes";
+
+          appendHistory(createHistoryRecord({
+            type: "pull",
+            environment,
+            scopes: scopesList.length ? scopesList : ["all"],
+            status: "success",
+            commitHash: postHash,
+            startedAt,
+            startTime,
+            summary,
+            details,
+          }));
+        } catch {
+          // history append failed — don't break the stream
+        }
+      } else {
+        // Failed pull — still record in history
+        try {
+          appendHistory(createHistoryRecord({
+            type: "pull",
+            environment,
+            scopes: scopesList.length ? scopesList : ["all"],
+            status: "failed",
+            commitHash: null,
+            startedAt,
+            startTime,
+            summary: "Pull failed",
+            details: {},
+          }));
+        } catch {
+          // ignore
         }
       }
 
