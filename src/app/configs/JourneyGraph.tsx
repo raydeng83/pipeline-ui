@@ -532,12 +532,13 @@ function PropertyTable({ config }: { config: Record<string, unknown> }) {
 }
 
 function NodeInfoDrawer({
-  node, open, environment, journeyId, onClose,
+  node, open, environment, journeyId, onNavigate, onClose,
 }: {
   node: NodePanelData | null;
   open: boolean;
   environment?: string;
   journeyId?: string;
+  onNavigate?: (treeId: string) => void;
   onClose: () => void;
 }) {
   const [config, setConfig] = useState<Record<string, unknown> | null>(null);
@@ -610,6 +611,23 @@ function NodeInfoDrawer({
               </div>
             )}
 
+            {/* Jump to inner tree */}
+            {node?.nodeType === "InnerTreeEvaluatorNode" && !!config?.tree && (
+              <div className="px-4 py-3 border-b border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.(String(config.tree))}
+                  className="w-full flex items-center gap-2 text-[11px] font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg px-3 py-2 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  <span className="flex-1 text-left">Open inner tree</span>
+                  <span className="font-mono text-[10px] text-sky-400 truncate max-w-[110px]">{String(config.tree)}</span>
+                </button>
+              </div>
+            )}
+
             {/* Config */}
             {!isStaticNode && (
               <div className="px-4 py-3">
@@ -644,24 +662,59 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const [nodePanel,      setNodePanel]       = useState<NodePanelData | null>(null);
   const [pageConfigs,    setPageConfigs]     = useState<Map<string, PageNodeConfig>>(new Map());
 
-  // Detect PageNode IDs in the journey JSON
+  // ── Inner-tree navigation stack ───────────────────────────────────────────
+  const [navStack,   setNavStack]   = useState<{ journeyId: string; json: string }[]>([]);
+  const [navLoading, setNavLoading] = useState(false);
+
+  // Derive active journey from top of stack (falls back to props)
+  const activeJson      = navStack.length > 0 ? navStack[navStack.length - 1].json      : json;
+  const activeJourneyId = navStack.length > 0 ? navStack[navStack.length - 1].journeyId : journeyId;
+
+  // Reset stack when the parent selects a different journey
+  useEffect(() => { setNavStack([]); }, [json]);
+
+  const navigateToTree = useCallback(async (treeId: string) => {
+    if (!environment) return;
+    setNavLoading(true);
+    try {
+      const params = new URLSearchParams({ environment, scope: "journeys", item: treeId });
+      const res = await fetch(`/api/push/item?${params}`);
+      if (!res.ok) return;
+      const data = await res.json() as { files: Array<{ content: string }> };
+      const newJson = data.files?.[0]?.content;
+      if (!newJson) return;
+      setNavStack((prev) => [...prev, { journeyId: treeId, json: newJson }]);
+      setNodePanel(null);
+      setSelectedNodeId(null);
+    } finally {
+      setNavLoading(false);
+    }
+  }, [environment]);
+
+  const goToIndex = useCallback((index: number) => {
+    setNavStack((prev) => index < 0 ? [] : prev.slice(0, index + 1));
+    setNodePanel(null);
+    setSelectedNodeId(null);
+  }, []);
+
+  // Detect PageNode IDs in the active journey JSON
   const pageNodeIds = useMemo(() => {
     try {
-      const data = JSON.parse(json) as JourneyJson;
+      const data = JSON.parse(activeJson) as JourneyJson;
       return Object.entries(data.nodes ?? {})
         .filter(([, n]) => n.nodeType === "PageNode")
         .map(([id]) => id);
     } catch { return []; }
-  }, [json]);
+  }, [activeJson]);
 
   // Fetch PageNode configs
   useEffect(() => {
     setPageConfigs(new Map());
-    if (!environment || !journeyId || pageNodeIds.length === 0) return;
+    if (!environment || !activeJourneyId || pageNodeIds.length === 0) return;
 
     Promise.all(
       pageNodeIds.map(async (nodeId) => {
-        const params = new URLSearchParams({ environment: environment!, journey: journeyId!, nodeId });
+        const params = new URLSearchParams({ environment: environment!, journey: activeJourneyId!, nodeId });
         const res = await fetch(`/api/push/journey-node?${params}`);
         if (!res.ok) return null;
         const d = await res.json();
@@ -675,12 +728,12 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       );
       setPageConfigs(map);
     });
-  }, [environment, journeyId, pageNodeIds]);
+  }, [environment, activeJourneyId, pageNodeIds]);
 
   const { dagreNodes, baseEdges } = useMemo(() => {
-    const { nodes, edges } = parseJourney(json, pageConfigs.size > 0 ? pageConfigs : undefined);
+    const { nodes, edges } = parseJourney(activeJson, pageConfigs.size > 0 ? pageConfigs : undefined);
     return { dagreNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
-  }, [json, layoutKey, pageConfigs]);
+  }, [activeJson, layoutKey, pageConfigs]);
 
   // Reset to dagre positions when layout changes
   useEffect(() => {
@@ -859,6 +912,36 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       <Panel position="top-left">
         <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} onReset={() => setLayoutKey((k) => k + 1)} />
       </Panel>
+      {navStack.length > 0 && (
+        <Panel position="top-center">
+          <nav className="flex items-center gap-1 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg shadow-sm px-2.5 py-1.5 text-[11px] max-w-lg">
+            <button
+              type="button"
+              onClick={() => goToIndex(-1)}
+              className="text-sky-600 hover:text-sky-800 font-medium truncate max-w-[160px] shrink-0"
+            >
+              {journeyId ?? "Journey"}
+            </button>
+            {navStack.map((entry, i) => (
+              <Fragment key={`${entry.journeyId}-${i}`}>
+                <span className="text-slate-300 shrink-0">›</span>
+                {i < navStack.length - 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => goToIndex(i)}
+                    className="text-sky-600 hover:text-sky-800 font-medium truncate max-w-[160px]"
+                  >
+                    {entry.journeyId}
+                  </button>
+                ) : (
+                  <span className="text-slate-700 font-semibold truncate max-w-[160px]">{entry.journeyId}</span>
+                )}
+              </Fragment>
+            ))}
+            {navLoading && <span className="text-slate-400 ml-1 shrink-0">…</span>}
+          </nav>
+        </Panel>
+      )}
       <Panel position="top-right">
         <Legend />
       </Panel>
@@ -880,7 +963,8 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       node={nodePanel}
       open={!!nodePanel}
       environment={environment}
-      journeyId={journeyId}
+      journeyId={activeJourneyId}
+      onNavigate={navigateToTree}
       onClose={() => { setNodePanel(null); setSelectedNodeId(null); }}
     />
     </div>
