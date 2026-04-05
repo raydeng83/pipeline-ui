@@ -33,8 +33,8 @@ const MAX_RETRIES = 3;
 
 function sleep(ms) {
   return new Promise((resolve, reject) => {
-    sleepReject = reject;
-    setTimeout(() => { sleepReject = null; resolve(); }, ms);
+    const id = setTimeout(() => { sleepReject = null; resolve(); }, ms);
+    sleepReject = () => { clearTimeout(id); reject(new Error("cancelled")); sleepReject = null; };
   });
 }
 
@@ -154,7 +154,7 @@ function stopSearch() {
   searchParams = null;
   searchPaused = false;
   if (searchResolveResume) { searchResolveResume(); searchResolveResume = null; }
-  if (sleepReject) { sleepReject(new Error("cancelled")); sleepReject = null; }
+  if (sleepReject) { sleepReject(); sleepReject = null; }
 }
 
 self.onmessage = async function (e) {
@@ -164,6 +164,7 @@ self.onmessage = async function (e) {
     case "fetch":
       stopTail();
       stopSearch();
+      sleepReject = null; // ensure no stale reject from previous operations
       currentFetchId++;
       await doFetch(msg.env, msg.source, msg.beginTime, msg.endTime, currentFetchId);
       break;

@@ -733,7 +733,7 @@ export function LogsExplorer({
   const [fetchProgress, setFetchProgress] = useState<{ loaded: number; page: number; done: boolean; paused: boolean } | null>(null);
 
   useEffect(() => {
-    const worker = new Worker("/log-worker.js");
+    const worker = new Worker(`/log-worker.js?v=${Date.now()}`);
     worker.onmessage = (e: MessageEvent) => {
       const msg = e.data as
         | { type: "entries"; entries: LogEntry[]; append: boolean }
@@ -959,7 +959,7 @@ export function LogsExplorer({
               </button>
               <button
                 type="button"
-                onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); setSearch(""); setExpandedIdx(null); } }}
+                onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); setSearch(""); setExpandedIdx(null); setFetchProgress(null); } }}
                 className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
               >
                 Clear
@@ -1349,6 +1349,19 @@ export function LogsExplorer({
                   <button type="button" onClick={() => { setPage(totalPages); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }} disabled={currentPage >= totalPages} className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" title="Latest (last page)">Latest</button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Search completed indicator */}
+          {fetchProgress && fetchProgress.done && fetchProgress.loaded > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2 border-t border-slate-100 bg-emerald-50/50 shrink-0">
+              <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-xs text-slate-600">
+                Search complete — {fetchProgress.loaded.toLocaleString()} entries loaded
+                {fetchProgress.page > 1 ? ` across ${fetchProgress.page} pages` : " (1 page)"}
+              </span>
             </div>
           )}
 
