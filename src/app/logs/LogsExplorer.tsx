@@ -554,11 +554,53 @@ export function LogsExplorer({
   const grow = () => setTableHeight((h) => Math.min(window.innerHeight - 100, h + 50));
   const shrink = () => setTableHeight((h) => Math.max(200, h - 50));
 
-  // ── Transaction drill-down ──
+  // ── Transaction drill-down (from clicking inline txId in table) ──
   const [drilldown, setDrilldown] = useState<{ txId: string } | null>(null);
 
+  // ── Transaction search from control section → load into main table ──
   useEffect(() => {
-    if (txSearchId) setDrilldown({ txId: txSearchId.id });
+    if (!txSearchId || !env || sources.length === 0) return;
+
+    // Stop any active tail
+    onConfigChange({ tailing: false });
+    workerRef.current?.postMessage({ type: "tail-stop" });
+
+    setError("");
+    onConfigChange({ loading: true });
+    setEntries([]);
+    setFetched(false);
+    setExpandedIdx(null);
+
+    // Determine which aggregate/individual sources to query
+    const AM_INDIVIDUAL = ["am-access", "am-authentication", "am-core"];
+    const IDM_INDIVIDUAL = ["idm-access", "idm-activity", "idm-authentication"];
+    const amSrcs = sources.includes("am-everything") ? ["am-everything"] : AM_INDIVIDUAL.filter((s) => sources.includes(s));
+    const idmSrcs = sources.includes("idm-everything") ? ["idm-everything"] : IDM_INDIVIDUAL.filter((s) => sources.includes(s));
+    const querySources = [...amSrcs, ...idmSrcs];
+
+    Promise.all(
+      querySources.map((src) =>
+        fetch("/api/logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ env, source: src, transactionId: txSearchId.id, pageSize: 1000 }),
+        })
+          .then((r) => r.json())
+          .then((data): LogEntry[] => {
+            if (data.error || !Array.isArray(data.result)) return [];
+            return (data.result as LogEntry[]).map((e) => ({ ...e, source: e.source ?? src }));
+          })
+          .catch(() => [] as LogEntry[])
+      )
+    ).then((results) => {
+      const merged = results.flat().sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      setEntries(merged);
+      setFetched(true);
+      setLastUpdated(new Date());
+      setPage(Infinity);
+      onConfigChange({ loading: false });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txSearchId]);
 
   const deferredIsActive = useDeferredValue(isActive);
