@@ -241,6 +241,7 @@ function EntryRow({
   expanded,
   onToggle,
   searchTerm,
+  keywords,
   onTransactionClick,
 }: {
   entry: LogEntry;
@@ -248,6 +249,7 @@ function EntryRow({
   expanded: boolean;
   onToggle: () => void;
   searchTerm: string;
+  keywords: string[];
   onTransactionClick: (txId: string, timestamp: string) => void;
 }) {
   const effectiveSource = entry.source ?? source;
@@ -261,14 +263,23 @@ function EntryRow({
   const isText = isTextEntry(entry);
 
   function highlight(text: string) {
-    if (!searchTerm) return <>{text}</>;
-    const idx = text.toLowerCase().indexOf(searchTerm.toLowerCase());
-    if (idx === -1) return <>{text}</>;
+    const terms = [searchTerm, ...keywords].filter(Boolean);
+    if (terms.length === 0) return <>{text}</>;
+    const escaped = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const regex = new RegExp(`(${escaped.join("|")})`, "gi");
+    const parts = text.split(regex);
+    if (parts.length === 1) return <>{text}</>;
+    // Reset lastIndex between test calls by using source + flags
+    const testRe = new RegExp(`^(?:${escaped.join("|")})$`, "i");
     return (
       <>
-        {text.slice(0, idx)}
-        <mark className="bg-yellow-200 text-inherit rounded-sm">{text.slice(idx, idx + searchTerm.length)}</mark>
-        {text.slice(idx + searchTerm.length)}
+        {parts.map((part, i) =>
+          testRe.test(part) ? (
+            <mark key={i} className="bg-yellow-200 text-inherit rounded-sm px-0.5">{part}</mark>
+          ) : (
+            part
+          )
+        )}
       </>
     );
   }
@@ -496,14 +507,30 @@ export function LogsExplorer({
   onConfigChange,
   onLabelChange,
   isActive = true,
+  tabs = [],
+  activeTabId,
+  onTabSwitch,
+  fullscreen = false,
+  onFullscreenChange,
 }: {
   environments: EnvWithLogApi[];
   config: TabConfig;
   onConfigChange: (updates: Partial<TabConfig>) => void;
   onLabelChange?: (label: string) => void;
   isActive?: boolean;
+  tabs?: { id: number; label: string }[];
+  activeTabId?: number;
+  onTabSwitch?: (id: number) => void;
+  fullscreen?: boolean;
+  onFullscreenChange?: (v: boolean) => void;
 }) {
   const { env, source, sources, sourcesLoading, sourcesError, levelFilter, tailSecs, tailing, loading } = config;
+
+  const [keywordsRaw, setKeywordsRaw] = useState("");
+  const keywords = keywordsRaw
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
 
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [error, setError] = useState("");
@@ -519,19 +546,10 @@ export function LogsExplorer({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // ── Resize + fullscreen ──
+  // ── Resize ──
   const [tableHeight, setTableHeight] = useState(420);
-  const [fullscreen, setFullscreen] = useState(false);
   const grow = () => setTableHeight((h) => Math.min(window.innerHeight - 100, h + 50));
   const shrink = () => setTableHeight((h) => Math.max(200, h - 50));
-
-  // ESC exits fullscreen
-  useEffect(() => {
-    if (!fullscreen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [fullscreen]);
 
   // ── Transaction drill-down ──
   const [drilldown, setDrilldown] = useState<{ txId: string; timestamp: string } | null>(null);
@@ -656,108 +674,187 @@ export function LogsExplorer({
             {loading && !tailing && " · loading…"}
           </span>
         )}
-        {fetched && !tailing && (
-          <>
-            <button
-              type="button"
-              onClick={() => {
-                const data = JSON.stringify(filtered.map((e) => ({ timestamp: e.timestamp, source: e.source, type: e.type, payload: e.payload })), null, 2);
-                const blob = new Blob([data], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `logs-${source}-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              Export
-            </button>
-            <button
-              type="button"
-              onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); setSearch(""); setExpandedIdx(null); } }}
-              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              Clear
-            </button>
-          </>
-        )}
         {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
         {error && <span className="text-xs text-red-500">{error}</span>}
-      </div>
-
-      {/* ── Placeholder when no logs fetched yet ── */}
-      {!fetched && (
-        <div className="flex items-center justify-center h-48 rounded-lg border border-dashed border-slate-200 bg-slate-50">
-          <p className="text-sm text-slate-400">Select a source and click Tail Logs to start</p>
-        </div>
-      )}
-
-      {/* ── Results ── */}
-      {fetched && (
-        <div className={cn(
-          "bg-white border border-slate-200 flex flex-col",
-          fullscreen ? "fixed inset-0 z-50 rounded-none overflow-hidden" : "rounded-lg"
-        )}>
-          {/* Search bar + fullscreen toggle */}
-          <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-100 bg-slate-50/50 shrink-0">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setExpandedIdx(null); }}
-              placeholder="Filter entries…"
-              className="flex-1 text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
-            />
-            {search && (
-              <button type="button" onClick={() => setSearch("")} className="text-xs text-slate-400 hover:text-slate-600">
+        <div className="ml-auto flex items-center gap-3">
+          {fetched && !tailing && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  const data = JSON.stringify(filtered.map((e) => ({ timestamp: e.timestamp, source: e.source, type: e.type, payload: e.payload })), null, 2);
+                  const blob = new Blob([data], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `logs-${source}-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                Export
+              </button>
+              <button
+                type="button"
+                onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); setSearch(""); setExpandedIdx(null); } }}
+                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              >
                 Clear
               </button>
-            )}
-            <span className="text-xs text-slate-400 whitespace-nowrap">
-              {filtered.length} / {entries.length}
-            </span>
-            {/* Height +/- and fullscreen controls */}
-            {!fullscreen && (
-              <div className="flex items-center gap-0.5 shrink-0">
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Log window ── */}
+      <div className={cn(
+        "bg-white border border-slate-200 flex flex-col",
+        fullscreen ? "fixed inset-0 z-50 rounded-none overflow-hidden" : "rounded-lg"
+      )}>
+          {/* Fullscreen tab bar */}
+          {fullscreen && tabs.length > 0 && (
+            <div className="flex items-end gap-0 border-b border-slate-200 bg-slate-50 shrink-0">
+              {tabs.map((tab) => (
                 <button
+                  key={tab.id}
                   type="button"
-                  onClick={shrink}
-                  title="Shrink"
-                  className="text-slate-400 hover:text-slate-600 transition-colors p-0.5"
+                  onClick={() => onTabSwitch?.(tab.id)}
+                  className={cn(
+                    "px-3 py-2 text-xs border-b-2 transition-colors whitespace-nowrap",
+                    tab.id === activeTabId
+                      ? "border-sky-600 text-slate-900 font-medium bg-white"
+                      : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-white/60"
+                  )}
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
-                  </svg>
+                  {tab.label}
                 </button>
-                <button
-                  type="button"
-                  onClick={grow}
-                  title="Grow"
-                  className="text-slate-400 hover:text-slate-600 transition-colors p-0.5"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
-                  </svg>
-                </button>
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => setFullscreen((f) => !f)}
-              title={fullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
-              className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
-            >
-              {fullscreen ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
-                </svg>
+              ))}
+            </div>
+          )}
+
+          {/* Toolbar */}
+          <div className="flex flex-col border-b border-slate-100 bg-slate-50/50 shrink-0">
+            {/* Row 1: tail button + keyword highlights */}
+            <div className="flex items-center gap-2 px-4 py-2">
+              {!tailing ? (
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onConfigChange({ tailing: true })}
+                    disabled={loading || !source || !!sourcesError}
+                    className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
+                  >
+                    {loading ? "Fetching…" : "Tail Logs"}
+                  </button>
+                  {([5, 10, 30] as TailSecs[]).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => onConfigChange({ tailSecs: s })}
+                      className={cn(
+                        "px-2 py-1 text-xs rounded border transition-colors",
+                        tailSecs === s
+                          ? "bg-slate-700 border-slate-700 text-white"
+                          : "border-slate-300 text-slate-500 hover:bg-slate-50"
+                      )}
+                    >
+                      {s}s
+                    </button>
+                  ))}
+                </div>
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                </svg>
+                <button
+                  type="button"
+                  onClick={() => onConfigChange({ tailing: false })}
+                  className="px-3 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors shrink-0"
+                >
+                  Stop Tail
+                </button>
               )}
-            </button>
+              <span className="text-slate-300 select-none shrink-0">|</span>
+              <label className="text-xs font-medium text-slate-500 shrink-0">Highlight</label>
+              <input
+                type="text"
+                value={keywordsRaw}
+                onChange={(e) => setKeywordsRaw(e.target.value)}
+                placeholder="Keywords to highlight, comma-separated…"
+                className="flex-1 text-xs rounded border border-slate-200 px-2.5 py-1 font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+              />
+              {keywordsRaw && (
+                <>
+                  <span className="text-xs text-amber-600 whitespace-nowrap">
+                    {keywords.length} keyword{keywords.length !== 1 ? "s" : ""}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setKeywordsRaw("")}
+                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    Clear
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Row 2: filter + count + height controls + fullscreen */}
+            <div className="flex items-center gap-3 px-4 py-2 border-t border-slate-100">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setExpandedIdx(null); }}
+                placeholder="Filter entries…"
+                className="flex-1 text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+              {search && (
+                <button type="button" onClick={() => setSearch("")} className="text-xs text-slate-400 hover:text-slate-600">
+                  Clear
+                </button>
+              )}
+              <span className="text-xs text-slate-400 whitespace-nowrap">
+                {filtered.length} / {entries.length}
+              </span>
+              {!fullscreen && (
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={shrink}
+                    title="Shrink"
+                    className="text-slate-400 hover:text-slate-600 transition-colors p-0.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={grow}
+                    title="Grow"
+                    className="text-slate-400 hover:text-slate-600 transition-colors p-0.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => onFullscreenChange?.(!fullscreen)}
+                title={fullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+                className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+              >
+                {fullscreen ? (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Scrollable log window — CSS resize handle at bottom-right corner */}
@@ -769,7 +866,11 @@ export function LogsExplorer({
             )}
             style={fullscreen ? undefined : { height: tableHeight }}
           >
-            {!deferredIsActive ? null : filtered.length === 0 ? (
+            {!fetched ? (
+              <div className="flex items-center justify-center h-full min-h-[160px]">
+                <p className="text-sm text-slate-400">Select a source and click Tail Logs to start</p>
+              </div>
+            ) : !deferredIsActive ? null : filtered.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400">
                 {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
               </div>
@@ -796,6 +897,7 @@ export function LogsExplorer({
                         expanded={expandedIdx === globalIdx}
                         onToggle={() => setExpandedIdx(expandedIdx === globalIdx ? null : globalIdx)}
                         searchTerm={search}
+                        keywords={keywords}
                         onTransactionClick={(txId, ts) => setDrilldown({ txId, timestamp: ts })}
                       />
                     );
@@ -806,7 +908,7 @@ export function LogsExplorer({
           </div>
 
           {/* Pagination controls */}
-          {filtered.length > 0 && (
+          {fetched && filtered.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500">
@@ -835,7 +937,6 @@ export function LogsExplorer({
             </div>
           )}
         </div>
-      )}
 
       {/* ── Transaction drill-down modal ── */}
       {drilldown && (
@@ -881,6 +982,14 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
     { id: 1, label: "Tab 1", config: makeDefaultConfig(environments) },
   ]);
   const [activeId, setActiveId] = useState(1);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [fullscreen]);
 
   const activeTab = tabs.find((t) => t.id === activeId) ?? tabs[0];
   const cfg = activeTab?.config;
@@ -974,44 +1083,6 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
             )}
           </div>
 
-          {/* Row 2: tail controls */}
-          <div className="flex items-center gap-3 flex-wrap">
-            {!cfg.tailing ? (
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => updateActiveConfig({ tailing: true })}
-                  disabled={cfg.loading || !cfg.source || !!cfg.sourcesError}
-                  className="px-4 py-1.5 text-sm font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
-                >
-                  {cfg.loading ? "Fetching…" : "Tail Logs"}
-                </button>
-                {([5, 10, 30] as TailSecs[]).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => updateActiveConfig({ tailSecs: s })}
-                    className={cn(
-                      "px-2 py-1 text-xs rounded border transition-colors",
-                      cfg.tailSecs === s
-                        ? "bg-slate-700 border-slate-700 text-white"
-                        : "border-slate-300 text-slate-500 hover:bg-slate-50"
-                    )}
-                  >
-                    {s}s
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => updateActiveConfig({ tailing: false })}
-                className="px-4 py-1.5 text-sm font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-              >
-                Stop Tail
-              </button>
-            )}
-          </div>
         </div>
       )}
 
@@ -1068,6 +1139,11 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
               }
               isActive={tab.id === activeId}
               onLabelChange={(label) => updateLabel(tab.id, label)}
+              tabs={tabs.map((t) => ({ id: t.id, label: t.label }))}
+              activeTabId={activeId}
+              onTabSwitch={setActiveId}
+              fullscreen={fullscreen}
+              onFullscreenChange={setFullscreen}
             />
           </div>
         </div>
