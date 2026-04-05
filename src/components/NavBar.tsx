@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/configs", label: "Browse" },
   { href: "/compare", label: "Compare" },
   { href: "/history", label: "History" },
+  { href: "/logs", label: "Logs" },
   { href: "/environments", label: "Environments" },
 ];
 
