@@ -4,7 +4,7 @@ import { parseEnvFile } from "@/lib/env-parser";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { env, source, beginTime, endTime, pageSize = 50, cookie, tail = false } = body as {
+  const { env, source, beginTime, endTime, pageSize = 50, cookie, tail = false, transactionId } = body as {
     env: string;
     source: string;
     beginTime?: string;
@@ -12,13 +12,14 @@ export async function POST(req: NextRequest) {
     pageSize?: number;
     cookie?: string;
     tail?: boolean;
+    transactionId?: string;
   };
 
   if (!env || !source) {
     return NextResponse.json({ error: "env and source are required." }, { status: 400 });
   }
-  if (!tail && !beginTime) {
-    return NextResponse.json({ error: "beginTime is required for non-tail requests." }, { status: 400 });
+  if (!tail && !beginTime && !transactionId) {
+    return NextResponse.json({ error: "beginTime or transactionId is required for non-tail requests." }, { status: 400 });
   }
 
   const creds = getLogApiCredentials(env);
@@ -38,6 +39,15 @@ export async function POST(req: NextRequest) {
       ...(cookie ? { _pagedResultsCookie: cookie } : {}),
     });
     url = `${tenantBaseUrl}/monitoring/logs/tail?${params}`;
+  } else if (transactionId) {
+    // Indexed transaction ID lookup — no time range needed, Ping searches full retention window
+    const params = new URLSearchParams({
+      source,
+      transactionId,
+      _pageSize: String(pageSize),
+      ...(cookie ? { _pagedResultsCookie: cookie } : {}),
+    });
+    url = `${tenantBaseUrl}/monitoring/logs?${params}`;
   } else {
     const params = new URLSearchParams({
       source,

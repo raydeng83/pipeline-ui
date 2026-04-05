@@ -250,7 +250,7 @@ function EntryRow({
   onToggle: () => void;
   searchTerm: string;
   keywords: string[];
-  onTransactionClick: (txId: string, timestamp: string) => void;
+  onTransactionClick: (txId: string) => void;
 }) {
   const effectiveSource = entry.source ?? source;
   const level = getLevel(entry);
@@ -328,7 +328,7 @@ function EntryRow({
               {transactionId ? (
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); onTransactionClick(transactionId, entry.timestamp); }}
+                  onClick={(e) => { e.stopPropagation(); onTransactionClick(transactionId); }}
                   className="font-mono text-[10px] text-sky-600 hover:text-sky-800 hover:underline truncate max-w-[130px] block"
                   title={transactionId}
                 >
@@ -359,13 +359,11 @@ function EntryRow({
 
 function TransactionDrilldown({
   transactionId,
-  timestamp,
   env,
   availableSources,
   onClose,
 }: {
   transactionId: string;
-  timestamp: string;
   env: string;
   availableSources: string[];
   onClose: () => void;
@@ -375,7 +373,16 @@ function TransactionDrilldown({
   const [error, setError] = useState("");
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
-  const sources = TRANSACTION_SOURCES.filter((s) => availableSources.includes(s));
+  // Prefer aggregate sources for full coverage; fall back to individual sources
+  const AM_INDIVIDUAL = ["am-access", "am-authentication", "am-core"];
+  const IDM_INDIVIDUAL = ["idm-access", "idm-activity", "idm-authentication"];
+  const amSources = availableSources.includes("am-everything")
+    ? ["am-everything"]
+    : AM_INDIVIDUAL.filter((s) => availableSources.includes(s));
+  const idmSources = availableSources.includes("idm-everything")
+    ? ["idm-everything"]
+    : IDM_INDIVIDUAL.filter((s) => availableSources.includes(s));
+  const sources = [...amSources, ...idmSources];
 
   useEffect(() => {
     if (sources.length === 0) {
@@ -384,23 +391,18 @@ function TransactionDrilldown({
       return;
     }
 
-    const center = new Date(timestamp).getTime();
-    const beginTime = new Date(center - 5 * 60 * 1000).toISOString();
-    const endTime = new Date(center + 5 * 60 * 1000).toISOString();
-
+    // Use the indexed transactionId param — Ping searches the full retention window
     Promise.all(
       sources.map((src) =>
         fetch("/api/logs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ env, source: src, beginTime, endTime, pageSize: 100 }),
+          body: JSON.stringify({ env, source: src, transactionId, pageSize: 1000 }),
         })
           .then((r) => r.json())
           .then((data): (LogEntry & { source: string })[] => {
             if (data.error || !Array.isArray(data.result)) return [];
-            return (data.result as LogEntry[])
-              .filter((e) => getTransactionId(e) === transactionId)
-              .map((e) => ({ ...e, source: src }));
+            return (data.result as LogEntry[]).map((e) => ({ ...e, source: src }));
           })
           .catch(() => [] as (LogEntry & { source: string })[])
       )
@@ -438,7 +440,7 @@ function TransactionDrilldown({
           ) : error ? (
             <div className="p-8 text-center text-sm text-red-500">{error}</div>
           ) : entries.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-400">No entries found for this transaction ID in the ±5 min window.</div>
+            <div className="p-8 text-center text-sm text-slate-400">No entries found for this transaction ID.</div>
           ) : (
             <table className="w-full text-xs border-collapse">
               <thead>
@@ -490,8 +492,7 @@ function TransactionDrilldown({
         {!loading && !error && (
           <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0 text-xs text-slate-400">
             {entries.length} {entries.length === 1 ? "entry" : "entries"} across{" "}
-            {sourcesWithHits} of {sourcesQueried} sources
-            {" · "}±5 min around {new Date(timestamp).toLocaleTimeString()}
+            {sourcesWithHits} of {sourcesQueried} source{sourcesQueried !== 1 ? "s" : ""}
           </div>
         )}
       </div>
@@ -512,6 +513,7 @@ export function LogsExplorer({
   onTabSwitch,
   fullscreen = false,
   onFullscreenChange,
+  txSearchId,
 }: {
   environments: EnvWithLogApi[];
   config: TabConfig;
@@ -523,6 +525,7 @@ export function LogsExplorer({
   onTabSwitch?: (id: number) => void;
   fullscreen?: boolean;
   onFullscreenChange?: (v: boolean) => void;
+  txSearchId?: { id: string; seq: number };
 }) {
   const { env, source, sources, sourcesLoading, sourcesError, levelFilter, tailSecs, tailing, loading } = config;
 
@@ -552,7 +555,11 @@ export function LogsExplorer({
   const shrink = () => setTableHeight((h) => Math.max(200, h - 50));
 
   // ── Transaction drill-down ──
-  const [drilldown, setDrilldown] = useState<{ txId: string; timestamp: string } | null>(null);
+  const [drilldown, setDrilldown] = useState<{ txId: string } | null>(null);
+
+  useEffect(() => {
+    if (txSearchId) setDrilldown({ txId: txSearchId.id });
+  }, [txSearchId]);
 
   const deferredIsActive = useDeferredValue(isActive);
 
@@ -898,7 +905,7 @@ export function LogsExplorer({
                         onToggle={() => setExpandedIdx(expandedIdx === globalIdx ? null : globalIdx)}
                         searchTerm={search}
                         keywords={keywords}
-                        onTransactionClick={(txId, ts) => setDrilldown({ txId, timestamp: ts })}
+                        onTransactionClick={(txId) => setDrilldown({ txId })}
                       />
                     );
                   })}
@@ -942,7 +949,6 @@ export function LogsExplorer({
       {drilldown && (
         <TransactionDrilldown
           transactionId={drilldown.txId}
-          timestamp={drilldown.timestamp}
           env={env}
           availableSources={sources}
           onClose={() => setDrilldown(null)}
@@ -993,6 +999,14 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
 
   const activeTab = tabs.find((t) => t.id === activeId) ?? tabs[0];
   const cfg = activeTab?.config;
+
+  const [txInput, setTxInput] = useState("");
+  const [txSearch, setTxSearch] = useState<{ id: string; seq: number } | undefined>(undefined);
+
+  function submitTxSearch() {
+    const id = txInput.trim();
+    if (id) setTxSearch((prev) => ({ id, seq: (prev?.seq ?? 0) + 1 }));
+  }
 
   const updateActiveConfig = useCallback((updates: Partial<TabConfig>) => {
     setTabs((prev) =>
@@ -1083,6 +1097,31 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
             )}
           </div>
 
+          {/* Row 2: transaction ID search */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-slate-600 shrink-0">Transaction ID</label>
+            <input
+              type="text"
+              value={txInput}
+              onChange={(e) => setTxInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") submitTxSearch(); }}
+              placeholder="Paste a transaction ID to trace…"
+              className="text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 w-96"
+            />
+            <button
+              type="button"
+              onClick={submitTxSearch}
+              disabled={!txInput.trim() || !cfg?.env}
+              className="px-3 py-1.5 text-xs font-medium bg-slate-700 text-white rounded hover:bg-slate-800 disabled:opacity-40 transition-colors"
+            >
+              Trace
+            </button>
+            {txInput && (
+              <button type="button" onClick={() => { setTxInput(""); setTxSearch(undefined); }} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+                Clear
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -1144,6 +1183,7 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
               onTabSwitch={setActiveId}
               fullscreen={fullscreen}
               onFullscreenChange={setFullscreen}
+              txSearchId={tab.id === activeId ? txSearch : undefined}
             />
           </div>
         </div>
