@@ -233,6 +233,67 @@ function formatTs(ts: string): { date: string; time: string } {
   }
 }
 
+// ── Resizable table header ───────────────────────────────────────────────────
+
+const DEFAULT_COL_WIDTHS: Record<string, number> = {
+  timestamp: 160,
+  source: 120,
+  level: 70,
+  transaction: 160,
+  message: 0, // flex
+};
+
+function ResizableHeader({
+  label,
+  colKey,
+  widths,
+  onResize,
+  className,
+}: {
+  label: string;
+  colKey: string;
+  widths: Record<string, number>;
+  onResize: (key: string, width: number) => void;
+  className?: string;
+}) {
+  const w = widths[colKey];
+  const isFlex = !w;
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startW = w || 200;
+    const onMove = (ev: MouseEvent) => {
+      const delta = ev.clientX - startX;
+      onResize(colKey, Math.max(40, startW + delta));
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  return (
+    <th
+      className={cn("px-2 py-2 font-semibold text-slate-500 whitespace-nowrap relative select-none", className)}
+      style={isFlex ? undefined : { width: w, minWidth: w }}
+    >
+      {label}
+      <div
+        onMouseDown={handleMouseDown}
+        className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-sky-400/40 transition-colors"
+      />
+    </th>
+  );
+}
+
 // ── Entry row ────────────────────────────────────────────────────────────────
 
 function EntryRow({
@@ -243,6 +304,7 @@ function EntryRow({
   searchTerm,
   keywords,
   onTransactionClick,
+  fullscreen = false,
 }: {
   entry: LogEntry;
   source: string;
@@ -251,6 +313,7 @@ function EntryRow({
   searchTerm: string;
   keywords: string[];
   onTransactionClick: (txId: string) => void;
+  fullscreen?: boolean;
 }) {
   const effectiveSource = entry.source ?? source;
   const level = getLevel(entry);
@@ -308,6 +371,33 @@ function EntryRow({
           </td>
         ) : (
           <>
+            <td className="px-2 py-2 whitespace-nowrap align-top">
+              {transactionId ? (
+                <span className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onTransactionClick(transactionId); }}
+                    className={cn(
+                      "font-mono text-[10px] text-sky-600 hover:text-sky-800 hover:underline block",
+                      fullscreen ? "break-all whitespace-normal" : "truncate max-w-[130px]"
+                    )}
+                    title={transactionId}
+                  >
+                    {fullscreen ? transactionId : transactionId.length > 20 ? `${transactionId.slice(0, 8)}…${transactionId.slice(-8)}` : transactionId}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(transactionId); }}
+                    className="text-slate-300 hover:text-slate-500 shrink-0"
+                    title="Copy transaction ID"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </span>
+              ) : null}
+            </td>
             <td className="px-2 py-2 text-slate-800 align-top">
               <span className="line-clamp-2 break-all">{highlight(message)}</span>
               <span className="flex items-center gap-2 mt-0.5">
@@ -323,18 +413,6 @@ function EntryRow({
                   </span>
                 )}
               </span>
-            </td>
-            <td className="px-2 py-2 whitespace-nowrap align-top">
-              {transactionId ? (
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); onTransactionClick(transactionId); }}
-                  className="font-mono text-[10px] text-sky-600 hover:text-sky-800 hover:underline truncate max-w-[130px] block"
-                  title={transactionId}
-                >
-                  {transactionId.length > 20 ? `${transactionId.slice(0, 8)}…${transactionId.slice(-8)}` : transactionId}
-                </button>
-              ) : null}
             </td>
           </>
         )}
@@ -541,6 +619,10 @@ export function LogsExplorer({
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const [search, setSearch] = useState("");
+  const [colWidths, setColWidths] = useState<Record<string, number>>({ ...DEFAULT_COL_WIDTHS });
+  const handleColResize = useCallback((key: string, width: number) => {
+    setColWidths((prev) => ({ ...prev, [key]: width }));
+  }, []);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   // ── Pagination ──
@@ -924,15 +1006,15 @@ export function LogsExplorer({
                 {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
               </div>
             ) : (
-              <table className="w-full text-xs border-collapse">
+              <table className="text-xs border-collapse" style={{ tableLayout: "fixed", width: "100%", minWidth: 700 }}>
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-slate-50 border-b border-slate-200 text-left">
-                    <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
+                    <ResizableHeader label="Timestamp" colKey="timestamp" widths={colWidths} onResize={handleColResize} className="px-3" />
+                    <ResizableHeader label="Source" colKey="source" widths={colWidths} onResize={handleColResize} />
+                    <ResizableHeader label="Level" colKey="level" widths={colWidths} onResize={handleColResize} />
+                    <ResizableHeader label="Transaction" colKey="transaction" widths={colWidths} onResize={handleColResize} />
                     <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Transaction</th>
-                    <th className="w-6" />
+                    <th style={{ width: 24 }} />
                   </tr>
                 </thead>
                 <tbody>
@@ -948,6 +1030,7 @@ export function LogsExplorer({
                         searchTerm={search}
                         keywords={keywords}
                         onTransactionClick={(txId) => setDrilldown({ txId })}
+                        fullscreen={fullscreen}
                       />
                     );
                   })}
@@ -1026,11 +1109,14 @@ function makeDefaultConfig(environments: EnvWithLogApi[]): TabConfig {
 let _nextTabId = 2;
 
 export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi[] }) {
+  const [mounted, setMounted] = useState(false);
   const [tabs, setTabs] = useState<TabDef[]>([
     { id: 1, label: "Tab 1", config: makeDefaultConfig(environments) },
   ]);
   const [activeId, setActiveId] = useState(1);
   const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (!fullscreen) return;
@@ -1081,6 +1167,10 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
   }
 
   const selectedEnv = environments.find((e) => e.name === cfg?.env);
+
+  if (!mounted) {
+    return <div className="h-64 flex items-center justify-center text-sm text-slate-400">Loading…</div>;
+  }
 
   return (
     <div className="space-y-0">
