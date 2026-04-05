@@ -315,6 +315,7 @@ function EntryRow({
   onTransactionClick: (txId: string) => void;
   fullscreen?: boolean;
 }) {
+  const [txCopied, setTxCopied] = useState(false);
   const effectiveSource = entry.source ?? source;
   const level = getLevel(entry);
   const message = getMessage(entry);
@@ -387,13 +388,25 @@ function EntryRow({
                   </button>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(transactionId); }}
-                    className="text-slate-300 hover:text-slate-500 shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigator.clipboard.writeText(transactionId).then(() => {
+                        setTxCopied(true);
+                        setTimeout(() => setTxCopied(false), 1500);
+                      });
+                    }}
+                    className={cn("shrink-0", txCopied ? "text-emerald-500" : "text-slate-300 hover:text-slate-500")}
                     title="Copy transaction ID"
                   >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
+                    {txCopied ? (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    )}
                   </button>
                 </span>
               ) : null}
@@ -1243,10 +1256,20 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
             <button
               type="button"
               onClick={submitTxSearch}
-              disabled={!txInput.trim() || !cfg?.env}
-              className="px-3 py-1.5 text-xs font-medium bg-slate-700 text-white rounded hover:bg-slate-800 disabled:opacity-40 transition-colors"
+              disabled={!txInput.trim() || !cfg?.env || cfg?.loading}
+              className="px-3 py-1.5 text-xs font-medium bg-slate-700 text-white rounded hover:bg-slate-800 disabled:opacity-40 transition-colors flex items-center gap-1.5"
             >
-              Trace
+              {cfg?.loading && txSearch ? (
+                <>
+                  <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Tracing…
+                </>
+              ) : (
+                "Trace"
+              )}
             </button>
             {txInput && (
               <button type="button" onClick={() => { setTxInput(""); setTxSearch(undefined); }} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
