@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ interface LogEntry {
 }
 
 type Preset = "15m" | "1h" | "6h" | "24h" | "custom";
+type TailSecs = 5 | 10 | 30;
 
 const PRESETS: { label: string; value: Preset; ms: number }[] = [
   { label: "15 min", value: "15m", ms: 15 * 60 * 1000 },
@@ -25,6 +26,12 @@ const PRESETS: { label: string; value: Preset; ms: number }[] = [
   { label: "6 hours", value: "6h", ms: 6 * 60 * 60 * 1000 },
   { label: "24 hours", value: "24h", ms: 24 * 60 * 60 * 1000 },
   { label: "Custom", value: "custom", ms: 0 },
+];
+
+// Sources queried for transaction drill-down
+const TRANSACTION_SOURCES = [
+  "am-access", "am-authentication", "am-core",
+  "idm-access", "idm-activity", "idm-authentication",
 ];
 
 // ── Field extraction ──────────────────────────────────────────────────────────
@@ -72,7 +79,7 @@ function getUserId(payload: Record<string, unknown>): string {
   return "";
 }
 
-// ── Level badge ───────────────────────────────────────────────────────────────
+// ── Badges ────────────────────────────────────────────────────────────────────
 
 const LEVEL_STYLES: Record<string, string> = {
   ERROR: "bg-red-100 text-red-700 border border-red-200",
@@ -93,6 +100,18 @@ function LevelBadge({ level }: { level: string }) {
   );
 }
 
+function SourceBadge({ source }: { source: string }) {
+  const isAm = source.startsWith("am-");
+  return (
+    <span className={cn(
+      "inline-block px-1.5 py-0.5 rounded text-[10px] font-mono leading-none whitespace-nowrap",
+      isAm ? "bg-purple-100 text-purple-700" : "bg-teal-50 text-teal-700"
+    )}>
+      {source}
+    </span>
+  );
+}
+
 // ── Timestamp formatting ──────────────────────────────────────────────────────
 
 function formatTs(ts: string): { date: string; time: string } {
@@ -107,6 +126,16 @@ function formatTs(ts: string): { date: string; time: string } {
   }
 }
 
+// ── Datetime-local helpers ────────────────────────────────────────────────────
+
+function toDatetimeLocal(iso: string): string {
+  return iso.slice(0, 16);
+}
+
+function fromDatetimeLocal(val: string): string {
+  return val ? new Date(val).toISOString() : "";
+}
+
 // ── Entry row ─────────────────────────────────────────────────────────────────
 
 function EntryRow({
@@ -115,12 +144,14 @@ function EntryRow({
   expanded,
   onToggle,
   searchTerm,
+  onTransactionClick,
 }: {
   entry: LogEntry;
   source: string;
   expanded: boolean;
   onToggle: () => void;
   searchTerm: string;
+  onTransactionClick: (txId: string, timestamp: string) => void;
 }) {
   const level = getLevel(entry.payload);
   const message = getMessage(entry.payload);
@@ -128,8 +159,6 @@ function EntryRow({
   const transactionId = getTransactionId(entry.payload);
   const userId = getUserId(entry.payload);
   const { date, time } = formatTs(entry.timestamp);
-
-  const rawJson = JSON.stringify(entry.payload, null, 2);
 
   function highlight(text: string) {
     if (!searchTerm) return <>{text}</>;
@@ -145,7 +174,7 @@ function EntryRow({
   }
 
   return (
-    <>
+    <Fragment>
       <tr
         onClick={onToggle}
         className={cn(
@@ -153,30 +182,33 @@ function EntryRow({
           expanded && "bg-slate-50"
         )}
       >
-        {/* Timestamp */}
         <td className="px-3 py-2 font-mono text-slate-400 whitespace-nowrap align-top">
           <span className="text-slate-300 text-[10px]">{date} </span>{time}
         </td>
-        {/* Level */}
         <td className="px-2 py-2 whitespace-nowrap align-top">
           <LevelBadge level={level} />
         </td>
-        {/* Component */}
         <td className="px-2 py-2 text-slate-500 whitespace-nowrap align-top max-w-[180px] truncate font-mono text-[11px]">
           {highlight(component)}
         </td>
-        {/* Message */}
         <td className="px-2 py-2 text-slate-800 align-top">
           <span className="line-clamp-2 break-all">{highlight(message)}</span>
           {userId && (
             <span className="text-slate-400 font-mono text-[10px] block mt-0.5">{highlight(userId)}</span>
           )}
         </td>
-        {/* Transaction ID */}
-        <td className="px-2 py-2 text-slate-400 font-mono text-[10px] whitespace-nowrap align-top max-w-[140px] truncate">
-          {transactionId ? highlight(transactionId.slice(0, 16) + (transactionId.length > 16 ? "…" : "")) : ""}
+        <td className="px-2 py-2 whitespace-nowrap align-top">
+          {transactionId ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onTransactionClick(transactionId, entry.timestamp); }}
+              className="font-mono text-[10px] text-sky-600 hover:text-sky-800 hover:underline truncate max-w-[130px] block"
+              title={transactionId}
+            >
+              {transactionId.slice(0, 16)}{transactionId.length > 16 ? "…" : ""}
+            </button>
+          ) : null}
         </td>
-        {/* Expand indicator */}
         <td className="px-2 py-2 text-slate-300 align-top text-center">
           <span className={cn("inline-block transition-transform text-[10px]", expanded && "rotate-90")}>▶</span>
         </td>
@@ -185,24 +217,178 @@ function EntryRow({
         <tr className="bg-slate-950 border-b border-slate-700">
           <td colSpan={6} className="p-0">
             <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto whitespace-pre-wrap break-all max-h-96 overflow-y-auto leading-5">
-              {rawJson}
+              {JSON.stringify(entry.payload, null, 2)}
             </pre>
           </td>
         </tr>
       )}
-    </>
+    </Fragment>
   );
 }
 
-// ── Datetime-local helpers ────────────────────────────────────────────────────
+// ── Transaction drill-down modal ──────────────────────────────────────────────
 
-function toDatetimeLocal(iso: string): string {
-  // "2024-01-01T12:00:00.000Z" → "2024-01-01T12:00"
-  return iso.slice(0, 16);
-}
+function TransactionDrilldown({
+  transactionId,
+  timestamp,
+  env,
+  availableSources,
+  onClose,
+}: {
+  transactionId: string;
+  timestamp: string;
+  env: string;
+  availableSources: string[];
+  onClose: () => void;
+}) {
+  const [entries, setEntries] = useState<(LogEntry & { source: string })[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
-function fromDatetimeLocal(val: string): string {
-  return val ? new Date(val).toISOString() : "";
+  const sources = TRANSACTION_SOURCES.filter((s) => availableSources.includes(s));
+
+  useEffect(() => {
+    if (sources.length === 0) {
+      setError("No relevant log sources available for this environment.");
+      setLoading(false);
+      return;
+    }
+
+    const center = new Date(timestamp).getTime();
+    const beginTime = new Date(center - 5 * 60 * 1000).toISOString();
+    const endTime = new Date(center + 5 * 60 * 1000).toISOString();
+
+    Promise.all(
+      sources.map((src) =>
+        fetch("/api/logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ env, source: src, beginTime, endTime, pageSize: 100 }),
+        })
+          .then((r) => r.json())
+          .then((data): (LogEntry & { source: string })[] => {
+            if (data.error || !Array.isArray(data.result)) return [];
+            return (data.result as LogEntry[])
+              .filter((e) => getTransactionId(e.payload) === transactionId)
+              .map((e) => ({ ...e, source: src }));
+          })
+          .catch(() => [] as (LogEntry & { source: string })[])
+      )
+    ).then((results) => {
+      const merged = results
+        .flat()
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      setEntries(merged);
+      setLoading(false);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transactionId]);
+
+  const sourcesQueried = sources.length;
+  const sourcesWithHits = new Set(entries.map((e) => e.source)).size;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
+      <div
+        className="bg-white rounded-lg border border-slate-200 shadow-xl w-full max-w-4xl max-h-[80vh] flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-sm font-semibold text-slate-700 shrink-0">Transaction Trace</span>
+            <code className="text-xs font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded truncate">
+              {transactionId}
+            </code>
+          </div>
+          <button
+            onClick={onClose}
+            className="ml-4 shrink-0 text-slate-400 hover:text-slate-700 text-lg leading-none"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <div className="p-8 text-center text-sm text-slate-400">
+              Querying {sourcesQueried} source{sourcesQueried !== 1 ? "s" : ""}…
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center text-sm text-red-500">{error}</div>
+          ) : entries.length === 0 ? (
+            <div className="p-8 text-center text-sm text-slate-400">
+              No entries found for this transaction ID in the ±5 min window.
+            </div>
+          ) : (
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-left sticky top-0">
+                  <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
+                  <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
+                  <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
+                  <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
+                  <th className="w-6" />
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((entry, i) => {
+                  const level = getLevel(entry.payload);
+                  const message = getMessage(entry.payload);
+                  const { date, time } = formatTs(entry.timestamp);
+                  return (
+                    <Fragment key={i}>
+                      <tr
+                        onClick={() => setExpandedIdx(expandedIdx === i ? null : i)}
+                        className={cn(
+                          "cursor-pointer border-b border-slate-100 hover:bg-slate-50 transition-colors",
+                          expandedIdx === i && "bg-slate-50"
+                        )}
+                      >
+                        <td className="px-3 py-2 font-mono text-slate-400 whitespace-nowrap">
+                          <span className="text-slate-300 text-[10px]">{date} </span>{time}
+                        </td>
+                        <td className="px-2 py-2 whitespace-nowrap">
+                          <SourceBadge source={entry.source} />
+                        </td>
+                        <td className="px-2 py-2 whitespace-nowrap">
+                          <LevelBadge level={level} />
+                        </td>
+                        <td className="px-2 py-2 text-slate-800 break-all">{message}</td>
+                        <td className="px-2 py-2 text-slate-300 text-center">
+                          <span className={cn("inline-block transition-transform text-[10px]", expandedIdx === i && "rotate-90")}>▶</span>
+                        </td>
+                      </tr>
+                      {expandedIdx === i && (
+                        <tr className="bg-slate-950 border-b border-slate-700">
+                          <td colSpan={5} className="p-0">
+                            <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto whitespace-pre-wrap break-all max-h-64 overflow-y-auto leading-5">
+                              {JSON.stringify(entry.payload, null, 2)}
+                            </pre>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Footer */}
+        {!loading && !error && (
+          <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0 text-xs text-slate-400">
+            {entries.length} {entries.length === 1 ? "entry" : "entries"} across{" "}
+            {sourcesWithHits} of {sourcesQueried} sources
+            {" · "}±5 min around {new Date(timestamp).toLocaleTimeString()}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -226,9 +412,20 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [fetched, setFetched] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const [search, setSearch] = useState("");
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+
+  // ── Live tail ──
+  const [tailing, setTailing] = useState(false);
+  const [tailSecs, setTailSecs] = useState<TailSecs>(10);
+  const tailIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fetchLogsRef = useRef<(append?: boolean) => void>(() => {});
+  const tableEndRef = useRef<HTMLDivElement>(null);
+
+  // ── Transaction drill-down ──
+  const [drilldown, setDrilldown] = useState<{ txId: string; timestamp: string } | null>(null);
 
   // ── Fetch sources when env changes ──
   useEffect(() => {
@@ -240,6 +437,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
     setEntries([]);
     setCookie(null);
     setFetched(false);
+    setTailing(false);
 
     fetch(`/api/logs/sources?env=${encodeURIComponent(env)}`)
       .then((r) => r.json())
@@ -256,21 +454,15 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
   // ── Time range ──
   function getRange(): { beginTime: string; endTime: string } {
     if (preset === "custom") {
-      return {
-        beginTime: fromDatetimeLocal(customBegin),
-        endTime: fromDatetimeLocal(customEnd),
-      };
+      return { beginTime: fromDatetimeLocal(customBegin), endTime: fromDatetimeLocal(customEnd) };
     }
     const ms = PRESETS.find((p) => p.value === preset)!.ms;
     const now = new Date();
-    return {
-      beginTime: new Date(now.getTime() - ms).toISOString(),
-      endTime: now.toISOString(),
-    };
+    return { beginTime: new Date(now.getTime() - ms).toISOString(), endTime: now.toISOString() };
   }
 
   // ── Fetch logs ──
-  const fetchLogs = useCallback(async (append = false, overrideCookie?: string | null) => {
+  const fetchLogs = useCallback(async (append = false) => {
     if (!env || !source) return;
     const { beginTime, endTime } = getRange();
 
@@ -282,12 +474,8 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          env,
-          source,
-          beginTime,
-          endTime,
-          pageSize: 50,
-          cookie: append ? (overrideCookie ?? cookie) : undefined,
+          env, source, beginTime, endTime, pageSize: 50,
+          cookie: append ? cookie : undefined,
         }),
       });
       const data = await res.json();
@@ -297,7 +485,8 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
       setEntries((prev) => append ? [...prev, ...newEntries] : newEntries);
       setCookie(data.pagedResultsCookie ?? null);
       setFetched(true);
-      setExpandedIdx(null);
+      setLastUpdated(new Date());
+      if (!append) setExpandedIdx(null);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -306,6 +495,39 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [env, source, preset, customBegin, customEnd, cookie]);
+
+  // Keep ref up-to-date so tail interval always calls latest version
+  useEffect(() => { fetchLogsRef.current = fetchLogs; }, [fetchLogs]);
+
+  // ── Auto-scroll when tailing ──
+  useEffect(() => {
+    if (tailing && entries.length > 0) {
+      tableEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [entries, tailing]);
+
+  // ── Tail interval ──
+  useEffect(() => {
+    if (!tailing) return;
+    const id = setInterval(() => fetchLogsRef.current(false), tailSecs * 1000);
+    tailIntervalRef.current = id;
+    return () => clearInterval(id);
+  }, [tailing, tailSecs]);
+
+  // ── Stop tail on unmount ──
+  useEffect(() => () => {
+    if (tailIntervalRef.current) clearInterval(tailIntervalRef.current);
+  }, []);
+
+  const stopTail = () => {
+    setTailing(false);
+    if (tailIntervalRef.current) { clearInterval(tailIntervalRef.current); tailIntervalRef.current = null; }
+  };
+
+  const startTail = () => {
+    setTailing(true);
+    fetchLogsRef.current(false); // immediate first fetch
+  };
 
   // ── Filtered entries ──
   const filtered = search
@@ -324,8 +546,8 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
             <label className="text-xs font-medium text-slate-600">Environment</label>
             <select
               value={env}
-              onChange={(e) => setEnv(e.target.value)}
-              disabled={loading}
+              onChange={(e) => { stopTail(); setEnv(e.target.value); }}
+              disabled={loading || tailing}
               className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
             >
               {environments.map((e) => (
@@ -340,8 +562,8 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
             <label className="text-xs font-medium text-slate-600">Log Source</label>
             <select
               value={source}
-              onChange={(e) => setSource(e.target.value)}
-              disabled={loading || sourcesLoading || sources.length === 0}
+              onChange={(e) => { stopTail(); setSource(e.target.value); }}
+              disabled={loading || tailing || sourcesLoading || sources.length === 0}
               className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 min-w-[180px]"
             >
               {sourcesLoading && <option>Loading sources…</option>}
@@ -364,9 +586,10 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
             <button
               key={p.value}
               type="button"
-              onClick={() => setPreset(p.value)}
+              onClick={() => { stopTail(); setPreset(p.value); }}
+              disabled={tailing}
               className={cn(
-                "px-2.5 py-1 text-xs rounded border transition-colors",
+                "px-2.5 py-1 text-xs rounded border transition-colors disabled:opacity-40",
                 preset === p.value
                   ? "bg-sky-600 border-sky-600 text-white"
                   : "border-slate-300 text-slate-600 hover:bg-slate-50"
@@ -377,7 +600,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
           ))}
         </div>
 
-        {preset === "custom" && (
+        {preset === "custom" && !tailing && (
           <div className="flex flex-wrap items-center gap-3">
             <div className="space-y-1">
               <label className="text-xs font-medium text-slate-600">From</label>
@@ -400,28 +623,69 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
           </div>
         )}
 
-        {/* Row 3: fetch button + errors */}
+        {/* Row 3: fetch + tail controls */}
         <div className="flex items-center gap-3 flex-wrap">
-          <button
-            type="button"
-            onClick={() => fetchLogs(false)}
-            disabled={loading || !source || !!sourcesError}
-            className="px-4 py-1.5 text-sm font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
-          >
-            {loading ? "Fetching…" : "Fetch Logs"}
-          </button>
-          {fetched && !loading && (
+          {!tailing ? (
+            <>
+              <button
+                type="button"
+                onClick={() => fetchLogs(false)}
+                disabled={loading || !source || !!sourcesError}
+                className="px-4 py-1.5 text-sm font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
+              >
+                {loading ? "Fetching…" : "Fetch Logs"}
+              </button>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={startTail}
+                  disabled={loading || !source || !!sourcesError}
+                  className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
+                >
+                  Tail
+                </button>
+                {([5, 10, 30] as TailSecs[]).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setTailSecs(s)}
+                    className={cn(
+                      "px-2 py-1 text-xs rounded border transition-colors",
+                      tailSecs === s
+                        ? "bg-slate-700 border-slate-700 text-white"
+                        : "border-slate-300 text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    {s}s
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={stopTail}
+                className="px-4 py-1.5 text-sm font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+              >
+                Stop Tail
+              </button>
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                {loading ? "Fetching…" : lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Starting…"}
+              </div>
+            </>
+          )}
+
+          {fetched && !loading && !tailing && (
             <span className="text-xs text-slate-400">
-              {entries.length} {entries.length === 1 ? "entry" : "entries"} retrieved
+              {entries.length} {entries.length === 1 ? "entry" : "entries"}
               {filtered.length !== entries.length && ` · ${filtered.length} matching`}
             </span>
           )}
-          {sourcesError && (
-            <span className="text-xs text-red-500">{sourcesError}</span>
-          )}
-          {error && (
-            <span className="text-xs text-red-500">{error}</span>
-          )}
+          {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
+          {error && <span className="text-xs text-red-500">{error}</span>}
         </div>
       </div>
 
@@ -438,11 +702,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
               className="flex-1 text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
             {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="text-xs text-slate-400 hover:text-slate-600"
-              >
+              <button type="button" onClick={() => setSearch("")} className="text-xs text-slate-400 hover:text-slate-600">
                 Clear
               </button>
             )}
@@ -477,15 +737,17 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
                       expanded={expandedIdx === i}
                       onToggle={() => setExpandedIdx(expandedIdx === i ? null : i)}
                       searchTerm={search}
+                      onTransactionClick={(txId, ts) => setDrilldown({ txId, timestamp: ts })}
                     />
                   ))}
                 </tbody>
               </table>
+              <div ref={tableEndRef} />
             </div>
           )}
 
-          {/* Load more */}
-          {cookie && !search && (
+          {/* Load more (not shown while tailing) */}
+          {cookie && !search && !tailing && (
             <div className="flex items-center justify-center px-4 py-3 border-t border-slate-100 bg-slate-50/50">
               <button
                 type="button"
@@ -498,6 +760,17 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
             </div>
           )}
         </div>
+      )}
+
+      {/* ── Transaction drill-down modal ── */}
+      {drilldown && (
+        <TransactionDrilldown
+          transactionId={drilldown.txId}
+          timestamp={drilldown.timestamp}
+          env={env}
+          availableSources={sources}
+          onClose={() => setDrilldown(null)}
+        />
       )}
     </div>
   );
