@@ -4,14 +4,13 @@ import { parseEnvFile } from "@/lib/env-parser";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { env, source, beginTime, endTime, pageSize = 50, cookie, loggingLevel } = body as {
+  const { env, source, beginTime, endTime, pageSize = 50, cookie } = body as {
     env: string;
     source: string;
     beginTime: string;
     endTime: string;
     pageSize?: number;
     cookie?: string;
-    loggingLevel?: string;
   };
 
   if (!env || !source || !beginTime) {
@@ -33,7 +32,6 @@ export async function POST(req: NextRequest) {
     ...(endTime ? { endTime } : {}),
     _pageSize: String(pageSize),
     ...(cookie ? { _pagedResultsCookie: cookie } : {}),
-    ...(loggingLevel ? { loggingLevel } : {}),
   });
 
   try {

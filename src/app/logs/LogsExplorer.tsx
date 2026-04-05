@@ -21,17 +21,25 @@ interface LogEntry {
 type Preset = "15m" | "1h" | "6h" | "24h" | "custom";
 type TailSecs = 5 | 10 | 30;
 
-// AIC loggingLevel values and what they include
-// "INFO" = SEVERE+ERROR+FATAL+WARNING+WARN+CONFIG+INFO+INFORMATION (matches frodo -l 2)
-// "DEBUG" = all of the above + DEBUG
-// "ALL" = all including TRACE
-const LOG_LEVELS = [
+// Client-side level filter: severity order (higher index = less severe)
+const LEVEL_ORDER = ["FATAL", "ERROR", "WARN", "WARNING", "INFO", "INFORMATION", "CONFIG", "DEBUG", "TRACE"];
+
+const LEVEL_FILTERS = [
   { value: "ERROR", label: "ERROR+" },
-  { value: "WARNING", label: "WARN+" },
-  { value: "INFO", label: "INFO+" },
+  { value: "WARN",  label: "WARN+" },
+  { value: "INFO",  label: "INFO+" },
   { value: "DEBUG", label: "DEBUG+" },
-  { value: "ALL", label: "ALL" },
+  { value: "ALL",   label: "ALL" },
 ];
+
+function levelPassesFilter(level: string, minLevel: string): boolean {
+  if (minLevel === "ALL") return true;
+  const idx = LEVEL_ORDER.indexOf(level.toUpperCase());
+  const minIdx = LEVEL_ORDER.indexOf(minLevel.toUpperCase());
+  if (idx === -1) return true; // unknown level — show it
+  if (minIdx === -1) return true;
+  return idx <= minIdx;
+}
 
 const PRESETS: { label: string; value: Preset; ms: number }[] = [
   { label: "15 min", value: "15m", ms: 15 * 60 * 1000 },
@@ -259,14 +267,12 @@ function TransactionDrilldown({
   timestamp,
   env,
   availableSources,
-  loggingLevel,
   onClose,
 }: {
   transactionId: string;
   timestamp: string;
   env: string;
   availableSources: string[];
-  loggingLevel: string;
   onClose: () => void;
 }) {
   const [entries, setEntries] = useState<(LogEntry & { source: string })[]>([]);
@@ -292,7 +298,7 @@ function TransactionDrilldown({
         fetch("/api/logs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ env, source: src, beginTime, endTime, pageSize: 100, loggingLevel }),
+          body: JSON.stringify({ env, source: src, beginTime, endTime, pageSize: 100 }),
         })
           .then((r) => r.json())
           .then((data): (LogEntry & { source: string })[] => {
@@ -430,7 +436,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
   const [sourcesError, setSourcesError] = useState("");
   const [source, setSource] = useState("");
 
-  const [loggingLevel, setLoggingLevel] = useState("INFO");
+  const [levelFilter, setLevelFilter] = useState("INFO");
 
   const [preset, setPreset] = useState<Preset>("1h");
   const [customBegin, setCustomBegin] = useState(() => toDatetimeLocal(new Date(Date.now() - 3600000).toISOString()));
@@ -506,7 +512,6 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
         body: JSON.stringify({
           env, source, beginTime, endTime, pageSize: 50,
           cookie: append ? cookie : undefined,
-          loggingLevel,
         }),
       });
       const data = await res.json();
@@ -525,7 +530,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
       setLoadingMore(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [env, source, preset, customBegin, customEnd, cookie, loggingLevel]);
+  }, [env, source, preset, customBegin, customEnd, cookie]);
 
   // Keep ref up-to-date so tail interval always calls latest version
   useEffect(() => { fetchLogsRef.current = fetchLogs; }, [fetchLogs]);
@@ -561,9 +566,13 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
   };
 
   // ── Filtered entries ──
+  const levelFiltered = levelFilter === "ALL"
+    ? entries
+    : entries.filter((e) => levelPassesFilter(getLevel(e.payload), levelFilter));
+
   const filtered = search
-    ? entries.filter((e) => JSON.stringify(e).toLowerCase().includes(search.toLowerCase()))
-    : entries;
+    ? levelFiltered.filter((e) => JSON.stringify(e).toLowerCase().includes(search.toLowerCase()))
+    : levelFiltered;
 
   const selectedEnv = environments.find((e) => e.name === env);
 
@@ -604,14 +613,13 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600">Log Level</label>
+            <label className="text-xs font-medium text-slate-600">Min Level</label>
             <select
-              value={loggingLevel}
-              onChange={(e) => { stopTail(); setLoggingLevel(e.target.value); }}
-              disabled={loading || tailing}
-              className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value)}
+              className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
-              {LOG_LEVELS.map((l) => (
+              {LEVEL_FILTERS.map((l) => (
                 <option key={l.value} value={l.value}>{l.label}</option>
               ))}
             </select>
@@ -725,8 +733,8 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
 
           {fetched && !loading && !tailing && (
             <span className="text-xs text-slate-400">
-              {entries.length} {entries.length === 1 ? "entry" : "entries"}
-              {filtered.length !== entries.length && ` · ${filtered.length} matching`}
+              {filtered.length}{filtered.length !== entries.length && `/${entries.length}`}{" "}
+              {filtered.length === 1 ? "entry" : "entries"}
             </span>
           )}
           {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
@@ -815,7 +823,6 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
           timestamp={drilldown.timestamp}
           env={env}
           availableSources={sources}
-          loggingLevel={loggingLevel}
           onClose={() => setDrilldown(null)}
         />
       )}
