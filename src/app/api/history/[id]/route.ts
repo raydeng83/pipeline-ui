@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readDetail } from "@/lib/history";
+import { readDetail, deleteHistoryRecord } from "@/lib/history";
 
 export async function GET(
   _req: NextRequest,
@@ -11,4 +11,14 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   return NextResponse.json(detail);
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const ok = deleteHistoryRecord(id);
+  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ ok: true });
 }

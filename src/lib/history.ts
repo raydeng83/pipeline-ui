@@ -7,6 +7,7 @@ const ENVIRONMENTS_DIR = path.join(process.cwd(), "environments");
 const HISTORY_PATH = path.join(ENVIRONMENTS_DIR, "history.json");
 const HISTORY_DIR = path.join(ENVIRONMENTS_DIR, "history");
 const MAX_ENTRIES = 200;
+const LOG_SEARCH_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ export interface LogEntry {
 /** Lightweight index record — stored in history.json */
 export interface HistoryRecord {
   id: string;
-  type: "pull" | "push" | "compare";
+  type: "pull" | "push" | "compare" | "log-search";
   environment: string;
   /** Compare: source endpoint */
   source?: CompareEndpoint;
@@ -44,6 +45,14 @@ export interface HistoryRecord {
   completedAt: string;
   duration: number;
   summary: string;
+  /** Log search: source name */
+  logSource?: string;
+  /** Log search: mode used */
+  logMode?: "search" | "tail" | "transaction";
+  /** Log search: time preset */
+  logPreset?: string;
+  /** Log search: total log entries */
+  logEntryCount?: number;
 }
 
 /** Full detail — stored in history/{id}.json */
@@ -51,6 +60,8 @@ export interface HistoryDetail {
   scopeDetails?: Record<string, ScopeDetail>;
   compareReport?: CompareReport;
   logs?: LogEntry[];
+  /** Log search: stored log entries from Ping API */
+  logSearchEntries?: unknown[];
 }
 
 // ── Index read / write ───────────────────────────────────────────────────────
@@ -74,14 +85,23 @@ export function appendHistory(record: HistoryRecord, detail?: HistoryDetail): vo
   const records = readHistory();
   records.unshift(record);
 
-  // Collect IDs that will be pruned
-  const pruned = records.length > MAX_ENTRIES ? records.slice(MAX_ENTRIES) : [];
-  if (records.length > MAX_ENTRIES) records.length = MAX_ENTRIES;
+  // Cleanup: remove log-search records older than 7 days
+  const cutoff = Date.now() - LOG_SEARCH_MAX_AGE_MS;
+  const expired = records.filter(
+    (r) => r.type === "log-search" && new Date(r.completedAt).getTime() < cutoff
+  );
+  const active = records.filter(
+    (r) => !(r.type === "log-search" && new Date(r.completedAt).getTime() < cutoff)
+  );
 
-  fs.writeFileSync(HISTORY_PATH, JSON.stringify(records, null, 2));
+  // Apply 200-entry cap on remaining records
+  const pruned = active.length > MAX_ENTRIES ? active.slice(MAX_ENTRIES) : [];
+  if (active.length > MAX_ENTRIES) active.length = MAX_ENTRIES;
 
-  // Cleanup pruned detail files
-  for (const r of pruned) {
+  fs.writeFileSync(HISTORY_PATH, JSON.stringify(active, null, 2));
+
+  // Delete detail files for expired + pruned records
+  for (const r of [...expired, ...pruned]) {
     deleteDetail(r.id);
   }
 }
@@ -114,6 +134,17 @@ function deleteDetail(id: string): void {
   if (fs.existsSync(p)) {
     try { fs.unlinkSync(p); } catch { /* ignore */ }
   }
+}
+
+/** Remove a record from the index and delete its detail file. */
+export function deleteHistoryRecord(id: string): boolean {
+  const records = readHistory();
+  const idx = records.findIndex((r) => r.id === id);
+  if (idx === -1) return false;
+  records.splice(idx, 1);
+  fs.writeFileSync(HISTORY_PATH, JSON.stringify(records, null, 2));
+  deleteDetail(id);
+  return true;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

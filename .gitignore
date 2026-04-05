@@ -37,6 +37,7 @@ yarn-error.log*
 environments/history.json
 environments/history/
 
+
 # log API credentials (sensitive)
 environments/*/log-api.json
 

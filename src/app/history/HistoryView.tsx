@@ -40,7 +40,7 @@ function formatTimestamp(iso: string): string {
 
 // ── Filter bar ───────────────────────────────────────────────────────────────
 
-type TypeFilter = "all" | "pull" | "push" | "compare";
+type TypeFilter = "all" | "pull" | "push" | "compare" | "log-search";
 
 function FilterBar({
   environments,
@@ -71,7 +71,7 @@ function FilterBar({
       </select>
 
       <div className="flex rounded-md border border-slate-300 overflow-hidden">
-        {(["all", "pull", "push", "compare"] as TypeFilter[]).map((t) => (
+        {(["all", "pull", "push", "compare", "log-search"] as TypeFilter[]).map((t) => (
           <button
             key={t}
             onClick={() => onTypeChange(t)}
@@ -82,7 +82,7 @@ function FilterBar({
                 : "bg-white text-slate-600 hover:bg-slate-50"
             )}
           >
-            {t === "all" ? "All" : t.charAt(0).toUpperCase() + t.slice(1)}
+            {t === "all" ? "All" : t === "log-search" ? "Log Search" : t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
         ))}
       </div>
@@ -164,6 +164,55 @@ function CompareDetailPanel({ detail }: { detail: HistoryDetail }) {
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+// ── Log search detail panel ──────────────────────────────────────────────────
+
+function LogSearchDetailPanel({ record, detail }: { record: HistoryRecord; detail: HistoryDetail }) {
+  const entries = detail.logSearchEntries ?? [];
+  const [showCount, setShowCount] = useState(50);
+
+  return (
+    <div className="space-y-3">
+      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Log Search Results</div>
+      <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+        {record.logSource && <span>Source: <span className="font-mono text-slate-700">{record.logSource}</span></span>}
+        {record.logMode && <span>Mode: <span className="font-medium text-slate-700">{record.logMode}</span></span>}
+        {record.logPreset && <span>Range: <span className="font-medium text-slate-700">{record.logPreset}</span></span>}
+        <span>{(record.logEntryCount ?? entries.length).toLocaleString()} entries</span>
+      </div>
+      {entries.length > 0 ? (
+        <div className="font-mono text-xs bg-slate-900 rounded p-3 max-h-80 overflow-y-auto space-y-0.5">
+          {(entries as Array<{ timestamp?: string; payload?: Record<string, unknown> | string; source?: string }>).slice(0, showCount).map((entry, i) => {
+            const ts = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString(undefined, { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
+            const msg = typeof entry.payload === "string"
+              ? entry.payload
+              : typeof entry.payload === "object" && entry.payload
+              ? (entry.payload.message as string) ?? (entry.payload.eventName as string) ?? JSON.stringify(entry.payload).slice(0, 120)
+              : "";
+            return (
+              <div key={i} className="text-slate-300 whitespace-pre-wrap break-all leading-5">
+                <span className="text-slate-500">{ts}</span>
+                {entry.source && <span className="text-purple-400 ml-2">{entry.source}</span>}
+                <span className="ml-2">{msg}</span>
+              </div>
+            );
+          })}
+          {entries.length > showCount && (
+            <button
+              type="button"
+              onClick={() => setShowCount((c) => c + 100)}
+              className="text-sky-400 hover:text-sky-300 mt-2"
+            >
+              Show more ({entries.length - showCount} remaining)
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="text-xs text-slate-400">No entries stored.</div>
       )}
     </div>
   );
@@ -333,8 +382,11 @@ function ExpandedDetail({ record }: { record: HistoryRecord }) {
       {/* Compare report */}
       {record.type === "compare" && <CompareDetailPanel detail={detail} />}
 
-      {/* Logs */}
-      <LogPanel detail={detail} />
+      {/* Log search results */}
+      {record.type === "log-search" && <LogSearchDetailPanel record={record} detail={detail} />}
+
+      {/* Operation logs */}
+      {record.type !== "log-search" && <LogPanel detail={detail} />}
     </div>
   );
 }
@@ -345,6 +397,7 @@ const TYPE_BADGE: Record<string, { bg: string; label: string }> = {
   pull: { bg: "bg-sky-100 text-sky-700", label: "Pull" },
   push: { bg: "bg-emerald-100 text-emerald-700", label: "Push" },
   compare: { bg: "bg-violet-100 text-violet-700", label: "Compare" },
+  "log-search": { bg: "bg-amber-100 text-amber-700", label: "Log Search" },
 };
 
 function RecordRow({
