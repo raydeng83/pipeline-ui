@@ -186,6 +186,9 @@ function EntryRow({
           <span className="text-slate-300 text-[10px]">{date} </span>{time}
         </td>
         <td className="px-2 py-2 whitespace-nowrap align-top">
+          <SourceBadge source={source} />
+        </td>
+        <td className="px-2 py-2 whitespace-nowrap align-top">
           <LevelBadge level={level} />
         </td>
         <td className="px-2 py-2 text-slate-500 whitespace-nowrap align-top max-w-[180px] truncate font-mono text-[11px]">
@@ -215,7 +218,7 @@ function EntryRow({
       </tr>
       {expanded && (
         <tr className="bg-slate-950 border-b border-slate-700">
-          <td colSpan={6} className="p-0">
+          <td colSpan={7} className="p-0">
             <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto whitespace-pre-wrap break-all max-h-96 overflow-y-auto leading-5">
               {JSON.stringify(entry.payload, null, 2)}
             </pre>
@@ -721,6 +724,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-left">
                     <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
+                    <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
                     <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
                     <th className="px-2 py-2 font-semibold text-slate-500">Component</th>
                     <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
