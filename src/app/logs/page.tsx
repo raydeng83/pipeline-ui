@@ -1,5 +1,5 @@
 import { getEnvironments, getLogApiCredentials } from "@/lib/fr-config";
-import { LogsExplorer } from "./LogsExplorer";
+import { LogsExplorerTabs } from "./LogsExplorer";
 
 export default function LogsPage() {
   const environments = getEnvironments().map((env) => ({
@@ -15,7 +15,7 @@ export default function LogsPage() {
           Query monitoring logs from Ping Advanced Identity Cloud tenants.
         </p>
       </div>
-      <LogsExplorer environments={environments} />
+      <LogsExplorerTabs environments={environments} />
     </div>
   );
 }

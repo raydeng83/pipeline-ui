@@ -427,7 +427,13 @@ function TransactionDrilldown({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }) {
+export function LogsExplorer({
+  environments,
+  onLabelChange,
+}: {
+  environments: EnvWithLogApi[];
+  onLabelChange?: (label: string) => void;
+}) {
   const defaultEnv = environments.find((e) => e.hasLogApi) ?? environments[0];
 
   const [env, setEnv] = useState(defaultEnv?.name ?? "");
@@ -463,6 +469,12 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
 
   // ── Transaction drill-down ──
   const [drilldown, setDrilldown] = useState<{ txId: string; timestamp: string } | null>(null);
+
+  // ── Sync tab label ──
+  useEffect(() => {
+    onLabelChange?.(source ? source : env);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [env, source]);
 
   // ── Fetch sources when env changes ──
   useEffect(() => {
@@ -832,6 +844,95 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
           onClose={() => setDrilldown(null)}
         />
       )}
+    </div>
+  );
+}
+
+// ── Tabs wrapper ──────────────────────────────────────────────────────────────
+
+interface TabDef {
+  id: number;
+  label: string;
+}
+
+let _nextTabId = 2;
+
+export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi[] }) {
+  const [tabs, setTabs] = useState<TabDef[]>([{ id: 1, label: "Tab 1" }]);
+  const [activeId, setActiveId] = useState(1);
+
+  function addTab() {
+    const id = _nextTabId++;
+    setTabs((prev) => [...prev, { id, label: `Tab ${id}` }]);
+    setActiveId(id);
+  }
+
+  function closeTab(id: number) {
+    setTabs((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      if (activeId === id) {
+        const idx = prev.findIndex((t) => t.id === id);
+        const fallback = prev[idx + 1] ?? prev[idx - 1];
+        if (fallback) setActiveId(fallback.id);
+      }
+      return next;
+    });
+  }
+
+  function updateLabel(id: number, label: string) {
+    setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, label } : t)));
+  }
+
+  return (
+    <div className="space-y-0">
+      {/* Tab bar */}
+      <div className="flex items-end gap-0 border-b border-slate-200">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 text-xs border-b-2 cursor-pointer select-none transition-colors",
+              tab.id === activeId
+                ? "border-sky-600 text-slate-900 font-medium bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+            )}
+          >
+            <span onClick={() => setActiveId(tab.id)} className="max-w-[160px] truncate">
+              {tab.label}
+            </span>
+            {tabs.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
+                className="text-slate-300 hover:text-slate-500 leading-none text-sm ml-0.5"
+                title="Close tab"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addTab}
+          className="px-3 py-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 text-base leading-none transition-colors"
+          title="New tab"
+        >
+          +
+        </button>
+      </div>
+
+      {/* Tab panels — all mounted to preserve state */}
+      {tabs.map((tab) => (
+        <div key={tab.id} className={tab.id === activeId ? "" : "hidden"}>
+          <div className="pt-4">
+            <LogsExplorer
+              environments={environments}
+              onLabelChange={(label) => updateLabel(tab.id, label)}
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
