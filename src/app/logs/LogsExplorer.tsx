@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, Fragment, startTransition } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment, startTransition, useDeferredValue } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -472,6 +472,9 @@ export function LogsExplorer({
   // ── Transaction drill-down ──
   const [drilldown, setDrilldown] = useState<{ txId: string; timestamp: string } | null>(null);
 
+  // Defer table rendering so tab switches are instant even with large entry sets
+  const deferredIsActive = useDeferredValue(isActive);
+
   // ── Sync tab label ──
   useEffect(() => {
     onLabelChange?.(source ? source : env);
@@ -552,6 +555,8 @@ export function LogsExplorer({
           if (!shouldAppend) setExpandedIdx(null);
         });
 
+        // Unblock the UI after first page — remaining pages stream in the background
+        if (isFirstPage) setLoading(false);
         isFirstPage = false;
         if (isTail) break; // tail never chains pages
       } while (nextCookie);
@@ -803,8 +808,8 @@ export function LogsExplorer({
 
           {/* Scrollable log window — renders table only when tab is active */}
           <div ref={scrollContainerRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: "calc(100vh - 360px)" }}>
-            {!isActive ? (
-              // Tab is hidden — render nothing so React skips reconciling the table
+            {!deferredIsActive ? (
+              // Tab inactive or switching — skip table so React can commit the switch instantly
               null
             ) : filtered.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400">
