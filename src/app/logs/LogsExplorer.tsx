@@ -453,7 +453,6 @@ export function LogsExplorer({
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [cookie, setCookie] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [fetched, setFetched] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -514,39 +513,52 @@ export function LogsExplorer({
   }
 
   // ── Fetch logs ──
+  // append=false → fresh fetch (replace entries), then auto-chain remaining pages
+  // append=true  → start from current cookie cursor and append (used by tail interval)
   const fetchLogs = useCallback(async (append = false) => {
     if (!env || !source) return;
-
-    append ? setLoadingMore(true) : setLoading(true);
+    setLoading(true);
     setError("");
 
     try {
-      const body = tailingRef.current
-        ? { env, source, tail: true, cookie: append ? cookie : undefined }
-        : (() => {
-            const { beginTime, endTime } = getRange();
-            return { env, source, beginTime, endTime, pageSize: 50, cookie: append ? cookie : undefined };
-          })();
+      const isTail = tailingRef.current;
+      let nextCookie: string | null = append ? (cookie ?? null) : null;
+      let isFirstPage = true;
 
-      const res = await fetch("/api/logs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (data.error) { setError(data.error); return; }
+      do {
+        const body = isTail
+          ? { env, source, tail: true, cookie: nextCookie ?? undefined }
+          : (() => {
+              const { beginTime, endTime } = getRange();
+              return { env, source, beginTime, endTime, pageSize: 50, cookie: nextCookie ?? undefined };
+            })();
 
-      const newEntries: LogEntry[] = Array.isArray(data.result) ? data.result : [];
-      setEntries((prev) => append ? [...prev, ...newEntries] : newEntries);
-      setCookie(data.pagedResultsCookie ?? null);
-      setFetched(true);
-      setLastUpdated(new Date());
-      if (!append) setExpandedIdx(null);
+        const res = await fetch("/api/logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.error) { setError(data.error); return; }
+
+        const newEntries: LogEntry[] = Array.isArray(data.result) ? data.result : [];
+        nextCookie = data.pagedResultsCookie ?? null;
+
+        const shouldAppend = append || !isFirstPage;
+        setEntries((prev) => shouldAppend ? [...prev, ...newEntries] : newEntries);
+        setFetched(true);
+        setLastUpdated(new Date());
+        if (!shouldAppend) setExpandedIdx(null);
+
+        isFirstPage = false;
+        if (isTail) break; // tail never chains pages
+      } while (nextCookie);
+
+      setCookie(nextCookie);
     } catch (e) {
       setError(String(e));
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [env, source, preset, customBegin, customEnd, cookie]);
@@ -565,7 +577,7 @@ export function LogsExplorer({
   // ── Tail interval ──
   useEffect(() => {
     if (!tailing) return;
-    const id = setInterval(() => fetchLogsRef.current(false), tailSecs * 1000);
+    const id = setInterval(() => fetchLogsRef.current(true), tailSecs * 1000);
     tailIntervalRef.current = id;
     return () => clearInterval(id);
   }, [tailing, tailSecs]);
@@ -753,10 +765,11 @@ export function LogsExplorer({
             </>
           )}
 
-          {fetched && !loading && !tailing && (
+          {fetched && (
             <span className="text-xs text-slate-400">
               {filtered.length}{filtered.length !== entries.length && `/${entries.length}`}{" "}
-              {filtered.length === 1 ? "entry" : "entries"}
+              {entries.length === 1 ? "entry" : "entries"}
+              {loading && !tailing && " · loading…"}
             </span>
           )}
           {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
@@ -828,19 +841,6 @@ export function LogsExplorer({
             )}
           </div>
 
-          {/* Load more (not shown while tailing) */}
-          {cookie && !search && !tailing && (
-            <div className="flex items-center justify-center px-4 py-3 border-t border-slate-100 bg-slate-50/50">
-              <button
-                type="button"
-                onClick={() => fetchLogs(true)}
-                disabled={loadingMore}
-                className="px-4 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-              >
-                {loadingMore ? "Loading…" : "Load more"}
-              </button>
-            </div>
-          )}
         </div>
       )}
 
