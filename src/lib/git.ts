@@ -162,6 +162,7 @@ export function analyzeChanges(environment: string, configDirRel: string): Scope
   const output = execSync(`git status --porcelain -- "${relPath}"`, {
     cwd: REPO_ROOT,
     encoding: "utf-8",
+    maxBuffer: 10 * 1024 * 1024,
   }).trim();
 
   if (!output) return [];
@@ -235,17 +236,6 @@ function buildSummaryLine(title: string, changes: ScopeChange[]): string {
   return `${title} — ${totalFiles} items across ${changes.length} scope${changes.length !== 1 ? "s" : ""} (${scopeNames})`;
 }
 
-function buildDetails(changes: ScopeChange[]): string {
-  const lines: string[] = [];
-  for (const s of changes) {
-    lines.push(`  ${scopeLabel(s.scope)}:`);
-    for (const name of s.added) lines.push(`    + ${name}`);
-    for (const name of s.modified) lines.push(`    ~ ${name}`);
-    for (const name of s.deleted) lines.push(`    - ${name}`);
-  }
-  return lines.join("\n");
-}
-
 export function buildCommitMessage(
   title: string,
   environment: string,
@@ -255,8 +245,17 @@ export function buildCommitMessage(
   if (changes.length === 0) return title;
 
   const summary = buildSummaryLine(title, changes);
-  const details = buildDetails(changes);
-  return `${summary}\n\nDetails:\n${details}`;
+
+  // Per-scope one-line summary (not full item list — full details are in history)
+  const scopeLines = changes.map((s) => {
+    const parts: string[] = [];
+    if (s.added.length) parts.push(`+${s.added.length}`);
+    if (s.modified.length) parts.push(`~${s.modified.length}`);
+    if (s.deleted.length) parts.push(`-${s.deleted.length}`);
+    return `  ${scopeLabel(s.scope)}: ${parts.join(" ")}`;
+  });
+
+  return `${summary}\n\n${scopeLines.join("\n")}\n\nFull details saved to history.`;
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
@@ -267,6 +266,7 @@ export function hasChanges(environment: string): boolean {
   const status = execSync(`git status --porcelain -- "${relPath}"`, {
     cwd: REPO_ROOT,
     encoding: "utf-8",
+    maxBuffer: 10 * 1024 * 1024,
   }).trim();
   return status.length > 0;
 }
@@ -281,8 +281,8 @@ export function autoCommit(
 
   const message = buildCommitMessage(title, environment, configDirRel);
   const relPath = envRelPath(environment);
-  execSync(`git add -- "${relPath}"`, { cwd: REPO_ROOT });
-  execSync(`git commit -m ${JSON.stringify(message)}`, { cwd: REPO_ROOT });
+  execSync(`git add -- "${relPath}"`, { cwd: REPO_ROOT, maxBuffer: 10 * 1024 * 1024 });
+  execSync(`git commit -m ${JSON.stringify(message)}`, { cwd: REPO_ROOT, maxBuffer: 10 * 1024 * 1024 });
 
   const hash = execSync("git rev-parse --short HEAD", {
     cwd: REPO_ROOT,
