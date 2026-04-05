@@ -274,6 +274,140 @@ function FieldInput({
   );
 }
 
+// ── Test Log API ──────────────────────────────────────────────────────────────
+
+function TestLogApiButton({
+  tenantBaseUrl,
+  apiKey,
+  apiSecret,
+}: {
+  tenantBaseUrl: string;
+  apiKey: string;
+  apiSecret: string;
+}) {
+  const [running, setRunning] = useState(false);
+  const [debug, setDebug] = useState(false);
+  const [logs, setLogs] = useState<{ type: string; data: string }[]>([]);
+  const [exitCode, setExitCode] = useState<number | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
+
+  const run = async (isDebug: boolean) => {
+    setLogs([]);
+    setExitCode(null);
+    setRunning(true);
+    try {
+      const res = await fetch("/api/environments/test-log-api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantBaseUrl, apiKey, apiSecret, debug: isDebug }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const entries: { type: string; data: string }[] = [
+          { type: "stdout", data: `HTTP ${data.status} — connection successful` },
+        ];
+        if (isDebug && data.body) {
+          entries.push({ type: "stdout", data: data.body });
+        }
+        setLogs(entries);
+        setExitCode(0);
+      } else {
+        const entries: { type: string; data: string }[] = [
+          { type: "stderr", data: data.message || `HTTP ${data.status}` },
+        ];
+        if (isDebug && data.body) {
+          entries.push({ type: "stderr", data: data.body });
+        }
+        setLogs(entries);
+        setExitCode(1);
+      }
+    } catch (err) {
+      setLogs([{ type: "error", data: String(err) }]);
+      setExitCode(1);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const statusColor = exitCode === null
+    ? running ? "text-yellow-400" : "text-slate-400"
+    : exitCode === 0 ? "text-green-400" : "text-red-400";
+
+  const statusDot = running
+    ? "bg-yellow-400 animate-pulse"
+    : exitCode === null ? "bg-slate-400"
+    : exitCode === 0 ? "bg-green-400" : "bg-red-400";
+
+  return (
+    <div className="space-y-2 w-full">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => run(debug)}
+          disabled={running || !apiKey || !apiSecret || !tenantBaseUrl}
+          className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
+        >
+          {running ? "Testing..." : "Test Log API"}
+        </button>
+        <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={debug}
+            onChange={(e) => setDebug(e.target.checked)}
+            disabled={running}
+            className="accent-sky-600"
+          />
+          Debug
+        </label>
+        {logs.length > 0 && !running && (
+          <button
+            type="button"
+            onClick={() => { setLogs([]); setExitCode(null); }}
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {logs.length > 0 && (
+        <div className="rounded-md overflow-hidden border border-slate-700">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border-b border-slate-700">
+            <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", statusDot)} />
+            <span className={cn("text-xs font-mono", statusColor)}>
+              {running
+                ? "Connecting to Log API..."
+                : exitCode === 0 ? "Log API credentials valid"
+                : exitCode !== null ? "Log API test failed"
+                : ""}
+            </span>
+          </div>
+          <div className="bg-slate-900 p-3 font-mono text-xs max-h-48 overflow-y-auto">
+            {logs.map((entry, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "whitespace-pre-wrap break-all leading-5",
+                  entry.type === "stderr" && "text-yellow-300",
+                  entry.type === "error" && "text-red-400",
+                  entry.type === "stdout" && "text-slate-100"
+                )}
+              >
+                {entry.data}
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Test Connection ───────────────────────────────────────────────────────────
 
 function TestConnectionButton({
@@ -672,63 +806,74 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
 
           {/* ═══════════ Log API section ═══════════ */}
           {section === "log-api" && (
-            <div className="p-4 space-y-6 max-w-lg">
-              <div>
-                <p className="text-xs text-slate-500 mb-4">
-                  API key and secret for accessing PingOne Advanced Identity Cloud monitoring logs.
-                  Create these in the AIC admin console under Tenant Settings &gt; Log API Keys.
-                </p>
+            <>
+              {/* Test Log API */}
+              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+                <TestLogApiButton
+                  tenantBaseUrl={values["TENANT_BASE_URL"] ?? ""}
+                  apiKey={logApiKey}
+                  apiSecret={logApiSecret}
+                />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">API Key</label>
-                <p className="text-xs text-slate-400">The API key ID from the AIC admin console.</p>
-                <div className="relative">
-                  <input
-                    type={logApiKeyVisible ? "text" : "password"}
-                    value={logApiKey}
-                    onChange={(e) => setLogApiKey(e.target.value)}
-                    placeholder="e.g. a1b2c3d4e5f6..."
-                    className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 pr-14 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setLogApiKeyVisible((v) => !v)}
-                    className="absolute top-1.5 right-2 text-xs text-slate-400 hover:text-slate-700"
-                  >
-                    {logApiKeyVisible ? "Hide" : "Show"}
-                  </button>
+              <div className="p-4 space-y-6 max-w-lg">
+                <div>
+                  <p className="text-xs text-slate-500">
+                    API key and secret for accessing PingOne Advanced Identity Cloud monitoring logs.
+                    Create these in the AIC admin console under Tenant Settings &gt; Log API Keys.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">API Key</label>
+                  <p className="text-xs text-slate-400">The API key ID from the AIC admin console.</p>
+                  <div className="relative">
+                    <input
+                      type={logApiKeyVisible ? "text" : "password"}
+                      value={logApiKey}
+                      onChange={(e) => setLogApiKey(e.target.value)}
+                      placeholder="e.g. a1b2c3d4e5f6..."
+                      className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 pr-14 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setLogApiKeyVisible((v) => !v)}
+                      className="absolute top-1.5 right-2 text-xs text-slate-400 hover:text-slate-700"
+                    >
+                      {logApiKeyVisible ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">API Secret</label>
+                  <p className="text-xs text-slate-400">The API secret paired with the key above.</p>
+                  <div className="relative">
+                    <input
+                      type={logApiSecretVisible ? "text" : "password"}
+                      value={logApiSecret}
+                      onChange={(e) => setLogApiSecret(e.target.value)}
+                      placeholder="e.g. x9y8z7w6v5u4..."
+                      className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 pr-14 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setLogApiSecretVisible((v) => !v)}
+                      className="absolute top-1.5 right-2 text-xs text-slate-400 hover:text-slate-700"
+                    >
+                      {logApiSecretVisible ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <p className="text-xs text-slate-400">
+                    These credentials are stored locally in <code className="font-mono bg-slate-100 px-1 rounded">{env.name}/log-api.json</code> and
+                    are used to query the <code className="font-mono bg-slate-100 px-1 rounded">/monitoring/logs</code> endpoint.
+                  </p>
                 </div>
               </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">API Secret</label>
-                <p className="text-xs text-slate-400">The API secret paired with the key above.</p>
-                <div className="relative">
-                  <input
-                    type={logApiSecretVisible ? "text" : "password"}
-                    value={logApiSecret}
-                    onChange={(e) => setLogApiSecret(e.target.value)}
-                    placeholder="e.g. x9y8z7w6v5u4..."
-                    className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 pr-14 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setLogApiSecretVisible((v) => !v)}
-                    className="absolute top-1.5 right-2 text-xs text-slate-400 hover:text-slate-700"
-                  >
-                    {logApiSecretVisible ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <p className="text-xs text-slate-400">
-                  These credentials are stored locally in <code className="font-mono bg-slate-100 px-1 rounded">{env.name}/log-api.json</code> and
-                  are used to query the <code className="font-mono bg-slate-100 px-1 rounded">/monitoring/logs</code> endpoint.
-                </p>
-              </div>
-            </div>
+            </>
           )}
         </>
       )}
