@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, Fragment } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment, startTransition } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -545,10 +545,12 @@ export function LogsExplorer({
         nextCookie = data.pagedResultsCookie ?? null;
 
         const shouldAppend = append || !isFirstPage;
-        setEntries((prev) => shouldAppend ? [...prev, ...newEntries] : newEntries);
-        setFetched(true);
-        setLastUpdated(new Date());
-        if (!shouldAppend) setExpandedIdx(null);
+        startTransition(() => {
+          setEntries((prev) => shouldAppend ? [...prev, ...newEntries] : newEntries);
+          setFetched(true);
+          setLastUpdated(new Date());
+          if (!shouldAppend) setExpandedIdx(null);
+        });
 
         isFirstPage = false;
         if (isTail) break; // tail never chains pages
