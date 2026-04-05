@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, Fragment, startTransition, useDeferredValue } from "react";
+import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -451,7 +451,6 @@ export function LogsExplorer({
   const [customEnd, setCustomEnd] = useState(() => toDatetimeLocal(new Date().toISOString()));
 
   const [entries, setEntries] = useState<LogEntry[]>([]);
-  const [cookie, setCookie] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fetched, setFetched] = useState(false);
@@ -462,18 +461,43 @@ export function LogsExplorer({
 
   // ── Live tail ──
   const [tailing, setTailing] = useState(false);
-  const tailingRef = useRef(false);
   const [tailSecs, setTailSecs] = useState<TailSecs>(10);
-  const tailIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const fetchLogsRef = useRef<(append?: boolean) => void>(() => {});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const tableEndRef = useRef<HTMLDivElement>(null);
 
   // ── Transaction drill-down ──
   const [drilldown, setDrilldown] = useState<{ txId: string; timestamp: string } | null>(null);
 
   // Defer table rendering so tab switches are instant even with large entry sets
   const deferredIsActive = useDeferredValue(isActive);
+
+  // ── Web Worker — owns all fetch and tail interval logic ──
+  const workerRef = useRef<Worker | null>(null);
+
+  useEffect(() => {
+    const worker = new Worker("/log-worker.js");
+    worker.onmessage = (e: MessageEvent) => {
+      const msg = e.data as
+        | { type: "entries"; entries: LogEntry[]; append: boolean }
+        | { type: "status"; loading: boolean }
+        | { type: "error"; message: string };
+
+      if (msg.type === "entries") {
+        startTransition(() => {
+          setEntries((prev) => msg.append ? [...prev, ...msg.entries] : msg.entries);
+          setFetched(true);
+          setLastUpdated(new Date());
+          if (!msg.append) setExpandedIdx(null);
+        });
+      } else if (msg.type === "status") {
+        setLoading(msg.loading);
+      } else if (msg.type === "error") {
+        setError(msg.message);
+        setLoading(false);
+      }
+    };
+    workerRef.current = worker;
+    return () => worker.terminate();
+  }, []);
 
   // ── Sync tab label ──
   useEffect(() => {
@@ -484,12 +508,12 @@ export function LogsExplorer({
   // ── Fetch sources when env changes ──
   useEffect(() => {
     if (!env) return;
+    workerRef.current?.postMessage({ type: "cancel" });
     setSourcesLoading(true);
     setSourcesError("");
     setSources([]);
     setSource("");
     setEntries([]);
-    setCookie(null);
     setFetched(false);
     setTailing(false);
 
@@ -505,6 +529,14 @@ export function LogsExplorer({
       .finally(() => setSourcesLoading(false));
   }, [env]);
 
+  // ── Auto-scroll when tailing ──
+  useEffect(() => {
+    if (tailing && entries.length > 0 && isActive) {
+      const el = scrollContainerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    }
+  }, [entries, tailing, isActive]);
+
   // ── Time range ──
   function getRange(): { beginTime: string; endTime: string } {
     if (preset === "custom") {
@@ -515,96 +547,32 @@ export function LogsExplorer({
     return { beginTime: new Date(now.getTime() - ms).toISOString(), endTime: now.toISOString() };
   }
 
-  // ── Fetch logs ──
-  // append=false → fresh fetch (replace entries), then auto-chain remaining pages
-  // append=true  → start from current cookie cursor and append (used by tail interval)
-  const fetchLogs = useCallback(async (append = false) => {
+  const fetchLogs = () => {
     if (!env || !source) return;
-    setLoading(true);
     setError("");
-
-    try {
-      const isTail = tailingRef.current;
-      let nextCookie: string | null = append ? (cookie ?? null) : null;
-      let isFirstPage = true;
-
-      do {
-        const body = isTail
-          ? { env, source, tail: true, cookie: nextCookie ?? undefined }
-          : (() => {
-              const { beginTime, endTime } = getRange();
-              return { env, source, beginTime, endTime, pageSize: 50, cookie: nextCookie ?? undefined };
-            })();
-
-        const res = await fetch("/api/logs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const data = await res.json();
-        if (data.error) { setError(data.error); return; }
-
-        const newEntries: LogEntry[] = Array.isArray(data.result) ? data.result : [];
-        nextCookie = data.pagedResultsCookie ?? null;
-
-        const shouldAppend = append || !isFirstPage;
-        startTransition(() => {
-          setEntries((prev) => shouldAppend ? [...prev, ...newEntries] : newEntries);
-          setFetched(true);
-          setLastUpdated(new Date());
-          if (!shouldAppend) setExpandedIdx(null);
-        });
-
-        // Unblock the UI after first page — remaining pages stream in the background
-        if (isFirstPage) setLoading(false);
-        isFirstPage = false;
-        if (isTail) break; // tail never chains pages
-      } while (nextCookie);
-
-      setCookie(nextCookie);
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setLoading(false);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [env, source, preset, customBegin, customEnd, cookie]);
-
-  // Keep ref up-to-date so tail interval always calls latest version
-  useEffect(() => { fetchLogsRef.current = fetchLogs; }, [fetchLogs]);
-
-  // ── Auto-scroll when tailing ──
-  useEffect(() => {
-    if (tailing && entries.length > 0 && isActive) {
-      const el = scrollContainerRef.current;
-      if (el) el.scrollTop = el.scrollHeight;
-    }
-  }, [entries, tailing, isActive]);
-
-  // ── Tail interval ──
-  useEffect(() => {
-    if (!tailing) return;
-    const id = setInterval(() => fetchLogsRef.current(true), tailSecs * 1000);
-    tailIntervalRef.current = id;
-    return () => clearInterval(id);
-  }, [tailing, tailSecs]);
-
-  // ── Stop tail on unmount ──
-  useEffect(() => () => {
-    if (tailIntervalRef.current) clearInterval(tailIntervalRef.current);
-  }, []);
+    setTailing(false);
+    const { beginTime, endTime } = getRange();
+    workerRef.current?.postMessage({ type: "fetch", env, source, beginTime, endTime, pageSize: 50 });
+  };
 
   const stopTail = () => {
-    tailingRef.current = false;
     setTailing(false);
-    if (tailIntervalRef.current) { clearInterval(tailIntervalRef.current); tailIntervalRef.current = null; }
+    workerRef.current?.postMessage({ type: "tail-stop" });
   };
 
   const startTail = () => {
-    tailingRef.current = true;
+    setError("");
     setTailing(true);
-    fetchLogsRef.current(false); // immediate first fetch
+    workerRef.current?.postMessage({ type: "tail-start", env, source, tailSecs });
   };
+
+  // Restart tail when tailSecs changes while already tailing
+  useEffect(() => {
+    if (tailing) {
+      workerRef.current?.postMessage({ type: "tail-start", env, source, tailSecs });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tailSecs]);
 
   // ── Filtered entries ──
   const levelFiltered = levelFilter === "ALL"
@@ -723,7 +691,7 @@ export function LogsExplorer({
             <>
               <button
                 type="button"
-                onClick={() => fetchLogs(false)}
+                onClick={() => fetchLogs()}
                 disabled={loading || !source || !!sourcesError}
                 className="px-4 py-1.5 text-sm font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
               >
@@ -843,7 +811,6 @@ export function LogsExplorer({
                     ))}
                   </tbody>
                 </table>
-                <div ref={tableEndRef} />
               </>
             )}
           </div>
