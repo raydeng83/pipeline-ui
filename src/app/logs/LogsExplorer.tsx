@@ -21,6 +21,18 @@ interface LogEntry {
 type Preset = "15m" | "1h" | "6h" | "24h" | "custom";
 type TailSecs = 5 | 10 | 30;
 
+// AIC loggingLevel values and what they include
+// "INFO" = SEVERE+ERROR+FATAL+WARNING+WARN+CONFIG+INFO+INFORMATION (matches frodo -l 2)
+// "DEBUG" = all of the above + DEBUG
+// "ALL" = all including TRACE
+const LOG_LEVELS = [
+  { value: "ERROR", label: "ERROR+" },
+  { value: "WARNING", label: "WARN+" },
+  { value: "INFO", label: "INFO+" },
+  { value: "DEBUG", label: "DEBUG+" },
+  { value: "ALL", label: "ALL" },
+];
+
 const PRESETS: { label: string; value: Preset; ms: number }[] = [
   { label: "15 min", value: "15m", ms: 15 * 60 * 1000 },
   { label: "1 hour", value: "1h", ms: 60 * 60 * 1000 },
@@ -247,12 +259,14 @@ function TransactionDrilldown({
   timestamp,
   env,
   availableSources,
+  loggingLevel,
   onClose,
 }: {
   transactionId: string;
   timestamp: string;
   env: string;
   availableSources: string[];
+  loggingLevel: string;
   onClose: () => void;
 }) {
   const [entries, setEntries] = useState<(LogEntry & { source: string })[]>([]);
@@ -278,7 +292,7 @@ function TransactionDrilldown({
         fetch("/api/logs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ env, source: src, beginTime, endTime, pageSize: 100 }),
+          body: JSON.stringify({ env, source: src, beginTime, endTime, pageSize: 100, loggingLevel }),
         })
           .then((r) => r.json())
           .then((data): (LogEntry & { source: string })[] => {
@@ -416,6 +430,8 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
   const [sourcesError, setSourcesError] = useState("");
   const [source, setSource] = useState("");
 
+  const [loggingLevel, setLoggingLevel] = useState("INFO");
+
   const [preset, setPreset] = useState<Preset>("1h");
   const [customBegin, setCustomBegin] = useState(() => toDatetimeLocal(new Date(Date.now() - 3600000).toISOString()));
   const [customEnd, setCustomEnd] = useState(() => toDatetimeLocal(new Date().toISOString()));
@@ -490,6 +506,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
         body: JSON.stringify({
           env, source, beginTime, endTime, pageSize: 50,
           cookie: append ? cookie : undefined,
+          loggingLevel,
         }),
       });
       const data = await res.json();
@@ -508,7 +525,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
       setLoadingMore(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [env, source, preset, customBegin, customEnd, cookie]);
+  }, [env, source, preset, customBegin, customEnd, cookie, loggingLevel]);
 
   // Keep ref up-to-date so tail interval always calls latest version
   useEffect(() => { fetchLogsRef.current = fetchLogs; }, [fetchLogs]);
@@ -583,6 +600,20 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
               {sourcesLoading && <option>Loading sources…</option>}
               {!sourcesLoading && sources.length === 0 && <option>No sources available</option>}
               {sources.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600">Log Level</label>
+            <select
+              value={loggingLevel}
+              onChange={(e) => { stopTail(); setLoggingLevel(e.target.value); }}
+              disabled={loading || tailing}
+              className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
+            >
+              {LOG_LEVELS.map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
             </select>
           </div>
 
@@ -784,6 +815,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
           timestamp={drilldown.timestamp}
           env={env}
           availableSources={sources}
+          loggingLevel={loggingLevel}
           onClose={() => setDrilldown(null)}
         />
       )}
