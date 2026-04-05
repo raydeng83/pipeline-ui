@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { CompareReport, FileDiff, DiffLine } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +62,6 @@ function DiffViewer({ lines }: { lines: DiffLine[] }) {
   const hunks = buildHunks(lines);
 
   let leftNo = 0, rightNo = 0;
-  // Pre-compute line numbers at each index
   const lineNums: Array<{ left: number | null; right: number | null }> = lines.map((l) => {
     if (l.type === "removed") { leftNo++; return { left: leftNo, right: null }; }
     if (l.type === "added")   { rightNo++; return { left: null, right: rightNo }; }
@@ -70,7 +69,6 @@ function DiffViewer({ lines }: { lines: DiffLine[] }) {
     return { left: leftNo, right: rightNo };
   });
 
-  // Track index into lines as we render hunks
   let lineIdx = 0;
 
   return (
@@ -136,7 +134,7 @@ function DiffViewer({ lines }: { lines: DiffLine[] }) {
   );
 }
 
-// ── Side-by-side file viewer ──────────────────────────────────────────────────
+// ── Side-by-side file viewer ────────────────────────────────────────────────
 
 function SideBySideViewer({
   localContent,
@@ -177,7 +175,65 @@ function FilePane({ label, content, absence }: { label: string; content?: string
   );
 }
 
-// ── File row ──────────────────────────────────────────────────────────────────
+// ── Display name resolution ──────────────────────────────────────────────────
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function resolveDisplayName(file: FileDiff): { name: string; detail: string } {
+  const parts = file.relativePath.split("/");
+  const fileName = parts[parts.length - 1];
+  const stem = fileName.replace(/\.[^.]+$/, "");
+
+  // Journeys: realms/<realm>/journeys/<JourneyName>/...
+  const journeyIdx = parts.indexOf("journeys");
+  if (journeyIdx >= 0 && parts.length > journeyIdx + 1) {
+    const journeyName = parts[journeyIdx + 1];
+    // Sub-path within journey (e.g., nodes/nodeId.json)
+    const subPath = parts.slice(journeyIdx + 2).join("/");
+    if (subPath && subPath !== `${journeyName}.json`) {
+      return { name: `${journeyName} / ${subPath}`, detail: file.relativePath };
+    }
+    return { name: journeyName, detail: file.relativePath };
+  }
+
+  // Script config: scripts/scripts-config/{uuid}.json → parse name from content
+  if (parts.includes("scripts-config") && UUID_RE.test(stem)) {
+    const content = file.localContent ?? file.remoteContent;
+    if (content) {
+      try {
+        const json = JSON.parse(content);
+        if (typeof json.name === "string" && json.name) {
+          return { name: json.name, detail: `${stem}` };
+        }
+      } catch { /* fall through */ }
+    }
+    return { name: stem, detail: file.relativePath };
+  }
+
+  // Script content: scripts/scripts-content/{type}/{ScriptName}.ext
+  if (parts.includes("scripts-content")) {
+    return { name: stem, detail: file.relativePath };
+  }
+
+  // Other JSON with name field
+  if (fileName.endsWith(".json") && UUID_RE.test(stem)) {
+    const content = file.localContent ?? file.remoteContent;
+    if (content) {
+      try {
+        const json = JSON.parse(content);
+        const name = json.name ?? json._id ?? json.displayName;
+        if (typeof name === "string" && name) {
+          return { name, detail: stem };
+        }
+      } catch { /* fall through */ }
+    }
+  }
+
+  // Default: filename without extension
+  return { name: stem, detail: parts.length > 1 ? file.relativePath : "" };
+}
+
+// ── File row ────────────────────────────────────────────────────────────────
 
 type ViewMode = "diff" | "files";
 
@@ -198,12 +254,13 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
   const added   = file.linesAdded   ?? 0;
   const removed = file.linesRemoved ?? 0;
 
+  const { name: displayName, detail: displayDetail } = resolveDisplayName(file);
+
   return (
     <div className="border border-slate-200 rounded overflow-hidden">
-      {/* Row header */}
       <div
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-xs transition-colors",
+          "flex items-center gap-2 px-3 py-1.5 text-xs transition-colors",
           hasDiff ? "cursor-pointer hover:bg-slate-50" : "cursor-default",
           open ? "bg-slate-50 border-b border-slate-200" : "bg-white"
         )}
@@ -212,9 +269,11 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
         <span className={cn("inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold shrink-0", s.badge)}>
           {s.icon}
         </span>
-        <span className="font-mono text-slate-700 truncate flex-1 min-w-0">{file.relativePath}</span>
+        <span className="truncate flex-1 min-w-0" title={file.relativePath}>
+          <span className="text-slate-700">{displayName}</span>
+          {displayDetail && <span className="text-slate-400 font-mono text-[10px] ml-1.5">{displayDetail}</span>}
+        </span>
 
-        {/* +/- summary */}
         {(added > 0 || removed > 0) && (
           <span className="shrink-0 flex items-center gap-1.5 text-[10px] font-mono">
             {added   > 0 && <span className="text-emerald-600">+{added}</span>}
@@ -222,7 +281,6 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
           </span>
         )}
 
-        {/* View toggle — only when open */}
         {open && (
           <div
             className="flex items-center rounded border border-slate-300 overflow-hidden text-[10px] shrink-0"
@@ -249,7 +307,6 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
         )}
       </div>
 
-      {/* Body */}
       {open && (
         view === "diff" && file.diffLines
           ? <DiffViewer lines={file.diffLines} />
@@ -259,54 +316,117 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
   );
 }
 
-// ── Section ───────────────────────────────────────────────────────────────────
+// ── Scope grouping ──────────────────────────────────────────────────────────
 
-function FileSection({
-  title, files, defaultOpen, badgeClass, sourceLabel, targetLabel,
-}: {
-  title: string;
+const SCOPE_LABELS: Record<string, string> = {
+  "access-config": "Access Config", "audit": "Audit", "authorization": "Authorization Policies",
+  "cookie-domains": "Cookie Domains", "cors": "CORS", "csp": "CSP", "custom-nodes": "Custom Nodes",
+  "email-provider": "Email Provider", "email-templates": "Email Templates", "endpoints": "Custom Endpoints",
+  "esvs": "Secrets & Variables", "idm-authentication-config": "IDM Authentication",
+  "iga": "IGA Workflows", "internal-roles": "Internal Roles", "journeys": "Journeys",
+  "kba": "KBA", "locales": "Locales", "managed-objects": "Managed Objects",
+  "org-privileges": "Org Privileges", "password-policy": "Password Policy", "raw": "Raw Config",
+  "realm-config": "Realm Config", "schedules": "Schedules", "scripts": "Scripts",
+  "secret-mappings": "Secret Mappings", "service-objects": "Service Objects", "services": "Services",
+  "sync": "Sync & Connectors", "telemetry": "Telemetry", "terms-conditions": "Terms & Conditions",
+  "themes": "Themes", "ui": "UI Config",
+};
+
+interface ScopeGroup {
+  scope: string;
+  label: string;
   files: FileDiff[];
-  defaultOpen?: boolean;
-  badgeClass: string;
+  added: number;
+  modified: number;
+  removed: number;
+}
+
+function extractScope(relativePath: string): string {
+  const parts = relativePath.split("/");
+  // Realm-based: realms/<realm>/<scope>/...
+  if (parts[0] === "realms" && parts.length >= 3) return parts[2];
+  // Global: <scope>/...
+  return parts[0];
+}
+
+function groupByScope(files: FileDiff[]): ScopeGroup[] {
+  const map = new Map<string, FileDiff[]>();
+  for (const f of files) {
+    if (f.status === "unchanged") continue;
+    const scope = extractScope(f.relativePath);
+    if (!map.has(scope)) map.set(scope, []);
+    map.get(scope)!.push(f);
+  }
+
+  return Array.from(map.entries())
+    .map(([scope, scopeFiles]) => ({
+      scope,
+      label: SCOPE_LABELS[scope] ?? scope.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      files: scopeFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath)),
+      added: scopeFiles.filter((f) => f.status === "added").length,
+      modified: scopeFiles.filter((f) => f.status === "modified").length,
+      removed: scopeFiles.filter((f) => f.status === "removed").length,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+// ── Scope section ───────────────────────────────────────────────────────────
+
+function ScopeSection({
+  group, sourceLabel, targetLabel, defaultOpen,
+}: {
+  group: ScopeGroup;
   sourceLabel: string;
   targetLabel: string;
+  defaultOpen: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen ?? true);
-  if (files.length === 0) return null;
-
-  const totalAdded   = files.reduce((s, f) => s + (f.linesAdded   ?? 0), 0);
-  const totalRemoved = files.reduce((s, f) => s + (f.linesRemoved ?? 0), 0);
+  const [open, setOpen] = useState(defaultOpen);
+  const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
 
   return (
-    <div>
-      <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 w-full text-left mb-2">
-        <span className="text-sm font-semibold text-slate-700">{title}</span>
-        <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full", badgeClass)}>{files.length}</span>
-        {(totalAdded > 0 || totalRemoved > 0) && (
-          <span className="text-[10px] font-mono flex gap-1.5">
-            {totalAdded   > 0 && <span className="text-emerald-600">+{totalAdded}</span>}
-            {totalRemoved > 0 && <span className="text-red-500">−{totalRemoved}</span>}
-          </span>
-        )}
-        <span className="ml-auto text-slate-400 text-xs">{open ? "▲" : "▼"}</span>
-      </button>
+    <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div
+        className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="text-sm font-semibold text-slate-700 flex-1">{group.label}</span>
+
+        {/* Per-scope status counts */}
+        <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
+          {group.modified > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{group.modified} modified</span>
+          )}
+          {group.added > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{group.added} added</span>
+          )}
+          {group.removed > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{group.removed} removed</span>
+          )}
+          {totalLines > 0 && (
+            <span className="text-slate-400">({totalLines} lines)</span>
+          )}
+        </div>
+
+        <span className="text-slate-400 text-xs shrink-0">{open ? "▲" : "▼"}</span>
+      </div>
+
       {open && (
-        <div className="space-y-1.5">
-          {files.map((f) => <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />)}
+        <div className="p-3 space-y-1.5 bg-white">
+          {group.files.map((f) => (
+            <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-// ── Main report ───────────────────────────────────────────────────────────────
+// ── Main report ─────────────────────────────────────────────────────────────
 
 export function DiffReport({ report }: { report: CompareReport }) {
   const { summary, files } = report;
-  const total    = summary.added + summary.removed + summary.modified + summary.unchanged;
-  const modified = files.filter((f) => f.status === "modified");
-  const added    = files.filter((f) => f.status === "added");
-  const removed  = files.filter((f) => f.status === "removed");
+  const total = summary.added + summary.removed + summary.modified + summary.unchanged;
+  const [hideUnchanged, setHideUnchanged] = useState(true);
 
   const sameEnv = report.source.environment === report.target.environment;
   const sourceLabel = sameEnv
@@ -316,43 +436,62 @@ export function DiffReport({ report }: { report: CompareReport }) {
     ? `${report.target.environment} (${report.target.mode})`
     : report.target.environment;
 
+  const scopeGroups = useMemo(() => groupByScope(files), [files]);
+  const changedCount = summary.added + summary.removed + summary.modified;
+
   return (
     <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-800">
-            Comparison Report —{" "}
             <span className="font-mono">{sourceLabel}</span>
             <span className="mx-1.5 text-slate-400">→</span>
             <span className="font-mono">{targetLabel}</span>
           </h2>
           <span className="text-xs text-slate-400">{new Date(report.generatedAt).toLocaleString()}</span>
         </div>
+
+        {/* Stats cards */}
         <div className="flex flex-wrap gap-3">
           <Stat count={summary.modified}  label="Modified"  color="text-amber-600"   bg="bg-amber-50" />
           <Stat count={summary.added}     label="Added"     color="text-emerald-600" bg="bg-emerald-50" />
           <Stat count={summary.removed}   label="Removed"   color="text-red-600"     bg="bg-red-50" />
           <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
-          <span className="ml-auto text-xs text-slate-400 self-center">{total} files total</span>
+          <div className="flex items-center gap-3 ml-auto">
+            <span className="text-xs text-slate-400">{total} files · {scopeGroups.length} scopes</span>
+            <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={hideUnchanged}
+                onChange={(e) => setHideUnchanged(e.target.checked)}
+                className="accent-sky-600"
+              />
+              Hide unchanged
+            </label>
+          </div>
         </div>
       </div>
 
-      {/* Sections */}
-      <div className="p-5 space-y-6">
-        {summary.modified === 0 && summary.added === 0 && summary.removed === 0 ? (
+      {/* Scope sections */}
+      <div className="p-5 space-y-3">
+        {changedCount === 0 ? (
           <p className="text-sm text-slate-500 text-center py-4">
             No differences found — source and target configs are identical.
           </p>
         ) : (
-          <>
-            <FileSection title="Modified" files={modified} defaultOpen badgeClass="bg-amber-100 text-amber-700" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-            <FileSection title={`Added in target (${targetLabel})`} files={added} defaultOpen={added.length <= 10} badgeClass="bg-emerald-100 text-emerald-700" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-            <FileSection title={`Removed from target (${targetLabel})`} files={removed} defaultOpen={removed.length <= 10} badgeClass="bg-red-100 text-red-700" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-          </>
+          scopeGroups.map((group) => (
+            <ScopeSection
+              key={group.scope}
+              group={group}
+              sourceLabel={sourceLabel}
+              targetLabel={targetLabel}
+              defaultOpen={scopeGroups.length <= 5}
+            />
+          ))
         )}
-        {summary.unchanged > 0 && (
-          <p className="text-xs text-slate-400 text-center">
+        {!hideUnchanged && summary.unchanged > 0 && (
+          <p className="text-xs text-slate-400 text-center pt-2">
             {summary.unchanged} file{summary.unchanged !== 1 ? "s" : ""} unchanged
           </p>
         )}

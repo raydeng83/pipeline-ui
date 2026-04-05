@@ -5,6 +5,73 @@ import type { DiffLine, FileDiff, CompareReport, CompareEndpoint } from "./diff-
 const MAX_LINES = 2000;
 const MAX_CONTENT_BYTES = 200_000; // 200 KB per side
 
+// ── Scope → directory mapping ────────────────────────────────────────────────
+
+const SCOPE_DIR: Record<string, string> = {
+  "access-config":         "access-config",
+  "audit":                 "audit",
+  "connector-definitions": "sync/connectors",
+  "connector-mappings":    "sync/mappings",
+  "cookie-domains":        "cookie-domains",
+  "cors":                  "cors",
+  "csp":                   "csp",
+  "custom-nodes":          "custom-nodes",
+  "email-provider":        "email-provider",
+  "email-templates":       "email-templates",
+  "endpoints":             "endpoints",
+  "idm-authentication":    "idm-authentication-config",
+  "iga-workflows":         "iga/workflows",
+  "internal-roles":        "internal-roles",
+  "kba":                   "kba",
+  "locales":               "locales",
+  "managed-objects":       "managed-objects",
+  "org-privileges":        "org-privileges",
+  "raw":                   "raw",
+  "remote-servers":        "sync/rcs",
+  "schedules":             "schedules",
+  "secrets":               "esvs/secrets",
+  "service-objects":       "service-objects",
+  "telemetry":             "telemetry",
+  "terms-and-conditions":  "terms-conditions",
+  "ui-config":             "ui",
+  "variables":             "esvs/variables",
+};
+
+const REALM_SCOPE_SUBDIR: Record<string, string> = {
+  "authz-policies":  "authorization",
+  "journeys":        "journeys",
+  "oauth2-agents":   "realm-config/agents",
+  "password-policy": "password-policy",
+  "saml":            "realm-config/saml",
+  "scripts":         "scripts",
+  "secret-mappings": "secret-mappings",
+  "services":        "services",
+  "themes":          "themes",
+};
+
+/** Resolve scope names to actual filesystem directories within a config dir. */
+function resolveScopeDirs(configDir: string, scopes: string[]): string[] {
+  const dirs: string[] = [];
+  for (const scope of scopes) {
+    if (scope in REALM_SCOPE_SUBDIR) {
+      // Realm-based scope: scan all realms
+      const realmsDir = path.join(configDir, "realms");
+      if (fs.existsSync(realmsDir)) {
+        for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
+          if (!realm.isDirectory()) continue;
+          const scopePath = path.join(realmsDir, realm.name, REALM_SCOPE_SUBDIR[scope]);
+          if (fs.existsSync(scopePath)) dirs.push(scopePath);
+        }
+      }
+    } else {
+      const dirName = SCOPE_DIR[scope] ?? scope;
+      const scopePath = path.join(configDir, dirName);
+      if (fs.existsSync(scopePath)) dirs.push(scopePath);
+    }
+  }
+  return dirs;
+}
+
 function normalizeContent(content: string, filePath: string): string {
   if (filePath.endsWith(".json")) {
     try { return JSON.stringify(JSON.parse(content), null, 2); } catch { /* fall through */ }
@@ -77,9 +144,11 @@ export function compareDirs(
   const local = new Map<string, string>();
 
   if (scopes && scopes.length > 0) {
-    for (const scope of scopes) {
-      walkDir(path.join(remoteDir, scope), remoteDir, remote);
-      walkDir(path.join(localDir, scope), localDir, local);
+    for (const dir of resolveScopeDirs(remoteDir, scopes)) {
+      walkDir(dir, remoteDir, remote);
+    }
+    for (const dir of resolveScopeDirs(localDir, scopes)) {
+      walkDir(dir, localDir, local);
     }
   } else {
     walkDir(remoteDir, remoteDir, remote);
