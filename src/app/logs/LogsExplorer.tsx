@@ -430,9 +430,11 @@ function TransactionDrilldown({
 export function LogsExplorer({
   environments,
   onLabelChange,
+  isActive = true,
 }: {
   environments: EnvWithLogApi[];
   onLabelChange?: (label: string) => void;
+  isActive?: boolean;
 }) {
   const defaultEnv = environments.find((e) => e.hasLogApi) ?? environments[0];
 
@@ -465,6 +467,7 @@ export function LogsExplorer({
   const [tailSecs, setTailSecs] = useState<TailSecs>(10);
   const tailIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fetchLogsRef = useRef<(append?: boolean) => void>(() => {});
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const tableEndRef = useRef<HTMLDivElement>(null);
 
   // ── Transaction drill-down ──
@@ -553,10 +556,11 @@ export function LogsExplorer({
 
   // ── Auto-scroll when tailing ──
   useEffect(() => {
-    if (tailing && entries.length > 0) {
-      tableEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (tailing && entries.length > 0 && isActive) {
+      const el = scrollContainerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
     }
-  }, [entries, tailing]);
+  }, [entries, tailing, isActive]);
 
   // ── Tail interval ──
   useEffect(() => {
@@ -782,41 +786,47 @@ export function LogsExplorer({
             </span>
           </div>
 
-          {filtered.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-400">
-              {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-left">
-                    <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Component</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Transaction</th>
-                    <th className="w-6" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((entry, i) => (
-                    <EntryRow
-                      key={i}
-                      entry={entry}
-                      source={source}
-                      expanded={expandedIdx === i}
-                      onToggle={() => setExpandedIdx(expandedIdx === i ? null : i)}
-                      searchTerm={search}
-                      onTransactionClick={(txId, ts) => setDrilldown({ txId, timestamp: ts })}
-                    />
-                  ))}
-                </tbody>
-              </table>
-              <div ref={tableEndRef} />
-            </div>
-          )}
+          {/* Scrollable log window — renders table only when tab is active */}
+          <div ref={scrollContainerRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: "calc(100vh - 360px)" }}>
+            {!isActive ? (
+              // Tab is hidden — render nothing so React skips reconciling the table
+              null
+            ) : filtered.length === 0 ? (
+              <div className="p-8 text-center text-sm text-slate-400">
+                {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
+              </div>
+            ) : (
+              <>
+                <table className="w-full text-xs border-collapse">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="bg-slate-50 border-b border-slate-200 text-left">
+                      <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
+                      <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
+                      <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
+                      <th className="px-2 py-2 font-semibold text-slate-500">Component</th>
+                      <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
+                      <th className="px-2 py-2 font-semibold text-slate-500">Transaction</th>
+                      <th className="w-6" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((entry, i) => (
+                      <EntryRow
+                        key={i}
+                        entry={entry}
+                        source={source}
+                        expanded={expandedIdx === i}
+                        onToggle={() => setExpandedIdx(expandedIdx === i ? null : i)}
+                        searchTerm={search}
+                        onTransactionClick={(txId, ts) => setDrilldown({ txId, timestamp: ts })}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+                <div ref={tableEndRef} />
+              </>
+            )}
+          </div>
 
           {/* Load more (not shown while tailing) */}
           {cookie && !search && !tailing && (
@@ -928,6 +938,7 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
           <div className="pt-4">
             <LogsExplorer
               environments={environments}
+              isActive={tab.id === activeId}
               onLabelChange={(label) => updateLabel(tab.id, label)}
             />
           </div>
