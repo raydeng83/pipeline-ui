@@ -20,10 +20,16 @@ export interface CompareEndpoint {
   mode: "local" | "remote";
 }
 
+export interface DiffOptions {
+  includeMetadata?: boolean;
+  ignoreWhitespace?: boolean;
+}
+
 export interface CompareReport {
   source: CompareEndpoint;
   target: CompareEndpoint;
   generatedAt: string;
+  options?: DiffOptions;
   summary: {
     added: number;
     removed: number;

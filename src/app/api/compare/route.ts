@@ -10,10 +10,11 @@ import type { LogEntry } from "@/lib/history";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { source, target, scopes } = body as {
+  const { source, target, scopes, diffOptions } = body as {
     source: CompareEndpoint;
     target: CompareEndpoint;
     scopes?: ConfigScope[];
+    diffOptions?: { includeMetadata?: boolean; ignoreWhitespace?: boolean };
   };
 
   if (!source?.environment || !target?.environment) {
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
           pullSide("target", target, targetTempDir),
         ]);
 
-        const report = buildReport(source, sourceConfigDir, target, targetConfigDir, scopes);
+        const report = buildReport(source, sourceConfigDir, target, targetConfigDir, scopes, diffOptions);
         enqueue({ type: "report", data: JSON.stringify(report), ts: Date.now() });
         enqueue({ type: "exit", code: 0, ts: Date.now() });
 

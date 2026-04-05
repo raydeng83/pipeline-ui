@@ -111,6 +111,7 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
   const [source, setSource] = useState<Endpoint>({ environment: defaultEnv, mode: "local" });
   const [target, setTarget] = useState<Endpoint>({ environment: defaultEnv, mode: "remote" });
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
+  const [includeMetadata, setIncludeMetadata] = useState(false);
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
@@ -126,7 +127,12 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
   const showConsole = logs.length > 0 || running;
 
   const handleCompare = () => {
-    run("/api/compare", { source, target, scopes });
+    run("/api/compare", {
+      source,
+      target,
+      scopes,
+      diffOptions: { includeMetadata, ignoreWhitespace: true },
+    });
   };
 
   return (
@@ -159,7 +165,7 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
 
         <ScopeSelector selected={scopes} onChange={setScopes} disabled={running} action="compare" />
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <button
             type="button"
             onClick={handleCompare}
@@ -168,6 +174,16 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
           >
             {running ? "Comparing…" : "Compare"}
           </button>
+          <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={includeMetadata}
+              onChange={(e) => setIncludeMetadata(e.target.checked)}
+              disabled={running}
+              className="accent-sky-600"
+            />
+            Include metadata (createdBy, dates, etc.)
+          </label>
           {running && (
             <button
               type="button"

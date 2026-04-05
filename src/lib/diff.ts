@@ -1,9 +1,16 @@
 import fs from "fs";
 import path from "path";
-import type { DiffLine, FileDiff, CompareReport, CompareEndpoint } from "./diff-types";
+import type { DiffLine, FileDiff, CompareReport, CompareEndpoint, DiffOptions } from "./diff-types";
 
 const MAX_LINES = 2000;
 const MAX_CONTENT_BYTES = 200_000; // 200 KB per side
+
+// ── Metadata fields to strip from JSON when not including metadata ───────────
+
+const METADATA_KEYS = new Set([
+  "createdBy", "creationDate", "lastModifiedBy", "lastModifiedDate",
+  "lastChangeDate", "lastChangedBy",
+]);
 
 // ── Scope → directory mapping ────────────────────────────────────────────────
 
@@ -72,11 +79,38 @@ function resolveScopeDirs(configDir: string, scopes: string[]): string[] {
   return dirs;
 }
 
-function normalizeContent(content: string, filePath: string): string {
-  if (filePath.endsWith(".json")) {
-    try { return JSON.stringify(JSON.parse(content), null, 2); } catch { /* fall through */ }
+function stripMetadata(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(stripMetadata);
+  if (obj && typeof obj === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+      if (!METADATA_KEYS.has(k)) out[k] = stripMetadata(v);
+    }
+    return out;
   }
-  return content;
+  return obj;
+}
+
+function normalizeContent(content: string, filePath: string, opts: DiffOptions = {}): string {
+  let result = content;
+
+  // Normalize line endings
+  result = result.replace(/\r\n?/g, "\n");
+
+  if (filePath.endsWith(".json")) {
+    try {
+      let parsed = JSON.parse(result);
+      if (!opts.includeMetadata) parsed = stripMetadata(parsed);
+      result = JSON.stringify(parsed, null, 2);
+    } catch { /* fall through */ }
+  }
+
+  // Ignore whitespace: normalize each line's whitespace
+  if (opts.ignoreWhitespace) {
+    result = result.split("\n").map((line) => line.trim()).join("\n");
+  }
+
+  return result;
 }
 
 function computeLineDiff(aText: string, bText: string): DiffLine[] {
@@ -138,7 +172,8 @@ function walkDir(dir: string, base: string, out: Map<string, string>): void {
 export function compareDirs(
   remoteDir: string,
   localDir: string,
-  scopes?: string[]
+  scopes?: string[],
+  opts: DiffOptions = {},
 ): FileDiff[] {
   const remote = new Map<string, string>();
   const local = new Map<string, string>();
@@ -164,7 +199,7 @@ export function compareDirs(
 
     if (r !== undefined && l === undefined) {
       // Only in remote — added
-      const rNorm = normalizeContent(r, rel);
+      const rNorm = normalizeContent(r, rel, opts);
       const diffLines = rNorm.split("\n").slice(0, MAX_LINES).map((c) => ({ type: "added" as const, content: c }));
       diffs.push({
         relativePath: rel,
@@ -176,7 +211,7 @@ export function compareDirs(
       });
     } else if (r === undefined && l !== undefined) {
       // Only in local — removed
-      const lNorm = normalizeContent(l, rel);
+      const lNorm = normalizeContent(l, rel, opts);
       const diffLines = lNorm.split("\n").slice(0, MAX_LINES).map((c) => ({ type: "removed" as const, content: c }));
       diffs.push({
         relativePath: rel,
@@ -187,8 +222,8 @@ export function compareDirs(
         linesRemoved: diffLines.length,
       });
     } else if (r !== undefined && l !== undefined) {
-      const rNorm = normalizeContent(r, rel);
-      const lNorm = normalizeContent(l, rel);
+      const rNorm = normalizeContent(r, rel, opts);
+      const lNorm = normalizeContent(l, rel, opts);
       if (rNorm === lNorm) {
         diffs.push({ relativePath: rel, status: "unchanged" });
       } else {
@@ -215,15 +250,21 @@ export function buildReport(
   target: CompareEndpoint,
   targetDir: string,
   scopes?: string[],
+  opts: DiffOptions = {},
 ): CompareReport {
-  // targetDir = "new state" (remote), sourceDir = "old state" (local) in diff semantics
-  const files = compareDirs(targetDir, sourceDir, scopes);
+  // Default: ignore whitespace, exclude metadata
+  const effectiveOpts: DiffOptions = {
+    includeMetadata: opts.includeMetadata ?? false,
+    ignoreWhitespace: opts.ignoreWhitespace ?? true,
+  };
+  const files = compareDirs(targetDir, sourceDir, scopes, effectiveOpts);
   const summary = { added: 0, removed: 0, modified: 0, unchanged: 0 };
   for (const f of files) summary[f.status]++;
   return {
     source,
     target,
     generatedAt: new Date().toISOString(),
+    options: effectiveOpts,
     summary,
     files,
   };
