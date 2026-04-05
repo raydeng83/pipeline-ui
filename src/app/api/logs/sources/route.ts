@@ -13,11 +13,12 @@ export async function GET(req: NextRequest) {
   const tenantBaseUrl = vars.TENANT_BASE_URL?.replace(/\/+$/, "");
   if (!tenantBaseUrl) return NextResponse.json({ error: "No TENANT_BASE_URL in environment config." }, { status: 400 });
 
-  const authorization = `Basic ${Buffer.from(`${creds.apiKey}:${creds.apiSecret}`).toString("base64")}`;
-
   try {
     const res = await fetch(`${tenantBaseUrl}/monitoring/logs/sources`, {
-      headers: { Authorization: authorization },
+      headers: {
+        "x-api-key": creds.apiKey,
+        "x-api-secret": creds.apiSecret,
+      },
     });
     if (!res.ok) {
       const body = await res.text();

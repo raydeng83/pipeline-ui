@@ -29,22 +29,22 @@ export async function POST(req: NextRequest) {
   const tenantBaseUrl = vars.TENANT_BASE_URL?.replace(/\/+$/, "");
   if (!tenantBaseUrl) return NextResponse.json({ error: "No TENANT_BASE_URL in environment config." }, { status: 400 });
 
-  const authorization = `Basic ${Buffer.from(`${creds.apiKey}:${creds.apiSecret}`).toString("base64")}`;
+  const authHeaders = {
+    "x-api-key": creds.apiKey,
+    "x-api-secret": creds.apiSecret,
+  };
 
   let url: string;
   if (tail) {
-    // Use the tail endpoint (same as frodo logs tail) — no time params needed
     const params = new URLSearchParams({
       source,
       ...(cookie ? { _pagedResultsCookie: cookie } : {}),
     });
     url = `${tenantBaseUrl}/monitoring/logs/tail?${params}`;
   } else if (transactionId) {
-    // Indexed transaction ID lookup — no time range needed, Ping searches full retention window
     const params = new URLSearchParams({
       source,
       transactionId,
-      _pageSize: String(pageSize),
       ...(cookie ? { _pagedResultsCookie: cookie } : {}),
     });
     url = `${tenantBaseUrl}/monitoring/logs?${params}`;
@@ -53,7 +53,6 @@ export async function POST(req: NextRequest) {
       source,
       beginTime: beginTime!,
       ...(endTime ? { endTime } : {}),
-      _pageSize: String(pageSize),
       ...(cookie ? { _pagedResultsCookie: cookie } : {}),
     });
     url = `${tenantBaseUrl}/monitoring/logs?${params}`;
@@ -61,7 +60,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const res = await fetch(url, {
-      headers: { Authorization: authorization },
+      headers: authHeaders,
     });
     if (!res.ok) {
       const text = await res.text();

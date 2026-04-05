@@ -17,11 +17,13 @@ export async function POST(req: NextRequest) {
 
   const base = tenantBaseUrl.replace(/\/+$/, "");
   const url = `${base}/monitoring/logs/sources`;
-  const credentials = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64");
 
   try {
     const res = await fetch(url, {
-      headers: { Authorization: `Basic ${credentials}` },
+      headers: {
+        "x-api-key": apiKey,
+        "x-api-secret": apiSecret,
+      },
     });
 
     const text = await res.text();

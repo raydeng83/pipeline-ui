@@ -63,6 +63,20 @@ const TRANSACTION_SOURCES = [
 
 // ── Tab config (shared between parent controls and tab content) ──────────────
 
+type LogMode = "tail" | "search";
+type Preset = "15m" | "1h" | "6h" | "24h" | "custom";
+
+const PRESETS: { label: string; value: Preset; ms: number }[] = [
+  { label: "15 min", value: "15m", ms: 15 * 60 * 1000 },
+  { label: "1 hour", value: "1h", ms: 60 * 60 * 1000 },
+  { label: "6 hours", value: "6h", ms: 6 * 60 * 60 * 1000 },
+  { label: "24 hours", value: "24h", ms: 24 * 60 * 60 * 1000 },
+  { label: "Custom", value: "custom", ms: 0 },
+];
+
+function toDatetimeLocal(iso: string): string { return iso.slice(0, 16); }
+function fromDatetimeLocal(val: string): string { return val ? new Date(val).toISOString() : ""; }
+
 export interface TabConfig {
   env: string;
   source: string;
@@ -70,9 +84,18 @@ export interface TabConfig {
   sourcesLoading: boolean;
   sourcesError: string;
   levelFilter: string;
+  mode: LogMode;
   tailSecs: TailSecs;
   tailing: boolean;
   loading: boolean;
+  // Search mode
+  preset: Preset;
+  customBegin: string;
+  customEnd: string;
+  /** Incremented to trigger a search fetch */
+  searchSeq: number;
+  /** True while search is auto-paginating through server pages */
+  searching: boolean;
 }
 
 // ── Field extraction ────────────────────────────────────────────────────────
@@ -618,7 +641,7 @@ export function LogsExplorer({
   onFullscreenChange?: (v: boolean) => void;
   txSearchId?: { id: string; seq: number };
 }) {
-  const { env, source, sources, sourcesLoading, sourcesError, levelFilter, tailSecs, tailing, loading } = config;
+  const { env, source, sources, sourcesLoading, sourcesError, levelFilter, mode, tailSecs, tailing, loading, preset, customBegin, customEnd, searchSeq, searching } = config;
 
   const [keywordsRaw, setKeywordsRaw] = useState("");
   const keywords = keywordsRaw
@@ -703,12 +726,15 @@ export function LogsExplorer({
   // ── Web Worker ──
   const workerRef = useRef<Worker | null>(null);
 
+  const [fetchProgress, setFetchProgress] = useState<{ loaded: number; page: number; done: boolean; paused: boolean } | null>(null);
+
   useEffect(() => {
     const worker = new Worker("/log-worker.js");
     worker.onmessage = (e: MessageEvent) => {
       const msg = e.data as
         | { type: "entries"; entries: LogEntry[]; append: boolean }
         | { type: "status"; loading: boolean }
+        | { type: "progress"; loaded: number; page: number; done: boolean; paused: boolean }
         | { type: "error"; message: string };
 
       if (msg.type === "entries") {
@@ -717,9 +743,13 @@ export function LogsExplorer({
           setFetched(true);
           setLastUpdated(new Date());
           if (!msg.append) { setExpandedIdx(null); setPage(Infinity); }
+          else { setPage(Infinity); }
         });
       } else if (msg.type === "status") {
         onConfigChange({ loading: msg.loading });
+      } else if (msg.type === "progress") {
+        setFetchProgress({ loaded: msg.loaded, page: msg.page, done: msg.done, paused: msg.paused });
+        onConfigChange({ searching: !msg.done });
       } else if (msg.type === "error") {
         setError(msg.message);
         onConfigChange({ loading: false });
@@ -782,6 +812,42 @@ export function LogsExplorer({
     prevTailing.current = tailing;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tailing, tailSecs]);
+
+  // ── React to search mode fetch trigger ──
+  const prevSearchSeq = useRef(0);
+
+  useEffect(() => {
+    if (searchSeq <= prevSearchSeq.current) return;
+    prevSearchSeq.current = searchSeq;
+    if (!env || !source) return;
+
+    // Stop tail if running
+    if (tailing) {
+      onConfigChange({ tailing: false });
+      workerRef.current?.postMessage({ type: "tail-stop" });
+    }
+
+    // Compute time range
+    let beginTime: string;
+    let endTime: string;
+    if (preset === "custom") {
+      beginTime = fromDatetimeLocal(customBegin);
+      endTime = fromDatetimeLocal(customEnd);
+    } else {
+      const ms = PRESETS.find((p) => p.value === preset)!.ms;
+      const now = new Date();
+      beginTime = new Date(now.getTime() - ms).toISOString();
+      endTime = now.toISOString();
+    }
+
+    setError("");
+    setEntries([]);
+    setFetched(false);
+    setExpandedIdx(null);
+    setFetchProgress(null);
+    workerRef.current?.postMessage({ type: "fetch", env, source, beginTime, endTime });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchSeq]);
 
   // ── Filtered entries ──
   const levelFiltered = levelFilter === "ALL"
@@ -879,43 +945,131 @@ export function LogsExplorer({
 
           {/* Toolbar */}
           <div className="flex flex-col border-b border-slate-100 bg-slate-50/50 shrink-0">
-            {/* Row 1: tail button + keyword highlights */}
+            {/* Row 1: mode toggle + tail/search controls + keyword highlights */}
             <div className="flex items-center gap-2 px-4 py-2">
-              {!tailing ? (
-                <div className="flex items-center gap-1 shrink-0">
+              {/* Mode toggle */}
+              <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
+                {(["tail", "search"] as LogMode[]).map((m) => (
                   <button
+                    key={m}
                     type="button"
-                    onClick={() => onConfigChange({ tailing: true })}
-                    disabled={loading || !source || !!sourcesError}
-                    className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
+                    onClick={() => {
+                      if (tailing) onConfigChange({ tailing: false });
+                      onConfigChange({ mode: m });
+                    }}
+                    disabled={loading || searching}
+                    className={cn(
+                      "px-2 py-0.5 text-[11px] font-medium transition-colors",
+                      mode === m
+                        ? "bg-slate-900 text-white"
+                        : "bg-white text-slate-500 hover:bg-slate-50"
+                    )}
                   >
-                    {loading ? "Fetching…" : "Tail Logs"}
+                    {m === "tail" ? "Tail" : "Search"}
                   </button>
-                  {([5, 10, 30] as TailSecs[]).map((s) => (
+                ))}
+              </div>
+
+              {/* Tail mode controls */}
+              {mode === "tail" && (
+                <>
+                  {!tailing ? (
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => onConfigChange({ tailing: true })}
+                        disabled={loading || searching || !source || !!sourcesError}
+                        className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
+                      >
+                        {loading ? "Fetching…" : "Tail Logs"}
+                      </button>
+                      {([5, 10, 30] as TailSecs[]).map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => onConfigChange({ tailSecs: s })}
+                          className={cn(
+                            "px-2 py-1 text-xs rounded border transition-colors",
+                            tailSecs === s
+                              ? "bg-slate-700 border-slate-700 text-white"
+                              : "border-slate-300 text-slate-500 hover:bg-slate-50"
+                          )}
+                        >
+                          {s}s
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
                     <button
-                      key={s}
                       type="button"
-                      onClick={() => onConfigChange({ tailSecs: s })}
+                      onClick={() => onConfigChange({ tailing: false })}
+                      className="px-3 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors shrink-0"
+                    >
+                      Stop Tail
+                    </button>
+                  )}
+                </>
+              )}
+
+              {/* Search mode controls */}
+              {mode === "search" && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {PRESETS.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => onConfigChange({ preset: p.value })}
+                      disabled={searching}
                       className={cn(
-                        "px-2 py-1 text-xs rounded border transition-colors",
-                        tailSecs === s
-                          ? "bg-slate-700 border-slate-700 text-white"
+                        "px-2 py-0.5 text-[11px] rounded border transition-colors",
+                        preset === p.value
+                          ? "bg-sky-600 border-sky-600 text-white"
                           : "border-slate-300 text-slate-500 hover:bg-slate-50"
                       )}
                     >
-                      {s}s
+                      {p.label}
                     </button>
                   ))}
+                  {preset === "custom" && (
+                    <>
+                      <input
+                        type="datetime-local"
+                        value={customBegin}
+                        onChange={(e) => onConfigChange({ customBegin: e.target.value })}
+                        disabled={searching}
+                        className="rounded border border-slate-300 px-1.5 py-0.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-sky-500"
+                      />
+                      <span className="text-slate-400 text-[11px]">→</span>
+                      <input
+                        type="datetime-local"
+                        value={customEnd}
+                        onChange={(e) => onConfigChange({ customEnd: e.target.value })}
+                        disabled={searching}
+                        className="rounded border border-slate-300 px-1.5 py-0.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-sky-500"
+                      />
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onConfigChange({ searchSeq: (searchSeq ?? 0) + 1 })}
+                    disabled={loading || searching || !source || !!sourcesError}
+                    className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors flex items-center gap-1"
+                  >
+                    {searching ? (
+                      <>
+                        <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Running…
+                      </>
+                    ) : (
+                      "Search"
+                    )}
+                  </button>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onConfigChange({ tailing: false })}
-                  className="px-3 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors shrink-0"
-                >
-                  Stop Tail
-                </button>
               )}
+
               <span className="text-slate-300 select-none shrink-0">|</span>
               <label className="text-xs font-medium text-slate-500 shrink-0">Highlight</label>
               <input
@@ -1081,6 +1235,53 @@ export function LogsExplorer({
               </div>
             </div>
           )}
+
+          {/* Search progress indicator */}
+          {fetchProgress && !fetchProgress.done && (
+            <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-sky-50/50 shrink-0">
+              <div className="flex items-center gap-2">
+                {fetchProgress.paused ? (
+                  <span className="inline-block w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                ) : (
+                  <svg className="w-3 h-3 animate-spin text-sky-600 shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                )}
+                <span className="text-xs text-slate-600">
+                  {fetchProgress.paused
+                    ? `Paused — ${fetchProgress.loaded.toLocaleString()} entries loaded (page ${fetchProgress.page})`
+                    : `Fetching page ${fetchProgress.page}… ${fetchProgress.loaded.toLocaleString()} entries loaded`}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {fetchProgress.paused ? (
+                  <button
+                    type="button"
+                    onClick={() => workerRef.current?.postMessage({ type: "fetch-resume" })}
+                    className="px-2.5 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 transition-colors"
+                  >
+                    Resume
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => workerRef.current?.postMessage({ type: "fetch-pause" })}
+                    className="px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors"
+                  >
+                    Pause
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => workerRef.current?.postMessage({ type: "fetch-stop" })}
+                  className="px-2.5 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                >
+                  Stop
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
       {/* ── Transaction drill-down modal ── */}
@@ -1113,9 +1314,15 @@ function makeDefaultConfig(environments: EnvWithLogApi[]): TabConfig {
     sourcesLoading: false,
     sourcesError: "",
     levelFilter: "ALL",
+    mode: "tail",
     tailSecs: 5,
     tailing: false,
     loading: false,
+    preset: "1h",
+    customBegin: toDatetimeLocal(new Date(Date.now() - 3600000).toISOString()),
+    customEnd: toDatetimeLocal(new Date().toISOString()),
+    searchSeq: 0,
+    searching: false,
   };
 }
 
