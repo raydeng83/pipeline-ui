@@ -292,15 +292,11 @@ function EntryRow({
           <LevelBadge level={level} />
         </td>
         {isText ? (
-          // Plain text entries: span message across component + message + transaction columns
-          <td colSpan={3} className="px-2 py-2 text-slate-700 align-top font-mono text-[11px]">
+          <td colSpan={2} className="px-2 py-2 text-slate-700 align-top font-mono text-[11px]">
             <span className="line-clamp-2 break-all whitespace-pre-wrap">{highlight(message)}</span>
           </td>
         ) : (
           <>
-            <td className="px-2 py-2 text-slate-500 whitespace-nowrap align-top max-w-[180px] truncate font-mono text-[11px]">
-              {highlight(component)}
-            </td>
             <td className="px-2 py-2 text-slate-800 align-top">
               <span className="line-clamp-2 break-all">{highlight(message)}</span>
               <span className="flex items-center gap-2 mt-0.5">
@@ -325,7 +321,7 @@ function EntryRow({
                   className="font-mono text-[10px] text-sky-600 hover:text-sky-800 hover:underline truncate max-w-[130px] block"
                   title={transactionId}
                 >
-                  {transactionId.slice(0, 16)}{transactionId.length > 16 ? "…" : ""}
+                  {transactionId.length > 20 ? `${transactionId.slice(0, 8)}…${transactionId.slice(-8)}` : transactionId}
                 </button>
               ) : null}
             </td>
@@ -337,7 +333,7 @@ function EntryRow({
       </tr>
       {expanded && (
         <tr className="bg-slate-950 border-b border-slate-700">
-          <td colSpan={7} className="p-0">
+          <td colSpan={6} className="p-0">
             <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto whitespace-pre-wrap break-all max-h-96 overflow-y-auto leading-5">
               {isText ? getTextPayload(entry) : JSON.stringify(entry.payload, null, 2)}
             </pre>
@@ -523,8 +519,11 @@ export function LogsExplorer({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // ── Fullscreen ──
+  // ── Resize + fullscreen ──
+  const [tableHeight, setTableHeight] = useState(420);
   const [fullscreen, setFullscreen] = useState(false);
+  const grow = () => setTableHeight((h) => Math.min(window.innerHeight - 100, h + 50));
+  const shrink = () => setTableHeight((h) => Math.max(200, h - 50));
 
   // ESC exits fullscreen
   useEffect(() => {
@@ -657,9 +656,43 @@ export function LogsExplorer({
             {loading && !tailing && " · loading…"}
           </span>
         )}
+        {fetched && !tailing && (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                const data = JSON.stringify(filtered.map((e) => ({ timestamp: e.timestamp, source: e.source, type: e.type, payload: e.payload })), null, 2);
+                const blob = new Blob([data], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `logs-${source}-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              Export
+            </button>
+            <button
+              type="button"
+              onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); setSearch(""); setExpandedIdx(null); } }}
+              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              Clear
+            </button>
+          </>
+        )}
         {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
         {error && <span className="text-xs text-red-500">{error}</span>}
       </div>
+
+      {/* ── Placeholder when no logs fetched yet ── */}
+      {!fetched && (
+        <div className="flex items-center justify-center h-48 rounded-lg border border-dashed border-slate-200 bg-slate-50">
+          <p className="text-sm text-slate-400">Select a source and click Tail Logs to start</p>
+        </div>
+      )}
 
       {/* ── Results ── */}
       {fetched && (
@@ -684,6 +717,31 @@ export function LogsExplorer({
             <span className="text-xs text-slate-400 whitespace-nowrap">
               {filtered.length} / {entries.length}
             </span>
+            {/* Height +/- and fullscreen controls */}
+            {!fullscreen && (
+              <div className="flex items-center gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={shrink}
+                  title="Shrink"
+                  className="text-slate-400 hover:text-slate-600 transition-colors p-0.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={grow}
+                  title="Grow"
+                  className="text-slate-400 hover:text-slate-600 transition-colors p-0.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
+                  </svg>
+                </button>
+              </div>
+            )}
             <button
               type="button"
               onClick={() => setFullscreen((f) => !f)}
@@ -709,7 +767,7 @@ export function LogsExplorer({
               "overflow-y-auto overflow-x-auto",
               fullscreen ? "flex-1" : "resize-y min-h-[200px]"
             )}
-            style={fullscreen ? undefined : { height: 420 }}
+            style={fullscreen ? undefined : { height: tableHeight }}
           >
             {!deferredIsActive ? null : filtered.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400">
@@ -722,7 +780,6 @@ export function LogsExplorer({
                     <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
                     <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
                     <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
-                    <th className="px-2 py-2 font-semibold text-slate-500">Component</th>
                     <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
                     <th className="px-2 py-2 font-semibold text-slate-500">Transaction</th>
                     <th className="w-6" />
