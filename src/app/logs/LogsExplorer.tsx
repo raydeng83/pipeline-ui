@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue } from "react";
+import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue, useCallback } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -14,15 +14,29 @@ interface EnvWithLogApi extends Environment {
 interface LogEntry {
   timestamp: string;
   type: string;
-  source?: string;  // per-entry source (present in am-everything and idm-everything responses)
-  payload: Record<string, unknown>;
+  source?: string;
+  payload: Record<string, unknown> | string;
 }
 
-type Preset = "15m" | "1h" | "6h" | "24h" | "custom";
+/** Safely access payload as an object. Returns empty object for text/plain entries. */
+function payloadObj(entry: LogEntry): Record<string, unknown> {
+  return typeof entry.payload === "object" && entry.payload !== null ? entry.payload : {};
+}
+
+/** Check if entry is plain text (idm-core, am-core text logs). */
+function isTextEntry(entry: LogEntry): boolean {
+  return entry.type === "text/plain" || typeof entry.payload === "string";
+}
+
+/** Get the display text for a plain-text entry. */
+function getTextPayload(entry: LogEntry): string {
+  return typeof entry.payload === "string" ? entry.payload : "";
+}
+
 type TailSecs = 5 | 10 | 30;
 
-// Client-side level filter: severity order (higher index = less severe)
-const LEVEL_ORDER = ["FATAL", "ERROR", "WARN", "WARNING", "INFO", "INFORMATION", "CONFIG", "DEBUG", "TRACE"];
+// Client-side level filter
+const LEVEL_ORDER = ["FATAL", "SEVERE", "ERROR", "WARN", "WARNING", "INFO", "INFORMATION", "CONFIG", "DEBUG", "FINE", "FINER", "TRACE", "FINEST"];
 
 const LEVEL_FILTERS = [
   { value: "ERROR", label: "ERROR+" },
@@ -36,18 +50,10 @@ function levelPassesFilter(level: string, minLevel: string): boolean {
   if (minLevel === "ALL") return true;
   const idx = LEVEL_ORDER.indexOf(level.toUpperCase());
   const minIdx = LEVEL_ORDER.indexOf(minLevel.toUpperCase());
-  if (idx === -1) return true; // unknown level — show it
+  if (idx === -1) return true;
   if (minIdx === -1) return true;
   return idx <= minIdx;
 }
-
-const PRESETS: { label: string; value: Preset; ms: number }[] = [
-  { label: "15 min", value: "15m", ms: 15 * 60 * 1000 },
-  { label: "1 hour", value: "1h", ms: 60 * 60 * 1000 },
-  { label: "6 hours", value: "6h", ms: 6 * 60 * 60 * 1000 },
-  { label: "24 hours", value: "24h", ms: 24 * 60 * 60 * 1000 },
-  { label: "Custom", value: "custom", ms: 0 },
-];
 
 // Sources queried for transaction drill-down
 const TRANSACTION_SOURCES = [
@@ -55,57 +61,122 @@ const TRANSACTION_SOURCES = [
   "idm-access", "idm-activity", "idm-authentication",
 ];
 
-// ── Field extraction ──────────────────────────────────────────────────────────
+// ── Tab config (shared between parent controls and tab content) ──────────────
 
-function getLevel(payload: Record<string, unknown>): string {
-  if (typeof payload.level === "string") return payload.level.toUpperCase();
-  if (typeof payload.severity === "string") return payload.severity.toUpperCase();
-  if (payload.result === "FAILED" || payload.result === "false") return "WARN";
-  const resp = payload.response as Record<string, unknown> | undefined;
+export interface TabConfig {
+  env: string;
+  source: string;
+  sources: string[];
+  sourcesLoading: boolean;
+  sourcesError: string;
+  levelFilter: string;
+  tailSecs: TailSecs;
+  tailing: boolean;
+  loading: boolean;
+}
+
+// ── Field extraction ────────────────────────────────────────────────────────
+
+/** Parse level from plain-text log line (e.g. "FINE:", "WARNING:", "SEVERE:") */
+function parseTextLevel(text: string): string {
+  const match = text.match(/^(FINEST|FINER|FINE|CONFIG|INFO|INFORMATION|WARNING|SEVERE|FATAL):/);
+  if (match) return match[1].toUpperCase();
+  return "INFO";
+}
+
+/** Parse class name from plain-text log line (e.g. "[147] Apr 05 ... org.foo.Bar method") */
+function parseTextComponent(text: string): string {
+  // Pattern: [threadId] date time AM/PM org.package.Class methodName
+  const match = text.match(/\d{4}\s+(?:AM|PM)\s+([\w.]+)\s+\w+$/);
+  if (match) {
+    const parts = match[1].split(".");
+    return parts[parts.length - 1];
+  }
+  return "";
+}
+
+function getLevel(entry: LogEntry): string {
+  if (isTextEntry(entry)) {
+    const text = getTextPayload(entry);
+    return parseTextLevel(text);
+  }
+  const p = payloadObj(entry);
+  if (typeof p.level === "string") return p.level.toUpperCase();
+  if (typeof p.severity === "string") return p.severity.toUpperCase();
+  if (p.result === "FAILED" || p.result === "false") return "WARN";
+  const resp = p.response as Record<string, unknown> | undefined;
   if (resp?.status === "FAILED") return "WARN";
   return "INFO";
 }
 
-function getMessage(payload: Record<string, unknown>): string {
-  if (typeof payload.message === "string" && payload.message) return payload.message;
-  const eventName = payload.eventName as string | undefined;
+function getMessage(entry: LogEntry): string {
+  if (isTextEntry(entry)) return getTextPayload(entry);
+  const p = payloadObj(entry);
+  if (typeof p.message === "string" && p.message) return p.message;
+  const eventName = p.eventName as string | undefined;
   if (eventName === "AM-NODE-LOGIN-COMPLETED") {
-    const entries = payload.entries as Array<{ info?: Record<string, string> }> | undefined;
+    const entries = p.entries as Array<{ info?: Record<string, string> }> | undefined;
     const info = entries?.[0]?.info;
     if (info?.displayName) return `${info.displayName} → ${info.nodeOutcome ?? ""}`;
   }
   if (eventName) {
     const parts: string[] = [eventName];
-    if (typeof payload.result === "string") parts.push(`→ ${payload.result}`);
-    const userId = payload.userId;
+    if (typeof p.result === "string") parts.push(`→ ${p.result}`);
+    const userId = p.userId;
     if (typeof userId === "string" && userId) parts.push(`[${userId}]`);
     return parts.join(" ");
   }
-  const req = payload.request as Record<string, unknown> | undefined;
-  if (typeof req?.path === "string") return `${payload.http_method ?? ""} ${req.path}`.trim();
+  // IDM access: show operation + task/path
+  const req = p.request as Record<string, unknown> | undefined;
+  if (req) {
+    const op = typeof req.operation === "string" ? req.operation : "";
+    const detail = req.detail as Record<string, unknown> | undefined;
+    const taskName = typeof detail?.taskName === "string" ? detail.taskName : "";
+    const path = typeof req.path === "string" ? req.path : "";
+    if (op && taskName) return `${op}: ${taskName}`;
+    if (op && path) return `${op} ${path}`;
+    if (path) return `${p.http_method ?? ""} ${path}`.trim();
+  }
   return "(no message)";
 }
 
-function getComponent(payload: Record<string, unknown>, source: string): string {
-  if (typeof payload.component === "string" && payload.component) return payload.component;
-  if (typeof payload.logger === "string" && payload.logger) {
-    // Extract script name from: scripts.TYPE.uuid.(ScriptName)
-    const match = payload.logger.match(/\(([^)]+)\)$/);
+function getComponent(entry: LogEntry, source: string): string {
+  if (isTextEntry(entry)) return parseTextComponent(getTextPayload(entry)) || source;
+  const p = payloadObj(entry);
+  if (typeof p.component === "string" && p.component) return p.component;
+  if (typeof p.logger === "string" && p.logger) {
+    const match = p.logger.match(/\(([^)]+)\)$/);
     if (match) return match[1];
-    const parts = payload.logger.split(".");
+    const parts = p.logger.split(".");
     return parts[parts.length - 1];
   }
+  // IDM access: show protocol
+  const req = p.request as Record<string, unknown> | undefined;
+  if (typeof req?.protocol === "string") return req.protocol;
   return source;
 }
 
-function getTransactionId(payload: Record<string, unknown>): string {
-  if (typeof payload.transactionId === "string") return payload.transactionId;
+function getTransactionId(entry: LogEntry): string {
+  const p = payloadObj(entry);
+  if (typeof p.transactionId === "string") return p.transactionId;
+  // Check mdc.transactionId (am-core pattern)
+  const mdc = p.mdc as Record<string, unknown> | undefined;
+  if (typeof mdc?.transactionId === "string") return mdc.transactionId;
   return "";
 }
 
-function getUserId(payload: Record<string, unknown>): string {
-  if (typeof payload.userId === "string" && payload.userId) return payload.userId;
-  if (Array.isArray(payload.principal) && payload.principal.length > 0) return String(payload.principal[0]);
+function getUserId(entry: LogEntry): string {
+  const p = payloadObj(entry);
+  if (typeof p.userId === "string" && p.userId) return p.userId;
+  if (Array.isArray(p.principal) && p.principal.length > 0) return String(p.principal[0]);
+  return "";
+}
+
+function getStatus(entry: LogEntry): string {
+  const p = payloadObj(entry);
+  const resp = p.response as Record<string, unknown> | undefined;
+  if (typeof resp?.status === "string") return resp.status;
+  if (typeof p.result === "string") return p.result;
   return "";
 }
 
@@ -114,11 +185,17 @@ function getUserId(payload: Record<string, unknown>): string {
 const LEVEL_STYLES: Record<string, string> = {
   ERROR: "bg-red-100 text-red-700 border border-red-200",
   FATAL: "bg-red-100 text-red-700 border border-red-200",
+  SEVERE: "bg-red-100 text-red-700 border border-red-200",
   WARN: "bg-yellow-100 text-yellow-700 border border-yellow-200",
   WARNING: "bg-yellow-100 text-yellow-700 border border-yellow-200",
   INFO: "bg-sky-50 text-sky-700 border border-sky-200",
+  INFORMATION: "bg-sky-50 text-sky-700 border border-sky-200",
+  CONFIG: "bg-sky-50 text-sky-700 border border-sky-200",
   DEBUG: "bg-slate-100 text-slate-600 border border-slate-200",
+  FINE: "bg-slate-100 text-slate-600 border border-slate-200",
+  FINER: "bg-slate-100 text-slate-500 border border-slate-200",
   TRACE: "bg-slate-100 text-slate-500 border border-slate-200",
+  FINEST: "bg-slate-100 text-slate-500 border border-slate-200",
 };
 
 function LevelBadge({ level }: { level: string }) {
@@ -142,7 +219,7 @@ function SourceBadge({ source }: { source: string }) {
   );
 }
 
-// ── Timestamp formatting ──────────────────────────────────────────────────────
+// ── Timestamp formatting ────────────────────────────────────────────────────
 
 function formatTs(ts: string): { date: string; time: string } {
   try {
@@ -156,17 +233,7 @@ function formatTs(ts: string): { date: string; time: string } {
   }
 }
 
-// ── Datetime-local helpers ────────────────────────────────────────────────────
-
-function toDatetimeLocal(iso: string): string {
-  return iso.slice(0, 16);
-}
-
-function fromDatetimeLocal(val: string): string {
-  return val ? new Date(val).toISOString() : "";
-}
-
-// ── Entry row ─────────────────────────────────────────────────────────────────
+// ── Entry row ────────────────────────────────────────────────────────────────
 
 function EntryRow({
   entry,
@@ -184,12 +251,14 @@ function EntryRow({
   onTransactionClick: (txId: string, timestamp: string) => void;
 }) {
   const effectiveSource = entry.source ?? source;
-  const level = getLevel(entry.payload);
-  const message = getMessage(entry.payload);
-  const component = getComponent(entry.payload, effectiveSource);
-  const transactionId = getTransactionId(entry.payload);
-  const userId = getUserId(entry.payload);
+  const level = getLevel(entry);
+  const message = getMessage(entry);
+  const component = getComponent(entry, effectiveSource);
+  const transactionId = getTransactionId(entry);
+  const userId = getUserId(entry);
+  const status = getStatus(entry);
   const { date, time } = formatTs(entry.timestamp);
+  const isText = isTextEntry(entry);
 
   function highlight(text: string) {
     if (!searchTerm) return <>{text}</>;
@@ -222,27 +291,46 @@ function EntryRow({
         <td className="px-2 py-2 whitespace-nowrap align-top">
           <LevelBadge level={level} />
         </td>
-        <td className="px-2 py-2 text-slate-500 whitespace-nowrap align-top max-w-[180px] truncate font-mono text-[11px]">
-          {highlight(component)}
-        </td>
-        <td className="px-2 py-2 text-slate-800 align-top">
-          <span className="line-clamp-2 break-all">{highlight(message)}</span>
-          {userId && (
-            <span className="text-slate-400 font-mono text-[10px] block mt-0.5">{highlight(userId)}</span>
-          )}
-        </td>
-        <td className="px-2 py-2 whitespace-nowrap align-top">
-          {transactionId ? (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onTransactionClick(transactionId, entry.timestamp); }}
-              className="font-mono text-[10px] text-sky-600 hover:text-sky-800 hover:underline truncate max-w-[130px] block"
-              title={transactionId}
-            >
-              {transactionId.slice(0, 16)}{transactionId.length > 16 ? "…" : ""}
-            </button>
-          ) : null}
-        </td>
+        {isText ? (
+          // Plain text entries: span message across component + message + transaction columns
+          <td colSpan={3} className="px-2 py-2 text-slate-700 align-top font-mono text-[11px]">
+            <span className="line-clamp-2 break-all whitespace-pre-wrap">{highlight(message)}</span>
+          </td>
+        ) : (
+          <>
+            <td className="px-2 py-2 text-slate-500 whitespace-nowrap align-top max-w-[180px] truncate font-mono text-[11px]">
+              {highlight(component)}
+            </td>
+            <td className="px-2 py-2 text-slate-800 align-top">
+              <span className="line-clamp-2 break-all">{highlight(message)}</span>
+              <span className="flex items-center gap-2 mt-0.5">
+                {userId && (
+                  <span className="text-slate-400 font-mono text-[10px]">{highlight(userId)}</span>
+                )}
+                {status && (
+                  <span className={cn(
+                    "text-[10px] font-mono px-1 py-0.5 rounded leading-none",
+                    status === "SUCCESSFUL" ? "text-emerald-700 bg-emerald-50" : status === "FAILED" ? "text-red-700 bg-red-50" : "text-slate-500 bg-slate-50"
+                  )}>
+                    {status}
+                  </span>
+                )}
+              </span>
+            </td>
+            <td className="px-2 py-2 whitespace-nowrap align-top">
+              {transactionId ? (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onTransactionClick(transactionId, entry.timestamp); }}
+                  className="font-mono text-[10px] text-sky-600 hover:text-sky-800 hover:underline truncate max-w-[130px] block"
+                  title={transactionId}
+                >
+                  {transactionId.slice(0, 16)}{transactionId.length > 16 ? "…" : ""}
+                </button>
+              ) : null}
+            </td>
+          </>
+        )}
         <td className="px-2 py-2 text-slate-300 align-top text-center">
           <span className={cn("inline-block transition-transform text-[10px]", expanded && "rotate-90")}>▶</span>
         </td>
@@ -251,7 +339,7 @@ function EntryRow({
         <tr className="bg-slate-950 border-b border-slate-700">
           <td colSpan={7} className="p-0">
             <pre className="p-4 text-xs font-mono text-green-300 overflow-x-auto whitespace-pre-wrap break-all max-h-96 overflow-y-auto leading-5">
-              {JSON.stringify(entry.payload, null, 2)}
+              {isText ? getTextPayload(entry) : JSON.stringify(entry.payload, null, 2)}
             </pre>
           </td>
         </tr>
@@ -260,7 +348,7 @@ function EntryRow({
   );
 }
 
-// ── Transaction drill-down modal ──────────────────────────────────────────────
+// ── Transaction drill-down modal ────────────────────────────────────────────
 
 function TransactionDrilldown({
   transactionId,
@@ -304,7 +392,7 @@ function TransactionDrilldown({
           .then((data): (LogEntry & { source: string })[] => {
             if (data.error || !Array.isArray(data.result)) return [];
             return (data.result as LogEntry[])
-              .filter((e) => getTransactionId(e.payload) === transactionId)
+              .filter((e) => getTransactionId(e) === transactionId)
               .map((e) => ({ ...e, source: src }));
           })
           .catch(() => [] as (LogEntry & { source: string })[])
@@ -328,7 +416,6 @@ function TransactionDrilldown({
         className="bg-white rounded-lg border border-slate-200 shadow-xl w-full max-w-4xl max-h-[80vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-sm font-semibold text-slate-700 shrink-0">Transaction Trace</span>
@@ -336,26 +423,15 @@ function TransactionDrilldown({
               {transactionId}
             </code>
           </div>
-          <button
-            onClick={onClose}
-            className="ml-4 shrink-0 text-slate-400 hover:text-slate-700 text-lg leading-none"
-          >
-            ✕
-          </button>
+          <button onClick={onClose} className="ml-4 shrink-0 text-slate-400 hover:text-slate-700 text-lg leading-none">✕</button>
         </div>
-
-        {/* Body */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="p-8 text-center text-sm text-slate-400">
-              Querying {sourcesQueried} source{sourcesQueried !== 1 ? "s" : ""}…
-            </div>
+            <div className="p-8 text-center text-sm text-slate-400">Querying {sourcesQueried} source{sourcesQueried !== 1 ? "s" : ""}…</div>
           ) : error ? (
             <div className="p-8 text-center text-sm text-red-500">{error}</div>
           ) : entries.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-400">
-              No entries found for this transaction ID in the ±5 min window.
-            </div>
+            <div className="p-8 text-center text-sm text-slate-400">No entries found for this transaction ID in the ±5 min window.</div>
           ) : (
             <table className="w-full text-xs border-collapse">
               <thead>
@@ -369,27 +445,20 @@ function TransactionDrilldown({
               </thead>
               <tbody>
                 {entries.map((entry, i) => {
-                  const level = getLevel(entry.payload);
-                  const message = getMessage(entry.payload);
+                  const level = getLevel(entry);
+                  const message = getMessage(entry);
                   const { date, time } = formatTs(entry.timestamp);
                   return (
                     <Fragment key={i}>
                       <tr
                         onClick={() => setExpandedIdx(expandedIdx === i ? null : i)}
-                        className={cn(
-                          "cursor-pointer border-b border-slate-100 hover:bg-slate-50 transition-colors",
-                          expandedIdx === i && "bg-slate-50"
-                        )}
+                        className={cn("cursor-pointer border-b border-slate-100 hover:bg-slate-50 transition-colors", expandedIdx === i && "bg-slate-50")}
                       >
                         <td className="px-3 py-2 font-mono text-slate-400 whitespace-nowrap">
                           <span className="text-slate-300 text-[10px]">{date} </span>{time}
                         </td>
-                        <td className="px-2 py-2 whitespace-nowrap">
-                          <SourceBadge source={entry.source} />
-                        </td>
-                        <td className="px-2 py-2 whitespace-nowrap">
-                          <LevelBadge level={level} />
-                        </td>
+                        <td className="px-2 py-2 whitespace-nowrap"><SourceBadge source={entry.source} /></td>
+                        <td className="px-2 py-2 whitespace-nowrap"><LevelBadge level={level} /></td>
                         <td className="px-2 py-2 text-slate-800 break-all">{message}</td>
                         <td className="px-2 py-2 text-slate-300 text-center">
                           <span className={cn("inline-block transition-transform text-[10px]", expandedIdx === i && "rotate-90")}>▶</span>
@@ -411,8 +480,6 @@ function TransactionDrilldown({
             </table>
           )}
         </div>
-
-        {/* Footer */}
         {!loading && !error && (
           <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0 text-xs text-slate-400">
             {entries.length} {entries.length === 1 ? "entry" : "entries"} across{" "}
@@ -425,33 +492,24 @@ function TransactionDrilldown({
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── LogsExplorer (tab content — no controls, receives config from parent) ───
 
 export function LogsExplorer({
   environments,
+  config,
+  onConfigChange,
   onLabelChange,
   isActive = true,
 }: {
   environments: EnvWithLogApi[];
+  config: TabConfig;
+  onConfigChange: (updates: Partial<TabConfig>) => void;
   onLabelChange?: (label: string) => void;
   isActive?: boolean;
 }) {
-  const defaultEnv = environments.find((e) => e.hasLogApi) ?? environments[0];
-
-  const [env, setEnv] = useState(defaultEnv?.name ?? "");
-  const [sources, setSources] = useState<string[]>([]);
-  const [sourcesLoading, setSourcesLoading] = useState(false);
-  const [sourcesError, setSourcesError] = useState("");
-  const [source, setSource] = useState("");
-
-  const [levelFilter, setLevelFilter] = useState("INFO");
-
-  const [preset, setPreset] = useState<Preset>("1h");
-  const [customBegin, setCustomBegin] = useState(() => toDatetimeLocal(new Date(Date.now() - 3600000).toISOString()));
-  const [customEnd, setCustomEnd] = useState(() => toDatetimeLocal(new Date().toISOString()));
+  const { env, source, sources, sourcesLoading, sourcesError, levelFilter, tailSecs, tailing, loading } = config;
 
   const [entries, setEntries] = useState<LogEntry[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fetched, setFetched] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -463,18 +521,25 @@ export function LogsExplorer({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
 
-  // ── Live tail ──
-  const [tailing, setTailing] = useState(false);
-  const [tailSecs, setTailSecs] = useState<TailSecs>(10);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // ── Fullscreen ──
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // ESC exits fullscreen
+  useEffect(() => {
+    if (!fullscreen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [fullscreen]);
 
   // ── Transaction drill-down ──
   const [drilldown, setDrilldown] = useState<{ txId: string; timestamp: string } | null>(null);
 
-  // Defer table rendering so tab switches are instant even with large entry sets
   const deferredIsActive = useDeferredValue(isActive);
 
-  // ── Web Worker — owns all fetch and tail interval logic ──
+  // ── Web Worker ──
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
@@ -493,14 +558,15 @@ export function LogsExplorer({
           if (!msg.append) { setExpandedIdx(null); setPage(Infinity); }
         });
       } else if (msg.type === "status") {
-        setLoading(msg.loading);
+        onConfigChange({ loading: msg.loading });
       } else if (msg.type === "error") {
         setError(msg.message);
-        setLoading(false);
+        onConfigChange({ loading: false });
       }
     };
     workerRef.current = worker;
     return () => worker.terminate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Sync tab label ──
@@ -513,24 +579,20 @@ export function LogsExplorer({
   useEffect(() => {
     if (!env) return;
     workerRef.current?.postMessage({ type: "cancel" });
-    setSourcesLoading(true);
-    setSourcesError("");
-    setSources([]);
-    setSource("");
+    onConfigChange({ sourcesLoading: true, sourcesError: "", sources: [], source: "", tailing: false });
     setEntries([]);
     setFetched(false);
-    setTailing(false);
 
     fetch(`/api/logs/sources?env=${encodeURIComponent(env)}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) { setSourcesError(data.error); return; }
+        if (data.error) { onConfigChange({ sourcesError: data.error, sourcesLoading: false }); return; }
         const list: string[] = Array.isArray(data.result) ? data.result : [];
-        setSources(list);
-        setSource(list[0] ?? "");
+        const defaultSource = list.includes("am-everything") ? "am-everything" : list[0] ?? "";
+        onConfigChange({ sources: list, source: defaultSource, sourcesLoading: false });
       })
-      .catch((e) => setSourcesError(String(e)))
-      .finally(() => setSourcesLoading(false));
+      .catch((e) => onConfigChange({ sourcesError: String(e), sourcesLoading: false }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [env]);
 
   // ── Auto-scroll when tailing ──
@@ -541,47 +603,29 @@ export function LogsExplorer({
     }
   }, [entries, tailing, isActive]);
 
-  // ── Time range ──
-  function getRange(): { beginTime: string; endTime: string } {
-    if (preset === "custom") {
-      return { beginTime: fromDatetimeLocal(customBegin), endTime: fromDatetimeLocal(customEnd) };
-    }
-    const ms = PRESETS.find((p) => p.value === preset)!.ms;
-    const now = new Date();
-    return { beginTime: new Date(now.getTime() - ms).toISOString(), endTime: now.toISOString() };
-  }
+  // ── React to tailing / tailSecs changes from parent config ──
+  const prevTailing = useRef(false);
 
-  const fetchLogs = () => {
-    if (!env || !source) return;
-    setError("");
-    setTailing(false);
-    const { beginTime, endTime } = getRange();
-    workerRef.current?.postMessage({ type: "fetch", env, source, beginTime, endTime, pageSize: 50 });
-  };
-
-  const stopTail = () => {
-    setTailing(false);
-    workerRef.current?.postMessage({ type: "tail-stop" });
-  };
-
-  const startTail = () => {
-    setError("");
-    setTailing(true);
-    workerRef.current?.postMessage({ type: "tail-start", env, source, tailSecs });
-  };
-
-  // Restart tail when tailSecs changes while already tailing
   useEffect(() => {
-    if (tailing) {
+    if (tailing && !prevTailing.current) {
+      // Start tail
+      setError("");
+      workerRef.current?.postMessage({ type: "tail-start", env, source, tailSecs });
+    } else if (!tailing && prevTailing.current) {
+      // Stop tail
+      workerRef.current?.postMessage({ type: "tail-stop" });
+    } else if (tailing && prevTailing.current) {
+      // Restart tail (tailSecs changed)
       workerRef.current?.postMessage({ type: "tail-start", env, source, tailSecs });
     }
+    prevTailing.current = tailing;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tailSecs]);
+  }, [tailing, tailSecs]);
 
   // ── Filtered entries ──
   const levelFiltered = levelFilter === "ALL"
     ? entries
-    : entries.filter((e) => levelPassesFilter(getLevel(e.payload), levelFilter));
+    : entries.filter((e) => levelPassesFilter(getLevel(e), levelFilter));
 
   const filtered = search
     ? levelFiltered.filter((e) => JSON.stringify(e).toLowerCase().includes(search.toLowerCase()))
@@ -594,183 +638,37 @@ export function LogsExplorer({
   const pageEndIdx = Math.min(currentPage * pageSize, filtered.length);
   const pageEntries = filtered.slice(pageStartIdx, pageEndIdx);
 
-  // Reset to last page (newest) on filter changes
   useEffect(() => { setPage(Math.max(1, Math.ceil(filtered.length / pageSize))); setExpandedIdx(null); }, [search, levelFilter, filtered.length, pageSize]);
-
-  const selectedEnv = environments.find((e) => e.name === env);
 
   return (
     <div className="space-y-4">
-      {/* ── Controls ── */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-4">
-        {/* Row 1: env + source */}
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600">Environment</label>
-            <select
-              value={env}
-              onChange={(e) => { stopTail(); setEnv(e.target.value); }}
-              disabled={loading || tailing}
-              className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
-            >
-              {environments.map((e) => (
-                <option key={e.name} value={e.name} disabled={!e.hasLogApi}>
-                  {e.label}{!e.hasLogApi ? " (no credentials)" : ""}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600">Log Source</label>
-            <select
-              value={source}
-              onChange={(e) => { stopTail(); setSource(e.target.value); }}
-              disabled={loading || tailing || sourcesLoading || sources.length === 0}
-              className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 min-w-[180px]"
-            >
-              {sourcesLoading && <option>Loading sources…</option>}
-              {!sourcesLoading && sources.length === 0 && <option>No sources available</option>}
-              {sources.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600">Min Level</label>
-            <select
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value)}
-              className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-            >
-              {LEVEL_FILTERS.map((l) => (
-                <option key={l.value} value={l.value}>{l.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {selectedEnv && (
-            <div className="pb-0.5">
-              <EnvironmentBadge env={selectedEnv} />
-            </div>
-          )}
-        </div>
-
-        {/* Row 2: time range */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium text-slate-600 mr-1">Time range:</span>
-          {PRESETS.map((p) => (
-            <button
-              key={p.value}
-              type="button"
-              onClick={() => { stopTail(); setPreset(p.value); }}
-              disabled={tailing}
-              className={cn(
-                "px-2.5 py-1 text-xs rounded border transition-colors disabled:opacity-40",
-                preset === p.value
-                  ? "bg-sky-600 border-sky-600 text-white"
-                  : "border-slate-300 text-slate-600 hover:bg-slate-50"
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-
-        {preset === "custom" && !tailing && (
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">From</label>
-              <input
-                type="datetime-local"
-                value={customBegin}
-                onChange={(e) => setCustomBegin(e.target.value)}
-                className="block rounded border border-slate-300 px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">To</label>
-              <input
-                type="datetime-local"
-                value={customEnd}
-                onChange={(e) => setCustomEnd(e.target.value)}
-                className="block rounded border border-slate-300 px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
-              />
-            </div>
+      {/* ── Tail status bar ── */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {tailing && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            {loading ? "Fetching…" : lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Starting…"}
           </div>
         )}
-
-        {/* Row 3: fetch + tail controls */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {!tailing ? (
-            <>
-              <button
-                type="button"
-                onClick={() => fetchLogs()}
-                disabled={loading || !source || !!sourcesError}
-                className="px-4 py-1.5 text-sm font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
-              >
-                {loading ? "Fetching…" : "Fetch Logs"}
-              </button>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={startTail}
-                  disabled={loading || !source || !!sourcesError}
-                  className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
-                >
-                  Tail
-                </button>
-                {([5, 10, 30] as TailSecs[]).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setTailSecs(s)}
-                    className={cn(
-                      "px-2 py-1 text-xs rounded border transition-colors",
-                      tailSecs === s
-                        ? "bg-slate-700 border-slate-700 text-white"
-                        : "border-slate-300 text-slate-500 hover:bg-slate-50"
-                    )}
-                  >
-                    {s}s
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={stopTail}
-                className="px-4 py-1.5 text-sm font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-              >
-                Stop Tail
-              </button>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                {loading ? "Fetching…" : lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Starting…"}
-              </div>
-            </>
-          )}
-
-          {fetched && (
-            <span className="text-xs text-slate-400">
-              {filtered.length}{filtered.length !== entries.length && `/${entries.length}`}{" "}
-              {entries.length === 1 ? "entry" : "entries"}
-              {loading && !tailing && " · loading…"}
-            </span>
-          )}
-          {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
-          {error && <span className="text-xs text-red-500">{error}</span>}
-        </div>
+        {fetched && (
+          <span className="text-xs text-slate-400">
+            {filtered.length}{filtered.length !== entries.length && `/${entries.length}`}{" "}
+            {entries.length === 1 ? "entry" : "entries"}
+            {loading && !tailing && " · loading…"}
+          </span>
+        )}
+        {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
+        {error && <span className="text-xs text-red-500">{error}</span>}
       </div>
 
       {/* ── Results ── */}
       {fetched && (
-        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-          {/* Search bar + pagination info */}
-          <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
+        <div className={cn(
+          "bg-white border border-slate-200 flex flex-col",
+          fullscreen ? "fixed inset-0 z-50 rounded-none overflow-hidden" : "rounded-lg"
+        )}>
+          {/* Search bar + fullscreen toggle */}
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-100 bg-slate-50/50 shrink-0">
             <input
               type="text"
               value={search}
@@ -786,13 +684,34 @@ export function LogsExplorer({
             <span className="text-xs text-slate-400 whitespace-nowrap">
               {filtered.length} / {entries.length}
             </span>
+            <button
+              type="button"
+              onClick={() => setFullscreen((f) => !f)}
+              title={fullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+              className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+            >
+              {fullscreen ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                </svg>
+              )}
+            </button>
           </div>
 
-          {/* Scrollable log window — renders table only when tab is active */}
-          <div ref={scrollContainerRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: "calc(100vh - 420px)" }}>
-            {!deferredIsActive ? (
-              null
-            ) : filtered.length === 0 ? (
+          {/* Scrollable log window — CSS resize handle at bottom-right corner */}
+          <div
+            ref={scrollContainerRef}
+            className={cn(
+              "overflow-y-auto overflow-x-auto",
+              fullscreen ? "flex-1" : "resize-y min-h-[200px]"
+            )}
+            style={fullscreen ? undefined : { height: 420 }}
+          >
+            {!deferredIsActive ? null : filtered.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400">
                 {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
               </div>
@@ -831,16 +750,14 @@ export function LogsExplorer({
 
           {/* Pagination controls */}
           {filtered.length > 0 && (
-            <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500">
                   Showing {pageStartIdx + 1}–{pageEndIdx} of {filtered.length}
                   {currentPage === totalPages && " (latest)"}
                 </span>
               </div>
-
               <div className="flex items-center gap-2">
-                {/* Page size selector */}
                 <select
                   value={pageSize}
                   onChange={(e) => { setPageSize(Number(e.target.value)); setPage(Infinity); setExpandedIdx(null); }}
@@ -850,53 +767,16 @@ export function LogsExplorer({
                     <option key={s} value={s}>{s} / page</option>
                   ))}
                 </select>
-
-                {/* Page navigation */}
                 <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => { setPage(1); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
-                    disabled={currentPage <= 1}
-                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    title="Oldest (page 1)"
-                  >
-                    Oldest
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setPage((p) => Math.max(1, p - 1)); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
-                    disabled={currentPage <= 1}
-                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    title="Older entries"
-                  >
-                    ← Older
-                  </button>
-                  <span className="text-xs text-slate-500 px-2 tabular-nums">
-                    {currentPage} / {totalPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
-                    disabled={currentPage >= totalPages}
-                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    title="Newer entries"
-                  >
-                    Newer →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setPage(totalPages); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
-                    disabled={currentPage >= totalPages}
-                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    title="Latest (last page)"
-                  >
-                    Latest
-                  </button>
+                  <button type="button" onClick={() => { setPage(1); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }} disabled={currentPage <= 1} className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" title="Oldest (page 1)">Oldest</button>
+                  <button type="button" onClick={() => { setPage((p) => Math.max(1, p - 1)); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }} disabled={currentPage <= 1} className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" title="Older entries">← Older</button>
+                  <span className="text-xs text-slate-500 px-2 tabular-nums">{currentPage} / {totalPages}</span>
+                  <button type="button" onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }} disabled={currentPage >= totalPages} className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" title="Newer entries">Newer →</button>
+                  <button type="button" onClick={() => { setPage(totalPages); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }} disabled={currentPage >= totalPages} className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" title="Latest (last page)">Latest</button>
                 </div>
               </div>
             </div>
           )}
-
         </div>
       )}
 
@@ -914,22 +794,51 @@ export function LogsExplorer({
   );
 }
 
-// ── Tabs wrapper ──────────────────────────────────────────────────────────────
+// ── Tabs wrapper with shared controls above ──────────────────────────────────
 
 interface TabDef {
   id: number;
   label: string;
+  config: TabConfig;
+}
+
+function makeDefaultConfig(environments: EnvWithLogApi[]): TabConfig {
+  const defaultEnv = environments.find((e) => e.hasLogApi) ?? environments[0];
+  return {
+    env: defaultEnv?.name ?? "",
+    source: "",
+    sources: [],
+    sourcesLoading: false,
+    sourcesError: "",
+    levelFilter: "ALL",
+    tailSecs: 5,
+    tailing: false,
+    loading: false,
+  };
 }
 
 let _nextTabId = 2;
 
 export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi[] }) {
-  const [tabs, setTabs] = useState<TabDef[]>([{ id: 1, label: "Tab 1" }]);
+  const [tabs, setTabs] = useState<TabDef[]>([
+    { id: 1, label: "Tab 1", config: makeDefaultConfig(environments) },
+  ]);
   const [activeId, setActiveId] = useState(1);
+
+  const activeTab = tabs.find((t) => t.id === activeId) ?? tabs[0];
+  const cfg = activeTab?.config;
+
+  const updateActiveConfig = useCallback((updates: Partial<TabConfig>) => {
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.id === activeId ? { ...t, config: { ...t.config, ...updates } } : t
+      )
+    );
+  }, [activeId]);
 
   function addTab() {
     const id = _nextTabId++;
-    setTabs((prev) => [...prev, { id, label: `Tab ${id}` }]);
+    setTabs((prev) => [...prev, { id, label: `Tab ${id}`, config: makeDefaultConfig(environments) }]);
     setActiveId(id);
   }
 
@@ -949,10 +858,108 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, label } : t)));
   }
 
+  const selectedEnv = environments.find((e) => e.name === cfg?.env);
+
   return (
     <div className="space-y-0">
-      {/* Tab bar */}
-      <div className="flex items-end gap-0 border-b border-slate-200">
+      {/* ── Controls (above tabs) ── */}
+      {cfg && (
+        <div className="bg-white rounded-t-lg border border-b-0 border-slate-200 p-4 space-y-4">
+          {/* Row 1: env + source + level */}
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600">Environment</label>
+              <select
+                value={cfg.env}
+                onChange={(e) => updateActiveConfig({ env: e.target.value, tailing: false })}
+                disabled={cfg.loading || cfg.tailing}
+                className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
+              >
+                {environments.map((e) => (
+                  <option key={e.name} value={e.name} disabled={!e.hasLogApi}>
+                    {e.label}{!e.hasLogApi ? " (no credentials)" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600">Log Source</label>
+              <select
+                value={cfg.source}
+                onChange={(e) => updateActiveConfig({ source: e.target.value, tailing: false })}
+                disabled={cfg.loading || cfg.tailing || cfg.sourcesLoading || cfg.sources.length === 0}
+                className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 min-w-[180px]"
+              >
+                {cfg.sourcesLoading && <option>Loading sources…</option>}
+                {!cfg.sourcesLoading && cfg.sources.length === 0 && <option>No sources available</option>}
+                {cfg.sources.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600">Min Level</label>
+              <select
+                value={cfg.levelFilter}
+                onChange={(e) => updateActiveConfig({ levelFilter: e.target.value })}
+                className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              >
+                {LEVEL_FILTERS.map((l) => (
+                  <option key={l.value} value={l.value}>{l.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {selectedEnv && (
+              <div className="pb-0.5">
+                <EnvironmentBadge env={selectedEnv} />
+              </div>
+            )}
+          </div>
+
+          {/* Row 2: tail controls */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {!cfg.tailing ? (
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => updateActiveConfig({ tailing: true })}
+                  disabled={cfg.loading || !cfg.source || !!cfg.sourcesError}
+                  className="px-4 py-1.5 text-sm font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
+                >
+                  {cfg.loading ? "Fetching…" : "Tail Logs"}
+                </button>
+                {([5, 10, 30] as TailSecs[]).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => updateActiveConfig({ tailSecs: s })}
+                    className={cn(
+                      "px-2 py-1 text-xs rounded border transition-colors",
+                      cfg.tailSecs === s
+                        ? "bg-slate-700 border-slate-700 text-white"
+                        : "border-slate-300 text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    {s}s
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => updateActiveConfig({ tailing: false })}
+                className="px-4 py-1.5 text-sm font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+              >
+                Stop Tail
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab bar ── */}
+      <div className="flex items-end gap-0 border-b border-slate-200 bg-white border-x border-slate-200">
         {tabs.map((tab) => (
           <div
             key={tab.id}
@@ -988,12 +995,20 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
         </button>
       </div>
 
-      {/* Tab panels — all mounted to preserve state */}
+      {/* ── Tab panels ── */}
       {tabs.map((tab) => (
         <div key={tab.id} className={tab.id === activeId ? "" : "hidden"}>
           <div className="pt-4">
             <LogsExplorer
               environments={environments}
+              config={tab.config}
+              onConfigChange={(updates) =>
+                setTabs((prev) =>
+                  prev.map((t) =>
+                    t.id === tab.id ? { ...t, config: { ...t.config, ...updates } } : t
+                  )
+                )
+              }
               isActive={tab.id === activeId}
               onLabelChange={(label) => updateLabel(tab.id, label)}
             />
