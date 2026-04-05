@@ -1,0 +1,16 @@
+{
+  "_id": "be50a64d-e37a-4cf0-97bf-c7dc3bc87a08",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286708521,
+  "default": false,
+  "description": "This script is used to provision role to user.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766053898584,
+  "name": "KYID.2B1.Journey.ProvisionRole",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ProvisionRole.js"
+  }
+}

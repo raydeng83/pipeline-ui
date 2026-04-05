@@ -1,0 +1,16 @@
+{
+  "_id": "1954d262-d829-4bd8-8c56-27bd34eb49a2",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286687414,
+  "default": false,
+  "description": "This script shows the widgets associated with the enrolled roles and application",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766055279707,
+  "name": "KYID.2B1.getWidget",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.getWidget.js"
+  }
+}

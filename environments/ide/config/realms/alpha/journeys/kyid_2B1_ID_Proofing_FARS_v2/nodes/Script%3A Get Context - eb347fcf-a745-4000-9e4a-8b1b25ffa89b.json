@@ -1,0 +1,56 @@
+{
+  "_id": "eb347fcf-a745-4000-9e4a-8b1b25ffa89b",
+  "_outcomes": [
+    {
+      "displayName": "success",
+      "id": "success"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "displayFARS_1",
+      "id": "displayFARS_1"
+    },
+    {
+      "displayName": "displayFARS_2",
+      "id": "displayFARS_2"
+    },
+    {
+      "displayName": "LexisNexis",
+      "id": "LexisNexis"
+    },
+    {
+      "displayName": "helpdeskFars",
+      "id": "helpdeskFars"
+    },
+    {
+      "displayName": "displayFARS_2_Experian",
+      "id": "displayFARS_2_Experian"
+    }
+  ],
+  "_rev": "-140113782",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "success",
+    "error",
+    "displayFARS_1",
+    "displayFARS_2",
+    "LexisNexis",
+    "helpdeskFars",
+    "displayFARS_2_Experian"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "f0526321-5af6-49b3-a574-19257c232bd8"
+}

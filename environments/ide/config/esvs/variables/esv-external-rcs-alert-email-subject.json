@@ -1,0 +1,6 @@
+{
+  "_id": "esv-external-rcs-alert-email-subject",
+  "description": "External RCS Alert Email Subject",
+  "expressionType": "string",
+  "valueBase64": "${ESV_EXTERNAL_RCS_ALERT_EMAIL_SUBJECT}"
+}

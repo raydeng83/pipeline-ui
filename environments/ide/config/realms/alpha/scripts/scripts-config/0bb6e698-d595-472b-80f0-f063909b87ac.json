@@ -1,0 +1,16 @@
+{
+  "_id": "0bb6e698-d595-472b-80f0-f063909b87ac",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287826705,
+  "name": "kyid.get.access.token.email.template",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/kyid.get.access.token.email.template.js"
+  }
+}

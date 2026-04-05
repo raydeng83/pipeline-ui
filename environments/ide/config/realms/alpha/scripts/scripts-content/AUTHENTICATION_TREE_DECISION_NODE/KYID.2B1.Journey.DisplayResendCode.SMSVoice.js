@@ -1,0 +1,46 @@
+
+function getLocale() {
+     var clocale = requestParameters.get("clocale");
+    if (clocale === null || clocale === "" || clocale === undefined) {
+        clocale = "en";
+    } else {
+        clocale = clocale.get(0);
+    }
+    nodeState.putShared("clocale", clocale);
+    logger.debug("*****************clocale***************** " + clocale + " ::::::::::::::" + clocale);
+    if (clocale === null || clocale === "" || clocale === undefined) {
+        // If 'clocale' is null or empty, redirect to false
+        logger.debug("Determined action based on English clocale."); 
+    } else if (clocale.indexOf("es") !== -1) {      
+        logger.debug("Determined action based on Spanish clocale.");
+    } else if (clocale.indexOf("en") !== -1) {       
+        logger.debug("Determined action based on English clocale.");       
+    } else {
+        
+        logger.debug("clocale not recognized, defaulting to false.");
+    }
+    return clocale;
+}
+
+// Function to set error message based on locale
+function setErrorMessage() {
+    var clocale = getLocale();
+    var resendcodeMessage = "";
+
+    if (clocale === "es") {
+        resendcodeMessage = systemEnv.getProperty("esv.resendcode.es");
+    } else {
+        resendcodeMessage = systemEnv.getProperty("esv.resendcode.en");
+    }
+    
+    nodeState.putShared("resendcodeMessage", resendcodeMessage);
+    logger.debug("Set error message: " + resendcodeMessage);
+}
+
+// Main execution
+try {
+    setErrorMessage();
+    outcome = "true"; 
+} catch (error) {
+    logger.error("Error in setting error message: " + error.message);
+    }

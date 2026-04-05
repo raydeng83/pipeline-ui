@@ -1,0 +1,32 @@
+{
+  "_id": "emailTemplate/kyid2B1RoleRemoved",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "KYID_2B1_Role_Removed",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyid2B1RoleRemoved.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyid2B1RoleRemoved.en.md"
+    },
+    "es": {
+      "file": "kyid2B1RoleRemoved.es.md"
+    }
+  },
+  "mimeType": "text/html",
+  "name": "kyid2B1RoleAdded",
+  "styles": {
+    "file": "kyid2B1RoleRemoved.css"
+  },
+  "subject": {
+    "en": "KYID Account Notification: Role(s) Removed",
+    "es": "Notificación de cuenta KYID: Rol(es) eliminado(s)"
+  },
+  "templateId": "kyid2B1RoleRemoved"
+}

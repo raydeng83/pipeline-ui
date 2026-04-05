@@ -1,0 +1,72 @@
+{
+  "approvalMode": "any",
+  "approvalTask": {
+    "actors": {
+      "isExpression": true,
+      "value": "(function() {\n    var content = execution.getVariables();\n    return [{\n        \"id\": content.get('roleOwner'),\n        \"permissions\": {\n            \"approve\": true,\n            \"reject\": true,\n            \"reassign\": true,\n            \"modify\": true,\n            \"comment\": true\n        }\n    }];\n})()"
+    },
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "requestAssigned"
+      },
+      "escalation": {
+        "actors": [
+          {
+            "id": "managed/user/b89b1128-52a3-4cac-a04d-56cad0f14203"
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(5*1*24*60*60*1000))).toISOString()"
+        },
+        "notification": "requestEscalated"
+      },
+      "expiration": {
+        "action": "reject",
+        "actors": [
+          {
+            "id": "managed/user/b89b1128-52a3-4cac-a04d-56cad0f14203"
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(1*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 1,
+        "notification": "requestExpired"
+      },
+      "reassign": {
+        "notification": "requestReassigned"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*1*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "requestReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "EXPIRATION",
+        "step": null
+      },
+      {
+        "condition": null,
+        "outcome": "APPROVE",
+        "step": "scriptTask-0359a9d77ee2"
+      },
+      {
+        "condition": null,
+        "outcome": "REJECT",
+        "step": "scriptTask-aec6c36b3a45"
+      }
+    ]
+  },
+  "displayName": "Approval Task",
+  "name": "approvalTask-74cf85c35437",
+  "type": "approvalTask"
+}

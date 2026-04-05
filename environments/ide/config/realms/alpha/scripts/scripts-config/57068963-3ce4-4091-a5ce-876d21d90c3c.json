@@ -1,0 +1,16 @@
+{
+  "_id": "57068963-3ce4-4091-a5ce-876d21d90c3c",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "To display stub account error message",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287846610,
+  "name": "KYID.Journey.StubAccountMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.StubAccountMsg.js"
+  }
+}

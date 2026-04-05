@@ -1,0 +1,16 @@
+{
+  "_id": "03608aec-e7e5-4b1f-a776-22c48d90b059",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=16ddca0d-67fe-482c-96c9-75f3644bc992,ou=user,ou=am-config",
+  "creationDate": 1759311419743,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766055151111,
+  "name": "KYID.2B1.Journey.FetchUserInfoforManageProfile_revised",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.FetchUserInfoforManageProfile_revised.js"
+  }
+}

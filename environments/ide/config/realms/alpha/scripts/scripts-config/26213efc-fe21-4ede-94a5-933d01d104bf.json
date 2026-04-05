@@ -1,0 +1,16 @@
+{
+  "_id": "26213efc-fe21-4ede-94a5-933d01d104bf",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286699393,
+  "default": false,
+  "description": "This script is used to read userID information in the scenario of no valid session",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1773208543480,
+  "name": "KYID.2B1.Journey.hasNoSession.ReadUserInfo",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.hasNoSession.ReadUserInfo.js"
+  }
+}

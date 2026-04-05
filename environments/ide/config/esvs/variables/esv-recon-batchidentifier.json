@@ -1,0 +1,6 @@
+{
+  "_id": "esv-recon-batchidentifier",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_RECON_BATCHIDENTIFIER}"
+}

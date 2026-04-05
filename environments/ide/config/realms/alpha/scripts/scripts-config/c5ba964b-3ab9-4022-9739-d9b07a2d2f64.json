@@ -1,0 +1,16 @@
+{
+  "_id": "c5ba964b-3ab9-4022-9739-d9b07a2d2f64",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286693523,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1759203624552,
+  "name": "kyid.2B1.Journey.CheckUserHasRolesAndActiveEnrolment",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/kyid.2B1.Journey.CheckUserHasRolesAndActiveEnrolment.js"
+  }
+}

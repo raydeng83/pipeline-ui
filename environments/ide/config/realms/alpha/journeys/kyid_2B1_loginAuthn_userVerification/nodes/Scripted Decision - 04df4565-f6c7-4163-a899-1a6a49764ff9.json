@@ -1,0 +1,56 @@
+{
+  "_id": "04df4565-f6c7-4163-a899-1a6a49764ff9",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "phone",
+      "id": "phone"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "push",
+      "id": "push"
+    },
+    {
+      "displayName": "totp",
+      "id": "totp"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "primarysecondaryemail",
+      "id": "primarysecondaryemail"
+    }
+  ],
+  "_rev": "972385948",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "email",
+    "phone",
+    "symantec",
+    "push",
+    "totp",
+    "error",
+    "primarysecondaryemail"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "8c01726e-f972-4dd3-b196-e1b2df5dc348"
+}

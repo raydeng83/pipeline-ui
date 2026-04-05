@@ -1,0 +1,16 @@
+{
+  "_id": "7e0481d5-50af-4b43-a806-e579c13f0706",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1756186718759,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1775216467167,
+  "name": "KYID.2B1.Journey.MFALoginAuthn.Select.RIDP.Email.Helpdesk",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.MFALoginAuthn.Select.RIDP.Email.Helpdesk.js"
+  }
+}

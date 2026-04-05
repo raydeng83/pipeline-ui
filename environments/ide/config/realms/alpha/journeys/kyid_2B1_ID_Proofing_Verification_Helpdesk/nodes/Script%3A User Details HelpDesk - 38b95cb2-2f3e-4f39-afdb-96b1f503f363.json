@@ -1,0 +1,41 @@
+{
+  "_id": "38b95cb2-2f3e-4f39-afdb-96b1f503f363",
+  "_outcomes": [
+    {
+      "displayName": "User Found",
+      "id": "User Found"
+    },
+    {
+      "displayName": "User Not Found",
+      "id": "User Not Found"
+    },
+    {
+      "displayName": "Error",
+      "id": "Error"
+    },
+    {
+      "displayName": "Pass",
+      "id": "Pass"
+    }
+  ],
+  "_rev": "2051683077",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "User Found",
+    "User Not Found",
+    "Error",
+    "Pass"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "f98a76c3-206a-4d71-8f2b-343e1051463e"
+}

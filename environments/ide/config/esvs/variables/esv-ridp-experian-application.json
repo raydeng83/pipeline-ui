@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ridp-experian-application",
+  "description": "",
+  "expressionType": "array",
+  "valueBase64": "${ESV_RIDP_EXPERIAN_APPLICATION}"
+}

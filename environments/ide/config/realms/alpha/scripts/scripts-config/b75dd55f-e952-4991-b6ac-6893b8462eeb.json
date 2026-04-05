@@ -1,0 +1,16 @@
+{
+  "_id": "b75dd55f-e952-4991-b6ac-6893b8462eeb",
+  "context": "SAML2_IDP_ADAPTER",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287840565,
+  "name": "rs-saml-idp-adapter.js",
+  "script": {
+    "file": "scripts-content/SAML2_IDP_ADAPTER/rs-saml-idp-adapter.js.js"
+  }
+}

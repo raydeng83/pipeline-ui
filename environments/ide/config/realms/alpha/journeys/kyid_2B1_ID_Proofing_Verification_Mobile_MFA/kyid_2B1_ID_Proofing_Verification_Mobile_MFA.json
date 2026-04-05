@@ -1,0 +1,227 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Verification_Mobile_MFA",
+  "_rev": "1193352087",
+  "enabled": true,
+  "entryNodeId": "5cc7e210-c5c8-4206-83d2-78a763ec1ce1",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "2b593241-4f11-406a-aab9-c6a1cfa8f5cc": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e8dfbd25-4bd7-44ac-8713-6829c6e7cf48"
+      },
+      "displayName": "Script:Fetch KOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 535,
+      "y": 415.5
+    },
+    "2e99fc97-7d9f-46c6-8501-f2b9b0c85048": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "66523260-7f2a-4008-90ab-13b02d05ef12"
+      },
+      "displayName": "IJ: RIDP V1",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3393,
+      "y": 336.5
+    },
+    "314a6891-c0bc-4165-b5ed-539d04ed22cc": {
+      "connections": {
+        "True": "6c080a1d-1777-4c2d-a224-42f4fef067c9",
+        "appEnrollRIDP": "2b593241-4f11-406a-aab9-c6a1cfa8f5cc",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "firsttime": "2b593241-4f11-406a-aab9-c6a1cfa8f5cc"
+      },
+      "displayName": "Script: Get Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 313,
+      "y": 619
+    },
+    "4f3dbfdc-cdbc-499b-90fb-ad84600b2036": {
+      "connections": {
+        "lexisNexis": "bb2bbe65-bb73-41ef-b639-120724ac3b4b"
+      },
+      "displayName": "Script: Navigate FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2085,
+      "y": 533
+    },
+    "5cc7e210-c5c8-4206-83d2-78a763ec1ce1": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "314a6891-c0bc-4165-b5ed-539d04ed22cc"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 46,
+      "y": 838.5
+    },
+    "60989d48-2d49-40ef-945a-84b6349eb9da": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "66523260-7f2a-4008-90ab-13b02d05ef12"
+      },
+      "displayName": "IJ: RIDP V2",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3393.666748046875,
+      "y": 610.3333282470703
+    },
+    "66523260-7f2a-4008-90ab-13b02d05ef12": {
+      "connections": {
+        "failure": "79d922f0-880d-4e56-a496-30f9250a9cad",
+        "success": "79d922f0-880d-4e56-a496-30f9250a9cad"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3687.16650390625,
+      "y": 439.7291717529297
+    },
+    "6c080a1d-1777-4c2d-a224-42f4fef067c9": {
+      "connections": {
+        "FARS": "a057b449-4b71-4240-b59d-b7f514d8253d",
+        "continue": "bb2bbe65-bb73-41ef-b639-120724ac3b4b",
+        "create": "bb2bbe65-bb73-41ef-b639-120724ac3b4b",
+        "organ": "2e99fc97-7d9f-46c6-8501-f2b9b0c85048",
+        "update": "bb2bbe65-bb73-41ef-b639-120724ac3b4b"
+      },
+      "displayName": "Script: Journey Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1250,
+      "y": 330
+    },
+    "6d3312f6-8213-45c0-8438-04c78ffce1e5": {
+      "connections": {
+        "back": "bb2bbe65-bb73-41ef-b639-120724ac3b4b",
+        "next": "b94875e8-d50c-493d-8a1e-f523cf0ce735",
+        "skip": "2e99fc97-7d9f-46c6-8501-f2b9b0c85048"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2911,
+      "y": 442.015625
+    },
+    "79d922f0-880d-4e56-a496-30f9250a9cad": {
+      "connections": {
+        "FARS": "314a6891-c0bc-4165-b5ed-539d04ed22cc",
+        "KBABack": "314a6891-c0bc-4165-b5ed-539d04ed22cc",
+        "Next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "anotherMethod": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:  Navigate",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3895,
+      "y": 600
+    },
+    "82b7e025-d5e5-4ba6-b869-d923a3032f35": {
+      "connections": {
+        "true": "6c080a1d-1777-4c2d-a224-42f4fef067c9"
+      },
+      "displayName": "Script: App Enroll Retry",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1026.015625,
+      "y": 499.5390625
+    },
+    "a057b449-4b71-4240-b59d-b7f514d8253d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "4f3dbfdc-cdbc-499b-90fb-ad84600b2036"
+      },
+      "displayName": "IJ: FARS",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1568,
+      "y": 547.5
+    },
+    "b5ba5b47-b648-4119-9878-8b2fc3ea5088": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "6d3312f6-8213-45c0-8438-04c78ffce1e5"
+      },
+      "displayName": "IJ: Phone Registration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2635,
+      "y": 426.015625
+    },
+    "b94875e8-d50c-493d-8a1e-f523cf0ce735": {
+      "connections": {
+        "v1": "2e99fc97-7d9f-46c6-8501-f2b9b0c85048",
+        "v2": "60989d48-2d49-40ef-945a-84b6349eb9da"
+      },
+      "displayName": "Script: RIDP Version",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3154.666748046875,
+      "y": 478.3333282470703
+    },
+    "bb2bbe65-bb73-41ef-b639-120724ac3b4b": {
+      "connections": {
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "changeLog": "b94875e8-d50c-493d-8a1e-f523cf0ce735",
+        "divert": "d6d6e150-b523-4235-abc8-e36aa7016da8",
+        "exit": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "next": "b94875e8-d50c-493d-8a1e-f523cf0ce735",
+        "phoneRegistration": "b5ba5b47-b648-4119-9878-8b2fc3ea5088"
+      },
+      "displayName": "Script: Collect Basic Information ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2357,
+      "y": 127.5
+    },
+    "d6d6e150-b523-4235-abc8-e36aa7016da8": {
+      "connections": {
+        "true": "bb2bbe65-bb73-41ef-b639-120724ac3b4b"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2402,
+      "y": 473.5
+    },
+    "e8dfbd25-4bd7-44ac-8713-6829c6e7cf48": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "User Found": "82b7e025-d5e5-4ba6-b869-d923a3032f35",
+        "User Not Found": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Fetch User Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 799,
+      "y": 255.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 4520,
+      "y": 227
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3961,
+      "y": 991
+    },
+    "startNode": {
+      "x": 70,
+      "y": 338
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

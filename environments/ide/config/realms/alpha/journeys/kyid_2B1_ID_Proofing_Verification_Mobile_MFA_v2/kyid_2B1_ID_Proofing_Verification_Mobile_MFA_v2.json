@@ -1,0 +1,194 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Verification_Mobile_MFA_v2",
+  "_rev": "1999571658",
+  "enabled": true,
+  "entryNodeId": "95e97184-c9f6-4758-b24b-3cc589ea4f06",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1112aa6f-2553-4e2e-adc8-1b79f8e7bfc7": {
+      "connections": {
+        "back": "1983a893-64a9-4cdf-a806-f9a561ab2a3d",
+        "next": "d7968826-505f-4165-af57-b4dba5eb08f8",
+        "skip": "d7968826-505f-4165-af57-b4dba5eb08f8"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3021,
+      "y": 660.5
+    },
+    "1983a893-64a9-4cdf-a806-f9a561ab2a3d": {
+      "connections": {
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "changeLog": "d7968826-505f-4165-af57-b4dba5eb08f8",
+        "divert": "4efaace5-12dc-4e9c-bf95-a3a8de01b8c6",
+        "exit": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "next": "d7968826-505f-4165-af57-b4dba5eb08f8",
+        "phoneRegistration": "79889898-932b-4f90-a346-5bd168a4f90a"
+      },
+      "displayName": "Script: Collect Basic Information ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2403,
+      "y": 377.5
+    },
+    "2a037514-f3c1-4617-b36f-650ce6bc4bcd": {
+      "connections": {
+        "true": "e6d8c149-2837-4dad-b640-3a34ae9e37ac"
+      },
+      "displayName": "Script: Check Retry Limit",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1338.75,
+      "y": 631.3125
+    },
+    "4efaace5-12dc-4e9c-bf95-a3a8de01b8c6": {
+      "connections": {
+        "true": "1983a893-64a9-4cdf-a806-f9a561ab2a3d"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2427,
+      "y": 667.5
+    },
+    "78188619-c048-4fd7-94a8-de2a6a496066": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "User Found": "2a037514-f3c1-4617-b36f-650ce6bc4bcd",
+        "User Not Found": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Fetch User Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1157,
+      "y": 332.5
+    },
+    "79889898-932b-4f90-a346-5bd168a4f90a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1112aa6f-2553-4e2e-adc8-1b79f8e7bfc7"
+      },
+      "displayName": "IJ: Phone Registration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2680.5,
+      "y": 705.0625
+    },
+    "7cbc5fde-7dc8-4f28-97af-b095a8a44565": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "78188619-c048-4fd7-94a8-de2a6a496066"
+      },
+      "displayName": "Script:Fetch KOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 885,
+      "y": 340.5
+    },
+    "95e97184-c9f6-4758-b24b-3cc589ea4f06": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "d10a12a5-41e6-41f6-a7e5-0bf05c996f0f"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 336,
+      "y": 181.5
+    },
+    "a6ff6213-f68f-4a64-8416-c93934dc5c10": {
+      "connections": {
+        "lexisNexis": "1983a893-64a9-4cdf-a806-f9a561ab2a3d"
+      },
+      "displayName": "Script: Navigate FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2076,
+      "y": 508
+    },
+    "b43c3d2f-4f29-461a-9645-17920ba733f8": {
+      "connections": {
+        "true": "a6ff6213-f68f-4a64-8416-c93934dc5c10"
+      },
+      "displayName": "IJ: FARS",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1803,
+      "y": 525.015625
+    },
+    "cfffb8ce-c599-47a8-abcc-c1577536f65e": {
+      "connections": {
+        "FARS": "d10a12a5-41e6-41f6-a7e5-0bf05c996f0f",
+        "KBABack": "d10a12a5-41e6-41f6-a7e5-0bf05c996f0f",
+        "Next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "anotherMethod": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:  Navigate",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3754,
+      "y": 521
+    },
+    "d10a12a5-41e6-41f6-a7e5-0bf05c996f0f": {
+      "connections": {
+        "True": "e6d8c149-2837-4dad-b640-3a34ae9e37ac",
+        "appEnrollRIDP": "7cbc5fde-7dc8-4f28-97af-b095a8a44565",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "firsttime": "7cbc5fde-7dc8-4f28-97af-b095a8a44565"
+      },
+      "displayName": "Script: Get Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 630,
+      "y": 146
+    },
+    "d7968826-505f-4165-af57-b4dba5eb08f8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "cfffb8ce-c599-47a8-abcc-c1577536f65e"
+      },
+      "displayName": "IJ: Evaluate RIDP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3423,
+      "y": 550.5
+    },
+    "e6d8c149-2837-4dad-b640-3a34ae9e37ac": {
+      "connections": {
+        "FARS": "b43c3d2f-4f29-461a-9645-17920ba733f8",
+        "continue": "1983a893-64a9-4cdf-a806-f9a561ab2a3d",
+        "create": "1983a893-64a9-4cdf-a806-f9a561ab2a3d",
+        "organ": "d7968826-505f-4165-af57-b4dba5eb08f8",
+        "update": "1983a893-64a9-4cdf-a806-f9a561ab2a3d"
+      },
+      "displayName": "Script: Journey Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1515,
+      "y": 312
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 4265,
+      "y": 596
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 4410,
+      "y": 98
+    },
+    "startNode": {
+      "x": 70,
+      "y": 293.8333333333333
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[\"RIDP\"]"
+  }
+}

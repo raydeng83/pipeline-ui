@@ -1,0 +1,16 @@
+{
+  "_id": "b6638a7a-1df1-4b81-80e9-5b8ee6679575",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=aeeaf0b2-7303-4366-bb98-52421c314893,ou=user,ou=am-config",
+  "creationDate": 1736546133698,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287841069,
+  "name": "Le-Debug-output-textcallback",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Le-Debug-output-textcallback.js"
+  }
+}

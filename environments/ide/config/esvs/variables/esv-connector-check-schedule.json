@@ -1,0 +1,6 @@
+{
+  "_id": "esv-connector-check-schedule",
+  "description": "Cron expression for the Schedule Job ConnectorCheck, which control the trigger frequency.",
+  "expressionType": "string",
+  "valueBase64": "${ESV_CONNECTOR_CHECK_SCHEDULE}"
+}

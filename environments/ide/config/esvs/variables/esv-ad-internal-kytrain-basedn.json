@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-kytrain-basedn",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AD_INTERNAL_KYTRAIN_BASEDN}"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "0b93689e-aa00-42e0-b61d-0133cdbe9730",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=479238b6-ae6d-4939-ab44-62a6c1d6f052,ou=user,ou=am-config",
+  "creationDate": 1736418688588,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287828673,
+  "name": "testemailfromnodestate",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/testemailfromnodestate.js"
+  }
+}

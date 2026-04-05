@@ -1,0 +1,6 @@
+{
+  "_id": "esv-workflow-expirydate",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_WORKFLOW_EXPIRYDATE}"
+}

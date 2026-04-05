@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-kytest-dn",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AD_INTERNAL_KYTEST_DN}"
+}

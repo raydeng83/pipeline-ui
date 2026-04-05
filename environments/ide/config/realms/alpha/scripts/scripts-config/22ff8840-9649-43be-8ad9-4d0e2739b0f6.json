@@ -1,0 +1,16 @@
+{
+  "_id": "22ff8840-9649-43be-8ad9-4d0e2739b0f6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=f8b3dc13-fdd1-4223-a994-d036036730b2,ou=user,ou=am-config",
+  "creationDate": 1745440783115,
+  "default": false,
+  "description": "This script is used to unlock user account in AD if it's locked. ",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287836520,
+  "name": "KYID.Journey.AccountUnLockedNonProd",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.AccountUnLockedNonProd.js"
+  }
+}

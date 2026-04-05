@@ -1,0 +1,36 @@
+{
+  "_id": "8777e657-f5b5-4bdf-8522-22e025fdb17b",
+  "_outcomes": [
+    {
+      "displayName": "Error",
+      "id": "Error"
+    },
+    {
+      "displayName": "hasSession",
+      "id": "hasSession"
+    },
+    {
+      "displayName": "Success",
+      "id": "Success"
+    }
+  ],
+  "_rev": "-1526918404",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Error",
+    "hasSession",
+    "Success"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "26213efc-fe21-4ede-94a5-933d01d104bf"
+}

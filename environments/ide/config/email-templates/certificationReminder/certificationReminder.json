@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/certificationReminder",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "certificationReminder.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "certificationReminder.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "certificationReminder.css"
+  },
+  "subject": {
+    "en": "ATTENTION: Reminder to complete Certification Task"
+  }
+}

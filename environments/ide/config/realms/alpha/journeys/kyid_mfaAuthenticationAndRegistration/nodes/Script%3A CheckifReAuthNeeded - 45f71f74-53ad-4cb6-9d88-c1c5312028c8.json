@@ -1,0 +1,31 @@
+{
+  "_id": "45f71f74-53ad-4cb6-9d88-c1c5312028c8",
+  "_outcomes": [
+    {
+      "displayName": "NoAuthNeeded",
+      "id": "NoAuthNeeded"
+    },
+    {
+      "displayName": "Authenticate",
+      "id": "Authenticate"
+    }
+  ],
+  "_rev": "-2035247671",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "NoAuthNeeded",
+    "Authenticate"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "1da3df6a-d940-4d26-94ed-4be200f8bc0c"
+}

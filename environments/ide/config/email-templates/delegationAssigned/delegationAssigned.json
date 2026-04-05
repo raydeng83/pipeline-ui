@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/delegationAssigned",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "delegationAssigned.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "delegationAssigned.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "delegationAssigned.css"
+  },
+  "subject": {
+    "en": "Delegation Assigned"
+  }
+}

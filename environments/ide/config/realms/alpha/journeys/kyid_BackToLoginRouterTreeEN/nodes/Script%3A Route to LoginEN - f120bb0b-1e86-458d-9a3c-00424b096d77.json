@@ -1,0 +1,26 @@
+{
+  "_id": "f120bb0b-1e86-458d-9a3c-00424b096d77",
+  "_outcomes": [
+    {
+      "displayName": "redirect",
+      "id": "redirect"
+    }
+  ],
+  "_rev": "-1940920672",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "redirect"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "d002c813-2ef0-4248-bce8-07e55fd38d99"
+}

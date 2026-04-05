@@ -1,0 +1,26 @@
+{
+  "_id": "d6f0eda5-51b9-4f86-8dfb-f8c311dd2990",
+  "_outcomes": [
+    {
+      "displayName": "wait",
+      "id": "wait"
+    }
+  ],
+  "_rev": "-423307105",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "wait"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "26f473df-02de-4135-a4b1-b885081faae9"
+}

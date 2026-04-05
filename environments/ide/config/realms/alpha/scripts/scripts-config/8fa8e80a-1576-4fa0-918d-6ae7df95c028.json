@@ -1,0 +1,16 @@
+{
+  "_id": "8fa8e80a-1576-4fa0-918d-6ae7df95c028",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286714703,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1770091437405,
+  "name": "KYID.2B1.Journey.JITStubAccountErrorFailedURL",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.2B1.Journey.JITStubAccountErrorFailedURL.js"
+  }
+}

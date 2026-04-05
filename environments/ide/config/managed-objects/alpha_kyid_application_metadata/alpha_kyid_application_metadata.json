@@ -1,0 +1,198 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_application_metadata",
+  "onCreate": {
+    "file": "alpha_kyid_application_metadata.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_application_metadata.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "alpha_kyid_application_metadata.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "alpha_kyid_application_metadata.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "This holds metadata information of KYID applications.",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "forgerockAppId",
+      "auth0id",
+      "kogAppId",
+      "needClaims",
+      "kogAppUrl",
+      "kogDBUrl",
+      "environment",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "auth0id": {
+        "description": "Client ID from Auth0 for logout purpose",
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Auth0 Client ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "createDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "CreatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "environment": {
+        "searchable": false,
+        "title": "Environment",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "forgerockAppId": {
+        "description": "Entity ID of the application",
+        "format": null,
+        "isVirtual": false,
+        "policies": [
+          {
+            "params": {},
+            "policyId": "unique"
+          }
+        ],
+        "searchable": true,
+        "title": "ForgeRock App ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "kogAppId": {
+        "description": "Application Name to be passed for KOG Claims API",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "KOG App Id",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "kogAppUrl": {
+        "searchable": false,
+        "title": "KOG App URL",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "kogDBUrl": {
+        "searchable": false,
+        "title": "KOG DB URL",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "needClaims": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Require Claims",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "updateDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Update  Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "UpdatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "forgerockAppId",
+      "auth0id",
+      "kogAppId",
+      "needClaims",
+      "kogAppUrl",
+      "kogDBUrl"
+    ],
+    "title": "Alpha realm - KYID APP Metadata",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

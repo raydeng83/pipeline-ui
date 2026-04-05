@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/getFAQ",
+  "description": "This API endpoint is to get Help Topics and Help Category",
+  "file": "getFAQ.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

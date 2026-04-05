@@ -1,0 +1,16 @@
+{
+  "_id": "97f6da30-c5be-427f-96d6-63142e6a84d5",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287841606,
+  "name": "KYID.Journey.SetRequestUrlCookie",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetRequestUrlCookie.js"
+  }
+}

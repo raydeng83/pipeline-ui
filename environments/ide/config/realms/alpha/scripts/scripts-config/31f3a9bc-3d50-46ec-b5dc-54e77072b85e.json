@@ -1,0 +1,16 @@
+{
+  "_id": "31f3a9bc-3d50-46ec-b5dc-54e77072b85e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286702164,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054520393,
+  "name": "KYID.2B1.Journey.kyid_2B1_VerifiedPrerequisites.ShowErrorMessage",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.kyid_2B1_VerifiedPrerequisites.ShowErrorMessage.js"
+  }
+}

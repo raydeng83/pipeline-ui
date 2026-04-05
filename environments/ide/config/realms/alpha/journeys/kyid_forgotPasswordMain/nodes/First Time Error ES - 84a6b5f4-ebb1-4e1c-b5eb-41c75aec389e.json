@@ -1,0 +1,31 @@
+{
+  "_id": "84a6b5f4-ebb1-4e1c-b5eb-41c75aec389e",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1662787482",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "308cf533-8fd3-492a-bc85-b2f21ee56387",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"ConfirmationCallback\":[{\"id\":\"308cf533-8fd3-492a-bc85-b2f21ee56387\",\"showOnlyPositiveAnswer\":true,\"showButtonsAsLinks\":true}],\"pageFooter\":{\"es\":\"\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element text-align-left'>\\n<a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a>\\n</div>\\n</div>\"}}"
+}

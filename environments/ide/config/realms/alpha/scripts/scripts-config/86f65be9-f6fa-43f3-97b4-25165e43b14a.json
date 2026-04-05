@@ -1,0 +1,16 @@
+{
+  "_id": "86f65be9-f6fa-43f3-97b4-25165e43b14a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "Back to Login Screen ",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287832562,
+  "name": "KYID.Journey.BackToLoginES",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.BackToLoginES.js"
+  }
+}

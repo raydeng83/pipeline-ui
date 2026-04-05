@@ -1,0 +1,27 @@
+{
+  "_id": "e72c111d-f46d-4f12-9489-b88d4f62a7f8",
+  "_outcomes": [
+    {
+      "displayName": "Click here to redirect to Helpdesk KOG App",
+      "id": "Click here to redirect to Helpdesk KOG App"
+    }
+  ],
+  "_rev": "1730080619",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "409063fc-4ac8-48c5-91ae-335e8c3e7d15",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

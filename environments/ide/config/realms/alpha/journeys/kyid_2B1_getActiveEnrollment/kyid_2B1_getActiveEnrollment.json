@@ -1,0 +1,143 @@
+{
+  "_id": "kyid_2B1_getActiveEnrollment",
+  "_rev": "567897244",
+  "enabled": true,
+  "entryNodeId": "5c84fcaf-b71d-472b-96dd-2eee596212e0",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "00bde725-d7ed-46e6-aa10-e07e968c3bc4": {
+      "connections": {
+        "hasRoleActiveEnrolment": "adf3c3fd-5f9d-45ce-a4aa-d8ef8fd8858d",
+        "true": "8c795da8-3110-48c1-9001-2f2933ec60b4"
+      },
+      "displayName": "Script:CheckUserhasRolesAndActiveEnrolment",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 588,
+      "y": 398.3333282470703
+    },
+    "2faafd1d-fc48-4483-afd1-e5901e696bc9": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1004,
+      "y": 20
+    },
+    "5c84fcaf-b71d-472b-96dd-2eee596212e0": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e520d9db-8c59-4ed6-8081-2b20d02d699f"
+      },
+      "displayName": "Check JourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 55,
+      "y": 103.015625
+    },
+    "6fc306ee-1e1b-4943-8536-b46dc635b4e9": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 586,
+      "y": 854
+    },
+    "8c795da8-3110-48c1-9001-2f2933ec60b4": {
+      "connections": {
+        "error": "2faafd1d-fc48-4483-afd1-e5901e696bc9",
+        "false": "6fc306ee-1e1b-4943-8536-b46dc635b4e9",
+        "true": "2faafd1d-fc48-4483-afd1-e5901e696bc9"
+      },
+      "displayName": "GetActiveEnrollment",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 669,
+      "y": 38
+    },
+    "a02a05b1-40d1-44b0-8f83-850c6b36a6a8": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 1256,
+      "y": 318.3333282470703
+    },
+    "adf3c3fd-5f9d-45ce-a4aa-d8ef8fd8858d": {
+      "connections": {
+        "SkipToLogin": "a02a05b1-40d1-44b0-8f83-850c6b36a6a8",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:SelectSkipandLogintoApp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 904,
+      "y": 390.3333282470703
+    },
+    "e520d9db-8c59-4ed6-8081-2b20d02d699f": {
+      "connections": {
+        "hasSession": "e959539a-8809-48a4-b01d-b587894b3818",
+        "noSession": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:ValidSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 312,
+      "y": 50.33332824707031
+    },
+    "e959539a-8809-48a4-b01d-b587894b3818": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "f4a31ecf-918f-4f50-ad40-647799e73222"
+      },
+      "displayName": "Script:GetKOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 329,
+      "y": 253
+    },
+    "f4a31ecf-918f-4f50-ad40-647799e73222": {
+      "connections": {
+        "Error": "6fc306ee-1e1b-4943-8536-b46dc635b4e9",
+        "User Found": "00bde725-d7ed-46e6-aa10-e07e968c3bc4",
+        "User Not Found": "ff02dba3-9396-4a7d-a873-5c8dd6536748"
+      },
+      "displayName": "Script:GetUserID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 323,
+      "y": 459
+    },
+    "ff02dba3-9396-4a7d-a873-5c8dd6536748": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 583,
+      "y": 663
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1656,
+      "y": 38
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1741,
+      "y": 181
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,289 @@
+{
+  "_id": "kyid_2B1_PrimaryAlternateEmailSendVerify",
+  "_rev": "-1663022501",
+  "description": "Primary and Secondary Email Authentication for Password Recovery",
+  "enabled": true,
+  "entryNodeId": "2ead0f9f-b574-4def-a87a-9c56249ec699",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "100f8f67-f826-4054-b76a-c6ddfa450876": {
+      "connections": {
+        "True": "f0b5fb39-6cf8-407c-b5c2-83eb0c7e43a8"
+      },
+      "displayName": "Blank Otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 528,
+      "y": 831.7118062973022
+    },
+    "1c09ba3c-e832-4261-a384-b13d029a1614": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max Retry Limit for Back reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1983,
+      "y": 779.1000061035156
+    },
+    "2c8754f7-ae4a-4f18-bc63-c65fbb581ed3": {
+      "connections": {
+        "True": "f0b5fb39-6cf8-407c-b5c2-83eb0c7e43a8"
+      },
+      "displayName": "Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 510,
+      "y": 645.7118062973022
+    },
+    "2ead0f9f-b574-4def-a87a-9c56249ec699": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "d6c45229-16d5-4ae5-814f-6e365ef30f77"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 134,
+      "y": 408.3333282470703
+    },
+    "2fa40ba8-18a8-483e-8385-0cc87d0bc2a6": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max Retry Limit for Back reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1801.6666717529297,
+      "y": 969.15625
+    },
+    "3e15e3d9-f58e-4659-998b-1f1acce27a29": {
+      "connections": {
+        "True": "dbc2161c-ae02-4f19-b07e-3743b21141a7"
+      },
+      "displayName": "Blank Otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1585,
+      "y": 435.3333282470703
+    },
+    "416171c2-8d38-48dc-9326-759e7a6bf92f": {
+      "connections": {
+        "True": "dbc2161c-ae02-4f19-b07e-3743b21141a7"
+      },
+      "displayName": "Expired Otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1538,
+      "y": 90.015625
+    },
+    "503fa10f-7e6f-4cbb-ad2e-94bc4de18bd1": {
+      "connections": {
+        "true": "d2d3e0e3-1e54-4571-a579-bade321140ed"
+      },
+      "displayName": "Script:setidpauthtype",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1769,
+      "y": 176.015625
+    },
+    "8470eaa9-edc3-46ae-a0de-f7427d8e133d": {
+      "connections": {
+        "true": "ddb870ab-bb93-4461-b7ff-e81a347713ff"
+      },
+      "displayName": "ResendOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 510,
+      "y": 734.7118062973022
+    },
+    "86efae14-f3a7-46b4-9a9d-d2ab5ef80a0a": {
+      "connections": {
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "f0b5fb39-6cf8-407c-b5c2-83eb0c7e43a8",
+        "verifyPrimaryEmail": "dbc2161c-ae02-4f19-b07e-3743b21141a7"
+      },
+      "displayName": "SendOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 518,
+      "y": 270.5
+    },
+    "89328569-a354-425e-8ac6-8c7c93ac5e4b": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "ChooseAnotherFactor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1646,
+      "y": 692
+    },
+    "8eb4e1ff-f99d-46ac-9c38-0fba75a9c4ee": {
+      "connections": {
+        "True": "f0b5fb39-6cf8-407c-b5c2-83eb0c7e43a8"
+      },
+      "displayName": "Expired Otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 526,
+      "y": 545.7118062973022
+    },
+    "9522df62-2c65-4bd4-8a11-8b13e26c0c0d": {
+      "connections": {
+        "true": "dbc2161c-ae02-4f19-b07e-3743b21141a7"
+      },
+      "displayName": "ChooseAnotherFactor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1657,
+      "y": 801.15625
+    },
+    "aff89f6d-c19d-4f00-b94c-e98564f815b2": {
+      "connections": {
+        "True": "dbc2161c-ae02-4f19-b07e-3743b21141a7"
+      },
+      "displayName": "Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1316,
+      "y": 63
+    },
+    "b8c52785-9119-49bc-bef8-8776f6776743": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "dbc2161c-ae02-4f19-b07e-3743b21141a7"
+      },
+      "displayName": "Max Limit Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1704,
+      "y": 524.9999942779541
+    },
+    "c1b67943-2060-4491-b266-27dc9cc1f459": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "f0b5fb39-6cf8-407c-b5c2-83eb0c7e43a8"
+      },
+      "displayName": "Max Limit Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 484.5555725097656,
+      "y": 929.7118062973022
+    },
+    "c6ed7041-5b34-4d89-9d62-c39f02b53308": {
+      "connections": {
+        "true": "d6c45229-16d5-4ae5-814f-6e365ef30f77"
+      },
+      "displayName": "ResendOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1558,
+      "y": 318
+    },
+    "d2d3e0e3-1e54-4571-a579-bade321140ed": {
+      "connections": {
+        "true": "f2cee1c9-d561-4aa1-a929-5d204f2c7b75"
+      },
+      "displayName": "Script:MFAMethod",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1954,
+      "y": 362.015625
+    },
+    "d6c45229-16d5-4ae5-814f-6e365ef30f77": {
+      "connections": {
+        "outcome": "86efae14-f3a7-46b4-9a9d-d2ab5ef80a0a"
+      },
+      "displayName": "Primary HOTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 213,
+      "y": 259.5
+    },
+    "dbc2161c-ae02-4f19-b07e-3743b21141a7": {
+      "connections": {
+        "BlankOTP": "3e15e3d9-f58e-4659-998b-1f1acce27a29",
+        "Choose Another": "89328569-a354-425e-8ac6-8c7c93ac5e4b",
+        "MaxLimit": "b8c52785-9119-49bc-bef8-8776f6776743",
+        "Resend Code": "c6ed7041-5b34-4d89-9d62-c39f02b53308",
+        "Resend Code Primary Email": "c6ed7041-5b34-4d89-9d62-c39f02b53308",
+        "Send Alternate OTP": "ddb870ab-bb93-4461-b7ff-e81a347713ff",
+        "Verify": "503fa10f-7e6f-4cbb-ad2e-94bc4de18bd1",
+        "backLimit": "1c09ba3c-e832-4261-a384-b13d029a1614",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "expired": "416171c2-8d38-48dc-9326-759e7a6bf92f",
+        "false": "aff89f6d-c19d-4f00-b94c-e98564f815b2"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1003,
+      "y": 62.15625
+    },
+    "ddb870ab-bb93-4461-b7ff-e81a347713ff": {
+      "connections": {
+        "outcome": "86efae14-f3a7-46b4-9a9d-d2ab5ef80a0a"
+      },
+      "displayName": "Secondary HOTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 684,
+      "y": 70.015625
+    },
+    "f0b5fb39-6cf8-407c-b5c2-83eb0c7e43a8": {
+      "connections": {
+        "BlankOTP": "100f8f67-f826-4054-b76a-c6ddfa450876",
+        "Choose Another": "9522df62-2c65-4bd4-8a11-8b13e26c0c0d",
+        "MaxLimit": "c1b67943-2060-4491-b266-27dc9cc1f459",
+        "Resend Code": "8470eaa9-edc3-46ae-a0de-f7427d8e133d",
+        "Resend Code Alternate Email": "8470eaa9-edc3-46ae-a0de-f7427d8e133d",
+        "Verify": "503fa10f-7e6f-4cbb-ad2e-94bc4de18bd1",
+        "backLimit": "2fa40ba8-18a8-483e-8385-0cc87d0bc2a6",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "expired": "8eb4e1ff-f99d-46ac-9c38-0fba75a9c4ee",
+        "false": "2c8754f7-ae4a-4f18-bc63-c65fbb581ed3"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1109,
+      "y": 613.15625
+    },
+    "f2cee1c9-d561-4aa1-a929-5d204f2c7b75": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:LastLogonMethod",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2262,
+      "y": 364.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2541,
+      "y": 195
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2588,
+      "y": 699
+    },
+    "startNode": {
+      "x": 11,
+      "y": 368.8333333333333
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

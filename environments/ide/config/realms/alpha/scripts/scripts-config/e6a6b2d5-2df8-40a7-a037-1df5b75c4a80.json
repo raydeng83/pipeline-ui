@@ -1,0 +1,16 @@
+{
+  "_id": "e6a6b2d5-2df8-40a7-a037-1df5b75c4a80",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286704584,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1773210559132,
+  "name": "KYID.2B1.Journey.Patch.ManageProfile.Organ.Donor",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Patch.ManageProfile.Organ.Donor.js"
+  }
+}

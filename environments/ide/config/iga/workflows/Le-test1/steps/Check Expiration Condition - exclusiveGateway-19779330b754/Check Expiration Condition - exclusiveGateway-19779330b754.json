@@ -1,0 +1,23 @@
+{
+  "displayName": "Check Expiration Condition",
+  "name": "exclusiveGateway-19779330b754",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "requestExpired == true",
+        "outcome": "validationSuccess",
+        "step": "scriptTask-ab1048cb15af"
+      },
+      {
+        "condition": "requestExpired == false",
+        "outcome": "validationFailure",
+        "step": "scriptTask-f8efad8a4d2e"
+      }
+    ],
+    "script": {
+      "file": "Check Expiration Condition - exclusiveGateway-19779330b754.js"
+    }
+  },
+  "type": "scriptTask"
+}

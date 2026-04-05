@@ -1,0 +1,16 @@
+{
+  "_id": "85c54a93-81e8-42dc-8e49-5f5fcb3c2d0a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286701712,
+  "default": false,
+  "description": "This script is used to create request for role to get access to business application.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054113140,
+  "name": "KYID.2B1.Journey.RequestRole",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.RequestRole.js"
+  }
+}

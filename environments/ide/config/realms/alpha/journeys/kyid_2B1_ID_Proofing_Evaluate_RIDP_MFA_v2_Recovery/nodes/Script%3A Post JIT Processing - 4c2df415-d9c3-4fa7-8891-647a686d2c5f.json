@@ -1,0 +1,51 @@
+{
+  "_id": "4c2df415-d9c3-4fa7-8891-647a686d2c5f",
+  "_outcomes": [
+    {
+      "displayName": "highRiskTransaction",
+      "id": "highRiskTransaction"
+    },
+    {
+      "displayName": "errorInPingSearch",
+      "id": "errorInPingSearch"
+    },
+    {
+      "displayName": "inputNotMatchingVerifiedIdentity",
+      "id": "inputNotMatchingVerifiedIdentity"
+    },
+    {
+      "displayName": "inputLink2TerminatedAccount",
+      "id": "inputLink2TerminatedAccount"
+    },
+    {
+      "displayName": "lexIdMismatch",
+      "id": "lexIdMismatch"
+    },
+    {
+      "displayName": "exactMatch",
+      "id": "exactMatch"
+    }
+  ],
+  "_rev": "2009663061",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "highRiskTransaction",
+    "errorInPingSearch",
+    "inputNotMatchingVerifiedIdentity",
+    "inputLink2TerminatedAccount",
+    "lexIdMismatch",
+    "exactMatch"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "df31a92b-0e92-4e68-802d-081f7b25661f"
+}

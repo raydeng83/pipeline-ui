@@ -1,0 +1,16 @@
+{
+  "_id": "845ce26b-9a05-49cc-80d8-db178794d224",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=f8b3dc13-fdd1-4223-a994-d036036730b2,ou=user,ou=am-config",
+  "creationDate": 1745279828238,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287845315,
+  "name": "KYID.Journey.PTAIntUserAccountLockedForNonProdErrorMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.PTAIntUserAccountLockedForNonProdErrorMsg.js"
+  }
+}

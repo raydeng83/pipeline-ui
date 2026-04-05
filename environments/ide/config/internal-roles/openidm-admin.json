@@ -1,0 +1,170 @@
+{
+  "_id": "openidm-admin",
+  "_rev": "b0e2aae0-3981-4a41-932e-88f2ab80490d-2338267",
+  "condition": null,
+  "description": "Administrative access",
+  "name": "openidm-admin",
+  "privileges": [
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": false
+        },
+        {
+          "attribute": "description",
+          "readOnly": false
+        },
+        {
+          "attribute": "members",
+          "readOnly": false
+        },
+        {
+          "attribute": "assignments",
+          "readOnly": false
+        },
+        {
+          "attribute": "applications",
+          "readOnly": false
+        },
+        {
+          "attribute": "condition",
+          "readOnly": false
+        },
+        {
+          "attribute": "temporalConstraints",
+          "readOnly": false
+        },
+        {
+          "attribute": "content",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleActionType",
+          "readOnly": false
+        },
+        {
+          "attribute": "requiredMFAMethod",
+          "readOnly": false
+        },
+        {
+          "attribute": "displayName",
+          "readOnly": false
+        },
+        {
+          "attribute": "displayDescription",
+          "readOnly": false
+        },
+        {
+          "attribute": "adGroupName",
+          "readOnly": false
+        },
+        {
+          "attribute": "adGroupType",
+          "readOnly": false
+        },
+        {
+          "attribute": "doesProvidePriviledgedAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "doesProvideElevatedAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "doesProvideFTIAccess",
+          "readOnly": false
+        },
+        {
+          "attribute": "isDelegable",
+          "readOnly": false
+        },
+        {
+          "attribute": "isForwardDelegable",
+          "readOnly": false
+        },
+        {
+          "attribute": "isOrgScopedRole",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessRoleId",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "applicationId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createAccount_enrollmentContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "createAccount_optionalContent",
+          "readOnly": false
+        },
+        {
+          "attribute": "tags",
+          "readOnly": false
+        },
+        {
+          "attribute": "accessPolicy",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessAppId",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "Alpha realm - Roles",
+      "path": "managed/alpha_role",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE"
+      ]
+    }
+  ],
+  "temporalConstraints": []
+}

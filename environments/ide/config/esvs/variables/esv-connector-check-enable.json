@@ -1,0 +1,6 @@
+{
+  "_id": "esv-connector-check-enable",
+  "description": "Used to enable/disable the schedule Job ConnectorCheck.",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_CONNECTOR_CHECK_ENABLE}"
+}

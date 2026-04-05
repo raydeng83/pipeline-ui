@@ -1,0 +1,16 @@
+{
+  "_id": "50fb103c-2768-4759-b3c8-5da348732f91",
+  "context": "LIBRARY",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286687128,
+  "default": false,
+  "description": "This script is used to handle role delete functionalities",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287837214,
+  "name": "KYID.2B1.Library.Actions",
+  "script": {
+    "file": "scripts-content/LIBRARY/KYID.2B1.Library.Actions.js"
+  }
+}

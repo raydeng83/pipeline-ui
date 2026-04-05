@@ -1,0 +1,25 @@
+{
+  "_id": "852e574b-3775-4030-9f7b-e5401650a651",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "2125180760",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Verified Phone"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

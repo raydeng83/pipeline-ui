@@ -1,0 +1,16 @@
+{
+  "_id": "8467e2a3-ac13-4942-8982-3db92586f0a5",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287845006,
+  "name": "KYID.Journey.SetJourneyRecoveryMFA",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.SetJourneyRecoveryMFA.js"
+  }
+}

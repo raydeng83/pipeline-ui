@@ -1,0 +1,102 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "name"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "systemDbconnector_businessapplicationtagassocstag",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "systemDbconnector_businessapplicationtagassocstag",
+  "enableSync": false,
+  "name": "systemDbconnector_businessapplicationtagassocstag",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "__NAME__",
+      "target": "name"
+    },
+    {
+      "source": "",
+      "target": "tags",
+      "transform": {
+        "globals": {},
+        "source": "logger.info(\"Source tag names: \" + JSON.stringify(source));\nvar sourceTagName = source.TagName;\nvar resultArray = [];\ntry {\n    var uniquesourceTagNames = Array.from(new Set(sourceTagName.split(\"|\").map(function(item) { return item.trim(); })));\n    uniquesourceTagNames.forEach(function(tagName) {\n        var tagNameResponse = openidm.query(\n            \"managed/alpha_kyid_tag\",\n            {\n                \"_queryFilter\": 'name eq \"' + tagName + '\"'\n            },\n            [\"_id\"]\n        );\n        if (tagNameResponse.result && tagNameResponse.result.length > 0) {\n            var tagId = tagNameResponse.result[0]._id;\n            var tagRef = { \"_ref\": \"managed/alpha_kyid_tag/\" + tagId };\n            resultArray.push(tagRef);\n        }\n    });\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);\n}\nresultArray;",
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "system/DBConnector_BusinessApplicationTagAssocStaging/__ACCOUNT__",
+  "sourceQuery": {
+    "_queryFilter": "ReconFlag eq \"yes\""
+  },
+  "sourceQueryFullEntry": true,
+  "target": "managed/alpha_kyid_businessapplication",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

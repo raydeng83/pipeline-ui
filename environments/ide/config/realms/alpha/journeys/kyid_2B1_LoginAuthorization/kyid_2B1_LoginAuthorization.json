@@ -1,0 +1,128 @@
+{
+  "_id": "kyid_2B1_LoginAuthorization",
+  "_rev": "1946027488",
+  "description": "This is Authorization journey for login main",
+  "enabled": true,
+  "entryNodeId": "01fec19a-62ed-4c51-bf17-a88bca82679d",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "01fec19a-62ed-4c51-bf17-a88bca82679d": {
+      "connections": {
+        "activeenrollmentfound": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "hasContextID": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "hasRoles": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "noRoles": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "userhasRolesActiveEnrolment": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:EvaluateHasRoles",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 395,
+      "y": 7.015625
+    },
+    "10d27bf0-2992-4b45-86b9-f03773ac9512": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "ActiveEnrolmentOnly",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 1075,
+      "y": 780.015625
+    },
+    "2112d7be-8118-4c5d-b0db-a7ce86170471": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "RequestAccessPage",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 1083,
+      "y": 773.015625
+    },
+    "5750fb66-ef55-44a3-b76d-ca9b2b4209da": {
+      "connections": {
+        "true": "01fec19a-62ed-4c51-bf17-a88bca82679d"
+      },
+      "displayName": "Inner Tree Evaluator",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 118,
+      "y": 12.015625
+    },
+    "92f992b3-00cc-4692-868c-22406aa4b07b": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "User has roles",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 743,
+      "y": 15.015625
+    },
+    "98333ff9-9bf6-43f1-ad8a-ac51628bcd24": {
+      "connections": {
+        "CONFIGURATION_FAILED": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "redirectRequestAccess",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 732,
+      "y": 157.015625
+    },
+    "ce509daf-c168-472c-9385-e995459edf12": {
+      "connections": {
+        "success": "01fec19a-62ed-4c51-bf17-a88bca82679d"
+      },
+      "displayName": "Script:GetAppID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 215,
+      "y": 525.015625
+    },
+    "e1a5753a-32c8-4344-8491-880fc15c6d90": {
+      "connections": {
+        "CONFIGURATION_FAILED": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "redirectPreRequisite",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 733,
+      "y": 436.015625
+    },
+    "f2d37961-3b89-442a-9723-ed9e26e9ea1a": {
+      "connections": {
+        "CONFIGURATION_FAILED": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "redirectActiveEnrolment",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 731,
+      "y": 309.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1230,
+      "y": 77
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1280,
+      "y": 429
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

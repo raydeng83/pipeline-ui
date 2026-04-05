@@ -1,0 +1,56 @@
+{
+  "_id": "b2ea0111-6278-4825-a766-f63a70f8d1f0",
+  "_outcomes": [
+    {
+      "displayName": "verify",
+      "id": "verify"
+    },
+    {
+      "displayName": "dontVerify",
+      "id": "dontVerify"
+    },
+    {
+      "displayName": "skip",
+      "id": "skip"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "invalidPhone",
+      "id": "invalidPhone"
+    },
+    {
+      "displayName": "max limit",
+      "id": "max limit"
+    },
+    {
+      "displayName": "duplicatePhoneNumber",
+      "id": "duplicatePhoneNumber"
+    }
+  ],
+  "_rev": "-2113912892",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "verify",
+    "dontVerify",
+    "skip",
+    "back",
+    "invalidPhone",
+    "max limit",
+    "duplicatePhoneNumber"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "8a3ee45f-448a-4de6-86ca-6f890f98497a"
+}

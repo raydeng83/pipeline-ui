@@ -1,0 +1,31 @@
+{
+  "_id": "431e15a9-2477-4d69-928b-057bf78485ed",
+  "_outcomes": [
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    }
+  ],
+  "_rev": "-867238278",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "sms",
+    "voice"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "b93cb681-aa6a-4194-abe7-b00e506c72de"
+}

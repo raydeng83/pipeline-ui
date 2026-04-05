@@ -1,0 +1,16 @@
+{
+  "_id": "18f54a2f-fe9f-45b2-b64a-d4194f62dab1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "creationDate": 1773212355574,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1774244145889,
+  "name": "KYID.2B1.Journey.StandAlone.RIDP.Version.Flag.Not.Used",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.StandAlone.RIDP.Version.Flag.Not.Used.js"
+  }
+}

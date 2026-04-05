@@ -1,0 +1,51 @@
+{
+  "_id": "505dd9bd-42b1-405c-a71a-559e31de975c",
+  "_outcomes": [
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "failed",
+      "id": "failed"
+    },
+    {
+      "displayName": "appEnrollUnableToVerify",
+      "id": "appEnrollUnableToVerify"
+    },
+    {
+      "displayName": "errorMessage",
+      "id": "errorMessage"
+    },
+    {
+      "displayName": "nextnoappenroll",
+      "id": "nextnoappenroll"
+    }
+  ],
+  "_rev": "-171224299",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "next",
+    "back",
+    "failed",
+    "appEnrollUnableToVerify",
+    "errorMessage",
+    "nextnoappenroll"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "93fd9e35-d89b-4872-b4fa-65101af07a42"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-adconnector-notifyemails",
+  "description": "",
+  "expressionType": "array",
+  "valueBase64": "${ESV_ADCONNECTOR_NOTIFYEMAILS}"
+}

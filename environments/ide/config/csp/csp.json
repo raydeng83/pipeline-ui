@@ -1,0 +1,71 @@
+{
+  "enforced": {
+    "active": true,
+    "directives": {
+      "base-uri": [
+        "'none'"
+      ],
+      "connect-src": [
+        "'self'",
+        "https://www.google.com",
+        "https://openam-commkentwf-useast1-dev.id.forgerock.io"
+      ],
+      "default-src": [
+        "'self'",
+        "'unsafe-hashes'",
+        "'unsafe-inline'"
+      ],
+      "font-src": [
+        "'self'",
+        "https://www.google.com",
+        "https://cdn.forgerock.com"
+      ],
+      "frame-ancestors": [
+        "'self'"
+      ],
+      "frame-src": [
+        "'self'",
+        "https://www.google.com"
+      ],
+      "img-src": [
+        "'self'",
+        "data:",
+        "https://ide.kog.ky.gov",
+        "https://sso.ide.kyid.ky.gov",
+        "https://openam-commkentwf-useast1-dev.id.forgerock.io",
+        "https://kog.chfs.ky.gov"
+      ],
+      "object-src": [
+        "'none'"
+      ],
+      "script-src": [
+        "'self'",
+        "'unsafe-hashes'",
+        "'unsafe-eval'",
+        "'unsafe-inline'",
+        "https://www.google.com",
+        "https://www.gstatic.com"
+      ],
+      "style-src-elem": [
+        "'self'",
+        "'unsafe-eval'",
+        "'unsafe-hashes'",
+        "'unsafe-inline'",
+        "https://www.google.com"
+      ]
+    }
+  },
+  "report-only": {
+    "active": false,
+    "directives": {
+      "frame-ancestors": [
+        "'self'"
+      ],
+      "script-src": [
+        "'self'",
+        "'unsafe-eval'",
+        "'unsafe-inline'"
+      ]
+    }
+  }
+}

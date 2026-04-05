@@ -1,0 +1,212 @@
+{
+  "_id": "kyid_2B1_Registration_CreateAccount_v2",
+  "_rev": "-403537735",
+  "description": "Registration Acceptance for Invited Users",
+  "enabled": true,
+  "entryNodeId": "54ec2326-7621-42f6-bf05-6051cb332d32",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "08fd107e-c7fb-4528-a13e-5323434b2673": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "2869e5a6-0938-49f7-aae9-401ec5ed5c11"
+      },
+      "displayName": "User Input_Primary_Email_Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 484,
+      "y": 182.5
+    },
+    "14e5ac8f-86f7-4791-9080-c6097984372a": {
+      "connections": {
+        "v1": "f4926be5-90fc-4b3d-b8d8-a2524ba3e861",
+        "v2": "1bd8d3ec-b920-4183-9350-a19318b35b3f"
+      },
+      "displayName": "Script: RIDP Version ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2490,
+      "y": 97.66666666666667
+    },
+    "1bd8d3ec-b920-4183-9350-a19318b35b3f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5c3c1336-7dc4-4361-b4e3-74100a4f5647"
+      },
+      "displayName": "IJ:RIDP V2",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2772,
+      "y": 285
+    },
+    "2869e5a6-0938-49f7-aae9-401ec5ed5c11": {
+      "connections": {
+        "false": "fd27c8f5-9ded-48f4-9dd9-58e385b09192",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 804,
+      "y": 182.5
+    },
+    "2f7cfc6b-984c-4f99-b728-e54fb90f9c6b": {
+      "connections": {
+        "back": "fd27c8f5-9ded-48f4-9dd9-58e385b09192",
+        "next": "d03f32c9-485b-40b5-a0a8-eca43fca4917",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1925,
+      "y": 169.5
+    },
+    "44f53a09-1db0-41b9-9cb7-2f2cfb0500ea": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "2f7cfc6b-984c-4f99-b728-e54fb90f9c6b"
+      },
+      "displayName": "Alternate_Email_Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1605,
+      "y": 182.5
+    },
+    "54ec2326-7621-42f6-bf05-6051cb332d32": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "08fd107e-c7fb-4528-a13e-5323434b2673"
+      },
+      "displayName": "Journey Flag check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 182.5
+    },
+    "5c3c1336-7dc4-4361-b4e3-74100a4f5647": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "ceb60c34-3044-4677-902d-b80123a63207"
+      },
+      "displayName": "Collect Password",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3055,
+      "y": 182.5
+    },
+    "954f2256-c119-40a3-8abe-acf5aa372009": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "abb070de-2afd-45a9-a958-e8351ce5db29"
+      },
+      "displayName": "Phone_Email_Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3615,
+      "y": 98.33333333333333
+    },
+    "abb070de-2afd-45a9-a958-e8351ce5db29": {
+      "connections": {
+        "back": "fd27c8f5-9ded-48f4-9dd9-58e385b09192",
+        "next": "d03f32c9-485b-40b5-a0a8-eca43fca4917"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3934,
+      "y": 239.16666666666666
+    },
+    "c537af0b-24d1-4da4-9c14-f34097921305": {
+      "connections": {
+        "true": "d03f32c9-485b-40b5-a0a8-eca43fca4917"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2490,
+      "y": 293.8333333333333
+    },
+    "ceb60c34-3044-4677-902d-b80123a63207": {
+      "connections": {
+        "AlternateEmailVerification": "d03f32c9-485b-40b5-a0a8-eca43fca4917",
+        "PhoneEmailVerification": "954f2256-c119-40a3-8abe-acf5aa372009",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3338,
+      "y": 169.5
+    },
+    "d03f32c9-485b-40b5-a0a8-eca43fca4917": {
+      "connections": {
+        "back": "44f53a09-1db0-41b9-9cb7-2f2cfb0500ea",
+        "divert": "c537af0b-24d1-4da4-9c14-f34097921305",
+        "next": "14e5ac8f-86f7-4791-9080-c6097984372a"
+      },
+      "displayName": "Script: Collect User Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2184,
+      "y": 169.5
+    },
+    "dbd39907-63e3-49eb-88f8-d243c62a7540": {
+      "connections": {
+        "back": "08fd107e-c7fb-4528-a13e-5323434b2673",
+        "next": "44f53a09-1db0-41b9-9cb7-2f2cfb0500ea",
+        "skip": "44f53a09-1db0-41b9-9cb7-2f2cfb0500ea",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1346,
+      "y": 156
+    },
+    "f4926be5-90fc-4b3d-b8d8-a2524ba3e861": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5c3c1336-7dc4-4361-b4e3-74100a4f5647"
+      },
+      "displayName": "IJ:RIDP V1",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2772,
+      "y": 80
+    },
+    "fd27c8f5-9ded-48f4-9dd9-58e385b09192": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "dbd39907-63e3-49eb-88f8-d243c62a7540"
+      },
+      "displayName": "Phone Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1063,
+      "y": 182.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3615,
+      "y": 294.1666666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3934,
+      "y": 98.33333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 210
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

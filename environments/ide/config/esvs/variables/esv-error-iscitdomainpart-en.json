@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-iscitdomainpart-en",
+  "description": "Error Message for Is CIT domain part to Reset Password in English",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_ISCITDOMAINPART_EN}"
+}

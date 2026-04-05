@@ -1,0 +1,46 @@
+{
+  "_id": "01fec19a-62ed-4c51-bf17-a88bca82679d",
+  "_outcomes": [
+    {
+      "displayName": "hasRoles",
+      "id": "hasRoles"
+    },
+    {
+      "displayName": "noRoles",
+      "id": "noRoles"
+    },
+    {
+      "displayName": "activeenrollmentfound",
+      "id": "activeenrollmentfound"
+    },
+    {
+      "displayName": "userhasRolesActiveEnrolment",
+      "id": "userhasRolesActiveEnrolment"
+    },
+    {
+      "displayName": "hasContextID",
+      "id": "hasContextID"
+    }
+  ],
+  "_rev": "-361861070",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "hasRoles",
+    "noRoles",
+    "activeenrollmentfound",
+    "userhasRolesActiveEnrolment",
+    "hasContextID"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c6b0aa11-0e6c-4ef5-9fa2-504e7466f633"
+}

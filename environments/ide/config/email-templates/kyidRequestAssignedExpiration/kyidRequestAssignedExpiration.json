@@ -1,0 +1,27 @@
+{
+  "_id": "emailTemplate/kyidRequestAssignedExpiration",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "KYID_Request_Assigned_Expiration",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyidRequestAssignedExpiration.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyidRequestAssignedExpiration.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "kyidRequestAssignedExpiration.css"
+  },
+  "subject": {
+    "en": "KYID Request Expired"
+  },
+  "templateId": "kyidRequestAssignedExpiration"
+}

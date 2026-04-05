@@ -1,0 +1,230 @@
+{
+  "_id": "kyid_mfaAuthenticationForLogin",
+  "_rev": "-19813279",
+  "description": "Self and Others Authentication ",
+  "enabled": true,
+  "entryNodeId": "9a758ec8-9d4c-427d-8758-07e883ae418a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "09134716-c06b-4436-b89a-e2c275bd9056": {
+      "connections": {
+        "true": "a306c349-4317-4fcc-8e6b-326b6dc472c6"
+      },
+      "displayName": "Script: Blank Message Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 786.1111450195312,
+      "y": 599.9010314941406
+    },
+    "1b853b36-9411-431e-85ac-742a3452c171": {
+      "connections": {
+        "false": "72e66d22-b31d-4c78-b584-803eb5041a4a",
+        "true": "b505a884-4f3b-4ec8-a1e1-8348b8fee5ef"
+      },
+      "displayName": "isSelfOthersJourney",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 476,
+      "y": 247.015625
+    },
+    "250d6af8-f829-4351-b344-21887c76c437": {
+      "connections": {
+        "false": "d6fdf5dd-3fda-4b16-8e22-c993b55669bd",
+        "true": "b505a884-4f3b-4ec8-a1e1-8348b8fee5ef",
+        "without": "ba346b8c-aa1c-46d8-b622-5c519dbcdd41"
+      },
+      "displayName": "Choose Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1942,
+      "y": 251.33333333333331
+    },
+    "6ab07bdb-329c-4e28-8430-a62fb40d836f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "250d6af8-f829-4351-b344-21887c76c437"
+      },
+      "displayName": "kyid_mfaAuthenticationFRTOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1647,
+      "y": 419
+    },
+    "72e66d22-b31d-4c78-b584-803eb5041a4a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a306c349-4317-4fcc-8e6b-326b6dc472c6"
+      },
+      "displayName": "Script: Is MFA Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 727,
+      "y": 389.015625
+    },
+    "7619da3f-825a-477c-95a3-060ef4a94074": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "250d6af8-f829-4351-b344-21887c76c437"
+      },
+      "displayName": "Twilio API",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1646,
+      "y": 659.3333333333333
+    },
+    "922e7dfc-e824-4d22-89cd-995f1185b55e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Remove/Reset MFA Method",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1645,
+      "y": 779.6666666666665
+    },
+    "9a758ec8-9d4c-427d-8758-07e883ae418a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1b853b36-9411-431e-85ac-742a3452c171"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 201.5,
+      "y": 377.015625
+    },
+    "a306c349-4317-4fcc-8e6b-326b6dc472c6": {
+      "connections": {
+        "false": "ba346b8c-aa1c-46d8-b622-5c519dbcdd41",
+        "true": "b505a884-4f3b-4ec8-a1e1-8348b8fee5ef"
+      },
+      "displayName": "Script: Is Registration Allowed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 995.0909090909091,
+      "y": 363.1174136075107
+    },
+    "ac06332b-c0be-4624-874d-d14bdb50d624": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "250d6af8-f829-4351-b344-21887c76c437"
+      },
+      "displayName": "KYID-MFAAuthenticationSymantec",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1642,
+      "y": 64.015625
+    },
+    "b505a884-4f3b-4ec8-a1e1-8348b8fee5ef": {
+      "connections": {
+        "Default": "09134716-c06b-4436-b89a-e2c275bd9056",
+        "RecoveryMFA": "c71d64bf-03ac-4e97-a243-70cbbcb26989",
+        "Remove/Reset MFA Method": "922e7dfc-e824-4d22-89cd-995f1185b55e",
+        "email": "c218daf7-0c50-4b7b-b8d1-7bfe13ec58c0",
+        "otp": "6ab07bdb-329c-4e28-8430-a62fb40d836f",
+        "sms": "bc59611b-680a-43ad-acc2-9f8eec88586e",
+        "swk": "ffe504e3-fe09-4710-8795-39a34097ec6c",
+        "symantec": "ac06332b-c0be-4624-874d-d14bdb50d624",
+        "voice": "7619da3f-825a-477c-95a3-060ef4a94074"
+      },
+      "displayName": "With Remove/Reset Method Display registered MFA  methods",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1306,
+      "y": 511.015625
+    },
+    "ba346b8c-aa1c-46d8-b622-5c519dbcdd41": {
+      "connections": {
+        "Default": "09134716-c06b-4436-b89a-e2c275bd9056",
+        "RecoveryMFA": "c71d64bf-03ac-4e97-a243-70cbbcb26989",
+        "email": "c218daf7-0c50-4b7b-b8d1-7bfe13ec58c0",
+        "otp": "6ab07bdb-329c-4e28-8430-a62fb40d836f",
+        "sms": "bc59611b-680a-43ad-acc2-9f8eec88586e",
+        "swk": "ffe504e3-fe09-4710-8795-39a34097ec6c",
+        "symantec": "ac06332b-c0be-4624-874d-d14bdb50d624",
+        "voice": "7619da3f-825a-477c-95a3-060ef4a94074"
+      },
+      "displayName": "Without Remove/reset option Dynamic choice collector",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1286,
+      "y": 96
+    },
+    "bc59611b-680a-43ad-acc2-9f8eec88586e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "250d6af8-f829-4351-b344-21887c76c437"
+      },
+      "displayName": "KYID-MFAAuthentication-SMSOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1645,
+      "y": 539
+    },
+    "c218daf7-0c50-4b7b-b8d1-7bfe13ec58c0": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "250d6af8-f829-4351-b344-21887c76c437"
+      },
+      "displayName": "KYID-MFAAuthentication-EmailOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1643,
+      "y": 187
+    },
+    "c71d64bf-03ac-4e97-a243-70cbbcb26989": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "IJ: MFA Recovery",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1523.3333435058594,
+      "y": 946.3333282470703
+    },
+    "d6fdf5dd-3fda-4b16-8e22-c993b55669bd": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetRecoveryMFAtoFalse",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2090.6666870117188,
+      "y": 90.33332824707031
+    },
+    "ffe504e3-fe09-4710-8795-39a34097ec6c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "250d6af8-f829-4351-b344-21887c76c437"
+      },
+      "displayName": "KYID-MFAAuthentication-FRPushNotification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1644,
+      "y": 303
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2206,
+      "y": 259
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2222,
+      "y": 447
+    },
+    "startNode": {
+      "x": 70,
+      "y": 394.16666666666663
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

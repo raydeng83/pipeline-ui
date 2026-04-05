@@ -1,0 +1,6 @@
+{
+  "_id": "esv-connector-alert-email-subject",
+  "description": "Connector Alert Email Subject",
+  "expressionType": "string",
+  "valueBase64": "${ESV_CONNECTOR_ALERT_EMAIL_SUBJECT}"
+}

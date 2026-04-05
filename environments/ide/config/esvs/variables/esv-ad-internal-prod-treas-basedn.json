@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-prod-treas-basedn",
+  "description": "BaseDN for AD domain treas",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AD_INTERNAL_PROD_TREAS_BASEDN}"
+}

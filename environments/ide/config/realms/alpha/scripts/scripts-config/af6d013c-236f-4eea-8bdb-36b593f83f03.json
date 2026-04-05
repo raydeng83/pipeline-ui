@@ -1,0 +1,16 @@
+{
+  "_id": "af6d013c-236f-4eea-8bdb-36b593f83f03",
+  "context": "LIBRARY",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286703069,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1758857234721,
+  "name": "KYID.2B1.Library.AccessTokenDuplicate",
+  "script": {
+    "file": "scripts-content/LIBRARY/KYID.2B1.Library.AccessTokenDuplicate.js"
+  }
+}

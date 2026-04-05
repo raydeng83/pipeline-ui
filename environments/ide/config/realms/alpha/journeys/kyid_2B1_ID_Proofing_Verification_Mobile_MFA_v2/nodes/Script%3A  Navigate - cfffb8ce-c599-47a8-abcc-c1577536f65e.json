@@ -1,0 +1,41 @@
+{
+  "_id": "cfffb8ce-c599-47a8-abcc-c1577536f65e",
+  "_outcomes": [
+    {
+      "displayName": "KBABack",
+      "id": "KBABack"
+    },
+    {
+      "displayName": "anotherMethod",
+      "id": "anotherMethod"
+    },
+    {
+      "displayName": "Next",
+      "id": "Next"
+    },
+    {
+      "displayName": "FARS",
+      "id": "FARS"
+    }
+  ],
+  "_rev": "567578385",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "KBABack",
+    "anotherMethod",
+    "Next",
+    "FARS"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "94e8deb8-077f-46d6-9107-6db4f78ffe73"
+}

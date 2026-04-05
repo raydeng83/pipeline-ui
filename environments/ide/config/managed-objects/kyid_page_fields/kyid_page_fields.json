@@ -1,0 +1,245 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "kyid_page_fields",
+  "onCreate": {
+    "file": "kyid_page_fields.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "kyid_page_fields.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "kyid_page_fields.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "kyid_page_fields.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "KYID object to store page field definitions.",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "_id",
+      "page_name",
+      "name",
+      "type",
+      "callback_type",
+      "isrequired",
+      "locale",
+      "label",
+      "values",
+      "status",
+      "section",
+      "minLen",
+      "maxLen",
+      "updateDateEpoch",
+      "createDateEpoch",
+      "updatedBy",
+      "createdBy",
+      "updateDate",
+      "createDate",
+      "updatedByID",
+      "createdByID"
+    ],
+    "properties": {
+      "_id": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "callback_type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Callback Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By\t",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "CreatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "isrequired": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Is Required",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "label": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Field Label",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "locale": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Locale",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "maxLen": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Maximum Length",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "minLen": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Minimum Length",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Field Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "page_name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Page Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "section": {
+        "searchable": false,
+        "title": "Field Section",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "status": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Field Status",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Field Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "UpdatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "values": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "type": "string"
+        },
+        "searchable": true,
+        "title": "Field Values",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "page_name",
+      "name",
+      "type",
+      "isrequired",
+      "locale",
+      "status",
+      "section"
+    ],
+    "title": "KYID Page Fields",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

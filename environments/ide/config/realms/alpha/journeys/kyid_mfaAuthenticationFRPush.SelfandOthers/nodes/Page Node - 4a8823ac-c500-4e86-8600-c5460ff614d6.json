@@ -1,0 +1,40 @@
+{
+  "_id": "4a8823ac-c500-4e86-8600-c5460ff614d6",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1352195012",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "391770da-5bf9-4e04-a9bd-a2ec10e3c69c",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "65294b5d-c37c-4024-b92e-9368fa46f73d",
+      "displayName": "Push Notification Waiting",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'><br>\n<a href=\"&{esv.kog.help.mfa.auth.forgerock.push.url}\"target=\"_blank\">Need Assistance?</a><br>\n<br>",
+    "es": "<div class='page-footer-horizontal'><br>\n<a href=\"&{esv.kog.help.mfa.auth.forgerock.push.url}\"target=\"_blank\">¿Necesita ayuda?\n</a><br>\n<br>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/delegationRemoved",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "delegationRemoved.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "delegationRemoved.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "delegationRemoved.css"
+  },
+  "subject": {
+    "en": "Delegation Removed"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "_id": "8c9a1c91-87c5-456d-b0d5-850508945388",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "Duplicate",
+      "id": "Duplicate"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    }
+  ],
+  "_rev": "233315385",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "9081f86c-4e6b-443e-8797-a2db45039e24",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "39856b51-9270-4bb5-9f2a-e7bf4b63b9ba",
+      "displayName": "Collects Cred and Token",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Set up Symantec VIP</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.symantec.url}\"target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">\nIf you do not have Symantec VIP app then download and install the app on your desktop or mobile by visiting <a href=\"https://vip.symantec.com/\">https://vip.symantec.com/</a>\n<br>\n<br>\nFrom the Symantec VIP app, enter your credential ID and two consecutive generated codes.\n</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Configurar Symantec VIP</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.symantec.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">\nSi no tiene la aplicación Symantec VIP, descárguela e instálela en su computadora de escritorio o dispositivo móvil visitando <a href=\"https://vip.symantec.com/\">https://vip.symantec.com/</a>\n<br>\n<br>\nDesde la aplicación Symantec VIP, ingrese su ID de credencial y dos códigos generados consecutivos.\n</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

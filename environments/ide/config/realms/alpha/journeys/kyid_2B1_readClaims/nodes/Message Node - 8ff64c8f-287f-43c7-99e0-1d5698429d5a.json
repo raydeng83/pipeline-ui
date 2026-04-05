@@ -1,0 +1,25 @@
+{
+  "_id": "8ff64c8f-287f-43c7-99e0-1d5698429d5a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1565800368",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "get claims false"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

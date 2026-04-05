@@ -1,0 +1,25 @@
+{
+  "_id": "47525d6a-e1a6-4938-a985-bfa87ad78ad3",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-30553784",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Unable to fetch the user information"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

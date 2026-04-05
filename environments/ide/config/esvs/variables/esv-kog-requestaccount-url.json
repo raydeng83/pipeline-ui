@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kog-requestaccount-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KOG_REQUESTACCOUNT_URL}"
+}

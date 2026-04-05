@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-ide-host",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AD_INTERNAL_IDE_HOST}"
+}

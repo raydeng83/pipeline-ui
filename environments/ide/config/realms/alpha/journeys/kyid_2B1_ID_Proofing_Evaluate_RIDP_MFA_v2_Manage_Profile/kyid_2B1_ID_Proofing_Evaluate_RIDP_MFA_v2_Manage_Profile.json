@@ -1,0 +1,190 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v2_Manage_Profile",
+  "_rev": "1037132956",
+  "description": "Inner Jounrey for RIDP Manage Profile",
+  "enabled": true,
+  "entryNodeId": "1c005e8f-7a4f-4b05-b9f8-9bb8a3313c5c",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "15d0315d-fe8e-4f11-bcbc-4dfacb853f31": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Failed Assurance",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 827.015625,
+      "y": 585.5390625
+    },
+    "1c005e8f-7a4f-4b05-b9f8-9bb8a3313c5c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b4220d71-478c-46ea-9da1-e277c95b1ce7"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 232
+    },
+    "3e0c3a71-d413-4c1c-b60d-8950b1d78332": {
+      "connections": {
+        "Error": "c0a37192-5332-41f5-afa6-57deed0f3e52",
+        "Failed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Successful": "c0a37192-5332-41f5-afa6-57deed0f3e52"
+      },
+      "displayName": "Script: Patch KOG",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2357,
+      "y": 219
+    },
+    "6493e581-f78e-4346-96ba-fa7975f46ecb": {
+      "connections": {
+        "LinkWTerminatedAccount": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b",
+        "NotMatchingWLoggedUser": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b",
+        "UpdateUserIdentity": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "exactMatch": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b",
+        "highRiskTransaction": "65775d14-dc58-4001-bf6f-18e0393cbd70",
+        "jitProvisioning": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b",
+        "lexIdMismatch": "988ad829-490f-4f44-b74f-77cfdfbb61a5",
+        "noMatchPartialMatch": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b"
+      },
+      "displayName": "Script: MCI Search Manage Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 801,
+      "y": 148.5
+    },
+    "65775d14-dc58-4001-bf6f-18e0393cbd70": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: High risk",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1210,
+      "y": 45.333333333333314
+    },
+    "8418c6b6-e2e8-4abb-867e-a7487c48ba5b": {
+      "connections": {
+        "patchFailed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "patchInKOG": "3e0c3a71-d413-4c1c-b60d-8950b1d78332"
+      },
+      "displayName": "Script: Patch User Identity",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1293,
+      "y": 230
+    },
+    "9777820f-9a07-4cf1-a18b-cd2bd4530b7f": {
+      "connections": {
+        "jitProvisioning": "fe661266-ec6e-4550-acb9-72398d6fee7e"
+      },
+      "displayName": "Script: Pre JIT Provisioning ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1674,
+      "y": 732
+    },
+    "988ad829-490f-4f44-b74f-77cfdfbb61a5": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Unable To Verify",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1098,
+      "y": 521
+    },
+    "9988edd6-2b46-471e-ae5b-d52ca9f25348": {
+      "connections": {
+        "errorMessage": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "65775d14-dc58-4001-bf6f-18e0393cbd70"
+      },
+      "displayName": "Script: Delete MCI Record",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1342,
+      "y": 695
+    },
+    "b4220d71-478c-46ea-9da1-e277c95b1ce7": {
+      "connections": {
+        "assuranceFailed": "15d0315d-fe8e-4f11-bcbc-4dfacb853f31",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "highRisk": "d3dfb4bc-48e0-4c3d-b0ee-dbcdac43e381",
+        "highRiskManageProfile": "65775d14-dc58-4001-bf6f-18e0393cbd70",
+        "highRiskSoftRemove": "65775d14-dc58-4001-bf6f-18e0393cbd70",
+        "kbaFailed": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b",
+        "lexMatch": "6493e581-f78e-4346-96ba-fa7975f46ecb",
+        "lexMisMatch": "988ad829-490f-4f44-b74f-77cfdfbb61a5",
+        "mciSearch": "6493e581-f78e-4346-96ba-fa7975f46ecb",
+        "noLexInPing": "6493e581-f78e-4346-96ba-fa7975f46ecb",
+        "noLexTerminatedUser": "988ad829-490f-4f44-b74f-77cfdfbb61a5",
+        "noLexUserInPing": "6493e581-f78e-4346-96ba-fa7975f46ecb",
+        "notVerified": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b"
+      },
+      "displayName": "Script: Manage Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 495,
+      "y": 130
+    },
+    "c0a37192-5332-41f5-afa6-57deed0f3e52": {
+      "connections": {
+        "noSync": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: MCI SYNC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2624,
+      "y": 131.33333333333334
+    },
+    "d3dfb4bc-48e0-4c3d-b0ee-dbcdac43e381": {
+      "connections": {
+        "True": "65775d14-dc58-4001-bf6f-18e0393cbd70"
+      },
+      "displayName": "Script: Add MFA Methods",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 772.015625,
+      "y": 30.5390625
+    },
+    "fe661266-ec6e-4550-acb9-72398d6fee7e": {
+      "connections": {
+        "allJITCompleted": "8418c6b6-e2e8-4abb-867e-a7487c48ba5b",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "proceedJITProvisioning": "9777820f-9a07-4cf1-a18b-cd2bd4530b7f"
+      },
+      "displayName": "Script: Post JIT Provisioning ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1962,
+      "y": 694
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2885,
+      "y": 259.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2624,
+      "y": 310.6666666666667
+    },
+    "startNode": {
+      "x": 70,
+      "y": 259.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

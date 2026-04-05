@@ -1,0 +1,1 @@
+<html><body>This is a reminder to complete your certification task for {{object.campaign.name}}.</body></html>

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-external-dn",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AD_EXTERNAL_DN}"
+}

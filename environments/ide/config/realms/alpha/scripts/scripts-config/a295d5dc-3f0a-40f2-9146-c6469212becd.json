@@ -1,0 +1,16 @@
+{
+  "_id": "a295d5dc-3f0a-40f2-9146-c6469212becd",
+  "context": "SAML2_IDP_ATTRIBUTE_MAPPER",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=1ca864a6-a8a6-40c0-9f8a-0d5b003e4ac5,ou=user,ou=am-config",
+  "lastModifiedDate": 1760017260622,
+  "name": "KYID.SAML2.IDPAttributeMapper",
+  "script": {
+    "file": "scripts-content/SAML2_IDP_ATTRIBUTE_MAPPER/KYID.SAML2.IDPAttributeMapper.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "231cc64a-8029-444e-bad0-6bcc5a0a576f",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286698971,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1769657316004,
+  "name": "KYID.2B1.Journey.MFAAuthn.DisplayPhoneNumbers",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.MFAAuthn.DisplayPhoneNumbers.js"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "_id": "4b1f7185-0b1e-4f00-b036-a4e906776e25",
+  "_outcomes": [
+    {
+      "displayName": "retry",
+      "id": "retry"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "1025927977",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "retry",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "f2fc0750-2ad1-430d-895e-798e3f4c126f"
+}

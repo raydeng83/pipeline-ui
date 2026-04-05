@@ -1,0 +1,140 @@
+{
+  "_rev": 1,
+  "childType": false,
+  "description": "iTWIST Workflow generic workflow",
+  "displayName": "iTWIST Workflow Workflow",
+  "id": "iTWIST-Workflow",
+  "mutable": true,
+  "name": "iTWIST-Workflow",
+  "staticNodes": {
+    "endNode": {
+      "_outcomes": [],
+      "connections": {},
+      "displayDetails": {
+        "icon": "checkmark",
+        "value": "Success",
+        "variant": "success"
+      },
+      "displayType": "SingleInput",
+      "hasError": false,
+      "id": "endNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "End",
+      "nodeType": "SingleInput",
+      "schema": null,
+      "template": null,
+      "x": 2308,
+      "y": 207.5
+    },
+    "startNode": {
+      "_outcomes": [
+        {
+          "displayName": "start",
+          "id": "start"
+        }
+      ],
+      "connections": {
+        "start": "scriptTask-70b2da1a0483"
+      },
+      "displayDetails": {
+        "icon": "play_arrow",
+        "value": "Start",
+        "variant": "info"
+      },
+      "displayType": "IconOutcomeNode",
+      "hasError": false,
+      "id": "startNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "Start",
+      "nodeType": "IconOutcomeNode",
+      "schema": null,
+      "template": null,
+      "x": 70,
+      "y": 225.5
+    },
+    "uiConfig": {
+      "approvalTask-95a73e18cff6": {
+        "actors": [
+          {
+            "id": {
+              "isExpression": false,
+              "value": "managed/user/272a44f9-4d8b-44d4-9e02-169422385a88"
+            },
+            "type": "user"
+          },
+          {
+            "id": {
+              "isExpression": false,
+              "value": "managed/user/e580dfb1-bae2-452e-97f7-39c5ec00e736"
+            },
+            "type": "user"
+          }
+        ],
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 5,
+          "expirationDateType": "duration",
+          "expirationDateVariable": "",
+          "expirationTimeSpan": "minute(s)",
+          "reassignedActors": [
+            {
+              "id": ""
+            }
+          ],
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 783,
+        "y": 107.5
+      },
+      "exclusiveGateway-34047e616c13": {
+        "x": 1709,
+        "y": 268.8333333333333
+      },
+      "exclusiveGateway-63953f0126f4": {
+        "x": 440,
+        "y": 200.5
+      },
+      "exclusiveGateway-7f1777e228ba": {
+        "x": 1709,
+        "y": 75.66666666666667
+      },
+      "scriptTask-05efed9a34f3": {
+        "x": 1436,
+        "y": 98
+      },
+      "scriptTask-12f2e5af9606": {
+        "x": 1091,
+        "y": 58.015625
+      },
+      "scriptTask-37be22411bf7": {
+        "x": 1988,
+        "y": 209
+      },
+      "scriptTask-70b2da1a0483": {
+        "x": 209,
+        "y": 227
+      },
+      "scriptTask-74c5710a88c8": {
+        "x": 1986,
+        "y": 356
+      },
+      "scriptTask-a693f3a33d93": {
+        "x": 1258,
+        "y": 218.5
+      },
+      "scriptTask-ef98df825107": {
+        "x": 1988,
+        "y": 62
+      }
+    }
+  },
+  "status": "published"
+}

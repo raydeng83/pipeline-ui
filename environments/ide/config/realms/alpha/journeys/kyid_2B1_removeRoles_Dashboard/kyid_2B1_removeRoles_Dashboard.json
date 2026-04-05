@@ -1,0 +1,51 @@
+{
+  "_id": "kyid_2B1_removeRoles_Dashboard",
+  "_rev": "1409996860",
+  "enabled": true,
+  "entryNodeId": "c2aa0181-b35d-4ac0-8b52-65f2858980b0",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "c2aa0181-b35d-4ac0-8b52-65f2858980b0": {
+      "connections": {
+        "error": "c681790e-6e79-4a41-9ccb-672c7e521513",
+        "success": "c681790e-6e79-4a41-9ccb-672c7e521513"
+      },
+      "displayName": "Script:RoleandAccessID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 298,
+      "y": 94.015625
+    },
+    "c681790e-6e79-4a41-9ccb-672c7e521513": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:RemoveRole",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 837,
+      "y": 189.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1182,
+      "y": 51
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1343,
+      "y": 426
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

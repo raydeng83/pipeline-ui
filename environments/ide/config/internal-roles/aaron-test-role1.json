@@ -1,0 +1,184 @@
+{
+  "_id": "5a0043d7-4b28-4141-8290-83d7c898cb0f",
+  "_rev": "097ba0af-2d79-4eea-8364-4a11274e1b9c-158005",
+  "condition": null,
+  "description": "aaron-test-role1",
+  "name": "aaron-test-role1",
+  "privileges": [
+    {
+      "accessFlags": [
+        {
+          "attribute": "app",
+          "readOnly": false
+        },
+        {
+          "attribute": "appIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "assignmentDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "assignmentDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "audit",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyDescription",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyName",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyTypeName",
+          "readOnly": false
+        },
+        {
+          "attribute": "businessKeyValue",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "createdByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "currentDelegator",
+          "readOnly": false
+        },
+        {
+          "attribute": "currentDelegatorIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "enrollmentRequestId",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "expiryDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "id",
+          "readOnly": false
+        },
+        {
+          "attribute": "isForwardDelegable",
+          "readOnly": false
+        },
+        {
+          "attribute": "kogOrgBusinessKeyId",
+          "readOnly": false
+        },
+        {
+          "attribute": "orgId",
+          "readOnly": false
+        },
+        {
+          "attribute": "orgName",
+          "readOnly": false
+        },
+        {
+          "attribute": "orgType",
+          "readOnly": false
+        },
+        {
+          "attribute": "originalDelegator",
+          "readOnly": false
+        },
+        {
+          "attribute": "originalDelegatorIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "reconbatchidentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordSource",
+          "readOnly": false
+        },
+        {
+          "attribute": "recordState",
+          "readOnly": false
+        },
+        {
+          "attribute": "role",
+          "readOnly": false
+        },
+        {
+          "attribute": "roleIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "sourceUniqueId",
+          "readOnly": false
+        },
+        {
+          "attribute": "stgDelegationId",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": false
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": false
+        },
+        {
+          "attribute": "updatedByID",
+          "readOnly": false
+        },
+        {
+          "attribute": "user",
+          "readOnly": false
+        },
+        {
+          "attribute": "userIdentifier",
+          "readOnly": false
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "filter": "/appIdentifier eq \"b8e16d01-9744-43c9-8f5f-9cd13e2cda29\"",
+      "name": "Kyid Accesses",
+      "path": "managed/alpha_kyid_access",
+      "permissions": [
+        "VIEW",
+        "CREATE",
+        "UPDATE",
+        "DELETE"
+      ]
+    }
+  ],
+  "temporalConstraints": []
+}

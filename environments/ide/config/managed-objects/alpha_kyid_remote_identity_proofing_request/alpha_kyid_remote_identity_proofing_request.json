@@ -1,0 +1,271 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_remote_identity_proofing_request",
+  "onCreate": {
+    "file": "alpha_kyid_remote_identity_proofing_request.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_remote_identity_proofing_request.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "alpha_kyid_remote_identity_proofing_request.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "alpha_kyid_remote_identity_proofing_request.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "This managed object maintains the remote identity proofing request object specifications.",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "requestedUserId",
+      "requesterUserId",
+      "userPrereqId",
+      "status",
+      "referenceId",
+      "createDate",
+      "createDateEpoch",
+      "updateDate",
+      "updateDateEpoch",
+      "expiryDate",
+      "expiryDateEpoch",
+      "createdBy",
+      "updatedBy",
+      "recordState",
+      "recordSource",
+      "createdByID",
+      "updatedByID",
+      "userPrerequisite",
+      "userRequest"
+    ],
+    "properties": {
+      "createDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Create Date Epoch",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "CreatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "expiryDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Expiry Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "expiryDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Expiry Date Epoch",
+        "type": "number",
+        "userEditable": false,
+        "viewable": true
+      },
+      "recordSource": {
+        "searchable": false,
+        "title": "Record Source",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "recordState": {
+        "searchable": false,
+        "title": "Record State",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "referenceId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Reference ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "requestedUserId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Requested User ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "requesterUserId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Requester User ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "status": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Status",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "updateDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "update Date Epoch",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "UpdatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "userPrereqId": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_remote_identity_proofing_request:userPrereqId",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_enrollment_user_prerequisites",
+            "notify": false,
+            "path": "managed/alpha_kyid_enrollment_user_prerequisites",
+            "query": {
+              "fields": [
+                "enrollmentRequestId",
+                "preRequisiteTypeId",
+                "associatedRoleIds",
+                "preRequisiteId"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": true,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": false,
+        "title": "Userprereqid",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "userPrerequisite": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "User Prerequisite ID",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "userRequest": {
+        "searchable": false,
+        "title": "User Request",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "requestedUserId",
+      "requesterUserId",
+      "status",
+      "recordState",
+      "recordSource"
+    ],
+    "title": "KYID Remote Identity Proofing Request",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

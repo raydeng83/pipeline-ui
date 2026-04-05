@@ -1,0 +1,16 @@
+{
+  "_id": "9894f17b-eff4-4bd9-b7da-b6926a2ff334",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286691308,
+  "default": false,
+  "description": "This script is used to Reverify the user",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766055394176,
+  "name": "KYID.2B1.Journey.Reverify",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Reverify.js"
+  }
+}

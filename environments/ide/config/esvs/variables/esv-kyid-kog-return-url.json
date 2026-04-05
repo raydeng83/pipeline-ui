@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-kog-return-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_KOG_RETURN_URL}"
+}

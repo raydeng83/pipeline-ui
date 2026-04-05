@@ -1,0 +1,16 @@
+{
+  "_id": "2ebadd7f-a398-419c-837f-8e5c73ec7dda",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "This function is used to create new Forgerock AIC user profile based on KOG Profile.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287837058,
+  "name": "KYID.Journey.CreateUserInPingAIC",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.CreateUserInPingAIC.js"
+  }
+}

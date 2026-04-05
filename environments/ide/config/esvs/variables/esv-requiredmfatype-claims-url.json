@@ -1,0 +1,6 @@
+{
+  "_id": "esv-requiredmfatype-claims-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_REQUIREDMFATYPE_CLAIMS_URL}"
+}

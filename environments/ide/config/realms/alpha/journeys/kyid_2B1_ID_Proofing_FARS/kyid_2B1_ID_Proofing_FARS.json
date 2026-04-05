@@ -1,0 +1,168 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_FARS",
+  "_rev": "-1999777557",
+  "enabled": true,
+  "entryNodeId": "537ae5fa-1f8c-4da9-91f0-00cac337c5a3",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "09d9a100-b1e8-4a99-88e9-10db43d9219a": {
+      "connections": {
+        "displayFARS": "f614c83d-b89c-46e3-beff-d4d5555922c5",
+        "success": "236673bc-2ff4-4ce8-a9ce-382509d9c0df"
+      },
+      "displayName": "Script: Call FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 779,
+      "y": 61
+    },
+    "236673bc-2ff4-4ce8-a9ce-382509d9c0df": {
+      "connections": {
+        "MCISYNC": "d6cd94f2-5c2c-4269-8ae2-1b86f4e326eb",
+        "appEnrollRIDPmsg": "d6cd94f2-5c2c-4269-8ae2-1b86f4e326eb",
+        "displayUser": "d6cd94f2-5c2c-4269-8ae2-1b86f4e326eb"
+      },
+      "displayName": "Script: FARS MCI SEARCH",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1059.3333435058594,
+      "y": 60.34721374511719
+    },
+    "537ae5fa-1f8c-4da9-91f0-00cac337c5a3": {
+      "connections": {
+        "LexisNexis": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "displayFARS_1": "dbb68f96-0a36-4acf-b180-e474fd1c557b",
+        "displayFARS_2": "838b1898-d7fe-4481-bf5c-8dca7eaa4041",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "helpdeskFars": "b969d621-51f9-4771-94ae-de587b75d042",
+        "success": "d6cd94f2-5c2c-4269-8ae2-1b86f4e326eb"
+      },
+      "displayName": "Script: Get Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 178
+    },
+    "6c8a022f-7643-40ed-a1f5-5403db2d4f43": {
+      "connections": {
+        "CMSFARS": "09d9a100-b1e8-4a99-88e9-10db43d9219a",
+        "PrereqCompleted": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "lexisNexisRetry": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Check Prerequisite Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 764.015625,
+      "y": 437.5390625
+    },
+    "7aebf4be-75b4-4de7-8ed3-828034a8ba43": {
+      "connections": {
+        "Next": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display Message",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1680,
+      "y": 481.5
+    },
+    "838b1898-d7fe-4481-bf5c-8dca7eaa4041": {
+      "connections": {
+        "Next": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display FARS 2",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1330,
+      "y": 310
+    },
+    "8d3e968b-6135-48a5-bad7-1258221b61ec": {
+      "connections": {
+        "true": "b969d621-51f9-4771-94ae-de587b75d042"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 516,
+      "y": 493.00000000000006
+    },
+    "b969d621-51f9-4771-94ae-de587b75d042": {
+      "connections": {
+        "divert": "8d3e968b-6135-48a5-bad7-1258221b61ec",
+        "next": "09d9a100-b1e8-4a99-88e9-10db43d9219a"
+      },
+      "displayName": "Script: Experian Collect Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 486,
+      "y": 322.8333333333333
+    },
+    "c06a2a81-25f9-4059-8af9-6637035388ce": {
+      "connections": {
+        "Next": "7aebf4be-75b4-4de7-8ed3-828034a8ba43",
+        "appEnrollMessage": "7aebf4be-75b4-4de7-8ed3-828034a8ba43"
+      },
+      "displayName": "Script: Patch User PreReq",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1349,
+      "y": 495.3333282470703
+    },
+    "d6cd94f2-5c2c-4269-8ae2-1b86f4e326eb": {
+      "connections": {
+        "displayUser": "7aebf4be-75b4-4de7-8ed3-828034a8ba43",
+        "errorMessage": "c06a2a81-25f9-4059-8af9-6637035388ce",
+        "true": "c06a2a81-25f9-4059-8af9-6637035388ce"
+      },
+      "displayName": "Script: FARS MCI SYNC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1355,
+      "y": 138
+    },
+    "dbb68f96-0a36-4acf-b180-e474fd1c557b": {
+      "connections": {
+        "LexisNexis": "6c8a022f-7643-40ed-a1f5-5403db2d4f43",
+        "callFARS": "6c8a022f-7643-40ed-a1f5-5403db2d4f43",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display 1st FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 469,
+      "y": 101.66666666666667
+    },
+    "f614c83d-b89c-46e3-beff-d4d5555922c5": {
+      "connections": {
+        "FARS": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "appEnrollMessage": "d6cd94f2-5c2c-4269-8ae2-1b86f4e326eb",
+        "displayFARS2": "838b1898-d7fe-4481-bf5c-8dca7eaa4041"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1065,
+      "y": 218
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1155,
+      "y": 411
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1933,
+      "y": 258.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 258.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

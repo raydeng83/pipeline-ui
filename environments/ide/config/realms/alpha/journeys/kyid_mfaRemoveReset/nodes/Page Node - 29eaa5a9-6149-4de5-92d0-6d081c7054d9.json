@@ -1,0 +1,31 @@
+{
+  "_id": "29eaa5a9-6149-4de5-92d0-6d081c7054d9",
+  "_outcomes": [
+    {
+      "displayName": "Confirm",
+      "id": "Confirm"
+    },
+    {
+      "displayName": "GoBack",
+      "id": "GoBack"
+    }
+  ],
+  "_rev": "1049076157",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "2a65698a-4398-42b5-a4e6-8a4aa39ae656",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nBack to Application</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n    <div class='page-footer-element' style=\\\"text-align:left\\\">\\n    <span><a href=\\\"&{esv.mfaself.successurl}\\\">Volver a la solicitud\\n    </a></span>\\n    </div>\\n    <div class='page-footer-element' style=\\\"text-align:left\\\">\\n    <span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n    </div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

@@ -1,0 +1,39 @@
+{
+  "_id": "e2fe03ab-bc61-4c18-a855-717c759a8fea",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1966971942",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "002bb18b-3738-43c3-a839-dbb8b2b2d5b3",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "be90cf6a-1764-4d10-a090-68e6e29ae078",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "es": "<div class=\"page-header-title\">\n<h5>Restablezca su contraseña de Kentucky Online Gateway</h5>\n</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"ConfirmationCallback\":[{\"id\":\"be90cf6a-1764-4d10-a090-68e6e29ae078\",\"showOnlyPositiveAnswer\":true,\"showButtonsAsLinks\":true}],\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Ayuda</a></span>\\n</div>\"}}"
+}

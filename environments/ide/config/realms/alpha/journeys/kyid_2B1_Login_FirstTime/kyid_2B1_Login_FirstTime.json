@@ -1,0 +1,410 @@
+{
+  "_id": "kyid_2B1_Login_FirstTime",
+  "_rev": "370822364",
+  "enabled": true,
+  "entryNodeId": "74227f0c-3047-465a-9dd1-fd983423c084",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "02117ca0-03e1-4bba-8863-9fc5b526ac39": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "31c6496d-9471-45a1-aeab-06cb2c218340"
+      },
+      "displayName": "IJ : RIDP v2",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1921.25,
+      "y": 570.3125
+    },
+    "0521fe87-cb36-45a1-86ce-150432daf0f9": {
+      "connections": {
+        "True": "7a580f2e-3c25-4891-afab-5b043d58fb04"
+      },
+      "displayName": "Script:DefaultInternalRoles",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2567,
+      "y": 481.015625
+    },
+    "1da6a2ca-c8e5-4d21-861e-557a48abfacf": {
+      "connections": {
+        "Mobile": "383e25d8-080e-4b07-a00d-2d8b1e4d6b1a",
+        "skipMobile": "9037dd68-5b70-4175-a15a-e7be3d9e551e"
+      },
+      "displayName": "Script:SkipMobileorNot",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 191,
+      "y": 522.015625
+    },
+    "21f42a3b-d971-419d-8caa-38c647e31610": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "acb6184d-5e6e-420e-9b19-ebd6d6286627"
+      },
+      "displayName": "IJ:PhoneRegistration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 510,
+      "y": 862.015625
+    },
+    "297f41ae-32bb-4bbd-beca-d812707ba5ea": {
+      "connections": {
+        "MFAtrigger": "b20e0934-64ff-4b53-9c38-ffaf1c17400b",
+        "noMFAtrigger": "eb287382-e2e7-4de9-ad5a-e22521ee18aa"
+      },
+      "displayName": "Script:hasMFAPerformed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1257,
+      "y": 67.015625
+    },
+    "2ba4d13c-4ecf-41b2-8f65-144931387fe3": {
+      "connections": {
+        "EnrollMFA": "21f42a3b-d971-419d-8caa-38c647e31610",
+        "NotEnrollMFA": "dcda224d-4224-4c78-95c9-bf8a2b5caef7",
+        "RemoveMFA": "e889fb1f-b4b0-4494-96eb-8eed8fd8ac26",
+        "save": "9037dd68-5b70-4175-a15a-e7be3d9e551e"
+      },
+      "displayName": "Script:DisplayPhNum",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 506,
+      "y": 612.015625
+    },
+    "31c6496d-9471-45a1-aeab-06cb2c218340": {
+      "connections": {
+        "True": "3b188b70-47fc-43ad-be51-e07f3467b054"
+      },
+      "displayName": "Script: Add MFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2179.515625,
+      "y": 681.5390625
+    },
+    "383e25d8-080e-4b07-a00d-2d8b1e4d6b1a": {
+      "connections": {
+        "No": "21f42a3b-d971-419d-8caa-38c647e31610",
+        "Yes": "2ba4d13c-4ecf-41b2-8f65-144931387fe3"
+      },
+      "displayName": "Script:isMobileregistered",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 182,
+      "y": 700.3333282470703
+    },
+    "3b188b70-47fc-43ad-be51-e07f3467b054": {
+      "connections": {
+        "false": "6122663f-8435-443d-a684-b32e169ae9c3",
+        "goToMobileReg": "383e25d8-080e-4b07-a00d-2d8b1e4d6b1a",
+        "true": "e2114b4b-daf7-40ea-95c6-9c355bacd1ee"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2252.3333740234375,
+      "y": 28.333328247070312
+    },
+    "5e601926-3ec2-4570-ba4b-f6e9e3caf500": {
+      "connections": {
+        "Ridp": "7cd57b59-d3a3-44a5-bb66-0ebbc0945b8f",
+        "skipRidp": "6122663f-8435-443d-a684-b32e169ae9c3"
+      },
+      "displayName": "Script:CheckLastLogonRIDP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1722,
+      "y": 709.3333282470703
+    },
+    "6122663f-8435-443d-a684-b32e169ae9c3": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "0521fe87-cb36-45a1-86ce-150432daf0f9"
+      },
+      "displayName": "Script: UpdateKYIDUserProfileFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2297.5,
+      "y": 496.3125
+    },
+    "6da656fd-01f1-4121-8355-f4a7741c0a78": {
+      "connections": {
+        "true": "b9a5fbc0-df55-45a2-beeb-95aab638d380"
+      },
+      "displayName": "Script:NodeStateset",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 419,
+      "y": 202.015625
+    },
+    "74227f0c-3047-465a-9dd1-fd983423c084": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "aadc1369-0aba-4a9f-a672-72b2aaef41c2"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 116,
+      "y": 25.015625
+    },
+    "78fdf714-57e6-4c9c-974c-9efcd2d67046": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "eb287382-e2e7-4de9-ad5a-e22521ee18aa"
+      },
+      "displayName": "IJ:MFAAuthn",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1932,
+      "y": 41.015625
+    },
+    "7a580f2e-3c25-4891-afab-5b043d58fb04": {
+      "connections": {
+        "true": "9b1cac81-a59a-489b-be44-3a2183f0a6b6"
+      },
+      "displayName": "Script: Update Access MO",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2770,
+      "y": 531.3333282470703
+    },
+    "7cd57b59-d3a3-44a5-bb66-0ebbc0945b8f": {
+      "connections": {
+        "v1": "7d3978f6-4094-4974-86b1-ffa57f6b68a6",
+        "v2": "02117ca0-03e1-4bba-8863-9fc5b526ac39"
+      },
+      "displayName": "Script: RIDP Version ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1580,
+      "y": 466.3333282470703
+    },
+    "7d3978f6-4094-4974-86b1-ffa57f6b68a6": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "3b188b70-47fc-43ad-be51-e07f3467b054"
+      },
+      "displayName": "IJ : RIDP v1",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1937.3333129882812,
+      "y": 388.3333282470703
+    },
+    "7fcd036e-1e54-40ca-8b15-48b4a7ed8d85": {
+      "connections": {
+        "false": "5e601926-3ec2-4570-ba4b-f6e9e3caf500",
+        "true": "383e25d8-080e-4b07-a00d-2d8b1e4d6b1a"
+      },
+      "displayName": "Alternate Email Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1226,
+      "y": 594.3125
+    },
+    "9037dd68-5b70-4175-a15a-e7be3d9e551e": {
+      "connections": {
+        "gotoalternateemail": "e2114b4b-daf7-40ea-95c6-9c355bacd1ee",
+        "gotoridp": "5e601926-3ec2-4570-ba4b-f6e9e3caf500"
+      },
+      "displayName": "Script:CheckAlternateEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1167,
+      "y": 347.3333282470703
+    },
+    "97e20be9-bde2-4644-b1fb-7369e5ab618c": {
+      "connections": {
+        "True": "6122663f-8435-443d-a684-b32e169ae9c3"
+      },
+      "displayName": "AddMFAinPINGProfile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2307,
+      "y": 337.3125
+    },
+    "9b1cac81-a59a-489b-be44-3a2183f0a6b6": {
+      "connections": {
+        "true": "d1daa789-d061-414a-8645-a9f682849d02"
+      },
+      "displayName": "Script:SetinNodeState",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2618,
+      "y": 350.015625
+    },
+    "9b213233-29dd-45e1-baea-ca35dad5a8a6": {
+      "connections": {
+        "True": "9037dd68-5b70-4175-a15a-e7be3d9e551e"
+      },
+      "displayName": "Script:AddPhoneMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1176,
+      "y": 923.015625
+    },
+    "a7cf14f3-fc76-4c99-b67d-1106ba7c3fee": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "next": "297f41ae-32bb-4bbd-beca-d812707ba5ea"
+      },
+      "displayName": "Script:getStarted",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1016,
+      "y": 56.015625
+    },
+    "aadc1369-0aba-4a9f-a672-72b2aaef41c2": {
+      "connections": {
+        "firstTime": "6da656fd-01f1-4121-8355-f4a7741c0a78",
+        "skipFirstTime": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:FirstTime",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 447,
+      "y": 29.333328247070312
+    },
+    "acb6184d-5e6e-420e-9b19-ebd6d6286627": {
+      "connections": {
+        "false": "9037dd68-5b70-4175-a15a-e7be3d9e551e",
+        "true": "383e25d8-080e-4b07-a00d-2d8b1e4d6b1a"
+      },
+      "displayName": "Phone Verify Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 826,
+      "y": 1001.3125
+    },
+    "b17549b5-5911-49fc-9e11-2281ed46e284": {
+      "connections": {
+        "No": "9037dd68-5b70-4175-a15a-e7be3d9e551e",
+        "Yes": "9037dd68-5b70-4175-a15a-e7be3d9e551e"
+      },
+      "displayName": "Script:CheckMobilNum",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 805,
+      "y": 820.3333282470703
+    },
+    "b20e0934-64ff-4b53-9c38-ffaf1c17400b": {
+      "connections": {
+        "failed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "eceb27ac-79e6-4364-870e-990b30b0d52a"
+      },
+      "displayName": "Script:GetUsersMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1594,
+      "y": 63.015625
+    },
+    "b9a5fbc0-df55-45a2-beeb-95aab638d380": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "kyidProfileNotSetup": "a7cf14f3-fc76-4c99-b67d-1106ba7c3fee",
+        "kyidProfileSetup": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:CheckFirstTimeUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 711,
+      "y": 33.33332824707031
+    },
+    "bfffb198-2b69-4b5e-9aa0-72a0581fd6b7": {
+      "connections": {
+        "True": "5e601926-3ec2-4570-ba4b-f6e9e3caf500"
+      },
+      "displayName": "Script:AddMFAinPING",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1478.3333740234375,
+      "y": 904.3333282470703
+    },
+    "d1daa789-d061-414a-8645-a9f682849d02": {
+      "connections": {
+        "failure": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Send Mail : Profile Updated",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2568.6666259765625,
+      "y": 143.3333282470703
+    },
+    "dcda224d-4224-4c78-95c9-bf8a2b5caef7": {
+      "connections": {
+        "true": "2ba4d13c-4ecf-41b2-8f65-144931387fe3"
+      },
+      "displayName": "Reload",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 802,
+      "y": 702.015625
+    },
+    "e2114b4b-daf7-40ea-95c6-9c355bacd1ee": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "7fcd036e-1e54-40ca-8b15-48b4a7ed8d85"
+      },
+      "displayName": "IJ:AlternateEmailRegistration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1561,
+      "y": 260.015625
+    },
+    "e889fb1f-b4b0-4494-96eb-8eed8fd8ac26": {
+      "connections": {
+        "true": "b17549b5-5911-49fc-9e11-2281ed46e284"
+      },
+      "displayName": "IJ:RemoveMobile",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 789,
+      "y": 566.015625
+    },
+    "eb287382-e2e7-4de9-ad5a-e22521ee18aa": {
+      "connections": {
+        "back": "b9a5fbc0-df55-45a2-beeb-95aab638d380",
+        "next": "1da6a2ca-c8e5-4d21-861e-557a48abfacf"
+      },
+      "displayName": "Script:NextorBack",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 247,
+      "y": 344.015625
+    },
+    "eceb27ac-79e6-4364-870e-990b30b0d52a": {
+      "connections": {
+        "MFARequired": "78fdf714-57e6-4c9c-974c-9efcd2d67046",
+        "skipMFA": "383e25d8-080e-4b07-a00d-2d8b1e4d6b1a"
+      },
+      "displayName": "Script: Check Is MFA Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1865,
+      "y": 192.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2798,
+      "y": 66
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2821,
+      "y": 841
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

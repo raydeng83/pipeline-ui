@@ -1,0 +1,16 @@
+{
+  "_id": "9136382d-f15c-457f-a2b0-346459ccd418",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "This script is used to authenticate user against remote LDAP directory.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287829960,
+  "name": "Le-Updated-KYID.Journey.PTAAuthentication",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Le-Updated-KYID.Journey.PTAAuthentication.js"
+  }
+}

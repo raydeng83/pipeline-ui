@@ -1,0 +1,38 @@
+{
+  "_id": "kyid_CreateAccountRouterTree",
+  "_rev": "2142376200",
+  "enabled": true,
+  "entryNodeId": "e381a484-7de2-4766-8324-52ef041d387a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "e381a484-7de2-4766-8324-52ef041d387a": {
+      "connections": {},
+      "displayName": "Script: Redirects to KOG Create Account Form Page",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 269,
+      "y": 165.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 500,
+      "y": 50
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 500,
+      "y": 350
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Login\"]"
+  }
+}

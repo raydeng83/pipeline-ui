@@ -1,0 +1,387 @@
+{
+  "_id": "provisioner.openicf/DBConnector_PrerequisiteLPStaging",
+  "configurationProperties": {
+    "abandonWhenPercentageFull": 0,
+    "accessToUnderlyingConnectionAllowed": true,
+    "allNative": false,
+    "alternateUsernameAllowed": false,
+    "changeLogColumn": null,
+    "commitOnReturn": false,
+    "connectionProperties": null,
+    "defaultAutoCommit": null,
+    "defaultCatalog": null,
+    "defaultReadOnly": null,
+    "defaultTransactionIsolation": -1,
+    "disablePaging": false,
+    "driverClassName": "&{esv.dbconnector.jdbcdriver}",
+    "enableEmptyString": false,
+    "fairQueue": true,
+    "ignoreExceptionOnPreLoad": false,
+    "inclusiveSync": false,
+    "initSQL": null,
+    "initialSize": "10",
+    "jdbcInterceptors": null,
+    "jmxEnabled": true,
+    "keyColumn": "PrerequisiteTypeIdentifier",
+    "logAbandoned": false,
+    "logValidationErrors": false,
+    "maxActive": "100",
+    "maxAge": "0",
+    "maxIdle": "100",
+    "maxWait": "30000",
+    "minEvictableIdleTimeMillis": "60000",
+    "minIdle": "&{esv.dbconnector.min.idle}",
+    "name": "Tomcat Connection Pool[1-429075478]",
+    "nativeTimestamps": false,
+    "numTestsPerEvictionRun": 0,
+    "password": "&{esv.dbconnector.password}",
+    "passwordColumn": null,
+    "propagateInterruptState": false,
+    "quoting": "NONE",
+    "removeAbandoned": false,
+    "removeAbandonedTimeout": 60,
+    "rethrowAllSQLExceptions": true,
+    "returnGeneratedKeys": true,
+    "rollbackOnReturn": false,
+    "suppressPassword": true,
+    "suspectTimeout": 0,
+    "table": "PrerequisiteLPStaging",
+    "testOnBorrow": false,
+    "testOnConnect": false,
+    "testOnReturn": false,
+    "testWhileIdle": false,
+    "timeBetweenEvictionRunsMillis": "5000",
+    "url": "&{esv.dbconnector.jdbcurl}",
+    "useDisposableConnectionFacade": true,
+    "useEquals": true,
+    "useLock": false,
+    "useStatementFacade": true,
+    "username": "&{esv.dbconnector.username}",
+    "validationInterval": "3000",
+    "validationQuery": null,
+    "validationQueryTimeout": "-1",
+    "validatorClassName": null
+  },
+  "connectorRef": {
+    "bundleName": "org.forgerock.openicf.connectors.databasetable-connector",
+    "bundleVersion": "[1.5.20.12, 1.6.0.0)",
+    "connectorHostRef": "rcs-connector-external-1",
+    "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector",
+    "displayName": "Database Table Connector",
+    "systemType": "provisioner.openicf"
+  },
+  "connectorType": "org.identityconnectors.databasetable.DatabaseTableConnector_1.5.20.29",
+  "enabled": true,
+  "objectTypes": {
+    "__ACCOUNT__": {
+      "$schema": "http://json-schema.org/draft-03/schema",
+      "id": "__ACCOUNT__",
+      "nativeType": "__ACCOUNT__",
+      "properties": {
+        "AULevel2Code": {
+          "nativeName": "AULevel2Code",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "AULevel3Code": {
+          "nativeName": "AULevel3Code",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "AllowReuse": {
+          "nativeName": "AllowReuse",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "AllowReuseIfDaysOld": {
+          "nativeName": "AllowReuseIfDaysOld",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "ApplicationId": {
+          "nativeName": "ApplicationId",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "ApplicationName": {
+          "nativeName": "ApplicationName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CreateCycleNumber": {
+          "nativeName": "CreateCycleNumber",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "CreateDate": {
+          "nativeName": "CreateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CreateDateEpoch": {
+          "nativeName": "CreateDateEpoch",
+          "nativeType": "JAVA_TYPE_LONG",
+          "type": "number"
+        },
+        "CreateJobRunId": {
+          "nativeName": "CreateJobRunId",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "CreateUserId": {
+          "nativeName": "CreateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "Description": {
+          "nativeName": "Description",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "DisplayDescription": {
+          "nativeName": "DisplayDescription",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "DisplayName": {
+          "nativeName": "DisplayName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "DontAllow": {
+          "nativeName": "DontAllow",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "DontAllowExpiry": {
+          "nativeName": "DontAllowExpiry",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "EndDate": {
+          "nativeName": "EndDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "ExecutionOrder": {
+          "nativeName": "ExecutionOrder",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "FlaggedForDeltaLoad": {
+          "nativeName": "FlaggedForDeltaLoad",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "FrequencyInDays": {
+          "nativeName": "FrequencyInDays",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "FrequencyType": {
+          "nativeName": "FrequencyType",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "FrequencyValue": {
+          "nativeName": "FrequencyValue",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "GracePeriodInDays": {
+          "nativeName": "GracePeriodInDays",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "InDays": {
+          "nativeName": "InDays",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "IsRequiredEveryTime": {
+          "nativeName": "IsRequiredEveryTime",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "Locale": {
+          "nativeName": "Locale",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "LoginActionOnExpiry": {
+          "nativeName": "LoginActionOnExpiry",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "LoginPrerequisiteDueDate": {
+          "nativeName": "LoginPrerequisiteDueDate",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "Name": {
+          "nativeName": "Name",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "NumberOfDaysBeforeDueDate": {
+          "nativeName": "NumberOfDaysBeforeDueDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "PreRequisiteSourceName": {
+          "nativeName": "PreRequisiteSourceName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "PrerequisiteId": {
+          "nativeName": "PrerequisiteId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "PrerequisiteLPStagingId": {
+          "nativeName": "PrerequisiteLPStagingId",
+          "nativeType": "integer",
+          "required": true,
+          "type": "integer"
+        },
+        "ReconFlag": {
+          "nativeName": "ReconFlag",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "ReconFlagTrainingAgreement": {
+          "nativeName": "ReconFlagTrainingAgreement",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "RecordSource": {
+          "nativeName": "RecordSource",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "RecordState": {
+          "nativeName": "RecordState",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "RemovePrerequisite": {
+          "nativeName": "RemovePrerequisite",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "RoleId": {
+          "nativeName": "RoleId",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "SavePermanent": {
+          "nativeName": "SavePermanent",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "Save_Input": {
+          "nativeName": "Save_Input",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "SkipOption": {
+          "nativeName": "SkipOption",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "SrcCreateDate": {
+          "nativeName": "SrcCreateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "SrcCreateUserId": {
+          "nativeName": "SrcCreateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "SrcUpdateDate": {
+          "nativeName": "SrcUpdateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "SrcUpdateUserId": {
+          "nativeName": "SrcUpdateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "StandaloneActionOnExpiry": {
+          "nativeName": "StandaloneActionOnExpiry",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "StartDate": {
+          "nativeName": "StartDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "ToBeReconciled": {
+          "nativeName": "ToBeReconciled",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "Trigger_Always": {
+          "nativeName": "Trigger_Always",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "URL": {
+          "nativeName": "URL",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UpdateDate": {
+          "nativeName": "UpdateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UpdateDateEpoch": {
+          "nativeName": "UpdateDateEpoch",
+          "nativeType": "JAVA_TYPE_LONG",
+          "type": "number"
+        },
+        "UpdateUserId": {
+          "nativeName": "UpdateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "__NAME__": {
+          "nativeName": "__NAME__",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "operationTimeout": {
+    "AUTHENTICATE": -1,
+    "CREATE": -1,
+    "DELETE": -1,
+    "GET": -1,
+    "RESOLVEUSERNAME": -1,
+    "SCHEMA": -1,
+    "SCRIPT_ON_CONNECTOR": -1,
+    "SCRIPT_ON_RESOURCE": -1,
+    "SEARCH": -1,
+    "SYNC": -1,
+    "TEST": -1,
+    "UPDATE": -1,
+    "VALIDATE": -1
+  },
+  "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableCaseInsensitiveFilter": false,
+    "enableFilteredResultsHandler": false,
+    "enableNormalizingResultsHandler": false
+  }
+}

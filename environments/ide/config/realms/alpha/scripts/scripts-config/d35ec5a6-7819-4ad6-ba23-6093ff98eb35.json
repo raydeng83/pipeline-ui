@@ -1,0 +1,16 @@
+{
+  "_id": "d35ec5a6-7819-4ad6-ba23-6093ff98eb35",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1756182314394,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1775111088405,
+  "name": "KYID.2B1.Journey.UpdateMFAMethodAlternateEmail",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.UpdateMFAMethodAlternateEmail.js"
+  }
+}

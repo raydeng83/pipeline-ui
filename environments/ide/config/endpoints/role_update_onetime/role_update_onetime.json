@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/role_update_onetime",
+  "description": "used to do a one-time update on the role description to trigger the on-update script.",
+  "file": "role_update_onetime.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

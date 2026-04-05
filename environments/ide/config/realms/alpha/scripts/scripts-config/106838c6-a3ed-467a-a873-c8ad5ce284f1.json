@@ -1,0 +1,16 @@
+{
+  "_id": "106838c6-a3ed-467a-a873-c8ad5ce284f1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287831865,
+  "name": "KYID.journey.MFAAuthenticationAndRegistration.IsMFARequiredAsPerTheContext",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.journey.MFAAuthenticationAndRegistration.IsMFARequiredAsPerTheContext.js"
+  }
+}

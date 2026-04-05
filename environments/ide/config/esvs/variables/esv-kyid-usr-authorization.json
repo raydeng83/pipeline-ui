@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-usr-authorization",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_USR_AUTHORIZATION}"
+}

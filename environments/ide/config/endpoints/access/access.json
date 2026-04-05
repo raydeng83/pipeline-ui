@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/access",
+  "description": "CREATE, DELETE /access",
+  "file": "access.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\",\\n     \\\"content\\\": {\\\"payload\\\": {\\n        \\\"requestedUserAccountId\\\": \\\"4d03a91d-5843-4d82-9703-4455bdb61c47\\\",\\n        \\\"enrollmentRequestId\\\": \\\"57e39e7a-ed74-43ec-a74a-c887c44361e6\\\"\\n    },\\n    \\\"action\\\": \\\"2\\\"\\n    }}\\n  }\"",
+  "type": "text/javascript"
+}

@@ -1,0 +1,31 @@
+{
+  "_id": "9037dd68-5b70-4175-a15a-e7be3d9e551e",
+  "_outcomes": [
+    {
+      "displayName": "gotoridp",
+      "id": "gotoridp"
+    },
+    {
+      "displayName": "gotoalternateemail",
+      "id": "gotoalternateemail"
+    }
+  ],
+  "_rev": "-1576634838",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "gotoridp",
+    "gotoalternateemail"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "5c4455e9-b4c4-4ffb-af83-6a6b28082ebf"
+}

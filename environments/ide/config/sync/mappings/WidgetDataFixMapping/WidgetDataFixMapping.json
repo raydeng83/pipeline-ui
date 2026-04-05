@@ -1,0 +1,109 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "widgentIdentifier"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "WidgetDataFixMapping",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "WidgetDataFixMapping",
+  "enableSync": false,
+  "name": "WidgetDataFixMapping",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "__NAME__",
+      "target": "widgentIdentifier"
+    },
+    {
+      "source": "AllowedUserType",
+      "target": "allowedUserType"
+    },
+    {
+      "source": "",
+      "target": "myAppsSettings",
+      "transform": {
+        "globals": {},
+        "source": "var myAppsSettings = source;\nlogger.error(\"myAppsSettings : \"+myAppsSettings);\nvar resultMyAppsSettings = null;\n \nif (myAppsSettings != null) {\n  try {\n\n\tvar sourceRoleList = myAppsSettings.AssociatedRoleList\n\tlogger.error(\"sourceRoleList : \"+sourceRoleList);\n\tconst roleArray = JSON.parse(sourceRoleList);\n\tlogger.error(\"roleArray : \"+roleArray);\n\n    resultMyAppsSettings = {\n\t  \"associatedRoleList\":roleArray\n    };\n  } catch (error) {\n    logger.error(\"Error processing myAppsSettings: \" + error);\n    resultMyAppsSettings = null;\n  }\n} else {\n  resultMyAppsSettings = null;\n}\nresultMyAppsSettings;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "appLibrarySettings",
+      "transform": {
+        "globals": {},
+        "source": "var appLibrarySettings = source;\nvar resultAppLibrarySettings = null;\n\nif (appLibrarySettings != null) {\n  try {\n    resultAppLibrarySettings = {\n      \"enrollmentContext\":appLibrarySettings.GUIDExtract\n    };\n  } catch (error) {\n    logger.error(\"Error processing appLibrarySettings: \" + error);\n    resultAppLibrarySettings = null;\n  }\n} else {\n  resultAppLibrarySettings = null;\n}\nresultAppLibrarySettings;",
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "reconSourceQueryPageSize": 300,
+  "runTargetPhase": false,
+  "source": "system/DBConnector_AppWidgetStagingData/__ACCOUNT__",
+  "sourceQuery": {
+    "_queryFilter": "ReconFlag eq \"yes\""
+  },
+  "target": "managed/alpha_kyid_dashboardapplicationwidget",
+  "taskThreads": 5
+}

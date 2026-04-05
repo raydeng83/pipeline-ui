@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-blankotp-en",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_BLANKOTP_EN}"
+}

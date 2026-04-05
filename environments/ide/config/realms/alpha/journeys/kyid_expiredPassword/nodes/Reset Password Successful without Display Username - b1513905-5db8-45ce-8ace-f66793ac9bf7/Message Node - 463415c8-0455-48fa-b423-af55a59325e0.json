@@ -1,0 +1,29 @@
+{
+  "_id": "463415c8-0455-48fa-b423-af55a59325e0",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-2119614743",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "You have successfully updated your password.",
+    "es": "Ha actualizado correctamente su contraseña."
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Click here to continue",
+    "es": "Haga clic aquí para continuar"
+  }
+}

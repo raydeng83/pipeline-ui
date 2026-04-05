@@ -1,0 +1,33 @@
+{
+  "_id": "b0357afe-03c5-4f38-8b8e-589861a3ae6d",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-665053732",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "2e8e428c-9579-454d-89f0-9ac72a442904",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "es": "&{esv.session.expired.header.es}"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Ayuda</a></span>\\n</div>\"},\"ConfirmationCallback\":[{\"id\":\"2e8e428c-9579-454d-89f0-9ac72a442904\",\"showOnlyPositiveAnswer\":true,\"showButtonsAsLinks\":true}]}"
+}

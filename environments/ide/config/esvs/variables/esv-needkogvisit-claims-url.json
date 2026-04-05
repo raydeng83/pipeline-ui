@@ -1,0 +1,6 @@
+{
+  "_id": "esv-needkogvisit-claims-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_NEEDKOGVISIT_CLAIMS_URL}"
+}

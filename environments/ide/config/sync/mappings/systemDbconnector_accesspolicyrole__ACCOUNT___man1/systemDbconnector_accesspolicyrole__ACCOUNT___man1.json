@@ -1,0 +1,111 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "all": [
+          "businessRoleId"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "systemDbconnector_accesspolicyrole__ACCOUNT___man1",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "systemDbconnector_accesspolicyrole__ACCOUNT___man1",
+  "enableSync": false,
+  "name": "systemDbconnector_accesspolicyrole__ACCOUNT___man1",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "RoleId",
+      "target": "businessRoleId",
+      "transform": {
+        "globals": {},
+        "source": "source.toString()",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "accessPolicy",
+      "transform": {
+        "globals": {},
+        "source": "logger.info(\"Source policy: \" + JSON.stringify(source));\nvar sourcePolicyName = source.__NAME__;\nvar policyRef ={};\nvar result = {}; \ntry {\n    var policyResponse = openidm.query(\n        \"managed/alpha_kyid_enrollment_access_policy\",\n        {\n            \"_queryFilter\": 'name eq \"' + sourcePolicyName + '\"'\n        },\n        [\"_id\"]\n    ); \n    if (policyResponse.result && policyResponse.result.length == 1) {\n\t\tvar policyId = policyResponse.result[0]._id;\n\t\tpolicyRef = { \"_ref\": \"managed/alpha_kyid_enrollment_access_policy/\" + policyId }; \n    } else {\n\t\tlogger.error(\"Exception occurred during role to policy link \" );\n\t\tnull;\n    }\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);  \n}\npolicyRef;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "RoleName",
+      "target": "name"
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "system/DBConnector_AccessPolicyRole/__ACCOUNT__",
+  "sourceQuery": {
+    "_queryFilter": "ReconFlag eq \"yes\""
+  },
+  "sourceQueryFullEntry": true,
+  "target": "managed/alpha_role",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

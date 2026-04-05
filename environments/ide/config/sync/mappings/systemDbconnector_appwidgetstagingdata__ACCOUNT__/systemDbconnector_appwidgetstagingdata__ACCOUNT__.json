@@ -1,0 +1,212 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "widgentIdentifier"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "systemDbconnector_appwidgetstagingdata__ACCOUNT__",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "systemDbconnector_appwidgetstagingdata__ACCOUNT__",
+  "enableSync": false,
+  "name": "systemDbconnector_appwidgetstagingdata__ACCOUNT__",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "Name",
+      "target": "name"
+    },
+    {
+      "source": "Description",
+      "target": "description"
+    },
+    {
+      "source": "Type",
+      "target": "type"
+    },
+    {
+      "source": "",
+      "target": "content",
+      "transform": {
+        "globals": {},
+        "source": "var dbString = source;\nlogger.info(\"source widget : \" + JSON.stringify(source));\nvar resultArray = [];\n \nif (dbString != null) {\n    try {\n        var spanishPrefix = \"ES_\";\n \n        // Extract properties from source\n        var displayNameEN = source.Title;\n        var displayNameES = source.TitleSpanish;\n        var displayNameDynamicEN = source.TitleDynamic;\n        var displayNameDynamicES = source.TitleDynamicSpanish;\n \n        var appLibDescriptionEN = source.AppLibDescription;\n        var appLibDescriptionES = source.AppLibDescriptionSpanish;\n        var appLibDescriptionDynamicEN = source.AppLibDescriptionDynamic;\n        var appLibDescriptionDynamicES = source.AppLibDescriptionDynamicSpanish;\n \n        var myAppDescriptionEN = source.MyAppsDescription;\n        var myAppDescriptionES = source.MyAppsDescriptionSpanish;\n        var myAppDescriptionDynamicEN = source.MyAppsDescriptionDynamic;\n        var myAppDescriptionDynamicES = source.MyAppsDescriptionDynamicSpanish;\n\t\t\n\t\tvar appLibBanner = source.AppLibBanner\n\t\tvar appLibBannerSpanish = source.AppLibBannerSpanish\n\t\t\n\t\tvar myAppBanner = source.MyAppsBanner\n\t\tvar myAppBannerSpanish = source.MyAppsBannerSpanish\n \n        var type = source.Type;\n        logger.info(\"widget type : \" + type);\n        if (type == 0) {\n            // Populate displayNameES if missing\n            if (displayNameES == null || displayNameES === \"\") {\n                if (displayNameEN != null && displayNameEN !== \"\") {\n                    displayNameES = spanishPrefix + displayNameEN;\n                } else {\n                    displayNameES = null;\n                }\n            }\n            // Populate appLibDescriptionES if missing\n            if (appLibDescriptionES == null || appLibDescriptionES === \"\") {\n                if (appLibDescriptionEN != null && appLibDescriptionEN !== \"\") {\n                    appLibDescriptionES = spanishPrefix + appLibDescriptionEN;\n                } else {\n                    appLibDescriptionES = null;\n                }\n            }\n            // Populate myAppsDescriptionES if missing\n            if (myAppDescriptionES == null || myAppDescriptionES === \"\") {\n                if (myAppDescriptionEN != null && myAppDescriptionEN !== \"\") {\n                    myAppDescriptionES = spanishPrefix + myAppDescriptionEN;\n                } else {\n                    myAppDescriptionES = null;\n                }\n            }\n\t\t\t// Populate AppLibBannerSpanish if missing\n            if (appLibBannerSpanish == null || appLibBannerSpanish === \"\") {\n                if (appLibBanner != null && appLibBanner !== \"\") {\n                    appLibBannerSpanish = spanishPrefix + appLibBanner;\n                } else {\n                    appLibBannerSpanish = null;\n                }\n            }\n\t\t\t\n\t\t    // Populate MyAppsBannerSpanish if missing\n            if (myAppBannerSpanish == null || myAppBannerSpanish === \"\") {\n                if (myAppBanner != null && myAppBanner !== \"\") {\n                    myAppBannerSpanish = spanishPrefix + myAppBanner;\n                } else {\n                    myAppBannerSpanish = null;\n                }\n            }\n\t\t\t\n            // Prepare result array\n            resultArray = [{\n                \"title\": { \"en\": displayNameEN, \"es\": displayNameES },\n                \"appLibDescription\": { \"en\": appLibDescriptionEN, \"es\": appLibDescriptionES },\n                \"myAppsDescription\": { \"en\": myAppDescriptionEN, \"es\": myAppDescriptionES },\n\t\t\t\t\"appLibBanner\": { \"en\": appLibBanner, \"es\": appLibBannerSpanish },\n\t\t\t\t\"myAppsBanner\": { \"en\": myAppBanner, \"es\": myAppBannerSpanish }\n            }];\n \n            logger.error(\"Result array for type 0: \" + JSON.stringify(resultArray));\n             resultArray;\n        } else {\n            // Process for type != 0\n            logger.error(\"Processing type 1 or others\");\n \n            // Handle displayNameDynamicES\n            if (displayNameDynamicES == null || displayNameDynamicES === \"\") {\n                if (displayNameDynamicEN != null && displayNameDynamicEN !== \"\") {\n                    displayNameDynamicES = spanishPrefix + displayNameDynamicEN;\n                } else {\n                    displayNameDynamicES = null;\n                }\n            }\n \n            // Handle appLibDescriptionDynamicES\n            if (appLibDescriptionDynamicES == null || appLibDescriptionDynamicES === \"\") {\n                if (appLibDescriptionDynamicEN != null && appLibDescriptionDynamicEN !== \"\") {\n                    appLibDescriptionDynamicES = spanishPrefix + appLibDescriptionDynamicEN;\n                } else {\n                    // Do not assign default if no data\n                    appLibDescriptionDynamicES = null;\n                }\n            }\n \n            // Handle myAppsDescriptionDynamicES\n            if (myAppDescriptionDynamicES == null || myAppDescriptionDynamicES === \"\") {\n                if (myAppDescriptionDynamicEN != null && myAppDescriptionDynamicEN !== \"\") {\n                    myAppDescriptionDynamicES = spanishPrefix + myAppDescriptionDynamicEN;\n                } else {\n                    myAppDescriptionDynamicES = null;\n                }\n            }\n\t\t\t\n\t\t\t// Populate AppLibBannerSpanish if missing\n            if (appLibBannerSpanish == null || appLibBannerSpanish === \"\") {\n                if (appLibBanner != null && appLibBanner !== \"\") {\n                    appLibBannerSpanish = spanishPrefix + appLibBanner;\n                } else {\n                    appLibBannerSpanish = null;\n                }\n            }\n\t\t\t\n\t\t    // Populate MyAppsBannerSpanish if missing\n            if (myAppBannerSpanish == null || myAppBannerSpanish === \"\") {\n                if (myAppBanner != null && myAppBanner !== \"\") {\n                    myAppBannerSpanish = spanishPrefix + myAppBanner;\n                } else {\n                    myAppBannerSpanish = null;\n                }\n            }\n\t\t\t\n \n            // Prepare result array\n            resultArray = [{\n                \"title\": { \"en\": displayNameEN, \"es\": displayNameES },\n                \"appLibDescription\": { \"en\": appLibDescriptionEN, \"es\": appLibDescriptionES },\n                \"myAppsDescription\": { \"en\": myAppDescriptionEN, \"es\": myAppDescriptionES },\n\t\t\t\t\"appLibBanner\": { \"en\": appLibBanner, \"es\": appLibBannerSpanish },\n\t\t\t\t\"myAppsBanner\": { \"en\": myAppBanner, \"es\": myAppBannerSpanish }\n            }];\n \n            logger.error(\"Result array for dynamic type: \" + JSON.stringify(resultArray));\n             resultArray;\n        }\n    } catch (error) {\n        logger.error(\"Exception: \" + error);\n    }\n} else {\n    logger.error(\"Source is null\");\n}",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "default": false,
+      "source": "IsFeatured",
+      "target": "isFeatured"
+    },
+    {
+      "source": "SequenceNumber",
+      "target": "widgetDisplayOrder"
+    },
+    {
+      "default": false,
+      "source": "EnableMode",
+      "target": "maintenanceModeSettingsisEnabled"
+    },
+    {
+      "source": "",
+      "target": "appLibrarySettings",
+      "transform": {
+        "globals": {},
+        "source": "var appLibrarySettings = source;\nvar resultAppLibrarySettings = null;\n\nif (appLibrarySettings != null) {\n  try {\n    resultAppLibrarySettings = {\n      \"enrollmentScope\": appLibrarySettings.AppLibEnrollmentScope,\n      \"associatedAppSystemName\": appLibrarySettings.AppLibApplicationName,\n      \"associatedRoleSystemName\": appLibrarySettings.AppLibRoleName,\n      \"applicationURL\": appLibrarySettings.AppLibLaunchApplicationURL,\n      \"enrollmentContext\":appLibrarySettings.GUIDExtract\n    };\n  } catch (error) {\n    logger.error(\"Error processing appLibrarySettings: \" + error);\n    resultAppLibrarySettings = null;\n  }\n} else {\n  resultAppLibrarySettings = null;\n}\nresultAppLibrarySettings;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "myAppsSettings",
+      "transform": {
+        "globals": {},
+        "source": "var myAppsSettings = source;\nlogger.error(\"myAppsSettings : \"+myAppsSettings);\n \nvar resultMyAppsSettings = null;\n \nif (myAppsSettings != null) {\n  try {\n    var allowManageAccess;\n\t  logger.error(\"myAppsSettings.MyAppsApplicationName : \"+myAppsSettings.MyAppsApplicationName);\n\t  if(!myAppsSettings.MyAppsApplicationName == null || !myAppsSettings.MyAppsApplicationName == \"\" || !myAppsSettings.MyAppsApplicationName == \"undefined\" || !myAppsSettings.MyAppsApplicationName == undefined){\n\t\t \n\t\t  allowManageAccess = true;\n\t  }else{\n\t\t\n        allowManageAccess = false;\n      }\n\tvar sourceRoleList = myAppsSettings.AssociatedRoleList\n\tlogger.error(\"sourceRoleList : \"+sourceRoleList);\n\tvar roleArray = [];\n\tif(!sourceRoleList == null || !sourceRoleList == \"\" || !sourceRoleList == \"undefined\"){\n\t\tconst fixedSource = sourceRoleList.replace(/\\\\\"/g, '\"'); \t\n\t\troleArray = JSON.parse(fixedSource); \t\t\n\t}else{\n\t\troleArray = null;\t\n\t}\n    resultMyAppsSettings = {\n      \"launchURL\": myAppsSettings.MyAppsLaunchApplicationURL,\n      \"associatedAppSystemName\": myAppsSettings.MyAppsApplicationName,\n      \"associatedRoleSystemName\": myAppsSettings.MyAppsRoleName,\n      \"allowManageAccess\": allowManageAccess,\n\t  \"associatedRoleList\":roleArray\n    };\n  } catch (error) {\n    logger.error(\"Error processing myAppsSettings: \" + error);\n    resultMyAppsSettings = null;\n  }\n} else {\n  resultMyAppsSettings = null;\n}\nresultMyAppsSettings;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "ApplicationId",
+      "target": "applicationId"
+    },
+    {
+      "source": "RoleId",
+      "target": "roleId"
+    },
+    {
+      "source": "",
+      "target": "dynamicContentServiceEndpointId",
+      "transform": {
+        "globals": {},
+        "source": "var serviceEndPointName = source.ServiceEndPointName;\nvar result = {}; \ntry {\n    var serviceEndPointResponse = openidm.query(\n        \"managed/alpha_kyid_enrollment_service_endpoint\",\n        {\n            \"_queryFilter\": 'name eq \"' + serviceEndPointName + '\"'\n        },\n        [\"_id\"]\n    );\n    if (serviceEndPointResponse.result && serviceEndPointResponse.result.length > 0) {\n\t\tvar serviceEndPointId = serviceEndPointResponse.result[0]._id;\n\t\tvar serviceEndPointRef = { \"_ref\": \"managed/alpha_kyid_enrollment_service_endpoint/\" + serviceEndPointId };\n    } else {\n\t\tlogger.error(\"Exception occurred in else \" );\n    }\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);  \n}\nserviceEndPointRef;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "recordState",
+      "transform": {
+        "globals": {},
+        "source": "\"0\"",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "__NAME__",
+      "target": "widgentIdentifier"
+    },
+    {
+      "source": "WidgetID",
+      "target": "widgetId"
+    },
+    {
+      "source": "AllowedUserType",
+      "target": "allowedUserType"
+    },
+    {
+      "source": "CreateDate",
+      "target": "createDate"
+    },
+    {
+      "source": "UpdateDate",
+      "target": "updateDate"
+    },
+    {
+      "source": "CreateDateEpoch",
+      "target": "createDateEpoch"
+    },
+    {
+      "source": "updateDateEpoch",
+      "target": "updateDateEpoch"
+    },
+    {
+      "source": "CreateUserId",
+      "target": "createdByID"
+    },
+    {
+      "source": "UpdateUserId",
+      "target": "updatedByID"
+    },
+    {
+      "source": "SrcCreateUserId",
+      "target": "createdBy"
+    },
+    {
+      "source": "SrcUpdateUserId",
+      "target": "updatedByID"
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "system/DBConnector_AppWidgetStagingData/__ACCOUNT__",
+  "sourceQuery": {
+    "_queryFilter": "ReconFlag eq \"yes\""
+  },
+  "sourceQueryFullEntry": true,
+  "target": "managed/alpha_kyid_dashboardapplicationwidget",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

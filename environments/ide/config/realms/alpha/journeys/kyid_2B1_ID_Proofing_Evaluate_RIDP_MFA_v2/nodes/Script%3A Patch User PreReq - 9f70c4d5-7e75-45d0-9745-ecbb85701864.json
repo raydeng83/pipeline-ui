@@ -1,0 +1,41 @@
+{
+  "_id": "9f70c4d5-7e75-45d0-9745-ecbb85701864",
+  "_outcomes": [
+    {
+      "displayName": "Next",
+      "id": "Next"
+    },
+    {
+      "displayName": "appEnrollMessage",
+      "id": "appEnrollMessage"
+    },
+    {
+      "displayName": "FARS",
+      "id": "FARS"
+    },
+    {
+      "displayName": "displayFARS2",
+      "id": "displayFARS2"
+    }
+  ],
+  "_rev": "1856902612",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Next",
+    "appEnrollMessage",
+    "FARS",
+    "displayFARS2"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "95ccd81c-1773-4202-9967-e5c0be736681"
+}

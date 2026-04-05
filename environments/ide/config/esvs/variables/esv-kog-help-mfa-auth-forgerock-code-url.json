@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kog-help-mfa-auth-forgerock-code-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KOG_HELP_MFA_AUTH_FORGEROCK_CODE_URL}"
+}

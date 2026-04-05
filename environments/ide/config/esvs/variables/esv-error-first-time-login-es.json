@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-first-time-login-es",
+  "description": "Error Message for First Time Login in Spanish",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_FIRST_TIME_LOGIN_ES}"
+}

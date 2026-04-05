@@ -1,0 +1,16 @@
+{
+  "_id": "9f1e498d-51c1-4143-bd80-1cfbae7879d7",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287833109,
+  "name": "KYID.Journey.MFADynamicChoiceCollectorWithoutResetRemove.SelfOthers",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFADynamicChoiceCollectorWithoutResetRemove.SelfOthers.js"
+  }
+}

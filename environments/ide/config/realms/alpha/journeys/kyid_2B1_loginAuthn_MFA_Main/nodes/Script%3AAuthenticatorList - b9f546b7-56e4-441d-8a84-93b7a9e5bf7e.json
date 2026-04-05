@@ -1,0 +1,51 @@
+{
+  "_id": "b9f546b7-56e4-441d-8a84-93b7a9e5bf7e",
+  "_outcomes": [
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "forgerock",
+      "id": "forgerock"
+    },
+    {
+      "displayName": "googleTOTP",
+      "id": "googleTOTP"
+    },
+    {
+      "displayName": "microsoftTOTP",
+      "id": "microsoftTOTP"
+    }
+  ],
+  "_rev": "-179195366",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "symantec",
+    "error",
+    "back",
+    "forgerock",
+    "googleTOTP",
+    "microsoftTOTP"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c5b13137-3375-41e4-948b-8efdeaf3f1cf"
+}

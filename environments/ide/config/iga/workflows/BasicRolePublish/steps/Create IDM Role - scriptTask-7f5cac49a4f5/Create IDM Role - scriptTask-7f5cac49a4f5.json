@@ -1,0 +1,18 @@
+{
+  "displayName": "Create IDM Role",
+  "name": "scriptTask-7f5cac49a4f5",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "exclusiveGateway-f2035a953b37"
+      }
+    ],
+    "script": {
+      "file": "Create IDM Role - scriptTask-7f5cac49a4f5.js"
+    }
+  },
+  "type": "scriptTask"
+}
