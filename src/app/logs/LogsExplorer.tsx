@@ -14,6 +14,7 @@ interface EnvWithLogApi extends Environment {
 interface LogEntry {
   timestamp: string;
   type: string;
+  source?: string;  // per-entry source (present in am-everything and idm-everything responses)
   payload: Record<string, unknown>;
 }
 
@@ -47,8 +48,14 @@ function getLevel(payload: Record<string, unknown>): string {
 
 function getMessage(payload: Record<string, unknown>): string {
   if (typeof payload.message === "string" && payload.message) return payload.message;
-  if (typeof payload.eventName === "string") {
-    const parts: string[] = [payload.eventName as string];
+  const eventName = payload.eventName as string | undefined;
+  if (eventName === "AM-NODE-LOGIN-COMPLETED") {
+    const entries = payload.entries as Array<{ info?: Record<string, string> }> | undefined;
+    const info = entries?.[0]?.info;
+    if (info?.displayName) return `${info.displayName} → ${info.nodeOutcome ?? ""}`;
+  }
+  if (eventName) {
+    const parts: string[] = [eventName];
     if (typeof payload.result === "string") parts.push(`→ ${payload.result}`);
     const userId = payload.userId;
     if (typeof userId === "string" && userId) parts.push(`[${userId}]`);
@@ -62,7 +69,10 @@ function getMessage(payload: Record<string, unknown>): string {
 function getComponent(payload: Record<string, unknown>, source: string): string {
   if (typeof payload.component === "string" && payload.component) return payload.component;
   if (typeof payload.logger === "string" && payload.logger) {
-    const parts = (payload.logger as string).split(".");
+    // Extract script name from: scripts.TYPE.uuid.(ScriptName)
+    const match = payload.logger.match(/\(([^)]+)\)$/);
+    if (match) return match[1];
+    const parts = payload.logger.split(".");
     return parts[parts.length - 1];
   }
   return source;
@@ -153,9 +163,10 @@ function EntryRow({
   searchTerm: string;
   onTransactionClick: (txId: string, timestamp: string) => void;
 }) {
+  const effectiveSource = entry.source ?? source;
   const level = getLevel(entry.payload);
   const message = getMessage(entry.payload);
-  const component = getComponent(entry.payload, source);
+  const component = getComponent(entry.payload, effectiveSource);
   const transactionId = getTransactionId(entry.payload);
   const userId = getUserId(entry.payload);
   const { date, time } = formatTs(entry.timestamp);
@@ -186,7 +197,7 @@ function EntryRow({
           <span className="text-slate-300 text-[10px]">{date} </span>{time}
         </td>
         <td className="px-2 py-2 whitespace-nowrap align-top">
-          <SourceBadge source={source} />
+          <SourceBadge source={effectiveSource} />
         </td>
         <td className="px-2 py-2 whitespace-nowrap align-top">
           <LevelBadge level={level} />
