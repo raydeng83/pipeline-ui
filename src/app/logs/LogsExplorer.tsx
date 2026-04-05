@@ -974,31 +974,14 @@ export function LogsExplorer({
               {mode === "tail" && (
                 <>
                   {!tailing ? (
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => onConfigChange({ tailing: true })}
-                        disabled={loading || searching || !source || !!sourcesError}
-                        className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
-                      >
-                        {loading ? "Fetching…" : "Tail Logs"}
-                      </button>
-                      {([5, 10, 30] as TailSecs[]).map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => onConfigChange({ tailSecs: s })}
-                          className={cn(
-                            "px-2 py-1 text-xs rounded border transition-colors",
-                            tailSecs === s
-                              ? "bg-slate-700 border-slate-700 text-white"
-                              : "border-slate-300 text-slate-500 hover:bg-slate-50"
-                          )}
-                        >
-                          {s}s
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onConfigChange({ tailing: true })}
+                      disabled={loading || searching || !source || !!sourcesError}
+                      className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors shrink-0"
+                    >
+                      Tail Logs
+                    </button>
                   ) : (
                     <button
                       type="button"
@@ -1280,6 +1263,29 @@ export function LogsExplorer({
                   Stop
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Tail status indicator */}
+          {tailing && (
+            <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-emerald-50/50 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className="text-xs text-slate-600">
+                  {loading
+                    ? `Tailing — fetching new entries… (${entries.length.toLocaleString()} total)`
+                    : lastUpdated
+                    ? `Tailing — ${entries.length.toLocaleString()} entries · updated ${lastUpdated.toLocaleTimeString()}`
+                    : `Tailing — starting…`}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => onConfigChange({ tailing: false })}
+                className="px-2.5 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+              >
+                Stop
+              </button>
             </div>
           )}
         </div>
