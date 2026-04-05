@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import type { CompareReport, FileDiff, DiffLine } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +57,7 @@ function buildHunks(lines: DiffLine[]): HunkItem[] {
 
 // ── Unified diff viewer ───────────────────────────────────────────────────────
 
-function DiffViewer({ lines }: { lines: DiffLine[] }) {
+function DiffViewer({ lines, fullscreen }: { lines: DiffLine[]; fullscreen?: boolean }) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const hunks = buildHunks(lines);
 
@@ -72,7 +72,7 @@ function DiffViewer({ lines }: { lines: DiffLine[] }) {
   let lineIdx = 0;
 
   return (
-    <div className="overflow-x-auto bg-slate-950 text-[11px] font-mono leading-5 max-h-[600px] overflow-y-auto">
+    <div className={cn("overflow-x-auto bg-slate-950 text-[11px] font-mono leading-5 overflow-y-auto", fullscreen ? "flex-1" : "max-h-[600px]")}>
       <table className="w-full border-collapse">
         <tbody>
           {hunks.map((item, hi) => {
@@ -141,14 +141,19 @@ function SideBySideViewer({
   remoteContent,
   sourceLabel,
   targetLabel,
+  fullscreen,
 }: {
   localContent?: string;
   remoteContent?: string;
   sourceLabel: string;
   targetLabel: string;
+  fullscreen?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-2 divide-x divide-slate-700 bg-slate-950 max-h-[600px] overflow-hidden">
+    <div className={cn(
+      "grid grid-cols-2 divide-x divide-slate-700 bg-slate-950",
+      fullscreen ? "flex-1 min-h-0" : "max-h-[600px]"
+    )}>
       <FilePane label={sourceLabel} content={localContent} absence={`Not in ${sourceLabel}`} />
       <FilePane label={targetLabel} content={remoteContent} absence={`Not in ${targetLabel}`} />
     </div>
@@ -157,7 +162,7 @@ function SideBySideViewer({
 
 function FilePane({ label, content, absence }: { label: string; content?: string; absence: string }) {
   return (
-    <div className="flex flex-col min-h-0 overflow-hidden">
+    <div className="flex flex-col min-h-0">
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700 shrink-0">
         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">{label}</span>
       </div>
@@ -247,6 +252,7 @@ const STATUS_STYLES: Record<FileDiff["status"], { badge: string; icon: string }>
 function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLabel: string; targetLabel: string }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("diff");
+  const [fullscreen, setFullscreen] = useState(false);
   const s = STATUS_STYLES[file.status];
   const hasDiff = !!file.diffLines?.length;
   const hasContent = file.localContent !== undefined || file.remoteContent !== undefined;
@@ -255,6 +261,74 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
   const removed = file.linesRemoved ?? 0;
 
   const { name: displayName, detail: displayDetail } = resolveDisplayName(file);
+
+  // ESC exits fullscreen
+  useState(() => {
+    if (typeof window === "undefined") return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
+
+  const viewerContent = open && (
+    view === "diff" && file.diffLines
+      ? <DiffViewer lines={file.diffLines} fullscreen={fullscreen} />
+      : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} sourceLabel={sourceLabel} targetLabel={targetLabel} fullscreen={fullscreen} />
+  );
+
+  if (fullscreen && open) {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
+        {/* Fullscreen header */}
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 border-b border-slate-800 shrink-0">
+          <span className={cn("inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold shrink-0", s.badge)}>
+            {s.icon}
+          </span>
+          <span className="text-sm text-slate-200 flex-1 truncate" title={file.relativePath}>
+            {displayName}
+            {displayDetail && <span className="text-slate-500 font-mono text-xs ml-2">{displayDetail}</span>}
+          </span>
+          {(added > 0 || removed > 0) && (
+            <span className="shrink-0 flex items-center gap-1.5 text-xs font-mono">
+              {added   > 0 && <span className="text-emerald-400">+{added}</span>}
+              {removed > 0 && <span className="text-red-400">−{removed}</span>}
+            </span>
+          )}
+          <div
+            className="flex items-center rounded border border-slate-600 overflow-hidden text-[10px] shrink-0"
+          >
+            {(["diff", "files"] as ViewMode[]).map((m) => (
+              <button
+                key={m}
+                onClick={() => setView(m)}
+                disabled={m === "files" && !hasContent}
+                className={cn(
+                  "px-2 py-0.5 capitalize transition-colors disabled:opacity-30 disabled:cursor-not-allowed",
+                  view === m ? "bg-sky-600 text-white" : "text-slate-400 hover:bg-slate-800"
+                )}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setFullscreen(false)}
+            title="Exit fullscreen (Esc)"
+            className="text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        {/* Fullscreen content */}
+        <div className="flex-1 min-h-0 overflow-auto">
+          {viewerContent}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-slate-200 rounded overflow-hidden">
@@ -282,23 +356,32 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
         )}
 
         {open && (
-          <div
-            className="flex items-center rounded border border-slate-300 overflow-hidden text-[10px] shrink-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {(["diff", "files"] as ViewMode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => setView(m)}
-                disabled={m === "files" && !hasContent}
-                className={cn(
-                  "px-2 py-0.5 capitalize transition-colors disabled:opacity-30 disabled:cursor-not-allowed",
-                  view === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100"
-                )}
-              >
-                {m}
-              </button>
-            ))}
+          <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center rounded border border-slate-300 overflow-hidden text-[10px]">
+              {(["diff", "files"] as ViewMode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setView(m)}
+                  disabled={m === "files" && !hasContent}
+                  className={cn(
+                    "px-2 py-0.5 capitalize transition-colors disabled:opacity-30 disabled:cursor-not-allowed",
+                    view === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100"
+                  )}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setFullscreen(true)}
+              title="Fullscreen"
+              className="text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+              </svg>
+            </button>
           </div>
         )}
 
@@ -307,11 +390,7 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
         )}
       </div>
 
-      {open && (
-        view === "diff" && file.diffLines
-          ? <DiffViewer lines={file.diffLines} />
-          : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} sourceLabel={sourceLabel} targetLabel={targetLabel} />
-      )}
+      {open && viewerContent}
     </div>
   );
 }
@@ -370,18 +449,61 @@ function groupByScope(files: FileDiff[]): ScopeGroup[] {
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
+// ── Status sub-group (collapsible) ──────────────────────────────────────────
+
+function StatusGroup({
+  label, files, color, sourceLabel, targetLabel,
+}: {
+  label: string;
+  files: FileDiff[];
+  color: string;
+  sourceLabel: string;
+  targetLabel: string;
+}) {
+  const [open, setOpen] = useState(true);
+  if (files.length === 0) return null;
+
+  return (
+    <div className="space-y-1.5">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={cn("flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide px-1", color)}
+      >
+        <span className={cn("transition-transform inline-block", open ? "" : "-rotate-90")}>▼</span>
+        {label} ({files.length})
+      </button>
+      {open && files.map((f) => (
+        <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+      ))}
+    </div>
+  );
+}
+
 // ── Scope section ───────────────────────────────────────────────────────────
 
 function ScopeSection({
-  group, sourceLabel, targetLabel, defaultOpen,
+  group, sourceLabel, targetLabel, forceOpen,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
   targetLabel: string;
-  defaultOpen: boolean;
+  forceOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(forceOpen ?? false);
+
+  // React to parent expand/collapse all
+  const prevForce = useRef(forceOpen);
+  if (forceOpen !== undefined && forceOpen !== prevForce.current) {
+    prevForce.current = forceOpen;
+    if (open !== forceOpen) setOpen(forceOpen);
+  }
+
   const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
+
+  const modified = group.files.filter((f) => f.status === "modified");
+  const added = group.files.filter((f) => f.status === "added");
+  const removed = group.files.filter((f) => f.status === "removed");
 
   return (
     <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -391,7 +513,6 @@ function ScopeSection({
       >
         <span className="text-sm font-semibold text-slate-700 flex-1">{group.label}</span>
 
-        {/* Per-scope status counts */}
         <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
           {group.modified > 0 && (
             <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{group.modified} modified</span>
@@ -411,10 +532,10 @@ function ScopeSection({
       </div>
 
       {open && (
-        <div className="p-3 space-y-1.5 bg-white">
-          {group.files.map((f) => (
-            <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
-          ))}
+        <div className="p-3 space-y-3 bg-white">
+          <StatusGroup label="Modified" files={modified} color="text-amber-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+          <StatusGroup label="Added" files={added} color="text-emerald-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+          <StatusGroup label="Removed" files={removed} color="text-red-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
         </div>
       )}
     </div>
@@ -427,6 +548,8 @@ export function DiffReport({ report }: { report: CompareReport }) {
   const { summary, files } = report;
   const total = summary.added + summary.removed + summary.modified + summary.unchanged;
   const [hideUnchanged, setHideUnchanged] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
 
   const sameEnv = report.source.environment === report.target.environment;
   const sourceLabel = sameEnv
@@ -458,8 +581,38 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <Stat count={summary.added}     label="Added"     color="text-emerald-600" bg="bg-emerald-50" />
           <Stat count={summary.removed}   label="Removed"   color="text-red-600"     bg="bg-red-50" />
           <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
-          <div className="flex items-center gap-3 ml-auto">
-            <span className="text-xs text-slate-400">{total} files · {scopeGroups.length} scopes</span>
+          <span className="ml-auto text-xs text-slate-400 self-center">{total} files · {scopeGroups.length} scopes</span>
+        </div>
+
+        {/* Toolbar: expand/collapse all + filters toggle */}
+        <div className="flex items-center gap-3 pt-1">
+          <button
+            type="button"
+            onClick={() => setAllOpen(true)}
+            className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            Expand All
+          </button>
+          <button
+            type="button"
+            onClick={() => setAllOpen(false)}
+            className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            Collapse All
+          </button>
+          <span className="text-slate-300">|</span>
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((o) => !o)}
+            className={cn("text-xs transition-colors", filtersOpen ? "text-sky-600" : "text-slate-500 hover:text-slate-700")}
+          >
+            Filters {filtersOpen ? "▲" : "▼"}
+          </button>
+        </div>
+
+        {/* Collapsible filters */}
+        {filtersOpen && (
+          <div className="flex flex-wrap items-center gap-4 pt-1 pb-1 border-t border-slate-100 mt-2 pt-3">
             <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -467,10 +620,13 @@ export function DiffReport({ report }: { report: CompareReport }) {
                 onChange={(e) => setHideUnchanged(e.target.checked)}
                 className="accent-sky-600"
               />
-              Hide unchanged
+              Hide unchanged files
             </label>
+            <span className="text-xs text-slate-400">
+              Options from the compare form (metadata, whitespace) apply to the diff computation.
+            </span>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Scope sections */}
@@ -486,7 +642,7 @@ export function DiffReport({ report }: { report: CompareReport }) {
               group={group}
               sourceLabel={sourceLabel}
               targetLabel={targetLabel}
-              defaultOpen={scopeGroups.length <= 5}
+              forceOpen={allOpen}
             />
           ))
         )}

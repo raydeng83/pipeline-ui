@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { CONFIG_SCOPES, ConfigScope } from "@/lib/fr-config-types";
 import { cn } from "@/lib/utils";
 
@@ -18,10 +18,25 @@ const GROUPS = CONFIG_SCOPES.reduce<Record<string, typeof CONFIG_SCOPES>>((acc, 
 
 type Mode = "basic" | "advanced";
 
+const GROUP_NAMES = Object.keys(GROUPS);
+
 export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSelectorProps) {
   const [mode, setMode] = useState<Mode>("basic");
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const selectedSet = new Set(selected);
   const allSelected = selected.length === CONFIG_SCOPES.length;
+
+  const toggleGroupExpand = useCallback((name: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }, []);
+
+  const expandAllGroups = useCallback(() => setExpandedGroups(new Set(GROUP_NAMES)), []);
+  const collapseAllGroups = useCallback(() => setExpandedGroups(new Set()), []);
 
   const toggle = (value: ConfigScope) => {
     onChange(
@@ -118,98 +133,120 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
 
       {/* Advanced mode: grouped list with descriptions */}
       {mode === "advanced" && (
-      <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100">
-        {Object.entries(GROUPS).map(([groupName, scopes]) => {
-          const groupValues = scopes.map((s) => s.value);
-          const allGroupSelected = groupValues.every((v) => selectedSet.has(v));
-          const someGroupSelected = groupValues.some((v) => selectedSet.has(v));
-          const selectedCount = groupValues.filter((v) => selectedSet.has(v)).length;
+      <>
+        <div className="flex items-center gap-2 mb-1">
+          <button type="button" onClick={expandAllGroups} className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
+            Expand All
+          </button>
+          <button type="button" onClick={collapseAllGroups} className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
+            Collapse All
+          </button>
+        </div>
+        <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100">
+          {Object.entries(GROUPS).map(([groupName, scopes]) => {
+            const groupValues = scopes.map((s) => s.value);
+            const allGroupSelected = groupValues.every((v) => selectedSet.has(v));
+            const someGroupSelected = groupValues.some((v) => selectedSet.has(v));
+            const selectedCount = groupValues.filter((v) => selectedSet.has(v)).length;
+            const isExpanded = expandedGroups.has(groupName);
 
-          return (
-            <div key={groupName}>
-              {/* Group header */}
-              <div className="flex items-center justify-between px-3 py-2 bg-slate-50">
-                <button
-                  type="button"
-                  onClick={() => toggleGroup(scopes)}
-                  disabled={disabled}
-                  className="flex items-center gap-2 disabled:opacity-40"
-                >
-                  <span
-                    className={cn(
-                      "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
-                      allGroupSelected
-                        ? "bg-sky-600 border-sky-600"
-                        : someGroupSelected
-                        ? "bg-sky-200 border-sky-400"
-                        : "bg-white border-slate-300"
-                    )}
-                  >
-                    {allGroupSelected && (
-                      <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                    {someGroupSelected && !allGroupSelected && (
-                      <span className="w-2 h-0.5 bg-sky-600 rounded" />
-                    )}
-                  </span>
-                  <span className={cn(
-                    "text-xs font-semibold",
-                    allGroupSelected ? "text-sky-700" : someGroupSelected ? "text-sky-600" : "text-slate-600"
-                  )}>
-                    {groupName}
-                  </span>
-                </button>
-                {someGroupSelected && (
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {selectedCount}/{scopes.length}
-                  </span>
-                )}
-              </div>
-
-              {/* Scope rows */}
-              <div className="divide-y divide-slate-50">
-                {scopes.map(({ value, label, description }) => {
-                  const checked = selectedSet.has(value);
-                  return (
-                    <label
-                      key={value}
-                      className={cn(
-                        "flex items-start gap-3 px-3 py-2.5 cursor-pointer transition-colors select-none",
-                        disabled ? "opacity-40 cursor-not-allowed" : "hover:bg-slate-50",
-                        checked && "bg-sky-50/50"
-                      )}
+            return (
+              <div key={groupName}>
+                {/* Group header */}
+                <div className="flex items-center justify-between px-3 py-2 bg-slate-50">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleGroupExpand(groupName)}
+                      className="text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      <span className={cn("inline-block text-[10px] transition-transform", isExpanded ? "" : "-rotate-90")}>▼</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(scopes)}
+                      disabled={disabled}
+                      className="flex items-center gap-2 disabled:opacity-40"
                     >
                       <span
                         className={cn(
-                          "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
-                          checked ? "bg-sky-600 border-sky-600" : "bg-white border-slate-300"
+                          "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
+                          allGroupSelected
+                            ? "bg-sky-600 border-sky-600"
+                            : someGroupSelected
+                            ? "bg-sky-200 border-sky-400"
+                            : "bg-white border-slate-300"
                         )}
-                        onClick={() => !disabled && toggle(value)}
                       >
-                        {checked && (
+                        {allGroupSelected && (
                           <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         )}
+                        {someGroupSelected && !allGroupSelected && (
+                          <span className="w-2 h-0.5 bg-sky-600 rounded" />
+                        )}
                       </span>
-                      <div className="flex-1 min-w-0" onClick={() => !disabled && toggle(value)}>
-                        <div className={cn("text-xs font-medium", checked ? "text-sky-800" : "text-slate-700")}>
-                          {label}
-                        </div>
-                        <div className="text-[11px] text-slate-400 leading-snug mt-0.5">
-                          {description}
-                        </div>
-                      </div>
-                    </label>
-                  );
-                })}
+                      <span className={cn(
+                        "text-xs font-semibold",
+                        allGroupSelected ? "text-sky-700" : someGroupSelected ? "text-sky-600" : "text-slate-600"
+                      )}>
+                        {groupName}
+                      </span>
+                    </button>
+                  </div>
+                  {someGroupSelected && (
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {selectedCount}/{scopes.length}
+                    </span>
+                  )}
+                </div>
+
+                {/* Scope rows (collapsible) */}
+                {isExpanded && (
+                  <div className="divide-y divide-slate-50">
+                    {scopes.map(({ value, label, description }) => {
+                      const checked = selectedSet.has(value);
+                      return (
+                        <label
+                          key={value}
+                          className={cn(
+                            "flex items-start gap-3 px-3 py-2.5 cursor-pointer transition-colors select-none",
+                            disabled ? "opacity-40 cursor-not-allowed" : "hover:bg-slate-50",
+                            checked && "bg-sky-50/50"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
+                              checked ? "bg-sky-600 border-sky-600" : "bg-white border-slate-300"
+                            )}
+                            onClick={() => !disabled && toggle(value)}
+                          >
+                            {checked && (
+                              <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </span>
+                          <div className="flex-1 min-w-0" onClick={() => !disabled && toggle(value)}>
+                            <div className={cn("text-xs font-medium", checked ? "text-sky-800" : "text-slate-700")}>
+                              {label}
+                            </div>
+                            <div className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                              {description}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </>
       )}
     </div>
   );

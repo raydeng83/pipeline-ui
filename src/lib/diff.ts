@@ -91,6 +91,43 @@ function stripMetadata(obj: unknown): unknown {
   return obj;
 }
 
+/** Strip single-line (//) and multi-line (/* *​/) comments from JS/Groovy code. */
+function stripComments(code: string): string {
+  let result = "";
+  let i = 0;
+  while (i < code.length) {
+    // Single-line comment
+    if (code[i] === "/" && code[i + 1] === "/") {
+      // Skip to end of line
+      while (i < code.length && code[i] !== "\n") i++;
+    }
+    // Multi-line comment
+    else if (code[i] === "/" && code[i + 1] === "*") {
+      i += 2;
+      while (i < code.length && !(code[i] === "*" && code[i + 1] === "/")) i++;
+      i += 2; // skip */
+    }
+    // String literal (don't strip // or /* inside strings)
+    else if (code[i] === '"' || code[i] === "'" || code[i] === "`") {
+      const q = code[i];
+      result += code[i++];
+      while (i < code.length && code[i] !== q) {
+        if (code[i] === "\\") { result += code[i++]; }
+        if (i < code.length) { result += code[i++]; }
+      }
+      if (i < code.length) result += code[i++]; // closing quote
+    }
+    else {
+      result += code[i++];
+    }
+  }
+  return result;
+}
+
+function isScriptFile(filePath: string): boolean {
+  return /\.(js|groovy)$/i.test(filePath);
+}
+
 function normalizeContent(content: string, filePath: string, opts: DiffOptions = {}): string {
   let result = content;
 
@@ -105,9 +142,18 @@ function normalizeContent(content: string, filePath: string, opts: DiffOptions =
     } catch { /* fall through */ }
   }
 
-  // Ignore whitespace: normalize each line's whitespace
+  // Strip comments from script files
+  if (isScriptFile(filePath) && !opts.includeMetadata) {
+    result = stripComments(result);
+  }
+
+  // Ignore whitespace: trim each line, remove blank lines
   if (opts.ignoreWhitespace) {
-    result = result.split("\n").map((line) => line.trim()).join("\n");
+    result = result
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .join("\n");
   }
 
   return result;
@@ -193,7 +239,14 @@ export function compareDirs(
   const allPaths = new Set([...remote.keys(), ...local.keys()]);
   const diffs: FileDiff[] = [];
 
+  // Metadata file patterns to skip when includeMetadata is false
+  const METADATA_PATH_PATTERNS = [
+    /scripts-config\//,         // Script registration/metadata files
+  ];
+
   for (const rel of [...allPaths].sort()) {
+    // Skip metadata files when not including metadata
+    if (!opts.includeMetadata && METADATA_PATH_PATTERNS.some((p) => p.test(rel))) continue;
     const r = remote.get(rel);
     const l = local.get(rel);
 
