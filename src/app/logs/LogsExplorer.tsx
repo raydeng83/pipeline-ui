@@ -459,6 +459,10 @@ export function LogsExplorer({
   const [search, setSearch] = useState("");
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
+  // ── Pagination ──
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(100);
+
   // ── Live tail ──
   const [tailing, setTailing] = useState(false);
   const [tailSecs, setTailSecs] = useState<TailSecs>(10);
@@ -486,7 +490,7 @@ export function LogsExplorer({
           setEntries((prev) => msg.append ? [...prev, ...msg.entries] : msg.entries);
           setFetched(true);
           setLastUpdated(new Date());
-          if (!msg.append) setExpandedIdx(null);
+          if (!msg.append) { setExpandedIdx(null); setPage(Infinity); }
         });
       } else if (msg.type === "status") {
         setLoading(msg.loading);
@@ -582,6 +586,16 @@ export function LogsExplorer({
   const filtered = search
     ? levelFiltered.filter((e) => JSON.stringify(e).toLowerCase().includes(search.toLowerCase()))
     : levelFiltered;
+
+  // ── Pagination (page 1 = oldest, last page = newest) ──
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageStartIdx = (currentPage - 1) * pageSize;
+  const pageEndIdx = Math.min(currentPage * pageSize, filtered.length);
+  const pageEntries = filtered.slice(pageStartIdx, pageEndIdx);
+
+  // Reset to last page (newest) on filter changes
+  useEffect(() => { setPage(Math.max(1, Math.ceil(filtered.length / pageSize))); setExpandedIdx(null); }, [search, levelFilter, filtered.length, pageSize]);
 
   const selectedEnv = environments.find((e) => e.name === env);
 
@@ -755,7 +769,7 @@ export function LogsExplorer({
       {/* ── Results ── */}
       {fetched && (
         <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-          {/* Search bar */}
+          {/* Search bar + pagination info */}
           <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
             <input
               type="text"
@@ -775,45 +789,113 @@ export function LogsExplorer({
           </div>
 
           {/* Scrollable log window — renders table only when tab is active */}
-          <div ref={scrollContainerRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: "calc(100vh - 360px)" }}>
+          <div ref={scrollContainerRef} className="overflow-y-auto overflow-x-auto" style={{ maxHeight: "calc(100vh - 420px)" }}>
             {!deferredIsActive ? (
-              // Tab inactive or switching — skip table so React can commit the switch instantly
               null
             ) : filtered.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400">
                 {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
               </div>
             ) : (
-              <>
-                <table className="w-full text-xs border-collapse">
-                  <thead className="sticky top-0 z-10">
-                    <tr className="bg-slate-50 border-b border-slate-200 text-left">
-                      <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
-                      <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
-                      <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
-                      <th className="px-2 py-2 font-semibold text-slate-500">Component</th>
-                      <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
-                      <th className="px-2 py-2 font-semibold text-slate-500">Transaction</th>
-                      <th className="w-6" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((entry, i) => (
+              <table className="w-full text-xs border-collapse">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-slate-50 border-b border-slate-200 text-left">
+                    <th className="px-3 py-2 font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
+                    <th className="px-2 py-2 font-semibold text-slate-500">Source</th>
+                    <th className="px-2 py-2 font-semibold text-slate-500">Level</th>
+                    <th className="px-2 py-2 font-semibold text-slate-500">Component</th>
+                    <th className="px-2 py-2 font-semibold text-slate-500">Message</th>
+                    <th className="px-2 py-2 font-semibold text-slate-500">Transaction</th>
+                    <th className="w-6" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageEntries.map((entry, i) => {
+                    const globalIdx = pageStartIdx + i;
+                    return (
                       <EntryRow
-                        key={i}
+                        key={globalIdx}
                         entry={entry}
                         source={source}
-                        expanded={expandedIdx === i}
-                        onToggle={() => setExpandedIdx(expandedIdx === i ? null : i)}
+                        expanded={expandedIdx === globalIdx}
+                        onToggle={() => setExpandedIdx(expandedIdx === globalIdx ? null : globalIdx)}
                         searchTerm={search}
                         onTransactionClick={(txId, ts) => setDrilldown({ txId, timestamp: ts })}
                       />
-                    ))}
-                  </tbody>
-                </table>
-              </>
+                    );
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
+
+          {/* Pagination controls */}
+          {filtered.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500">
+                  Showing {pageStartIdx + 1}–{pageEndIdx} of {filtered.length}
+                  {currentPage === totalPages && " (latest)"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Page size selector */}
+                <select
+                  value={pageSize}
+                  onChange={(e) => { setPageSize(Number(e.target.value)); setPage(Infinity); setExpandedIdx(null); }}
+                  className="text-xs rounded border border-slate-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                >
+                  {[50, 100, 200, 500].map((s) => (
+                    <option key={s} value={s}>{s} / page</option>
+                  ))}
+                </select>
+
+                {/* Page navigation */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => { setPage(1); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
+                    disabled={currentPage <= 1}
+                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Oldest (page 1)"
+                  >
+                    Oldest
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPage((p) => Math.max(1, p - 1)); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
+                    disabled={currentPage <= 1}
+                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Older entries"
+                  >
+                    ← Older
+                  </button>
+                  <span className="text-xs text-slate-500 px-2 tabular-nums">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
+                    disabled={currentPage >= totalPages}
+                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Newer entries"
+                  >
+                    Newer →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPage(totalPages); setExpandedIdx(null); scrollContainerRef.current?.scrollTo(0, 0); }}
+                    disabled={currentPage >= totalPages}
+                    className="px-2 py-1 text-xs rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Latest (last page)"
+                  >
+                    Latest
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
       )}
