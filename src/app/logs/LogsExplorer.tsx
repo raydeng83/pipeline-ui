@@ -455,6 +455,7 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
 
   // ── Live tail ──
   const [tailing, setTailing] = useState(false);
+  const tailingRef = useRef(false);
   const [tailSecs, setTailSecs] = useState<TailSecs>(10);
   const tailIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fetchLogsRef = useRef<(append?: boolean) => void>(() => {});
@@ -500,19 +501,22 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
   // ── Fetch logs ──
   const fetchLogs = useCallback(async (append = false) => {
     if (!env || !source) return;
-    const { beginTime, endTime } = getRange();
 
     append ? setLoadingMore(true) : setLoading(true);
     setError("");
 
     try {
+      const body = tailingRef.current
+        ? { env, source, tail: true, cookie: append ? cookie : undefined }
+        : (() => {
+            const { beginTime, endTime } = getRange();
+            return { env, source, beginTime, endTime, pageSize: 50, cookie: append ? cookie : undefined };
+          })();
+
       const res = await fetch("/api/logs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          env, source, beginTime, endTime, pageSize: 50,
-          cookie: append ? cookie : undefined,
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (data.error) { setError(data.error); return; }
@@ -556,11 +560,13 @@ export function LogsExplorer({ environments }: { environments: EnvWithLogApi[] }
   }, []);
 
   const stopTail = () => {
+    tailingRef.current = false;
     setTailing(false);
     if (tailIntervalRef.current) { clearInterval(tailIntervalRef.current); tailIntervalRef.current = null; }
   };
 
   const startTail = () => {
+    tailingRef.current = true;
     setTailing(true);
     fetchLogsRef.current(false); // immediate first fetch
   };
