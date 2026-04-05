@@ -649,6 +649,38 @@ export function LogsExplorer({
     .map((k) => k.trim())
     .filter(Boolean);
 
+  // ── Auto-save helper ──
+  const autoSaveToHistory = useCallback((logMode: "search" | "tail" | "transaction", logEntries: unknown[], extra?: { transactionId?: string }) => {
+    if (logEntries.length === 0) return;
+    fetch("/api/history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        record: {
+          type: "log-search",
+          environment: env,
+          scopes: [],
+          status: "success",
+          commitHash: null,
+          startedAt: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          duration: 0,
+          summary: logMode === "transaction"
+            ? `${logEntries.length} entries for tx:${extra?.transactionId?.slice(0, 16) ?? ""}…`
+            : `${logEntries.length} entries from ${source}`,
+          logSource: source,
+          logMode,
+          logPreset: logMode === "search" ? preset : undefined,
+          logEntryCount: logEntries.length,
+        },
+        detail: { logSearchEntries: logEntries },
+      }),
+    }).then(() => {
+      setSaveFlash(true);
+      setTimeout(() => setSaveFlash(false), 10000);
+    }).catch(() => {});
+  }, [env, source, preset]);
+
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [error, setError] = useState("");
   const [fetched, setFetched] = useState(false);
@@ -721,6 +753,8 @@ export function LogsExplorer({
       setLastUpdated(new Date());
       setPage(Infinity);
       onConfigChange({ loading: false });
+      // Auto-save transaction search
+      autoSaveToHistory("transaction", merged, { transactionId: txSearchId.id });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txSearchId]);
@@ -800,6 +834,23 @@ export function LogsExplorer({
       .catch(() => setHistoryRecords([]))
       .finally(() => setHistoryLoading(false));
   }, [historyOpen]);
+
+  // ── Auto-save search results when complete ──
+  const entriesRef = useRef(entries);
+  entriesRef.current = entries;
+  const prevDone = useRef(false);
+  useEffect(() => {
+    const done = !!fetchProgress?.done;
+    if (done && !prevDone.current && mode === "search") {
+      // Delay slightly to ensure entries state has settled
+      setTimeout(() => {
+        if (entriesRef.current.length > 0) {
+          autoSaveToHistory("search", entriesRef.current);
+        }
+      }, 500);
+    }
+    prevDone.current = done;
+  }, [fetchProgress?.done, mode, autoSaveToHistory]);
 
   // ── Auto-scroll when tailing ──
   useEffect(() => {
@@ -899,6 +950,7 @@ export function LogsExplorer({
             {loading && !tailing && " · loading…"}
           </span>
         )}
+        {saveFlash && <span className="text-xs text-emerald-500 font-medium">Saved to history</span>}
         {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
         {error && <span className="text-xs text-red-500">{error}</span>}
         <div className="ml-auto flex items-center gap-3">
@@ -922,36 +974,10 @@ export function LogsExplorer({
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    const now = Date.now();
-                    await fetch("/api/history", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        record: {
-                          type: "log-search",
-                          environment: env,
-                          scopes: [],
-                          status: "success",
-                          commitHash: null,
-                          startedAt: new Date(now).toISOString(),
-                          completedAt: new Date(now).toISOString(),
-                          duration: 0,
-                          summary: `${entries.length.toLocaleString()} entries from ${source}`,
-                          logSource: source,
-                          logMode: mode,
-                          logPreset: mode === "search" ? preset : undefined,
-                          logEntryCount: entries.length,
-                        },
-                        detail: {
-                          logSearchEntries: entries,
-                        },
-                      }),
-                    });
-                    setSaveFlash(true);
-                    setTimeout(() => setSaveFlash(false), 2000);
-                  } catch { /* ignore */ }
+                onClick={() => {
+                  autoSaveToHistory(mode as "tail" | "search", entries);
+                  setSaveFlash(true);
+                  setTimeout(() => setSaveFlash(false), 10000);
                 }}
                 className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
               >
