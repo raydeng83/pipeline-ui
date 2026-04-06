@@ -540,6 +540,10 @@ function createMFAObject(usrKOGID, method, usrMfaValue, status, isRecoveryOnly) 
         //        'riskIndicator': emailPhoneRiskIndicator.riskIndicatorDetails || []
         // };
 
+        if(risk && risk.toLowerCase() === "high"){
+            status = "INACTIVE"
+        }
+
         var mfajsonObj = {
             'KOGId': usrKOGID,
             'MFAMethod': method,

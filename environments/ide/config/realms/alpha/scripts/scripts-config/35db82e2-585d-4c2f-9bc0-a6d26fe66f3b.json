@@ -8,7 +8,7 @@
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
   "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
-  "lastModifiedDate": 1775106881217,
+  "lastModifiedDate": 1775459822433,
   "name": "KYID.2B1.SelfRegistration.CreateUserInAIC",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.SelfRegistration.CreateUserInAIC.js"

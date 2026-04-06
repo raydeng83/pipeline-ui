@@ -36,7 +36,7 @@ var nodeLogger = {
 function main() {
     nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.begin + "::" + "Inside Main Function");  
     try {
-        logger.debug("userInfoJSON is :: " + JSON.stringify(nodeState.get("userInfoJSON")))
+        //logger.debug("userInfoJSON is :: " + JSON.stringify(nodeState.get("userInfoJSON")))
         var usrKOGID = nodeState.get("KOGID");
         var mail = nodeState.get("mail");
         var userInfoJSON = nodeState.get("userInfoJSON") || {};

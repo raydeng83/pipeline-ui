@@ -1,7 +1,7 @@
 {
   "_id": "schedule/CheckDecisionExpirationDates",
   "concurrentExecution": false,
-  "enabled": true,
+  "enabled": false,
   "endTime": null,
   "invokeContext": {
     "script": {
