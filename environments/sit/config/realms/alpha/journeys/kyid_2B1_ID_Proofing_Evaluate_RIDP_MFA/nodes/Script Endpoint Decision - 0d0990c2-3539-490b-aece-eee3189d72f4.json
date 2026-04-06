@@ -1,0 +1,41 @@
+{
+  "_id": "0d0990c2-3539-490b-aece-eee3189d72f4",
+  "_outcomes": [
+    {
+      "displayName": "LexisNexisKBA",
+      "id": "LexisNexisKBA"
+    },
+    {
+      "displayName": "LexisNexisVerification",
+      "id": "LexisNexisVerification"
+    },
+    {
+      "displayName": "CMSEXPERIAN",
+      "id": "CMSEXPERIAN"
+    },
+    {
+      "displayName": "SSA",
+      "id": "SSA"
+    }
+  ],
+  "_rev": "-1567659324",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "LexisNexisKBA",
+    "LexisNexisVerification",
+    "CMSEXPERIAN",
+    "SSA"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "d9df6e7f-5e08-4b48-81d9-8621bb67cb84"
+}

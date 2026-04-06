@@ -1,0 +1,25 @@
+{
+  "_id": "dcfb3f91-d6d4-455b-a3a8-d0ab80b21392",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-156661680",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Password reset successfully"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

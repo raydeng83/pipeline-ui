@@ -1,0 +1,28 @@
+{
+  "_id": "emailTemplate/kyidUserEmailChange",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "kyidUserEmailChange",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyidUserEmailChange.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyidUserEmailChange.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "name": "kyidUserActive",
+  "styles": {
+    "file": "kyidUserEmailChange.css"
+  },
+  "subject": {
+    "en": "KYID Account Email Address Change"
+  },
+  "templateId": "kyidUserEmailChange"
+}

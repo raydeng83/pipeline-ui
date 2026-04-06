@@ -1,0 +1,16 @@
+{
+  "_id": "f98a76c3-206a-4d71-8f2b-343e1051463e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1757066510706,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1775112198575,
+  "name": "KYID.2B1.Journey.GetUserInfoforHelpdesk",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.GetUserInfoforHelpdesk.js"
+  }
+}

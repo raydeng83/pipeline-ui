@@ -1,0 +1,16 @@
+{
+  "_id": "0f5ceb10-e002-4b84-9267-3daea6d40bfc",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=aeeaf0b2-7303-4366-bb98-52421c314893,ou=user,ou=am-config",
+  "creationDate": 1736533828645,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287828795,
+  "name": "KYID.Journey.CheckSkipKerberosCookie",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.CheckSkipKerberosCookie.js"
+  }
+}

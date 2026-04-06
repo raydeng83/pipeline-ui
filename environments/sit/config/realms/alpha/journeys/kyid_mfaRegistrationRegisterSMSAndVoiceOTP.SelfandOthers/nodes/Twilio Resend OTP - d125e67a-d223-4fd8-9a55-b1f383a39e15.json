@@ -1,0 +1,31 @@
+{
+  "_id": "d125e67a-d223-4fd8-9a55-b1f383a39e15",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1214101868",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "4e7b3e38-97be-4ffd-8740-28b496782421",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<hr>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<hr>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"}}"
+}

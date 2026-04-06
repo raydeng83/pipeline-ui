@@ -1,0 +1,206 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "KYIDTransactionId"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "UserPrerequisiteData",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "UserPrerequisiteData",
+  "enableSync": false,
+  "name": "UserPrerequisiteData",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "",
+      "target": "preRequisiteId",
+      "transform": {
+        "globals": {},
+        "source": "logger.info(\"Source object preerquisite: \" + JSON.stringify(source));\nvar prereqName = source.PrerequisiteName;\nvar result = {}; \ntry {\n    var prereqResponse = openidm.query(\n        \"managed/alpha_kyid_enrollment_prerequisite\",\n        {\n            \"_queryFilter\": 'name eq \"' + prereqName + '\"'\n        },\n        [\"_id\"]\n    );\n    if (prereqResponse.result && prereqResponse.result.length > 0) {\n\t\tvar prereqId = prereqResponse.result[0]._id;\n\t\tvar prereqRef = { \"_ref\": \"managed/alpha_kyid_enrollment_prerequisite/\" + prereqId };\n    } else {\n\t\tlogger.error(\"Exception occurred in else \" );\n\t\tnull;\n    }\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);  \n}\nprereqRef;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "preRequisiteTypeId",
+      "transform": {
+        "globals": {},
+        "source": "logger.info(\"Source object preerquisite type: \" + JSON.stringify(source));\nvar prereqTypeName = source.PrerequisiteTypeName;\nvar result = {}; \ntry {\n    var prereqTypeResponse = openidm.query(\n        \"managed/alpha_kyid_enrollment_prerequisite_type\",\n        {\n            \"_queryFilter\": 'name eq \"' + prereqTypeName + '\"'\n        },\n        [\"_id\"]\n    );\n    if (prereqTypeResponse.result && prereqTypeResponse.result.length > 0) {\n\t\tvar prereqTypeId = prereqTypeResponse.result[0]._id;\n\t\tvar prereqTypeRef = { \"_ref\": \"managed/alpha_kyid_enrollment_prerequisite_type/\" + prereqTypeId };\n    } else {\n\t\tlogger.error(\"Exception occurred in else \" );\n\t\tnull;\n    }\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);  \n}\nprereqTypeRef;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "KYIDRoleId",
+      "target": "associatedRoleIds"
+    },
+    {
+      "source": "UserPrerequisiteCreateDate",
+      "target": "createDate"
+    },
+    {
+      "source": "CreateDateEpoch",
+      "target": "createDateEpoch"
+    },
+    {
+      "source": "CompletionDate",
+      "target": "completionDate"
+    },
+    {
+      "source": "CompletionDateEpoch",
+      "target": "completionDateEpoch"
+    },
+    {
+      "source": "ExpiryDate",
+      "target": "expiryDate"
+    },
+    {
+      "source": "ExpiryDateEpoch",
+      "target": "expiryDateEpoch"
+    },
+    {
+      "source": "Status",
+      "target": "status",
+      "transform": {
+        "globals": {},
+        "source": "source.toUpperCase();",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "KYIDRequesterId",
+      "target": "requesterUserAccountId"
+    },
+    {
+      "source": "KYIDRequesteeId",
+      "target": "requestedUserAccountId"
+    },
+    {
+      "source": "UserPrerequisiteValues",
+      "target": "prerequisiteValues",
+      "transform": {
+        "globals": {},
+        "source": "const inputJson = source;\nlogger.error(\"inputJson : \"+inputJson);\nif(!inputJson == null || !inputJson == \"\"){\nconst result = JSON.parse(inputJson);\nlogger.error(\"inputJson result :\"+result);\nlogger.error(\"result.prerequisiteValues : \"+result.prerequisiteValues);\nresult.prerequisiteValues;\n}else{null;}",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "RecordSource",
+      "target": "recordSource"
+    },
+    {
+      "source": "RecordState",
+      "target": "recordState",
+      "transform": {
+        "globals": {},
+        "source": "  if(source == 0){\n      \"ACTIVE\";\n  }else if(source == 1){\n    \"1\";\n  }else{\n  \t\"ACTIVE\";\n  }\n",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "__NAME__",
+      "target": "KYIDTransactionId"
+    },
+    {
+      "source": "UpdateDate",
+      "target": "updateDate"
+    },
+    {
+      "source": "UpdateDateEpoch",
+      "target": "updateDateEpoch"
+    },
+    {
+      "source": "CreateUserId",
+      "target": "createdByID"
+    },
+    {
+      "source": "UpdateUserId",
+      "target": "updatedByID"
+    },
+    {
+      "source": "SrcCreateUserId",
+      "target": "createdBy"
+    },
+    {
+      "source": "SrcUpdateUserId",
+      "target": "updatedBy"
+    },
+    {
+      "source": "ReconBatchIdentifier",
+      "target": "reconbatchidentifier"
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "system/DBConnector_UserPrerequisiteAPStaging/__ACCOUNT__",
+  "sourceQuery": {
+    "_queryFilter": "ReconFlag eq \"yes\""
+  },
+  "sourceQueryFullEntry": true,
+  "target": "managed/alpha_kyid_enrollment_user_prerequisites",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

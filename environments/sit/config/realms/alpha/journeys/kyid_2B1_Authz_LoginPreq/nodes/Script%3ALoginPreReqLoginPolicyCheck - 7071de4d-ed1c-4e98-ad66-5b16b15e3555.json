@@ -1,0 +1,31 @@
+{
+  "_id": "7071de4d-ed1c-4e98-ad66-5b16b15e3555",
+  "_outcomes": [
+    {
+      "displayName": "skiploginprereq",
+      "id": "skiploginprereq"
+    },
+    {
+      "displayName": "loginprereq",
+      "id": "loginprereq"
+    }
+  ],
+  "_rev": "-671921673",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "skiploginprereq",
+    "loginprereq"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "64e5547a-40a2-4a12-99a3-ad47c6d19880"
+}

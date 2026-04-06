@@ -1,0 +1,16 @@
+{
+  "_id": "e4d7be69-9f2f-442c-b189-d0560362c6f8",
+  "context": "SAML2_IDP_ADAPTER",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287835544,
+  "name": "KYID.SAML2.IDPAdapter_Multinode",
+  "script": {
+    "file": "scripts-content/SAML2_IDP_ADAPTER/KYID.SAML2.IDPAdapter_Multinode.js"
+  }
+}

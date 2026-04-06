@@ -1,0 +1,6 @@
+{
+  "_id": "esv-language-preference",
+  "description": "",
+  "expressionType": "object",
+  "valueBase64": "${ESV_LANGUAGE_PREFERENCE}"
+}

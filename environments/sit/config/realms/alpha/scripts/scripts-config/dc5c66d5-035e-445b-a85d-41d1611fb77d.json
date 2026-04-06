@@ -1,0 +1,16 @@
+{
+  "_id": "dc5c66d5-035e-445b-a85d-41d1611fb77d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286700162,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1773208564076,
+  "name": "KYID.2B1.Journey.InvalidSMSVoiceOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.InvalidSMSVoiceOTP.js"
+  }
+}

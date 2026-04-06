@@ -1,0 +1,25 @@
+{
+  "_id": "b346fb37-d62e-4112-b4ad-0c1f90561d81",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1975511742",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "expired"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "2ba819a3-52b1-4301-9fe5-f80fe771e502",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287836702,
+  "name": "KYID.Journey.IsLocationInfoRequired",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.IsLocationInfoRequired.js"
+  }
+}

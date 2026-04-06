@@ -1,0 +1,16 @@
+{
+  "_id": "cfa3c68c-ef07-4b05-ab01-b7b5bd1e76b1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286712881,
+  "default": false,
+  "description": "The script is used to verify the primary email OTP in password recovery journey",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1768984583317,
+  "name": "KYID.2B1.Journey.VerifyPrimaryEmailOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.VerifyPrimaryEmailOTP.js"
+  }
+}

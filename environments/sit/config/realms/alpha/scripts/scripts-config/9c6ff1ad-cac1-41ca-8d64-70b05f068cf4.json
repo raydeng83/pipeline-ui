@@ -1,0 +1,16 @@
+{
+  "_id": "9c6ff1ad-cac1-41ca-8d64-70b05f068cf4",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1756784067124,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766053828385,
+  "name": "KYID.2B1.Journey.PTAExttUserLockoutFailMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.PTAExttUserLockoutFailMsg.js"
+  }
+}

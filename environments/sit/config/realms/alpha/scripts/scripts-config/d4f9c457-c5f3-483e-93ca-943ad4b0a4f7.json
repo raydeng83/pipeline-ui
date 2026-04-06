@@ -1,0 +1,16 @@
+{
+  "_id": "d4f9c457-c5f3-483e-93ca-943ad4b0a4f7",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286696837,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054822859,
+  "name": "KYID.2B1.Journey.Invitation.CreateApplicationObject",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Invitation.CreateApplicationObject.js"
+  }
+}

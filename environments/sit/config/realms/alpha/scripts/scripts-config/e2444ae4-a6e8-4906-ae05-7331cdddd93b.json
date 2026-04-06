@@ -1,0 +1,16 @@
+{
+  "_id": "e2444ae4-a6e8-4906-ae05-7331cdddd93b",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286702167,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1770091479713,
+  "name": "KYID.Journey.JITInvalidAccountErrorFailedURL",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.JITInvalidAccountErrorFailedURL.js"
+  }
+}

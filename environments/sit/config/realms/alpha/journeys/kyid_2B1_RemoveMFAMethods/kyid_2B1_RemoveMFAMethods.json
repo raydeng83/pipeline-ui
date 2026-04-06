@@ -1,0 +1,143 @@
+{
+  "_id": "kyid_2B1_RemoveMFAMethods",
+  "_rev": "-1670688817",
+  "enabled": true,
+  "entryNodeId": "945ac82d-c934-4829-b7c8-382e26844d26",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0e3e7c17-eaa6-4e8c-8513-df6caa422aba": {
+      "connections": {
+        "failure": "5f8d0a8e-5661-4b3c-80a2-6836ca868d75",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "MFA Removed - Send Mail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1250.3333129882812,
+      "y": 189.67707347869873
+    },
+    "1c5dbe49-6ab2-4b3d-9948-06d86c18a560": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1401,
+      "y": 472.015625
+    },
+    "56408038-0e15-4695-ada9-7d99d80a2561": {
+      "connections": {
+        "email": "a5923157-e3e3-4c4a-a672-53e00e72e35a",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "sms": "6c78c725-b652-4138-a3c1-852f447167a9",
+        "true": "0e3e7c17-eaa6-4e8c-8513-df6caa422aba"
+      },
+      "displayName": "Script: RemoveMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 551,
+      "y": 130.015625
+    },
+    "5f8d0a8e-5661-4b3c-80a2-6836ca868d75": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1537.3333740234375,
+      "y": 330.34375
+    },
+    "6c78c725-b652-4138-a3c1-852f447167a9": {
+      "connections": {
+        "Error": "bffe311a-92b9-45bb-b9e5-dcc56ca6362e",
+        "Failed": "1c5dbe49-6ab2-4b3d-9948-06d86c18a560",
+        "Successful": "0e3e7c17-eaa6-4e8c-8513-df6caa422aba"
+      },
+      "displayName": "Scripted: AddRemoveMobilePhone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 919,
+      "y": 11
+    },
+    "945ac82d-c934-4829-b7c8-382e26844d26": {
+      "connections": {
+        "False": "f2ac57d2-87a0-4c63-a86c-70c4246889ed",
+        "True": "56408038-0e15-4695-ada9-7d99d80a2561"
+      },
+      "displayName": "GetAccessToken",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 258,
+      "y": 123.015625
+    },
+    "a5923157-e3e3-4c4a-a672-53e00e72e35a": {
+      "connections": {
+        "Error": "eeadc449-957e-40ab-ab3e-6a42f36bdad8",
+        "Failed": "1c5dbe49-6ab2-4b3d-9948-06d86c18a560",
+        "Successful": "0e3e7c17-eaa6-4e8c-8513-df6caa422aba"
+      },
+      "displayName": "Script: AddRemoevAlternateEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 787.25,
+      "y": 396.8125
+    },
+    "bffe311a-92b9-45bb-b9e5-dcc56ca6362e": {
+      "connections": {
+        "try again": "6c78c725-b652-4138-a3c1-852f447167a9"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1037.5,
+      "y": 279.3125
+    },
+    "eeadc449-957e-40ab-ab3e-6a42f36bdad8": {
+      "connections": {
+        "try again": "a5923157-e3e3-4c4a-a672-53e00e72e35a"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 933,
+      "y": 759.8125
+    },
+    "f2ac57d2-87a0-4c63-a86c-70c4246889ed": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 457,
+      "y": 518.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1737,
+      "y": 267
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1786,
+      "y": 545
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

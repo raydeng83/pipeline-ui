@@ -1,0 +1,6 @@
+{
+  "_id": "esv-sa-accesstoken-tenantfqdnesv",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_SA_ACCESSTOKEN_TENANTFQDNESV}"
+}

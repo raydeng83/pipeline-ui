@@ -1,0 +1,35 @@
+{
+  "_id": "c6c65eb9-8b1f-4505-9696-ee417cb89e34",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    },
+    {
+      "displayName": "Not registered",
+      "id": "notRegisteredOutcome"
+    }
+  ],
+  "_rev": "-1257092001",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "00299342-33c6-42bb-8029-10c268213e37",
+      "displayName": "OATH Token Verifier",
+      "nodeType": "OathTokenVerifierNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-element' style=\\\"text-align:left\\\">\\n    <span><a href=\\\"&{esv.mfaself.successurl}\\\">\\n    Back</a></span>\\n    </div>\\n    <div class='page-footer-horizontal'>\\n    <div class='page-footer-element' style=\\\"text-align:left\\\">\\n    <span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n    </div>\",\"es\":\"<div class='page-footer-element' style=\\\"text-align:left\\\">\\n        <span><a href=\\\"&{esv.mfaself.successurl}\\\">\\n        Atrás</a></span>\\n        </div>\\n        <div class='page-footer-horizontal'>\\n        <div class='page-footer-element' style=\\\"text-align:left\\\">\\n        <span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n        </div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

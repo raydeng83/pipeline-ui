@@ -1,0 +1,6 @@
+{
+  "_id": "esv-pingoneprotect-location-whitelisted-ip",
+  "description": "",
+  "expressionType": "array",
+  "valueBase64": "${ESV_PINGONEPROTECT_LOCATION_WHITELISTED_IP}"
+}

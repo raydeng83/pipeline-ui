@@ -1,0 +1,1 @@
+<html><head></head><body>The violation assigned to you for {{object.user.givenName}} {{object.user.sn}} is awaiting your action.</body></html>

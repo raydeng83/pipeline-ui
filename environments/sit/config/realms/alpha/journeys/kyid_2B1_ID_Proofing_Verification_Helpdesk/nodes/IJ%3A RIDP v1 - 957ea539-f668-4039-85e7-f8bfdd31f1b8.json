@@ -1,0 +1,22 @@
+{
+  "_id": "957ea539-f668-4039-85e7-f8bfdd31f1b8",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "361218752",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_ID_Proofing_Evaluate_RIDP_Helpdesk"
+}

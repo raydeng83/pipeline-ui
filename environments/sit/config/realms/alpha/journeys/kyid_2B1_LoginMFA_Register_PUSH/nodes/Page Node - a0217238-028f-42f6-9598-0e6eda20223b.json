@@ -1,0 +1,28 @@
+{
+  "_id": "a0217238-028f-42f6-9598-0e6eda20223b",
+  "_outcomes": [
+    {
+      "displayName": "Done",
+      "id": "DONE"
+    }
+  ],
+  "_rev": "101875921",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "2fb9cebc-629b-4056-a03b-053c8eebf4a7",
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "2_verify_PUSH"
+  }
+}

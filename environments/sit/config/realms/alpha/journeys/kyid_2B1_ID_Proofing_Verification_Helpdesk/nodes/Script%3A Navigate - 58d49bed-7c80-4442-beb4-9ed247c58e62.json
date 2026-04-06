@@ -1,0 +1,46 @@
+{
+  "_id": "58d49bed-7c80-4442-beb4-9ed247c58e62",
+  "_outcomes": [
+    {
+      "displayName": "KBABack",
+      "id": "KBABack"
+    },
+    {
+      "displayName": "anotherMethod",
+      "id": "anotherMethod"
+    },
+    {
+      "displayName": "Next",
+      "id": "Next"
+    },
+    {
+      "displayName": "FARS",
+      "id": "FARS"
+    },
+    {
+      "displayName": "differentMethod",
+      "id": "differentMethod"
+    }
+  ],
+  "_rev": "1825431440",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "KBABack",
+    "anotherMethod",
+    "Next",
+    "FARS",
+    "differentMethod"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "fc2c71b3-0b49-4bc0-bb3b-3170011c921f"
+}

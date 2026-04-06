@@ -1,0 +1,13 @@
+{
+  "_id": "PingOne Worker Service",
+  "_type": {
+    "_id": "workers",
+    "collection": true,
+    "name": "PingOne Worker"
+  },
+  "apiUrl": "&{esv.pingone.api.server.url}",
+  "authUrl": "&{esv.pingone.authorization.server.url}",
+  "clientId": "&{esv.pingone.protect.client.id}",
+  "clientSecretPurpose": "am.services.pingone.worker.workerAppClientSecret.clientsecret",
+  "environmentId": "&{esv.pingone.protect.environment.id}"
+}

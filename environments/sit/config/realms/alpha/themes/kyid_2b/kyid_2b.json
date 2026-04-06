@@ -1,0 +1,872 @@
+{
+  "_id": "b1ddbe55-d353-49dd-8314-c41d8553efa3",
+  "accountCardBackgroundColor": "#ffffff",
+  "accountCardHeaderColor": "#23282e",
+  "accountCardInnerBorderColor": "#e7eef4",
+  "accountCardInputBackgroundColor": "#ffffff",
+  "accountCardInputBorderColor": "#c0c9d5",
+  "accountCardInputFocusBorderColor": "#324054",
+  "accountCardInputLabelColor": "#5e6d82",
+  "accountCardInputSelectColor": "#e4f4fd",
+  "accountCardInputSelectHoverColor": "#f6f8fa",
+  "accountCardInputTextColor": "#23282e",
+  "accountCardOuterBorderColor": "#e7eef4",
+  "accountCardShadow": 3,
+  "accountCardTabActiveBorderColor": "#109cf1",
+  "accountCardTabActiveColor": "#e4f4fd",
+  "accountCardTextColor": "#5e6d82",
+  "accountFooter": {
+    "file": "accountFooter.html"
+  },
+  "accountFooterEnabled": false,
+  "accountFooterScriptTag": "",
+  "accountFooterScriptTagEnabled": false,
+  "accountNavigationBackgroundColor": "#ffffff",
+  "accountNavigationTextColor": "#455469",
+  "accountNavigationToggleBorderColor": "#e7eef4",
+  "accountPageSections": {
+    "accountControls": {
+      "enabled": false
+    },
+    "accountSecurity": {
+      "enabled": false,
+      "subsections": {
+        "password": {
+          "enabled": true
+        },
+        "securityQuestions": {
+          "enabled": false
+        },
+        "twoStepVerification": {
+          "enabled": true
+        },
+        "username": {
+          "enabled": true
+        }
+      }
+    },
+    "consent": {
+      "enabled": false
+    },
+    "oauthApplications": {
+      "enabled": false
+    },
+    "personalInformation": {
+      "enabled": true
+    },
+    "preferences": {
+      "enabled": false
+    },
+    "social": {
+      "enabled": false
+    },
+    "trustedDevices": {
+      "enabled": false
+    }
+  },
+  "accountTableRowHoverColor": "#f6f8fa",
+  "backgroundColor": "#ffffff",
+  "backgroundImage": "",
+  "bodyText": "#23282e",
+  "boldLinks": false,
+  "buttonFocusBorderColor": "#0778d6",
+  "buttonRounded": 5,
+  "dangerColor": "#dc3545",
+  "darkColor": "#23282e",
+  "endUserMenuItems": [
+    {
+      "icon": "dashboard",
+      "id": "dashboard",
+      "label": {
+        "en": "Dashboard"
+      },
+      "labelKey": "sideMenu.endUser.dashboard"
+    },
+    {
+      "icon": "summarize",
+      "id": "reports",
+      "label": {
+        "en": "Reports"
+      },
+      "labelKey": "sideMenu.endUser.reports"
+    },
+    {
+      "disabled": true,
+      "icon": "inbox",
+      "id": "inbox",
+      "label": {
+        "en": "My Inbox"
+      },
+      "labelKey": "sideMenu.endUser.inbox",
+      "selectedSubItems": [
+        "approvals",
+        "tasks",
+        "accessReviews",
+        "violations"
+      ],
+      "subItems": [
+        {
+          "icon": "approvals",
+          "id": "approvals",
+          "label": {
+            "en": "Approvals"
+          },
+          "labelKey": "sideMenu.endUser.approvals"
+        },
+        {
+          "icon": "tasks",
+          "id": "tasks",
+          "label": {
+            "en": "Tasks"
+          },
+          "labelKey": "sideMenu.endUser.tasks"
+        },
+        {
+          "icon": "accessReviews",
+          "id": "accessReviews",
+          "label": {
+            "en": "Access Reviews"
+          },
+          "labelKey": "sideMenu.endUser.accessReviews"
+        },
+        {
+          "icon": "violations",
+          "id": "violations",
+          "label": {
+            "en": "Violations"
+          },
+          "labelKey": "sideMenu.endUser.violations"
+        }
+      ]
+    },
+    {
+      "icon": "horizontal_rule",
+      "id": "divider",
+      "isDivider": true,
+      "label": {
+        "en": "Divider"
+      },
+      "labelKey": "sideMenu.endUser.divider"
+    },
+    {
+      "disabled": true,
+      "icon": "apps",
+      "id": "applications",
+      "label": {
+        "en": "Applications"
+      },
+      "labelKey": "sideMenu.endUser.applications"
+    },
+    {
+      "disabled": true,
+      "icon": "lock",
+      "id": "myAccess",
+      "label": {
+        "en": "My Access"
+      },
+      "labelKey": "sideMenu.endUser.myAccess",
+      "selectedSubItems": [
+        "myAccounts",
+        "myRoles",
+        "myEntitlements"
+      ],
+      "subItems": [
+        {
+          "icon": "myAccounts",
+          "id": "myAccounts",
+          "label": {
+            "en": "My Accounts"
+          },
+          "labelKey": "sideMenu.endUser.myAccounts"
+        },
+        {
+          "icon": "myRoles",
+          "id": "myRoles",
+          "label": {
+            "en": "My Roles"
+          },
+          "labelKey": "sideMenu.endUser.myRoles"
+        },
+        {
+          "icon": "myEntitlements",
+          "id": "myEntitlements",
+          "label": {
+            "en": "My Entitlements"
+          },
+          "labelKey": "sideMenu.endUser.myEntitlements"
+        }
+      ]
+    },
+    {
+      "disabled": true,
+      "icon": "folder",
+      "id": "directory",
+      "label": {
+        "en": "My Directory"
+      },
+      "labelKey": "sideMenu.endUser.directory",
+      "selectedSubItems": [
+        "delegates",
+        "directReports"
+      ],
+      "subItems": [
+        {
+          "icon": "delegates",
+          "id": "delegates",
+          "label": {
+            "en": "My Delegates"
+          },
+          "labelKey": "sideMenu.endUser.delegates"
+        },
+        {
+          "icon": "directReports",
+          "id": "directReports",
+          "label": {
+            "en": "Direct Reports"
+          },
+          "labelKey": "sideMenu.endUser.directReports"
+        }
+      ]
+    },
+    {
+      "icon": "send",
+      "id": "requests",
+      "label": {
+        "en": "My Requests"
+      },
+      "labelKey": "sideMenu.endUser.requests"
+    },
+    {
+      "disabled": true,
+      "icon": "person",
+      "id": "profile",
+      "label": {
+        "en": "Profile"
+      },
+      "labelKey": "sideMenu.endUser.profile"
+    },
+    {
+      "icon": "manage_accounts",
+      "id": "lcm",
+      "label": {
+        "en": "Administer"
+      },
+      "labelKey": "sideMenu.endUser.lcm",
+      "selectedSubItems": [
+        "lcmUsers",
+        "lcmEntitlements"
+      ],
+      "subItems": [
+        {
+          "icon": "lcmUsers",
+          "id": "lcmUsers",
+          "label": {
+            "en": "Users"
+          },
+          "labelKey": "sideMenu.endUser.lcmUsers"
+        },
+        {
+          "icon": "lcmEntitlements",
+          "id": "lcmEntitlements",
+          "label": {
+            "en": "Entitlements"
+          },
+          "labelKey": "sideMenu.endUser.lcmEntitlements"
+        }
+      ]
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_group",
+      "isManagedObject": true,
+      "label": {
+        "en": "Alpha realm - Group"
+      },
+      "labelKey": "Alpha realm - Group"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_access",
+      "isManagedObject": true,
+      "label": {
+        "en": "Access"
+      },
+      "labelKey": "Access"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_application_access_data",
+      "isManagedObject": true,
+      "label": {
+        "en": "Application Access Data"
+      },
+      "labelKey": "Application Access Data"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_application_metadata",
+      "isManagedObject": true,
+      "label": {
+        "en": "Alpha realm - KYID APP Metadata"
+      },
+      "labelKey": "Alpha realm - KYID APP Metadata"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_applicationrequest",
+      "isManagedObject": true,
+      "label": {
+        "en": null
+      },
+      "labelKey": null
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_audit_logger",
+      "isManagedObject": true,
+      "label": {
+        "en": "Alpha KYID Audit Logger"
+      },
+      "labelKey": "Alpha KYID Audit Logger"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_authenticators",
+      "isManagedObject": true,
+      "label": {
+        "en": "User Authenticators"
+      },
+      "labelKey": "User Authenticators"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_credentials",
+      "isManagedObject": true,
+      "label": {
+        "en": "Credentials"
+      },
+      "labelKey": "Credentials"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_dashboardapplicationwidget",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_dashboardapplicationwidget"
+      },
+      "labelKey": "alpha_kyid_dashboardapplicationwidget"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_dbconnector",
+      "isManagedObject": true,
+      "label": {
+        "en": "DB connector Poc"
+      },
+      "labelKey": "DB connector Poc"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_endpointrequestmapping",
+      "isManagedObject": true,
+      "label": {
+        "en": "Prerequisite Endpoint Request Mapping"
+      },
+      "labelKey": "Prerequisite Endpoint Request Mapping"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_endpointresponsemapping",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_endpointresponsemapping"
+      },
+      "labelKey": "alpha_kyid_endpointresponsemapping"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrollment_contextId",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Enrollment Context"
+      },
+      "labelKey": "KYID Enrollment Context"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrollment_access_policy",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Access Policy"
+      },
+      "labelKey": "KYID Access Policy"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrollment_prerequisite",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Enrollment Pre-requisite"
+      },
+      "labelKey": "KYID Enrollment Pre-requisite"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrollment_prerequisite_type",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Enrollment Pre-requisite Type"
+      },
+      "labelKey": "KYID Enrollment Pre-requisite Type"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrollment_request",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Enrollment Request"
+      },
+      "labelKey": "KYID Enrollment Request"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrollment_service_endpoint",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Service Endpoint"
+      },
+      "labelKey": "KYID Service Endpoint"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrollment_user_prerequisites",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID User Pre-Requisites"
+      },
+      "labelKey": "KYID User Pre-Requisites"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrolment_context_details",
+      "isManagedObject": true,
+      "label": {
+        "en": "Enrolment context details"
+      },
+      "labelKey": "Enrolment context details"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_enrolmentcontext",
+      "isManagedObject": true,
+      "label": {
+        "en": "Enrolment Context"
+      },
+      "labelKey": "Enrolment Context"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_errormessages",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_errormessages"
+      },
+      "labelKey": "alpha_kyid_errormessages"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_extendedIdentity",
+      "isManagedObject": true,
+      "label": {
+        "en": "Extended Identity"
+      },
+      "labelKey": "Extended Identity"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_faq_mapping",
+      "isManagedObject": true,
+      "label": {
+        "en": "FAQ Mapping Object List"
+      },
+      "labelKey": "FAQ Mapping Object List"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_help_category",
+      "isManagedObject": true,
+      "label": {
+        "en": "Help Category"
+      },
+      "labelKey": "Help Category"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_help_topic",
+      "isManagedObject": true,
+      "label": {
+        "en": "Help Topic"
+      },
+      "labelKey": "Help Topic"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_helpdeskcontact",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Helpdesk Contact"
+      },
+      "labelKey": "KYID Helpdesk Contact"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_identity_verification_documents",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Identity Verification Documents"
+      },
+      "labelKey": "KYID Identity Verification Documents"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_login_policy",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Login Policy"
+      },
+      "labelKey": "KYID Login Policy"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_mfa_methods",
+      "isManagedObject": true,
+      "label": {
+        "en": "kyid_mfa_methods"
+      },
+      "labelKey": "kyid_mfa_methods"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_myaccount",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_myaccount"
+      },
+      "labelKey": "alpha_kyid_myaccount"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_policy",
+      "isManagedObject": true,
+      "label": {
+        "en": "Policy"
+      },
+      "labelKey": "Policy"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_prerequisite",
+      "isManagedObject": true,
+      "label": {
+        "en": "Prerequisite"
+      },
+      "labelKey": "Prerequisite"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_prerequisite_endpoint",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_prerequisite_endpoint"
+      },
+      "labelKey": "alpha_kyid_prerequisite_endpoint"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_prerequisite_type",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_prerequisite_type"
+      },
+      "labelKey": "alpha_kyid_prerequisite_type"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_prerequisiteattributes",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_prerequisiteattributes"
+      },
+      "labelKey": "alpha_kyid_prerequisiteattributes"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_remote_identity_proofing_request",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Remote Identity Proofing Request"
+      },
+      "labelKey": "KYID Remote Identity Proofing Request"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_request",
+      "isManagedObject": true,
+      "label": {
+        "en": "Request"
+      },
+      "labelKey": "Request"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_restricted_entries",
+      "isManagedObject": true,
+      "label": {
+        "en": "Restricted Entries"
+      },
+      "labelKey": "Restricted Entries"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_role_approvers",
+      "isManagedObject": true,
+      "label": {
+        "en": "Role Apporvers"
+      },
+      "labelKey": "Role Apporvers"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_roleactiontype",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_roleactiontype"
+      },
+      "labelKey": "alpha_kyid_roleactiontype"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_systemmessages",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_systemmessages"
+      },
+      "labelKey": "alpha_kyid_systemmessages"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_tag",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_tag"
+      },
+      "labelKey": "alpha_kyid_tag"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_token_email",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID Email Token"
+      },
+      "labelKey": "KYID Email Token"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_user_identity",
+      "isManagedObject": true,
+      "label": {
+        "en": "KYID User Identity"
+      },
+      "labelKey": "KYID User Identity"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_kyid_useraccounttype",
+      "isManagedObject": true,
+      "label": {
+        "en": "alpha_kyid_useraccounttype"
+      },
+      "labelKey": "alpha_kyid_useraccounttype"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_organization",
+      "isManagedObject": true,
+      "label": {
+        "en": "Alpha realm - Organization"
+      },
+      "labelKey": "Alpha realm - Organization"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_role",
+      "isManagedObject": true,
+      "label": {
+        "en": "Alpha realm - Role"
+      },
+      "labelKey": "Alpha realm - Role"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "alpha_user",
+      "isManagedObject": true,
+      "label": {
+        "en": "Alpha realm - User"
+      },
+      "labelKey": "Alpha realm - User"
+    },
+    {
+      "disabled": true,
+      "icon": "people",
+      "id": "internal/role",
+      "isManagedObject": true,
+      "label": {
+        "en": "Internal Role"
+      },
+      "labelKey": "Internal Role"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "MFAContextObject",
+      "isManagedObject": true,
+      "label": {
+        "en": "MFAContextObject"
+      },
+      "labelKey": "MFAContextObject"
+    },
+    {
+      "disabled": true,
+      "icon": "check_box_outline_blank",
+      "id": "workflowdata",
+      "isManagedObject": true,
+      "label": {
+        "en": "workflowdata"
+      },
+      "labelKey": "workflowdata"
+    }
+  ],
+  "favicon": "https://cdn.forgerock.com/platform/themes/starter/logo-starter.svg",
+  "fontFamily": "Open Sans",
+  "infoColor": "#109cf1",
+  "isDefault": false,
+  "journeyA11yAddFallbackErrorHeading": true,
+  "journeyCardBackgroundColor": "#ffffff",
+  "journeyCardBorderRadius": 4,
+  "journeyCardHeaderBackgroundColor": "#ffffff",
+  "journeyCardShadow": 3,
+  "journeyCardTextColor": "#5e6d82",
+  "journeyCardTitleColor": "#23282e",
+  "journeyFloatingLabels": true,
+  "journeyFocusElement": "header",
+  "journeyFocusFirstFocusableItemEnabled": false,
+  "journeyFooter": {
+    "file": "journeyFooter.html"
+  },
+  "journeyFooterEnabled": false,
+  "journeyFooterScriptTag": "",
+  "journeyFooterScriptTagEnabled": false,
+  "journeyHeader": {
+    "file": "journeyHeader.html"
+  },
+  "journeyHeaderEnabled": false,
+  "journeyHeaderSkipLinkEnabled": false,
+  "journeyInputBackgroundColor": "#ffffff",
+  "journeyInputBorderColor": "#c0c9d5",
+  "journeyInputFocusBorderColor": "#324054",
+  "journeyInputLabelColor": "#5e6d82",
+  "journeyInputSelectColor": "#e4f4fd",
+  "journeyInputSelectHoverColor": "#f6f8fa",
+  "journeyInputTextColor": "#23282e",
+  "journeyJustifiedContent": "",
+  "journeyJustifiedContentEnabled": false,
+  "journeyJustifiedContentMobileViewEnabled": false,
+  "journeyLayout": "card",
+  "journeyRememberMeEnabled": false,
+  "journeyRememberMeLabel": "",
+  "journeySignInButtonPosition": "flex-column",
+  "journeyTheaterMode": false,
+  "lightColor": "#f6f8fa",
+  "linkActiveColor": "#0a6eab",
+  "linkActiveColorOnDark": "#0a6eab",
+  "linkColor": "#109cf1",
+  "linkColorOnDark": "#109cf1",
+  "linkedTrees": [],
+  "logo": "img/placeholder.95d0bb8e.svg",
+  "logoAltText": "Logo",
+  "logoEnabled": true,
+  "logoHeight": "43",
+  "logoProfile": "data:image/png;base64,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",
+  "logoProfileAltText": "kyid_2b",
+  "logoProfileCollapsed": "data:image/png;base64,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",
+  "logoProfileCollapsedAltText": "kyid_2b",
+  "logoProfileHeight": "24",
+  "name": "kyid_2b",
+  "pageTitle": "#23282e",
+  "primaryColor": "#324054",
+  "primaryOffColor": "#242E3C",
+  "profileBackgroundColor": "#ffffff",
+  "profileMenuHighlightColor": "#f3f5f8",
+  "profileMenuHoverColor": "#f3f5f8",
+  "profileMenuHoverTextColor": "#455469",
+  "profileMenuTextHighlightColor": "#455469",
+  "secondaryColor": "#69788b",
+  "successColor": "#2ed47a",
+  "switchBackgroundColor": "#c0c9d5",
+  "textColor": "#ffffff",
+  "topBarBackgroundColor": "#ffffff",
+  "topBarBorderColor": "#e7eef4",
+  "topBarHeaderColor": "#23282e",
+  "topBarTextColor": "#69788b",
+  "warningColor": "#ffb946"
+}

@@ -1,0 +1,23 @@
+{
+  "_id": "external.email",
+  "auth": {
+    "enable": true,
+    "password": "&{esv.smtp.password}",
+    "username": "&{esv.smtp.username}"
+  },
+  "connectiontimeout": 30000,
+  "debug": false,
+  "from": "\"&{esv.smtp.from.name}\" <&{esv.smtp.from.address}>",
+  "host": "&{esv.smtp.hostname}",
+  "port": 25,
+  "smtpProperties": [],
+  "ssl": {
+    "enable": false
+  },
+  "starttls": {
+    "enable": true
+  },
+  "threadPoolSize": 20,
+  "timeout": 30000,
+  "writetimeout": 30000
+}

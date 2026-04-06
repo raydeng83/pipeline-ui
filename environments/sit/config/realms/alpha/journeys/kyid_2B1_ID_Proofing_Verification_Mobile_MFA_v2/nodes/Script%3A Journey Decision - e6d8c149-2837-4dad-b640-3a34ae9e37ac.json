@@ -1,0 +1,46 @@
+{
+  "_id": "e6d8c149-2837-4dad-b640-3a34ae9e37ac",
+  "_outcomes": [
+    {
+      "displayName": "create",
+      "id": "create"
+    },
+    {
+      "displayName": "continue",
+      "id": "continue"
+    },
+    {
+      "displayName": "update",
+      "id": "update"
+    },
+    {
+      "displayName": "organ",
+      "id": "organ"
+    },
+    {
+      "displayName": "FARS",
+      "id": "FARS"
+    }
+  ],
+  "_rev": "-1342308106",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "create",
+    "continue",
+    "update",
+    "organ",
+    "FARS"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "654012a0-dab5-458e-a746-95dad2f7a8d1"
+}

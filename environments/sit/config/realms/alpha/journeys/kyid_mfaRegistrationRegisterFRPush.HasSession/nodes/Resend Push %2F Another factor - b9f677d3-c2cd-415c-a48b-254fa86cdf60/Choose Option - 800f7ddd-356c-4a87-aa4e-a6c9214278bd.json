@@ -1,0 +1,32 @@
+{
+  "_id": "800f7ddd-356c-4a87-aa4e-a6c9214278bd",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "180595896",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Select your choice!",
+    "es": "Haga su selección"
+  },
+  "messageNo": {
+    "en": "Another Factor?",
+    "es": "¿Otro factor?"
+  },
+  "messageYes": {
+    "en": "Resend Push",
+    "es": "Reenviar Push"
+  }
+}

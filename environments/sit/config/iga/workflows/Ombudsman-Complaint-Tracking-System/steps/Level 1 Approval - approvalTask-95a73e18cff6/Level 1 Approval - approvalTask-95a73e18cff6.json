@@ -1,0 +1,90 @@
+{
+  "approvalMode": "any",
+  "approvalTask": {
+    "actors": [
+      {
+        "id": "managed/user/56ee9a18-3681-4bae-9e47-a75b8a21858a",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/8b04715c-febc-43b8-b8bb-c4145609359f",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/cd0030e4-afe9-4d29-87c6-61827e2f555e",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/f3606b6f-cbe3-4ace-ac86-19073af79d2b",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      }
+    ],
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "kyidRequestAssigned"
+      },
+      "expiration": {
+        "action": "reject",
+        "actors": [
+          {
+            "id": ""
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(7*86400000))).toISOString()"
+        },
+        "frequency": 7,
+        "notification": "kyidRequestAssignedExpiration"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "kyidRequestAssignedReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "APPROVE",
+        "step": "scriptTask-12f2e5af9606"
+      },
+      {
+        "condition": null,
+        "outcome": "REJECT",
+        "step": "scriptTask-a693f3a33d93"
+      }
+    ]
+  },
+  "displayName": "Level 1 Approval",
+  "name": "approvalTask-95a73e18cff6",
+  "type": "approvalTask"
+}

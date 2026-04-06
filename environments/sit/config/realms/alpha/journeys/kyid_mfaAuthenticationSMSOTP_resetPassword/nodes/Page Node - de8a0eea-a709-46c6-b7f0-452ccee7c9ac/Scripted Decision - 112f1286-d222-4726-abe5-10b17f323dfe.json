@@ -1,0 +1,51 @@
+{
+  "_id": "112f1286-d222-4726-abe5-10b17f323dfe",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "expired",
+      "id": "expired"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    }
+  ],
+  "_rev": "-1609702197",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Verify",
+    "Resend Code",
+    "Choose Another Method",
+    "expired",
+    "false",
+    "BlankOTP"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "94face11-09be-4f75-8a9c-ec00f8afb391"
+}

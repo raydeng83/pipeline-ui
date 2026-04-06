@@ -1,0 +1,31 @@
+{
+  "_id": "eceb27ac-79e6-4364-870e-990b30b0d52a",
+  "_outcomes": [
+    {
+      "displayName": "MFARequired",
+      "id": "MFARequired"
+    },
+    {
+      "displayName": "skipMFA",
+      "id": "skipMFA"
+    }
+  ],
+  "_rev": "1535270643",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "MFARequired",
+    "skipMFA"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "07ce3dfa-cffe-4b02-b729-41c110fe8e18"
+}

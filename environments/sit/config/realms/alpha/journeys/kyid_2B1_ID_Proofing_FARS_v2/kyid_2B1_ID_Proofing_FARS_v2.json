@@ -1,0 +1,181 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_FARS_v2",
+  "_rev": "1229744562",
+  "enabled": true,
+  "entryNodeId": "eb347fcf-a745-4000-9e4a-8b1b25ffa89b",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "197aeef4-ce0a-4bce-a61a-e5b9b72fa372": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 806,
+      "y": 311
+    },
+    "1a5e26d3-3e74-4a59-bd62-bc026efc3746": {
+      "connections": {
+        "displayUser": "9225282e-36e4-4572-a72b-54589f99bfeb",
+        "errorMessage": "3458c1cb-fba9-496e-a76e-bcc767b34867",
+        "true": "3458c1cb-fba9-496e-a76e-bcc767b34867"
+      },
+      "displayName": "Script: FARS MCI SYNC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1700,
+      "y": 130.66666666666666
+    },
+    "3458c1cb-fba9-496e-a76e-bcc767b34867": {
+      "connections": {
+        "Next": "9225282e-36e4-4572-a72b-54589f99bfeb",
+        "appEnrollMessage": "9225282e-36e4-4572-a72b-54589f99bfeb"
+      },
+      "displayName": "Script: Patch User PreReq",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1997,
+      "y": 232
+    },
+    "3664f7a6-88f4-414d-923d-8abfb153195f": {
+      "connections": {
+        "MCISYNC": "1a5e26d3-3e74-4a59-bd62-bc026efc3746",
+        "appEnrollRIDPmsg": "1a5e26d3-3e74-4a59-bd62-bc026efc3746",
+        "displayUser": "1a5e26d3-3e74-4a59-bd62-bc026efc3746"
+      },
+      "displayName": "Script: FARS MCI SEARCH",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1385,
+      "y": 104.33333333333333
+    },
+    "44fde972-aa57-4fa3-80f7-dcf71b3d7193": {
+      "connections": {
+        "CMSFARS": "4534930a-4928-4e2e-9b4a-1de23b6cf03e",
+        "PrereqCompleted": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "lexisNexisRetry": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Check Prerequisite Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 806,
+      "y": 80
+    },
+    "4534930a-4928-4e2e-9b4a-1de23b6cf03e": {
+      "connections": {
+        "displayFARS": "a4d79c88-3aa0-4b88-bccc-e7144e50e732",
+        "success": "3664f7a6-88f4-414d-923d-8abfb153195f"
+      },
+      "displayName": "Script: Call FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1126,
+      "y": 140
+    },
+    "9225282e-36e4-4572-a72b-54589f99bfeb": {
+      "connections": {
+        "Next": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display Message",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2317,
+      "y": 271.5
+    },
+    "962ec3cb-b311-4e32-9c0c-36e47b76688f": {
+      "connections": {
+        "LexisNexis": "44fde972-aa57-4fa3-80f7-dcf71b3d7193",
+        "callFARS": "44fde972-aa57-4fa3-80f7-dcf71b3d7193",
+        "continue": "197aeef4-ce0a-4bce-a61a-e5b9b72fa372",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display 1st FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 486,
+      "y": 104
+    },
+    "a4d79c88-3aa0-4b88-bccc-e7144e50e732": {
+      "connections": {
+        "FARS": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "appEnrollMessage": "1a5e26d3-3e74-4a59-bd62-bc026efc3746",
+        "displayFARS2": "b74cf829-9f0a-4df1-aff8-7b10a6a67905"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1385,
+      "y": 323.1666666666667
+    },
+    "b74cf829-9f0a-4df1-aff8-7b10a6a67905": {
+      "connections": {
+        "Next": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display FARS 2",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1700,
+      "y": 336.3333333333333
+    },
+    "c167d32f-f50e-4786-87db-69bb183e31de": {
+      "connections": {
+        "divert": "f2f4e35a-2e45-4b79-bcf4-7de6042dab53",
+        "next": "4534930a-4928-4e2e-9b4a-1de23b6cf03e"
+      },
+      "displayName": "Script: Experian Collect Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 486,
+      "y": 350
+    },
+    "eb347fcf-a745-4000-9e4a-8b1b25ffa89b": {
+      "connections": {
+        "LexisNexis": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "displayFARS_1": "962ec3cb-b311-4e32-9c0c-36e47b76688f",
+        "displayFARS_2": "b74cf829-9f0a-4df1-aff8-7b10a6a67905",
+        "displayFARS_2_Experian": "4534930a-4928-4e2e-9b4a-1de23b6cf03e",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "helpdeskFars": "c167d32f-f50e-4786-87db-69bb183e31de",
+        "success": "1a5e26d3-3e74-4a59-bd62-bc026efc3746"
+      },
+      "displayName": "Script: Get Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 215,
+      "y": 214
+    },
+    "f2f4e35a-2e45-4b79-bcf4-7de6042dab53": {
+      "connections": {
+        "true": "c167d32f-f50e-4786-87db-69bb183e31de"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 806,
+      "y": 463
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1126,
+      "y": 315
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2623,
+      "y": 272.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 272.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[\"RIDP\"]"
+  }
+}

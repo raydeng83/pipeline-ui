@@ -1,0 +1,71 @@
+{
+  "_id": "kyid_BackToApplicationRouter",
+  "_rev": "-1360957699",
+  "enabled": true,
+  "entryNodeId": "04d54668-32dc-4c6c-8f54-04df0b939f4f",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "04d54668-32dc-4c6c-8f54-04df0b939f4f": {
+      "connections": {
+        "en": "0da17a86-1782-4da3-8e4f-8880ec4e3a9c",
+        "es": "b0357afe-03c5-4f38-8b8e-589861a3ae6d"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 228,
+      "y": 234.5555477142334
+    },
+    "0da17a86-1782-4da3-8e4f-8880ec4e3a9c": {
+      "connections": {
+        "false": "91268d47-8185-4f3b-be3f-22493055afef",
+        "true": "91268d47-8185-4f3b-be3f-22493055afef"
+      },
+      "displayName": "Session Expire EN",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 492,
+      "y": 57.22221374511719
+    },
+    "91268d47-8185-4f3b-be3f-22493055afef": {
+      "connections": {},
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 846.6666679382324,
+      "y": 164.2222137451172
+    },
+    "b0357afe-03c5-4f38-8b8e-589861a3ae6d": {
+      "connections": {
+        "false": "91268d47-8185-4f3b-be3f-22493055afef",
+        "true": "91268d47-8185-4f3b-be3f-22493055afef"
+      },
+      "displayName": "Session Expire ES",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 490,
+      "y": 340.5555477142334
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1259,
+      "y": 74
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1270,
+      "y": 365
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

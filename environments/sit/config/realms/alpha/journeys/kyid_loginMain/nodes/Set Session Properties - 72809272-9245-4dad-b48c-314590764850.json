@@ -1,0 +1,19 @@
+{
+  "_id": "72809272-9245-4dad-b48c-314590764850",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "228543205",
+  "_type": {
+    "_id": "SetSessionPropertiesNode",
+    "collection": true,
+    "name": "Set Session Properties",
+    "version": "1.0"
+  },
+  "properties": {
+    "visitedUrl": "TRUE"
+  }
+}

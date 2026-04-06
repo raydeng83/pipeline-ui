@@ -1,0 +1,16 @@
+{
+  "_id": "a3b38bf7-ddc1-4f2e-ba26-395d741a608b",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=3721d1a2-ede0-4a1e-8356-36b797f27300,ou=user,ou=am-config",
+  "creationDate": 1735290630469,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287847127,
+  "name": "test.oidc.redirect",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/test.oidc.redirect.js"
+  }
+}

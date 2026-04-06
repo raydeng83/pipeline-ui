@@ -1,0 +1,16 @@
+{
+  "_id": "418d014d-7a6b-4af6-b5c9-1c9dc02e3758",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1773208588893,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1773208588893,
+  "name": "KYID.2B1.Journey.IDProofing.LexisNexis.Verification.Phone.Retry",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.LexisNexis.Verification.Phone.Retry.js"
+  }
+}

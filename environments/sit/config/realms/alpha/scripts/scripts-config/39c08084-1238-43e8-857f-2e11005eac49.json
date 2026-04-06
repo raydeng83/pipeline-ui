@@ -1,0 +1,16 @@
+{
+  "_id": "39c08084-1238-43e8-857f-2e11005eac49",
+  "context": "OAUTH2_ACCESS_TOKEN_MODIFICATION",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "Default alpha realm script for OAuth2 Access Token Modification",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287844294,
+  "name": "Alpha OAuth2 Access Token Modification Script",
+  "script": {
+    "file": "scripts-content/OAUTH2_ACCESS_TOKEN_MODIFICATION/Alpha OAuth2 Access Token Modification Script.js"
+  }
+}

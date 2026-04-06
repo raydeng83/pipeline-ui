@@ -1,0 +1,16 @@
+{
+  "_id": "fb417377-70d7-4ddc-b0a1-0958d88d9df3",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286700721,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=1ca864a6-a8a6-40c0-9f8a-0d5b003e4ac5,ou=user,ou=am-config",
+  "lastModifiedDate": 1774429468288,
+  "name": "KYID.2B1.Journey.IsValidSessionExist.MasterLogin",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IsValidSessionExist.MasterLogin.js"
+  }
+}

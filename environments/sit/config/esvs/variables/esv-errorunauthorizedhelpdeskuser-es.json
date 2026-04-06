@@ -1,0 +1,6 @@
+{
+  "_id": "esv-errorunauthorizedhelpdeskuser-es",
+  "description": "Error Message Unauthorized Help Desk User in Spanish",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERRORUNAUTHORIZEDHELPDESKUSER_ES}"
+}

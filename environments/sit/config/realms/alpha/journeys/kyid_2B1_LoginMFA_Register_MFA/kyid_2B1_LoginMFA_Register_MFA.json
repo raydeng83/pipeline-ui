@@ -1,0 +1,254 @@
+{
+  "_id": "kyid_2B1_LoginMFA_Register_MFA",
+  "_rev": "-878175544",
+  "enabled": true,
+  "entryNodeId": "ad4210a0-fbd4-4ba0-94cd-6fa6eb573ca0",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "14541a1c-387f-4538-878b-ea74291bbc63": {
+      "connections": {
+        "authenticator": "2f61010c-bd75-4374-adcf-08ee482682e5",
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "limit": "bfc332f2-dcf9-40eb-a221-20b831450a99",
+        "phone": "f16ba4a2-3cd3-4d16-9be6-0603d225da23",
+        "secondaryEmail": "f09b7572-fb74-462d-a41a-2ac01bb61631"
+      },
+      "displayName": "Script: DIsplay Phone/Soft Token",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 855,
+      "y": 424.3472137451172
+    },
+    "2f61010c-bd75-4374-adcf-08ee482682e5": {
+      "connections": {
+        "back": "14541a1c-387f-4538-878b-ea74291bbc63",
+        "forgeRock": "ade2d73e-7003-48ad-8463-0a383543bf38",
+        "googleTOTP": "5578ab6a-2bf1-4fb4-8b47-0867b7a803ff",
+        "limit": "cc85bec7-d517-46f0-b0a9-9117211effaa",
+        "microsoftTOTP": "5578ab6a-2bf1-4fb4-8b47-0867b7a803ff",
+        "symantec": "fbb672d1-ef0f-4808-97b5-c2aff0849bdf"
+      },
+      "displayName": "Script: Display Soft Tokens",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1254,
+      "y": 270.015625
+    },
+    "5578ab6a-2bf1-4fb4-8b47-0867b7a803ff": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "82d8e1d3-e2d6-47b6-8009-56cabb9108e9"
+      },
+      "displayName": "IJ: Register TOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1722,
+      "y": 384.015625
+    },
+    "6605baab-d8fa-4650-b5f6-3697babdced6": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Success": "9fbf1bc0-19cc-4484-a5cb-7c145136f5c9"
+      },
+      "displayName": "Script: Get User ID from Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 481,
+      "y": 296.3333282470703
+    },
+    "70483a7f-cd68-47f7-a33a-8f3a09a66a0a": {
+      "connections": {
+        "byPass": "14541a1c-387f-4538-878b-ea74291bbc63",
+        "hasSession": "6605baab-d8fa-4650-b5f6-3697babdced6",
+        "noSession": "8d8a563d-1e9b-477f-bdda-7840893282a9"
+      },
+      "displayName": "Script: Is Session Exist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 490,
+      "y": 471.3333282470703
+    },
+    "82d8e1d3-e2d6-47b6-8009-56cabb9108e9": {
+      "connections": {
+        "FRback": "ade2d73e-7003-48ad-8463-0a383543bf38",
+        "altMailBack": "14541a1c-387f-4538-878b-ea74291bbc63",
+        "back": "2f61010c-bd75-4374-adcf-08ee482682e5",
+        "next": "b9cf6285-96c1-40f9-a82c-daf90e12f234",
+        "phoneBack": "14541a1c-387f-4538-878b-ea74291bbc63"
+      },
+      "displayName": "Script: Navigate",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1994,
+      "y": 238.3333282470703
+    },
+    "8d8a563d-1e9b-477f-bdda-7840893282a9": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "No Session",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 555,
+      "y": 713.3333282470703
+    },
+    "913ac9db-f627-458c-8324-102d3c4d85f5": {
+      "connections": {
+        "True": "14541a1c-387f-4538-878b-ea74291bbc63"
+      },
+      "displayName": "Script: Get Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 748,
+      "y": 58.33332824707031
+    },
+    "9fbf1bc0-19cc-4484-a5cb-7c145136f5c9": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "14541a1c-387f-4538-878b-ea74291bbc63"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 450,
+      "y": 89.33332824707031
+    },
+    "ad4210a0-fbd4-4ba0-94cd-6fa6eb573ca0": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70483a7f-cd68-47f7-a33a-8f3a09a66a0a"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 149,
+      "y": 478.3472137451172
+    },
+    "ade2d73e-7003-48ad-8463-0a383543bf38": {
+      "connections": {
+        "FRPUSH": "d20fd45f-923b-48a0-a560-d3e11c063831",
+        "FRTOTP": "5578ab6a-2bf1-4fb4-8b47-0867b7a803ff",
+        "back": "2f61010c-bd75-4374-adcf-08ee482682e5"
+      },
+      "displayName": "Script: DIsplay FR Soft Token",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1251,
+      "y": 75.015625
+    },
+    "b9cf6285-96c1-40f9-a82c-daf90e12f234": {
+      "connections": {
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2315.3333435058594,
+      "y": 272.3333282470703
+    },
+    "bf08ba47-bd31-4bc2-b8e1-d748a0b0cfcb": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1589,
+      "y": 254.015625
+    },
+    "bfc332f2-dcf9-40eb-a221-20b831450a99": {
+      "connections": {
+        "alternateEmail": "f09b7572-fb74-462d-a41a-2ac01bb61631",
+        "auth": "2f61010c-bd75-4374-adcf-08ee482682e5",
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "divert": "cc85bec7-d517-46f0-b0a9-9117211effaa",
+        "forgeRock": "ade2d73e-7003-48ad-8463-0a383543bf38",
+        "googleTOTP": "5578ab6a-2bf1-4fb4-8b47-0867b7a803ff",
+        "microsoftTOTP": "5578ab6a-2bf1-4fb4-8b47-0867b7a803ff",
+        "phone": "f16ba4a2-3cd3-4d16-9be6-0603d225da23",
+        "symantec": "cc85bec7-d517-46f0-b0a9-9117211effaa"
+      },
+      "displayName": "Script: Max Limit",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1066.6666641235352,
+      "y": 704.3333282470703
+    },
+    "cc85bec7-d517-46f0-b0a9-9117211effaa": {
+      "connections": {
+        "true": "bfc332f2-dcf9-40eb-a221-20b831450a99"
+      },
+      "displayName": "Script: Limit Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1481.6666641235352,
+      "y": 774.3333282470703
+    },
+    "d20fd45f-923b-48a0-a560-d3e11c063831": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "82d8e1d3-e2d6-47b6-8009-56cabb9108e9"
+      },
+      "displayName": "IJ: Register PUSH",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1693,
+      "y": 126.015625
+    },
+    "f09b7572-fb74-462d-a41a-2ac01bb61631": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "82d8e1d3-e2d6-47b6-8009-56cabb9108e9"
+      },
+      "displayName": "IJ: Register Alternate Email",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1675.3333129882812,
+      "y": 554.680549621582
+    },
+    "f16ba4a2-3cd3-4d16-9be6-0603d225da23": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "82d8e1d3-e2d6-47b6-8009-56cabb9108e9"
+      },
+      "displayName": "IJ: Phone Registration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 891,
+      "y": 179.3472137451172
+    },
+    "fbb672d1-ef0f-4808-97b5-c2aff0849bdf": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "82d8e1d3-e2d6-47b6-8009-56cabb9108e9"
+      },
+      "displayName": "IJ: Symantec Register",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1238,
+      "y": 546.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2969,
+      "y": 98
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2258,
+      "y": 662
+    },
+    "startNode": {
+      "x": 35,
+      "y": 324
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"kyid_2B1\"]"
+  }
+}

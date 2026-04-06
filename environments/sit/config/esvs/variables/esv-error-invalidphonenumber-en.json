@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-invalidphonenumber-en",
+  "description": "Error Message Invalid Phone Number in English",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_INVALIDPHONENUMBER_EN}"
+}

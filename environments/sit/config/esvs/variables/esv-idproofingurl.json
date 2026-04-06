@@ -1,0 +1,6 @@
+{
+  "_id": "esv-idproofingurl",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_IDPROOFINGURL}"
+}

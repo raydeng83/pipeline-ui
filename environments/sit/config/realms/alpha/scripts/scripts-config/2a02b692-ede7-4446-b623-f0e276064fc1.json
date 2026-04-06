@@ -1,0 +1,16 @@
+{
+  "_id": "2a02b692-ede7-4446-b623-f0e276064fc1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286692676,
+  "default": false,
+  "description": "This script checks if the Jit is required or not based on nodeState value",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1769658320868,
+  "name": "KYID.2B1.Journey.isJitRequiredFromNodeState",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.isJitRequiredFromNodeState.js"
+  }
+}

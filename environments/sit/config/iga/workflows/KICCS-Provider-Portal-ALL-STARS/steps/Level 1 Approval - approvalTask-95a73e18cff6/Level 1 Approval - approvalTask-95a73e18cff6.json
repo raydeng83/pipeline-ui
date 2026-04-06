@@ -1,0 +1,96 @@
+{
+  "approvalMode": "any",
+  "approvalTask": {
+    "actors": [
+      {
+        "id": "managed/user/0c1f0c9a-94e1-4ecd-a617-0f0646795d04",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/56ee9a18-3681-4bae-9e47-a75b8a21858a",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/eadd3699-bdda-4890-838d-908060303b09",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/fb3c8dd5-4553-47b6-8b2e-a8b27191fbdb",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/5cd8c26a-7472-44a6-8c49-5b3b43f81cf7",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      }
+    ],
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "kyidRequestAssigned"
+      },
+      "expiration": {
+        "action": "reject",
+        "actors": [],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(7*86400000))).toISOString()"
+        },
+        "frequency": 7,
+        "notification": "kyidRequestAssignedExpiration"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "kyidRequestAssignedReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "APPROVE",
+        "step": "scriptTask-e1fcba2a3455"
+      },
+      {
+        "condition": null,
+        "outcome": "REJECT",
+        "step": "scriptTask-a693f3a33d93"
+      }
+    ]
+  },
+  "displayName": "Level 1 Approval",
+  "name": "approvalTask-95a73e18cff6",
+  "type": "approvalTask"
+}

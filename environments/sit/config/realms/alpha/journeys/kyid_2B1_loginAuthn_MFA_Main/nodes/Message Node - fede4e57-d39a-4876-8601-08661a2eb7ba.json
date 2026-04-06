@@ -1,0 +1,25 @@
+{
+  "_id": "fede4e57-d39a-4876-8601-08661a2eb7ba",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-885320986",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Primary Secondary Email Selected"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

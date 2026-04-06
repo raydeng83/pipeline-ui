@@ -1,0 +1,31 @@
+{
+  "_id": "84652983-bd1a-45f2-8182-7c8a0b075835",
+  "_outcomes": [
+    {
+      "displayName": "patchInKOG",
+      "id": "patchInKOG"
+    },
+    {
+      "displayName": "patchFailed",
+      "id": "patchFailed"
+    }
+  ],
+  "_rev": "-1659856023",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "patchInKOG",
+    "patchFailed"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "8e10009c-0fdb-495b-bc10-35f8eba02738"
+}

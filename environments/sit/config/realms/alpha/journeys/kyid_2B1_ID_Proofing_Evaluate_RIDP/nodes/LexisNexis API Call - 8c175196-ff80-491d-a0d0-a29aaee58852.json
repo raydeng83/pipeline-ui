@@ -1,0 +1,61 @@
+{
+  "_id": "8c175196-ff80-491d-a0d0-a29aaee58852",
+  "_outcomes": [
+    {
+      "displayName": "noLexId",
+      "id": "noLexId"
+    },
+    {
+      "displayName": "multipleLexId",
+      "id": "multipleLexId"
+    },
+    {
+      "displayName": "singleLexIdMachFound",
+      "id": "singleLexIdMachFound"
+    },
+    {
+      "displayName": "singleLexIdNoMatch",
+      "id": "singleLexIdNoMatch"
+    },
+    {
+      "displayName": "KBA",
+      "id": "KBA"
+    },
+    {
+      "displayName": "unableToVerify",
+      "id": "unableToVerify"
+    },
+    {
+      "displayName": "appEnrollUnableToVerify",
+      "id": "appEnrollUnableToVerify"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-449113005",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "noLexId",
+    "multipleLexId",
+    "singleLexIdMachFound",
+    "singleLexIdNoMatch",
+    "KBA",
+    "unableToVerify",
+    "appEnrollUnableToVerify",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "863f475f-62d5-45e7-8151-02ff85ece571"
+}

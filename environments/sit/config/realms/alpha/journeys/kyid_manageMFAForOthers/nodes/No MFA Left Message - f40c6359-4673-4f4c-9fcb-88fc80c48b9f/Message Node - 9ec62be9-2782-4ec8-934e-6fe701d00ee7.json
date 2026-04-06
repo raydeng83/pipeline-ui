@@ -1,0 +1,29 @@
+{
+  "_id": "9ec62be9-2782-4ec8-934e-6fe701d00ee7",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-344443015",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "No security methods available for removal",
+    "es": "No hay métodos de seguridad disponibles para eliminar."
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Continue",
+    "es": "Continuar"
+  }
+}

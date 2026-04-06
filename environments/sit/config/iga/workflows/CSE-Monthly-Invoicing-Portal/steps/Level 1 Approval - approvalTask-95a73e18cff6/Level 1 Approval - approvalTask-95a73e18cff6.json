@@ -1,0 +1,66 @@
+{
+  "approvalMode": "any",
+  "approvalTask": {
+    "actors": [
+      {
+        "id": "managed/user/9f1a2edd-6bcc-43c1-9bd6-2d8fdaf9b7bd",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      },
+      {
+        "id": "managed/user/8f7b25cc-f27e-46fa-91f3-5341f35a0746",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      }
+    ],
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "kyidRequestAssigned"
+      },
+      "expiration": {
+        "action": "reject",
+        "actors": [],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(7*86400000))).toISOString()"
+        },
+        "frequency": 7,
+        "notification": "kyidRequestAssignedExpiration"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "kyidRequestAssignedReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "APPROVE",
+        "step": "scriptTask-e1fcba2a3455"
+      },
+      {
+        "condition": null,
+        "outcome": "REJECT",
+        "step": "scriptTask-a693f3a33d93"
+      }
+    ]
+  },
+  "displayName": "Level 1 Approval",
+  "name": "approvalTask-95a73e18cff6",
+  "type": "approvalTask"
+}

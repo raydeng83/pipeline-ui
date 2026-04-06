@@ -1,0 +1,66 @@
+{
+  "_id": "bfc332f2-dcf9-40eb-a221-20b831450a99",
+  "_outcomes": [
+    {
+      "displayName": "phone",
+      "id": "phone"
+    },
+    {
+      "displayName": "auth",
+      "id": "auth"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "forgeRock",
+      "id": "forgeRock"
+    },
+    {
+      "displayName": "microsoftTOTP",
+      "id": "microsoftTOTP"
+    },
+    {
+      "displayName": "googleTOTP",
+      "id": "googleTOTP"
+    },
+    {
+      "displayName": "divert",
+      "id": "divert"
+    },
+    {
+      "displayName": "alternateEmail",
+      "id": "alternateEmail"
+    }
+  ],
+  "_rev": "1667442898",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "phone",
+    "auth",
+    "back",
+    "symantec",
+    "forgeRock",
+    "microsoftTOTP",
+    "googleTOTP",
+    "divert",
+    "alternateEmail"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "343b6bd3-fc5b-42bb-9e2f-afa33f2fa721"
+}

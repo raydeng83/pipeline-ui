@@ -1,0 +1,56 @@
+{
+  "_id": "98f0aec7-ac6a-493d-bac3-e19c9cf00380",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-927037450",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "email",
+    "sms",
+    "otp",
+    "swk",
+    "voice",
+    "symantec",
+    "Default"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "9f1e498d-51c1-4143-bd80-1cfbae7879d7"
+}

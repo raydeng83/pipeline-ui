@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kog-help-forgot-pwd-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KOG_HELP_FORGOT_PWD_URL}"
+}

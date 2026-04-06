@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-duplicatesymanteccredid-en",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_DUPLICATESYMANTECCREDID_EN}"
+}

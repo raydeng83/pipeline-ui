@@ -1,0 +1,16 @@
+{
+  "_id": "9430f180-1d63-4230-8fd3-f1d1d69ef821",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287845403,
+  "name": "KYID.Journey.JWTvalidationFailErrorMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.JWTvalidationFailErrorMsg.js"
+  }
+}

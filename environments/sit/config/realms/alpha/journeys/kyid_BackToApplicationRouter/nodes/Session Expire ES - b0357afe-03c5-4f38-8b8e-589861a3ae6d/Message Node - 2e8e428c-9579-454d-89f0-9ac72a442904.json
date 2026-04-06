@@ -1,0 +1,27 @@
+{
+  "_id": "2e8e428c-9579-454d-89f0-9ac72a442904",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-806141006",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "es": "&{esv.session.expired.message.es}"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "es": "Volver para iniciar sesión"
+  }
+}

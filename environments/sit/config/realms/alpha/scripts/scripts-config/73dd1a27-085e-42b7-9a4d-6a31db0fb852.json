@@ -1,0 +1,16 @@
+{
+  "_id": "73dd1a27-085e-42b7-9a4d-6a31db0fb852",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "To Display InValid Account Error Message",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287831118,
+  "name": "KYID.Journey.JITInValidAccountErrorMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.JITInValidAccountErrorMsg.js"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/prerequisite",
+  "description": "This endpoint is used to return the requested prerequisite page for enrollment and to process the submitted page data for validation and storage (verified data)",
+  "file": "prerequisite.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\",\\n\\t  \\\"body\\\": {\\n\\t  \\\"payload\\\":{\\n\\t\\t\\\"enrollmentRequestId\\\":\\\"423de56c-00db-40d5-ab0a-8e1755cb06f3\\\",\\n\\t\\t\\\"userPrereqId\\\":\\\"b2ad745d-cded-4033-8044-32bf2f196f8f\\\", \\n\\t\\t\\\"preReqId\\\":\\\"fae8b0b8-fd12-4c7a-99d1-e60613448642\\\",\\n\\t\\t\\\"preReqTypeId\\\":\\\"5ff7ee16-29ca-45a8-a73f-4df5208e5a2e\\\",\\n\\t\\t\\\"pageNumber\\\":\\\"1\\\",\\n\\t\\t\\\"pageElements\\\":[\\n\\t\\t\\t{\\n\\t\\t\\t\\\"name\\\":\\\"MC Expiration Date\\\",\\n\\t\\t\\t\\\"type\\\":\\\"date\\\",\\n\\t\\t\\t\\\"value\\\":[\\\"31/09/2025\\\"]\\n\\t\\t\\t},\\n\\t\\t\\t{\\n\\t\\t\\t\\\"name\\\":\\\"MC License No\\\",\\n\\t\\t\\t\\\"type\\\":\\\"text\\\",\\n\\t\\t\\t\\\"value\\\":[\\\"1234567\\\"]\\n\\t\\t\\t},\\n\\t\\t\\t{\\n\\t\\t\\t\\\"name\\\":\\\"MC Text Signature\\\",\\n\\t\\t\\t\\\"type\\\":\\\"text\\\",\\n\\t\\t\\t\\\"value\\\":[\\\"John A. Doe, M.D.\\\"]\\n\\t\\t\\t},\\n\\t\\t\\t{\\n\\t\\t\\t\\\"name\\\":\\\"MC Title\\\",\\n\\t\\t\\t\\\"type\\\":\\\"radio\\\",\\n\\t\\t\\t\\\"value\\\":[\\\"practioner\\\"]\\n\\t\\t\\t}\\n\\t\\t]\\n\\t  },\\n\\t\\t\\\"action\\\":1\\n\\t  }\\n\\t}\\n  }    \\n\\t\"",
+  "type": "text/javascript"
+}

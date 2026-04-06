@@ -1,0 +1,25 @@
+{
+  "_id": "42c4ba5e-b6a3-48fd-8b5b-253591b23cee",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1160595223",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "{\"pageHeader\":\"Redirect_to_logout\"}"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

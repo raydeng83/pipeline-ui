@@ -1,0 +1,131 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_faq_mapping",
+  "onCreate": {
+    "file": "alpha_kyid_faq_mapping.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_faq_mapping.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onValidate": {
+    "file": "alpha_kyid_faq_mapping.onValidate.js",
+    "globals": {
+      "_humanReadableEventName_": "FAQ Mapping Object List (OnValidate)"
+    },
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "process",
+      "pageHeader",
+      "faqTopics",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "CreatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "faqTopics": {
+        "items": {
+          "type": "string"
+        },
+        "searchable": false,
+        "title": "faqTopics",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "pageHeader": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "pageHeader",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "process": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "process",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "UpdatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "FAQ Mapping Object List",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

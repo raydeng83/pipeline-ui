@@ -1,0 +1,56 @@
+{
+  "_id": "8b3b6733-13a6-42fa-af79-cf12ac547b3d",
+  "_outcomes": [
+    {
+      "displayName": "SMS",
+      "id": "SMS"
+    },
+    {
+      "displayName": "Voice",
+      "id": "Voice"
+    },
+    {
+      "displayName": "anotherMethod",
+      "id": "anotherMethod"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Duplicate",
+      "id": "Duplicate"
+    },
+    {
+      "displayName": "InvalidPhoneNumber",
+      "id": "InvalidPhoneNumber"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    }
+  ],
+  "_rev": "-673986904",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "SMS",
+    "Voice",
+    "anotherMethod",
+    "false",
+    "Duplicate",
+    "InvalidPhoneNumber",
+    "BlankOTP"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "fc83a2bd-2162-4e31-9998-4bf782e1f75c"
+}

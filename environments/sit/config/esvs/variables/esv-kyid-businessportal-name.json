@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-businessportal-name",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_BUSINESSPORTAL_NAME}"
+}

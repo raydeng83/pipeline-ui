@@ -1,0 +1,16 @@
+{
+  "_id": "055c5fea-4773-4129-92a7-70aebb1e4f4e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3721d1a2-ede0-4a1e-8356-36b797f27300,ou=user,ou=am-config",
+  "creationDate": 1732703368489,
+  "default": false,
+  "description": "This script is used to set cookies in browser for login main journey.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287848242,
+  "name": "KYID.Journey.setLoginUrlCookies.Updated",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.setLoginUrlCookies.Updated.js"
+  }
+}

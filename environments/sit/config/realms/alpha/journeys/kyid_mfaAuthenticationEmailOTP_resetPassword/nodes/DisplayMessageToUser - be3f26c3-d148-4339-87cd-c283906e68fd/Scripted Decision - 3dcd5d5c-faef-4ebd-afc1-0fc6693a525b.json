@@ -1,0 +1,31 @@
+{
+  "_id": "3dcd5d5c-faef-4ebd-afc1-0fc6693a525b",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "Another Factor",
+      "id": "Another Factor"
+    }
+  ],
+  "_rev": "136617566",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "Another Factor"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "11a09a7e-c32b-4d98-9f94-dcb7b63f3cae"
+}

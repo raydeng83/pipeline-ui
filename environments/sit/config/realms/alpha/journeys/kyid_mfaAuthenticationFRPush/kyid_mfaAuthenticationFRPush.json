@@ -1,0 +1,152 @@
+{
+  "_id": "kyid_mfaAuthenticationFRPush",
+  "_rev": "-2113306883",
+  "enabled": true,
+  "entryNodeId": "4d47a2ea-b022-4388-a356-ffb435c0b75e",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "179131d9-e905-4921-a5f4-742a29d06f9d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "811ffd8b-22bb-4bfb-9d27-cdd71346ccbf"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 307.7875061035156,
+      "y": 572.2125015258789
+    },
+    "1dcad77e-5235-44eb-96d4-e93690652e82": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Choose Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1508,
+      "y": 165
+    },
+    "4d47a2ea-b022-4388-a356-ffb435c0b75e": {
+      "connections": {
+        "true": "179131d9-e905-4921-a5f4-742a29d06f9d"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 55,
+      "y": 679.3333282470703
+    },
+    "659aa884-d0c3-4f61-af92-5ef88ab631e5": {
+      "connections": {
+        "DONE": "b1be2428-8deb-47b7-8587-19a2de1b34d5"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 623,
+      "y": 580.3333282470703
+    },
+    "811ffd8b-22bb-4bfb-9d27-cdd71346ccbf": {
+      "connections": {
+        "NOT_REGISTERED": "bc99f192-cec9-4d4c-b7fe-c1e006b54eea",
+        "SENT": "b1be2428-8deb-47b7-8587-19a2de1b34d5"
+      },
+      "displayName": "Push Sender",
+      "nodeType": "PushAuthenticationSenderNode",
+      "version": "1.0",
+      "x": 308,
+      "y": 103
+    },
+    "b1be2428-8deb-47b7-8587-19a2de1b34d5": {
+      "connections": {
+        "EXPIRED": "f1864df0-0238-4f52-bbf1-ac41d2289e82",
+        "FALSE": "f1864df0-0238-4f52-bbf1-ac41d2289e82",
+        "TRUE": "f7e75c21-bc46-4e95-96e6-51fe70fdd261",
+        "WAITING": "659aa884-d0c3-4f61-af92-5ef88ab631e5"
+      },
+      "displayName": "Push Result Verifier Node",
+      "nodeType": "PushResultVerifierNode",
+      "version": "1.0",
+      "x": 858,
+      "y": 70
+    },
+    "bc99f192-cec9-4d4c-b7fe-c1e006b54eea": {
+      "connections": {
+        "failureOutcome": "f1864df0-0238-4f52-bbf1-ac41d2289e82",
+        "successOutcome": "811ffd8b-22bb-4bfb-9d27-cdd71346ccbf",
+        "timeoutOutcome": "f1864df0-0238-4f52-bbf1-ac41d2289e82"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 570,
+      "y": 216.3333282470703
+    },
+    "ccf7cb77-0d72-406d-91bd-f2b8b926becf": {
+      "connections": {
+        "DONE": "b1be2428-8deb-47b7-8587-19a2de1b34d5",
+        "EXITED": "e3c7fef7-0306-484a-a02e-c606c9238cd3"
+      },
+      "displayName": "Push Wait Node",
+      "nodeType": "PushWaitNode",
+      "version": "1.0",
+      "x": 894,
+      "y": 481.3333333333333
+    },
+    "e3c7fef7-0306-484a-a02e-c606c9238cd3": {
+      "connections": {
+        "false": "ccf7cb77-0d72-406d-91bd-f2b8b926becf",
+        "true": "ccf7cb77-0d72-406d-91bd-f2b8b926becf"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1157,
+      "y": 595.015625
+    },
+    "f1864df0-0238-4f52-bbf1-ac41d2289e82": {
+      "connections": {
+        "false": "1dcad77e-5235-44eb-96d4-e93690652e82",
+        "true": "811ffd8b-22bb-4bfb-9d27-cdd71346ccbf"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1159,
+      "y": 282.6666666666667
+    },
+    "f7e75c21-bc46-4e95-96e6-51fe70fdd261": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Push Noti",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1169,
+      "y": 139.33333333333334
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1713,
+      "y": 331
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1455,
+      "y": 317
+    },
+    "startNode": {
+      "x": 70,
+      "y": 582
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

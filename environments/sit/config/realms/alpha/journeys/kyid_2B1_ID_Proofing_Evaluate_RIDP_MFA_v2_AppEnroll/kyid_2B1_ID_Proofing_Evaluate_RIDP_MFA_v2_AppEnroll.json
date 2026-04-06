@@ -1,0 +1,232 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v2_AppEnroll",
+  "_rev": "560211370",
+  "description": "Inner Journey for RIDP AppEnroll",
+  "enabled": true,
+  "entryNodeId": "405839a3-59cc-4816-8b28-6b7f65f315e1",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "02a55fb9-1271-49ca-93e0-83bac1a7741a": {
+      "connections": {
+        "associatedAccounts": "40c5387d-87cf-48a5-8898-79aeed41e095",
+        "highRiskTransaction": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "highRiskTransactionBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "inActiveAccountFounD": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "inActiveAccountFoundBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "jitProvisioning": "40c5387d-87cf-48a5-8898-79aeed41e095",
+        "noMatchPartialMatch": "40c5387d-87cf-48a5-8898-79aeed41e095",
+        "patchPreReq": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "terminatedUnableToVerify": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "terminatedUnableToVerifyBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "unableToVerify": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "unableToVerifyBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f"
+      },
+      "displayName": "Script: MCI Search AppEnroll",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 779,
+      "y": 274.5
+    },
+    "05c7abc1-6d04-46b8-ad62-92e7cb21a094": {
+      "connections": {
+        "errorMessage": "ed862ec0-c304-4aec-af0a-262ac233a9cf",
+        "true": "ed862ec0-c304-4aec-af0a-262ac233a9cf"
+      },
+      "displayName": "Script: Delete MCI Record",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 834.25,
+      "y": 106.0625
+    },
+    "1b207e23-9643-44a9-8276-a5cdda30a494": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Appenroll Completed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3370.75,
+      "y": 365.0625
+    },
+    "405839a3-59cc-4816-8b28-6b7f65f315e1": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "af4547d7-2672-4480-9a18-b19c76c0dd3b"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 298
+    },
+    "40c5387d-87cf-48a5-8898-79aeed41e095": {
+      "connections": {
+        "continue": "8de70907-dac7-42b4-9b33-f024bf814e2a",
+        "inputNotMatchWithVerifiedIdentity": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "logout": "42c4ba5e-b6a3-48fd-8b5b-253591b23cee",
+        "patchPreReq": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "terminatedLowRisk": "f6dd1ffe-5689-4252-a751-bd790fb67c2c"
+      },
+      "displayName": "Script: Associated Accounts App Enroll",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1984,
+      "y": 591
+    },
+    "42c4ba5e-b6a3-48fd-8b5b-253591b23cee": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Logout",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 2281,
+      "y": 462
+    },
+    "534cac38-2e74-473b-bc7d-67e506c80ba2": {
+      "connections": {
+        "jitProvisioning": "c18d2088-daf6-4784-9bae-bc207eccfe48"
+      },
+      "displayName": "Script: Pre JIT Provisioning ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1070,
+      "y": 373.33333333333326
+    },
+    "84652983-bd1a-45f2-8182-7c8a0b075835": {
+      "connections": {
+        "patchFailed": "c1b0b658-d61d-449f-b946-946e636062e4",
+        "patchInKOG": "c1b0b658-d61d-449f-b946-946e636062e4"
+      },
+      "displayName": "Script: Patch User Identity",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2555,
+      "y": 169.015625
+    },
+    "8de70907-dac7-42b4-9b33-f024bf814e2a": {
+      "connections": {
+        "true": "e9a26710-ef05-4750-b6bf-a940e8284571"
+      },
+      "displayName": "Script: MCI SYNC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3093,
+      "y": 159.3333282470703
+    },
+    "af4547d7-2672-4480-9a18-b19c76c0dd3b": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "highRisk": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "highRiskBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "highRiskSoftRemove": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "highRiskSoftRemoveBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "kbaFailed": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "kbaFailedBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "lexMatch": "02a55fb9-1271-49ca-93e0-83bac1a7741a",
+        "lexMisMatch": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "lexMisMatchBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "mciSearch": "02a55fb9-1271-49ca-93e0-83bac1a7741a",
+        "notVerified": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "notVerifiedBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f",
+        "terminated": "f6dd1ffe-5689-4252-a751-bd790fb67c2c",
+        "terminatedBSP": "e699f600-9b16-49f1-b7c3-4e6cc367349f"
+      },
+      "displayName": "Script: AppEnroll",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 504,
+      "y": 259.5
+    },
+    "c18d2088-daf6-4784-9bae-bc207eccfe48": {
+      "connections": {
+        "allJITCompleted": "40c5387d-87cf-48a5-8898-79aeed41e095",
+        "errorState": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "proceedJITProvisioning": "534cac38-2e74-473b-bc7d-67e506c80ba2"
+      },
+      "displayName": "Script: Post JIT Provisioning ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1622,
+      "y": 343
+    },
+    "c1b0b658-d61d-449f-b946-946e636062e4": {
+      "connections": {
+        "Error": "8de70907-dac7-42b4-9b33-f024bf814e2a",
+        "Failed": "8de70907-dac7-42b4-9b33-f024bf814e2a",
+        "Successful": "8de70907-dac7-42b4-9b33-f024bf814e2a"
+      },
+      "displayName": "Script: Patch KOG",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2845,
+      "y": 121.015625
+    },
+    "e699f600-9b16-49f1-b7c3-4e6cc367349f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Unable To Verify",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1497,
+      "y": 849.0625
+    },
+    "e9a26710-ef05-4750-b6bf-a940e8284571": {
+      "connections": {
+        "failure": "1b207e23-9643-44a9-8276-a5cdda30a494",
+        "success": "1b207e23-9643-44a9-8276-a5cdda30a494"
+      },
+      "displayName": "Send Mail : AppEnroll",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3326,
+      "y": 119.33332824707031
+    },
+    "ed862ec0-c304-4aec-af0a-262ac233a9cf": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: High risk",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1200,
+      "y": 118.16666666666669
+    },
+    "f6dd1ffe-5689-4252-a751-bd790fb67c2c": {
+      "connections": {
+        "FARS": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "appEnrollMessage": "84652983-bd1a-45f2-8182-7c8a0b075835",
+        "displayFARS2": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: PatchUserPrereqAppEnroll",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2272,
+      "y": 209
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2862,
+      "y": 287.6666666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3474,
+      "y": 674.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 325.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

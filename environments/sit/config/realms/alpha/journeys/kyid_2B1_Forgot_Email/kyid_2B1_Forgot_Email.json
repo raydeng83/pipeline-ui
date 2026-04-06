@@ -1,0 +1,282 @@
+{
+  "_id": "kyid_2B1_Forgot_Email",
+  "_rev": "232855940",
+  "enabled": true,
+  "entryNodeId": "7a52732f-bb37-4d6e-8ed0-8d5ca1eb96c2",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "037d2a62-440d-4090-ae65-ecd9dad5ff3b": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "9a4ce44c-827d-4b0c-8529-7b598d215ecb"
+      },
+      "displayName": "Display Helpdesk Details",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1809,
+      "y": 415
+    },
+    "0c3b8783-138c-450f-85be-0a1ff8099be7": {
+      "connections": {
+        "email": "c6d9d7af-7bca-4a4a-8417-90a4450d11a8",
+        "error": "a02924f3-0f17-46d1-bf1f-b74a79d682c4",
+        "helpdesk": "037d2a62-440d-4090-ae65-ecd9dad5ff3b",
+        "identity_proofing": "5731e198-94bc-4735-a320-74bfb108cc52",
+        "phone": "8d781281-31d6-4bc2-a798-7344a76a5672"
+      },
+      "displayName": "CheckSelectedMFAOption",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1489,
+      "y": 348
+    },
+    "0e2ed501-fffa-41a1-93a2-f3dc6151e81a": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "0c3b8783-138c-450f-85be-0a1ff8099be7"
+      },
+      "displayName": "Verify User Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 942,
+      "y": 167
+    },
+    "30933ea9-4bb8-4dea-a4a8-70f8ad0c8270": {
+      "connections": {
+        "hasSession": "a02924f3-0f17-46d1-bf1f-b74a79d682c4",
+        "noSession": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:ValidSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 70,
+      "y": 145
+    },
+    "429302e8-a203-491f-8982-e81aa3ddccf3": {
+      "connections": {
+        "True": "9a50d4e9-7725-46d8-9ec2-c5c8850c78ef"
+      },
+      "displayName": "DisplayNoPrimaryEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3292,
+      "y": 252
+    },
+    "5269fb9b-0e85-49ba-91dc-48f3b8fb7f20": {
+      "connections": {
+        "false": "429302e8-a203-491f-8982-e81aa3ddccf3",
+        "true": "ca477a11-a17f-40f3-8155-a40921d59f21"
+      },
+      "displayName": "CheckPrimaryEmailExist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2980,
+      "y": 387.5
+    },
+    "5459ef97-b827-47c1-a4aa-beec96ebff76": {
+      "connections": {
+        "anotherMethod": "a02924f3-0f17-46d1-bf1f-b74a79d682c4",
+        "back": "0c3b8783-138c-450f-85be-0a1ff8099be7",
+        "next": "ca477a11-a17f-40f3-8155-a40921d59f21"
+      },
+      "displayName": "Script: Back Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2210,
+      "y": 228.16666666666669
+    },
+    "5731e198-94bc-4735-a320-74bfb108cc52": {
+      "connections": {
+        "v1": "94316874-1763-45f5-9f5a-d77ac941b203",
+        "v2": "78a600f8-12d2-486c-80b9-8b3c0d6b0793"
+      },
+      "displayName": "Script: RIDP Version ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1805.75,
+      "y": 597.0625
+    },
+    "6d2ea8dc-ff84-4695-b62f-1c7ac61f456c": {
+      "connections": {
+        "continue": "ca477a11-a17f-40f3-8155-a40921d59f21",
+        "differentMethod": "7a52732f-bb37-4d6e-8ed0-8d5ca1eb96c2",
+        "retry": "5731e198-94bc-4735-a320-74bfb108cc52"
+      },
+      "displayName": "Script: Retry Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2424.25,
+      "y": 599.0625
+    },
+    "78a600f8-12d2-486c-80b9-8b3c0d6b0793": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "6d2ea8dc-ff84-4695-b62f-1c7ac61f456c"
+      },
+      "displayName": "IJ: RIDP V2",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2130.25,
+      "y": 674.0625
+    },
+    "7a52732f-bb37-4d6e-8ed0-8d5ca1eb96c2": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a02924f3-0f17-46d1-bf1f-b74a79d682c4"
+      },
+      "displayName": "Journey Check Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 346,
+      "y": 387.5
+    },
+    "7b63cb7d-81d7-4767-8af0-0c3e47c3573d": {
+      "connections": {
+        "false": "5269fb9b-0e85-49ba-91dc-48f3b8fb7f20",
+        "true": "a02924f3-0f17-46d1-bf1f-b74a79d682c4"
+      },
+      "displayName": "Redirection",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2721,
+      "y": 387.5
+    },
+    "8d781281-31d6-4bc2-a798-7344a76a5672": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "93427ac0-c96e-416d-8215-c51a33915581"
+      },
+      "displayName": "Phone Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1818,
+      "y": 227
+    },
+    "8f76375a-0995-456b-a0f0-a909da8aac06": {
+      "connections": {
+        "false": "f83c2916-01b5-45db-b72d-5982a55ba79f",
+        "true": "0c3b8783-138c-450f-85be-0a1ff8099be7"
+      },
+      "displayName": "Verify Profile",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 942,
+      "y": 328.5
+    },
+    "93427ac0-c96e-416d-8215-c51a33915581": {
+      "connections": {
+        "true": "7b63cb7d-81d7-4767-8af0-0c3e47c3573d"
+      },
+      "displayName": "FetchPrimaryEmailViaPhone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2401,
+      "y": 414
+    },
+    "94316874-1763-45f5-9f5a-d77ac941b203": {
+      "connections": {
+        "true": "5459ef97-b827-47c1-a4aa-beec96ebff76"
+      },
+      "displayName": "IJ: RIDP V1",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2128,
+      "y": 493
+    },
+    "9a4ce44c-827d-4b0c-8529-7b598d215ecb": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3859,
+      "y": 387.5
+    },
+    "9a50d4e9-7725-46d8-9ec2-c5c8850c78ef": {
+      "connections": {
+        "false": "9a4ce44c-827d-4b0c-8529-7b598d215ecb",
+        "true": "a02924f3-0f17-46d1-bf1f-b74a79d682c4"
+      },
+      "displayName": "Redirection",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3600,
+      "y": 387.5
+    },
+    "a02924f3-0f17-46d1-bf1f-b74a79d682c4": {
+      "connections": {
+        "False": "0e2ed501-fffa-41a1-93a2-f3dc6151e81a",
+        "True": "8f76375a-0995-456b-a0f0-a909da8aac06"
+      },
+      "displayName": "Check if Captcha Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 622,
+      "y": 387.5
+    },
+    "c6d9d7af-7bca-4a4a-8417-90a4450d11a8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "9a50d4e9-7725-46d8-9ec2-c5c8850c78ef"
+      },
+      "displayName": "Alternate_Email_Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1809,
+      "y": 71
+    },
+    "ca477a11-a17f-40f3-8155-a40921d59f21": {
+      "connections": {
+        "True": "9a50d4e9-7725-46d8-9ec2-c5c8850c78ef"
+      },
+      "displayName": "DisplayPrimaryEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3324,
+      "y": 381
+    },
+    "e4f79480-0bb7-4930-9bb6-4311f8c939ab": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "7a52732f-bb37-4d6e-8ed0-8d5ca1eb96c2"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 70,
+      "y": 317.5
+    },
+    "f83c2916-01b5-45db-b72d-5982a55ba79f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0c3b8783-138c-450f-85be-0a1ff8099be7"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1232,
+      "y": 347.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 70,
+      "y": 900
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3666,
+      "y": 802.3333333333334
+    },
+    "startNode": {
+      "x": 70,
+      "y": 511.6666666666667
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

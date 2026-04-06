@@ -1,0 +1,137 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "KOGID"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "UserIdentityUpdate",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "UserIdentityUpdate",
+  "enableSync": false,
+  "name": "UserIdentityUpdate",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ABSENT"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    }
+  ],
+  "properties": [
+    {
+      "source": "givenName",
+      "target": "givenName"
+    },
+    {
+      "source": "sn",
+      "target": "sn"
+    },
+    {
+      "source": "userName",
+      "target": "KOGID",
+      "transform": {
+        "globals": {},
+        "source": "source.toLowerCase();",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "account",
+      "transform": {
+        "globals": {},
+        "source": "logger.error(\"Source user identity: \" + JSON.stringify(source));\n\nvar sourceKyid = source._id;\nvar resultArray = [];\n \ntry {\n    \n\tif(!sourceKyid == null || !sourceKyid == \"\"){\n\t\tvar uniqueKyids = Array.from(new Set(sourceKyid.split(\",\").map(function(item) { return item.trim(); })));\n\t\tlogger.error(\"Unique user identities: \" + JSON.stringify(uniqueKyids));\n\t\t// Process each unique role\n\t\tuniqueKyids.forEach(function(kyid) {\n\t\t\tlogger.error(\"kyid inside for loop: \"+kyid);\n\t\t\t//if (exclusionRoleResponse.result && exclusionRoleResponse.result.length > 0) {\n\t\t\t\t//var roleId = exclusionRoleResponse.result[0]._id;\n\t\t\t\tvar identityRef = { \"_ref\": \"managed/alpha_user/\" + kyid };\n\t\t\t\tresultArray.push(identityRef);\n\t\t\t//}\n\t\t});\n\t\tlogger.error(\"Result Array: \" + JSON.stringify(resultArray));\n\t}else{\n\t\tlogger.error(\"inside else\");\n\t\tnull;\n\t\t}\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);\n}\n \nresultArray;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "city",
+      "target": "city"
+    },
+    {
+      "source": "custom_createDateISO",
+      "target": "createDate"
+    },
+    {
+      "source": "custom_createDateEpoch",
+      "target": "createDateEpoch"
+    },
+    {
+      "source": "custom_county",
+      "target": "countyCode"
+    },
+    {
+      "source": "country",
+      "target": "countryCode"
+    },
+    {
+      "source": "custom_zipExtension",
+      "target": "zip"
+    },
+    {
+      "source": "custom_middleName",
+      "target": "middleName"
+    },
+    {
+      "source": "custom_dateofBirth",
+      "target": "dob"
+    }
+  ],
+  "reconSourceQueryPageSize": 1000,
+  "runTargetPhase": false,
+  "source": "managed/alpha_user",
+  "target": "managed/alpha_kyid_user_identity"
+}

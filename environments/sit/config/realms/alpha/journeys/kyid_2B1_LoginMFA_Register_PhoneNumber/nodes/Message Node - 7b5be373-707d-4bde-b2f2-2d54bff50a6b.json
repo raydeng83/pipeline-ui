@@ -1,0 +1,25 @@
+{
+  "_id": "7b5be373-707d-4bde-b2f2-2d54bff50a6b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1694368199",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Unable to retrieve the user information to proceed further"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

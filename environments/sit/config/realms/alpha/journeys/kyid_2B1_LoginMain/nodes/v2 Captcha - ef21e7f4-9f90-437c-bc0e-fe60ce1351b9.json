@@ -1,0 +1,36 @@
+{
+  "_id": "ef21e7f4-9f90-437c-bc0e-fe60ce1351b9",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1027521797",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "cb6f8aa4-007b-4dfa-8d6a-6caf86031244",
+      "displayName": "Password Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "5a995fed-27a4-4231-9f94-26593c98c0a8",
+      "displayName": "CAPTCHA",
+      "nodeType": "product-CaptchaNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

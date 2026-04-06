@@ -1,0 +1,16 @@
+{
+  "_id": "00a3d142-2eb1-47a2-9372-83ff0fb0f998",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1756783735318,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=5d66c13a-1395-4276-b17a-7242fb229af8,ou=user,ou=am-config",
+  "lastModifiedDate": 1768904777913,
+  "name": "KYID.2B1.Journey.LoginAuthorizationCheck",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.LoginAuthorizationCheck.js"
+  }
+}

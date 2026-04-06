@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-kyide-host-failover",
+  "description": "failover host for the prod AD ",
+  "expressionType": "array",
+  "valueBase64": "${ESV_AD_INTERNAL_KYIDE_HOST_FAILOVER}"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-recaptcha-whitelisted-ip",
+  "description": "This ESV is used to By Pass the google reCAPTCHA for the mentioned IPs in the array",
+  "expressionType": "array",
+  "valueBase64": "${ESV_RECAPTCHA_WHITELISTED_IP}"
+}

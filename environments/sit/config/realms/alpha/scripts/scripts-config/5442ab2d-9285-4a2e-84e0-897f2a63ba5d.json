@@ -1,0 +1,16 @@
+{
+  "_id": "5442ab2d-9285-4a2e-84e0-897f2a63ba5d",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=4064f4e7-4e68-4c17-a19d-93dfe4c9804e,ou=user,ou=am-config",
+  "creationDate": 1736743388160,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287838907,
+  "name": "KYID.Journey.SetRedquestIDCookie",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetRedquestIDCookie.js"
+  }
+}

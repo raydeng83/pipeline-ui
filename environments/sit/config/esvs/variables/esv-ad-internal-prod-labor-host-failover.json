@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-prod-labor-host-failover",
+  "description": "failover host for the prod AD ",
+  "expressionType": "array",
+  "valueBase64": "${ESV_AD_INTERNAL_PROD_LABOR_HOST_FAILOVER}"
+}

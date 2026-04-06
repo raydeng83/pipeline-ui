@@ -1,0 +1,6 @@
+{
+  "_id": "esv-jitnotallowederror-fail-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_JITNOTALLOWEDERROR_FAIL_URL}"
+}

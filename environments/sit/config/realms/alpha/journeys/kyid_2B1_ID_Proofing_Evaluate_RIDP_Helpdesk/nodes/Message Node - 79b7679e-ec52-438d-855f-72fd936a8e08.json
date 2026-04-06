@@ -1,0 +1,25 @@
+{
+  "_id": "79b7679e-ec52-438d-855f-72fd936a8e08",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1498832383",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "{\"pageHeader\": \"Helpdesk_Verification_Completed\"}"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

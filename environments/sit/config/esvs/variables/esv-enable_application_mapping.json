@@ -1,0 +1,6 @@
+{
+  "_id": "esv-enable_application_mapping",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_ENABLE_APPLICATION_MAPPING}"
+}

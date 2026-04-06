@@ -1,0 +1,41 @@
+{
+  "_id": "962ec3cb-b311-4e32-9c0c-36e47b76688f",
+  "_outcomes": [
+    {
+      "displayName": "callFARS",
+      "id": "callFARS"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "LexisNexis",
+      "id": "LexisNexis"
+    },
+    {
+      "displayName": "continue",
+      "id": "continue"
+    }
+  ],
+  "_rev": "-1686549369",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "callFARS",
+    "error",
+    "LexisNexis",
+    "continue"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "3428af43-ffdd-4194-9806-35064258fae4"
+}

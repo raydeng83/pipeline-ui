@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-2b-perflog-enabled",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_KYID_2B_PERFLOG_ENABLED}"
+}

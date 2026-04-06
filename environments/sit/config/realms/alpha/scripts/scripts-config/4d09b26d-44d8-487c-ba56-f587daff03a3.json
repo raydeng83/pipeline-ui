@@ -1,0 +1,16 @@
+{
+  "_id": "4d09b26d-44d8-487c-ba56-f587daff03a3",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "This function is used to get KOG app claims through KOG UserClaims API.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287844492,
+  "name": "KYID.Journey.ReadKOGApplicationClaims",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ReadKOGApplicationClaims.js"
+  }
+}

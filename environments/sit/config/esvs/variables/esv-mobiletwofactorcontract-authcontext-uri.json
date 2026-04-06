@@ -1,0 +1,6 @@
+{
+  "_id": "esv-mobiletwofactorcontract-authcontext-uri",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_MOBILETWOFACTORCONTRACT_AUTHCONTEXT_URI}"
+}

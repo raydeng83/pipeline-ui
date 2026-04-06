@@ -1,0 +1,6 @@
+{
+  "_id": "esv-errorinvalidotpsmsvoiceregistration-es",
+  "description": "Error Message for SMS & Voice Registration on Invalid OTP Spanish",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERRORINVALIDOTPSMSVOICEREGISTRATION_ES}"
+}

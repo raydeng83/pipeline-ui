@@ -1,0 +1,114 @@
+{
+  "_id": "kyid_LocaleRouterTreeEN",
+  "_rev": "-1848354673",
+  "enabled": true,
+  "entryNodeId": "0f875cdd-6205-4060-976d-4db6fe67aaea",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0f875cdd-6205-4060-976d-4db6fe67aaea": {
+      "connections": {
+        "TransactionSessionOver": "11a657d4-c32b-4e69-a4f9-8d5638139087"
+      },
+      "displayName": "Script: CheckSessionTimeOut",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 0,
+      "y": 4.015625
+    },
+    "11a657d4-c32b-4e69-a4f9-8d5638139087": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "4cee0ae5-30bb-4b74-aee8-d82235e35241"
+      },
+      "displayName": "Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 143,
+      "y": 68.15625
+    },
+    "15b38119-dfc6-49a3-8f43-e906dff9cc8d": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "78316ef0-8a0d-4956-9dca-a1caac7a1c68"
+      },
+      "displayName": "Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 158,
+      "y": 433.15625
+    },
+    "16a4b2b2-d8a1-4d93-8657-4ad138109866": {
+      "connections": {},
+      "displayName": "Script: SwitchToEnglish",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 769,
+      "y": 265.015625
+    },
+    "1b3a9d5a-48fa-4510-ad46-c30cfdde0a66": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "8510d2a9-763c-4bd6-b23a-de2d8114449a"
+      },
+      "displayName": "Script: Is RequestURL cookie Present",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 407,
+      "y": 241.3472137451172
+    },
+    "4cee0ae5-30bb-4b74-aee8-d82235e35241": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "15b38119-dfc6-49a3-8f43-e906dff9cc8d"
+      },
+      "displayName": "Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 164,
+      "y": 242.015625
+    },
+    "78316ef0-8a0d-4956-9dca-a1caac7a1c68": {
+      "connections": {
+        "false": "1b3a9d5a-48fa-4510-ad46-c30cfdde0a66",
+        "true": "16a4b2b2-d8a1-4d93-8657-4ad138109866"
+      },
+      "displayName": "Cookie Presence Decision Node",
+      "nodeType": "CookiePresenceDecisionNode",
+      "version": "1.0",
+      "x": 399,
+      "y": 68.34721374511719
+    },
+    "8510d2a9-763c-4bd6-b23a-de2d8114449a": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "16a4b2b2-d8a1-4d93-8657-4ad138109866"
+      },
+      "displayName": "Set RequestURL Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 442,
+      "y": 425.3472137451172
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 988,
+      "y": 99
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 942,
+      "y": 399
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Login\"]"
+  }
+}

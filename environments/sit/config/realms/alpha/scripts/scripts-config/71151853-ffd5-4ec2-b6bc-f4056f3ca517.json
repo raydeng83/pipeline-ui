@@ -1,0 +1,16 @@
+{
+  "_id": "71151853-ffd5-4ec2-b6bc-f4056f3ca517",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286694594,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766053469902,
+  "name": "KYID.2B1.Journey.Login.Register.MFA.Select.FRPUSH.FRTOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Login.Register.MFA.Select.FRPUSH.FRTOTP.js"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "_id": "65679dcd-4c2a-4429-873e-f25f58b5069a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1630366145",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "{\"pageHeader\":\"back_button_clicked\"}"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

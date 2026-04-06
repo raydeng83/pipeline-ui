@@ -1,0 +1,16 @@
+{
+  "_id": "71474584-ec77-41c9-aec2-706f327e57ae",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286696834,
+  "default": false,
+  "description": "This script is used to send success or failure email to user when requested application role is successfully provisioned or failed to provisioned. ",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054587641,
+  "name": "KYID.2B1.Prerequisites.Email",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Prerequisites.Email.js"
+  }
+}

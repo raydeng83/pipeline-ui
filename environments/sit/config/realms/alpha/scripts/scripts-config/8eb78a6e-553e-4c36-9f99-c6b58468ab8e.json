@@ -1,0 +1,16 @@
+{
+  "_id": "8eb78a6e-553e-4c36-9f99-c6b58468ab8e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=479238b6-ae6d-4939-ab44-62a6c1d6f052,ou=user,ou=am-config",
+  "creationDate": 1736076402794,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287831845,
+  "name": "KYID.Journey.GetEmailAddressfromNodeState",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.GetEmailAddressfromNodeState.js"
+  }
+}

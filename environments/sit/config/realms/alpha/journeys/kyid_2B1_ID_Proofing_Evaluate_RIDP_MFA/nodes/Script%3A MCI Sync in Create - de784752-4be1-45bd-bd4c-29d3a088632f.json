@@ -1,0 +1,31 @@
+{
+  "_id": "de784752-4be1-45bd-bd4c-29d3a088632f",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "firstTimeLogin",
+      "id": "firstTimeLogin"
+    }
+  ],
+  "_rev": "940981633",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "firstTimeLogin"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "74b4629f-ad6e-4b34-9269-7a6a9f36b14d"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "e707ba9d-7af5-49a8-a249-3b9367a8110a",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1756782514761,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=16ddca0d-67fe-482c-96c9-75f3644bc992,ou=user,ou=am-config",
+  "lastModifiedDate": 1775145395947,
+  "name": "KYID.2B1.Journey.RedirectURL.MasterLogin",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.2B1.Journey.RedirectURL.MasterLogin.js"
+  }
+}

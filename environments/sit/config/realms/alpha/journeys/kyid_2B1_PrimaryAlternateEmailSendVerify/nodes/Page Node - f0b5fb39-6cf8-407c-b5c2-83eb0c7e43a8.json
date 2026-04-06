@@ -1,0 +1,62 @@
+{
+  "_id": "f0b5fb39-6cf8-407c-b5c2-83eb0c7e43a8",
+  "_outcomes": [
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "expired",
+      "id": "expired"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "Choose Another",
+      "id": "Choose Another"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    },
+    {
+      "displayName": "MaxLimit",
+      "id": "MaxLimit"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "backLimit",
+      "id": "backLimit"
+    },
+    {
+      "displayName": "Resend Code Alternate Email",
+      "id": "Resend Code Alternate Email"
+    }
+  ],
+  "_rev": "-1878385985",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "042cdc41-184e-49b8-b6f4-e78c34cc33d5",
+      "displayName": "Verify Alternate Email OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

@@ -1,0 +1,22 @@
+{
+  "_id": "ea2198e6-3c47-490c-aa6e-ffaa5c3ef0bb",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-2118501781",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_LoginMFA_Authn_Verify_OTP_Email"
+}

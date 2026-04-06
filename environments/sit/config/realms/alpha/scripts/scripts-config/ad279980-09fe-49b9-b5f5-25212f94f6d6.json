@@ -1,0 +1,16 @@
+{
+  "_id": "ad279980-09fe-49b9-b5f5-25212f94f6d6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1761796489282,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=16ddca0d-67fe-482c-96c9-75f3644bc992,ou=user,ou=am-config",
+  "lastModifiedDate": 1766133241453,
+  "name": "KYID.2B1.Journey.Login.Register.AccountReview.Divert",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Login.Register.AccountReview.Divert.js"
+  }
+}

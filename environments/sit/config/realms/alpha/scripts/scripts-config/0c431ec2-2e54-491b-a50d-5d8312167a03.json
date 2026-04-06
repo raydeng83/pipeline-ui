@@ -1,0 +1,16 @@
+{
+  "_id": "0c431ec2-2e54-491b-a50d-5d8312167a03",
+  "context": "OAUTH2_ACCESS_TOKEN_MODIFICATION",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286681002,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1756179775355,
+  "name": "KYID.2B1.Journey.OIDC.AccessTokenModification",
+  "script": {
+    "file": "scripts-content/OAUTH2_ACCESS_TOKEN_MODIFICATION/KYID.2B1.Journey.OIDC.AccessTokenModification.js"
+  }
+}

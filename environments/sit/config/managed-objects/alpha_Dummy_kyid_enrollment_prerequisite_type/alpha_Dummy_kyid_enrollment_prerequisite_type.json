@@ -1,0 +1,63 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_Dummy_kyid_enrollment_prerequisite_type",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "alpha_Dummy_kyid_enrollment_prerequisite_type",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "name",
+      "typeName",
+      "recordState",
+      "prerequisiteId"
+    ],
+    "properties": {
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Pre-requisite Type Name",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "prerequisiteId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Prerequisite Id",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "recordState": {
+        "searchable": false,
+        "title": "Record State",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "typeName": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Pre-requisite Definition Type",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      }
+    },
+    "required": [
+      "name",
+      "typeName",
+      "recordState"
+    ],
+    "title": "alpha_Dummy_kyid_enrollment_prerequisite_type",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

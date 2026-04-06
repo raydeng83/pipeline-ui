@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-userprerequisite-enable-kog",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_USERPREREQUISITE_ENABLE_KOG}"
+}

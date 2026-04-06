@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ad-internal-prod-jus-host-failover",
+  "description": "failover host for the prod AD ",
+  "expressionType": "array",
+  "valueBase64": "${ESV_AD_INTERNAL_PROD_JUS_HOST_FAILOVER}"
+}

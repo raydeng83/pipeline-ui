@@ -1,0 +1,36 @@
+{
+  "_id": "fe661266-ec6e-4550-acb9-72398d6fee7e",
+  "_outcomes": [
+    {
+      "displayName": "allJITCompleted",
+      "id": "allJITCompleted"
+    },
+    {
+      "displayName": "proceedJITProvisioning",
+      "id": "proceedJITProvisioning"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "1419063745",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "allJITCompleted",
+    "proceedJITProvisioning",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "f5c47dd7-77d4-4270-aed9-0cd461c3f713"
+}

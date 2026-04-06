@@ -1,0 +1,32 @@
+{
+  "_id": "emailTemplate/kyidRequestCancelled",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "KYID_Request_Cancelled",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyidRequestCancelled.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyidRequestCancelled.en.md"
+    },
+    "es": {
+      "file": "kyidRequestCancelled.es.md"
+    }
+  },
+  "mimeType": "text/html",
+  "name": "kyidRequestRejected",
+  "styles": {
+    "file": "kyidRequestCancelled.css"
+  },
+  "subject": {
+    "en": "KYID Account Notification: Cancel Enrollment",
+    "es": "Notificación de cuenta KYID: Cancelar inscripción"
+  },
+  "templateId": "kyidRequestCancelled"
+}

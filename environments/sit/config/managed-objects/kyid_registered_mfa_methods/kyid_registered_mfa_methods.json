@@ -1,0 +1,175 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "kyid_registered_mfa_methods",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "Object to store registered MFA methods",
+    "icon": "fa-database",
+    "order": [
+      "_id",
+      "type",
+      "name",
+      "label",
+      "code",
+      "credential_id",
+      "status",
+      "userId"
+    ],
+    "properties": {
+      "_id": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "code": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "KOG Method Code",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "credential_id": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Method Id",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "label": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Kyid_registered_mfa_methods:label",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "label": {
+                "label": "Label",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Kyid_labels",
+            "notify": false,
+            "path": "managed/kyid_labels",
+            "query": {
+              "fields": [
+                "name",
+                "value_en",
+                "value_es"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": false,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Label",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Method Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "status": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Status",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Method Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "userId": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Kyid_registered_mfa_methods:userId",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_user",
+            "notify": false,
+            "path": "managed/alpha_user",
+            "query": {
+              "fields": [
+                "_id"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": false,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Userid",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "type",
+      "name",
+      "code",
+      "status"
+    ],
+    "title": "KYID Registered MFA Methods",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

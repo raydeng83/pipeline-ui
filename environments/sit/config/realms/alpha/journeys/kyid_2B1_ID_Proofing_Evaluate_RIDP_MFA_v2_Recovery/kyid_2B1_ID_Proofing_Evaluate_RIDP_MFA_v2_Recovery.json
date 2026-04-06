@@ -1,0 +1,180 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v2_Recovery",
+  "_rev": "1317227832",
+  "description": "Inner Journey for RIDP Password and Authenticator Flow",
+  "enabled": true,
+  "entryNodeId": "a56bea26-6dd9-42c8-9f1a-62c529162c28",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "01db6d5f-b207-45a4-b6ad-2f5006962c69": {
+      "connections": {
+        "DONE": "4c2df415-d9c3-4fa7-8891-647a686d2c5f"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1871.6666870117188,
+      "y": 99.33332824707031
+    },
+    "24f9ffe3-75e2-44ad-95a2-360c197dc534": {
+      "connections": {
+        "Error": "5714405d-5d4d-4f2e-a8da-13f9af5a2b53",
+        "Failed": "5714405d-5d4d-4f2e-a8da-13f9af5a2b53",
+        "Successful": "5714405d-5d4d-4f2e-a8da-13f9af5a2b53"
+      },
+      "displayName": "Script: Patch KOG",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1441,
+      "y": 529.3333333333333
+    },
+    "32df3ed2-3638-4012-ad0c-73bf6d93fd4b": {
+      "connections": {
+        "allJITCompleted": "01db6d5f-b207-45a4-b6ad-2f5006962c69",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "proceedJITProvisioning": "8f8df686-571e-44c4-a7da-e3876190aa62"
+      },
+      "displayName": "Script: Post JIT Provisioning ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1506,
+      "y": 55.333333333333314
+    },
+    "4c2df415-d9c3-4fa7-8891-647a686d2c5f": {
+      "connections": {
+        "errorInPingSearch": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "exactMatch": "f459cace-28e5-4421-9542-9c13eeb9a2dc",
+        "highRiskTransaction": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "inputLink2TerminatedAccount": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "inputNotMatchingVerifiedIdentity": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "lexIdMismatch": "f6b85079-9c66-4ecd-9bdb-afc943191596"
+      },
+      "displayName": "Script: Post JIT Processing",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2130.333335876465,
+      "y": 58.33332824707031
+    },
+    "5714405d-5d4d-4f2e-a8da-13f9af5a2b53": {
+      "connections": {
+        "noSync": "872dcd63-69dd-467a-8593-a4fcbb5fc459",
+        "true": "872dcd63-69dd-467a-8593-a4fcbb5fc459"
+      },
+      "displayName": "Script: MCI SYNC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1719,
+      "y": 516.6666666666666
+    },
+    "7d461c42-2d16-4d7a-8390-17e6df485b0a": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "exactMatch": "f459cace-28e5-4421-9542-9c13eeb9a2dc",
+        "highRiskTransaction": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "inputLink2TerminatedAccount": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "inputNotMatchingVerifiedIdentity": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "jitProvisioning": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "lexIdMismatch": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "noMatchPartialMatch": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "noMatchPerviousSearch": "f459cace-28e5-4421-9542-9c13eeb9a2dc"
+      },
+      "displayName": "Script: MCI Search Recovery",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 807,
+      "y": 277.5
+    },
+    "872dcd63-69dd-467a-8593-a4fcbb5fc459": {
+      "connections": {
+        "failure": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Send Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1968,
+      "y": 521.3333282470703
+    },
+    "8f8df686-571e-44c4-a7da-e3876190aa62": {
+      "connections": {
+        "jitProvisioning": "32df3ed2-3638-4012-ad0c-73bf6d93fd4b"
+      },
+      "displayName": "Script: Pre JIT Provisioning ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 913,
+      "y": 90
+    },
+    "a56bea26-6dd9-42c8-9f1a-62c529162c28": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fbad2504-cdc4-48c3-a675-5144f74a40a3"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 309.5
+    },
+    "f459cace-28e5-4421-9542-9c13eeb9a2dc": {
+      "connections": {
+        "patchFailed": "5714405d-5d4d-4f2e-a8da-13f9af5a2b53",
+        "patchInKOG": "24f9ffe3-75e2-44ad-95a2-360c197dc534"
+      },
+      "displayName": "Script: Update User Identity",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1120,
+      "y": 533
+    },
+    "f6b85079-9c66-4ecd-9bdb-afc943191596": {
+      "connections": {
+        "differentMethod": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Retry Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2523.6666870117188,
+      "y": 128.3333282470703
+    },
+    "fbad2504-cdc4-48c3-a675-5144f74a40a3": {
+      "connections": {
+        "highRisk": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "kbaFailed": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "lexMatch": "7d461c42-2d16-4d7a-8390-17e6df485b0a",
+        "lexMisMatch": "f6b85079-9c66-4ecd-9bdb-afc943191596",
+        "mciSearch": "7d461c42-2d16-4d7a-8390-17e6df485b0a",
+        "notVerified": "f6b85079-9c66-4ecd-9bdb-afc943191596"
+      },
+      "displayName": "Script: Recovery Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 479,
+      "y": 301
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2885,
+      "y": 348
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2751,
+      "y": 586
+    },
+    "startNode": {
+      "x": 70,
+      "y": 299
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

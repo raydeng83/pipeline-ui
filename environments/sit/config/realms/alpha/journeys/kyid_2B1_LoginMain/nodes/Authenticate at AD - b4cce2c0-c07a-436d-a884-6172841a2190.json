@@ -1,0 +1,46 @@
+{
+  "_id": "b4cce2c0-c07a-436d-a884-6172841a2190",
+  "_outcomes": [
+    {
+      "displayName": "success",
+      "id": "success"
+    },
+    {
+      "displayName": "fail",
+      "id": "fail"
+    },
+    {
+      "displayName": "newUser",
+      "id": "newUser"
+    },
+    {
+      "displayName": "invalidPassword",
+      "id": "invalidPassword"
+    },
+    {
+      "displayName": "passwordExpired",
+      "id": "passwordExpired"
+    }
+  ],
+  "_rev": "721306132",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "success",
+    "fail",
+    "newUser",
+    "invalidPassword",
+    "passwordExpired"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "94d164b4-9e5e-4ff4-b1fb-4da3fa9c8ea3"
+}

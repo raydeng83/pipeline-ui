@@ -1,0 +1,32 @@
+{
+  "_id": "34ff38f1-f108-44ad-91eb-910c54ebf847",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-312423114",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "An OTP has been sent to your phone",
+    "es": "Se ha enviado una OTP a su teléfono"
+  },
+  "messageNo": {
+    "en": "Click here to choose Another factor",
+    "es": "Haga clic aquí para elegir Otro factor"
+  },
+  "messageYes": {
+    "en": "Click here to enter the OTP",
+    "es": "Haga clic aquí para ingresar la OTP"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-useragreementssignedredirect-api",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_USERAGREEMENTSSIGNEDREDIRECT_API}"
+}

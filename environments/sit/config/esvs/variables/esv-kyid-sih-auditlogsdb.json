@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-sih-auditlogsdb",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_SIH_AUDITLOGSDB}"
+}

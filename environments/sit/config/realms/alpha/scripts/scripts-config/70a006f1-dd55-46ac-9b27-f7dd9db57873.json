@@ -1,0 +1,16 @@
+{
+  "_id": "70a006f1-dd55-46ac-9b27-f7dd9db57873",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1756182332260,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766053619518,
+  "name": "KYID.2B1.Journey.MFA.InvalidSecondaryEmail",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.MFA.InvalidSecondaryEmail.js"
+  }
+}

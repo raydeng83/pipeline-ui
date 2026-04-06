@@ -1,0 +1,16 @@
+{
+  "_id": "d7e60626-1a02-4a21-bf8b-96f531d5bc19",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286711406,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054530349,
+  "name": "KYID.2B1.Journey.sessionAssuranceLevelforMFA.Authenticator",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.sessionAssuranceLevelforMFA.Authenticator.js"
+  }
+}

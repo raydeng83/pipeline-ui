@@ -1,0 +1,16 @@
+{
+  "_id": "5f748350-5afd-48ee-9306-f4436e3842fd",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287846833,
+  "name": "KYID.Journey.MFAAuthentication.Email.SetIDPAuthType",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAAuthentication.Email.SetIDPAuthType.js"
+  }
+}

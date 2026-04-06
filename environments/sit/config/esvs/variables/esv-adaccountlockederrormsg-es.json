@@ -1,0 +1,6 @@
+{
+  "_id": "esv-adaccountlockederrormsg-es",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ADACCOUNTLOCKEDERRORMSG_ES}"
+}

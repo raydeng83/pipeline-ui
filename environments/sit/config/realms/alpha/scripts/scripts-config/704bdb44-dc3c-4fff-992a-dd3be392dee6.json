@@ -1,0 +1,16 @@
+{
+  "_id": "704bdb44-dc3c-4fff-992a-dd3be392dee6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "allow registration",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287838474,
+  "name": "KYID.Journey.MFASelf.IsRegistrationAllowed",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFASelf.IsRegistrationAllowed.js"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "_id": "ff92fcf0-ddac-4cb3-ae24-f6f36ca79edc",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1430135913",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "<div class='error-message'>&{esv.mfa.auth.frotp.invalidcode.en}</div>",
+    "es": "<div class='error-message'>&{esv.mfa.auth.frotp.invalidcode.es}</div>"
+  },
+  "messageNo": {
+    "en": "Return to authenticator list",
+    "es": "Volver a la lista de autenticadores"
+  },
+  "messageYes": {
+    "en": "Re-Enter code",
+    "es": "Vuelva a ingresar el código"
+  }
+}

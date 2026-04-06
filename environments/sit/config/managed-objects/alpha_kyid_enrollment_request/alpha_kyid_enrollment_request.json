@@ -1,0 +1,485 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_enrollment_request",
+  "onCreate": {
+    "file": "alpha_kyid_enrollment_request.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_enrollment_request.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "alpha_kyid_enrollment_request.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "alpha_kyid_enrollment_request.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "This managed object maintains the enrollment request object specifications.",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "pingRequestId",
+      "enrollmentContextId",
+      "createDate",
+      "createDateEpoch",
+      "completionDate",
+      "completionDateEpoch",
+      "expiryDate",
+      "expiryDateEpoch",
+      "status",
+      "requesterId",
+      "requestedUserId",
+      "appSystemName",
+      "roleIds",
+      "recordState",
+      "updateDate",
+      "updateDateEpoch",
+      "createdBy",
+      "updatedBy",
+      "roleContext",
+      "conversionDate",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "appSystemName": {
+        "items": {
+          "type": "string"
+        },
+        "searchable": false,
+        "title": "Associated Application System Name",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "completionDate": {
+        "description": "This property stores the enrollment request completion date and time.",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enrollment Request Completion Date",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "completionDateEpoch": {
+        "searchable": false,
+        "title": "Enrollment Request Completion Date in Epoch",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "conversionDate": {
+        "searchable": false,
+        "title": "Conversion Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enrollment Request Create Date",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Enrollment Request Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Created By User Identifier",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "CreatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "enrollmentContextId": {
+        "description": "This property stores the associated enrollment context id.",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Associated Enrollment Context Id",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "expiryDate": {
+        "searchable": false,
+        "title": "Enrollment Request Expiry Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "expiryDateEpoch": {
+        "searchable": false,
+        "title": "Expirty Date in Epoch",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "pingRequestId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Ping Workflow Request Id",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "recordState": {
+        "searchable": false,
+        "title": "Record State",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "requestedUserId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enrollment Requested User ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "requesterId": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enrollment Requester ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "roleContext": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "orgType",
+            "orgId",
+            "orgName",
+            "businessKeys",
+            "roleName",
+            "appName",
+            "orginalDelegatorId",
+            "currentDelegatorId",
+            "isForwardDelegable",
+            "delegationEndDate",
+            "delegationEndDateEpoch",
+            "roleId",
+            "applicationId",
+            "orgSourceUniqueId",
+            "businessKeyTypeName",
+            "businessKeyId",
+            "businessKeyName",
+            "businessKeyDescription",
+            "kogOrgBusinessKeyId"
+          ],
+          "properties": {
+            "appName": {
+              "searchable": false,
+              "title": "Application Name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "applicationId": {
+              "searchable": false,
+              "title": "Application Identifier",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "businessKeyDescription": {
+              "searchable": false,
+              "title": "Business Key Description",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "businessKeyId": {
+              "searchable": false,
+              "title": "Business Key Identifier",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "businessKeyName": {
+              "searchable": false,
+              "title": "Business Key Value",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "businessKeyTypeName": {
+              "searchable": false,
+              "title": "Business Key Type Name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "businessKeys": {
+              "description": null,
+              "isVirtual": false,
+              "items": {
+                "order": [
+                  "businessKeyName",
+                  "businessKeyValue"
+                ],
+                "properties": {
+                  "businessKeyName": {
+                    "searchable": false,
+                    "title": "Business Key Name",
+                    "type": "string",
+                    "userEditable": true,
+                    "viewable": true
+                  },
+                  "businessKeyValue": {
+                    "searchable": false,
+                    "title": "Business Key Value",
+                    "type": "string",
+                    "userEditable": true,
+                    "viewable": true
+                  }
+                },
+                "required": [],
+                "type": "object"
+              },
+              "searchable": false,
+              "title": "Business Keys",
+              "type": "array",
+              "userEditable": true,
+              "viewable": true
+            },
+            "currentDelegatorId": {
+              "searchable": false,
+              "title": "Current Delegator ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "delegationEndDate": {
+              "searchable": false,
+              "title": "Delegation EndDate",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "delegationEndDateEpoch": {
+              "searchable": false,
+              "title": "Delegation EndDate Epoch",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "isForwardDelegable": {
+              "searchable": false,
+              "title": "Is Forward Delegable",
+              "type": "boolean",
+              "userEditable": true,
+              "viewable": true
+            },
+            "kogOrgBusinessKeyId": {
+              "searchable": false,
+              "title": "KOG Organization Business Key Id",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "orgId": {
+              "searchable": false,
+              "title": "Org ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "orgName": {
+              "searchable": false,
+              "title": "Org Name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "orgSourceUniqueId": {
+              "searchable": false,
+              "title": "Organization Source Unique ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "orgType": {
+              "searchable": false,
+              "title": "Org Type",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "orginalDelegatorId": {
+              "searchable": false,
+              "title": "Original Delegator ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "roleId": {
+              "searchable": false,
+              "title": "Role Identifer",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "roleName": {
+              "searchable": false,
+              "title": "Role Name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": false,
+        "title": "Role Context",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "roleIds": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_enrollment_request:roleIds",
+        "items": {
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_role",
+              "notify": false,
+              "path": "managed/alpha_role",
+              "query": {
+                "fields": [
+                  "name"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": true,
+        "searchable": true,
+        "title": "Associated Role IDs",
+        "type": "array",
+        "userEditable": false,
+        "viewable": true
+      },
+      "status": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Enrollment Request Status",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "updateDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Enrollment Context Update Date ",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Enrollment Context Update Date  in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Updated By User Identifier",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "UpdatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "expiryDate",
+      "status",
+      "requesterId",
+      "requestedUserId",
+      "appSystemName",
+      "recordState"
+    ],
+    "title": "KYID Enrollment Request",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

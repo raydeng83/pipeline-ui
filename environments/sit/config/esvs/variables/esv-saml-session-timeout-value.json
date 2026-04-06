@@ -1,0 +1,6 @@
+{
+  "_id": "esv-saml-session-timeout-value",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_SAML_SESSION_TIMEOUT_VALUE}"
+}

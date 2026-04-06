@@ -1,0 +1,16 @@
+{
+  "_id": "f02b2f51-0377-4687-b2fb-6acaa383df1e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3721d1a2-ede0-4a1e-8356-36b797f27300,ou=user,ou=am-config",
+  "creationDate": 1735968090223,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287841849,
+  "name": "test_dataInSession",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/test_dataInSession.js"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "_id": "kyid_2B1_InvokeAPIWithCert_Logs",
+  "_rev": "1388872077",
+  "enabled": true,
+  "entryNodeId": "6e28f1f4-2441-4fcb-a688-53e2a280038c",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "6e28f1f4-2441-4fcb-a688-53e2a280038c": {
+      "connections": {
+        "true": "de0bea7b-ba43-4b24-98aa-01040a15574c"
+      },
+      "displayName": "Script: Get Input",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 268,
+      "y": 124.015625
+    },
+    "de0bea7b-ba43-4b24-98aa-01040a15574c": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Invoke API",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 515,
+      "y": 202.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 844,
+      "y": 90
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1065,
+      "y": 326
+    },
+    "startNode": {
+      "x": 108,
+      "y": 166
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

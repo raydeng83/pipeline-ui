@@ -1,0 +1,97 @@
+{
+  "_id": "authentication",
+  "rsFilter": {
+    "augmentSecurityContext": {
+      "source": "require('auth/orgPrivileges').assignPrivilegesToUser(resource, security, properties, subjectMapping, privileges, security.authorization.component.includes('/alpha_') ? 'alphaOrgPrivileges' : 'bravoOrgPrivileges', 'privilegeAssignments');",
+      "type": "text/javascript"
+    },
+    "cache": {
+      "maxTimeout": "300 seconds"
+    },
+    "scopes": [
+      "fr:idm:*"
+    ],
+    "staticUserMapping": [
+      {
+        "localUser": "internal/user/idm-provisioning",
+        "roles": [
+          "internal/role/platform-provisioning"
+        ],
+        "subject": "getCurrentTime"
+      },
+      {
+        "localUser": "internal/user/kyid-endpoint-user",
+        "roles": [
+          "internal/role/kyid-endpoint-role"
+        ],
+        "subject": "manageenrollmentcontext"
+      },
+      {
+        "localUser": "internal/user/kyid-endpoint-user",
+        "roles": [
+          "internal/role/platform-provisioning",
+          "internal/role/kyid-endpoint-role"
+        ],
+        "subject": "3b0770a7-t1a1-4388-9b46-3d280b1k5908"
+      },
+      {
+        "localUser": "internal/user/kyid-endpoint-user",
+        "roles": [
+          "internal/role/platform-provisioning",
+          "internal/role/kyid-endpoint-role"
+        ],
+        "subject": "kyid-kog"
+      },
+      {
+        "localUser": "internal/user/kyid-endpoint-user",
+        "roles": [
+          "internal/role/kyid-endpoint-role"
+        ],
+        "subject": "1b0770a7-f1a1-4388-9a46-1d280b1a5708"
+      },
+      {
+        "localUser": "internal/user/kyid-endpoint-user",
+        "roles": [
+          "internal/role/platform-provisioning",
+          "internal/role/kyid-endpoint-role",
+          "internal/role/openidm-authorized"
+        ],
+        "subject": "4a0650a7-t9c4-7645-9b87-3d280b1s9086"
+      },
+      {
+        "localUser": "internal/user/kyid-endpoint-user",
+        "roles": [
+          "internal/role/platform-provisioning",
+          "internal/role/kyid-endpoint-role",
+          "internal/role/openidm-authorized"
+        ],
+        "subject": "c6ed1b8b-d27d-406c-aa14-1e8818c2069c"
+      },
+      {
+        "localUser": "internal/user/kyid-endpoint-user",
+        "roles": [
+          "internal/role/platform-provisioning",
+          "internal/role/kyid-endpoint-role",
+          "internal/role/openidm-authorized"
+        ],
+        "subject": "837afa3e-50d8-4b76-a2c9-41b6a55b3a9f"
+      }
+    ],
+    "subjectMapping": [
+      {
+        "additionalUserFields": [
+          "adminOfOrg",
+          "ownerOfOrg"
+        ],
+        "defaultRoles": [
+          "internal/role/openidm-authorized"
+        ],
+        "propertyMapping": {
+          "sub": "_id"
+        },
+        "queryOnResource": "managed/{{substring realm 1}}_user",
+        "userRoles": "authzRoles/*"
+      }
+    ]
+  }
+}

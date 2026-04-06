@@ -1,0 +1,1 @@
+<html><body>One or more certification tasks for {{object.campaign.name}} have been escalated to you.</body></html>

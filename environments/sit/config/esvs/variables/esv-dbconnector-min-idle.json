@@ -1,0 +1,6 @@
+{
+  "_id": "esv-dbconnector-min-idle",
+  "description": "",
+  "expressionType": "number",
+  "valueBase64": "${ESV_DBCONNECTOR_MIN_IDLE}"
+}

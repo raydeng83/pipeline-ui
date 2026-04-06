@@ -1,0 +1,61 @@
+{
+  "_id": "7251e08e-5421-447d-9ec6-27e770df3d05",
+  "_outcomes": [
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "failure",
+      "id": "failure"
+    },
+    {
+      "displayName": "missingMandatoryConfig",
+      "id": "missingMandatoryConfig"
+    },
+    {
+      "displayName": "noUserAuthz",
+      "id": "noUserAuthz"
+    },
+    {
+      "displayName": "APIFailed",
+      "id": "APIFailed"
+    },
+    {
+      "displayName": "kogAPIFailed",
+      "id": "kogAPIFailed"
+    },
+    {
+      "displayName": "roleMissingInPing",
+      "id": "roleMissingInPing"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-126824424",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "next",
+    "failure",
+    "missingMandatoryConfig",
+    "noUserAuthz",
+    "APIFailed",
+    "kogAPIFailed",
+    "roleMissingInPing",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "dd2505d9-7f73-48e6-ba78-e5a060f136a4"
+}

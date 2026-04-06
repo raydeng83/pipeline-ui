@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/certificationExpired",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "certificationExpired.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "certificationExpired.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "certificationExpired.css"
+  },
+  "subject": {
+    "en": "ATTENTION: Expiration of Certification Task"
+  }
+}

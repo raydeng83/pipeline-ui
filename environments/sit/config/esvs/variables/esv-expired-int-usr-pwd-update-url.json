@@ -1,0 +1,6 @@
+{
+  "_id": "esv-expired-int-usr-pwd-update-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_EXPIRED_INT_USR_PWD_UPDATE_URL}"
+}
