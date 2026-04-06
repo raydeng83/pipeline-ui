@@ -332,6 +332,7 @@ function EntryRow({
   keywords,
   onTransactionClick,
   fullscreen = false,
+  showFullMessage = false,
 }: {
   entry: LogEntry;
   source: string;
@@ -341,6 +342,7 @@ function EntryRow({
   keywords: string[];
   onTransactionClick: (txId: string) => void;
   fullscreen?: boolean;
+  showFullMessage?: boolean;
 }) {
   const [txCopied, setTxCopied] = useState(false);
   const effectiveSource = entry.source ?? source;
@@ -395,7 +397,7 @@ function EntryRow({
         </td>
         {isText ? (
           <td colSpan={2} className="px-2 py-2 text-slate-700 align-top font-mono text-[11px]">
-            <span className="line-clamp-2 break-all whitespace-pre-wrap">{highlight(message)}</span>
+            <span className={cn("break-all whitespace-pre-wrap", !showFullMessage && "line-clamp-2")}>{highlight(message)}</span>
           </td>
         ) : (
           <>
@@ -439,7 +441,7 @@ function EntryRow({
               ) : null}
             </td>
             <td className="px-2 py-2 text-slate-800 align-top">
-              <span className="line-clamp-2 break-all">{highlight(message)}</span>
+              <span className={cn("break-all", !showFullMessage && "line-clamp-2")}>{highlight(message)}</span>
               <span className="flex items-center gap-2 mt-0.5">
                 {userId && (
                   <span className="text-slate-400 font-mono text-[10px]">{highlight(userId)}</span>
@@ -693,6 +695,7 @@ export function LogsExplorer({
   const [fetched, setFetched] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+  const [showFullMessage, setShowFullMessage] = useState(false);
   const [rawSearch, setRawSearch] = useState("");   // what's in the input box
   const [search, setSearch] = useState("");          // active filter (3+ chars or Enter)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1311,6 +1314,15 @@ export function LogsExplorer({
                   Clear
                 </button>
               )}
+              <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={showFullMessage}
+                  onChange={(e) => setShowFullMessage(e.target.checked)}
+                  className="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                />
+                Full message
+              </label>
               <span className="text-xs text-slate-400 whitespace-nowrap">
                 {filtered.length} / {entries.length}
               </span>
@@ -1407,6 +1419,7 @@ export function LogsExplorer({
                         keywords={keywords}
                         onTransactionClick={(txId) => setDrilldown({ txId })}
                         fullscreen={fullscreen}
+                        showFullMessage={showFullMessage}
                       />
                     );
                   })}
