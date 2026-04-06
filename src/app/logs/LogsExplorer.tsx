@@ -1279,18 +1279,9 @@ export function LogsExplorer({
                 className="flex-1 text-xs rounded border border-slate-200 px-2.5 py-1 font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
               />
               {keywordsRaw && (
-                <>
-                  <span className="text-xs text-amber-600 whitespace-nowrap">
-                    {keywords.length} keyword{keywords.length !== 1 ? "s" : ""}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => { setKeywordsRaw(""); keywordsRawRef.current = ""; }}
-                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-                  >
-                    Clear
-                  </button>
-                </>
+                <span className="text-xs text-amber-600 whitespace-nowrap">
+                  {keywords.length} keyword{keywords.length !== 1 ? "s" : ""}
+                </span>
               )}
             </div>
 
