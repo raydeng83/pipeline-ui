@@ -774,7 +774,7 @@ export function LogsExplorer({
   // ── Web Worker ──
   const workerRef = useRef<Worker | null>(null);
 
-  const [fetchProgress, setFetchProgress] = useState<{ loaded: number; page: number; done: boolean; paused: boolean } | null>(null);
+  const [fetchProgress, setFetchProgress] = useState<{ loaded: number; page: number; done: boolean; paused: boolean; source?: string; window?: string } | null>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -783,7 +783,7 @@ export function LogsExplorer({
       const msg = e.data as
         | { type: "entries"; entries: LogEntry[]; append: boolean }
         | { type: "status"; loading: boolean }
-        | { type: "progress"; loaded: number; page: number; done: boolean; paused: boolean }
+        | { type: "progress"; loaded: number; page: number; done: boolean; paused: boolean; source?: string; window?: string }
         | { type: "error"; message: string; transient?: boolean };
 
       if (msg.type === "entries") {
@@ -797,7 +797,7 @@ export function LogsExplorer({
       } else if (msg.type === "status") {
         onConfigChange({ loading: msg.loading });
       } else if (msg.type === "progress") {
-        setFetchProgress({ loaded: msg.loaded, page: msg.page, done: msg.done, paused: msg.paused });
+        setFetchProgress({ loaded: msg.loaded, page: msg.page, done: msg.done, paused: msg.paused, source: msg.source, window: msg.window });
         onConfigChange({ searching: !msg.done });
       } else if (msg.type === "error") {
         if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
@@ -805,7 +805,8 @@ export function LogsExplorer({
         if (msg.transient) {
           errorTimerRef.current = setTimeout(() => setError(""), 5000);
         } else {
-          onConfigChange({ loading: false });
+          // Always clear loading+searching on a terminal error so the UI doesn't stay stuck
+          onConfigChange({ loading: false, searching: false });
         }
       }
     };
@@ -1414,14 +1415,21 @@ export function LogsExplorer({
           )}
 
           {/* Search completed indicator */}
-          {fetchProgress && fetchProgress.done && fetchProgress.loaded > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2 border-t border-slate-100 bg-emerald-50/50 shrink-0">
-              <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+          {fetchProgress && fetchProgress.done && (
+            <div className={cn("flex items-center gap-2 px-4 py-2 border-t border-slate-100 shrink-0", fetchProgress.loaded > 0 ? "bg-emerald-50/50" : "bg-slate-50/50")}>
+              {fetchProgress.loaded > 0 ? (
+                <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+              )}
               <span className="text-xs text-slate-600">
-                Search complete — {fetchProgress.loaded.toLocaleString()} entries loaded
-                {fetchProgress.page > 1 ? ` across ${fetchProgress.page} pages` : " (1 page)"}
+                {fetchProgress.loaded > 0
+                  ? `Search complete — ${fetchProgress.loaded.toLocaleString()} entries loaded${fetchProgress.page > 1 ? ` across ${fetchProgress.page} pages` : " (1 page)"}`
+                  : "Search complete — no entries found for this time range"}
               </span>
             </div>
           )}
@@ -1441,7 +1449,12 @@ export function LogsExplorer({
                 <span className="text-xs text-slate-600">
                   {fetchProgress.paused
                     ? `Paused — ${fetchProgress.loaded.toLocaleString()} entries loaded (page ${fetchProgress.page})`
-                    : `Fetching page ${fetchProgress.page}… ${fetchProgress.loaded.toLocaleString()} entries loaded`}
+                    : [
+                        fetchProgress.source && `[${fetchProgress.source}]`,
+                        fetchProgress.window && fetchProgress.window,
+                        `page ${fetchProgress.page}`,
+                        fetchProgress.loaded > 0 && `${fetchProgress.loaded.toLocaleString()} entries`,
+                      ].filter(Boolean).join(' · ')}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">

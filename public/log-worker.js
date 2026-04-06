@@ -13,7 +13,7 @@
  * Outbound messages (to component):
  *   { type: "entries",  entries: LogEntry[], append: boolean }
  *   { type: "status",   loading: boolean }
- *   { type: "progress", loaded: number, page: number, done: boolean, paused: boolean }
+ *   { type: "progress", loaded: number, page: number, done: boolean, paused: boolean, source?: string, window?: string }
  *   { type: "error",    message: string }
  */
 
@@ -146,8 +146,11 @@ async function doFetch(env, sources, beginTime, endTime, queryFilter, fetchId) {
           searchParams = { env, sources, beginTime: chunk.beginTime, endTime: chunk.endTime, queryFilter };
 
           const isLastChunk = ci === chunks.length - 1;
+          const windowStr = chunk.beginTime
+            ? chunk.beginTime.slice(0, 10) + (chunk.endTime ? ' → ' + chunk.endTime.slice(0, 10) : '')
+            : '';
           self.postMessage({ type: "entries", entries, append: !isVeryFirst });
-          self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: isLastSource && isLastChunk && !cookie, paused: false });
+          self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: isLastSource && isLastChunk && !cookie, paused: false, source, window: windowStr });
 
           if (isVeryFirst) {
             self.postMessage({ type: "status", loading: false });
