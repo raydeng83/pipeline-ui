@@ -1659,6 +1659,7 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
       ...baseConfig,
       env: (tabs.find((t) => t.id === activeId)?.config.env) ?? baseConfig.env,
       selectedSources: contextSources,
+      mode: "search",
       preset: "custom",
       customBegin: begin,
       customEnd: end,
