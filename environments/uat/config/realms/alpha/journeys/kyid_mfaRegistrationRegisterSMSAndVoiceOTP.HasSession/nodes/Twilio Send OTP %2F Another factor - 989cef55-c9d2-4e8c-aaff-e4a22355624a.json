@@ -1,0 +1,52 @@
+{
+  "_id": "989cef55-c9d2-4e8c-aaff-e4a22355624a",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    }
+  ],
+  "_rev": "-704195003",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "d8d094c5-f667-4311-825c-f9035f118d36",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "6814987a-8a12-4844-a494-e1e18bf9f995",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Set up phone authentication</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.voice.url}\" target=\"_blank\">Need Assistance?</a>\n</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Configurar la autenticación del teléfono</h5><br>\n<a href=\"&{esv.kog.help.mfa.reg.voice.url}\" target=\"_blank\">¿Necesita ayuda?</a>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

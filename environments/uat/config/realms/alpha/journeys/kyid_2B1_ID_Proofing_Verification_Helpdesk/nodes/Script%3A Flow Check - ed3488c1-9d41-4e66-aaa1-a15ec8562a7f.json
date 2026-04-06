@@ -1,0 +1,46 @@
+{
+  "_id": "ed3488c1-9d41-4e66-aaa1-a15ec8562a7f",
+  "_outcomes": [
+    {
+      "displayName": "updateprofile",
+      "id": "updateprofile"
+    },
+    {
+      "displayName": "id_verification",
+      "id": "id_verification"
+    },
+    {
+      "displayName": "appEnroll",
+      "id": "appEnroll"
+    },
+    {
+      "displayName": "standaloneRIDP",
+      "id": "standaloneRIDP"
+    },
+    {
+      "displayName": "true",
+      "id": "true"
+    }
+  ],
+  "_rev": "-569683603",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "updateprofile",
+    "id_verification",
+    "appEnroll",
+    "standaloneRIDP",
+    "true"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "d30e422e-d989-4b0a-aee1-99bd4827212f"
+}

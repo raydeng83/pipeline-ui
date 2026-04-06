@@ -1,0 +1,41 @@
+{
+  "_id": "1a2e3209-3fcb-4aec-96ad-7cb08433e016",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "authenticator",
+      "id": "authenticator"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1121095721",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "email",
+    "sms",
+    "authenticator",
+    "false"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "9551fbb9-ddc6-4a9f-b129-d7434708906b"
+}

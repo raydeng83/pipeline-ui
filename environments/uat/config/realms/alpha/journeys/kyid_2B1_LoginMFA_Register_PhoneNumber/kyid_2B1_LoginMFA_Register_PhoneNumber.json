@@ -1,0 +1,288 @@
+{
+  "_id": "kyid_2B1_LoginMFA_Register_PhoneNumber",
+  "_rev": "-773526509",
+  "enabled": true,
+  "entryNodeId": "3dbb10ae-4696-4718-9129-4209f45dde10",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "011c5657-3fbc-4c65-a472-cba1c0e4e27c": {
+      "connections": {
+        "true": "6d691b03-a561-47c5-9d4a-b0cb16e3bb6c"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1877,
+      "y": 476.5
+    },
+    "0829ae09-ef5a-4af9-9060-cd0d9c5488d5": {
+      "connections": {
+        "Error": "7b5be373-707d-4bde-b2f2-2d54bff50a6b",
+        "Success": "63b46265-f44a-40b5-ab6e-bcbe6882ff26",
+        "hasSession": "f91ffee0-880f-470d-80b5-ee25a939b3c4"
+      },
+      "displayName": "Script: Read userInfo without a session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 966,
+      "y": 437
+    },
+    "09a4de50-d1f2-4e7d-be86-8d3d538bc412": {
+      "connections": {
+        "back": "0b7ac931-0776-4ece-86f5-45a373beacd9",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "verify": "159b393e-fee4-46bf-a796-8b7d76871c46"
+      },
+      "displayName": "Navigate",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2423,
+      "y": 431.5
+    },
+    "0b7ac931-0776-4ece-86f5-45a373beacd9": {
+      "connections": {
+        "back": "09a4de50-d1f2-4e7d-be86-8d3d538bc412",
+        "duplicate": "93382413-1599-405e-a4a0-6074adff359c",
+        "invalidPhoneNumber": "c8ff2f64-3ed3-45c2-bd96-64ef2033dd47",
+        "invalidphone": "93382413-1599-405e-a4a0-6074adff359c",
+        "maxLimitReached": "22d595c0-bd1d-438f-a347-d9f87028a1b7",
+        "missingConfirmPhoneNumber": "93382413-1599-405e-a4a0-6074adff359c",
+        "missingCountryCode": "93382413-1599-405e-a4a0-6074adff359c",
+        "missingPhoneNumber": "93382413-1599-405e-a4a0-6074adff359c",
+        "phoneNumberNotMatched": "93382413-1599-405e-a4a0-6074adff359c",
+        "verify": "8feb997b-b71f-470e-a381-8b95d90c3c2e"
+      },
+      "displayName": "Collect Phone Number",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2692,
+      "y": 364.3333333333333
+    },
+    "159b393e-fee4-46bf-a796-8b7d76871c46": {
+      "connections": {
+        "AddMobile": "2a586874-3272-4a1b-8a90-fd01f498a0b5",
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "4975fee9-aeb2-4fe2-9dbf-41854b5841a1"
+      },
+      "displayName": "Script: Update MFA Method",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2684,
+      "y": 163.66666666666669
+    },
+    "22d595c0-bd1d-438f-a347-d9f87028a1b7": {
+      "connections": {
+        "true": "0b7ac931-0776-4ece-86f5-45a373beacd9"
+      },
+      "displayName": "Message: Max Limit",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3016,
+      "y": 621
+    },
+    "2a586874-3272-4a1b-8a90-fd01f498a0b5": {
+      "connections": {
+        "Error": "ddb4d342-61e1-4b86-abc5-0367661cb38a",
+        "Failed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Successful": "4975fee9-aeb2-4fe2-9dbf-41854b5841a1"
+      },
+      "displayName": "Script: AddRemoveMobilePhone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3010,
+      "y": 80
+    },
+    "3dbb10ae-4696-4718-9129-4209f45dde10": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "98a82a72-885d-4b0b-9b5c-2fad7401a9bb"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 390,
+      "y": 450
+    },
+    "4975fee9-aeb2-4fe2-9dbf-41854b5841a1": {
+      "connections": {
+        "failure": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "MFA Added - Send Mail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3341,
+      "y": 31.5
+    },
+    "500f2343-d774-46ce-a45d-f37d009912a4": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max limit reached for back",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 70,
+      "y": 176.25
+    },
+    "63b46265-f44a-40b5-ab6e-bcbe6882ff26": {
+      "connections": {
+        "true": "011c5657-3fbc-4c65-a472-cba1c0e4e27c"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 1585,
+      "y": 450
+    },
+    "65679dcd-4c2a-4429-873e-f25f58b5069a": {
+      "connections": {},
+      "displayName": "Error",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3572.5,
+      "y": 649.8958282470703
+    },
+    "6d691b03-a561-47c5-9d4a-b0cb16e3bb6c": {
+      "connections": {
+        "false": "09a4de50-d1f2-4e7d-be86-8d3d538bc412",
+        "true": "09a4de50-d1f2-4e7d-be86-8d3d538bc412"
+      },
+      "displayName": "IJ: Phone Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2136,
+      "y": 484
+    },
+    "7b5be373-707d-4bde-b2f2-2d54bff50a6b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1321,
+      "y": 333.33333333333337
+    },
+    "852e574b-3775-4030-9f7b-e5401650a651": {
+      "connections": {
+        "true": "159b393e-fee4-46bf-a796-8b7d76871c46"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 70,
+      "y": 333.125
+    },
+    "8feb997b-b71f-470e-a381-8b95d90c3c2e": {
+      "connections": {
+        "false": "09a4de50-d1f2-4e7d-be86-8d3d538bc412",
+        "true": "159b393e-fee4-46bf-a796-8b7d76871c46"
+      },
+      "displayName": "Phone Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3013,
+      "y": 450
+    },
+    "93382413-1599-405e-a4a0-6074adff359c": {
+      "connections": {
+        "true": "0b7ac931-0776-4ece-86f5-45a373beacd9"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3025,
+      "y": 811
+    },
+    "98a82a72-885d-4b0b-9b5c-2fad7401a9bb": {
+      "connections": {
+        "byPass": "0829ae09-ef5a-4af9-9060-cd0d9c5488d5",
+        "hasSession": "f91ffee0-880f-470d-80b5-ee25a939b3c4",
+        "noSession": "0829ae09-ef5a-4af9-9060-cd0d9c5488d5"
+      },
+      "displayName": "Script - Is Session Exist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 666,
+      "y": 437
+    },
+    "bc8d9ce0-c90d-4972-9710-e0636f6cdd55": {
+      "connections": {
+        "error": "65679dcd-4c2a-4429-873e-f25f58b5069a",
+        "retry": "6d691b03-a561-47c5-9d4a-b0cb16e3bb6c"
+      },
+      "displayName": "Script: LexisNexis Retry",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3568.666748046875,
+      "y": 476.3333282470703
+    },
+    "c8ff2f64-3ed3-45c2-bd96-64ef2033dd47": {
+      "connections": {
+        "true": "0b7ac931-0776-4ece-86f5-45a373beacd9"
+      },
+      "displayName": "Error: Invalid Phone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3012,
+      "y": 335
+    },
+    "db0e0247-e68b-42db-ab17-8677859ffb6c": {
+      "connections": {
+        "error": "65679dcd-4c2a-4429-873e-f25f58b5069a",
+        "highRisk": "bc8d9ce0-c90d-4972-9710-e0636f6cdd55",
+        "success": "159b393e-fee4-46bf-a796-8b7d76871c46"
+      },
+      "displayName": "Script: LexisNexis ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3334.3333740234375,
+      "y": 478.3333282470703
+    },
+    "ddb4d342-61e1-4b86-abc5-0367661cb38a": {
+      "connections": {
+        "try again": "2a586874-3272-4a1b-8a90-fd01f498a0b5"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3343,
+      "y": 216.75
+    },
+    "f91ffee0-880f-470d-80b5-ee25a939b3c4": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Success": "63b46265-f44a-40b5-ab6e-bcbe6882ff26"
+      },
+      "displayName": "Script - Read User Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1275,
+      "y": 626.1666666666667
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3925,
+      "y": 141.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3982,
+      "y": 830.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 522.0833333333334
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

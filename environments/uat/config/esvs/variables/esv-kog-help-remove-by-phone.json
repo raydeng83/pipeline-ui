@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kog-help-remove-by-phone",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KOG_HELP_REMOVE_BY_PHONE}"
+}

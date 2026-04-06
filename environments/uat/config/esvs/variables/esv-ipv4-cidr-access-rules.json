@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ipv4-cidr-access-rules",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_IPV4_CIDR_ACCESS_RULES}"
+}

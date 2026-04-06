@@ -1,0 +1,17 @@
+{
+  "_id": "e21ee806-3a25-4395-a1c8-2f754490bc60",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1434115574",
+  "_type": {
+    "_id": "product-PingOneProtectResultNode",
+    "collection": true,
+    "name": "PingOne Protect Result",
+    "version": "1.0"
+  },
+  "status": "SUCCESS"
+}

@@ -1,0 +1,67 @@
+{
+  "_id": "0b7ac931-0776-4ece-86f5-45a373beacd9",
+  "_outcomes": [
+    {
+      "displayName": "verify",
+      "id": "verify"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "missingCountryCode",
+      "id": "missingCountryCode"
+    },
+    {
+      "displayName": "missingPhoneNumber",
+      "id": "missingPhoneNumber"
+    },
+    {
+      "displayName": "missingConfirmPhoneNumber",
+      "id": "missingConfirmPhoneNumber"
+    },
+    {
+      "displayName": "phoneNumberNotMatched",
+      "id": "phoneNumberNotMatched"
+    },
+    {
+      "displayName": "maxLimitReached",
+      "id": "maxLimitReached"
+    },
+    {
+      "displayName": "duplicate",
+      "id": "duplicate"
+    },
+    {
+      "displayName": "invalidphone",
+      "id": "invalidphone"
+    },
+    {
+      "displayName": "invalidPhoneNumber",
+      "id": "invalidPhoneNumber"
+    }
+  ],
+  "_rev": "1604010151",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "0f2157e4-9bbe-469c-9316-68cf16385c7e",
+      "displayName": "Collect Phone Number",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "set_recovery_method"
+  },
+  "pageHeader": {
+    "en": "2_phone_number"
+  },
+  "stage": "{\"pageFooter\":{\"en\":\"additional_recovery_methods\"}}"
+}

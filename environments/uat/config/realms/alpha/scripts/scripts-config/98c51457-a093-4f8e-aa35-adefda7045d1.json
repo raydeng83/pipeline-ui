@@ -1,0 +1,16 @@
+{
+  "_id": "98c51457-a093-4f8e-aa35-adefda7045d1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286701713,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054302168,
+  "name": "KYID.2B1.Journey.UpdateEmail.AlreadyExists",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.UpdateEmail.AlreadyExists.js"
+  }
+}

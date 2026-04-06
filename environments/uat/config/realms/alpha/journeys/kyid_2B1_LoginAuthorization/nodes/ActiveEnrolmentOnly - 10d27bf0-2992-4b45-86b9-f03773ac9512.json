@@ -1,0 +1,17 @@
+{
+  "_id": "10d27bf0-2992-4b45-86b9-f03773ac9512",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-831645294",
+  "_type": {
+    "_id": "SetSuccessUrlNode",
+    "collection": true,
+    "name": "Success URL",
+    "version": "1.0"
+  },
+  "successUrl": "https://sso.dev2.kyid.ky.gov/am/XUI/?realm=/alpha&authIndexType=service&authIndexValue=kyid_2B1_getActiveEnrollment"
+}

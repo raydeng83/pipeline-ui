@@ -1,0 +1,16 @@
+{
+  "_id": "7727c142-86d5-4aa4-a83a-8b7bfe6a8485",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=aeeaf0b2-7303-4366-bb98-52421c314893,ou=user,ou=am-config",
+  "creationDate": 1733427926930,
+  "default": false,
+  "description": "This script is used to call KOG userProfileAPI in PTA.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287844457,
+  "name": "Le-KYID.Journey.ReadUserKOGProfileInfo",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Le-KYID.Journey.ReadUserKOGProfileInfo.js"
+  }
+}

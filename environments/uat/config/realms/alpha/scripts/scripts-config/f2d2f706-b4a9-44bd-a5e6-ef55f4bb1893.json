@@ -1,0 +1,16 @@
+{
+  "_id": "f2d2f706-b4a9-44bd-a5e6-ef55f4bb1893",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286709335,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766055233233,
+  "name": "KYID.2B1.Journey.Login.Register.UpdateMFAMethod_SP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Login.Register.UpdateMFAMethod_SP.js"
+  }
+}

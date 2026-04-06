@@ -1,0 +1,222 @@
+{
+  "_id": "KYID_2B1_Change_Email",
+  "_rev": "2125204669",
+  "enabled": true,
+  "entryNodeId": "1ca20986-36af-4147-ae8f-63bdba4f314e",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "06c8e13f-7549-432b-9c85-987a8628cc2e": {
+      "connections": {
+        "False": "7550f1c4-daed-4992-992b-367d53c70380",
+        "True": "722c20c6-f3c7-441c-ac50-e3ed145017ca"
+      },
+      "displayName": "Script: Check Back Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1891,
+      "y": 338
+    },
+    "1ca20986-36af-4147-ae8f-63bdba4f314e": {
+      "connections": {
+        "hasSession": "5b1efd17-d0f9-4680-b863-fd49a6d30a8e",
+        "noSession": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:ValidSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 338
+    },
+    "41f7852f-762f-4d55-bb7d-e8e550481ac3": {
+      "connections": {
+        "try again": "82aaf90c-1d41-4cce-ba6a-a68ffc10f526"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3319,
+      "y": 265.375
+    },
+    "5b1efd17-d0f9-4680-b863-fd49a6d30a8e": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Success": "621b7fdd-13db-4db2-a50b-2d054c592e5e"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 485,
+      "y": 338
+    },
+    "621b7fdd-13db-4db2-a50b-2d054c592e5e": {
+      "connections": {
+        "Error": "de79eac8-120c-4c66-a038-8ab8d6ffd111",
+        "User Found": "722c20c6-f3c7-441c-ac50-e3ed145017ca",
+        "User Not Found": "7f89517a-0d2a-404f-9fb7-26510a4d97f8"
+      },
+      "displayName": "Script:GetUserID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 750,
+      "y": 325
+    },
+    "65d0cc89-8be4-4929-8dee-55f34dea87a5": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "82aaf90c-1d41-4cce-ba6a-a68ffc10f526"
+      },
+      "displayName": "Update MFA Object",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2720,
+      "y": 338
+    },
+    "69ce0795-14ff-4107-86f2-c142c7ef68a2": {
+      "connections": {
+        "failed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "userdonotexist": "e88b04cd-eb5b-478d-b09f-261f81763408",
+        "userexist": "6c663a6b-c18d-43ee-a2fd-ff6eea4cde18"
+      },
+      "displayName": "Script:UserExisitinKOG",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1300,
+      "y": 325
+    },
+    "6c663a6b-c18d-43ee-a2fd-ff6eea4cde18": {
+      "connections": {
+        "true": "722c20c6-f3c7-441c-ac50-e3ed145017ca"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1601,
+      "y": 345.6666666666667
+    },
+    "722c20c6-f3c7-441c-ac50-e3ed145017ca": {
+      "connections": {
+        "Back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "BlankOTP": "6c663a6b-c18d-43ee-a2fd-ff6eea4cde18",
+        "EmailDifferent": "6c663a6b-c18d-43ee-a2fd-ff6eea4cde18",
+        "Verify": "69ce0795-14ff-4107-86f2-c142c7ef68a2",
+        "user exist": "6c663a6b-c18d-43ee-a2fd-ff6eea4cde18"
+      },
+      "displayName": "Change Email Screen",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1011,
+      "y": 285
+    },
+    "7550f1c4-daed-4992-992b-367d53c70380": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "highRisk": "e6dd3f64-e98a-47ff-b469-643ee4bf1f92",
+        "success": "a809c53c-e7e9-48b0-a420-32c9cc21dee9"
+      },
+      "displayName": "Script: LexisNexis",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2194,
+      "y": 325
+    },
+    "7f89517a-0d2a-404f-9fb7-26510a4d97f8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "UserNotFound",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1011,
+      "y": 596
+    },
+    "82aaf90c-1d41-4cce-ba6a-a68ffc10f526": {
+      "connections": {
+        "Error": "41f7852f-762f-4d55-bb7d-e8e550481ac3",
+        "Failed": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Successful": "bee9e4fb-a8ed-4683-ade3-d289fc54b5ed"
+      },
+      "displayName": "UpdatePrimaryEmailInAD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2999,
+      "y": 325
+    },
+    "a809c53c-e7e9-48b0-a420-32c9cc21dee9": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "65d0cc89-8be4-4929-8dee-55f34dea87a5"
+      },
+      "displayName": "Patch",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2450,
+      "y": 341.6666666666667
+    },
+    "bee9e4fb-a8ed-4683-ade3-d289fc54b5ed": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Update Success Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3319,
+      "y": 146.75
+    },
+    "de79eac8-120c-4c66-a038-8ab8d6ffd111": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node: Error",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1011,
+      "y": 80
+    },
+    "e6dd3f64-e98a-47ff-b469-643ee4bf1f92": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "retry": "1ca20986-36af-4147-ae8f-63bdba4f314e"
+      },
+      "displayName": "Script: Retry",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2465,
+      "y": 131.83333333333331
+    },
+    "e88b04cd-eb5b-478d-b09f-261f81763408": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "06c8e13f-7549-432b-9c85-987a8628cc2e"
+      },
+      "displayName": "Email Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1601,
+      "y": 201.33333333333331
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3639,
+      "y": 365.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3319,
+      "y": 406.25
+    },
+    "startNode": {
+      "x": 70,
+      "y": 365.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

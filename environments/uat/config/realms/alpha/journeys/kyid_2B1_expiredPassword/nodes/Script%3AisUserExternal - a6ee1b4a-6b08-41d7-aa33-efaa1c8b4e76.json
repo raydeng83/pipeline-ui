@@ -1,0 +1,36 @@
+{
+  "_id": "a6ee1b4a-6b08-41d7-aa33-efaa1c8b4e76",
+  "_outcomes": [
+    {
+      "displayName": "Yes",
+      "id": "Yes"
+    },
+    {
+      "displayName": "No",
+      "id": "No"
+    },
+    {
+      "displayName": "Neither",
+      "id": "Neither"
+    }
+  ],
+  "_rev": "-852370352",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Yes",
+    "No",
+    "Neither"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "4536ba27-f4e2-4574-abbb-df644ddb507e"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "365a0af0-830a-478a-928b-5bcb3167f9e6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286717595,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766053874744,
+  "name": "KYID.2B1.Journey.PatchUpdatedPrimaryEmail",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.PatchUpdatedPrimaryEmail.js"
+  }
+}

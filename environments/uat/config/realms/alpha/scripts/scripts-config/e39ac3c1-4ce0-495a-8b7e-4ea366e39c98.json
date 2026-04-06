@@ -1,0 +1,16 @@
+{
+  "_id": "e39ac3c1-4ce0-495a-8b7e-4ea366e39c98",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "Updating email in the node state, since it is needed for the change password in AD",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287844841,
+  "name": "KYID.Journey.ForgotPassword.SettingMailInNodeStateForADUpdating",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ForgotPassword.SettingMailInNodeStateForADUpdating.js"
+  }
+}

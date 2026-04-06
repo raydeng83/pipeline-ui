@@ -1,0 +1,166 @@
+{
+  "_id": "kyid_mfaRegistrationHasSession",
+  "_rev": "-26507489",
+  "description": "Users has session",
+  "enabled": true,
+  "entryNodeId": "88d80ab2-2bfb-4332-8e4f-4512ef15959a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "06c4aeef-3af8-482a-966f-5176f8b1c349": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1390,
+      "y": 1112
+    },
+    "38ed7c4b-5333-4371-aa77-3b33aeaec996": {
+      "connections": {
+        "false": "b7cd621e-a556-4dff-9cad-576bd4c141e1",
+        "true": "e387187a-f5c2-4b2b-8f21-63ddb8a3dcb5"
+      },
+      "displayName": "Register Symantec",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1391,
+      "y": 770
+    },
+    "5402463d-1090-4bae-a20c-e81372167e2b": {
+      "connections": {
+        "False": "06c4aeef-3af8-482a-966f-5176f8b1c349",
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Error: Registration Not Supported",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 934,
+      "y": 862.6666666666666
+    },
+    "5ab4fadb-8c28-4ac2-a699-f32087af7354": {
+      "connections": {
+        "false": "b7cd621e-a556-4dff-9cad-576bd4c141e1",
+        "true": "e387187a-f5c2-4b2b-8f21-63ddb8a3dcb5"
+      },
+      "displayName": "Register FR Code",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1393,
+      "y": 422
+    },
+    "88d80ab2-2bfb-4332-8e4f-4512ef15959a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b7cd621e-a556-4dff-9cad-576bd4c141e1"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 218,
+      "y": 686.5
+    },
+    "93d3f49b-21e3-4f26-b701-3ff2fa227b02": {
+      "connections": {
+        "false": "b7cd621e-a556-4dff-9cad-576bd4c141e1",
+        "true": "e387187a-f5c2-4b2b-8f21-63ddb8a3dcb5"
+      },
+      "displayName": "Register SMS|Voice OTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1391,
+      "y": 955
+    },
+    "b159b5af-eac3-4c4e-a936-45d1bed34dfa": {
+      "connections": {
+        "false": "b7cd621e-a556-4dff-9cad-576bd4c141e1",
+        "true": "e387187a-f5c2-4b2b-8f21-63ddb8a3dcb5"
+      },
+      "displayName": "Register FR Push Notification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1391,
+      "y": 584
+    },
+    "b7cd621e-a556-4dff-9cad-576bd4c141e1": {
+      "connections": {
+        "Default": "88d80ab2-2bfb-4332-8e4f-4512ef15959a",
+        "email": "f3f7fb07-f3b3-4ded-a8d7-36908d880d89",
+        "otp": "5ab4fadb-8c28-4ac2-a699-f32087af7354",
+        "sms": "93d3f49b-21e3-4f26-b701-3ff2fa227b02",
+        "swk": "b159b5af-eac3-4c4e-a936-45d1bed34dfa",
+        "symantec": "38ed7c4b-5333-4371-aa77-3b33aeaec996",
+        "voice": "93d3f49b-21e3-4f26-b701-3ff2fa227b02"
+      },
+      "displayName": "Page: Security Methods for registration",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 933,
+      "y": 407.33333333333337
+    },
+    "c2d8a8b2-7872-4548-8f92-7707b443dfdd": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1712,
+      "y": 272
+    },
+    "def64ad9-bba8-4628-a393-426f215c79ad": {
+      "connections": {
+        "false": "5402463d-1090-4bae-a20c-e81372167e2b",
+        "true": "b7cd621e-a556-4dff-9cad-576bd4c141e1"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 515,
+      "y": 838.5
+    },
+    "e387187a-f5c2-4b2b-8f21-63ddb8a3dcb5": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "b7cd621e-a556-4dff-9cad-576bd4c141e1"
+      },
+      "displayName": "Choose Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1766,
+      "y": 850
+    },
+    "f3f7fb07-f3b3-4ded-a8d7-36908d880d89": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c2d8a8b2-7872-4548-8f92-7707b443dfdd"
+      },
+      "displayName": "Register Email OTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1390,
+      "y": 267
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2201,
+      "y": 708
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2432,
+      "y": 1098.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 703.1
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

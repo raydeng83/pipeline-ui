@@ -1,0 +1,14 @@
+{
+  "_id": "ig.ide.kyid.gov",
+  "_type": {
+    "_id": "commConfigs",
+    "collection": true,
+    "name": "instance"
+  },
+  "decryptPrivateKey": "{     \"p\": \"_6zd3_GKO2TXfT8wRvSvQcPTL6oA2zjGgX4nXtMTwu5tSlf_XJilH5LVzcviCFdIuZ1z8Glx3dD9Tqz_tm65rK7gzcCgQWXLnB4hrKMSJxMkWY_0FMCLaicY1cnC593INP-4ykByM_ppDkutkLM2VnOhCaIsGKNaCuLg79aPaVU\",     \"kty\": \"RSA\",     \"q\": \"n-xRl9vbzeO3Ft_RN2ETa6iheUW6BpfhNjb7jNUuhsFTKewaNN0V51drD-xFrohzWQ9l5WBwUG0GGgqopmCBnr2oz27QZ2s_Z6AdbtFST-BqYpiy0DyucGY-hgnYO24_Am1GNOYHpesi6yqExHtsxsJnQmCCPQCTvpmXYLOZ9D8\",     \"d\": \"hgkgkcZebLpGwE1WLNzgTbZQeXvxCl5XkMULPsLl3BYTw88kap9XNtMYlkMV_Ckam9ZX2ctiubA8JjvUoBiPmxbbIxjb-Ycb1pYgUp0bWS4AQPUS80asfkZm_LriwBUJTG1-0zGfip89ofTr0TipFcV91r6SQ_yN44qz1NpXovx5Ofcc-jnUnPjImDPxqsaDIcmTXSw9EeFJQWddNyr7tKXgln45WqtIPmRnZ4HeTkHZ48Wo_7MzKEHe_OTA7lKp-A8UpZi-aKWcSNjer03YHxLMuBnpcU3iY7Ymw1MnmyrUdp4hZIfag4BM3ux2tbVwP1ztO2lqO2yTaJMdIKDlkQ\",     \"e\": \"AQAB\",     \"use\": \"sig\",     \"kid\": \"sig-1723835145\",     \"qi\": \"8g-cRgSnOJozyYyL5IdEiOpFlIDk722WNomcxx0DisgRXgmykLSpJHjvI9vAvq-IrXR2UXCZEaVBnizDApTHjJOmvwvzj1s_ucpFO2sE5TbIvUVg9KsDk4P1uGTLNDqp5rdzVioo3L4rvncqUjXiq9OplPBcpatiNQ-vAwklm2Q\",     \"dp\": \"w4ao22U1qHxTC5ZyTiE7khi2_cGODBicPlWCuFLFzxJVhEBNqruVs9KwLUUZY_WUSVbvXlDVYqQ7w5orqJF-71-Bzffc1oaJsqecaxD-heFusAuVxvUE6TZjGMPGiVmjjVxvLkUg0T1UcDlRz9It4Olmox5hiKoL5z1gdipo3E0\",     \"alg\": \"RS512\",     \"dq\": \"FdUaUoQGXvZOgYXutwO-tfzghoDZY5sKeO9KqjBUWLs90kRUU5E3M00A5byYyroAHVF31Le0vZYUtitsWMJmD7jOufrj4qqGjmwSeJWFCjiV7X3xM3KFUfzzXjMr3PkxCvDGG-SneKRAMSCt3XEIKZ5SoIIyZYeVo_it7Nq4Ets\",     \"n\": \"n7hip_42qSfVJsFsms-3qL7fQf8ZdBOPDcpEG1xvq9LniMdClHc03BXuJp0uen0-SzS8iQM7mDt1ZOLdkGdx6vjeulZn4r7Zg24sCXvQszs-GS3K61TRL_KecURpnrco_wkXgm--l9TEqHAmTxha2kyrr4M4mpsCvymemkk2LYLniy-E135nJ3WIwkbw9L9rMD7gGSoX-lXKZRGixFPqJsVY7Qq4DTdxRhWo-yR0hrf32lzU6RlVbFBbdt9Ey9KOO1eUQFydw3EpefU5tguFCnQn1fpSzxETtcsRW6dUCIlvYdY7EaDv34vFeWe_oILDfZJP3bwhI5olTRjC4Hzv6w\" }",
+  "igURL": "https://ig.ide.kyid.ky.gov:443",
+  "jwtExpiration": 10000,
+  "returningJWTName": "IGCommJWT",
+  "sendToIGSecurity": "Signed",
+  "signPublicKey": "{     \"kty\": \"RSA\",     \"e\": \"AQAB\",     \"use\": \"sig\",     \"kid\": \"sig-1723834881\",     \"alg\": \"RS512\",     \"n\": \"xx21p4zovQNqpIrbjNHOfVunQFcrGqJh37UA4CvYDSFNceKF7FTyLLlAdU3ZD_5uNBNUIPrmj1nNxcq9SZXoMDFKrsZNw321WU9UFLQvrKyFx1WrbWXPS7BIBS7Zcj4-GcUzrKwqiUz_lWKedSCfzais-P4v3G53a_z3eloXUsCkLg-p7EiDkCViANWuH_Kbnpqt6wUfA_xnvTQsryJI0IMctrowuO2DjiZ3vzhjhX1MLy_fiRdXNv4WdWzy5k1cf2xrToisQKmnkEu0VDLwAhpSTT-TsGNolrsuWl5y4vqYjX81jAQHJMxd8LoHloOiY0Z55dBb1d6XPwd86q4FRw\" }"
+}

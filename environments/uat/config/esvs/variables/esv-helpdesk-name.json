@@ -1,0 +1,6 @@
+{
+  "_id": "esv-helpdesk-name",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_HELPDESK_NAME}"
+}

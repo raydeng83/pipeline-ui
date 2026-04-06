@@ -1,0 +1,16 @@
+{
+  "_id": "67ef5cfc-6e7c-4e14-901e-5e33fb5ec3dc",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1757754482065,
+  "default": false,
+  "description": "This script used to update the user profile in KOG using SIH API.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054321235,
+  "name": "KYID.2B1.Journey.UpdateUserStatusSIHAPI",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.UpdateUserStatusSIHAPI.js"
+  }
+}

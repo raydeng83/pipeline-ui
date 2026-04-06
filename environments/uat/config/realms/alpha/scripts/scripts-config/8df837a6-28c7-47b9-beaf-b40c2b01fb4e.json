@@ -1,0 +1,16 @@
+{
+  "_id": "8df837a6-28c7-47b9-beaf-b40c2b01fb4e",
+  "context": "LIBRARY",
+  "createdBy": "id=69b0bd73-18cc-4daa-abe3-b281bc59ab17,ou=user,ou=am-config",
+  "creationDate": 1759496023839,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=69b0bd73-18cc-4daa-abe3-b281bc59ab17,ou=user,ou=am-config",
+  "lastModifiedDate": 1759496023839,
+  "name": "KYID.2B1.Library.AuditDetails copy",
+  "script": {
+    "file": "scripts-content/LIBRARY/KYID.2B1.Library.AuditDetails copy.js"
+  }
+}

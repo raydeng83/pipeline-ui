@@ -1,0 +1,16 @@
+{
+  "_id": "04ba4547-0759-44fb-b5a3-0bf67a5c5f0d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754324172080,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1773218306985,
+  "name": "kyid.2B1.Journey.ForgotEmail.ShowVerifyIdentityOptions",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/kyid.2B1.Journey.ForgotEmail.ShowVerifyIdentityOptions.js"
+  }
+}

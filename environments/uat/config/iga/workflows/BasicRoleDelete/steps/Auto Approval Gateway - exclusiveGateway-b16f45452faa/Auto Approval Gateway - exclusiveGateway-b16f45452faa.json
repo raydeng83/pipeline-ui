@@ -1,0 +1,23 @@
+{
+  "displayName": "Auto Approval Gateway",
+  "name": "exclusiveGateway-b16f45452faa",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "skipApproval  == true",
+        "outcome": "AutoApproval",
+        "step": "scriptTask-0359a9d77ee2"
+      },
+      {
+        "condition": "skipApproval == false",
+        "outcome": "Approval",
+        "step": "approvalTask-74cf85c35437"
+      }
+    ],
+    "script": {
+      "file": "Auto Approval Gateway - exclusiveGateway-b16f45452faa.js"
+    }
+  },
+  "type": "scriptTask"
+}

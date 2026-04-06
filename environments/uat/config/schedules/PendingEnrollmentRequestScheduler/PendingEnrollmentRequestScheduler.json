@@ -1,0 +1,23 @@
+{
+  "_id": "schedule/PendingEnrollmentRequestScheduler",
+  "concurrentExecution": false,
+  "enabled": false,
+  "endTime": null,
+  "invokeContext": {
+    "script": {
+      "globals": {},
+      "source": "proccessPendingEnrollments();\nfunction proccessPendingEnrollments() {\n    try {\n        logger.error(\"Processing Pending Enrollments\");\n        var response = openidm.read('endpoint/provisionPendingEnrollments', {});\n        logger.error(\"Response is \"+ response)\n        if(response){\n            logger.error(\"Pending Enrollments Processed Successfully\" + JSON.stringify(response));\n        }\n         \n        \n    } catch (error) {\n        logger.error(\"Error in Processing Pending Enrollments: \" + error);\n    }\n}",
+      "type": "text/javascript"
+    }
+  },
+  "invokeLogLevel": "info",
+  "invokeService": "org.forgerock.openidm.script",
+  "misfirePolicy": "fireAndProceed",
+  "persisted": true,
+  "recoverable": false,
+  "repeatCount": -1,
+  "repeatInterval": 43200000,
+  "schedule": null,
+  "startTime": null,
+  "type": "simple"
+}

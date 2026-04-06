@@ -1,0 +1,6 @@
+{
+  "_id": "esv-mailserver-port",
+  "description": "Mail Server Port Number",
+  "expressionType": "number",
+  "valueBase64": "${ESV_MAILSERVER_PORT}"
+}

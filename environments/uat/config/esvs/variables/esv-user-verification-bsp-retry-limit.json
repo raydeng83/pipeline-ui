@@ -1,0 +1,6 @@
+{
+  "_id": "esv-user-verification-bsp-retry-limit",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_USER_VERIFICATION_BSP_RETRY_LIMIT}"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "3ceccaef-419c-4b65-b3f1-ac84f4ac4808",
+  "context": "SAML2_NAMEID_MAPPER",
+  "createdBy": "id=f8b3dc13-fdd1-4223-a994-d036036730b2,ou=user,ou=am-config",
+  "creationDate": 1750798969424,
+  "default": false,
+  "description": "Pass Widow Account Name as NameID",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=f8b3dc13-fdd1-4223-a994-d036036730b2,ou=user,ou=am-config",
+  "lastModifiedDate": 1750799009682,
+  "name": "KYID.SAML2.SPNameIDMapper_windowAccount",
+  "script": {
+    "file": "scripts-content/SAML2_NAMEID_MAPPER/KYID.SAML2.SPNameIDMapper_windowAccount.js"
+  }
+}

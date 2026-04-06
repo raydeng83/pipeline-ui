@@ -1,0 +1,27 @@
+{
+  "_id": "6ee71bc1-2f5b-4831-8867-0dae0c32bae5",
+  "_outcomes": [
+    {
+      "displayName": "Sent",
+      "id": "SENT"
+    },
+    {
+      "displayName": "Not Registered",
+      "id": "NOT_REGISTERED"
+    }
+  ],
+  "_rev": "-1610484760",
+  "_type": {
+    "_id": "PushAuthenticationSenderNode",
+    "collection": true,
+    "name": "Push Sender",
+    "version": "1.0"
+  },
+  "captureFailure": false,
+  "contextInfo": false,
+  "customPayload": [],
+  "mandatory": true,
+  "messageTimeout": 20000,
+  "pushType": "DEFAULT",
+  "userMessage": {}
+}

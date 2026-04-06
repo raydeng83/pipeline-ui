@@ -1,0 +1,18 @@
+{
+  "displayName": "Update Request",
+  "name": "scriptTask-0359a9d77ee2",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "Update Request - scriptTask-0359a9d77ee2.js"
+    }
+  },
+  "type": "scriptTask"
+}

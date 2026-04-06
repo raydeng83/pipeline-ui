@@ -1,0 +1,250 @@
+{
+  "_id": "kyid_loginMain",
+  "_rev": "486285456",
+  "enabled": true,
+  "entryNodeId": "f6ae9dce-7b66-4055-9c11-2bb3b31f5a23",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": true,
+  "noSession": false,
+  "nodes": {
+    "03d8c00f-9140-470b-b867-37f494578887": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Redirection with Locale",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1353,
+      "y": 404
+    },
+    "1abab701-e4b9-4ea8-90d6-1a689652afa0": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "b1d321af-ac18-4e0e-9351-b8382042d42e"
+      },
+      "displayName": "Script: Initialize Journey",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 433,
+      "y": 258
+    },
+    "44912310-44ad-4f2a-bae2-a01a687ed2eb": {
+      "connections": {
+        "outcome": "4acd24a4-5b30-40d3-9db5-ac040518308a"
+      },
+      "displayName": "PingOne Protect Result",
+      "nodeType": "product-PingOneProtectResultNode",
+      "version": "1.0",
+      "x": 2089.34375,
+      "y": 126.015625
+    },
+    "4acd24a4-5b30-40d3-9db5-ac040518308a": {
+      "connections": {
+        "false": "6c822847-cd42-4c8c-8206-c99147a085c4",
+        "true": "f180ed07-e83f-4917-bdcd-667e0fcc1cb9"
+      },
+      "displayName": "IJ03: Just In Time Provisioning",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2385,
+      "y": 297
+    },
+    "52fd3356-4a77-483a-9e29-957ac9363db1": {
+      "connections": {
+        "true": "9572bfa1-ec98-401a-b519-f2700f7bd59c"
+      },
+      "displayName": "Script: Does App Requires MFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2710,
+      "y": 29.015625
+    },
+    "6c822847-cd42-4c8c-8206-c99147a085c4": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Update App Failure Count",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2195,
+      "y": 441
+    },
+    "72809272-9245-4dad-b48c-314590764850": {
+      "connections": {
+        "outcome": "1abab701-e4b9-4ea8-90d6-1a689652afa0"
+      },
+      "displayName": "Set Session Properties",
+      "nodeType": "SetSessionPropertiesNode",
+      "version": "1.0",
+      "x": 188,
+      "y": 275
+    },
+    "7e040253-5879-48ba-b758-8d3ccc74b292": {
+      "connections": {
+        "clientError": "b3eade63-bca0-41b6-b054-291c32d1250c",
+        "exceed": "b3eade63-bca0-41b6-b054-291c32d1250c",
+        "failure": "b3eade63-bca0-41b6-b054-291c32d1250c",
+        "high": "44912310-44ad-4f2a-bae2-a01a687ed2eb",
+        "low": "44912310-44ad-4f2a-bae2-a01a687ed2eb",
+        "medium": "44912310-44ad-4f2a-bae2-a01a687ed2eb"
+      },
+      "displayName": "PingOne Protect Evaluation",
+      "nodeType": "product-PingOneProtectEvaluationNode",
+      "version": "1.0",
+      "x": 1718.34375,
+      "y": 79.015625
+    },
+    "926e7479-982e-42ff-8eb4-40413f13d2d4": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "f9255ade-55cb-43c2-a085-d0f1c68d3eec"
+      },
+      "displayName": "Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1012,
+      "y": 467.2222137451172
+    },
+    "93829c47-a313-49ef-9ab5-4c4a2ac3de5a": {
+      "connections": {
+        "false": "6c822847-cd42-4c8c-8206-c99147a085c4",
+        "true": "7e040253-5879-48ba-b758-8d3ccc74b292"
+      },
+      "displayName": "IJ02: Pass Through Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1718,
+      "y": 388
+    },
+    "9572bfa1-ec98-401a-b519-f2700f7bd59c": {
+      "connections": {
+        "false": "6c822847-cd42-4c8c-8206-c99147a085c4",
+        "true": "e29d07e9-89d4-4cc6-8c00-126824e5f198"
+      },
+      "displayName": "IJ06: First Time Login",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2629,
+      "y": 155
+    },
+    "9df0da42-b5c1-4ce5-902f-324962806c22": {
+      "connections": {
+        "false": "93829c47-a313-49ef-9ab5-4c4a2ac3de5a",
+        "true": "7e040253-5879-48ba-b758-8d3ccc74b292"
+      },
+      "displayName": "IJ01: Kerberos Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1354,
+      "y": 237
+    },
+    "a2234849-cf0c-4bc4-be44-eee55c0af9e3": {
+      "connections": {
+        "false": "6c822847-cd42-4c8c-8206-c99147a085c4",
+        "true": "52fd3356-4a77-483a-9e29-957ac9363db1"
+      },
+      "displayName": "IJ05: MFA Registration & Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2406,
+      "y": 29
+    },
+    "b1d321af-ac18-4e0e-9351-b8382042d42e": {
+      "connections": {
+        "False": "f9255ade-55cb-43c2-a085-d0f1c68d3eec",
+        "True": "926e7479-982e-42ff-8eb4-40413f13d2d4"
+      },
+      "displayName": "Script:Fetch RequestId from Request URL Cookie",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 682,
+      "y": 222
+    },
+    "b3eade63-bca0-41b6-b054-291c32d1250c": {
+      "connections": {
+        "outcome": "4acd24a4-5b30-40d3-9db5-ac040518308a"
+      },
+      "displayName": "PingOne Protect Result",
+      "nodeType": "product-PingOneProtectResultNode",
+      "version": "1.0",
+      "x": 2082.34375,
+      "y": 247.015625
+    },
+    "e29d07e9-89d4-4cc6-8c00-126824e5f198": {
+      "connections": {
+        "false": "6c822847-cd42-4c8c-8206-c99147a085c4",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "IJ07: Need KOG Visit Redirection",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2867,
+      "y": 159
+    },
+    "f180ed07-e83f-4917-bdcd-667e0fcc1cb9": {
+      "connections": {
+        "false": "6c822847-cd42-4c8c-8206-c99147a085c4",
+        "true": "a2234849-cf0c-4bc4-be44-eee55c0af9e3"
+      },
+      "displayName": "IJ04: Read Claims",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2689,
+      "y": 368
+    },
+    "f6ae9dce-7b66-4055-9c11-2bb3b31f5a23": {
+      "connections": {
+        "true": "fc85b479-ca4f-45ae-a278-a0fbae824e7b"
+      },
+      "displayName": "Script:GetAcceptLangHeader",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 52,
+      "y": 49
+    },
+    "f9255ade-55cb-43c2-a085-d0f1c68d3eec": {
+      "connections": {
+        "SetLocaleInURL": "03d8c00f-9140-470b-b867-37f494578887",
+        "hasSession": "4acd24a4-5b30-40d3-9db5-ac040518308a",
+        "noSession": "9df0da42-b5c1-4ce5-902f-324962806c22"
+      },
+      "displayName": "Script: Check Existing Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 935,
+      "y": 273.5
+    },
+    "fc85b479-ca4f-45ae-a278-a0fbae824e7b": {
+      "connections": {
+        "CONFIGURATION_FAILED": "72809272-9245-4dad-b48c-314590764850",
+        "outcome": "72809272-9245-4dad-b48c-314590764850"
+      },
+      "displayName": "Set UserLangPref",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 378,
+      "y": 22
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3053,
+      "y": 488
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2357,
+      "y": 598
+    },
+    "startNode": {
+      "x": 70,
+      "y": 269.6666666666667
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[\"Login\"]"
+  }
+}

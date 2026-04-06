@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kog-help-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KOG_HELP_URL}"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ridp-experian-role",
+  "description": "",
+  "expressionType": "array",
+  "valueBase64": "${ESV_RIDP_EXPERIAN_ROLE}"
+}

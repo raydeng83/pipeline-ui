@@ -1,0 +1,41 @@
+{
+  "_id": "b1c0773e-7942-4cb4-bd51-71e7959cb348",
+  "_outcomes": [
+    {
+      "displayName": "Successful",
+      "id": "Successful"
+    },
+    {
+      "displayName": "failOrInactive",
+      "id": "failOrInactive"
+    },
+    {
+      "displayName": "connFail",
+      "id": "connFail"
+    },
+    {
+      "displayName": "pwdExpire",
+      "id": "pwdExpire"
+    }
+  ],
+  "_rev": "1997495435",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Successful",
+    "failOrInactive",
+    "connFail",
+    "pwdExpire"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "108c77fe-fa7a-42b6-abb0-2c2b26afd408"
+}

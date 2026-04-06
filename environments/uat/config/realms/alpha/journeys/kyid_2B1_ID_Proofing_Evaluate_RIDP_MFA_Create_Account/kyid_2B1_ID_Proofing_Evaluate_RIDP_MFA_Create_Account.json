@@ -1,0 +1,94 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_Create_Account",
+  "_rev": "72179653",
+  "enabled": true,
+  "entryNodeId": "d5437205-41a1-4122-a3da-c49b0dcb3a24",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0a497788-080b-4a77-aca2-7dfbfc3dc5fb": {
+      "connections": {
+        "associatedAccounts": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "createAccount": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "highRiskTransaction": "fafad024-2c90-4454-a178-daa58774dd29",
+        "noMatchCreateAccount": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: MCI Search",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 796,
+      "y": 113.5
+    },
+    "0c5594c4-20d7-48e7-8c29-c4355d29be26": {
+      "connections": {
+        "errorMessage": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fafad024-2c90-4454-a178-daa58774dd29"
+      },
+      "displayName": "Script: Delete MCI Record",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1060,
+      "y": 65
+    },
+    "63114fc4-e2ff-46ad-85e3-c13cfd7cc80f": {
+      "connections": {
+        "associatedAccounts": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
+        "createAccount": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "highRisk": "fafad024-2c90-4454-a178-daa58774dd29",
+        "highRiskMCIDelete": "fafad024-2c90-4454-a178-daa58774dd29",
+        "noRiskCreateAccount": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
+        "notVerifiedMCISearch": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
+        "verifiedMCISearch": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb"
+      },
+      "displayName": "Script: Create Account",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 498,
+      "y": 89
+    },
+    "d5437205-41a1-4122-a3da-c49b0dcb3a24": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "63114fc4-e2ff-46ad-85e3-c13cfd7cc80f"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 155
+    },
+    "fafad024-2c90-4454-a178-daa58774dd29": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: High risk",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1353,
+      "y": 223.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1638,
+      "y": 369
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1644,
+      "y": 182.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 182.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

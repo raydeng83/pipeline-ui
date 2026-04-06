@@ -1,0 +1,56 @@
+{
+  "_id": "032ed01d-ffe2-40b0-8683-d201f5e0e7a1",
+  "_outcomes": [
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "invalidEmail",
+      "id": "invalidEmail"
+    },
+    {
+      "displayName": "max limit",
+      "id": "max limit"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "duplicate",
+      "id": "duplicate"
+    },
+    {
+      "displayName": "same primary email",
+      "id": "same primary email"
+    }
+  ],
+  "_rev": "-1166164939",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "back",
+    "next",
+    "invalidEmail",
+    "max limit",
+    "error",
+    "duplicate",
+    "same primary email"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "fb22b935-af3b-4e96-854c-085af208da79"
+}

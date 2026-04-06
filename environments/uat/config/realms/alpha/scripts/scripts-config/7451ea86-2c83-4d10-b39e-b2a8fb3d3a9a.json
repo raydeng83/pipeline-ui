@@ -1,0 +1,16 @@
+{
+  "_id": "7451ea86-2c83-4d10-b39e-b2a8fb3d3a9a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286694862,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1770091462937,
+  "name": "KYID.2B1.Journey.JIT.CreateNewUserandMFAinPING",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.JIT.CreateNewUserandMFAinPING.js"
+  }
+}

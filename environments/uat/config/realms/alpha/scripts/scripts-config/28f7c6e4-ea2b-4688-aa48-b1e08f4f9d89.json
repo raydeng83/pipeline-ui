@@ -1,0 +1,16 @@
+{
+  "_id": "28f7c6e4-ea2b-4688-aa48-b1e08f4f9d89",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "creationDate": 1773211842194,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1774244130473,
+  "name": "KYID.2B1.Journey.ManageProfile.Verification.Helpdesk.Retry.Check.Not.Used",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ManageProfile.Verification.Helpdesk.Retry.Check.Not.Used.js"
+  }
+}

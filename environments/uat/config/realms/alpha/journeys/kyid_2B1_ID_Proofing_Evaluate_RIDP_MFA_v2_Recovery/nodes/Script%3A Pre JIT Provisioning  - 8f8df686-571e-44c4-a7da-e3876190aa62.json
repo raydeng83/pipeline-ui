@@ -1,0 +1,26 @@
+{
+  "_id": "8f8df686-571e-44c4-a7da-e3876190aa62",
+  "_outcomes": [
+    {
+      "displayName": "jitProvisioning",
+      "id": "jitProvisioning"
+    }
+  ],
+  "_rev": "-1629456487",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "jitProvisioning"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "f8f49b44-3e60-4041-b156-0eeafeab9820"
+}

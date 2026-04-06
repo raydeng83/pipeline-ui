@@ -1,0 +1,6 @@
+{
+  "_id": "esv-dbconnector-jdbcurl",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_DBCONNECTOR_JDBCURL}"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "014b45a6-80ed-4279-8318-b9f2e608b933",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286680506,
+  "default": false,
+  "description": "This script is used to navigate to back and forth in a prerequisite journey",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766053814112,
+  "name": "KYID.2B1.Journey.NavigateForSubmitBtn",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.NavigateForSubmitBtn.js"
+  }
+}

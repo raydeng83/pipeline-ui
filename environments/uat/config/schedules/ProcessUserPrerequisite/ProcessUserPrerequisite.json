@@ -1,0 +1,23 @@
+{
+  "_id": "schedule/ProcessUserPrerequisite",
+  "concurrentExecution": false,
+  "enabled": true,
+  "endTime": null,
+  "invokeContext": {
+    "script": {
+      "globals": {},
+      "source": "(function () {\n    // Call the custom endpoint to initiate a process\n    var result = openidm.create('endpoint/UserPrerequisiteAPI', null, {\n        \"payload\": {},\n        \"action\": 4\n    });\n\n    // Optionally, handle the result returned by the custom endpoint\n    if (result && result!=null) {\n        logger.error(\"Custom endpoint called successfully. Response is - \"+ JSON.stringify(result));\n    } else {\n        logger.error(\"Error calling custom endpoint: \" + JSON.stringify(result));\n    }\n})();",
+      "type": "text/javascript"
+    }
+  },
+  "invokeLogLevel": "info",
+  "invokeService": "org.forgerock.openidm.script",
+  "misfirePolicy": "fireAndProceed",
+  "persisted": true,
+  "recoverable": false,
+  "repeatCount": 1,
+  "repeatInterval": 31536000000,
+  "schedule": null,
+  "startTime": null,
+  "type": "simple"
+}

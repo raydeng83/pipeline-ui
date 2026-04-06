@@ -1,0 +1,177 @@
+{
+  "_id": "kyid_mfaRegistrationRegisterEMAILOTP",
+  "_rev": "840190280",
+  "enabled": true,
+  "entryNodeId": "c7bbfa80-4f4e-4c1b-9bc6-1a7a6db13155",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "129cb357-8a05-45dd-810e-1aec31b146fb": {
+      "connections": {
+        "true": "ce6859ec-ac08-4894-bb87-5713903323fc"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 1275,
+      "y": 357.5
+    },
+    "3a84bd73-b64a-44a3-88a9-e7f566fe6514": {
+      "connections": {
+        "Reject": "c307f423-81d5-4482-b42d-e261f6cb5987",
+        "Retry": "5e005949-4b0b-44d3-b327-ee2aa4711f78"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 1767,
+      "y": 635
+    },
+    "4e26f05f-deb6-4cb4-a47a-94921b3c9810": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2812,
+      "y": 197.33333333333331
+    },
+    "55c60ab2-6408-49f5-9881-eca0543ade1d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "4e26f05f-deb6-4cb4-a47a-94921b3c9810"
+      },
+      "displayName": "Set IDPAuthType Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2555,
+      "y": 357.5
+    },
+    "58446024-25cc-4795-b9f5-3786842213d5": {
+      "connections": {
+        "outcome": "c307f423-81d5-4482-b42d-e261f6cb5987"
+      },
+      "displayName": "Email OTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 800,
+      "y": 382.5
+    },
+    "5877f458-99b6-40ee-aa81-5f7cec9a8adc": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1767,
+      "y": 450
+    },
+    "5e005949-4b0b-44d3-b327-ee2aa4711f78": {
+      "connections": {
+        "false": "3a84bd73-b64a-44a3-88a9-e7f566fe6514",
+        "true": "f5127ce9-997a-4748-8aa3-aa7ee60d9991"
+      },
+      "displayName": "OTP Collector Decision",
+      "nodeType": "OneTimePasswordCollectorDecisionNode",
+      "version": "1.0",
+      "x": 2006,
+      "y": 357.5
+    },
+    "619f97a4-a076-4a46-a263-b122d8a17b83": {
+      "connections": {
+        "true": "58446024-25cc-4795-b9f5-3786842213d5"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 553,
+      "y": 357.5
+    },
+    "8cea6003-0866-46a8-947b-eb1b7aa65103": {
+      "connections": {
+        "false": "f5127ce9-997a-4748-8aa3-aa7ee60d9991",
+        "true": "f5127ce9-997a-4748-8aa3-aa7ee60d9991"
+      },
+      "displayName": "Update Node State",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1767,
+      "y": 80
+    },
+    "c307f423-81d5-4482-b42d-e261f6cb5987": {
+      "connections": {
+        "outcome": "129cb357-8a05-45dd-810e-1aec31b146fb"
+      },
+      "displayName": "OTP Email Sender",
+      "nodeType": "OneTimePasswordSmtpSenderNode",
+      "version": "1.0",
+      "x": 1045,
+      "y": 382.5
+    },
+    "c7bbfa80-4f4e-4c1b-9bc6-1a7a6db13155": {
+      "connections": {
+        "outcome": "619f97a4-a076-4a46-a263-b122d8a17b83"
+      },
+      "displayName": "Username Collector",
+      "nodeType": "UsernameCollectorNode",
+      "version": "1.0",
+      "x": 315,
+      "y": 382.5
+    },
+    "ce6859ec-ac08-4894-bb87-5713903323fc": {
+      "connections": {
+        "Choose Another Method": "f1788ea5-8fc3-4203-8b82-58ab591a8473",
+        "Verify": "8cea6003-0866-46a8-947b-eb1b7aa65103",
+        "expired": "5877f458-99b6-40ee-aa81-5f7cec9a8adc",
+        "false": "3a84bd73-b64a-44a3-88a9-e7f566fe6514"
+      },
+      "displayName": "Enter OTP(custom callback)",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1520,
+      "y": 244
+    },
+    "f1788ea5-8fc3-4203-8b82-58ab591a8473": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1767,
+      "y": 265
+    },
+    "f5127ce9-997a-4748-8aa3-aa7ee60d9991": {
+      "connections": {
+        "true": "55c60ab2-6408-49f5-9881-eca0543ade1d"
+      },
+      "displayName": "Update User Profile for MFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2262,
+      "y": 357.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3057,
+      "y": 375
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2812,
+      "y": 376.6666666666667
+    },
+    "startNode": {
+      "x": 70,
+      "y": 477.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "06f34901-5963-4ecc-961b-9343775e58b9",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "Verify OTP",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287826146,
+  "name": "KYID.Journey.MFARegistration.EnterEmailOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFARegistration.EnterEmailOTP.js"
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "_id": "kyid_mfaRegistrationLogin.HasSession",
+  "_rev": "599828677",
+  "enabled": true,
+  "entryNodeId": "4b46f197-c520-4da9-9176-0d4185c22f53",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1bc9204b-0a96-4cc5-b12e-5f0b95f82933": {
+      "connections": {
+        "false": "5b286a38-7317-4416-b7ba-fa84a749f039",
+        "true": "8e34a784-c2a8-4bf9-b1d3-b600eca24722"
+      },
+      "displayName": "Register SMS|Voice OTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1422,
+      "y": 950
+    },
+    "21c9f25b-cfb9-41ba-ba37-ed3457b376bb": {
+      "connections": {
+        "False": "52edd50d-a9e8-4ed8-b3b3-07f366230eae",
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Error: Registration Not Supported",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 941,
+      "y": 677.6666666666666
+    },
+    "32bc6a27-d47c-42a5-81f5-583d11bc4e88": {
+      "connections": {
+        "false": "5b286a38-7317-4416-b7ba-fa84a749f039",
+        "true": "8e34a784-c2a8-4bf9-b1d3-b600eca24722"
+      },
+      "displayName": "Register FR Push Notification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1391,
+      "y": 585
+    },
+    "353e247c-4c69-4573-b1be-11186e132ccd": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "f9dce3de-2ca9-4e03-bf98-ffc93d35ca1e"
+      },
+      "displayName": "Register Email OTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1390,
+      "y": 267
+    },
+    "4b46f197-c520-4da9-9176-0d4185c22f53": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5b286a38-7317-4416-b7ba-fa84a749f039"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 300,
+      "y": 440.5
+    },
+    "52edd50d-a9e8-4ed8-b3b3-07f366230eae": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1379,
+      "y": 1110
+    },
+    "5b286a38-7317-4416-b7ba-fa84a749f039": {
+      "connections": {
+        "Default": "8e7f0b70-9580-492a-8647-a0ba92176d88",
+        "email": "353e247c-4c69-4573-b1be-11186e132ccd",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "otp": "f698f141-5b13-42a9-ac57-0f21313afab1",
+        "sms": "1bc9204b-0a96-4cc5-b12e-5f0b95f82933",
+        "swk": "32bc6a27-d47c-42a5-81f5-583d11bc4e88",
+        "symantec": "d2628801-2f9d-41ff-b403-ad48ad28c7f0",
+        "voice": "1bc9204b-0a96-4cc5-b12e-5f0b95f82933"
+      },
+      "displayName": "Page: Security Methods for registration",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 960,
+      "y": 124.33333333333334
+    },
+    "8e34a784-c2a8-4bf9-b1d3-b600eca24722": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "5b286a38-7317-4416-b7ba-fa84a749f039"
+      },
+      "displayName": "Choose Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1731,
+      "y": 484
+    },
+    "8e7f0b70-9580-492a-8647-a0ba92176d88": {
+      "connections": {
+        "true": "4b46f197-c520-4da9-9176-0d4185c22f53"
+      },
+      "displayName": "Script: Blank Message Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 288,
+      "y": 254.90103149414062
+    },
+    "d2628801-2f9d-41ff-b403-ad48ad28c7f0": {
+      "connections": {
+        "false": "5b286a38-7317-4416-b7ba-fa84a749f039",
+        "true": "8e34a784-c2a8-4bf9-b1d3-b600eca24722"
+      },
+      "displayName": "Register Symantec",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1391,
+      "y": 770
+    },
+    "f682b58c-8cfa-4c00-9792-8878c6ef2396": {
+      "connections": {
+        "false": "21c9f25b-cfb9-41ba-ba37-ed3457b376bb",
+        "true": "5b286a38-7317-4416-b7ba-fa84a749f039"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 540,
+      "y": 624.5
+    },
+    "f698f141-5b13-42a9-ac57-0f21313afab1": {
+      "connections": {
+        "false": "5b286a38-7317-4416-b7ba-fa84a749f039",
+        "true": "8e34a784-c2a8-4bf9-b1d3-b600eca24722"
+      },
+      "displayName": "Register FR Code",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1391,
+      "y": 400
+    },
+    "f9dce3de-2ca9-4e03-bf98-ffc93d35ca1e": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1709,
+      "y": 271
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2428,
+      "y": 694
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2432,
+      "y": 1098.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 703.1
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

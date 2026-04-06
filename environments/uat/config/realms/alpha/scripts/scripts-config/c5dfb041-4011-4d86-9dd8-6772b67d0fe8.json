@@ -1,0 +1,16 @@
+{
+  "_id": "c5dfb041-4011-4d86-9dd8-6772b67d0fe8",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53e612f6-5d16-47ec-b89c-ecfbb8b367f8,ou=user,ou=am-config",
+  "creationDate": 1742245757198,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287838794,
+  "name": "KYID.Journey.ByPassCaptchaForWhitelistedIPs",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ByPassCaptchaForWhitelistedIPs.js"
+  }
+}

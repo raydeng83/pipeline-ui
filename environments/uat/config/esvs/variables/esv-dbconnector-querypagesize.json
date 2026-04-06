@@ -1,0 +1,6 @@
+{
+  "_id": "esv-dbconnector-querypagesize",
+  "description": "",
+  "expressionType": "number",
+  "valueBase64": "${ESV_DBCONNECTOR_QUERYPAGESIZE}"
+}

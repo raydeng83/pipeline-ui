@@ -1,0 +1,16 @@
+{
+  "_id": "c33dc6b5-77cc-49b9-859e-2c9a2c0851b5",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286702567,
+  "default": false,
+  "description": "Back to Login Screen ",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054935028,
+  "name": "KYID.2B1.Journey.BackToLoginES",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.BackToLoginES.js"
+  }
+}

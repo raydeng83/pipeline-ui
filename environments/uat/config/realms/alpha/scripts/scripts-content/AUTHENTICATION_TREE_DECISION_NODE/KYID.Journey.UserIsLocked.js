@@ -1,0 +1,55 @@
+/*
+  - Data made available by nodes that have already executed are available in the sharedState variable.
+  - The script should set outcome to either "true" or "false".
+ */
+var dateTime = new Date().toISOString();
+
+// Node Config
+var nodeConfig = {
+    begin: "Begining Node Execution",
+    node: "Node",
+    nodeName: "User Locked",
+    script: "Script",
+    scriptName: "KYID.Journey.UserIsLocked",
+    error: "Account is locked.",
+    timestamp: dateTime
+}
+
+/**
+   * Logging function
+   * @type {Function}
+   */
+var nodeLogger = {
+    // Logs detailed debug messages for troubleshooting  
+    debug: function (message) {
+        logger.debug(message);
+    },
+    // Logs Error that can impact Application functionality
+    error: function (message) {
+        logger.error(message);
+    }
+};
+
+var nodeOutcome = {
+    NEXT: "next"
+};
+
+
+var transactionId = nodeState.get("transactionId");
+var UserNameAttribute = nodeState.get("searchAttribute");
+if(UserNameAttribute === "mail"){
+    username = nodeState.get("mail").trim();
+}else{
+    username = nodeState.get("username").trim();
+}
+if (callbacks.isEmpty()) {
+    nodeLogger.debug(nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + transactionId +"::"+ nodeConfig.error+"::"+username);
+            callbacksBuilder.textOutputCallback(0,"Account is locked.")
+            callbacksBuilder.confirmationCallback(0,["Next"], 0);
+    }
+    else{
+        var selectedOutcome = callbacks.getConfirmationCallbacks()[0];
+         if (selectedOutcome === 0) {
+                  action.goTo(nodeOutcome.NEXT);
+          } 
+  }

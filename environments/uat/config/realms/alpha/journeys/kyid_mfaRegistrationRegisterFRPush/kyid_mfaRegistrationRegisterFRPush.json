@@ -1,0 +1,204 @@
+{
+  "_id": "kyid_mfaRegistrationRegisterFRPush",
+  "_rev": "1161409201",
+  "enabled": true,
+  "entryNodeId": "3a175e1e-97ca-44ee-97f7-d960dcbec6c2",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1a092236-04b3-4595-a45c-cc32aa338a6f": {
+      "connections": {
+        "DONE": "554570e8-e230-4f4a-a123-0b86959fc263"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1615,
+      "y": 503
+    },
+    "3a175e1e-97ca-44ee-97f7-d960dcbec6c2": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "4dc78e7c-d6ab-48d3-9b2e-bbe086ebbd99"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 372,
+      "y": 266.5
+    },
+    "45735dd7-ee06-4fa5-a630-5fff9f129ee5": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1860,
+      "y": 142.66666666666666
+    },
+    "4c345eae-a562-43c4-a323-5ccdd96a71b6": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c8020ace-96c2-4d6f-a9ff-7aa5804a618a"
+      },
+      "displayName": "Update User Profile for MFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1860,
+      "y": 296.3333333333333
+    },
+    "4dc78e7c-d6ab-48d3-9b2e-bbe086ebbd99": {
+      "connections": {
+        "anotherMethod": "45735dd7-ee06-4fa5-a630-5fff9f129ee5",
+        "true": "a12ef1f7-c7b2-4203-882b-488a7eff7954"
+      },
+      "displayName": "Display instruction",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 619,
+      "y": 213.5
+    },
+    "554570e8-e230-4f4a-a123-0b86959fc263": {
+      "connections": {
+        "EXPIRED": "db264a11-f9e9-4fea-80c8-5d2e5edc17b2",
+        "FALSE": "db264a11-f9e9-4fea-80c8-5d2e5edc17b2",
+        "TRUE": "e1f08db4-13ea-4d07-a198-177afae5e84e",
+        "WAITING": "1a092236-04b3-4595-a45c-cc32aa338a6f"
+      },
+      "displayName": "Push Result Verifier Node",
+      "nodeType": "PushResultVerifierNode",
+      "version": "1.0",
+      "x": 1339,
+      "y": 241.5
+    },
+    "754062dc-76f5-478f-9a05-c2cd9fc854a4": {
+      "connections": {
+        "Another Factor?": "45735dd7-ee06-4fa5-a630-5fff9f129ee5"
+      },
+      "displayName": "Resend Push / Another factor",
+      "nodeType": "ChoiceCollectorNode",
+      "version": "1.0",
+      "x": 49,
+      "y": 102.33333333333331
+    },
+    "9a7e21bd-ecf8-4776-b362-f20a41667f25": {
+      "connections": {
+        "SENT": "554570e8-e230-4f4a-a123-0b86959fc263"
+      },
+      "displayName": "Push Sender",
+      "nodeType": "PushAuthenticationSenderNode",
+      "version": "1.0",
+      "x": 1094,
+      "y": 125
+    },
+    "a12ef1f7-c7b2-4203-882b-488a7eff7954": {
+      "connections": {
+        "failureOutcome": "cffecf6a-25ab-48eb-a47e-3eb50e64b70c",
+        "successOutcome": "9a7e21bd-ecf8-4776-b362-f20a41667f25",
+        "timeoutOutcome": "cffecf6a-25ab-48eb-a47e-3eb50e64b70c"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 861,
+      "y": 198.3333282470703
+    },
+    "c79cfa84-1881-426a-937b-04937bb4e4c1": {
+      "connections": {
+        "false": "c862aa25-b36f-4c8c-a450-b4355f2e865c",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Messgae",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2697,
+      "y": 136.66666666666666
+    },
+    "c8020ace-96c2-4d6f-a9ff-7aa5804a618a": {
+      "connections": {
+        "true": "f7a43ea4-3369-4fa6-b073-35958f73448c"
+      },
+      "displayName": "Script: Set IDPAuthType",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2153,
+      "y": 291.5
+    },
+    "c862aa25-b36f-4c8c-a450-b4355f2e865c": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetUp additional security methods",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2942,
+      "y": 291.5
+    },
+    "cffecf6a-25ab-48eb-a47e-3eb50e64b70c": {
+      "connections": {
+        "false": "45735dd7-ee06-4fa5-a630-5fff9f129ee5",
+        "true": "a12ef1f7-c7b2-4203-882b-488a7eff7954"
+      },
+      "displayName": "Resend Push / Another factor",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1099,
+      "y": 291.5
+    },
+    "db264a11-f9e9-4fea-80c8-5d2e5edc17b2": {
+      "connections": {
+        "false": "45735dd7-ee06-4fa5-a630-5fff9f129ee5",
+        "true": "9a7e21bd-ecf8-4776-b362-f20a41667f25"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1615,
+      "y": 265
+    },
+    "e1f08db4-13ea-4d07-a198-177afae5e84e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "4c345eae-a562-43c4-a323-5ccdd96a71b6"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1615,
+      "y": 80
+    },
+    "f7a43ea4-3369-4fa6-b073-35958f73448c": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "c79cfa84-1881-426a-937b-04937bb4e4c1"
+      },
+      "displayName": "Script: FirstTimeLoginUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2416,
+      "y": 266.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3262,
+      "y": 284
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2697,
+      "y": 346.3333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 302.1666666666667
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

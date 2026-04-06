@@ -1,0 +1,39 @@
+{
+  "_id": "0505e692-8117-4ec4-a661-61e6866534bf",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "577980841",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "b663c668-dd46-4d00-98cc-79d27f50bd82",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "0f6da7b0-f2fb-478e-a801-c702a2387dfb",
+      "displayName": "CAPTCHA",
+      "nodeType": "product-CaptchaNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "create_kyid_kyid_account_1"
+  },
+  "stage": "{\"submitButtonText\":{\"en\":\"get_started\"}}"
+}

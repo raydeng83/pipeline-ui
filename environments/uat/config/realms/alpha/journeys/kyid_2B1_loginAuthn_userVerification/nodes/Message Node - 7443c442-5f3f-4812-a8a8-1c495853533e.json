@@ -1,0 +1,25 @@
+{
+  "_id": "7443c442-5f3f-4812-a8a8-1c495853533e",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "128224893",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Primary Secondary Email Selected"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "c60f3e39-87a4-41e5-8f13-15ab9708bd5a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286691777,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054141589,
+  "name": "KYID.2B1.Journey.SelectMFAMethodtoRemoveReset",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.SelectMFAMethodtoRemoveReset.js"
+  }
+}

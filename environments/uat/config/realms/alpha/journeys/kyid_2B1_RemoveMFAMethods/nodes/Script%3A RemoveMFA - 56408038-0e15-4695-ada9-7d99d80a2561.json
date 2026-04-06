@@ -1,0 +1,41 @@
+{
+  "_id": "56408038-0e15-4695-ada9-7d99d80a2561",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "email",
+      "id": "email"
+    }
+  ],
+  "_rev": "1102894201",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "false",
+    "sms",
+    "email"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "498124c5-b561-45bb-8b66-2e832bf47f0e"
+}

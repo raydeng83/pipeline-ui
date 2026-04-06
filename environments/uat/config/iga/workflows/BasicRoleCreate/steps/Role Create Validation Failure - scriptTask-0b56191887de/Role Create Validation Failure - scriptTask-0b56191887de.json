@@ -1,0 +1,18 @@
+{
+  "displayName": "Role Create Validation Failure",
+  "name": "scriptTask-0b56191887de",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "Role Create Validation Failure - scriptTask-0b56191887de.js"
+    }
+  },
+  "type": "scriptTask"
+}

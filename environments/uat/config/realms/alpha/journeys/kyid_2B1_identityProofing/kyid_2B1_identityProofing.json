@@ -1,0 +1,103 @@
+{
+  "_id": "kyid_2B1_identityProofing",
+  "_rev": "-642354444",
+  "enabled": true,
+  "entryNodeId": "c6972bfd-b730-433a-80ee-1fe4c8b155a3",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "13503112-9845-4e3a-9bb5-5eef4f72173a": {
+      "connections": {
+        "true": "26757db1-3569-48fd-a49c-9bfefa3beb5b"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 667,
+      "y": 521.015625
+    },
+    "1f20f143-469e-4b5c-a650-5f07c2258e0b": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1144,
+      "y": 485.015625
+    },
+    "26757db1-3569-48fd-a49c-9bfefa3beb5b": {
+      "connections": {
+        "True": "1f20f143-469e-4b5c-a650-5f07c2258e0b"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 915,
+      "y": 482.015625
+    },
+    "3a635fba-ba58-4b53-9d3a-2d5b0e080bf4": {
+      "connections": {
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "invalidName": "84123b58-3165-408e-a897-8025b70baeb1",
+        "max limit": "13503112-9845-4e3a-9bb5-5eef4f72173a",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:SetupPersonalDetails",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 528,
+      "y": 70.33332824707031
+    },
+    "84123b58-3165-408e-a897-8025b70baeb1": {
+      "connections": {
+        "true": "3a635fba-ba58-4b53-9d3a-2d5b0e080bf4"
+      },
+      "displayName": "Script:Showerror",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 537,
+      "y": 386.015625
+    },
+    "9d111971-1488-4829-978c-224bd43b3eee": {
+      "connections": {
+        "true": "1f20f143-469e-4b5c-a650-5f07c2258e0b"
+      },
+      "displayName": "Script:SendrequesttoAPI",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1005,
+      "y": 600.015625
+    },
+    "c6972bfd-b730-433a-80ee-1fe4c8b155a3": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "3a635fba-ba58-4b53-9d3a-2d5b0e080bf4"
+      },
+      "displayName": "Script:CheckJourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 109,
+      "y": 74.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1399,
+      "y": 73
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1422,
+      "y": 429
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

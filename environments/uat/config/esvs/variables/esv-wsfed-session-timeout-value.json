@@ -1,0 +1,6 @@
+{
+  "_id": "esv-wsfed-session-timeout-value",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_WSFED_SESSION_TIMEOUT_VALUE}"
+}

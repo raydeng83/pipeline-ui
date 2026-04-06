@@ -1,0 +1,6 @@
+{
+  "_id": "esv-updatepwdinternaladmsg-en",
+  "description": "Message with Link for internal users whose password is expired.",
+  "expressionType": "string",
+  "valueBase64": "${ESV_UPDATEPWDINTERNALADMSG_EN}"
+}

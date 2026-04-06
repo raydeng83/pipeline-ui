@@ -1,0 +1,6 @@
+{
+  "_id": "esv-recaptcha-whitelisted-ip",
+  "description": "",
+  "expressionType": "array",
+  "valueBase64": "${ESV_RECAPTCHA_WHITELISTED_IP}"
+}

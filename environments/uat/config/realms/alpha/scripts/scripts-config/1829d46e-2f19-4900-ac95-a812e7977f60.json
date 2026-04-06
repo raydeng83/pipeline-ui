@@ -1,0 +1,16 @@
+{
+  "_id": "1829d46e-2f19-4900-ac95-a812e7977f60",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3721d1a2-ede0-4a1e-8356-36b797f27300,ou=user,ou=am-config",
+  "creationDate": 1735818245151,
+  "default": false,
+  "description": "This script is used to check if valid session exist for the user.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c1dfbbb7-c421-482f-8e88-ffab5b832904,ou=user,ou=am-config",
+  "lastModifiedDate": 1773811479170,
+  "name": "KYID.Journey.IsValidSessionExist",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.IsValidSessionExist.js"
+  }
+}

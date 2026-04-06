@@ -1,0 +1,191 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Verification",
+  "_rev": "438350848",
+  "enabled": true,
+  "entryNodeId": "ae14e9f5-3245-4775-8b9e-7f2743c4a7a7",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "3a193fa8-4be4-40ac-b33e-2d1f73b152ef": {
+      "connections": {
+        "FARS": "63c12283-1304-40e7-be72-3bceca7b701d",
+        "KBABack": "63c12283-1304-40e7-be72-3bceca7b701d",
+        "Next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "anotherMethod": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:  Navigate",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3125,
+      "y": 209
+    },
+    "5a094b82-7808-47ca-98b5-92021d17116e": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "User Found": "e1be2b51-3685-4059-80d3-ef726d26a3dd",
+        "User Not Found": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Fetch User Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1003,
+      "y": 106
+    },
+    "63c12283-1304-40e7-be72-3bceca7b701d": {
+      "connections": {
+        "True": "e1be2b51-3685-4059-80d3-ef726d26a3dd",
+        "appEnrollRIDP": "9dd0bbec-65d7-454a-9be8-e0a42d180887",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "firsttime": "9dd0bbec-65d7-454a-9be8-e0a42d180887"
+      },
+      "displayName": "Script: Get Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 475,
+      "y": 292
+    },
+    "74017253-e628-4380-a112-cd576f26d03d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c7cce187-3628-49a4-af3f-31d04e91c149"
+      },
+      "displayName": "IJ: Evaluate RIDP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2579,
+      "y": 97.33333333333333
+    },
+    "9dd0bbec-65d7-454a-9be8-e0a42d180887": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5a094b82-7808-47ca-98b5-92021d17116e"
+      },
+      "displayName": "Script:Fetch KOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 735,
+      "y": 118.5
+    },
+    "ab6c7ca1-4fdb-430a-82d2-1a1b42980209": {
+      "connections": {
+        "questions": "63c12283-1304-40e7-be72-3bceca7b701d"
+      },
+      "displayName": "Script: Select Option",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 203,
+      "y": 442.3333282470703
+    },
+    "ae14e9f5-3245-4775-8b9e-7f2743c4a7a7": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "63c12283-1304-40e7-be72-3bceca7b701d"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 191,
+      "y": 270.5
+    },
+    "b383e078-9713-4937-aa8d-799ce9d67184": {
+      "connections": {
+        "true": "dd5466a0-4076-477b-90db-3577c1f82f39"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2579,
+      "y": 292.6666666666667
+    },
+    "c7cce187-3628-49a4-af3f-31d04e91c149": {
+      "connections": {
+        "failure": "3a193fa8-4be4-40ac-b33e-2d1f73b152ef",
+        "success": "3a193fa8-4be4-40ac-b33e-2d1f73b152ef"
+      },
+      "displayName": "Send Mail: RIDP Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2848.9998779296875,
+      "y": 45.72917175292969
+    },
+    "dd5466a0-4076-477b-90db-3577c1f82f39": {
+      "connections": {
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "changeLog": "74017253-e628-4380-a112-cd576f26d03d",
+        "divert": "b383e078-9713-4937-aa8d-799ce9d67184",
+        "exit": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "next": "74017253-e628-4380-a112-cd576f26d03d"
+      },
+      "displayName": "Script: Collect Basic Information ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2229,
+      "y": 141.5
+    },
+    "e1be2b51-3685-4059-80d3-ef726d26a3dd": {
+      "connections": {
+        "FARS": "ebb6edff-8b35-44de-b586-1554cdaababa",
+        "continue": "f6d9ab00-16eb-4b7f-9c3b-40f8c405471b",
+        "create": "dd5466a0-4076-477b-90db-3577c1f82f39",
+        "organ": "74017253-e628-4380-a112-cd576f26d03d",
+        "update": "dd5466a0-4076-477b-90db-3577c1f82f39"
+      },
+      "displayName": "Script: Journey Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1317,
+      "y": 94.5
+    },
+    "e9ddbc6f-b8d2-4c6b-b42b-8549475744b0": {
+      "connections": {
+        "lexisNexis": "dd5466a0-4076-477b-90db-3577c1f82f39"
+      },
+      "displayName": "Script: Navigate FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1936,
+      "y": 360
+    },
+    "ebb6edff-8b35-44de-b586-1554cdaababa": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e9ddbc6f-b8d2-4c6b-b42b-8549475744b0"
+      },
+      "displayName": "IJ: FARS",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1635,
+      "y": 349.66666666666674
+    },
+    "f6d9ab00-16eb-4b7f-9c3b-40f8c405471b": {
+      "connections": {
+        "next": "dd5466a0-4076-477b-90db-3577c1f82f39"
+      },
+      "displayName": "Script: IDProofing Popup",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1645,
+      "y": 88.33333333333331
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3458,
+      "y": 232.50000000000003
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3356,
+      "y": 58
+    },
+    "startNode": {
+      "x": 70,
+      "y": 208.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"kyid_2B1\"]"
+  }
+}

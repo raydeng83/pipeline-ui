@@ -1,0 +1,162 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "kyid_messages",
+  "onCreate": {
+    "file": "kyid_messages.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "kyid_messages.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "kyid_messages.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "kyid_messages.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "KYID Messages",
+    "icon": "fa-envelope-square",
+    "mat-icon": "",
+    "order": [
+      "_id",
+      "name",
+      "label",
+      "locale",
+      "type",
+      "updateDateEpoch",
+      "createDateEpoch",
+      "updatedBy",
+      "createdBy",
+      "createDate",
+      "updateDate",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "_id": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "CreatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "label": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Message Label",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "locale": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Locale",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Message Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Message Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "UpdatedByID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "name",
+      "label",
+      "locale",
+      "type"
+    ],
+    "title": "KYID Messages",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-isgcaptcharequired",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ISGCAPTCHAREQUIRED}"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-branding-footer",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_BRANDING_FOOTER}"
+}

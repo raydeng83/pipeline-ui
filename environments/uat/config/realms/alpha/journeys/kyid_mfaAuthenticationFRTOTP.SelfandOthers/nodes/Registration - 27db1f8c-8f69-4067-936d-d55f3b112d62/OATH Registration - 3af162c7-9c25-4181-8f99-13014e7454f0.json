@@ -1,0 +1,36 @@
+{
+  "_id": "3af162c7-9c25-4181-8f99-13014e7454f0",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    }
+  ],
+  "_rev": "345368430",
+  "_type": {
+    "_id": "OathRegistrationNode",
+    "collection": true,
+    "name": "OATH Registration",
+    "version": "1.0"
+  },
+  "accountName": "EMAIL_ADDRESS",
+  "addChecksum": false,
+  "algorithm": "TOTP",
+  "bgColor": "032b75",
+  "generateRecoveryCodes": true,
+  "issuer": "&{esv.frapp.issuer}",
+  "minSharedSecretLength": 32,
+  "passwordLength": "SIX_DIGITS",
+  "postponeDeviceProfileStorage": false,
+  "scanQRCodeMessage": {
+    "en": "Scan the QR code image below with the ForgeRock Authenticator app to register your device with your login",
+    "es": "Escanee la imagen del código QR a continuación con la aplicación ForgeRock Authenticator para registrar su dispositivo con su nombre de usuario."
+  },
+  "totpHashAlgorithm": "HMAC_SHA1",
+  "totpTimeInterval": 30,
+  "truncationOffset": -1
+}

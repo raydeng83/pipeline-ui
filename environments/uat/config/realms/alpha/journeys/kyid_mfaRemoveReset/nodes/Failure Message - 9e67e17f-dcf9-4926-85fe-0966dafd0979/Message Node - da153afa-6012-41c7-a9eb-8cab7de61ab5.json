@@ -1,0 +1,29 @@
+{
+  "_id": "da153afa-6012-41c7-a9eb-8cab7de61ab5",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1605572236",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Failed to remove the selected security method.",
+    "es": "No se pudo eliminar el método de seguridad seleccionado."
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Click here to Continue",
+    "es": "Haga clic aquí para continuar"
+  }
+}

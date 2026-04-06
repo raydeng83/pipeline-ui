@@ -1,0 +1,94 @@
+{
+  "_rev": 4,
+  "childType": false,
+  "description": "Basic workflow for publishing a governance role",
+  "displayName": "BasicRolePublish",
+  "id": "BasicRolePublish",
+  "mutable": true,
+  "name": "BasicRolePublish",
+  "staticNodes": {
+    "endNode": {
+      "connections": null,
+      "id": "endNode",
+      "x": 3161,
+      "y": 347
+    },
+    "startNode": {
+      "connections": {
+        "start": "scriptTask-3eab1948f1ec"
+      },
+      "id": "startNode",
+      "x": 70,
+      "y": 140
+    },
+    "uiConfig": {
+      "approvalTask-74cf85c35437": {
+        "actors": {
+          "isExpression": true,
+          "value": "(function() {\n    var content = execution.getVariables();\n    return [{\n        \"id\": content.get('roleOwner'),\n        \"permissions\": {\n            \"approve\": true,\n            \"reject\": true,\n            \"reassign\": true,\n            \"modify\": true,\n            \"comment\": true\n        }\n    }];\n})()"
+        },
+        "events": {
+          "escalationDate": 5,
+          "escalationTimeSpan": "day(s)",
+          "escalationType": "script",
+          "expirationDate": 1,
+          "expirationTimeSpan": "day(s)",
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 1114,
+        "y": 102
+      },
+      "exclusiveGateway-48e748c42994": {
+        "x": 503,
+        "y": 120.015625
+      },
+      "exclusiveGateway-eb351160a59b": {
+        "x": 2611.999969482422,
+        "y": 181.66665649414062
+      },
+      "exclusiveGateway-f2035a953b37": {
+        "x": 1923.0606079101562,
+        "y": 174.8087158203125
+      },
+      "exclusiveGateway-f217bfa97521": {
+        "x": 1379.0606231689453,
+        "y": 147.35416984558105
+      },
+      "scriptTask-0359a9d77ee2": {
+        "x": 2451,
+        "y": 65.015625
+      },
+      "scriptTask-0b56191887de": {
+        "x": 1300,
+        "y": 422.015625
+      },
+      "scriptTask-3eab1948f1ec": {
+        "x": 197,
+        "y": 139.015625
+      },
+      "scriptTask-583182fdcb8f": {
+        "x": 2193.6060180664062,
+        "y": 173.44507598876953
+      },
+      "scriptTask-7ddf82215dd0": {
+        "x": 789.6666564941406,
+        "y": 136.66665649414062
+      },
+      "scriptTask-7f5cac49a4f5": {
+        "x": 1647.3333129882812,
+        "y": 259.8087158203125
+      },
+      "scriptTask-a0c9fc54ced2": {
+        "x": 2639.6666564941406,
+        "y": 403.6666564941406
+      },
+      "scriptTask-aec6c36b3a45": {
+        "x": 1648,
+        "y": 353.015625
+      }
+    }
+  },
+  "status": "published",
+  "type": "provisioning"
+}

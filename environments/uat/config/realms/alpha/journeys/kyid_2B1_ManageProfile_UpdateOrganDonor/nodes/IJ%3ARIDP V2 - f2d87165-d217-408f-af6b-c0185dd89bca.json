@@ -1,0 +1,22 @@
+{
+  "_id": "f2d87165-d217-408f-af6b-c0185dd89bca",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "561411850",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_ID_Proofing_Verification_Mobile_MFA_v2"
+}

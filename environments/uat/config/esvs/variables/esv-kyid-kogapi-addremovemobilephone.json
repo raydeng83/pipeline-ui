@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-kogapi-addremovemobilephone",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_KOGAPI_ADDREMOVEMOBILEPHONE}"
+}

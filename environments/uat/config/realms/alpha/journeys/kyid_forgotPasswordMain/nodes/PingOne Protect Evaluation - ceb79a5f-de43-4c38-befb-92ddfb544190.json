@@ -1,0 +1,51 @@
+{
+  "_id": "ceb79a5f-de43-4c38-befb-92ddfb544190",
+  "_outcomes": [
+    {
+      "displayName": "High",
+      "id": "high"
+    },
+    {
+      "displayName": "Medium",
+      "id": "medium"
+    },
+    {
+      "displayName": "Low",
+      "id": "low"
+    },
+    {
+      "displayName": "Exceeds Score Threshold",
+      "id": "exceed"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failure"
+    },
+    {
+      "displayName": "ClientError",
+      "id": "clientError"
+    }
+  ],
+  "_rev": "-1185459663",
+  "_type": {
+    "_id": "product-PingOneProtectEvaluationNode",
+    "collection": true,
+    "name": "PingOne Protect Evaluation",
+    "version": "1.0"
+  },
+  "authenticationFlowSubtype": "NONE",
+  "authorizationFlowSubtype": "NONE",
+  "deviceSharingType": "SHARED",
+  "dynamicRiskPolicySetID": false,
+  "dynamicTargetResourceID": false,
+  "dynamicTargetResourceName": false,
+  "flowType": "AUTHENTICATION",
+  "pauseBehavioralData": true,
+  "pingOneWorker": "PingOne Worker Service",
+  "recommendedActions": [],
+  "riskPolicySetID": "&{esv.pingone.protect.risk.policy.set.id.forgot.password}",
+  "scoreThreshold": "300",
+  "storeEvaluateResult": false,
+  "targetedPoliciesEvaluation": false,
+  "userType": "EXTERNAL"
+}

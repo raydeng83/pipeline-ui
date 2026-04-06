@@ -1,0 +1,24 @@
+{
+  "_id": "df8bb24d-2b73-4e8d-b52f-331fb6db926e",
+  "_outcomes": [
+    {
+      "displayName": "Done",
+      "id": "DONE"
+    },
+    {
+      "displayName": "Exit",
+      "id": "EXITED"
+    }
+  ],
+  "_rev": "1706888881",
+  "_type": {
+    "_id": "PushWaitNode",
+    "collection": true,
+    "name": "Push Wait Node",
+    "version": "1.0"
+  },
+  "challengeMessage": {},
+  "exitMessage": {},
+  "secondsToWait": 5,
+  "waitingMessage": {}
+}

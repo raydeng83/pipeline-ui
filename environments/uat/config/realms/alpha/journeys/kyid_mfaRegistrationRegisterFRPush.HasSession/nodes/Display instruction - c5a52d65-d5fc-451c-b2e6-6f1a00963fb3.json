@@ -1,0 +1,40 @@
+{
+  "_id": "c5a52d65-d5fc-451c-b2e6-6f1a00963fb3",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "anotherMethod",
+      "id": "anotherMethod"
+    }
+  ],
+  "_rev": "-1521853266",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "85c8cb3f-acee-48a6-8dce-0fae8fbfc771",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "e10fd33b-670a-430e-9b93-53e51f7d346d",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Set up Forgerock Authenticator Push Notification</h5>\n<a href=\"&{esv.kog.help.mfa.reg.forgerock.push.url}\"target=\"_blank\">Need Assistance?</a>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Configurar la notificación push del Forgerock Authenticator</h5>\n<a href=\"&{esv.kog.help.mfa.reg.forgerock.push.url}\"target=\"_blank\">¿Necesita ayuda?</a>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

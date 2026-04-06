@@ -1,0 +1,16 @@
+{
+  "_id": "1da9e876-e3d9-496c-8b5d-13550fd6f078",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287838615,
+  "name": "KYID.Journey.MFAAuthentication.DisplayMessageToUserToSendVoiceOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAAuthentication.DisplayMessageToUserToSendVoiceOTP.js"
+  }
+}

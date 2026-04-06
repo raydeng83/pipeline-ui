@@ -1,0 +1,6 @@
+{
+  "_id": "esv-blankoption-error-message-es",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_BLANKOPTION_ERROR_MESSAGE_ES}"
+}

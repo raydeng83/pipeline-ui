@@ -1,0 +1,16 @@
+{
+  "_id": "8a3ee45f-448a-4de6-86ca-6f890f98497a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1756182234862,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1773208586958,
+  "name": "RIDP.2B1.Journey.Registration_Acceptance.CollectPhoneNumber",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/RIDP.2B1.Journey.Registration_Acceptance.CollectPhoneNumber.js"
+  }
+}

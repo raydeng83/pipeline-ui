@@ -1,0 +1,25 @@
+{
+  "_id": "92f992b3-00cc-4692-868c-22406aa4b07b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-20986565",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Move to Claims Issuance Journey"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

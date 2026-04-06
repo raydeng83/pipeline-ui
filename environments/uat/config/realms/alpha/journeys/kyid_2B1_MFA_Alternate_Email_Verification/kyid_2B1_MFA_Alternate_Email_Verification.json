@@ -1,0 +1,181 @@
+{
+  "_id": "kyid_2B1_MFA_Alternate_Email_Verification",
+  "_rev": "1090406689",
+  "description": "Registration Acceptance for Invited Users",
+  "enabled": true,
+  "entryNodeId": "48e768fd-6aec-48aa-9e03-93c2bbf5a1ac",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "032ed01d-ffe2-40b0-8683-d201f5e0e7a1": {
+      "connections": {
+        "back": "94bbf248-438a-443c-9758-f9a586102960",
+        "duplicate": "8c933618-bed2-4b17-b34c-b79117f3f6f2",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "invalidEmail": "8c933618-bed2-4b17-b34c-b79117f3f6f2",
+        "max limit": "77c2ae89-4173-44c9-9fdd-d34d18aa88a1",
+        "next": "ba73cc43-a787-4104-9580-4844f97eb717",
+        "same primary email": "8c933618-bed2-4b17-b34c-b79117f3f6f2"
+      },
+      "displayName": "Alternate Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 486,
+      "y": 192.5
+    },
+    "23bda036-b418-4fdd-9fdf-f983ff4a293e": {
+      "connections": {
+        "try again": "399ac4bb-410c-4cc1-8414-2d589854cd56"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2237,
+      "y": 490
+    },
+    "3438a241-556b-490d-a696-85c34160d583": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 2237,
+      "y": 80
+    },
+    "399ac4bb-410c-4cc1-8414-2d589854cd56": {
+      "connections": {
+        "Error": "23bda036-b418-4fdd-9fdf-f983ff4a293e",
+        "Failed": "3438a241-556b-490d-a696-85c34160d583",
+        "Successful": "ff9f1844-62c4-4867-9ca6-d8afaf98f01f"
+      },
+      "displayName": "Script: AddRemoevAlternateEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1917,
+      "y": 245.5
+    },
+    "48e768fd-6aec-48aa-9e03-93c2bbf5a1ac": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "032ed01d-ffe2-40b0-8683-d201f5e0e7a1"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 258.5
+    },
+    "76eab7f4-2b4c-42e3-91c2-b36dc03f8df1": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "399ac4bb-410c-4cc1-8414-2d589854cd56"
+      },
+      "displayName": "Script: Update MFA Method",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1597,
+      "y": 258.5
+    },
+    "77c2ae89-4173-44c9-9fdd-d34d18aa88a1": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max limit reached for back",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 745,
+      "y": 80
+    },
+    "8c933618-bed2-4b17-b34c-b79117f3f6f2": {
+      "connections": {
+        "true": "032ed01d-ffe2-40b0-8683-d201f5e0e7a1"
+      },
+      "displayName": "Error: Invalid Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 745,
+      "y": 490
+    },
+    "94bbf248-438a-443c-9758-f9a586102960": {
+      "connections": {
+        "back": "032ed01d-ffe2-40b0-8683-d201f5e0e7a1",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "update": "76eab7f4-2b4c-42e3-91c2-b36dc03f8df1"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1334,
+      "y": 94.5
+    },
+    "ba73cc43-a787-4104-9580-4844f97eb717": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c481de3b-3feb-480e-9fc1-651e5cd875b7"
+      },
+      "displayName": "Alternate Email Authn",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 745,
+      "y": 285
+    },
+    "c481de3b-3feb-480e-9fc1-651e5cd875b7": {
+      "connections": {
+        "highRisk": "d6613f22-e845-4727-8e05-c9ea2df9fbb1",
+        "skip": "94bbf248-438a-443c-9758-f9a586102960",
+        "success": "94bbf248-438a-443c-9758-f9a586102960"
+      },
+      "displayName": "Script: LexisNexis",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1065,
+      "y": 232
+    },
+    "d6613f22-e845-4727-8e05-c9ea2df9fbb1": {
+      "connections": {
+        "retry": "032ed01d-ffe2-40b0-8683-d201f5e0e7a1"
+      },
+      "displayName": "Script: LexisNexis Retry",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1329,
+      "y": 480
+    },
+    "ff9f1844-62c4-4867-9ca6-d8afaf98f01f": {
+      "connections": {
+        "failure": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Send Mail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2237,
+      "y": 285
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2496,
+      "y": 273.6666666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2496,
+      "y": 167.33333333333331
+    },
+    "startNode": {
+      "x": 70,
+      "y": 286
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

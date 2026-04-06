@@ -1,0 +1,12 @@
+{
+  "_id": "IG-Identity-assertion",
+  "_type": {
+    "_id": "serverConfigs",
+    "collection": true,
+    "name": "serverConfigs"
+  },
+  "jwtExpiration": 60,
+  "secretLabelIdentifier": "igkerberos",
+  "serverUrl": "&{esv.kyid.ig.identity.assertion.url}",
+  "skewAllowance": 60
+}

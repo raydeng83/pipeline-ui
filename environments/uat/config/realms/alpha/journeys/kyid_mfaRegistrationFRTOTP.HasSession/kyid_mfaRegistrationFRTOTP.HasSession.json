@@ -1,0 +1,195 @@
+{
+  "_id": "kyid_mfaRegistrationFRTOTP.HasSession",
+  "_rev": "-1519183757",
+  "enabled": true,
+  "entryNodeId": "d8b3ed70-02c9-4312-87c0-0cb87655e16a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "16b45435-8b9b-4dbf-9674-7846a1f22f8a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Choose Another Factor FRCode",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1292,
+      "y": 164.33333333333331
+    },
+    "251b9cf2-7196-4484-9a31-14bcf8330c8b": {
+      "connections": {
+        "false": "b88ce373-f066-4b86-8767-9c5028b69c0e",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Registration Success",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1403,
+      "y": 789.3125
+    },
+    "27749b88-3270-4f15-abfb-e1b4baf21b54": {
+      "connections": {
+        "true": "3999400a-4961-4fbb-b174-27e2d7bb9c2a"
+      },
+      "displayName": "Update Node State",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1056,
+      "y": 210.33333333333331
+    },
+    "3999400a-4961-4fbb-b174-27e2d7bb9c2a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5e851fbd-fb9a-408e-9d47-c3dcd7af467d"
+      },
+      "displayName": "Update MFA Method",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1318,
+      "y": 367.6666666666667
+    },
+    "439238f0-2573-4e06-b98c-b0bd20b0a1c6": {
+      "connections": {
+        "failureOutcome": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "successOutcome": "c6c65eb9-8b1f-4505-9696-ee417cb89e34"
+      },
+      "displayName": "Registartion",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 769,
+      "y": 26
+    },
+    "53c1a12c-bdac-45df-b903-feb836303b0b": {
+      "connections": {
+        "false": "68923911-3ab4-42e1-b263-3eeb9e1ebfb3",
+        "goBack": "9d8bcc6a-75c8-419a-affb-ba5af62ebb1d",
+        "submit": "3999400a-4961-4fbb-b174-27e2d7bb9c2a",
+        "true": "3999400a-4961-4fbb-b174-27e2d7bb9c2a"
+      },
+      "displayName": "Re-enter code Another factor",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 533,
+      "y": 645
+    },
+    "5e851fbd-fb9a-408e-9d47-c3dcd7af467d": {
+      "connections": {
+        "true": "fd356b29-8d0d-4705-8fb9-ee9766888089"
+      },
+      "displayName": "Script: SetIDPAuthType",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1548,
+      "y": 336.3125
+    },
+    "68923911-3ab4-42e1-b263-3eeb9e1ebfb3": {
+      "connections": {
+        "Reject": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Retry": "53c1a12c-bdac-45df-b903-feb836303b0b"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 457,
+      "y": 328
+    },
+    "9d8bcc6a-75c8-419a-affb-ba5af62ebb1d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1036,
+      "y": 746.6666666666667
+    },
+    "b88ce373-f066-4b86-8767-9c5028b69c0e": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetUp additional security methods",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1753,
+      "y": 753.015625
+    },
+    "c0c199d3-10f1-4c5f-b2c5-bfc586c3602d": {
+      "connections": {
+        "anotherMethod": "16b45435-8b9b-4dbf-9674-7846a1f22f8a",
+        "true": "439238f0-2573-4e06-b98c-b0bd20b0a1c6"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 484,
+      "y": 25
+    },
+    "c6c65eb9-8b1f-4505-9696-ee417cb89e34": {
+      "connections": {
+        "failureOutcome": "e7e90332-e87d-4328-8971-6c7ade680bf3",
+        "notRegisteredOutcome": "439238f0-2573-4e06-b98c-b0bd20b0a1c6",
+        "successOutcome": "27749b88-3270-4f15-abfb-e1b4baf21b54"
+      },
+      "displayName": "Verifier",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 734,
+      "y": 392.3333282470703
+    },
+    "d8b3ed70-02c9-4312-87c0-0cb87655e16a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c0c199d3-10f1-4c5f-b2c5-bfc586c3602d"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 196.78750610351562,
+      "y": 383.6125030517578
+    },
+    "e7e90332-e87d-4328-8971-6c7ade680bf3": {
+      "connections": {
+        "false": "16b45435-8b9b-4dbf-9674-7846a1f22f8a",
+        "true": "c6c65eb9-8b1f-4505-9696-ee417cb89e34"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1094,
+      "y": 492.015625
+    },
+    "fd356b29-8d0d-4705-8fb9-ee9766888089": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "251b9cf2-7196-4484-9a31-14bcf8330c8b"
+      },
+      "displayName": "Script: FirstTimeLoginUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1568,
+      "y": 521.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1935,
+      "y": 457
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1866,
+      "y": 216
+    },
+    "startNode": {
+      "x": 70,
+      "y": 372.1666666666667
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

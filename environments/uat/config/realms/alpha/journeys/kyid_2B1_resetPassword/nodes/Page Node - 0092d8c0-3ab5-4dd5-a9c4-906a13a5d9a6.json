@@ -1,0 +1,31 @@
+{
+  "_id": "0092d8c0-3ab5-4dd5-a9c4-906a13a5d9a6",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "True"
+    },
+    {
+      "displayName": "False",
+      "id": "False"
+    }
+  ],
+  "_rev": "-1672802942",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "73cc6d47-4856-40d8-bd5c-16c065ddf7a9",
+      "displayName": "Reset Password",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div style=\\\"text-align:left;\\\">\\n</div>\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n</div>\",\"es\":\"<div style=\\\"text-align:left;\\\">\\n</div>\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n</div>\"},\"submitButtonText\":{\"en\":\"Reset_Password\",\"es\":\"Restablecer_contraseña\"}}"
+}

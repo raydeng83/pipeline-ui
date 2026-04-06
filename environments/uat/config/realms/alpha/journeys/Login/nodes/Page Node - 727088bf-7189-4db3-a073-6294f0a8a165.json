@@ -1,0 +1,33 @@
+{
+  "_id": "727088bf-7189-4db3-a073-6294f0a8a165",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1433333240",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "cff9fecc-a198-4f04-bf46-3f61e93020ae",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "Default Journey"
+  },
+  "stage": "{\"ConfirmationCallback\":[{\"id\":\"820f4e47-b824-4082-b82e-1622c4a50b02\",\"showOnlyPositiveAnswer\":true}]}"
+}

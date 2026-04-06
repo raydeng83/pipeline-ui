@@ -1,0 +1,6 @@
+{
+  "_id": "esv-adconnector-checkdisabled",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_ADCONNECTOR_CHECKDISABLED}"
+}

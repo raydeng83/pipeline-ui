@@ -1,0 +1,16 @@
+{
+  "_id": "2be67858-43f3-42d4-828e-83ca88039384",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3721d1a2-ede0-4a1e-8356-36b797f27300,ou=user,ou=am-config",
+  "creationDate": 1733301477594,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287828786,
+  "name": "KYID.Journey.ValidateTempPwdExistInAD",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ValidateTempPwdExistInAD.js"
+  }
+}

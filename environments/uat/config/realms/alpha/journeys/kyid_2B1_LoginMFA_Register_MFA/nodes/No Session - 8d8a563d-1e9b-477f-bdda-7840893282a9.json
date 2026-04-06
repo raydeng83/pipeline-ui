@@ -1,0 +1,25 @@
+{
+  "_id": "8d8a563d-1e9b-477f-bdda-7840893282a9",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "2133177256",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User Session not found"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

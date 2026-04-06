@@ -1,0 +1,36 @@
+{
+  "_id": "4a69e8fe-3dfd-489d-a90b-66094e671b01",
+  "_outcomes": [
+    {
+      "displayName": "LexisNexis",
+      "id": "LexisNexis"
+    },
+    {
+      "displayName": "SSA",
+      "id": "SSA"
+    },
+    {
+      "displayName": "Experian",
+      "id": "Experian"
+    }
+  ],
+  "_rev": "-177194941",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "LexisNexis",
+    "SSA",
+    "Experian"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "4ffb643a-eade-4a66-9aa8-8c7a00fc3074"
+}

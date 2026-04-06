@@ -1,0 +1,34 @@
+{
+  "_id": "800fbeb8-9c59-49a1-b904-c618356f927a",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    },
+    {
+      "displayName": "Time Out",
+      "id": "timeoutOutcome"
+    }
+  ],
+  "_rev": "-123520687",
+  "_type": {
+    "_id": "PushRegistrationNode",
+    "collection": true,
+    "name": "Push Registration",
+    "version": "1.0"
+  },
+  "accountName": "EMAIL_ADDRESS",
+  "bgColor": "032b75",
+  "generateRecoveryCodes": false,
+  "imgUrl": "",
+  "issuer": "&{esv.frapp.issuer}",
+  "scanQRCodeMessage": {
+    "en": "Scan the QR code image below with the ForgeRock Authenticator app to register your device with your login.",
+    "es": "Escanee la imagen del código QR a continuación con la aplicación ForgeRock Authenticator para registrar su dispositivo con su nombre de usuario."
+  },
+  "timeout": 60
+}

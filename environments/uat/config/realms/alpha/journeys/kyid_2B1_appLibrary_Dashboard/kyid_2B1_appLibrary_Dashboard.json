@@ -1,0 +1,253 @@
+{
+  "_id": "kyid_2B1_appLibrary_Dashboard",
+  "_rev": "-183065526",
+  "enabled": true,
+  "entryNodeId": "18dab0d6-3610-46df-8a3b-ab263c835bb7",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "18dab0d6-3610-46df-8a3b-ab263c835bb7": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "7097b66a-691e-4d18-ad31-84f4707d9a81"
+      },
+      "displayName": "Script:CheckJourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 148.6666660308838,
+      "y": 61.33332824707031
+    },
+    "1e1b22ad-ae9c-428d-b814-43bb8d5481ce": {
+      "connections": {
+        "true": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "Error:InvalidAction",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1489,
+      "y": 692.015625
+    },
+    "1e8c4f0c-bff9-4ac0-8923-45bc92595d06": {
+      "connections": {
+        "false": "a80278a9-af39-48e0-bbff-e1c28e7af8c0",
+        "true": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "Script:isUserExternal",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 414,
+      "y": 609.015625
+    },
+    "27cd392c-e337-406f-854a-34d8ab633b95": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a0a50826-4c5f-4283-b441-d538c0abae2d"
+      },
+      "displayName": "Script:GetKOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 161,
+      "y": 473
+    },
+    "565d5c37-1677-4e8d-bfca-93971cf58f30": {
+      "connections": {},
+      "displayName": "Error",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 449,
+      "y": 918
+    },
+    "577674be-b0b4-4876-94bb-74099ac807e3": {
+      "connections": {
+        "false": "6af7497d-a253-4497-96db-e97b584e74b4",
+        "true": "6af7497d-a253-4497-96db-e97b584e74b4",
+        "unexpectederror": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "GoBack",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1420,
+      "y": 61
+    },
+    "613aeb57-f096-4092-a54a-1c700e408d99": {
+      "connections": {
+        "true": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "Error:UnexpectedError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1488,
+      "y": 824.015625
+    },
+    "6af7497d-a253-4497-96db-e97b584e74b4": {
+      "connections": {
+        "error": "613aeb57-f096-4092-a54a-1c700e408d99",
+        "internalerrordatamissing": "613aeb57-f096-4092-a54a-1c700e408d99",
+        "invalidaction": "1e1b22ad-ae9c-428d-b814-43bb8d5481ce",
+        "invalidjson": "75052861-3035-411b-8613-ec46025a03b4",
+        "manageaccess": "950f95b6-58c1-4f07-a020-ca1001c122a9",
+        "removerole": "d0d2ab51-e5d2-4b18-b8cd-74e169e9bd56",
+        "viewappdetails": "fe562051-49fe-4097-98a6-88bb7b06f1a3"
+      },
+      "displayName": "Script:appLibScreen",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 478,
+      "y": 86.9999942779541
+    },
+    "7097b66a-691e-4d18-ad31-84f4707d9a81": {
+      "connections": {
+        "hasSession": "27cd392c-e337-406f-854a-34d8ab633b95",
+        "noSession": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:ValidSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 155,
+      "y": 266.3333282470703
+    },
+    "7355e763-24a6-4aaa-b470-a3226a0210c5": {
+      "connections": {
+        "true": "9f229afc-06a0-4f7e-b61e-a44d95ad01fb"
+      },
+      "displayName": "Script:FetchAppLibJson",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 859,
+      "y": 1137.015625
+    },
+    "75052861-3035-411b-8613-ec46025a03b4": {
+      "connections": {
+        "true": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "Error:InvalidJSON",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1483,
+      "y": 565.015625
+    },
+    "9383f1e2-f705-48e5-b635-bcc61571c0c1": {
+      "connections": {},
+      "displayName": "UserNotFound",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 424,
+      "y": 753
+    },
+    "950f95b6-58c1-4f07-a020-ca1001c122a9": {
+      "connections": {
+        "true": "577674be-b0b4-4876-94bb-74099ac807e3"
+      },
+      "displayName": "IJ:ManageAccess",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1147,
+      "y": 174.3333282470703
+    },
+    "9f229afc-06a0-4f7e-b61e-a44d95ad01fb": {
+      "connections": {
+        "error": "613aeb57-f096-4092-a54a-1c700e408d99",
+        "internalerrordatamissing": "613aeb57-f096-4092-a54a-1c700e408d99",
+        "invalidaction": "75052861-3035-411b-8613-ec46025a03b4",
+        "invalidjson": "1e1b22ad-ae9c-428d-b814-43bb8d5481ce",
+        "manageaccess": "950f95b6-58c1-4f07-a020-ca1001c122a9",
+        "viewappdetails": "df79a183-add2-4ce6-86a9-8f73e548ecfe"
+      },
+      "displayName": "Script:AppLibraryScreen",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1205,
+      "y": 1020.015625
+    },
+    "a0a50826-4c5f-4283-b441-d538c0abae2d": {
+      "connections": {
+        "Error": "565d5c37-1677-4e8d-bfca-93971cf58f30",
+        "User Found": "1e8c4f0c-bff9-4ac0-8923-45bc92595d06",
+        "User Not Found": "9383f1e2-f705-48e5-b635-bcc61571c0c1"
+      },
+      "displayName": "Script:GetUserID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 155,
+      "y": 669
+    },
+    "a80278a9-af39-48e0-bbff-e1c28e7af8c0": {
+      "connections": {},
+      "displayName": "Script:InternalUserEmptyDashboard",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 690,
+      "y": 809.015625
+    },
+    "b3c5ebf1-5e92-4773-99f6-efd3163d6b53": {
+      "connections": {
+        "true": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "IJ:RemoveRoles",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 823,
+      "y": 387.015625
+    },
+    "ba02e9e2-47d8-49c3-bf64-48dbee545b60": {
+      "connections": {
+        "true": "df79a183-add2-4ce6-86a9-8f73e548ecfe"
+      },
+      "displayName": "Script:getWidgetID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1493.6666717529297,
+      "y": 992.3333282470703
+    },
+    "d0d2ab51-e5d2-4b18-b8cd-74e169e9bd56": {
+      "connections": {
+        "true": "b3c5ebf1-5e92-4773-99f6-efd3163d6b53"
+      },
+      "displayName": "Script:FetchRoleID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 805,
+      "y": 257.015625
+    },
+    "df79a183-add2-4ce6-86a9-8f73e548ecfe": {
+      "connections": {
+        "cancel": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "Script:ViewAppDetails",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1514,
+      "y": 1095
+    },
+    "fe562051-49fe-4097-98a6-88bb7b06f1a3": {
+      "connections": {
+        "cancel": "6af7497d-a253-4497-96db-e97b584e74b4"
+      },
+      "displayName": "Script:viewAppDetail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 793,
+      "y": 92.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2306,
+      "y": 66
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2260,
+      "y": 507
+    },
+    "startNode": {
+      "x": 40,
+      "y": 258
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

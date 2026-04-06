@@ -1,0 +1,28 @@
+{
+  "_id": "8c578a04-48e6-4e30-a309-6b4a6655e752",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "TRUE"
+    },
+    {
+      "displayName": "Failure",
+      "id": "FALSE"
+    },
+    {
+      "displayName": "Expired",
+      "id": "EXPIRED"
+    },
+    {
+      "displayName": "Waiting",
+      "id": "WAITING"
+    }
+  ],
+  "_rev": "-202369522",
+  "_type": {
+    "_id": "PushResultVerifierNode",
+    "collection": true,
+    "name": "Push Result Verifier Node",
+    "version": "1.0"
+  }
+}

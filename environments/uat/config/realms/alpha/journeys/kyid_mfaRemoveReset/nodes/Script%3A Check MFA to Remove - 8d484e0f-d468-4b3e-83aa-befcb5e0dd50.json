@@ -1,0 +1,31 @@
+{
+  "_id": "8d484e0f-d468-4b3e-83aa-befcb5e0dd50",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "True"
+    },
+    {
+      "displayName": "noMFA",
+      "id": "noMFA"
+    }
+  ],
+  "_rev": "2014871845",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "True",
+    "noMFA"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "b14cd3c4-629d-4868-bd19-bdb896e94f74"
+}

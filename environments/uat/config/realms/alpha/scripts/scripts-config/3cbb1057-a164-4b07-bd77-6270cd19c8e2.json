@@ -1,0 +1,16 @@
+{
+  "_id": "3cbb1057-a164-4b07-bd77-6270cd19c8e2",
+  "context": "SAML2_IDP_ADAPTER",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1757571002458,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=1ca864a6-a8a6-40c0-9f8a-0d5b003e4ac5,ou=user,ou=am-config",
+  "lastModifiedDate": 1771936499430,
+  "name": "KYID2B.SAML2.IDPAdapter",
+  "script": {
+    "file": "scripts-content/SAML2_IDP_ADAPTER/KYID2B.SAML2.IDPAdapter.js"
+  }
+}

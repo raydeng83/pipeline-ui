@@ -1,0 +1,16 @@
+{
+  "_id": "bc716d76-f27b-4735-8029-39c4d56b37b3",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "Creating a script to check if the user is part of the CIT Domain",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287833503,
+  "name": "KYID.journey.ForgotPassword.IsPartOfCITDomain",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.journey.ForgotPassword.IsPartOfCITDomain.js"
+  }
+}

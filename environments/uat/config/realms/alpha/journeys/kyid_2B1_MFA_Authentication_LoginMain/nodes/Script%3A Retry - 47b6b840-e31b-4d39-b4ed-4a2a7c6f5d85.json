@@ -1,0 +1,36 @@
+{
+  "_id": "47b6b840-e31b-4d39-b4ed-4a2a7c6f5d85",
+  "_outcomes": [
+    {
+      "displayName": "retry",
+      "id": "retry"
+    },
+    {
+      "displayName": "differentMethod",
+      "id": "differentMethod"
+    },
+    {
+      "displayName": "continue",
+      "id": "continue"
+    }
+  ],
+  "_rev": "-900218944",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "retry",
+    "differentMethod",
+    "continue"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "2d3b3d66-fd00-48fa-bb55-bdc51f4f1f4a"
+}

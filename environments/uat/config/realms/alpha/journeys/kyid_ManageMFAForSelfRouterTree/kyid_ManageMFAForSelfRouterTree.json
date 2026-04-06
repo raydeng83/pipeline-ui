@@ -1,0 +1,70 @@
+{
+  "_id": "kyid_ManageMFAForSelfRouterTree",
+  "_rev": "2054092968",
+  "enabled": true,
+  "entryNodeId": "2a994b41-321d-49f7-be78-a706c5c382a3",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "27024eaf-7efa-4d8f-93f7-d8e2e53065ad": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "cb15885c-5a2e-4b1a-9f41-fd056102a058"
+      },
+      "displayName": "Set Locale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 370,
+      "y": 218.015625
+    },
+    "2a994b41-321d-49f7-be78-a706c5c382a3": {
+      "connections": {
+        "true": "27024eaf-7efa-4d8f-93f7-d8e2e53065ad"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 155,
+      "y": 252.015625
+    },
+    "cb15885c-5a2e-4b1a-9f41-fd056102a058": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "f2361f91-8d62-414a-b312-f26a8134e8ec"
+      },
+      "displayName": "Set CLocale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 582,
+      "y": 203.015625
+    },
+    "f2361f91-8d62-414a-b312-f26a8134e8ec": {
+      "connections": {},
+      "displayName": "MFASelfRedirection",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 778,
+      "y": 218.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1169,
+      "y": 47
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1022,
+      "y": 359
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

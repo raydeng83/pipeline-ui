@@ -1,0 +1,56 @@
+{
+  "_id": "65e232d7-af4d-4b55-a55e-418981a5ceaa",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "True"
+    },
+    {
+      "displayName": "appEnrollRIDP",
+      "id": "appEnrollRIDP"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "helpdesk_verification",
+      "id": "helpdesk_verification"
+    },
+    {
+      "displayName": "helpdesk_manageprofile",
+      "id": "helpdesk_manageprofile"
+    },
+    {
+      "displayName": "helpdesk_ridp",
+      "id": "helpdesk_ridp"
+    },
+    {
+      "displayName": "in_person",
+      "id": "in_person"
+    }
+  ],
+  "_rev": "1049469810",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "True",
+    "appEnrollRIDP",
+    "false",
+    "helpdesk_verification",
+    "helpdesk_manageprofile",
+    "helpdesk_ridp",
+    "in_person"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "dc384900-64b1-4ecc-8a6f-b8a1c9c6de3b"
+}

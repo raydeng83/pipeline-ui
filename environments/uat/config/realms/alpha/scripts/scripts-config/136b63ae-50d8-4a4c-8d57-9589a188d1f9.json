@@ -1,0 +1,16 @@
+{
+  "_id": "136b63ae-50d8-4a4c-8d57-9589a188d1f9",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1773209532821,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1775039583725,
+  "name": "KYID.2B1.Journey.IDProofing.AppEnroll.AssociatedAccounts.Proccessing",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.AppEnroll.AssociatedAccounts.Proccessing.js"
+  }
+}

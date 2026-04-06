@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-jwt-issuer",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_JWT_ISSUER}"
+}

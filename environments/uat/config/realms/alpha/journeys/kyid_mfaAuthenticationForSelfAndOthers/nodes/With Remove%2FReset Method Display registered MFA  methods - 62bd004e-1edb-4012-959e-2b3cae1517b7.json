@@ -1,0 +1,60 @@
+{
+  "_id": "62bd004e-1edb-4012-959e-2b3cae1517b7",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Remove/Reset MFA Method",
+      "id": "Remove/Reset MFA Method"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-177811464",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "063c111b-f9a8-4c89-a90e-7ff3b157c4a5",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "2947ff2c-6771-4dae-b8ab-8e8c84dd8449",
+      "displayName": "Dynamic Choice",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify identity with a security method</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.for.self}\"target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">Verify with one of the following security methods to manage the registered methods.</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verifique con uno de los siguientes métodos de seguridad para administrar los métodos registrados.</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.for.self}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">Verifique con uno de los siguientes métodos de seguridad para administrar los métodos registrados.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nBack to Application</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nVolver a la solicitud</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Ayuda</a></span>\\n</div>\"}}"
+}

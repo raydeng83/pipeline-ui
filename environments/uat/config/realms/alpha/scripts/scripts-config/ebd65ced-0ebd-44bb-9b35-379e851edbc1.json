@@ -1,0 +1,16 @@
+{
+  "_id": "ebd65ced-0ebd-44bb-9b35-379e851edbc1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286712654,
+  "default": false,
+  "description": "Read context details ",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=16ddca0d-67fe-482c-96c9-75f3644bc992,ou=user,ou=am-config",
+  "lastModifiedDate": 1775111591721,
+  "name": "KYID.2B1.ReadContextDetails",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.ReadContextDetails.js"
+  }
+}

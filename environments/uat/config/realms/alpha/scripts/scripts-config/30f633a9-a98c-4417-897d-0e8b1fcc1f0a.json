@@ -1,0 +1,16 @@
+{
+  "_id": "30f633a9-a98c-4417-897d-0e8b1fcc1f0a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286703958,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766053490053,
+  "name": "KYID.2B1.Journey.Login.Register.NavigateSkipPUSHQRCodeScan",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Login.Register.NavigateSkipPUSHQRCodeScan.js"
+  }
+}

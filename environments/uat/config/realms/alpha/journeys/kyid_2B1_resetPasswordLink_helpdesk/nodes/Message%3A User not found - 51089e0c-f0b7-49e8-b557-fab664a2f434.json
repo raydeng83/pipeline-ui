@@ -1,0 +1,25 @@
+{
+  "_id": "51089e0c-f0b7-49e8-b557-fab664a2f434",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "388875350",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User not found"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

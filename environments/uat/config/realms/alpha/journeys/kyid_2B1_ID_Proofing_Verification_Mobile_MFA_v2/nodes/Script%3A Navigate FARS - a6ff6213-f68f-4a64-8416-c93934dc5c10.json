@@ -1,0 +1,26 @@
+{
+  "_id": "a6ff6213-f68f-4a64-8416-c93934dc5c10",
+  "_outcomes": [
+    {
+      "displayName": "lexisNexis",
+      "id": "lexisNexis"
+    }
+  ],
+  "_rev": "-1298202482",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "lexisNexis"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "cefcc775-21db-46ce-a574-1a66fc781620"
+}

@@ -1,0 +1,151 @@
+{
+  "_id": "kyid_2B1_AccountRecovery_ForgotEmail_Alternate_Email_Verification",
+  "_rev": "1463225786",
+  "description": "Registration Acceptance for Invited Users",
+  "enabled": true,
+  "entryNodeId": "11b3a7da-475b-4720-a1da-7d83af7ec356",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "06e5e7ae-e341-4327-997a-8953f381bffd": {
+      "connections": {
+        "false": "7936acdb-1026-4671-a5a1-c150d58fc24d",
+        "true": "99e2b51c-f646-462f-b9ef-cc67ac05b979"
+      },
+      "displayName": "CheckIfPrimaryEmailExist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1045,
+      "y": 457.3333282470703
+    },
+    "11b3a7da-475b-4720-a1da-7d83af7ec356": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b9c8fd8a-51ef-45a2-8390-a0b8b652544a"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 64,
+      "y": 352.3333282470703
+    },
+    "1f6a51e8-c330-4577-bdd4-5404dbf66b96": {
+      "connections": {
+        "back": "b9c8fd8a-51ef-45a2-8390-a0b8b652544a",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 979,
+      "y": 38.99998474121094
+    },
+    "360022d1-a3ec-4b60-8e9d-acf239b099a6": {
+      "connections": {
+        "true": "aba465f7-f13b-4d33-bcbd-22a3e3044b1c"
+      },
+      "displayName": "FetchPrimaryEmails",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 556,
+      "y": 26
+    },
+    "5ba9d439-d2f1-45de-83da-99b0dc6fe38f": {
+      "connections": {
+        "false": "06e5e7ae-e341-4327-997a-8953f381bffd",
+        "true": "b9c8fd8a-51ef-45a2-8390-a0b8b652544a"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 837.3333282470703,
+      "y": 237.3333282470703
+    },
+    "7936acdb-1026-4671-a5a1-c150d58fc24d": {
+      "connections": {
+        "True": "1f6a51e8-c330-4577-bdd4-5404dbf66b96"
+      },
+      "displayName": "DisplayNoPrimaryEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1504.3333435058594,
+      "y": 515.3333282470703
+    },
+    "99e2b51c-f646-462f-b9ef-cc67ac05b979": {
+      "connections": {
+        "True": "1f6a51e8-c330-4577-bdd4-5404dbf66b96"
+      },
+      "displayName": "DisplayPrimaryEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1310,
+      "y": 667
+    },
+    "aba465f7-f13b-4d33-bcbd-22a3e3044b1c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5ba9d439-d2f1-45de-83da-99b0dc6fe38f"
+      },
+      "displayName": "Alternate Email Authn",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 676,
+      "y": 520
+    },
+    "b9c8fd8a-51ef-45a2-8390-a0b8b652544a": {
+      "connections": {
+        "back": "1f6a51e8-c330-4577-bdd4-5404dbf66b96",
+        "invalidEmail": "d14106f5-05be-47b4-b98e-41605faff511",
+        "max limit": "c66bf1d8-375e-4dba-aaa8-aa18cbd9ad50",
+        "next": "360022d1-a3ec-4b60-8e9d-acf239b099a6",
+        "skip": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Alternate Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 238.015625,
+      "y": 52.03125
+    },
+    "c66bf1d8-375e-4dba-aaa8-aa18cbd9ad50": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max limit reached for back",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 648,
+      "y": 842.1000061035156
+    },
+    "d14106f5-05be-47b4-b98e-41605faff511": {
+      "connections": {
+        "true": "b9c8fd8a-51ef-45a2-8390-a0b8b652544a"
+      },
+      "displayName": "Error: Invalid Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 327,
+      "y": 558.6666412353516
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1483,
+      "y": 125
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1317,
+      "y": 880
+    },
+    "startNode": {
+      "x": 10,
+      "y": 291
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

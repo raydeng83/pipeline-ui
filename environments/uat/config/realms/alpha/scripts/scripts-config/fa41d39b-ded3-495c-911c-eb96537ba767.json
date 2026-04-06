@@ -1,0 +1,16 @@
+{
+  "_id": "fa41d39b-ded3-495c-911c-eb96537ba767",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3721d1a2-ede0-4a1e-8356-36b797f27300,ou=user,ou=am-config",
+  "creationDate": 1735208090847,
+  "default": false,
+  "description": "This script is used to initialize key session-related parameters such as expiration times",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287837152,
+  "name": "KYID.Journey.Initialize",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.Initialize.js"
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP",
+  "_rev": "615663630",
+  "enabled": true,
+  "entryNodeId": "4a69e8fe-3dfd-489d-a90b-66094e671b01",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "11c10a14-7807-4a8f-bfe7-76416b80c09c": {
+      "connections": {
+        "true": "8c175196-ff80-491d-a0d0-a29aaee58852"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 531,
+      "y": 437
+    },
+    "178bf231-8fc6-4025-a4b3-94c0dc641e72": {
+      "connections": {
+        "KBA": "505dd9bd-42b1-405c-a71a-559e31de975c",
+        "Sync": "479fb702-5478-4816-9380-674252d60156",
+        "SyncExp": "46378fc9-f782-4586-b01d-1be54320a53b",
+        "appEnrollRIDPmsg": "becbc836-0091-4720-98ff-e1b00d31046c",
+        "createAccount": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "displayUser": "923e4a6b-8a9e-4357-bafa-6fb2d499fcab",
+        "error": "fa83fd2b-7753-4e91-b7a3-97a47aa2e35e",
+        "firstTimeLogin": "6f733d0a-5524-4757-bc24-ddb8aca8d052"
+      },
+      "displayName": "Script: Search MCI",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 811,
+      "y": 80
+    },
+    "26b2b6d8-83fc-4868-8dda-47780063b92b": {
+      "connections": {
+        "true": "9714737e-b736-4855-ac0c-435e9da5a393"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 536,
+      "y": 866
+    },
+    "29e0b37b-d1ff-4381-9024-ee7ec88dddb7": {
+      "connections": {
+        "try again": "6f733d0a-5524-4757-bc24-ddb8aca8d052"
+      },
+      "displayName": "ShowError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1432,
+      "y": 867.5833333333334
+    },
+    "46378fc9-f782-4586-b01d-1be54320a53b": {
+      "connections": {
+        "true": "becbc836-0091-4720-98ff-e1b00d31046c"
+      },
+      "displayName": "Script: MCI Sync",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1401,
+      "y": 119.75
+    },
+    "479fb702-5478-4816-9380-674252d60156": {
+      "connections": {
+        "firstTimeLogin": "6f733d0a-5524-4757-bc24-ddb8aca8d052",
+        "true": "923e4a6b-8a9e-4357-bafa-6fb2d499fcab"
+      },
+      "displayName": "Script: MCI Sync in Create",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1092,
+      "y": 604.5
+    },
+    "4a69e8fe-3dfd-489d-a90b-66094e671b01": {
+      "connections": {
+        "Experian": "9714737e-b736-4855-ac0c-435e9da5a393",
+        "LexisNexis": "8c175196-ff80-491d-a0d0-a29aaee58852",
+        "SSA": "9714737e-b736-4855-ac0c-435e9da5a393"
+      },
+      "displayName": "Script Endpoint Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 311.5
+    },
+    "4ffc2bda-da7b-40e9-bb38-4ac712191aaf": {
+      "connections": {
+        "true": "505dd9bd-42b1-405c-a71a-559e31de975c"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1099,
+      "y": 422.25
+    },
+    "505dd9bd-42b1-405c-a71a-559e31de975c": {
+      "connections": {
+        "appEnrollUnableToVerify": "becbc836-0091-4720-98ff-e1b00d31046c",
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "errorMessage": "4ffc2bda-da7b-40e9-bb38-4ac712191aaf",
+        "failed": "923e4a6b-8a9e-4357-bafa-6fb2d499fcab",
+        "next": "46378fc9-f782-4586-b01d-1be54320a53b",
+        "nextnoappenroll": "becbc836-0091-4720-98ff-e1b00d31046c"
+      },
+      "displayName": "script: KBA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1091,
+      "y": 132.25
+    },
+    "6f733d0a-5524-4757-bc24-ddb8aca8d052": {
+      "connections": {
+        "Error": "b3442d25-fa5d-4619-bb33-ec291e1accba",
+        "Failed": "b3442d25-fa5d-4619-bb33-ec291e1accba",
+        "Successful": "b3442d25-fa5d-4619-bb33-ec291e1accba"
+      },
+      "displayName": "Script: Update SIH",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1413,
+      "y": 659.875
+    },
+    "8c175196-ff80-491d-a0d0-a29aaee58852": {
+      "connections": {
+        "KBA": "505dd9bd-42b1-405c-a71a-559e31de975c",
+        "appEnrollUnableToVerify": "becbc836-0091-4720-98ff-e1b00d31046c",
+        "error": "11c10a14-7807-4a8f-bfe7-76416b80c09c",
+        "multipleLexId": "178bf231-8fc6-4025-a4b3-94c0dc641e72",
+        "noLexId": "178bf231-8fc6-4025-a4b3-94c0dc641e72",
+        "singleLexIdMachFound": "479fb702-5478-4816-9380-674252d60156",
+        "singleLexIdNoMatch": "178bf231-8fc6-4025-a4b3-94c0dc641e72",
+        "unableToVerify": "923e4a6b-8a9e-4357-bafa-6fb2d499fcab"
+      },
+      "displayName": "LexisNexis API Call",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 523,
+      "y": 113
+    },
+    "923e4a6b-8a9e-4357-bafa-6fb2d499fcab": {
+      "connections": {
+        "Next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display Emails and MCI Sync",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1992,
+      "y": 324.5
+    },
+    "9714737e-b736-4855-ac0c-435e9da5a393": {
+      "connections": {
+        "MCISearch": "178bf231-8fc6-4025-a4b3-94c0dc641e72",
+        "errorMessage": "26b2b6d8-83fc-4868-8dda-47780063b92b",
+        "notVerified": "becbc836-0091-4720-98ff-e1b00d31046c"
+      },
+      "displayName": "Script SSA/EXPERIAN",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 512,
+      "y": 650.5
+    },
+    "b3442d25-fa5d-4619-bb33-ec291e1accba": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Patch in Ping",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1679,
+      "y": 649.875
+    },
+    "becbc836-0091-4720-98ff-e1b00d31046c": {
+      "connections": {
+        "FARS": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "Next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "appEnrollMessage": "923e4a6b-8a9e-4357-bafa-6fb2d499fcab",
+        "displayFARS2": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Patch User PreReq",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1672,
+      "y": 99.75
+    },
+    "fa83fd2b-7753-4e91-b7a3-97a47aa2e35e": {
+      "connections": {
+        "true": "178bf231-8fc6-4025-a4b3-94c0dc641e72"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 812,
+      "y": 444.16666666666663
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2312,
+      "y": 211.33333333333334
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2312,
+      "y": 295.6666666666667
+    },
+    "startNode": {
+      "x": 70,
+      "y": 352
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

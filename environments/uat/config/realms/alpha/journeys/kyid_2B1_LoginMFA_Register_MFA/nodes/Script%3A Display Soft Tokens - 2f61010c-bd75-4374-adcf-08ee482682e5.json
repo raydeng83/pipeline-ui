@@ -1,0 +1,51 @@
+{
+  "_id": "2f61010c-bd75-4374-adcf-08ee482682e5",
+  "_outcomes": [
+    {
+      "displayName": "forgeRock",
+      "id": "forgeRock"
+    },
+    {
+      "displayName": "microsoftTOTP",
+      "id": "microsoftTOTP"
+    },
+    {
+      "displayName": "googleTOTP",
+      "id": "googleTOTP"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "limit",
+      "id": "limit"
+    }
+  ],
+  "_rev": "1278069421",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "forgeRock",
+    "microsoftTOTP",
+    "googleTOTP",
+    "symantec",
+    "back",
+    "limit"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "5e490ccf-f6fc-47e9-bdcd-c439c29dafb7"
+}

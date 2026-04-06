@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-expiredotpemailsmsvoice-en",
+  "description": "Error Message for Expired OTP of Email Voice and SMS in English",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_EXPIREDOTPEMAILSMSVOICE_EN}"
+}

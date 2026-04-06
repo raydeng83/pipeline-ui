@@ -1,0 +1,16 @@
+{
+  "_id": "58daa47b-887b-403b-8074-b8610cde9094",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754287147870,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=5d66c13a-1395-4276-b17a-7242fb229af8,ou=user,ou=am-config",
+  "lastModifiedDate": 1768849825518,
+  "name": "KYID.2B1.Journey.AppLibraryScreen.Combine",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.AppLibraryScreen.Combine.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "698fb3eb-e06f-410d-a818-c0cf1cc17d3b",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286693653,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766054146756,
+  "name": "KYID.2B1.Journey.SelfRegestration.Alternate.Phone.Back.Limit.Reached",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.SelfRegestration.Alternate.Phone.Back.Limit.Reached.js"
+  }
+}

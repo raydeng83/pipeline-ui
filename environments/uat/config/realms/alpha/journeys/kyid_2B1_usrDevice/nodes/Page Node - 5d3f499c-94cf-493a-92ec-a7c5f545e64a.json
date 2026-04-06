@@ -1,0 +1,28 @@
+{
+  "_id": "5d3f499c-94cf-493a-92ec-a7c5f545e64a",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1433673115",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "56f8d70c-5707-4ff8-a8eb-808960f175f3",
+      "displayName": "Device Profile Collector",
+      "nodeType": "DeviceProfileCollectorNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "deviceProfileCheck"
+  }
+}

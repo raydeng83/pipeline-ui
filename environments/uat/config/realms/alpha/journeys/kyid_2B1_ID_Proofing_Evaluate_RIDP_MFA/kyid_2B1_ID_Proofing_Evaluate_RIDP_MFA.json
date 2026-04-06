@@ -1,0 +1,245 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA",
+  "_rev": "-975992348",
+  "enabled": true,
+  "entryNodeId": "0d0990c2-3539-490b-aece-eee3189d72f4",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "00758625-3cd4-4bb8-90ff-882a56fcdd21": {
+      "connections": {
+        "Error": "e273bb42-f648-452a-a7fa-701b3cbb3bb1",
+        "Failed": "e273bb42-f648-452a-a7fa-701b3cbb3bb1",
+        "Successful": "e273bb42-f648-452a-a7fa-701b3cbb3bb1"
+      },
+      "displayName": "Script: Update SIH",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2052,
+      "y": 164
+    },
+    "0d0990c2-3539-490b-aece-eee3189d72f4": {
+      "connections": {
+        "CMSEXPERIAN": "9f06f547-76e6-4ae4-b997-ebe767a8a6e4",
+        "LexisNexisKBA": "f3fc90ba-edf7-454f-aee8-d1191dec3901",
+        "LexisNexisVerification": "f3fc90ba-edf7-454f-aee8-d1191dec3901",
+        "SSA": "b97c23f1-b1b6-4f6c-ab79-172bedab1c90"
+      },
+      "displayName": "Script Endpoint Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 211,
+      "y": 351
+    },
+    "14748cab-efb6-4fb5-86b4-2bc201c57d50": {
+      "connections": {
+        "true": "9f06f547-76e6-4ae4-b997-ebe767a8a6e4"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 826,
+      "y": 746
+    },
+    "24a560f9-e6e5-4dc7-b3e7-89cc8867e9fc": {
+      "connections": {
+        "true": "5e721cdf-93ce-490f-9ffd-42202f9ad6b2"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 818,
+      "y": 419.66666666666663
+    },
+    "35cc8ca9-42b2-4642-b890-2272fa45e79c": {
+      "connections": {
+        "failure": "df09cdf4-b002-489b-a65a-78bcac4d62e2",
+        "success": "df09cdf4-b002-489b-a65a-78bcac4d62e2"
+      },
+      "displayName": "Send Mail: RIDP Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2521,
+      "y": 433.33333333333337
+    },
+    "47897ba4-f383-455e-82f1-e5aeee78f04d": {
+      "connections": {
+        "Error": "928454cb-9173-49bb-ab23-580529f9c0d8",
+        "Failed": "928454cb-9173-49bb-ab23-580529f9c0d8",
+        "Successful": "928454cb-9173-49bb-ab23-580529f9c0d8"
+      },
+      "displayName": "Script: Update SIH",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1746.75,
+      "y": 390.3125
+    },
+    "5db348cd-969d-4baa-8178-5c5804657237": {
+      "connections": {
+        "FARS": "928454cb-9173-49bb-ab23-580529f9c0d8",
+        "MCISYNC": "823856ca-c020-4d09-8c0f-d153901e323e",
+        "appEnrollRIDPmsg": "928454cb-9173-49bb-ab23-580529f9c0d8",
+        "continue": "928454cb-9173-49bb-ab23-580529f9c0d8",
+        "createAccount": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "displayUser": "df09cdf4-b002-489b-a65a-78bcac4d62e2",
+        "error": "816a87a9-6be6-4752-b7d5-0a76233803f6",
+        "firstTimeLogin": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "forgotEmailSuccess": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "notVerifiedSuccess": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "unableToVerify": "35cc8ca9-42b2-4642-b890-2272fa45e79c"
+      },
+      "displayName": "Script: Search MCI",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1121,
+      "y": 231
+    },
+    "5e721cdf-93ce-490f-9ffd-42202f9ad6b2": {
+      "connections": {
+        "FARS": "928454cb-9173-49bb-ab23-580529f9c0d8",
+        "MCISYNC": "823856ca-c020-4d09-8c0f-d153901e323e",
+        "MCISearch": "5db348cd-969d-4baa-8178-5c5804657237",
+        "createAccount": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "24a560f9-e6e5-4dc7-b3e7-89cc8867e9fc",
+        "firstTimeLogin": "de784752-4be1-45bd-bd4c-29d3a088632f",
+        "highRisk": "bbc38cff-451c-4ab5-92f9-74b23389c81d",
+        "unableToVerify": "35cc8ca9-42b2-4642-b890-2272fa45e79c",
+        "updateprofile_organdonor": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "LexisNexis API Call V2",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 813,
+      "y": 38.5
+    },
+    "816a87a9-6be6-4752-b7d5-0a76233803f6": {
+      "connections": {
+        "true": "5db348cd-969d-4baa-8178-5c5804657237"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1131,
+      "y": 655.25
+    },
+    "823856ca-c020-4d09-8c0f-d153901e323e": {
+      "connections": {
+        "true": "47897ba4-f383-455e-82f1-e5aeee78f04d"
+      },
+      "displayName": "Script: MCI Sync",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1434,
+      "y": 354.75
+    },
+    "928454cb-9173-49bb-ab23-580529f9c0d8": {
+      "connections": {
+        "FARS": "e273bb42-f648-452a-a7fa-701b3cbb3bb1",
+        "Next": "e273bb42-f648-452a-a7fa-701b3cbb3bb1",
+        "appEnrollMessage": "35cc8ca9-42b2-4642-b890-2272fa45e79c",
+        "displayFARS2": "e273bb42-f648-452a-a7fa-701b3cbb3bb1"
+      },
+      "displayName": "Script: Patch User PreReq",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2091,
+      "y": 389
+    },
+    "9f06f547-76e6-4ae4-b997-ebe767a8a6e4": {
+      "connections": {
+        "MCISearch": "5db348cd-969d-4baa-8178-5c5804657237",
+        "errorMessage": "14748cab-efb6-4fb5-86b4-2bc201c57d50",
+        "notVerified": "928454cb-9173-49bb-ab23-580529f9c0d8"
+      },
+      "displayName": "Script: EXPERIAN",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 823,
+      "y": 562.5
+    },
+    "b97c23f1-b1b6-4f6c-ab79-172bedab1c90": {
+      "connections": {
+        "failed": "35cc8ca9-42b2-4642-b890-2272fa45e79c",
+        "success": "9f06f547-76e6-4ae4-b997-ebe767a8a6e4"
+      },
+      "displayName": "Script SSA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 544,
+      "y": 579
+    },
+    "bbc38cff-451c-4ab5-92f9-74b23389c81d": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: High risk",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1140,
+      "y": 111.33332824707031
+    },
+    "de784752-4be1-45bd-bd4c-29d3a088632f": {
+      "connections": {
+        "firstTimeLogin": "00758625-3cd4-4bb8-90ff-882a56fcdd21",
+        "true": "df09cdf4-b002-489b-a65a-78bcac4d62e2"
+      },
+      "displayName": "Script: MCI Sync in Create",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1727,
+      "y": 174
+    },
+    "df09cdf4-b002-489b-a65a-78bcac4d62e2": {
+      "connections": {
+        "Next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Display Emails and MCI Sync",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1436,
+      "y": 521.5
+    },
+    "e273bb42-f648-452a-a7fa-701b3cbb3bb1": {
+      "connections": {
+        "failure": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Send Mail: RIDP Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2517.6041870117188,
+      "y": 214.31017684936523
+    },
+    "f3fc90ba-edf7-454f-aee8-d1191dec3901": {
+      "connections": {
+        "success": "5e721cdf-93ce-490f-9ffd-42202f9ad6b2"
+      },
+      "displayName": "Script: Lex Verification",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 522,
+      "y": 216.3333282470703
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2934,
+      "y": 181.16666666666669
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2796,
+      "y": 779
+    },
+    "startNode": {
+      "x": 70,
+      "y": 405
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

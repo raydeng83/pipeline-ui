@@ -1,0 +1,16 @@
+{
+  "_id": "0ee7fd27-3e87-4602-af7d-8860fff9a76a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "null",
+  "creationDate": 0,
+  "default": false,
+  "description": "This script is used to show change password link to internal users whose password is expired in AD",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1754287828561,
+  "name": "KYID.Journey.ExpIntUsrPwdUpdateMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ExpIntUsrPwdUpdateMsg.js"
+  }
+}

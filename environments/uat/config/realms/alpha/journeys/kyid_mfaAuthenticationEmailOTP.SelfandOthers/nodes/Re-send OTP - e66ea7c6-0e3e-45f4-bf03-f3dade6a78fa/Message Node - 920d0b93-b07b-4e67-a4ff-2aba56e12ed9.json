@@ -1,0 +1,32 @@
+{
+  "_id": "920d0b93-b07b-4e67-a4ff-2aba56e12ed9",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1578094548",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "<div class='page-element'>Click on 'Send new code' to generate and send a new verification code to the email. </div>",
+    "es": "Se ha enviado una OTP a su correo electrónico."
+  },
+  "messageNo": {
+    "en": "Return to Authenticator List",
+    "es": "Haga clic aquí para elegir Otro método de seguridad."
+  },
+  "messageYes": {
+    "en": "Send new code",
+    "es": "Haga clic aquí para ingresar a la OTP."
+  }
+}

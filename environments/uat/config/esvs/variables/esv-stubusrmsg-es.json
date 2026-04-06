@@ -1,0 +1,6 @@
+{
+  "_id": "esv-stubusrmsg-es",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_STUBUSRMSG_ES}"
+}

@@ -1,0 +1,51 @@
+{
+  "_id": "60378fd5-dc90-413b-9828-6cd16a75571a",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "Back",
+      "id": "Back"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Duplicate",
+      "id": "Duplicate"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    },
+    {
+      "displayName": "skip",
+      "id": "skip"
+    }
+  ],
+  "_rev": "-1291770428",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Verify",
+    "Back",
+    "false",
+    "Duplicate",
+    "BlankOTP",
+    "skip"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "982e6e04-a2e9-4323-81cb-017ee59493b7"
+}

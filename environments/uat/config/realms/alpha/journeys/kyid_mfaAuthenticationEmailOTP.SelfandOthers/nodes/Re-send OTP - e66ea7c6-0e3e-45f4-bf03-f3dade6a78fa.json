@@ -1,0 +1,40 @@
+{
+  "_id": "e66ea7c6-0e3e-45f4-bf03-f3dade6a78fa",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1196025763",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "99f2ee77-ef52-4589-a700-41892f20bb7d",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "920d0b93-b07b-4e67-a4ff-2aba56e12ed9",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify with your email</h5></div>\n<a href=\"&{esv.kog.help.mfa.auth.email.url}\"target=\"_blank\">Need Assistance?</a>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\">Verificar con su correo electrónico</div>\n<a href=\"&{esv.kog.help.mfa.auth.email.url}\"target=\"_blank\">¿Necesita ayuda?</a>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\" >Ayuda</a></span>\\n</div>\"}}"
+}

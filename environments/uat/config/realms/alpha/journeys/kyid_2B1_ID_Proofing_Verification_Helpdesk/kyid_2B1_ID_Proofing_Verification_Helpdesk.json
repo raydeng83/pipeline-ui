@@ -1,0 +1,374 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Verification_Helpdesk",
+  "_rev": "717614903",
+  "enabled": true,
+  "entryNodeId": "ce522ee8-125a-42b5-8949-f3c322c3a8bd",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "08ec026a-4412-464a-9263-39b688a13b87": {
+      "connections": {
+        "failure": "6e794ec9-0d15-4a5a-88ae-fc1abe58fc9a",
+        "success": "6e794ec9-0d15-4a5a-88ae-fc1abe58fc9a"
+      },
+      "displayName": "Send Mail: Profile Update",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3467,
+      "y": 97.015625
+    },
+    "12b348b2-18e4-41e2-997b-0354a18e070f": {
+      "connections": {
+        "true": "96a3e08a-be45-4daa-8e3c-be38c1571b7a"
+      },
+      "displayName": "Script: Manage Retry Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1973.75,
+      "y": 602.3125
+    },
+    "144b7bd2-1f14-45ae-a2a4-dcd4860f46af": {
+      "connections": {
+        "failure": "7fceffff-99a8-436b-9ed1-09e9f76b2948",
+        "success": "7fceffff-99a8-436b-9ed1-09e9f76b2948"
+      },
+      "displayName": "Script: Send Mail: Profile Update",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3773,
+      "y": 328.3333282470703
+    },
+    "1b0c32e7-6216-4caf-a821-2e78c62b3ed9": {
+      "connections": {},
+      "displayName": "In Person Successs",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3993.6666259765625,
+      "y": 128.3333282470703
+    },
+    "1b94d7c1-b78e-4b10-99d4-5d48ef947d10": {
+      "connections": {
+        "true": "f0b29de3-82bd-4fb6-b846-17fff842e074"
+      },
+      "displayName": "Script: Check Retry Limit",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1437.515625,
+      "y": 370.0390625
+    },
+    "206116b3-629a-4d26-8457-194041fb51b2": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e7f4cca8-1b9b-4ebd-bc9b-32108781f810"
+      },
+      "displayName": "Script:Fetch KOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 884,
+      "y": 125
+    },
+    "208b75bd-1106-417d-9386-eac14ec42d48": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Different Method",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3940.333251953125,
+      "y": 571.3333282470703
+    },
+    "2adb40ae-2d17-4d51-a74c-5a07caab0631": {
+      "connections": {
+        "back": "96a3e08a-be45-4daa-8e3c-be38c1571b7a",
+        "in_person": "3e23121a-24a1-4f6f-95ac-a8a9ec650434",
+        "true": "ed3488c1-9d41-4e66-aaa1-a15ec8562a7f"
+      },
+      "displayName": "Script: Check In Person",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2850.6666259765625,
+      "y": 277.3333282470703
+    },
+    "38b95cb2-2f3e-4f39-afdb-96b1f503f363": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Pass": "96a3e08a-be45-4daa-8e3c-be38c1571b7a",
+        "User Found": "12b348b2-18e4-41e2-997b-0354a18e070f",
+        "User Not Found": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: User Details HelpDesk",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1544,
+      "y": 550
+    },
+    "3b95a039-5c77-439f-80c1-64007f52c77c": {
+      "connections": {
+        "v1": "957ea539-f668-4039-85e7-f8bfdd31f1b8",
+        "v2": "e0448c31-233d-4163-9ae1-040a22c9fc5c"
+      },
+      "displayName": "Script: RIDP Version ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3153,
+      "y": 387.0625
+    },
+    "3e23121a-24a1-4f6f-95ac-a8a9ec650434": {
+      "connections": {
+        "failure": "1b0c32e7-6216-4caf-a821-2e78c62b3ed9",
+        "success": "08ec026a-4412-464a-9263-39b688a13b87"
+      },
+      "displayName": "Send Mail: In-person Verification Success",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3161.0118103027344,
+      "y": 128.12501525878906
+    },
+    "58d49bed-7c80-4442-beb4-9ed247c58e62": {
+      "connections": {
+        "FARS": "65e232d7-af4d-4b55-a55e-418981a5ceaa",
+        "KBABack": "65e232d7-af4d-4b55-a55e-418981a5ceaa",
+        "Next": "144b7bd2-1f14-45ae-a2a4-dcd4860f46af",
+        "anotherMethod": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "differentMethod": "208b75bd-1106-417d-9386-eac14ec42d48"
+      },
+      "displayName": "Script: Navigate",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3666,
+      "y": 495.16666666666674
+    },
+    "65e232d7-af4d-4b55-a55e-418981a5ceaa": {
+      "connections": {
+        "True": "f0b29de3-82bd-4fb6-b846-17fff842e074",
+        "appEnrollRIDP": "e7f4cca8-1b9b-4ebd-bc9b-32108781f810",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "helpdesk_manageprofile": "8c310ba9-85ea-46db-8e79-9e939be80b14",
+        "helpdesk_ridp": "96a3e08a-be45-4daa-8e3c-be38c1571b7a",
+        "helpdesk_verification": "6cce3ae0-43b6-4be9-bf10-93939cf91072",
+        "in_person": "6cce3ae0-43b6-4be9-bf10-93939cf91072"
+      },
+      "displayName": "Script: Get Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 642,
+      "y": 258
+    },
+    "6cce3ae0-43b6-4be9-bf10-93939cf91072": {
+      "connections": {
+        "false": "38b95cb2-2f3e-4f39-afdb-96b1f503f363",
+        "true": "38b95cb2-2f3e-4f39-afdb-96b1f503f363"
+      },
+      "displayName": "Script: Helpdesk Role Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1200,
+      "y": 579
+    },
+    "6e794ec9-0d15-4a5a-88ae-fc1abe58fc9a": {
+      "connections": {
+        "true": "1b0c32e7-6216-4caf-a821-2e78c62b3ed9"
+      },
+      "displayName": "Script: MCI Sync",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3757.333251953125,
+      "y": 148.99999523162842
+    },
+    "7fceffff-99a8-436b-9ed1-09e9f76b2948": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Update Profile Completed",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 4047,
+      "y": 326.015625
+    },
+    "8c310ba9-85ea-46db-8e79-9e939be80b14": {
+      "connections": {
+        "back": "65e232d7-af4d-4b55-a55e-418981a5ceaa",
+        "in-person": "6cce3ae0-43b6-4be9-bf10-93939cf91072",
+        "questions": "6cce3ae0-43b6-4be9-bf10-93939cf91072"
+      },
+      "displayName": "Script: Select Option",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 913,
+      "y": 547.3333333333333
+    },
+    "8c6b1bf9-95da-436a-9603-e3ce5839b978": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fffd348b-a7d0-45b8-942f-b3af1be0e213"
+      },
+      "displayName": "IJ: FARS",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1858.4444580078125,
+      "y": 335.45832443237305
+    },
+    "957ea539-f668-4039-85e7-f8bfdd31f1b8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "58d49bed-7c80-4442-beb4-9ed247c58e62"
+      },
+      "displayName": "IJ: RIDP v1",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3442,
+      "y": 389.6666666666667
+    },
+    "96a3e08a-be45-4daa-8e3c-be38c1571b7a": {
+      "connections": {
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "changeLog": "957ea539-f668-4039-85e7-f8bfdd31f1b8",
+        "divert": "bbc76228-9951-48dd-b791-a1d9c93a908f",
+        "exit": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "next": "2adb40ae-2d17-4d51-a74c-5a07caab0631",
+        "phoneRegistration": "957ea539-f668-4039-85e7-f8bfdd31f1b8"
+      },
+      "displayName": "Script: Collect Basic Information ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2504,
+      "y": 245
+    },
+    "a19bb5c3-90fb-4c4c-bc18-7d55d72a26ed": {
+      "connections": {
+        "v1": "957ea539-f668-4039-85e7-f8bfdd31f1b8",
+        "v2": "e0448c31-233d-4163-9ae1-040a22c9fc5c"
+      },
+      "displayName": "Script: RIDP Version ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3155.75,
+      "y": 737.0625
+    },
+    "b4eaea10-b6d9-4f3a-8570-376b96a0cdd6": {
+      "connections": {
+        "v1": "957ea539-f668-4039-85e7-f8bfdd31f1b8",
+        "v2": "e0448c31-233d-4163-9ae1-040a22c9fc5c"
+      },
+      "displayName": "Script: RIDP Version",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3152.75,
+      "y": 559.0625
+    },
+    "bbc76228-9951-48dd-b791-a1d9c93a908f": {
+      "connections": {
+        "true": "96a3e08a-be45-4daa-8e3c-be38c1571b7a"
+      },
+      "displayName": "Script: Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2518,
+      "y": 531.8333333333333
+    },
+    "ce522ee8-125a-42b5-8949-f3c322c3a8bd": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "65e232d7-af4d-4b55-a55e-418981a5ceaa"
+      },
+      "displayName": "Script: Check 2B Flag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 355,
+      "y": 311
+    },
+    "e0448c31-233d-4163-9ae1-040a22c9fc5c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "58d49bed-7c80-4442-beb4-9ed247c58e62"
+      },
+      "displayName": "IJ: RIDP v2",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3437.75,
+      "y": 624.0625
+    },
+    "e7f4cca8-1b9b-4ebd-bc9b-32108781f810": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "User Found": "1b94d7c1-b78e-4b10-99d4-5d48ef947d10",
+        "User Not Found": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Fetch User Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1232,
+      "y": 122
+    },
+    "ed3488c1-9d41-4e66-aaa1-a15ec8562a7f": {
+      "connections": {
+        "appEnroll": "a19bb5c3-90fb-4c4c-bc18-7d55d72a26ed",
+        "id_verification": "b4eaea10-b6d9-4f3a-8570-376b96a0cdd6",
+        "standaloneRIDP": "fde54c38-5e97-47d8-9bea-58aa89e5368d",
+        "updateprofile": "3b95a039-5c77-439f-80c1-64007f52c77c"
+      },
+      "displayName": "Script: Flow Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2904.75,
+      "y": 542.0625
+    },
+    "f0b29de3-82bd-4fb6-b846-17fff842e074": {
+      "connections": {
+        "FARS": "8c6b1bf9-95da-436a-9603-e3ce5839b978",
+        "continue": "96a3e08a-be45-4daa-8e3c-be38c1571b7a",
+        "create": "96a3e08a-be45-4daa-8e3c-be38c1571b7a",
+        "organ": "957ea539-f668-4039-85e7-f8bfdd31f1b8",
+        "update": "96a3e08a-be45-4daa-8e3c-be38c1571b7a"
+      },
+      "displayName": "Script: Journey Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1555,
+      "y": 114
+    },
+    "fde54c38-5e97-47d8-9bea-58aa89e5368d": {
+      "connections": {
+        "v1": "957ea539-f668-4039-85e7-f8bfdd31f1b8",
+        "v2": "e0448c31-233d-4163-9ae1-040a22c9fc5c"
+      },
+      "displayName": "Script: RIDP Version ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3155.75,
+      "y": 904.0625
+    },
+    "fffd348b-a7d0-45b8-942f-b3af1be0e213": {
+      "connections": {
+        "lexisNexis": "96a3e08a-be45-4daa-8e3c-be38c1571b7a"
+      },
+      "displayName": "Script: Navigate FARS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2130,
+      "y": 348.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 4499,
+      "y": 390
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3785,
+      "y": 2.3333333333333144
+    },
+    "startNode": {
+      "x": 70,
+      "y": 380.1666666666667
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

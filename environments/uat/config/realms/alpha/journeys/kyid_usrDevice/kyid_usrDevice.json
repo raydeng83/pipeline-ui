@@ -1,0 +1,62 @@
+{
+  "_id": "kyid_usrDevice",
+  "_rev": "2072493491",
+  "enabled": true,
+  "entryNodeId": "059f319b-5b7d-4b6e-b45e-79898019aebe",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "059f319b-5b7d-4b6e-b45e-79898019aebe": {
+      "connections": {
+        "False": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "True": "b6e4df67-6b6e-424a-8ea5-25f4864d70ea"
+      },
+      "displayName": "Script: Is Location Info Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 241.015625,
+      "y": 138.5390625
+    },
+    "b6e4df67-6b6e-424a-8ea5-25f4864d70ea": {
+      "connections": {
+        "outcome": "ecbf9dc8-d7cb-4a90-a17b-388804a8bc6e"
+      },
+      "displayName": "Device Profile Collector",
+      "nodeType": "DeviceProfileCollectorNode",
+      "version": "1.0",
+      "x": 605,
+      "y": 169.5
+    },
+    "ecbf9dc8-d7cb-4a90-a17b-388804a8bc6e": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Device Context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 863,
+      "y": 151.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1102,
+      "y": 85
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1112,
+      "y": 280
+    },
+    "startNode": {
+      "x": 70,
+      "y": 155
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Login\"]"
+  }
+}

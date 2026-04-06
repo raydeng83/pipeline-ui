@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-kogapi-getadditionalflagsinfoapiurl",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_KOGAPI_GETADDITIONALFLAGSINFOAPIURL}"
+}

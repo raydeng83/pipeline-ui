@@ -1,0 +1,16 @@
+{
+  "_id": "2a1d8bf9-d555-4d39-ba76-9092168a9cb7",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286696023,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1766052899310,
+  "name": "KYID.2B1.Journey.CheckPrimaryAlternateEmailPresent",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.CheckPrimaryAlternateEmailPresent.js"
+  }
+}

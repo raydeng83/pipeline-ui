@@ -1,0 +1,16 @@
+{
+  "_id": "0df05650-7076-4781-a560-fd7e3804794c",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286681980,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "lastModifiedDate": 1770091476055,
+  "name": "KYID.2B1.Journey.ClearUserKOGProfileFromNodeState",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ClearUserKOGProfileFromNodeState.js"
+  }
+}

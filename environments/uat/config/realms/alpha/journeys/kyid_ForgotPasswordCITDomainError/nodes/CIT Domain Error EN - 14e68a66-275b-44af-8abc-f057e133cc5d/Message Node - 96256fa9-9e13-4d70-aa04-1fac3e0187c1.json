@@ -1,0 +1,27 @@
+{
+  "_id": "96256fa9-9e13-4d70-aa04-1fac3e0187c1",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "276835083",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "<div class='error-message'>&{esv.error.iscitdomainpart.en}</div>"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Back to sign in"
+  }
+}

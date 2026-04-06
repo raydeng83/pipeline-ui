@@ -1,0 +1,25 @@
+{
+  "_id": "9a4ce44c-827d-4b0c-8529-7b598d215ecb",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-121466164",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Forgot Email Completed"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

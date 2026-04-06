@@ -1,0 +1,16 @@
+{
+  "_id": "92032c79-b2dc-4a3a-86d9-946c2dccf2b4",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
+  "creationDate": 1754286716206,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1775107748940,
+  "name": "KYID.2B1.Journey.GetUserMFARegisteredOptions.Login",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.GetUserMFARegisteredOptions.Login.js"
+  }
+}

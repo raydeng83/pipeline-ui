@@ -1,0 +1,18 @@
+{
+  "displayName": "Change Role Status Back to Draft",
+  "name": "scriptTask-a0c9fc54ced2",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "Change Role Status Back to Draft - scriptTask-a0c9fc54ced2.js"
+    }
+  },
+  "type": "scriptTask"
+}
