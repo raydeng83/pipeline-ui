@@ -648,6 +648,7 @@ export function LogsExplorer({
   const { env, source, sources, sourcesLoading, sourcesError, levelFilter, mode, tailSecs, tailing, loading, preset, customBegin, customEnd, searchSeq, searching } = config;
 
   const [keywordsRaw, setKeywordsRaw] = useState("");
+  const keywordsRawRef = useRef("");
   const keywords = keywordsRaw
     .split(",")
     .map((k) => k.trim())
@@ -920,11 +921,18 @@ export function LogsExplorer({
       endTime = now.toISOString();
     }
 
-    // Build server-side query filter from current search term to drastically reduce
-    // API page count and avoid rate limiting on long time ranges.
-    const term = searchRef.current.trim();
-    const queryFilter = term
-      ? `(/payload co "${term.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}") or (/payload/message co "${term.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}")`
+    // Build server-side _queryFilter from highlight keywords (and search term if set).
+    // This mirrors KYID Utilities' approach: only matching entries are returned by AIC,
+    // dramatically reducing page count and eliminating rate-limit risk on long ranges.
+    function escapeFilterValue(v: string) { return v.replace(/\\/g, "\\\\").replace(/"/g, '\\"'); }
+    const kwTerms = keywordsRawRef.current.split(",").map((k) => k.trim()).filter(Boolean);
+    const searchTerm = searchRef.current.trim();
+    const allTerms = [...new Set([...kwTerms, ...(searchTerm ? [searchTerm] : [])])];
+    const queryFilter = allTerms.length > 0
+      ? allTerms.map((t) => {
+          const v = escapeFilterValue(t);
+          return `(/payload co "${v}") or (/payload/message co "${v}") or (/payload/eventName co "${v}")`;
+        }).join(" or ")
       : undefined;
 
     setError("");
@@ -1246,7 +1254,7 @@ export function LogsExplorer({
               <input
                 type="text"
                 value={keywordsRaw}
-                onChange={(e) => setKeywordsRaw(e.target.value)}
+                onChange={(e) => { setKeywordsRaw(e.target.value); keywordsRawRef.current = e.target.value; }}
                 placeholder="Keywords to highlight, comma-separated…"
                 className="flex-1 text-xs rounded border border-slate-200 px-2.5 py-1 font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
               />
@@ -1257,7 +1265,7 @@ export function LogsExplorer({
                   </span>
                   <button
                     type="button"
-                    onClick={() => setKeywordsRaw("")}
+                    onClick={() => { setKeywordsRaw(""); keywordsRawRef.current = ""; }}
                     className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     Clear
