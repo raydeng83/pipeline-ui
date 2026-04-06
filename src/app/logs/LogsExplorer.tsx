@@ -422,13 +422,14 @@ function terminalLevelClass(level: string): string {
 }
 
 function TailTerminal({
-  entries, defaultSource, searchTerm, keywords, dropped,
+  entries, defaultSource, searchTerm, keywords, dropped, wrapLines = false,
 }: {
   entries: LogEntry[];
   defaultSource: string;
   searchTerm: string;
   keywords: string[];
   dropped: number;
+  wrapLines?: boolean;
 }) {
   const outerRef    = useRef<HTMLDivElement>(null);
   const [viewH, setViewH]       = useState(400);
@@ -504,7 +505,24 @@ function TailTerminal({
           <div className="flex items-center justify-center h-full min-h-[120px]">
             <span className="text-slate-500 text-xs font-mono animate-pulse">Waiting for log entries…</span>
           </div>
+        ) : wrapLines ? (
+          /* Wrap mode: variable row height — render all rows, no virtual list */
+          <div className="py-0.5">
+            {entries.map((entry, i) => {
+              const level = getLevel(entry);
+              const line  = formatTerminalLine(entry, defaultSource);
+              return (
+                <div
+                  key={i}
+                  className={cn("px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug", terminalLevelClass(level))}
+                >
+                  {highlightLine(line)}
+                </div>
+              );
+            })}
+          </div>
         ) : (
+          /* Nowrap mode: fixed row height — virtual list for performance */
           <div style={{ height: totalH, position: "relative" }}>
             <div style={{ position: "absolute", top: startIdx * TERMINAL_ROW_H, left: 0, right: 0 }}>
               {entries.slice(startIdx, endIdx + 1).map((entry, i) => {
@@ -931,6 +949,7 @@ export function LogsExplorer({
 
   const [showFullMessage, setShowFullMessage] = useState(false);
   const [terminalView, setTerminalView] = useState(true); // tail mode: terminal vs paginated table
+  const [wrapLines, setWrapLines] = useState(false);      // terminal: wrap long lines
   const [rawSearch, setRawSearch] = useState("");   // what's in the input box
   const [search, setSearch] = useState("");          // active filter (3+ chars or Enter)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1602,6 +1621,22 @@ export function LogsExplorer({
                   Table
                 </button>
               </div>
+              {/* Wrap toggle — terminal view only */}
+              {terminalView && (
+                <button
+                  type="button"
+                  onClick={() => setWrapLines((w) => !w)}
+                  title={wrapLines ? "Disable line wrap" : "Wrap long lines"}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium rounded border transition-colors shrink-0",
+                    wrapLines
+                      ? "bg-slate-900 text-white border-slate-900"
+                      : "bg-white text-slate-500 border-slate-300 hover:bg-slate-50"
+                  )}
+                >
+                  Wrap
+                </button>
+              )}
               <input
                 type="text"
                 value={rawSearch}
@@ -1711,6 +1746,7 @@ export function LogsExplorer({
                   searchTerm={search}
                   keywords={keywords}
                   dropped={tailDropped}
+                  wrapLines={wrapLines}
                 />
               )
             ) : !fetched ? (
