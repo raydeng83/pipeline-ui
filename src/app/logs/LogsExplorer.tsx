@@ -1505,31 +1505,6 @@ export function LogsExplorer({
                       Stop Tail
                     </button>
                   )}
-                  {/* Terminal / table view toggle (only while tail mode is selected) */}
-                  <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setTerminalView(true)}
-                      title="Terminal view"
-                      className={cn(
-                        "px-2 py-0.5 text-[11px] font-medium transition-colors",
-                        terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
-                      )}
-                    >
-                      Terminal
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTerminalView(false)}
-                      title="Paginated table view"
-                      className={cn(
-                        "px-2 py-0.5 text-[11px] font-medium transition-colors",
-                        !terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
-                      )}
-                    >
-                      Table
-                    </button>
-                  </div>
                 </>
               )}
 
@@ -1602,8 +1577,31 @@ export function LogsExplorer({
               )}
             </div>
 
-            {/* Row 2: filter + count + height controls + fullscreen */}
+            {/* Row 2: view toggle + filter + count + height controls + fullscreen */}
             <div className="flex items-center gap-3 px-4 py-2 border-t border-slate-100">
+              {/* Terminal / Table toggle — available in all modes */}
+              <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setTerminalView(true)}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium transition-colors",
+                    terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >
+                  Terminal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTerminalView(false)}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium transition-colors",
+                    !terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >
+                  Table
+                </button>
+              </div>
               <input
                 type="text"
                 value={rawSearch}
@@ -1622,7 +1620,7 @@ export function LogsExplorer({
                   Clear
                 </button>
               )}
-              {(!tailing || !terminalView) && (
+              {!terminalView && (
                 <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
                   <input
                     type="checkbox"
@@ -1690,19 +1688,31 @@ export function LogsExplorer({
               if (h >= 200) { setTableHeight(h); saveHeight(h); }
             }}
             className={cn(
-              tailing && terminalView ? "overflow-hidden" : "overflow-y-auto overflow-x-auto",
+              terminalView ? "overflow-hidden" : "overflow-y-auto overflow-x-auto",
               fullscreen ? "flex-1" : "resize-y min-h-[200px]"
             )}
             style={fullscreen ? undefined : { height: tableHeight }}
           >
-            {tailing && terminalView ? (
-              <TailTerminal
-                entries={entries}
-                defaultSource={tailSource}
-                searchTerm={search}
-                keywords={keywords}
-                dropped={tailDropped}
-              />
+            {terminalView ? (
+              !fetched && !tailing ? (
+                <div className="flex items-center justify-center h-full min-h-[160px] bg-slate-950">
+                  <p className="text-sm text-slate-500 font-mono">Select sources and start tailing or run a search</p>
+                </div>
+              ) : deferredIsActive && filtered.length === 0 && fetched ? (
+                <div className="flex items-center justify-center h-full min-h-[160px] bg-slate-950">
+                  <p className="text-sm text-slate-500 font-mono">
+                    {entries.length === 0 ? "No log entries returned." : "No entries match the filter."}
+                  </p>
+                </div>
+              ) : (
+                <TailTerminal
+                  entries={filtered}
+                  defaultSource={tailSource}
+                  searchTerm={search}
+                  keywords={keywords}
+                  dropped={tailDropped}
+                />
+              )
             ) : !fetched ? (
               <div className="flex items-center justify-center h-full min-h-[160px]">
                 <p className="text-sm text-slate-400">Select at least one source and click Tail Logs or Search</p>
