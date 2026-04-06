@@ -64,7 +64,7 @@ async function apiPost(body, retries = MAX_RETRIES, attempt = 0) {
     // Exponential backoff: 5s, 10s, 20s, 40s, 80s — respect Retry-After if larger
     const backoff = Math.pow(2, attempt) * 5000;
     const waitMs = Math.max(retryAfter * 1000, backoff);
-    self.postMessage({ type: "error", message: `Rate limited — retrying in ${Math.ceil(waitMs / 1000)}s… (attempt ${attempt + 1}/${MAX_RETRIES})` });
+    self.postMessage({ type: "error", message: `Rate limited — retrying in ${Math.ceil(waitMs / 1000)}s… (attempt ${attempt + 1}/${MAX_RETRIES})`, transient: true });
     await sleep(waitMs);
     return apiPost(body, retries - 1, attempt + 1);
   }

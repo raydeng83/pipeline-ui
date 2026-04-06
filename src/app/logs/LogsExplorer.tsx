@@ -772,6 +772,7 @@ export function LogsExplorer({
   const workerRef = useRef<Worker | null>(null);
 
   const [fetchProgress, setFetchProgress] = useState<{ loaded: number; page: number; done: boolean; paused: boolean } | null>(null);
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const worker = new Worker(`/log-worker.js?v=${Date.now()}`);
@@ -780,7 +781,7 @@ export function LogsExplorer({
         | { type: "entries"; entries: LogEntry[]; append: boolean }
         | { type: "status"; loading: boolean }
         | { type: "progress"; loaded: number; page: number; done: boolean; paused: boolean }
-        | { type: "error"; message: string };
+        | { type: "error"; message: string; transient?: boolean };
 
       if (msg.type === "entries") {
         startTransition(() => {
@@ -796,8 +797,13 @@ export function LogsExplorer({
         setFetchProgress({ loaded: msg.loaded, page: msg.page, done: msg.done, paused: msg.paused });
         onConfigChange({ searching: !msg.done });
       } else if (msg.type === "error") {
+        if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
         setError(msg.message);
-        onConfigChange({ loading: false });
+        if (msg.transient) {
+          errorTimerRef.current = setTimeout(() => setError(""), 5000);
+        } else {
+          onConfigChange({ loading: false });
+        }
       }
     };
     workerRef.current = worker;
