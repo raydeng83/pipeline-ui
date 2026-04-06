@@ -930,6 +930,7 @@ export function LogsExplorer({
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const [showFullMessage, setShowFullMessage] = useState(false);
+  const [terminalView, setTerminalView] = useState(true); // tail mode: terminal vs paginated table
   const [rawSearch, setRawSearch] = useState("");   // what's in the input box
   const [search, setSearch] = useState("");          // active filter (3+ chars or Enter)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1504,6 +1505,31 @@ export function LogsExplorer({
                       Stop Tail
                     </button>
                   )}
+                  {/* Terminal / table view toggle (only while tail mode is selected) */}
+                  <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setTerminalView(true)}
+                      title="Terminal view"
+                      className={cn(
+                        "px-2 py-0.5 text-[11px] font-medium transition-colors",
+                        terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                      )}
+                    >
+                      Terminal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTerminalView(false)}
+                      title="Paginated table view"
+                      className={cn(
+                        "px-2 py-0.5 text-[11px] font-medium transition-colors",
+                        !terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                      )}
+                    >
+                      Table
+                    </button>
+                  </div>
                 </>
               )}
 
@@ -1596,7 +1622,7 @@ export function LogsExplorer({
                   Clear
                 </button>
               )}
-              {!tailing && (
+              {(!tailing || !terminalView) && (
                 <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
                   <input
                     type="checkbox"
@@ -1664,12 +1690,12 @@ export function LogsExplorer({
               if (h >= 200) { setTableHeight(h); saveHeight(h); }
             }}
             className={cn(
-              tailing ? "overflow-hidden" : "overflow-y-auto overflow-x-auto",
+              tailing && terminalView ? "overflow-hidden" : "overflow-y-auto overflow-x-auto",
               fullscreen ? "flex-1" : "resize-y min-h-[200px]"
             )}
             style={fullscreen ? undefined : { height: tableHeight }}
           >
-            {tailing ? (
+            {tailing && terminalView ? (
               <TailTerminal
                 entries={entries}
                 defaultSource={tailSource}
