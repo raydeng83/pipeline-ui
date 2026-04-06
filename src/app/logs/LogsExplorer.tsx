@@ -1522,7 +1522,7 @@ function makeDefaultConfig(environments: EnvWithLogApi[]): TabConfig {
   const defaultEnv = environments.find((e) => e.hasLogApi) ?? environments[0];
   return {
     env: defaultEnv?.name ?? "",
-    selectedSources: ["am-everything"],
+    selectedSources: ["am-everything", "idm-everything"],
     sourcesError: "",
     levelFilter: "ALL",
     mode: "tail",
