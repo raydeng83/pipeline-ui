@@ -80,6 +80,74 @@ const PRESETS: { label: string; value: Preset; ms: number }[] = [
 
 const LOG_SOURCES = ["am-everything", "idm-everything"] as const;
 
+const TAIL_BUFFER_MAX  = 20_000; // entries kept in memory; older ones are dropped
+const TERMINAL_ROW_H   = 20;     // px — fixed height per row (nowrap lines)
+const TERMINAL_OVERSCAN = 15;    // extra rows rendered above/below viewport
+
+// ── IndexedDB tail session persistence ───────────────────────────────────────
+const IDB_NAME  = "ky-pipeline-logs";
+const IDB_VER   = 1;
+const IDB_STORE = "tail-batches";
+const IDB_MAX_SESSIONS = 10;
+
+function openLogDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VER);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        const s = db.createObjectStore(IDB_STORE, { keyPath: "id", autoIncrement: true });
+        s.createIndex("sessionId", "sessionId");
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror  = () => reject(req.error);
+  });
+}
+
+function idbWriteBatch(db: IDBDatabase, sessionId: string, entries: LogEntry[]): void {
+  try {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    tx.objectStore(IDB_STORE).add({ sessionId, entries, ts: Date.now() });
+    tx.onerror = () => {};
+  } catch { /* ignore */ }
+}
+
+function idbReadSession(db: IDBDatabase, sessionId: string): Promise<LogEntry[]> {
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).index("sessionId").getAll(sessionId);
+    req.onsuccess = () => {
+      const batches = (req.result as { entries: LogEntry[]; ts: number }[]).sort((a, b) => a.ts - b.ts);
+      resolve(batches.flatMap((b) => b.entries));
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idbDeleteSession(db: IDBDatabase, sessionId: string): void {
+  try {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    const req = tx.objectStore(IDB_STORE).index("sessionId").openCursor(IDBKeyRange.only(sessionId));
+    req.onsuccess = function () {
+      const cursor = (req.result as IDBCursorWithValue | null);
+      if (cursor) { cursor.delete(); cursor.continue(); }
+    };
+    tx.onerror = () => {};
+  } catch { /* ignore */ }
+}
+
+function idbRegisterSession(db: IDBDatabase, sessionId: string): void {
+  try {
+    const raw  = localStorage.getItem("tail-session-ids");
+    const ids: string[] = raw ? JSON.parse(raw) : [];
+    ids.push(sessionId);
+    const toDelete = ids.splice(0, Math.max(0, ids.length - IDB_MAX_SESSIONS));
+    localStorage.setItem("tail-session-ids", JSON.stringify(ids));
+    toDelete.forEach((id) => idbDeleteSession(db, id));
+  } catch { /* ignore */ }
+}
+
 function toDatetimeLocal(iso: string): string {
   // Format in LOCAL time so <input type="datetime-local"> shows and stores the right value.
   // Slicing a UTC ISO string directly would be off by the local UTC offset.
@@ -324,6 +392,151 @@ function ResizableHeader({
         className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-sky-400/40 transition-colors"
       />
     </th>
+  );
+}
+
+// ── Tail terminal ────────────────────────────────────────────────────────────
+
+function formatTerminalLine(entry: LogEntry, defaultSource: string): string {
+  const src = (entry.source ?? defaultSource).padEnd(15);
+  const lvl = getLevel(entry).padEnd(5);
+  const msg = getMessage(entry);
+  try {
+    const d = new Date(entry.timestamp);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const ts = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, "0")}`;
+    return `${ts}  ${src}  ${lvl}  ${msg}`;
+  } catch {
+    return `${entry.timestamp}  ${src}  ${lvl}  ${msg}`;
+  }
+}
+
+function terminalLevelClass(level: string): string {
+  switch (level.toUpperCase()) {
+    case "ERROR": case "SEVERE":  return "text-red-400";
+    case "WARN":  case "WARNING": return "text-yellow-300";
+    case "INFO":  case "INFORMATION": return "text-green-300";
+    case "DEBUG": case "FINE": case "FINER": case "FINEST": case "TRACE": return "text-slate-400";
+    default: return "text-slate-300";
+  }
+}
+
+function TailTerminal({
+  entries, defaultSource, searchTerm, keywords, dropped,
+}: {
+  entries: LogEntry[];
+  defaultSource: string;
+  searchTerm: string;
+  keywords: string[];
+  dropped: number;
+}) {
+  const outerRef    = useRef<HTMLDivElement>(null);
+  const [viewH, setViewH]       = useState(400);
+  const [scrollTop, setScrollTop] = useState(0);
+  const atBottomRef = useRef(true);
+  const [atBottom, setAtBottom] = useState(true);
+
+  // Track container height for virtual list calculations
+  useEffect(() => {
+    const el = outerRef.current;
+    if (!el) return;
+    setViewH(el.clientHeight);
+    const ro = new ResizeObserver(() => setViewH(el.clientHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Auto-scroll to bottom when new entries arrive
+  useEffect(() => {
+    if (atBottomRef.current && outerRef.current) {
+      outerRef.current.scrollTop = outerRef.current.scrollHeight;
+    }
+  }, [entries.length]);
+
+  function handleScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    const atBot = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    setScrollTop(el.scrollTop);
+    if (atBot !== atBottomRef.current) {
+      atBottomRef.current = atBot;
+      setAtBottom(atBot);
+    }
+  }
+
+  // Virtual list window
+  const totalH   = entries.length * TERMINAL_ROW_H;
+  const startIdx = Math.max(0, Math.floor(scrollTop / TERMINAL_ROW_H) - TERMINAL_OVERSCAN);
+  const endIdx   = Math.min(entries.length - 1, startIdx + Math.ceil(viewH / TERMINAL_ROW_H) + TERMINAL_OVERSCAN * 2);
+
+  // Highlight search / keyword terms
+  const allTerms = [searchTerm, ...keywords].filter(Boolean);
+  function highlightLine(text: string) {
+    if (allTerms.length === 0) return <>{text}</>;
+    const escaped = allTerms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const regex  = new RegExp(`(${escaped.join("|")})`, "gi");
+    const parts  = text.split(regex);
+    if (parts.length === 1) return <>{text}</>;
+    const testRe = new RegExp(`^(?:${escaped.join("|")})$`, "i");
+    return (
+      <>
+        {parts.map((part, i) =>
+          testRe.test(part)
+            ? <mark key={i} className="bg-yellow-400/30 text-yellow-200 rounded-sm">{part}</mark>
+            : part
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div className="relative h-full flex flex-col bg-slate-950">
+      {dropped > 0 && (
+        <div className="px-3 py-1 text-[11px] text-amber-400 bg-amber-950/40 border-b border-slate-700 shrink-0">
+          ⚠ {dropped.toLocaleString()} older entries dropped — showing last {TAIL_BUFFER_MAX.toLocaleString()}
+        </div>
+      )}
+      <div
+        ref={outerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto overflow-x-auto"
+      >
+        {entries.length === 0 ? (
+          <div className="flex items-center justify-center h-full min-h-[120px]">
+            <span className="text-slate-500 text-xs font-mono animate-pulse">Waiting for log entries…</span>
+          </div>
+        ) : (
+          <div style={{ height: totalH, position: "relative" }}>
+            <div style={{ position: "absolute", top: startIdx * TERMINAL_ROW_H, left: 0, right: 0 }}>
+              {entries.slice(startIdx, endIdx + 1).map((entry, i) => {
+                const level = getLevel(entry);
+                const line  = formatTerminalLine(entry, defaultSource);
+                return (
+                  <div
+                    key={startIdx + i}
+                    style={{ height: TERMINAL_ROW_H, lineHeight: `${TERMINAL_ROW_H}px` }}
+                    className={cn("px-3 font-mono text-[11px] whitespace-nowrap select-text", terminalLevelClass(level))}
+                  >
+                    {highlightLine(line)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+      {!atBottom && (
+        <button
+          type="button"
+          onClick={() => {
+            const el = outerRef.current;
+            if (el) { el.scrollTop = el.scrollHeight; atBottomRef.current = true; setAtBottom(true); }
+          }}
+          className="absolute bottom-4 right-4 px-3 py-1.5 text-xs bg-sky-700 text-white rounded-full shadow-lg hover:bg-sky-600 transition-colors z-10"
+        >
+          ↓ Jump to bottom
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -818,6 +1031,9 @@ export function LogsExplorer({
 
   // ── Web Worker ──
   const workerRef = useRef<Worker | null>(null);
+  const idbRef            = useRef<IDBDatabase | null>(null);
+  const tailSessionIdRef  = useRef<string | null>(null);
+  const [tailTotalReceived, setTailTotalReceived] = useState(0);
 
   const [fetchProgress, setFetchProgress] = useState<{ loaded: number; page: number; done: boolean; paused: boolean; source?: string; window?: string } | null>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -832,8 +1048,20 @@ export function LogsExplorer({
         | { type: "error"; message: string; transient?: boolean };
 
       if (msg.type === "entries") {
+        if (msg.append && idbRef.current && tailSessionIdRef.current) {
+          // Persist every incoming batch to IndexedDB (fire-and-forget)
+          idbWriteBatch(idbRef.current, tailSessionIdRef.current, msg.entries);
+          setTailTotalReceived((n) => n + msg.entries.length);
+        }
         startTransition(() => {
-          setEntries((prev) => msg.append ? [...prev, ...msg.entries] : msg.entries);
+          setEntries((prev) => {
+            const combined = msg.append ? [...prev, ...msg.entries] : msg.entries;
+            // Circular buffer: drop oldest when over cap (tail mode only)
+            if (msg.append && combined.length > TAIL_BUFFER_MAX) {
+              return combined.slice(-TAIL_BUFFER_MAX);
+            }
+            return combined;
+          });
           setFetched(true);
           setLastUpdated(new Date());
           if (!msg.append) { setExpandedIdx(null); }
@@ -858,6 +1086,12 @@ export function LogsExplorer({
     workerRef.current = worker;
     return () => worker.terminate();
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Open IndexedDB for tail session persistence ──
+  useEffect(() => {
+    openLogDb().then((db) => { idbRef.current = db; }).catch(() => {});
+    return () => { idbRef.current?.close(); idbRef.current = null; };
   }, []);
 
   // ── Sync tab label ──
@@ -926,7 +1160,13 @@ export function LogsExplorer({
 
   useEffect(() => {
     if (tailing && !prevTailing.current) {
-      // Start tail
+      // Start tail — new session
+      const sessionId = `tail-${Date.now()}`;
+      tailSessionIdRef.current = sessionId;
+      if (idbRef.current) idbRegisterSession(idbRef.current, sessionId);
+      setTailTotalReceived(0);
+      setEntries([]);
+      setFetched(false);
       setError("");
       workerRef.current?.postMessage({ type: "tail-start", env, source: tailSource, tailSecs });
     } else if (!tailing && prevTailing.current) {
@@ -994,6 +1234,26 @@ export function LogsExplorer({
     return doCleanup;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSeq]);
+
+  // Entries dropped from the in-memory circular buffer (tail mode only)
+  const tailDropped = tailing ? Math.max(0, tailTotalReceived - entries.length) : 0;
+
+  // Export the full tail session (all batches) from IndexedDB as a .log text file
+  async function exportTailSession() {
+    if (!idbRef.current || !tailSessionIdRef.current) return;
+    try {
+      const all   = await idbReadSession(idbRef.current, tailSessionIdRef.current);
+      const lines = all.map((e) => formatTerminalLine(e, tailSource)).join("\n");
+      const blob  = new Blob([lines], { type: "text/plain" });
+      const url   = URL.createObjectURL(blob);
+      const a     = Object.assign(document.createElement("a"), {
+        href: url,
+        download: `tail-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.log`,
+      });
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { /* ignore */ }
+  }
 
   // ── Filtered entries ──
   const levelFiltered = levelFilter === "ALL"
@@ -1336,15 +1596,17 @@ export function LogsExplorer({
                   Clear
                 </button>
               )}
-              <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
-                <input
-                  type="checkbox"
-                  checked={showFullMessage}
-                  onChange={(e) => setShowFullMessage(e.target.checked)}
-                  className="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
-                />
-                Full message
-              </label>
+              {!tailing && (
+                <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={showFullMessage}
+                    onChange={(e) => setShowFullMessage(e.target.checked)}
+                    className="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                  />
+                  Full message
+                </label>
+              )}
               <span className="text-xs text-slate-400 whitespace-nowrap">
                 {filtered.length} / {entries.length}
               </span>
@@ -1402,12 +1664,20 @@ export function LogsExplorer({
               if (h >= 200) { setTableHeight(h); saveHeight(h); }
             }}
             className={cn(
-              "overflow-y-auto overflow-x-auto",
+              tailing ? "overflow-hidden" : "overflow-y-auto overflow-x-auto",
               fullscreen ? "flex-1" : "resize-y min-h-[200px]"
             )}
             style={fullscreen ? undefined : { height: tableHeight }}
           >
-            {!fetched ? (
+            {tailing ? (
+              <TailTerminal
+                entries={entries}
+                defaultSource={tailSource}
+                searchTerm={search}
+                keywords={keywords}
+                dropped={tailDropped}
+              />
+            ) : !fetched ? (
               <div className="flex items-center justify-center h-full min-h-[160px]">
                 <p className="text-sm text-slate-400">Select at least one source and click Tail Logs or Search</p>
               </div>
@@ -1555,24 +1825,40 @@ export function LogsExplorer({
 
           {/* Tail status indicator */}
           {tailing && (
-            <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-emerald-50/50 shrink-0">
+            <div className="flex items-center justify-between px-4 py-2 border-t border-slate-700 bg-slate-900 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="text-xs text-slate-600">
+                <span className="text-xs text-slate-300 font-mono">
                   {loading
-                    ? `Tailing — fetching new entries… (${entries.length.toLocaleString()} total)`
+                    ? `Fetching…`
                     : lastUpdated
-                    ? `Tailing — ${entries.length.toLocaleString()} entries · updated ${lastUpdated.toLocaleTimeString()}`
-                    : `Tailing — starting…`}
+                    ? `Updated ${lastUpdated.toLocaleTimeString()}`
+                    : `Starting…`}
                 </span>
+                {tailTotalReceived > 0 && (
+                  <span className="text-xs text-slate-400 font-mono">
+                    · {tailTotalReceived.toLocaleString()} total
+                    {tailDropped > 0 && ` · ${entries.length.toLocaleString()} in buffer`}
+                    {" · saved to IndexedDB"}
+                  </span>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => onConfigChange({ tailing: false })}
-                className="px-2.5 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-              >
-                Stop
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={exportTailSession}
+                  className="px-2.5 py-1 text-xs font-medium bg-slate-700 text-slate-200 rounded hover:bg-slate-600 transition-colors"
+                >
+                  Export session
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onConfigChange({ tailing: false })}
+                  className="px-2.5 py-1 text-xs font-medium bg-red-900/60 text-red-300 rounded hover:bg-red-900 transition-colors"
+                >
+                  Stop
+                </button>
+              </div>
             </div>
           )}
         </div>
