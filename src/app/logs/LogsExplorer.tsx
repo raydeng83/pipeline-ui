@@ -502,6 +502,12 @@ function TailTerminal({
   const startIdx = Math.max(0, Math.floor(scrollTop / TERMINAL_ROW_H) - TERMINAL_OVERSCAN);
   const endIdx   = Math.min(entries.length - 1, startIdx + Math.ceil(viewH / TERMINAL_ROW_H) + TERMINAL_OVERSCAN * 2);
 
+  // Flash key: increments each time we navigate to a match, re-triggers the CSS animation
+  const [flashKey, setFlashKey] = useState(0);
+  useEffect(() => {
+    if (scrollToIndex !== null && scrollToIndex >= 0) setFlashKey((k) => k + 1);
+  }, [scrollToIndex]);
+
   // Highlight search / keyword terms — compile regexes once, not per row
   const allTerms = [searchTerm, ...keywords].filter(Boolean);
   const [hlRegex, hlTestRe] = useMemo(() => {
@@ -517,9 +523,9 @@ function TailTerminal({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, keywords, wholeWord, matchCase]);
 
-  function highlightLine(text: string) {
+  // A: active row marks use amber; other matched rows use sky-blue
+  function highlightLine(text: string, isActive = false) {
     if (!hlRegex || !hlTestRe) return <>{text}</>;
-    // Reset lastIndex since we reuse the regex object
     hlRegex.lastIndex = 0;
     const parts = text.split(hlRegex);
     if (parts.length === 1) return <>{text}</>;
@@ -527,7 +533,10 @@ function TailTerminal({
       <>
         {parts.map((part, i) =>
           hlTestRe.test(part)
-            ? <mark key={i} className="bg-sky-400/50 text-white rounded-sm">{part}</mark>
+            ? <mark key={i} className={isActive
+                ? "bg-amber-400 text-black rounded-sm"
+                : "bg-sky-400/50 text-white rounded-sm"
+              }>{part}</mark>
             : part
         )}
       </>
@@ -559,18 +568,24 @@ function TailTerminal({
               const line  = formatTerminalLine(entry, defaultSource);
               const isActive = activeMatchIndex === vRow.index;
               return (
+                // Outer div: stable key + measureElement for virtualizer
                 <div
                   key={vRow.index}
                   data-index={vRow.index}
                   ref={wrapVirtualizer.measureElement}
                   style={{ position: "absolute", top: vRow.start, left: 0, right: 0 }}
-                  className={cn(
-                    "px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug",
-                    terminalLevelClass(level),
-                    isActive && "ring-1 ring-inset ring-sky-400 bg-sky-950/60"
-                  )}
                 >
-                  {highlightLine(line)}
+                  {/* Inner div: re-keyed on flashKey so CSS animation re-fires on each navigation */}
+                  <div
+                    key={isActive ? flashKey : undefined}
+                    className={cn(
+                      "px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug",
+                      terminalLevelClass(level),
+                      isActive && "border-l-4 border-amber-400 pl-2.5 bg-slate-900/60 animate-match-flash",
+                    )}
+                  >
+                    {highlightLine(line, isActive)}
+                  </div>
                 </div>
               );
             })}
@@ -586,15 +601,15 @@ function TailTerminal({
                 const isActive = activeMatchIndex === absIdx;
                 return (
                   <div
-                    key={absIdx}
+                    key={isActive ? flashKey : absIdx}
                     style={{ height: TERMINAL_ROW_H, lineHeight: `${TERMINAL_ROW_H}px` }}
                     className={cn(
                       "px-3 font-mono text-[11px] whitespace-nowrap select-text",
                       terminalLevelClass(level),
-                      isActive && "ring-1 ring-inset ring-sky-400 bg-sky-950/60"
+                      isActive && "border-l-4 border-amber-400 pl-2.5 bg-slate-900/60 animate-match-flash",
                     )}
                   >
-                    {highlightLine(line)}
+                    {highlightLine(line, isActive)}
                   </div>
                 );
               })}

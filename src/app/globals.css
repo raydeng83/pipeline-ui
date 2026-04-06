@@ -44,3 +44,11 @@ body {
 .animate-progress-slide {
   animation: progress-slide 1.4s ease-in-out infinite;
 }
+
+@keyframes match-flash {
+  0%   { background-color: rgb(251 191 36 / 0.5); }  /* amber-400/50 */
+  100% { background-color: transparent; }
+}
+.animate-match-flash {
+  animation: match-flash 600ms ease-out forwards;
+}
