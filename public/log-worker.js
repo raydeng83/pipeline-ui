@@ -85,10 +85,20 @@ async function doFetch(env, sources, beginTime, endTime, queryFilter, fetchId) {
   let pageNum = 0;
   let isVeryFirst = true;
 
+  if (!sources || sources.length === 0) {
+    self.postMessage({ type: "error", message: "No log source selected." });
+    self.postMessage({ type: "status", loading: false });
+    self.postMessage({ type: "progress", loaded: 0, page: 0, done: true, paused: false });
+    return;
+  }
+
+  // Filter out any blank entries that could slip through
+  const validSources = sources.filter(Boolean);
+
   try {
-    for (let si = 0; si < sources.length; si++) {
-      const source = sources[si];
-      const isLastSource = si === sources.length - 1;
+    for (let si = 0; si < validSources.length; si++) {
+      const source = validSources[si];
+      const isLastSource = si === validSources.length - 1;
 
       for (let ci = 0; ci < chunks.length; ci++) {
         const chunk = chunks[ci];
@@ -201,7 +211,10 @@ self.onmessage = async function (e) {
       stopSearch();
       sleepReject = null; // ensure no stale reject from previous operations
       currentFetchId++;
-      await doFetch(msg.env, msg.sources, msg.beginTime, msg.endTime, msg.queryFilter ?? null, currentFetchId);
+      // Support both new multi-source (msg.sources) and old single-source (msg.source) formats
+      const fetchSources = msg.sources && msg.sources.length > 0 ? msg.sources
+        : msg.source ? [msg.source] : [];
+      await doFetch(msg.env, fetchSources, msg.beginTime, msg.endTime, msg.queryFilter ?? null, currentFetchId);
       break;
 
     case "fetch-pause":
