@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue, useCallback } from "react";
+import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue, useCallback, useMemo } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -423,6 +423,7 @@ function terminalLevelClass(level: string): string {
 
 function TailTerminal({
   entries, defaultSource, searchTerm, keywords, dropped, wrapLines = false,
+  scrollToIndex = null, activeMatchIndex = null,
 }: {
   entries: LogEntry[];
   defaultSource: string;
@@ -430,6 +431,8 @@ function TailTerminal({
   keywords: string[];
   dropped: number;
   wrapLines?: boolean;
+  scrollToIndex?: number | null;
+  activeMatchIndex?: number | null;
 }) {
   const outerRef    = useRef<HTMLDivElement>(null);
   const [viewH, setViewH]       = useState(400);
@@ -453,6 +456,17 @@ function TailTerminal({
       outerRef.current.scrollTop = outerRef.current.scrollHeight;
     }
   }, [entries.length]);
+
+  // Scroll to match index
+  useEffect(() => {
+    if (scrollToIndex === null || scrollToIndex < 0 || !outerRef.current) return;
+    const targetTop = scrollToIndex * TERMINAL_ROW_H;
+    const el = outerRef.current;
+    // Center the matched row in the viewport
+    el.scrollTop = targetTop - el.clientHeight / 2 + TERMINAL_ROW_H / 2;
+    atBottomRef.current = false;
+    setAtBottom(false);
+  }, [scrollToIndex]);
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const el = e.currentTarget;
@@ -511,10 +525,15 @@ function TailTerminal({
             {entries.map((entry, i) => {
               const level = getLevel(entry);
               const line  = formatTerminalLine(entry, defaultSource);
+              const isActive = activeMatchIndex === i;
               return (
                 <div
                   key={i}
-                  className={cn("px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug", terminalLevelClass(level))}
+                  className={cn(
+                    "px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug",
+                    terminalLevelClass(level),
+                    isActive && "ring-1 ring-inset ring-sky-400 bg-sky-950/60"
+                  )}
                 >
                   {highlightLine(line)}
                 </div>
@@ -526,13 +545,19 @@ function TailTerminal({
           <div style={{ height: totalH, position: "relative" }}>
             <div style={{ position: "absolute", top: startIdx * TERMINAL_ROW_H, left: 0, right: 0 }}>
               {entries.slice(startIdx, endIdx + 1).map((entry, i) => {
+                const absIdx = startIdx + i;
                 const level = getLevel(entry);
                 const line  = formatTerminalLine(entry, defaultSource);
+                const isActive = activeMatchIndex === absIdx;
                 return (
                   <div
-                    key={startIdx + i}
+                    key={absIdx}
                     style={{ height: TERMINAL_ROW_H, lineHeight: `${TERMINAL_ROW_H}px` }}
-                    className={cn("px-3 font-mono text-[11px] whitespace-nowrap select-text", terminalLevelClass(level))}
+                    className={cn(
+                      "px-3 font-mono text-[11px] whitespace-nowrap select-text",
+                      terminalLevelClass(level),
+                      isActive && "ring-1 ring-inset ring-sky-400 bg-sky-950/60"
+                    )}
                   >
                     {highlightLine(line)}
                   </div>
@@ -571,6 +596,8 @@ function EntryRow({
   onTimestampClick,
   fullscreen = false,
   showFullMessage = false,
+  highlighted = false,
+  rowIdx,
 }: {
   entry: LogEntry;
   source: string;
@@ -582,6 +609,8 @@ function EntryRow({
   onTimestampClick?: (timestamp: string, source: string) => void;
   fullscreen?: boolean;
   showFullMessage?: boolean;
+  highlighted?: boolean;
+  rowIdx?: number;
 }) {
   const [txCopied, setTxCopied] = useState(false);
   const effectiveSource = entry.source ?? source;
@@ -620,9 +649,11 @@ function EntryRow({
     <Fragment>
       <tr
         onClick={onToggle}
+        data-row-idx={rowIdx}
         className={cn(
           "cursor-pointer text-xs border-b border-slate-100 hover:bg-slate-50 transition-colors",
-          expanded && "bg-slate-50"
+          expanded && "bg-slate-50",
+          highlighted && "ring-1 ring-inset ring-sky-400 bg-sky-50"
         )}
       >
         <td className="px-3 py-2 font-mono text-slate-400 whitespace-nowrap align-top">
@@ -911,6 +942,9 @@ export function LogsExplorer({
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
+  const [matchCursor, setMatchCursor] = useState(-1); // index into matchIndices; -1 = none selected
+  const [highlightedTableIdx, setHighlightedTableIdx] = useState<number | null>(null); // filtered idx to highlight in table view
+  const highlightInputRef = useRef<HTMLInputElement>(null);
 
   // ── Auto-save helper ──
   const autoSaveToHistory = useCallback((logMode: "search" | "tail" | "transaction", logEntries: unknown[], extra?: { transactionId?: string }) => {
@@ -1286,6 +1320,37 @@ export function LogsExplorer({
     ? levelFiltered.filter((e) => JSON.stringify(e).toLowerCase().includes(search.toLowerCase()))
     : levelFiltered;
 
+  // ── Match navigation (terminal view, keyword highlighting) ──
+  // Compute indices into `filtered` where any keyword matches the formatted line
+  const defaultSourceForNav = selectedSources[0] ?? "";
+  const matchIndices = useMemo<number[]>(() => {
+    if (keywords.length === 0) return [];
+    const escaped = keywords.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const re = new RegExp(escaped.join("|"), "i");
+    const result: number[] = [];
+    for (let i = 0; i < filtered.length; i++) {
+      if (re.test(formatTerminalLine(filtered[i], defaultSourceForNav))) result.push(i);
+    }
+    return result;
+  }, [filtered, keywords, defaultSourceForNav]);
+
+  // Reset cursor whenever keywords or entries change
+  useEffect(() => { setMatchCursor(-1); }, [keywordsActive, filtered.length]);
+
+  const scrollToIndex = matchCursor >= 0 && matchCursor < matchIndices.length
+    ? matchIndices[matchCursor]
+    : null;
+  const activeMatchIndex = scrollToIndex;
+
+  function goNextMatch() {
+    if (matchIndices.length === 0) return;
+    setMatchCursor((c) => (c + 1) % matchIndices.length);
+  }
+  function goPrevMatch() {
+    if (matchIndices.length === 0) return;
+    setMatchCursor((c) => (c <= 0 ? matchIndices.length - 1 : c - 1));
+  }
+
   // ── Pagination (page 1 = oldest, last page = newest) ──
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -1308,6 +1373,13 @@ export function LogsExplorer({
     }
     // search active + already jumped: leave page alone so user can browse
   }, [search, levelFilter, filtered.length, pageSize]);
+
+  // Scroll highlighted row into view after switching to table view
+  useEffect(() => {
+    if (terminalView || highlightedTableIdx === null) return;
+    const el = scrollContainerRef.current?.querySelector(`[data-row-idx="${highlightedTableIdx}"]`);
+    if (el) el.scrollIntoView({ block: "center" });
+  }, [terminalView, highlightedTableIdx]);
 
   return (
     <div className="space-y-4">
@@ -1585,6 +1657,7 @@ export function LogsExplorer({
               <span className="text-slate-300 select-none shrink-0">|</span>
               <label className="text-xs font-medium text-slate-500 shrink-0">Highlight</label>
               <input
+                ref={highlightInputRef}
                 type="text"
                 value={keywordsRaw}
                 onChange={(e) => {
@@ -1594,6 +1667,14 @@ export function LogsExplorer({
                   if (keywordsDebounceRef.current) clearTimeout(keywordsDebounceRef.current);
                   keywordsDebounceRef.current = setTimeout(() => setKeywordsActive(val), 300);
                 }}
+                onKeyDown={(e) => {
+                  if (terminalView && matchIndices.length > 0) {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (e.shiftKey) goPrevMatch(); else goNextMatch();
+                    }
+                  }
+                }}
                 placeholder="Keywords to highlight, comma-separated…"
                 className="flex-1 text-xs rounded border border-slate-200 px-2.5 py-1 font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
               />
@@ -1601,6 +1682,39 @@ export function LogsExplorer({
                 <span className="text-xs text-amber-600 whitespace-nowrap">
                   {keywords.length} keyword{keywords.length !== 1 ? "s" : ""}
                 </span>
+              )}
+              {terminalView && matchIndices.length > 0 && (
+                <>
+                  <div className="flex items-center gap-1 text-[11px] text-slate-400 whitespace-nowrap tabular-nums">
+                    <input
+                      type="number"
+                      min={1}
+                      max={matchIndices.length}
+                      value={matchCursor >= 0 ? matchCursor + 1 : ""}
+                      placeholder="–"
+                      onChange={(e) => {
+                        const n = parseInt(e.target.value, 10);
+                        if (!isNaN(n) && n >= 1 && n <= matchIndices.length) setMatchCursor(n - 1);
+                      }}
+                      className="w-12 text-center text-[11px] rounded border border-slate-300 px-1 py-0.5 font-mono focus:outline-none focus:ring-1 focus:ring-sky-400 focus:border-sky-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    />
+                    <span>/ {matchIndices.length}</span>
+                  </div>
+                  <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
+                    <button
+                      type="button"
+                      title="Previous match (Shift+Enter)"
+                      onClick={goPrevMatch}
+                      className="px-2 py-0.5 text-[11px] font-medium bg-white text-slate-500 hover:bg-slate-50 transition-colors"
+                    >↑ Prev</button>
+                    <button
+                      type="button"
+                      title="Next match (Enter)"
+                      onClick={goNextMatch}
+                      className="px-2 py-0.5 text-[11px] font-medium bg-white text-slate-500 hover:bg-slate-50 border-l border-slate-300 hover:bg-slate-50 transition-colors"
+                    >↓ Next</button>
+                  </div>
+                </>
               )}
             </div>
 
@@ -1620,7 +1734,14 @@ export function LogsExplorer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setTerminalView(false)}
+                  onClick={() => {
+                    setTerminalView(false);
+                    if (activeMatchIndex !== null) {
+                      setHighlightedTableIdx(activeMatchIndex);
+                      setPage(Math.floor(activeMatchIndex / pageSize) + 1);
+                      setExpandedIdx(null);
+                    }
+                  }}
                   className={cn(
                     "px-2 py-0.5 text-[11px] font-medium transition-colors",
                     !terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
@@ -1755,6 +1876,8 @@ export function LogsExplorer({
                   keywords={keywords}
                   dropped={tailDropped}
                   wrapLines={wrapLines}
+                  scrollToIndex={scrollToIndex}
+                  activeMatchIndex={activeMatchIndex}
                 />
               )
             ) : !fetched ? (
@@ -1793,6 +1916,8 @@ export function LogsExplorer({
                         onTimestampClick={onOpenContextTab}
                         fullscreen={fullscreen}
                         showFullMessage={showFullMessage}
+                        highlighted={highlightedTableIdx === globalIdx}
+                        rowIdx={globalIdx}
                       />
                     );
                   })}
