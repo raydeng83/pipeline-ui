@@ -80,7 +80,13 @@ const PRESETS: { label: string; value: Preset; ms: number }[] = [
 
 const LOG_SOURCES = ["am-everything", "idm-everything"] as const;
 
-function toDatetimeLocal(iso: string): string { return iso.slice(0, 16); }
+function toDatetimeLocal(iso: string): string {
+  // Format in LOCAL time so <input type="datetime-local"> shows and stores the right value.
+  // Slicing a UTC ISO string directly would be off by the local UTC offset.
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 function fromDatetimeLocal(val: string): string { return val ? new Date(val).toISOString() : ""; }
 
 export interface TabConfig {
@@ -937,6 +943,11 @@ export function LogsExplorer({
     if (searchSeq <= prevSearchSeq.current) return;
     prevSearchSeq.current = searchSeq;
     if (!env || selectedSources.length === 0) return;
+    // Cleanup resets prevSearchSeq so the effect re-fires if the component remounts
+    // (React Strict Mode runs effects twice in development; this makes auto-search work correctly).
+    // In production there is no remount so the cleanup is harmless.
+    const capturedSeq = searchSeq;
+    const doCleanup = () => { if (prevSearchSeq.current >= capturedSeq) prevSearchSeq.current = capturedSeq - 1; };
 
     // Stop tail if running
     if (tailing) {
@@ -976,6 +987,7 @@ export function LogsExplorer({
     setExpandedIdx(null);
     setFetchProgress(null);
     workerRef.current?.postMessage({ type: "fetch", env, sources: selectedSources, beginTime, endTime, queryFilter });
+    return doCleanup;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSeq]);
 
