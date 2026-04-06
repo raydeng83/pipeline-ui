@@ -8,5 +8,20 @@
     "name": "temp-dcc",
     "label": "temp-dcc",
     "color": "blue"
+  },
+  {
+    "name": "ide",
+    "label": "IDE",
+    "color": "yellow"
+  },
+  {
+    "name": "sit",
+    "label": "SIT",
+    "color": "green"
+  },
+  {
+    "name": "uat",
+    "label": "UAT",
+    "color": "blue"
   }
 ]
