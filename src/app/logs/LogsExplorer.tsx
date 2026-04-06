@@ -331,6 +331,7 @@ function EntryRow({
   searchTerm,
   keywords,
   onTransactionClick,
+  onTimestampClick,
   fullscreen = false,
   showFullMessage = false,
 }: {
@@ -341,6 +342,7 @@ function EntryRow({
   searchTerm: string;
   keywords: string[];
   onTransactionClick: (txId: string) => void;
+  onTimestampClick?: (timestamp: string, source: string) => void;
   fullscreen?: boolean;
   showFullMessage?: boolean;
 }) {
@@ -387,7 +389,18 @@ function EntryRow({
         )}
       >
         <td className="px-3 py-2 font-mono text-slate-400 whitespace-nowrap align-top">
-          <span className="text-slate-300 text-[10px]">{date} </span>{time}
+          {onTimestampClick ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onTimestampClick(entry.timestamp, effectiveSource); }}
+              className="hover:text-sky-600 hover:underline transition-colors text-left"
+              title="Open ±1 min context in new tab"
+            >
+              <span className="text-slate-300 text-[10px]">{date} </span>{time}
+            </button>
+          ) : (
+            <><span className="text-slate-300 text-[10px]">{date} </span>{time}</>
+          )}
         </td>
         <td className="px-2 py-2 whitespace-nowrap align-top">
           <SourceBadge source={effectiveSource} />
@@ -634,6 +647,7 @@ export function LogsExplorer({
   fullscreen = false,
   onFullscreenChange,
   txSearchId,
+  onOpenContextTab,
 }: {
   environments: EnvWithLogApi[];
   config: TabConfig;
@@ -646,6 +660,7 @@ export function LogsExplorer({
   fullscreen?: boolean;
   onFullscreenChange?: (v: boolean) => void;
   txSearchId?: { id: string; seq: number };
+  onOpenContextTab?: (timestamp: string, source: string) => void;
 }) {
   const { env, selectedSources, sourcesError, levelFilter, mode, tailSecs, tailing, loading, preset, customBegin, customEnd, searchSeq, searching } = config;
   // Derived: single source for tail mode (always takes first selected)
@@ -1409,6 +1424,7 @@ export function LogsExplorer({
                         searchTerm={search}
                         keywords={keywords}
                         onTransactionClick={(txId) => setDrilldown({ txId })}
+                        onTimestampClick={onOpenContextTab}
                         fullscreen={fullscreen}
                         showFullMessage={showFullMessage}
                       />
@@ -1629,6 +1645,30 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
     setActiveId(id);
   }
 
+  function openContextTab(timestamp: string, source: string) {
+    const id = _nextTabId++;
+    const ts = new Date(timestamp).getTime();
+    const begin = toDatetimeLocal(new Date(ts - 60000).toISOString());
+    const end   = toDatetimeLocal(new Date(ts + 60000).toISOString());
+    const isIDM = source.startsWith("idm-");
+    const contextSources = isIDM ? ["idm-everything"] : ["am-everything"];
+    const shortTime = new Date(timestamp).toISOString().slice(11, 19); // HH:MM:SS
+    const label = `${isIDM ? "idm" : "am"} ±1m @${shortTime}`;
+    const baseConfig = makeDefaultConfig(environments);
+    const config: TabConfig = {
+      ...baseConfig,
+      env: (tabs.find((t) => t.id === activeId)?.config.env) ?? baseConfig.env,
+      selectedSources: contextSources,
+      preset: "custom",
+      customBegin: begin,
+      customEnd: end,
+      searchSeq: 1,
+      searching: false,
+    };
+    setTabs((prev) => [...prev, { id, label, config }]);
+    setActiveId(id);
+  }
+
   function closeTab(id: number) {
     setTabs((prev) => {
       const next = prev.filter((t) => t.id !== id);
@@ -1814,6 +1854,7 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
               fullscreen={fullscreen}
               onFullscreenChange={setFullscreen}
               txSearchId={tab.id === activeId ? txSearch : undefined}
+              onOpenContextTab={openContextTab}
             />
           </div>
         </div>
