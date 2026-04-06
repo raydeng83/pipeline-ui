@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue, useCallback, useMemo, memo } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -83,6 +83,7 @@ const LOG_SOURCES = ["am-everything", "idm-everything"] as const;
 const TAIL_BUFFER_MAX  = 20_000; // entries kept in memory; older ones are dropped
 const TERMINAL_ROW_H   = 20;     // px — fixed height per row (nowrap lines)
 const TERMINAL_OVERSCAN = 15;    // extra rows rendered above/below viewport
+const WRAP_MODE_MAX = 5_000;     // disable wrap above this many entries to protect DOM performance
 
 // ── IndexedDB tail session persistence ───────────────────────────────────────
 const IDB_NAME  = "ky-pipeline-logs";
@@ -441,6 +442,10 @@ function TailTerminal({
   const [scrollTop, setScrollTop] = useState(0);
   const atBottomRef = useRef(true);
   const [atBottom, setAtBottom] = useState(true);
+  const [forceWrap, setForceWrap] = useState(false);
+
+  // Reset forceWrap when wrap is toggled off so the warning re-appears next time
+  useEffect(() => { if (!wrapLines) setForceWrap(false); }, [wrapLines]);
 
   // Track container height for virtual list calculations
   useEffect(() => {
@@ -462,13 +467,20 @@ function TailTerminal({
   // Scroll to match index
   useEffect(() => {
     if (scrollToIndex === null || scrollToIndex < 0 || !outerRef.current) return;
-    const targetTop = scrollToIndex * TERMINAL_ROW_H;
-    const el = outerRef.current;
-    // Center the matched row in the viewport
-    el.scrollTop = targetTop - el.clientHeight / 2 + TERMINAL_ROW_H / 2;
+    const container = outerRef.current;
+    if (wrapLines) {
+      // Wrap mode: variable row heights — find the actual element and center it
+      const rowEl = container.querySelector(`[data-row-idx="${scrollToIndex}"]`) as HTMLElement | null;
+      if (rowEl) {
+        container.scrollTop = rowEl.offsetTop - container.clientHeight / 2 + rowEl.offsetHeight / 2;
+      }
+    } else {
+      // Virtual list mode: fixed row height — calculate directly
+      container.scrollTop = scrollToIndex * TERMINAL_ROW_H - container.clientHeight / 2 + TERMINAL_ROW_H / 2;
+    }
     atBottomRef.current = false;
     setAtBottom(false);
-  }, [scrollToIndex]);
+  }, [scrollToIndex, wrapLines]);
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const el = e.currentTarget;
@@ -485,21 +497,31 @@ function TailTerminal({
   const startIdx = Math.max(0, Math.floor(scrollTop / TERMINAL_ROW_H) - TERMINAL_OVERSCAN);
   const endIdx   = Math.min(entries.length - 1, startIdx + Math.ceil(viewH / TERMINAL_ROW_H) + TERMINAL_OVERSCAN * 2);
 
-  // Highlight search / keyword terms
+  // Highlight search / keyword terms — compile regexes once, not per row
   const allTerms = [searchTerm, ...keywords].filter(Boolean);
-  function highlightLine(text: string) {
-    if (allTerms.length === 0) return <>{text}</>;
+  const [hlRegex, hlTestRe] = useMemo(() => {
+    if (allTerms.length === 0) return [null, null];
     const escaped = allTerms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     const wrapped = wholeWord ? escaped.map((k) => `\\b${k}\\b`) : escaped;
     const flags = matchCase ? "g" : "gi";
-    const regex  = new RegExp(`(${wrapped.join("|")})`, flags);
-    const parts  = text.split(regex);
+    return [
+      new RegExp(`(${wrapped.join("|")})`, flags),
+      new RegExp(`^(?:${wrapped.join("|")})$`, matchCase ? "" : "i"),
+    ];
+  // allTerms is derived from props — use the props directly as deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, keywords, wholeWord, matchCase]);
+
+  function highlightLine(text: string) {
+    if (!hlRegex || !hlTestRe) return <>{text}</>;
+    // Reset lastIndex since we reuse the regex object
+    hlRegex.lastIndex = 0;
+    const parts = text.split(hlRegex);
     if (parts.length === 1) return <>{text}</>;
-    const testRe = new RegExp(`^(?:${wrapped.join("|")})$`, matchCase ? "" : "i");
     return (
       <>
         {parts.map((part, i) =>
-          testRe.test(part)
+          hlTestRe.test(part)
             ? <mark key={i} className="bg-sky-400/50 text-white rounded-sm">{part}</mark>
             : part
         )}
@@ -523,6 +545,21 @@ function TailTerminal({
           <div className="flex items-center justify-center h-full min-h-[120px]">
             <span className="text-slate-500 text-xs font-mono animate-pulse">Waiting for log entries…</span>
           </div>
+        ) : wrapLines && entries.length > WRAP_MODE_MAX && !forceWrap ? (
+          <div className="flex flex-col items-center justify-center gap-3 h-full min-h-[120px] px-8">
+            <span className="text-amber-400 text-xs font-mono text-center">
+              ⚠ Wrap mode with {entries.length.toLocaleString()} entries may cause slowness — rendering this many rows can freeze the browser.
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setForceWrap(true)}
+                className="px-3 py-1 text-xs font-medium bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors"
+              >
+                Enable anyway
+              </button>
+            </div>
+          </div>
         ) : wrapLines ? (
           /* Wrap mode: variable row height — render all rows, no virtual list */
           <div className="py-0.5">
@@ -533,6 +570,7 @@ function TailTerminal({
               return (
                 <div
                   key={i}
+                  data-row-idx={i}
                   className={cn(
                     "px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug",
                     terminalLevelClass(level),
@@ -589,7 +627,7 @@ function TailTerminal({
 
 // ── Entry row ────────────────────────────────────────────────────────────────
 
-function EntryRow({
+const EntryRow = memo(function EntryRow({
   entry,
   source,
   expanded,
@@ -763,7 +801,7 @@ function EntryRow({
       )}
     </Fragment>
   );
-}
+});
 
 // ── Transaction drill-down modal ────────────────────────────────────────────
 
@@ -1324,22 +1362,37 @@ export function LogsExplorer({
   }
 
   // ── Filtered entries ──
-  const levelFiltered = levelFilter === "ALL"
-    ? entries
-    : entries.filter((e) => levelPassesFilter(getLevel(e), levelFilter));
+  const levelFiltered = useMemo(() =>
+    levelFilter === "ALL"
+      ? entries
+      : entries.filter((e) => levelPassesFilter(getLevel(e), levelFilter)),
+  [entries, levelFilter]);
 
-  const filtered = useMemo(() => {
-    if (!search) return levelFiltered;
+  // Pre-compute searchable strings once per levelFiltered change
+  const defaultSourceForNav = selectedSources[0] ?? "";
+  const entryStrings = useMemo(() =>
+    levelFiltered.map((e) => ({
+      json: JSON.stringify(e),
+      line: formatTerminalLine(e, defaultSourceForNav),
+    })),
+  [levelFiltered, defaultSourceForNav]);
+
+  const filteredWithIdx = useMemo(() => {
+    if (!search) return levelFiltered.map((e, i) => ({ e, i }));
     const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const pattern = wholeWord ? `\\b${escaped}\\b` : escaped;
     const flags = matchCase ? "g" : "gi";
     const re = new RegExp(pattern, flags);
-    return levelFiltered.filter((e) => re.test(JSON.stringify(e)));
-  }, [levelFiltered, search, matchCase, wholeWord]);
+    return levelFiltered.reduce<{ e: LogEntry; i: number }[]>((acc, e, i) => {
+      if (re.test(entryStrings[i].json)) acc.push({ e, i });
+      return acc;
+    }, []);
+  }, [levelFiltered, entryStrings, search, matchCase, wholeWord]);
+
+  const filtered = useMemo(() => filteredWithIdx.map(({ e }) => e), [filteredWithIdx]);
 
   // ── Match navigation (terminal view, keyword highlighting) ──
   // Compute indices into `filtered` where any keyword matches the formatted line
-  const defaultSourceForNav = selectedSources[0] ?? "";
   const matchIndices = useMemo<number[]>(() => {
     if (keywords.length === 0) return [];
     const escaped = keywords.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
@@ -1347,14 +1400,17 @@ export function LogsExplorer({
     const flags = matchCase ? "g" : "gi";
     const re = new RegExp(wrapped.join("|"), flags);
     const result: number[] = [];
-    for (let i = 0; i < filtered.length; i++) {
-      if (re.test(formatTerminalLine(filtered[i], defaultSourceForNav))) result.push(i);
+    for (let fi = 0; fi < filteredWithIdx.length; fi++) {
+      if (re.test(entryStrings[filteredWithIdx[fi].i].line)) result.push(fi);
     }
     return result;
-  }, [filtered, keywords, defaultSourceForNav, matchCase, wholeWord]);
+  }, [filteredWithIdx, entryStrings, keywords, matchCase, wholeWord]);
 
-  // Reset cursor whenever keywords or entries change
-  useEffect(() => { setMatchCursor(-1); }, [keywordsActive, filtered.length]);
+  // Jump to first match when keywords/options change; reset when no matches
+  useEffect(() => {
+    setMatchCursor(matchIndices.length > 0 ? 0 : -1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keywordsActive, matchCase, wholeWord]);
 
   const scrollToIndex = matchCursor >= 0 && matchCursor < matchIndices.length
     ? matchIndices[matchCursor]
