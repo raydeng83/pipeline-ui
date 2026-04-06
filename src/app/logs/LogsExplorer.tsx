@@ -693,8 +693,31 @@ export function LogsExplorer({
   const [fetched, setFetched] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const [search, setSearch] = useState("");
-  const searchRef = useRef("");
+  const [rawSearch, setRawSearch] = useState("");   // what's in the input box
+  const [search, setSearch] = useState("");          // active filter (3+ chars or Enter)
+  const searchRef = useRef("");                      // mirrors `search` for searchSeq effect
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function applySearch(val: string) {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    setSearch(val);
+    searchRef.current = val;
+    setExpandedIdx(null);
+  }
+  function handleFilterChange(val: string) {
+    setRawSearch(val);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (val.length === 0) {
+      applySearch("");
+    } else if (val.length >= 3) {
+      searchDebounceRef.current = setTimeout(() => applySearch(val), 400);
+    }
+    // 1–2 chars: leave active filter unchanged until threshold or Enter
+  }
+  function clearSearch() {
+    setRawSearch("");
+    applySearch("");
+  }
   const [saveFlash, setSaveFlash] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyRecords, setHistoryRecords] = useState<{ id: string; completedAt: string; environment: string; logSource?: string; logMode?: string; logEntryCount?: number; logPreset?: string; summary: string }[]>([]);
@@ -1020,7 +1043,7 @@ export function LogsExplorer({
               </button>
               <button
                 type="button"
-                onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); setSearch(""); setExpandedIdx(null); setFetchProgress(null); } }}
+                onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); } }}
                 className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
               >
                 Clear
@@ -1270,13 +1293,19 @@ export function LogsExplorer({
             <div className="flex items-center gap-3 px-4 py-2 border-t border-slate-100">
               <input
                 type="text"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); searchRef.current = e.target.value; setExpandedIdx(null); }}
-                placeholder="Filter entries…"
-                className="flex-1 text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
+                value={rawSearch}
+                onChange={(e) => handleFilterChange(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") applySearch(rawSearch); }}
+                placeholder="Filter entries… (3+ chars or Enter)"
+                className={cn(
+                  "flex-1 text-xs rounded border px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500",
+                  rawSearch && !search
+                    ? "border-amber-300 focus:ring-amber-400"   // typed but not yet active
+                    : "border-slate-300"
+                )}
               />
-              {search && (
-                <button type="button" onClick={() => { setSearch(""); searchRef.current = ""; }} className="text-xs text-slate-400 hover:text-slate-600">
+              {rawSearch && (
+                <button type="button" onClick={clearSearch} className="text-xs text-slate-400 hover:text-slate-600">
                   Clear
                 </button>
               )}
