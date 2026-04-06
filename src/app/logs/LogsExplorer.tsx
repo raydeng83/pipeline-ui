@@ -423,7 +423,7 @@ function terminalLevelClass(level: string): string {
 
 function TailTerminal({
   entries, defaultSource, searchTerm, keywords, dropped, wrapLines = false,
-  scrollToIndex = null, activeMatchIndex = null,
+  scrollToIndex = null, activeMatchIndex = null, matchCase = false, wholeWord = false,
 }: {
   entries: LogEntry[];
   defaultSource: string;
@@ -433,6 +433,8 @@ function TailTerminal({
   wrapLines?: boolean;
   scrollToIndex?: number | null;
   activeMatchIndex?: number | null;
+  matchCase?: boolean;
+  wholeWord?: boolean;
 }) {
   const outerRef    = useRef<HTMLDivElement>(null);
   const [viewH, setViewH]       = useState(400);
@@ -488,10 +490,12 @@ function TailTerminal({
   function highlightLine(text: string) {
     if (allTerms.length === 0) return <>{text}</>;
     const escaped = allTerms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-    const regex  = new RegExp(`(${escaped.join("|")})`, "gi");
+    const wrapped = wholeWord ? escaped.map((k) => `\\b${k}\\b`) : escaped;
+    const flags = matchCase ? "g" : "gi";
+    const regex  = new RegExp(`(${wrapped.join("|")})`, flags);
     const parts  = text.split(regex);
     if (parts.length === 1) return <>{text}</>;
-    const testRe = new RegExp(`^(?:${escaped.join("|")})$`, "i");
+    const testRe = new RegExp(`^(?:${wrapped.join("|")})$`, matchCase ? "" : "i");
     return (
       <>
         {parts.map((part, i) =>
@@ -598,6 +602,8 @@ function EntryRow({
   showFullMessage = false,
   highlighted = false,
   rowIdx,
+  matchCase = false,
+  wholeWord = false,
 }: {
   entry: LogEntry;
   source: string;
@@ -611,6 +617,8 @@ function EntryRow({
   showFullMessage?: boolean;
   highlighted?: boolean;
   rowIdx?: number;
+  matchCase?: boolean;
+  wholeWord?: boolean;
 }) {
   const [txCopied, setTxCopied] = useState(false);
   const effectiveSource = entry.source ?? source;
@@ -627,11 +635,12 @@ function EntryRow({
     const terms = [searchTerm, ...keywords].filter(Boolean);
     if (terms.length === 0) return <>{text}</>;
     const escaped = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-    const regex = new RegExp(`(${escaped.join("|")})`, "gi");
+    const wrapped = wholeWord ? escaped.map((k) => `\\b${k}\\b`) : escaped;
+    const flags = matchCase ? "g" : "gi";
+    const regex = new RegExp(`(${wrapped.join("|")})`, flags);
     const parts = text.split(regex);
     if (parts.length === 1) return <>{text}</>;
-    // Reset lastIndex between test calls by using source + flags
-    const testRe = new RegExp(`^(?:${escaped.join("|")})$`, "i");
+    const testRe = new RegExp(`^(?:${wrapped.join("|")})$`, matchCase ? "" : "i");
     return (
       <>
         {parts.map((part, i) =>
@@ -944,6 +953,8 @@ export function LogsExplorer({
     .filter(Boolean);
   const [matchCursor, setMatchCursor] = useState(-1); // index into matchIndices; -1 = none selected
   const [highlightedTableIdx, setHighlightedTableIdx] = useState<number | null>(null); // filtered idx to highlight in table view
+  const [matchCase, setMatchCase] = useState(false);
+  const [wholeWord, setWholeWord] = useState(false);
   const highlightInputRef = useRef<HTMLInputElement>(null);
 
   // ── Auto-save helper ──
@@ -1286,6 +1297,7 @@ export function LogsExplorer({
     setFetched(false);
     setExpandedIdx(null);
     setFetchProgress(null);
+    onConfigChange({ searching: true });
     workerRef.current?.postMessage({ type: "fetch", env, sources: selectedSources, beginTime, endTime, queryFilter });
     return doCleanup;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1316,9 +1328,14 @@ export function LogsExplorer({
     ? entries
     : entries.filter((e) => levelPassesFilter(getLevel(e), levelFilter));
 
-  const filtered = search
-    ? levelFiltered.filter((e) => JSON.stringify(e).toLowerCase().includes(search.toLowerCase()))
-    : levelFiltered;
+  const filtered = useMemo(() => {
+    if (!search) return levelFiltered;
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const pattern = wholeWord ? `\\b${escaped}\\b` : escaped;
+    const flags = matchCase ? "g" : "gi";
+    const re = new RegExp(pattern, flags);
+    return levelFiltered.filter((e) => re.test(JSON.stringify(e)));
+  }, [levelFiltered, search, matchCase, wholeWord]);
 
   // ── Match navigation (terminal view, keyword highlighting) ──
   // Compute indices into `filtered` where any keyword matches the formatted line
@@ -1326,13 +1343,15 @@ export function LogsExplorer({
   const matchIndices = useMemo<number[]>(() => {
     if (keywords.length === 0) return [];
     const escaped = keywords.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-    const re = new RegExp(escaped.join("|"), "i");
+    const wrapped = wholeWord ? escaped.map((k) => `\\b${k}\\b`) : escaped;
+    const flags = matchCase ? "g" : "gi";
+    const re = new RegExp(wrapped.join("|"), flags);
     const result: number[] = [];
     for (let i = 0; i < filtered.length; i++) {
       if (re.test(formatTerminalLine(filtered[i], defaultSourceForNav))) result.push(i);
     }
     return result;
-  }, [filtered, keywords, defaultSourceForNav]);
+  }, [filtered, keywords, defaultSourceForNav, matchCase, wholeWord]);
 
   // Reset cursor whenever keywords or entries change
   useEffect(() => { setMatchCursor(-1); }, [keywordsActive, filtered.length]);
@@ -1683,6 +1702,26 @@ export function LogsExplorer({
                   {keywords.length} keyword{keywords.length !== 1 ? "s" : ""}
                 </span>
               )}
+              <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
+                <button
+                  type="button"
+                  title="Case sensitive"
+                  onClick={() => setMatchCase((v) => !v)}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium font-mono transition-colors",
+                    matchCase ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >Aa</button>
+                <button
+                  type="button"
+                  title="Whole word"
+                  onClick={() => setWholeWord((v) => !v)}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium font-mono border-l border-slate-300 transition-colors",
+                    wholeWord ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >[W]</button>
+              </div>
               {terminalView && matchIndices.length > 0 && (
                 <>
                   <div className="flex items-center gap-1 text-[11px] text-slate-400 whitespace-nowrap tabular-nums">
@@ -1784,6 +1823,26 @@ export function LogsExplorer({
                   Clear
                 </button>
               )}
+              <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
+                <button
+                  type="button"
+                  title="Case sensitive"
+                  onClick={() => setMatchCase((v) => !v)}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium font-mono transition-colors",
+                    matchCase ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >Aa</button>
+                <button
+                  type="button"
+                  title="Whole word"
+                  onClick={() => setWholeWord((v) => !v)}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium font-mono border-l border-slate-300 transition-colors",
+                    wholeWord ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >[W]</button>
+              </div>
               {!terminalView && (
                 <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
                   <input
@@ -1862,7 +1921,7 @@ export function LogsExplorer({
                 <div className="flex items-center justify-center h-full min-h-[160px] bg-slate-950">
                   <p className="text-sm text-slate-500 font-mono">Select sources and start tailing or run a search</p>
                 </div>
-              ) : deferredIsActive && filtered.length === 0 && fetched ? (
+              ) : deferredIsActive && filtered.length === 0 && fetched && !searching ? (
                 <div className="flex items-center justify-center h-full min-h-[160px] bg-slate-950">
                   <p className="text-sm text-slate-500 font-mono">
                     {entries.length === 0 ? "No log entries returned." : "No entries match the filter."}
@@ -1878,13 +1937,15 @@ export function LogsExplorer({
                   wrapLines={wrapLines}
                   scrollToIndex={scrollToIndex}
                   activeMatchIndex={activeMatchIndex}
+                  matchCase={matchCase}
+                  wholeWord={wholeWord}
                 />
               )
             ) : !fetched ? (
               <div className="flex items-center justify-center h-full min-h-[160px]">
                 <p className="text-sm text-slate-400">Select at least one source and click Tail Logs or Search</p>
               </div>
-            ) : !deferredIsActive ? null : filtered.length === 0 ? (
+            ) : !deferredIsActive ? null : filtered.length === 0 && !searching ? (
               <div className="p-8 text-center text-sm text-slate-400">
                 {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
               </div>
@@ -1918,6 +1979,8 @@ export function LogsExplorer({
                         showFullMessage={showFullMessage}
                         highlighted={highlightedTableIdx === globalIdx}
                         rowIdx={globalIdx}
+                        matchCase={matchCase}
+                        wholeWord={wholeWord}
                       />
                     );
                   })}
@@ -1970,17 +2033,17 @@ export function LogsExplorer({
               )}
               <span className="text-xs text-slate-600">
                 {fetchProgress.loaded > 0
-                  ? `Search complete — ${fetchProgress.loaded.toLocaleString()} entries loaded${fetchProgress.page > 1 ? ` across ${fetchProgress.page} pages` : " (1 page)"}`
+                  ? `Search complete — ${fetchProgress.loaded.toLocaleString()} entries loaded`
                   : "Search complete — no entries found for this time range"}
               </span>
             </div>
           )}
 
           {/* Search progress indicator */}
-          {fetchProgress && !fetchProgress.done && (
+          {(searching || (fetchProgress && !fetchProgress.done)) && (
             <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-sky-50/50 shrink-0">
               <div className="flex items-center gap-2">
-                {fetchProgress.paused ? (
+                {fetchProgress?.paused ? (
                   <span className="inline-block w-2 h-2 rounded-full bg-amber-400 shrink-0" />
                 ) : (
                   <svg className="w-3 h-3 animate-spin text-sky-600 shrink-0" fill="none" viewBox="0 0 24 24">
@@ -1989,18 +2052,19 @@ export function LogsExplorer({
                   </svg>
                 )}
                 <span className="text-xs text-slate-600">
-                  {fetchProgress.paused
-                    ? `Paused — ${fetchProgress.loaded.toLocaleString()} entries loaded (page ${fetchProgress.page})`
+                  {!fetchProgress
+                    ? "Starting search…"
+                    : fetchProgress.paused
+                    ? `Paused — ${fetchProgress.loaded.toLocaleString()} entries loaded`
                     : [
                         fetchProgress.source && `[${fetchProgress.source}]`,
                         fetchProgress.window && fetchProgress.window,
-                        `page ${fetchProgress.page}`,
                         fetchProgress.loaded > 0 && `${fetchProgress.loaded.toLocaleString()} entries`,
                       ].filter(Boolean).join(' · ')}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                {fetchProgress.paused ? (
+                {fetchProgress?.paused ? (
                   <button
                     type="button"
                     onClick={() => workerRef.current?.postMessage({ type: "fetch-resume" })}
