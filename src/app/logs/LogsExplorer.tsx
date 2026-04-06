@@ -78,14 +78,14 @@ const PRESETS: { label: string; value: Preset; ms: number }[] = [
   { label: "Custom",   value: "custom", ms: 0 },
 ];
 
+const LOG_SOURCES = ["am-everything", "idm-everything"] as const;
+
 function toDatetimeLocal(iso: string): string { return iso.slice(0, 16); }
 function fromDatetimeLocal(val: string): string { return val ? new Date(val).toISOString() : ""; }
 
 export interface TabConfig {
   env: string;
-  source: string;
-  sources: string[];
-  sourcesLoading: boolean;
+  selectedSources: string[];
   sourcesError: string;
   levelFilter: string;
   mode: LogMode;
@@ -645,7 +645,9 @@ export function LogsExplorer({
   onFullscreenChange?: (v: boolean) => void;
   txSearchId?: { id: string; seq: number };
 }) {
-  const { env, source, sources, sourcesLoading, sourcesError, levelFilter, mode, tailSecs, tailing, loading, preset, customBegin, customEnd, searchSeq, searching } = config;
+  const { env, selectedSources, sourcesError, levelFilter, mode, tailSecs, tailing, loading, preset, customBegin, customEnd, searchSeq, searching } = config;
+  // Derived: single source for tail mode (always takes first selected)
+  const tailSource = selectedSources[0] ?? "";
 
   const [keywordsRaw, setKeywordsRaw] = useState("");
   const keywordsRawRef = useRef("");
@@ -672,8 +674,8 @@ export function LogsExplorer({
           duration: 0,
           summary: logMode === "transaction"
             ? `${logEntries.length} entries for tx:${extra?.transactionId?.slice(0, 16) ?? ""}…`
-            : `${logEntries.length} entries from ${source}`,
-          logSource: source,
+            : `${logEntries.length} entries from ${selectedSources.join("+")}`,
+          logSource: selectedSources.join("+"),
           logMode,
           logPreset: logMode === "search" ? preset : undefined,
           logEntryCount: logEntries.length,
@@ -684,7 +686,7 @@ export function LogsExplorer({
       setSaveFlash(true);
       setTimeout(() => setSaveFlash(false), 10000);
     }).catch(() => {});
-  }, [env, source, preset]);
+  }, [env, selectedSources, preset]);
 
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [error, setError] = useState("");
@@ -713,16 +715,19 @@ export function LogsExplorer({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // ── Resize ──
-  const [tableHeight, setTableHeight] = useState(420);
-  const grow = () => setTableHeight((h) => Math.min(window.innerHeight - 100, h + 50));
-  const shrink = () => setTableHeight((h) => Math.max(200, h - 50));
+  const [tableHeight, setTableHeight] = useState(() => {
+    try { const v = localStorage.getItem("log-table-height"); return v ? parseInt(v, 10) : 420; } catch { return 420; }
+  });
+  function saveHeight(h: number) { try { localStorage.setItem("log-table-height", String(h)); } catch { /* ignore */ } }
+  const grow = () => setTableHeight((h) => { const next = Math.min(window.innerHeight - 100, h + 50); saveHeight(next); return next; });
+  const shrink = () => setTableHeight((h) => { const next = Math.max(200, h - 50); saveHeight(next); return next; });
 
   // ── Transaction drill-down (from clicking inline txId in table) ──
   const [drilldown, setDrilldown] = useState<{ txId: string } | null>(null);
 
   // ── Transaction search from control section → load into main table ──
   useEffect(() => {
-    if (!txSearchId || !env || sources.length === 0) return;
+    if (!txSearchId || !env) return;
 
     // Stop any active tail
     onConfigChange({ tailing: false });
@@ -734,12 +739,8 @@ export function LogsExplorer({
     setFetched(false);
     setExpandedIdx(null);
 
-    // Determine which aggregate/individual sources to query
-    const AM_INDIVIDUAL = ["am-access", "am-authentication", "am-core"];
-    const IDM_INDIVIDUAL = ["idm-access", "idm-activity", "idm-authentication"];
-    const amSrcs = sources.includes("am-everything") ? ["am-everything"] : AM_INDIVIDUAL.filter((s) => sources.includes(s));
-    const idmSrcs = sources.includes("idm-everything") ? ["idm-everything"] : IDM_INDIVIDUAL.filter((s) => sources.includes(s));
-    const querySources = [...amSrcs, ...idmSrcs];
+    // Query all selected sources (or both if none selected)
+    const querySources = selectedSources.length > 0 ? selectedSources : [...LOG_SOURCES];
 
     Promise.all(
       querySources.map((src) =>
@@ -815,27 +816,17 @@ export function LogsExplorer({
 
   // ── Sync tab label ──
   useEffect(() => {
-    onLabelChange?.(source ? source : env);
+    onLabelChange?.(selectedSources.length > 0 ? selectedSources[0] : env);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [env, source]);
+  }, [env, selectedSources]);
 
-  // ── Fetch sources when env changes ──
+  // ── Reset entries when env changes ──
   useEffect(() => {
     if (!env) return;
     workerRef.current?.postMessage({ type: "cancel" });
-    onConfigChange({ sourcesLoading: true, sourcesError: "", sources: [], source: "", tailing: false });
+    onConfigChange({ sourcesError: "", tailing: false });
     setEntries([]);
     setFetched(false);
-
-    fetch(`/api/logs/sources?env=${encodeURIComponent(env)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) { onConfigChange({ sourcesError: data.error, sourcesLoading: false }); return; }
-        const list: string[] = Array.isArray(data.result) ? data.result : [];
-        const defaultSource = list.includes("am-everything") ? "am-everything" : list[0] ?? "";
-        onConfigChange({ sources: list, source: defaultSource, sourcesLoading: false });
-      })
-      .catch((e) => onConfigChange({ sourcesError: String(e), sourcesLoading: false }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [env]);
 
@@ -882,13 +873,13 @@ export function LogsExplorer({
     if (tailing && !prevTailing.current) {
       // Start tail
       setError("");
-      workerRef.current?.postMessage({ type: "tail-start", env, source, tailSecs });
+      workerRef.current?.postMessage({ type: "tail-start", env, source: tailSource, tailSecs });
     } else if (!tailing && prevTailing.current) {
       // Stop tail
       workerRef.current?.postMessage({ type: "tail-stop" });
     } else if (tailing && prevTailing.current) {
       // Restart tail (tailSecs changed)
-      workerRef.current?.postMessage({ type: "tail-start", env, source, tailSecs });
+      workerRef.current?.postMessage({ type: "tail-start", env, source: tailSource, tailSecs });
     }
     prevTailing.current = tailing;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -900,7 +891,7 @@ export function LogsExplorer({
   useEffect(() => {
     if (searchSeq <= prevSearchSeq.current) return;
     prevSearchSeq.current = searchSeq;
-    if (!env || !source) return;
+    if (!env || selectedSources.length === 0) return;
 
     // Stop tail if running
     if (tailing) {
@@ -940,7 +931,7 @@ export function LogsExplorer({
     setFetched(false);
     setExpandedIdx(null);
     setFetchProgress(null);
-    workerRef.current?.postMessage({ type: "fetch", env, source, beginTime, endTime, queryFilter });
+    workerRef.current?.postMessage({ type: "fetch", env, sources: selectedSources, beginTime, endTime, queryFilter });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSeq]);
 
@@ -1007,7 +998,7 @@ export function LogsExplorer({
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   a.href = url;
-                  a.download = `logs-${source}-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.json`;
+                  a.download = `logs-${selectedSources.join("-")}-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.json`;
                   a.click();
                   URL.revokeObjectURL(url);
                 }}
@@ -1179,7 +1170,7 @@ export function LogsExplorer({
                     <button
                       type="button"
                       onClick={() => onConfigChange({ tailing: true })}
-                      disabled={loading || searching || !source || !!sourcesError}
+                      disabled={loading || searching || selectedSources.length === 0 || !!sourcesError}
                       className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors shrink-0"
                     >
                       Tail Logs
@@ -1231,7 +1222,7 @@ export function LogsExplorer({
                   <button
                     type="button"
                     onClick={() => onConfigChange({ searchSeq: (searchSeq ?? 0) + 1 })}
-                    disabled={loading || searching || !source || !!sourcesError}
+                    disabled={loading || searching || selectedSources.length === 0 || !!sourcesError}
                     className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors flex items-center gap-1"
                   >
                     {searching ? (
@@ -1337,6 +1328,13 @@ export function LogsExplorer({
           {/* Scrollable log window — CSS resize handle at bottom-right corner */}
           <div
             ref={scrollContainerRef}
+            onMouseUp={() => {
+              if (fullscreen) return;
+              const el = scrollContainerRef.current;
+              if (!el) return;
+              const h = el.clientHeight;
+              if (h >= 200) { setTableHeight(h); saveHeight(h); }
+            }}
             className={cn(
               "overflow-y-auto overflow-x-auto",
               fullscreen ? "flex-1" : "resize-y min-h-[200px]"
@@ -1345,7 +1343,7 @@ export function LogsExplorer({
           >
             {!fetched ? (
               <div className="flex items-center justify-center h-full min-h-[160px]">
-                <p className="text-sm text-slate-400">Select a source and click Tail Logs to start</p>
+                <p className="text-sm text-slate-400">Select at least one source and click Tail Logs or Search</p>
               </div>
             ) : !deferredIsActive ? null : filtered.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400">
@@ -1370,7 +1368,7 @@ export function LogsExplorer({
                       <EntryRow
                         key={globalIdx}
                         entry={entry}
-                        source={source}
+                        source={tailSource}
                         expanded={expandedIdx === globalIdx}
                         onToggle={() => setExpandedIdx(expandedIdx === globalIdx ? null : globalIdx)}
                         searchTerm={search}
@@ -1504,7 +1502,7 @@ export function LogsExplorer({
         <TransactionDrilldown
           transactionId={drilldown.txId}
           env={env}
-          availableSources={sources}
+          availableSources={[...LOG_SOURCES]}
           onClose={() => setDrilldown(null)}
         />
       )}
@@ -1524,9 +1522,7 @@ function makeDefaultConfig(environments: EnvWithLogApi[]): TabConfig {
   const defaultEnv = environments.find((e) => e.hasLogApi) ?? environments[0];
   return {
     env: defaultEnv?.name ?? "",
-    source: "",
-    sources: [],
-    sourcesLoading: false,
+    selectedSources: ["am-everything"],
     sourcesError: "",
     levelFilter: "ALL",
     mode: "tail",
@@ -1632,16 +1628,25 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
 
             <div className="space-y-1">
               <label className="text-xs font-medium text-slate-600">Log Source</label>
-              <select
-                value={cfg.source}
-                onChange={(e) => updateActiveConfig({ source: e.target.value, tailing: false })}
-                disabled={cfg.loading || cfg.tailing || cfg.sourcesLoading || cfg.sources.length === 0}
-                className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 min-w-[180px]"
-              >
-                {cfg.sourcesLoading && <option>Loading sources…</option>}
-                {!cfg.sourcesLoading && cfg.sources.length === 0 && <option>No sources available</option>}
-                {cfg.sources.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <div className="flex gap-3 py-1">
+                {LOG_SOURCES.map((s) => (
+                  <label key={s} className={cn("flex items-center gap-1.5 text-sm cursor-pointer select-none", (cfg.loading || cfg.tailing) ? "opacity-50 cursor-not-allowed" : "")}>
+                    <input
+                      type="checkbox"
+                      checked={cfg.selectedSources.includes(s)}
+                      disabled={cfg.loading || cfg.tailing}
+                      onChange={(e) => {
+                        const next = e.target.checked
+                          ? [...cfg.selectedSources, s]
+                          : cfg.selectedSources.filter((x) => x !== s);
+                        updateActiveConfig({ selectedSources: next, tailing: false });
+                      }}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                    />
+                    <span className="font-mono text-xs">{s}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-1">

@@ -2,7 +2,7 @@
  * Log fetch worker — runs entirely off the main thread.
  *
  * Inbound messages (from component):
- *   { type: "fetch",      env, source, beginTime, endTime, queryFilter? }
+ *   { type: "fetch",      env, sources, beginTime, endTime, queryFilter? }
  *   { type: "fetch-pause" }
  *   { type: "fetch-resume" }
  *   { type: "fetch-stop" }
@@ -75,7 +75,7 @@ function waitForResume() {
   return new Promise((resolve) => { searchResolveResume = resolve; });
 }
 
-async function doFetch(env, source, beginTime, endTime, queryFilter, fetchId) {
+async function doFetch(env, sources, beginTime, endTime, queryFilter, fetchId) {
   self.postMessage({ type: "status", loading: true });
 
   // Split into sub-day chunks when the range exceeds the AIC 1-day limit
@@ -86,60 +86,65 @@ async function doFetch(env, source, beginTime, endTime, queryFilter, fetchId) {
   let isVeryFirst = true;
 
   try {
-    for (let ci = 0; ci < chunks.length; ci++) {
-      const chunk = chunks[ci];
-      if (fetchId !== currentFetchId) return;
+    for (let si = 0; si < sources.length; si++) {
+      const source = sources[si];
+      const isLastSource = si === sources.length - 1;
 
-      let cookie = null;
-
-      do {
+      for (let ci = 0; ci < chunks.length; ci++) {
+        const chunk = chunks[ci];
         if (fetchId !== currentFetchId) return;
 
-        // Check if paused
-        if (searchPaused) {
-          self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: false, paused: true });
-          await waitForResume();
+        let cookie = null;
+
+        do {
           if (fetchId !== currentFetchId) return;
-        }
 
-        // Rate limit delay between pages (skip very first request)
-        if (!isVeryFirst) await sleep(RATE_LIMIT_DELAY);
+          // Check if paused
+          if (searchPaused) {
+            self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: false, paused: true });
+            await waitForResume();
+            if (fetchId !== currentFetchId) return;
+          }
 
-        pageNum++;
-        const data = await apiPost({
-          env, source,
-          beginTime: chunk.beginTime,
-          endTime: chunk.endTime,
-          ...(queryFilter ? { queryFilter } : {}),
-          cookie: cookie ?? undefined,
-        });
+          // Rate limit delay between pages (skip very first request)
+          if (!isVeryFirst) await sleep(RATE_LIMIT_DELAY);
 
-        if (fetchId !== currentFetchId) return;
+          pageNum++;
+          const data = await apiPost({
+            env, source,
+            beginTime: chunk.beginTime,
+            endTime: chunk.endTime,
+            ...(queryFilter ? { queryFilter } : {}),
+            cookie: cookie ?? undefined,
+          });
 
-        if (data.error) {
-          self.postMessage({ type: "error", message: data.error });
-          self.postMessage({ type: "status", loading: false });
-          self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: true, paused: false });
-          return;
-        }
+          if (fetchId !== currentFetchId) return;
 
-        const entries = Array.isArray(data.result) ? data.result : [];
-        cookie = data.pagedResultsCookie ?? null;
-        totalLoaded += entries.length;
+          if (data.error) {
+            self.postMessage({ type: "error", message: data.error });
+            self.postMessage({ type: "status", loading: false });
+            self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: true, paused: false });
+            return;
+          }
 
-        // Store for resume
-        searchCookie = cookie;
-        searchParams = { env, source, beginTime: chunk.beginTime, endTime: chunk.endTime, queryFilter };
+          const entries = Array.isArray(data.result) ? data.result : [];
+          cookie = data.pagedResultsCookie ?? null;
+          totalLoaded += entries.length;
 
-        const isLastChunk = ci === chunks.length - 1;
-        self.postMessage({ type: "entries", entries, append: !isVeryFirst });
-        self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: isLastChunk && !cookie, paused: false });
+          // Store for resume
+          searchCookie = cookie;
+          searchParams = { env, sources, beginTime: chunk.beginTime, endTime: chunk.endTime, queryFilter };
 
-        if (isVeryFirst) {
-          self.postMessage({ type: "status", loading: false });
-          isVeryFirst = false;
-        }
-      } while (cookie);
+          const isLastChunk = ci === chunks.length - 1;
+          self.postMessage({ type: "entries", entries, append: !isVeryFirst });
+          self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: isLastSource && isLastChunk && !cookie, paused: false });
+
+          if (isVeryFirst) {
+            self.postMessage({ type: "status", loading: false });
+            isVeryFirst = false;
+          }
+        } while (cookie);
+      }
     }
 
     self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: true, paused: false });
@@ -196,7 +201,7 @@ self.onmessage = async function (e) {
       stopSearch();
       sleepReject = null; // ensure no stale reject from previous operations
       currentFetchId++;
-      await doFetch(msg.env, msg.source, msg.beginTime, msg.endTime, msg.queryFilter ?? null, currentFetchId);
+      await doFetch(msg.env, msg.sources, msg.beginTime, msg.endTime, msg.queryFilter ?? null, currentFetchId);
       break;
 
     case "fetch-pause":
