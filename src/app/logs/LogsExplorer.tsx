@@ -862,7 +862,11 @@ export function LogsExplorer({
 
   // ── Sync tab label ──
   useEffect(() => {
-    onLabelChange?.(selectedSources.length > 0 ? selectedSources[0] : env);
+    const sourceLabel =
+      selectedSources.length >= 2 ? "both"
+      : selectedSources.length === 1 ? selectedSources[0]
+      : env;
+    onLabelChange?.(sourceLabel);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [env, selectedSources]);
 
@@ -1664,8 +1668,9 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
     const end   = toDatetimeLocal(new Date(ts + 60000).toISOString());
     const isIDM = source.startsWith("idm-");
     const contextSources = isIDM ? ["idm-everything"] : ["am-everything"];
-    const shortTime = new Date(timestamp).toISOString().slice(11, 19); // HH:MM:SS
-    const label = `${isIDM ? "idm" : "am"} ±1m @${shortTime}`;
+    const shortTime = new Date(timestamp).toLocaleTimeString(undefined, { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const sourceLabel = isIDM ? "idm-everything" : "am-everything";
+    const label = `${sourceLabel} ±1m @${shortTime}`;
     const baseConfig = makeDefaultConfig(environments);
     const config: TabConfig = {
       ...baseConfig,
