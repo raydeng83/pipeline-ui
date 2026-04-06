@@ -4,7 +4,7 @@ import { parseEnvFile } from "@/lib/env-parser";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { env, source, beginTime, endTime, pageSize = 50, cookie, tail = false, transactionId } = body as {
+  const { env, source, beginTime, endTime, pageSize = 1000, cookie, tail = false, transactionId, queryFilter } = body as {
     env: string;
     source: string;
     beginTime?: string;
@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     cookie?: string;
     tail?: boolean;
     transactionId?: string;
+    queryFilter?: string;
   };
 
   if (!env || !source) {
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
       source,
       beginTime: beginTime!,
       ...(endTime ? { endTime } : {}),
+      ...(queryFilter ? { _queryFilter: queryFilter } : {}),
       ...(cookie ? { _pagedResultsCookie: cookie } : {}),
     });
     url = `${tenantBaseUrl}/monitoring/logs?${params}`;

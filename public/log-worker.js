@@ -2,7 +2,7 @@
  * Log fetch worker — runs entirely off the main thread.
  *
  * Inbound messages (from component):
- *   { type: "fetch",      env, source, beginTime, endTime }
+ *   { type: "fetch",      env, source, beginTime, endTime, queryFilter? }
  *   { type: "fetch-pause" }
  *   { type: "fetch-resume" }
  *   { type: "fetch-stop" }
@@ -75,7 +75,7 @@ function waitForResume() {
   return new Promise((resolve) => { searchResolveResume = resolve; });
 }
 
-async function doFetch(env, source, beginTime, endTime, fetchId) {
+async function doFetch(env, source, beginTime, endTime, queryFilter, fetchId) {
   self.postMessage({ type: "status", loading: true });
 
   // Split into sub-day chunks when the range exceeds the AIC 1-day limit
@@ -110,6 +110,7 @@ async function doFetch(env, source, beginTime, endTime, fetchId) {
           env, source,
           beginTime: chunk.beginTime,
           endTime: chunk.endTime,
+          ...(queryFilter ? { queryFilter } : {}),
           cookie: cookie ?? undefined,
         });
 
@@ -128,7 +129,7 @@ async function doFetch(env, source, beginTime, endTime, fetchId) {
 
         // Store for resume
         searchCookie = cookie;
-        searchParams = { env, source, beginTime: chunk.beginTime, endTime: chunk.endTime };
+        searchParams = { env, source, beginTime: chunk.beginTime, endTime: chunk.endTime, queryFilter };
 
         const isLastChunk = ci === chunks.length - 1;
         self.postMessage({ type: "entries", entries, append: !isVeryFirst });
@@ -195,7 +196,7 @@ self.onmessage = async function (e) {
       stopSearch();
       sleepReject = null; // ensure no stale reject from previous operations
       currentFetchId++;
-      await doFetch(msg.env, msg.source, msg.beginTime, msg.endTime, currentFetchId);
+      await doFetch(msg.env, msg.source, msg.beginTime, msg.endTime, msg.queryFilter ?? null, currentFetchId);
       break;
 
     case "fetch-pause":

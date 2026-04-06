@@ -691,6 +691,7 @@ export function LogsExplorer({
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const [search, setSearch] = useState("");
+  const searchRef = useRef("");
   const [saveFlash, setSaveFlash] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyRecords, setHistoryRecords] = useState<{ id: string; completedAt: string; environment: string; logSource?: string; logMode?: string; logEntryCount?: number; logPreset?: string; summary: string }[]>([]);
@@ -919,12 +920,19 @@ export function LogsExplorer({
       endTime = now.toISOString();
     }
 
+    // Build server-side query filter from current search term to drastically reduce
+    // API page count and avoid rate limiting on long time ranges.
+    const term = searchRef.current.trim();
+    const queryFilter = term
+      ? `(/payload co "${term.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}") or (/payload/message co "${term.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}")`
+      : undefined;
+
     setError("");
     setEntries([]);
     setFetched(false);
     setExpandedIdx(null);
     setFetchProgress(null);
-    workerRef.current?.postMessage({ type: "fetch", env, source, beginTime, endTime });
+    workerRef.current?.postMessage({ type: "fetch", env, source, beginTime, endTime, queryFilter });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSeq]);
 
@@ -1263,12 +1271,12 @@ export function LogsExplorer({
               <input
                 type="text"
                 value={search}
-                onChange={(e) => { setSearch(e.target.value); setExpandedIdx(null); }}
+                onChange={(e) => { setSearch(e.target.value); searchRef.current = e.target.value; setExpandedIdx(null); }}
                 placeholder="Filter entries…"
                 className="flex-1 text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
               />
               {search && (
-                <button type="button" onClick={() => setSearch("")} className="text-xs text-slate-400 hover:text-slate-600">
+                <button type="button" onClick={() => { setSearch(""); searchRef.current = ""; }} className="text-xs text-slate-400 hover:text-slate-600">
                   Clear
                 </button>
               )}
