@@ -57,7 +57,7 @@ function buildHunks(lines: DiffLine[]): HunkItem[] {
 
 // ── Unified diff viewer ───────────────────────────────────────────────────────
 
-function DiffViewer({ lines, fullscreen }: { lines: DiffLine[]; fullscreen?: boolean }) {
+function DiffViewer({ lines, fullscreen, wrap }: { lines: DiffLine[]; fullscreen?: boolean; wrap?: boolean }) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const hunks = buildHunks(lines);
 
@@ -72,8 +72,8 @@ function DiffViewer({ lines, fullscreen }: { lines: DiffLine[]; fullscreen?: boo
   let lineIdx = 0;
 
   return (
-    <div className={cn("overflow-x-auto bg-slate-950 text-[11px] font-mono leading-5 overflow-y-auto", fullscreen ? "flex-1" : "max-h-[600px]")}>
-      <table className="w-full border-collapse">
+    <div className={cn("overflow-x-auto overflow-y-auto bg-slate-950 text-[11px] font-mono leading-5", fullscreen ? "flex-1" : "max-h-[600px]")}>
+      <table className="min-w-full border-collapse">
         <tbody>
           {hunks.map((item, hi) => {
             if (item.type === "ellipsis") {
@@ -98,7 +98,7 @@ function DiffViewer({ lines, fullscreen }: { lines: DiffLine[]; fullscreen?: boo
                           <span className="select-none text-slate-600 text-right w-10 border-r border-slate-800 px-2">{right}</span>
                           <span className="select-none w-4 px-1 text-slate-600"> </span>
                           <span
-                            className="px-2 whitespace-pre text-slate-500"
+                            className={cn("px-2 text-slate-500", wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre")}
                             dangerouslySetInnerHTML={{ __html: highlightLine(l.content) }}
                           />
                         </div>
@@ -122,7 +122,7 @@ function DiffViewer({ lines, fullscreen }: { lines: DiffLine[]; fullscreen?: boo
                 <td className="select-none text-slate-600 text-right px-2 py-0 w-10 border-r border-slate-800">{right ?? ""}</td>
                 <td className={cn("px-1 py-0 select-none w-4", pfxColor)}>{prefix}</td>
                 <td
-                  className={cn("px-2 py-0 whitespace-pre", textColor)}
+                  className={cn("px-2 py-0", wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre", textColor)}
                   dangerouslySetInnerHTML={{ __html: highlightLine(l.content) }}
                 />
               </tr>
@@ -142,25 +142,27 @@ function SideBySideViewer({
   sourceLabel,
   targetLabel,
   fullscreen,
+  wrap,
 }: {
   localContent?: string;
   remoteContent?: string;
   sourceLabel: string;
   targetLabel: string;
   fullscreen?: boolean;
+  wrap?: boolean;
 }) {
   return (
     <div className={cn(
       "grid grid-cols-2 divide-x divide-slate-700 bg-slate-950",
       fullscreen ? "flex-1 min-h-0" : "max-h-[600px]"
     )}>
-      <FilePane label={sourceLabel} content={localContent} absence={`Not in ${sourceLabel}`} />
-      <FilePane label={targetLabel} content={remoteContent} absence={`Not in ${targetLabel}`} />
+      <FilePane label={sourceLabel} content={localContent} absence={`Not in ${sourceLabel}`} wrap={wrap} />
+      <FilePane label={targetLabel} content={remoteContent} absence={`Not in ${targetLabel}`} wrap={wrap} />
     </div>
   );
 }
 
-function FilePane({ label, content, absence }: { label: string; content?: string; absence: string }) {
+function FilePane({ label, content, absence, wrap }: { label: string; content?: string; absence: string; wrap?: boolean }) {
   return (
     <div className="flex flex-col min-h-0">
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700 shrink-0">
@@ -168,7 +170,7 @@ function FilePane({ label, content, absence }: { label: string; content?: string
       </div>
       {content !== undefined ? (
         <pre
-          className="flex-1 overflow-auto text-[11px] font-mono leading-5 text-slate-300 p-3 whitespace-pre"
+          className={cn("flex-1 overflow-auto text-[11px] font-mono leading-5 text-slate-300 p-3", wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre")}
           dangerouslySetInnerHTML={{
             __html: content.split("\n").map(highlightLine).join("\n"),
           }}
@@ -253,6 +255,7 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("diff");
   const [fullscreen, setFullscreen] = useState(false);
+  const [wrap, setWrap] = useState(false);
   const s = STATUS_STYLES[file.status];
   const hasDiff = !!file.diffLines?.length;
   const hasContent = file.localContent !== undefined || file.remoteContent !== undefined;
@@ -272,8 +275,8 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
 
   const viewerContent = open && (
     view === "diff" && file.diffLines
-      ? <DiffViewer lines={file.diffLines} fullscreen={fullscreen} />
-      : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} sourceLabel={sourceLabel} targetLabel={targetLabel} fullscreen={fullscreen} />
+      ? <DiffViewer lines={file.diffLines} fullscreen={fullscreen} wrap={wrap} />
+      : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} sourceLabel={sourceLabel} targetLabel={targetLabel} fullscreen={fullscreen} wrap={wrap} />
   );
 
   if (fullscreen && open) {
@@ -311,6 +314,17 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setWrap((w) => !w)}
+            title="Toggle line wrap"
+            className={cn(
+              "px-2 py-0.5 text-[10px] rounded border transition-colors shrink-0",
+              wrap ? "bg-sky-600 text-white border-sky-600" : "text-slate-400 border-slate-600 hover:bg-slate-800"
+            )}
+          >
+            Wrap
+          </button>
           <button
             type="button"
             onClick={() => setFullscreen(false)}
@@ -372,6 +386,17 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setWrap((w) => !w)}
+              title="Toggle line wrap"
+              className={cn(
+                "px-2 py-0.5 text-[10px] rounded border transition-colors",
+                wrap ? "bg-slate-900 text-white border-slate-900" : "text-slate-500 border-slate-300 hover:bg-slate-100"
+              )}
+            >
+              Wrap
+            </button>
             <button
               type="button"
               onClick={() => setFullscreen(true)}
