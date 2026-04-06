@@ -695,13 +695,11 @@ export function LogsExplorer({
 
   const [rawSearch, setRawSearch] = useState("");   // what's in the input box
   const [search, setSearch] = useState("");          // active filter (3+ chars or Enter)
-  const searchRef = useRef("");                      // mirrors `search` for searchSeq effect
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function applySearch(val: string) {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     setSearch(val);
-    searchRef.current = val;
     setExpandedIdx(null);
   }
   function handleFilterChange(val: string) {
@@ -871,15 +869,20 @@ export function LogsExplorer({
   const prevDone = useRef(false);
   useEffect(() => {
     const done = !!fetchProgress?.done;
-    if (done && !prevDone.current && mode === "search") {
-      // Delay slightly to ensure entries state has settled
-      setTimeout(() => {
-        if (entriesRef.current.length > 0) {
-          autoSaveToHistory("search", entriesRef.current);
-        }
-      }, 500);
+    if (done && !prevDone.current) {
+      // Belt-and-suspenders: ensure searching is cleared whenever fetch completes
+      onConfigChange({ searching: false });
+      if (mode === "search") {
+        // Delay slightly to ensure entries state has settled
+        setTimeout(() => {
+          if (entriesRef.current.length > 0) {
+            autoSaveToHistory("search", entriesRef.current);
+          }
+        }, 500);
+      }
     }
     prevDone.current = done;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchProgress?.done, mode, autoSaveToHistory]);
 
   // ── Auto-scroll when tailing ──
@@ -936,13 +939,12 @@ export function LogsExplorer({
       endTime = now.toISOString();
     }
 
-    // Build server-side _queryFilter from highlight keywords (and search term if set).
+    // Build server-side _queryFilter from highlight keywords only.
+    // The Filter entries box is client-side only — do NOT include it here.
     // This mirrors KYID Utilities' approach: only matching entries are returned by AIC,
     // dramatically reducing page count and eliminating rate-limit risk on long ranges.
     function escapeFilterValue(v: string) { return v.replace(/\\/g, "\\\\").replace(/"/g, '\\"'); }
-    const kwTerms = keywordsRawRef.current.split(",").map((k) => k.trim()).filter(Boolean);
-    const searchTerm = searchRef.current.trim();
-    const allTerms = [...new Set([...kwTerms, ...(searchTerm ? [searchTerm] : [])])];
+    const allTerms = keywordsRawRef.current.split(",").map((k) => k.trim()).filter(Boolean);
     const queryFilter = allTerms.length > 0
       ? allTerms.map((t) => {
           const v = escapeFilterValue(t);
