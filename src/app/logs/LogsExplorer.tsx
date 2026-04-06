@@ -64,14 +64,18 @@ const TRANSACTION_SOURCES = [
 // ── Tab config (shared between parent controls and tab content) ──────────────
 
 type LogMode = "tail" | "search";
-type Preset = "15m" | "1h" | "6h" | "24h" | "custom";
+type Preset = "15m" | "1h" | "6h" | "24h" | "3d" | "5d" | "7d" | "30d" | "custom";
 
 const PRESETS: { label: string; value: Preset; ms: number }[] = [
-  { label: "15 min", value: "15m", ms: 15 * 60 * 1000 },
-  { label: "1 hour", value: "1h", ms: 60 * 60 * 1000 },
-  { label: "6 hours", value: "6h", ms: 6 * 60 * 60 * 1000 },
-  { label: "24 hours", value: "24h", ms: 24 * 60 * 60 * 1000 },
-  { label: "Custom", value: "custom", ms: 0 },
+  { label: "15 min",   value: "15m",  ms: 15 * 60 * 1000 },
+  { label: "1 hour",   value: "1h",   ms: 60 * 60 * 1000 },
+  { label: "6 hours",  value: "6h",   ms: 6 * 60 * 60 * 1000 },
+  { label: "24 hours", value: "24h",  ms: 24 * 60 * 60 * 1000 },
+  { label: "3 days",   value: "3d",   ms: 3 * 24 * 60 * 60 * 1000 },
+  { label: "5 days",   value: "5d",   ms: 5 * 24 * 60 * 60 * 1000 },
+  { label: "7 days",   value: "7d",   ms: 7 * 24 * 60 * 60 * 1000 },
+  { label: "1 month",  value: "30d",  ms: 30 * 24 * 60 * 60 * 1000 },
+  { label: "Custom",   value: "custom", ms: 0 },
 ];
 
 function toDatetimeLocal(iso: string): string { return iso.slice(0, 16); }
@@ -700,6 +704,9 @@ export function LogsExplorer({
   // ── Pagination ──
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
+  // Tracks whether we've already jumped to the first keyword/search match for the current filter.
+  // While true, page is not auto-advanced so the user can browse.
+  const firstMatchJumpedRef = useRef(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -780,8 +787,8 @@ export function LogsExplorer({
           setEntries((prev) => msg.append ? [...prev, ...msg.entries] : msg.entries);
           setFetched(true);
           setLastUpdated(new Date());
-          if (!msg.append) { setExpandedIdx(null); setPage(Infinity); }
-          else { setPage(Infinity); }
+          if (!msg.append) { setExpandedIdx(null); }
+          // Page changes are driven by the filtered.length useEffect below
         });
       } else if (msg.type === "status") {
         onConfigChange({ loading: msg.loading });
@@ -931,7 +938,21 @@ export function LogsExplorer({
   const pageEndIdx = Math.min(currentPage * pageSize, filtered.length);
   const pageEntries = filtered.slice(pageStartIdx, pageEndIdx);
 
-  useEffect(() => { setPage(Math.max(1, Math.ceil(filtered.length / pageSize))); setExpandedIdx(null); }, [search, levelFilter, filtered.length, pageSize]);
+  // Reset jump flag whenever the filter terms change so we jump fresh on the next match
+  useEffect(() => { firstMatchJumpedRef.current = false; }, [search, levelFilter]);
+
+  useEffect(() => {
+    setExpandedIdx(null);
+    if (search && filtered.length > 0 && !firstMatchJumpedRef.current) {
+      // First matching entry found — jump to page 1 (oldest = first match) and stay there
+      firstMatchJumpedRef.current = true;
+      setPage(1);
+    } else if (!search) {
+      // No filter active — follow the latest page as results stream in
+      setPage(Math.max(1, Math.ceil(filtered.length / pageSize)));
+    }
+    // search active + already jumped: leave page alone so user can browse
+  }, [search, levelFilter, filtered.length, pageSize]);
 
   return (
     <div className="space-y-4">
@@ -1156,22 +1177,16 @@ export function LogsExplorer({
               {/* Search mode controls */}
               {mode === "search" && (
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {PRESETS.map((p) => (
-                    <button
-                      key={p.value}
-                      type="button"
-                      onClick={() => onConfigChange({ preset: p.value })}
-                      disabled={searching}
-                      className={cn(
-                        "px-2 py-0.5 text-[11px] rounded border transition-colors",
-                        preset === p.value
-                          ? "bg-sky-600 border-sky-600 text-white"
-                          : "border-slate-300 text-slate-500 hover:bg-slate-50"
-                      )}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
+                  <select
+                    value={preset}
+                    onChange={(e) => onConfigChange({ preset: e.target.value as Preset })}
+                    disabled={searching}
+                    className="rounded border border-slate-300 px-1.5 py-0.5 text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-50"
+                  >
+                    {PRESETS.map((p) => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                  </select>
                   {preset === "custom" && (
                     <>
                       <input

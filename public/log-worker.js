@@ -29,7 +29,22 @@ let searchResolveResume = null; // resolve function for pause promise
 let sleepReject = null; // reject function to interrupt sleep on stop
 
 const RATE_LIMIT_DELAY = 1100; // 1.1s between pages (60 req/min limit)
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
+const MAX_CHUNK_MS = 23 * 60 * 60 * 1000; // AIC limit: < 1 day per request
+
+/** Split a time range into sub-day chunks if it exceeds 23 hours. */
+function splitTimeRange(beginTime, endTime) {
+  const start = new Date(beginTime).getTime();
+  const end = new Date(endTime).getTime();
+  const chunks = [];
+  let chunkStart = start;
+  while (chunkStart < end) {
+    const chunkEnd = Math.min(chunkStart + MAX_CHUNK_MS, end);
+    chunks.push({ beginTime: new Date(chunkStart).toISOString(), endTime: new Date(chunkEnd).toISOString() });
+    chunkStart = chunkEnd;
+  }
+  return chunks;
+}
 
 function sleep(ms) {
   return new Promise((resolve, reject) => {
@@ -38,18 +53,20 @@ function sleep(ms) {
   });
 }
 
-async function apiPost(body, retries = MAX_RETRIES) {
+async function apiPost(body, retries = MAX_RETRIES, attempt = 0) {
   const res = await fetch("/api/logs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (res.status === 429 && retries > 0) {
-    const retryAfter = parseInt(res.headers.get("Retry-After") || "2", 10);
-    const waitMs = Math.max(retryAfter * 1000, RATE_LIMIT_DELAY);
-    self.postMessage({ type: "error", message: `Rate limited — retrying in ${Math.ceil(waitMs / 1000)}s…` });
+    const retryAfter = parseInt(res.headers.get("Retry-After") || "0", 10);
+    // Exponential backoff: 5s, 10s, 20s, 40s, 80s — respect Retry-After if larger
+    const backoff = Math.pow(2, attempt) * 5000;
+    const waitMs = Math.max(retryAfter * 1000, backoff);
+    self.postMessage({ type: "error", message: `Rate limited — retrying in ${Math.ceil(waitMs / 1000)}s… (attempt ${attempt + 1}/${MAX_RETRIES})` });
     await sleep(waitMs);
-    return apiPost(body, retries - 1);
+    return apiPost(body, retries - 1, attempt + 1);
   }
   return res.json();
 }
@@ -61,56 +78,68 @@ function waitForResume() {
 async function doFetch(env, source, beginTime, endTime, fetchId) {
   self.postMessage({ type: "status", loading: true });
 
-  let cookie = null;
-  let isFirst = true;
+  // Split into sub-day chunks when the range exceeds the AIC 1-day limit
+  const chunks = (beginTime && endTime) ? splitTimeRange(beginTime, endTime) : [{ beginTime, endTime }];
+
   let totalLoaded = 0;
   let pageNum = 0;
+  let isVeryFirst = true;
 
   try {
-    do {
+    for (let ci = 0; ci < chunks.length; ci++) {
+      const chunk = chunks[ci];
       if (fetchId !== currentFetchId) return;
 
-      // Check if paused
-      if (searchPaused) {
-        self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: false, paused: true });
-        await waitForResume();
+      let cookie = null;
+
+      do {
         if (fetchId !== currentFetchId) return;
-      }
 
-      // Rate limit delay between pages (skip first request)
-      if (!isFirst) await sleep(RATE_LIMIT_DELAY);
+        // Check if paused
+        if (searchPaused) {
+          self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: false, paused: true });
+          await waitForResume();
+          if (fetchId !== currentFetchId) return;
+        }
 
-      pageNum++;
-      const data = await apiPost({
-        env, source, beginTime, endTime,
-        cookie: cookie ?? undefined,
-      });
+        // Rate limit delay between pages (skip very first request)
+        if (!isVeryFirst) await sleep(RATE_LIMIT_DELAY);
 
-      if (fetchId !== currentFetchId) return;
+        pageNum++;
+        const data = await apiPost({
+          env, source,
+          beginTime: chunk.beginTime,
+          endTime: chunk.endTime,
+          cookie: cookie ?? undefined,
+        });
 
-      if (data.error) {
-        self.postMessage({ type: "error", message: data.error });
-        self.postMessage({ type: "status", loading: false });
-        self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: true, paused: false });
-        return;
-      }
+        if (fetchId !== currentFetchId) return;
 
-      const entries = Array.isArray(data.result) ? data.result : [];
-      cookie = data.pagedResultsCookie ?? null;
-      totalLoaded += entries.length;
+        if (data.error) {
+          self.postMessage({ type: "error", message: data.error });
+          self.postMessage({ type: "status", loading: false });
+          self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: true, paused: false });
+          return;
+        }
 
-      // Store for resume
-      searchCookie = cookie;
-      searchParams = { env, source, beginTime, endTime };
+        const entries = Array.isArray(data.result) ? data.result : [];
+        cookie = data.pagedResultsCookie ?? null;
+        totalLoaded += entries.length;
 
-      self.postMessage({ type: "entries", entries, append: !isFirst });
-      self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: !cookie, paused: false });
+        // Store for resume
+        searchCookie = cookie;
+        searchParams = { env, source, beginTime: chunk.beginTime, endTime: chunk.endTime };
 
-      if (isFirst) {
-        self.postMessage({ type: "status", loading: false });
-        isFirst = false;
-      }
-    } while (cookie);
+        const isLastChunk = ci === chunks.length - 1;
+        self.postMessage({ type: "entries", entries, append: !isVeryFirst });
+        self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: isLastChunk && !cookie, paused: false });
+
+        if (isVeryFirst) {
+          self.postMessage({ type: "status", loading: false });
+          isVeryFirst = false;
+        }
+      } while (cookie);
+    }
 
     self.postMessage({ type: "progress", loaded: totalLoaded, page: pageNum, done: true, paused: false });
   } catch (e) {
