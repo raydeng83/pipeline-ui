@@ -134,11 +134,59 @@ function DiffViewer({ lines, fullscreen, wrap }: { lines: DiffLine[]; fullscreen
   );
 }
 
+// ── Side-by-side alignment ───────────────────────────────────────────────────
+
+type AlignedRow = {
+  leftContent?: string;
+  rightContent?: string;
+  leftNo?: number;
+  rightNo?: number;
+  /** "context" | "added" (right only) | "removed" (left only) | "changed" (both sides differ) */
+  type: "context" | "added" | "removed" | "changed";
+};
+
+function buildAlignedRows(diffLines: DiffLine[]): AlignedRow[] {
+  const rows: AlignedRow[] = [];
+  let leftNo = 0;
+  let rightNo = 0;
+  let i = 0;
+
+  while (i < diffLines.length) {
+    if (diffLines[i].type === "context") {
+      leftNo++; rightNo++;
+      rows.push({ leftContent: diffLines[i].content, rightContent: diffLines[i].content, leftNo, rightNo, type: "context" });
+      i++;
+    } else {
+      // Collect a block of consecutive removed then added lines
+      const removed: string[] = [];
+      const added: string[] = [];
+      while (i < diffLines.length && diffLines[i].type === "removed") { removed.push(diffLines[i].content); i++; }
+      while (i < diffLines.length && diffLines[i].type === "added")   { added.push(diffLines[i].content);   i++; }
+      const len = Math.max(removed.length, added.length);
+      for (let j = 0; j < len; j++) {
+        const hasL = j < removed.length;
+        const hasR = j < added.length;
+        if (hasL) leftNo++;
+        if (hasR) rightNo++;
+        rows.push({
+          leftContent:  hasL ? removed[j] : undefined,
+          rightContent: hasR ? added[j]   : undefined,
+          leftNo:  hasL ? leftNo  : undefined,
+          rightNo: hasR ? rightNo : undefined,
+          type: hasL && hasR ? "changed" : hasL ? "removed" : "added",
+        });
+      }
+    }
+  }
+  return rows;
+}
+
 // ── Side-by-side file viewer ────────────────────────────────────────────────
 
 function SideBySideViewer({
   localContent,
   remoteContent,
+  diffLines,
   sourceLabel,
   targetLabel,
   fullscreen,
@@ -146,34 +194,102 @@ function SideBySideViewer({
 }: {
   localContent?: string;
   remoteContent?: string;
+  diffLines?: DiffLine[];
   sourceLabel: string;
   targetLabel: string;
   fullscreen?: boolean;
   wrap?: boolean;
 }) {
+  const alignedRows = diffLines && diffLines.length > 0 ? buildAlignedRows(diffLines) : null;
+
   return (
     <div className={cn(
-      "grid grid-cols-2 divide-x divide-slate-700 bg-slate-950",
-      fullscreen ? "flex-1 min-h-0" : "max-h-[600px]"
+      "grid grid-cols-2 divide-x divide-slate-700 bg-slate-950 overflow-hidden",
+      fullscreen ? "flex-1 min-h-0" : "h-[600px]"
     )}>
-      <FilePane label={sourceLabel} content={localContent} absence={`Not in ${sourceLabel}`} wrap={wrap} />
-      <FilePane label={targetLabel} content={remoteContent} absence={`Not in ${targetLabel}`} wrap={wrap} />
+      <FilePane
+        label={sourceLabel}
+        content={localContent}
+        absence={`Not in ${sourceLabel}`}
+        rows={alignedRows}
+        side="left"
+        wrap={wrap}
+      />
+      <FilePane
+        label={targetLabel}
+        content={remoteContent}
+        absence={`Not in ${targetLabel}`}
+        rows={alignedRows}
+        side="right"
+        wrap={wrap}
+      />
     </div>
   );
 }
 
-function FilePane({ label, content, absence, wrap }: { label: string; content?: string; absence: string; wrap?: boolean }) {
+const ROW_BG: Record<AlignedRow["type"], { left: string; right: string }> = {
+  context: { left: "",              right: ""              },
+  removed: { left: "bg-red-950",    right: "bg-slate-900"  },
+  added:   { left: "bg-slate-900",  right: "bg-emerald-950"},
+  changed: { left: "bg-red-950",    right: "bg-emerald-950"},
+};
+
+const ROW_TEXT: Record<AlignedRow["type"], { left: string; right: string }> = {
+  context: { left: "text-slate-400",  right: "text-slate-400"  },
+  removed: { left: "text-red-300",    right: "text-slate-600"  },
+  added:   { left: "text-slate-600",  right: "text-emerald-300"},
+  changed: { left: "text-red-300",    right: "text-emerald-300"},
+};
+
+function FilePane({
+  label, content, absence, rows, side, wrap,
+}: {
+  label: string;
+  content?: string;
+  absence: string;
+  rows?: AlignedRow[] | null;
+  side: "left" | "right";
+  wrap?: boolean;
+}) {
   return (
-    <div className="flex flex-col min-h-0">
+    <div className="h-full flex flex-col min-h-0">
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700 shrink-0">
         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">{label}</span>
       </div>
-      {content !== undefined ? (
+      {rows ? (
+        /* Aligned diff view */
+        <div className="flex-1 overflow-auto text-[11px] font-mono leading-5 min-h-0">
+          <table className="min-w-full border-collapse">
+            <tbody>
+              {rows.map((row, i) => {
+                const lineNo   = side === "left" ? row.leftNo  : row.rightNo;
+                const lineText = side === "left" ? row.leftContent : row.rightContent;
+                const bg   = ROW_BG[row.type][side];
+                const text = ROW_TEXT[row.type][side];
+                const prefix = row.type === "context" ? " "
+                  : side === "left"  ? (row.leftContent  !== undefined ? "-" : " ")
+                  : side === "right" ? (row.rightContent !== undefined ? "+" : " ")
+                  : " ";
+                const pfxColor = prefix === "-" ? "text-red-500" : prefix === "+" ? "text-emerald-400" : "text-slate-600";
+                return (
+                  <tr key={i} className={bg}>
+                    <td className="select-none text-slate-600 text-right px-2 py-0 w-10 border-r border-slate-800 align-top">{lineNo ?? ""}</td>
+                    <td className={cn("px-1 py-0 select-none w-4 align-top", pfxColor)}>{prefix}</td>
+                    <td
+                      className={cn("px-2 py-0 align-top", wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre", text)}
+                      dangerouslySetInnerHTML={{ __html: lineText !== undefined ? highlightLine(lineText) : "" }}
+                    />
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : content !== undefined ? (
+        /* Raw content fallback (no diff data) */
         <pre
-          className={cn("flex-1 overflow-auto text-[11px] font-mono leading-5 text-slate-300 p-3", wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre")}
-          dangerouslySetInnerHTML={{
-            __html: content.split("\n").map(highlightLine).join("\n"),
-          }}
+          className={cn("flex-1 overflow-auto text-[11px] font-mono leading-5 text-slate-300 p-3 min-h-0", wrap ? "whitespace-pre-wrap break-all" : "whitespace-pre")}
+          dangerouslySetInnerHTML={{ __html: content.split("\n").map(highlightLine).join("\n") }}
         />
       ) : (
         <div className="flex-1 flex items-center justify-center text-xs text-slate-600 italic">{absence}</div>
@@ -276,7 +392,7 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
   const viewerContent = open && (
     view === "diff" && file.diffLines
       ? <DiffViewer lines={file.diffLines} fullscreen={fullscreen} wrap={wrap} />
-      : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} sourceLabel={sourceLabel} targetLabel={targetLabel} fullscreen={fullscreen} wrap={wrap} />
+      : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} diffLines={file.diffLines} sourceLabel={sourceLabel} targetLabel={targetLabel} fullscreen={fullscreen} wrap={wrap} />
   );
 
   if (fullscreen && open) {
