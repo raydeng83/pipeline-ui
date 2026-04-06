@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValue, useCallback, useMemo, memo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,6 @@ const LOG_SOURCES = ["am-everything", "idm-everything"] as const;
 const TAIL_BUFFER_MAX  = 20_000; // entries kept in memory; older ones are dropped
 const TERMINAL_ROW_H   = 20;     // px — fixed height per row (nowrap lines)
 const TERMINAL_OVERSCAN = 15;    // extra rows rendered above/below viewport
-const WRAP_MODE_MAX = 5_000;     // disable wrap above this many entries to protect DOM performance
 
 // ── IndexedDB tail session persistence ───────────────────────────────────────
 const IDB_NAME  = "ky-pipeline-logs";
@@ -442,10 +442,6 @@ function TailTerminal({
   const [scrollTop, setScrollTop] = useState(0);
   const atBottomRef = useRef(true);
   const [atBottom, setAtBottom] = useState(true);
-  const [forceWrap, setForceWrap] = useState(false);
-
-  // Reset forceWrap when wrap is toggled off so the warning re-appears next time
-  useEffect(() => { if (!wrapLines) setForceWrap(false); }, [wrapLines]);
 
   // Track container height for virtual list calculations
   useEffect(() => {
@@ -457,29 +453,38 @@ function TailTerminal({
     return () => ro.disconnect();
   }, []);
 
+  // Variable-height virtualizer for wrap mode
+  const wrapVirtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => outerRef.current,
+    estimateSize: () => 32, // rough estimate; actual heights measured by measureElement
+    measureElement: (el) => el.getBoundingClientRect().height,
+    overscan: TERMINAL_OVERSCAN,
+    enabled: wrapLines,
+  });
+
   // Auto-scroll to bottom when new entries arrive
   useEffect(() => {
-    if (atBottomRef.current && outerRef.current) {
+    if (!atBottomRef.current) return;
+    if (wrapLines) {
+      if (entries.length > 0) wrapVirtualizer.scrollToIndex(entries.length - 1, { align: "end" });
+    } else if (outerRef.current) {
       outerRef.current.scrollTop = outerRef.current.scrollHeight;
     }
-  }, [entries.length]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries.length, wrapLines]);
 
   // Scroll to match index
   useEffect(() => {
-    if (scrollToIndex === null || scrollToIndex < 0 || !outerRef.current) return;
-    const container = outerRef.current;
+    if (scrollToIndex === null || scrollToIndex < 0) return;
     if (wrapLines) {
-      // Wrap mode: variable row heights — find the actual element and center it
-      const rowEl = container.querySelector(`[data-row-idx="${scrollToIndex}"]`) as HTMLElement | null;
-      if (rowEl) {
-        container.scrollTop = rowEl.offsetTop - container.clientHeight / 2 + rowEl.offsetHeight / 2;
-      }
-    } else {
-      // Virtual list mode: fixed row height — calculate directly
-      container.scrollTop = scrollToIndex * TERMINAL_ROW_H - container.clientHeight / 2 + TERMINAL_ROW_H / 2;
+      wrapVirtualizer.scrollToIndex(scrollToIndex, { align: "center" });
+    } else if (outerRef.current) {
+      outerRef.current.scrollTop = scrollToIndex * TERMINAL_ROW_H - outerRef.current.clientHeight / 2 + TERMINAL_ROW_H / 2;
     }
     atBottomRef.current = false;
     setAtBottom(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollToIndex, wrapLines]);
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
@@ -545,32 +550,20 @@ function TailTerminal({
           <div className="flex items-center justify-center h-full min-h-[120px]">
             <span className="text-slate-500 text-xs font-mono animate-pulse">Waiting for log entries…</span>
           </div>
-        ) : wrapLines && entries.length > WRAP_MODE_MAX && !forceWrap ? (
-          <div className="flex flex-col items-center justify-center gap-3 h-full min-h-[120px] px-8">
-            <span className="text-amber-400 text-xs font-mono text-center">
-              ⚠ Wrap mode with {entries.length.toLocaleString()} entries may cause slowness — rendering this many rows can freeze the browser.
-            </span>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setForceWrap(true)}
-                className="px-3 py-1 text-xs font-medium bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors"
-              >
-                Enable anyway
-              </button>
-            </div>
-          </div>
         ) : wrapLines ? (
-          /* Wrap mode: variable row height — render all rows, no virtual list */
-          <div className="py-0.5">
-            {entries.map((entry, i) => {
+          /* Wrap mode: variable-height virtual list via @tanstack/react-virtual */
+          <div style={{ height: wrapVirtualizer.getTotalSize(), position: "relative" }}>
+            {wrapVirtualizer.getVirtualItems().map((vRow) => {
+              const entry = entries[vRow.index];
               const level = getLevel(entry);
               const line  = formatTerminalLine(entry, defaultSource);
-              const isActive = activeMatchIndex === i;
+              const isActive = activeMatchIndex === vRow.index;
               return (
                 <div
-                  key={i}
-                  data-row-idx={i}
+                  key={vRow.index}
+                  data-index={vRow.index}
+                  ref={wrapVirtualizer.measureElement}
+                  style={{ position: "absolute", top: vRow.start, left: 0, right: 0 }}
                   className={cn(
                     "px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug",
                     terminalLevelClass(level),
