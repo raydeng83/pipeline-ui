@@ -482,7 +482,7 @@ function TailTerminal({
       <>
         {parts.map((part, i) =>
           testRe.test(part)
-            ? <mark key={i} className="bg-yellow-400/30 text-yellow-200 rounded-sm">{part}</mark>
+            ? <mark key={i} className="bg-sky-400/50 text-white rounded-sm">{part}</mark>
             : part
         )}
       </>
@@ -905,7 +905,9 @@ export function LogsExplorer({
 
   const [keywordsRaw, setKeywordsRaw] = useState("");
   const keywordsRawRef = useRef("");
-  const keywords = keywordsRaw
+  const [keywordsActive, setKeywordsActive] = useState(""); // debounced — drives actual highlighting
+  const keywordsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const keywords = keywordsActive
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
@@ -1585,7 +1587,13 @@ export function LogsExplorer({
               <input
                 type="text"
                 value={keywordsRaw}
-                onChange={(e) => { setKeywordsRaw(e.target.value); keywordsRawRef.current = e.target.value; }}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setKeywordsRaw(val);
+                  keywordsRawRef.current = val;
+                  if (keywordsDebounceRef.current) clearTimeout(keywordsDebounceRef.current);
+                  keywordsDebounceRef.current = setTimeout(() => setKeywordsActive(val), 300);
+                }}
                 placeholder="Keywords to highlight, comma-separated…"
                 className="flex-1 text-xs rounded border border-slate-200 px-2.5 py-1 font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
               />
