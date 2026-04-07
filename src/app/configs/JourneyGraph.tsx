@@ -202,10 +202,13 @@ function PageGroupNodeComponent({ data }: NodeProps) {
 }
 
 function PageChildNodeComponent({ data }: NodeProps) {
-  const d = data as { label: string; nodeType: string };
+  const d = data as { label: string; nodeType: string; isSearchMatch?: boolean };
   return (
     <div
-      className="bg-white border border-violet-200 rounded-md shadow-sm px-2 flex flex-col justify-center"
+      className={cn(
+        "bg-white border rounded-md shadow-sm px-2 flex flex-col justify-center",
+        d.isSearchMatch ? "border-amber-400 ring-1 ring-amber-300" : "border-violet-200",
+      )}
       style={{ width: PAGE_CHILD_W, height: PAGE_CHILD_H }}
     >
       <p className="text-[10px] font-medium text-slate-700 leading-tight truncate">{d.label}</p>
@@ -969,18 +972,28 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return () => document.removeEventListener("keydown", handler);
   }, [getViewport, setViewport]);
 
-  // Search (exclude child nodes)
-  const searchMatches = useMemo(() => {
-    if (!searchQuery.trim()) return new Set<string>();
+  // Search — match top-level nodes and page-child nodes; also add parent group to set for highlighting
+  const { searchMatches, searchMatchCount } = useMemo(() => {
+    if (!searchQuery.trim()) return { searchMatches: new Set<string>(), searchMatchCount: 0 };
     const q = searchQuery.toLowerCase();
-    return new Set(rfNodes
-      .filter((n) => !n.parentId && String(n.data.label ?? "").toLowerCase().includes(q))
-      .map((n) => n.id));
+    const ids = new Set<string>();
+    let count = 0;
+    for (const n of rfNodes) {
+      if (String(n.data.label ?? "").toLowerCase().includes(q)) {
+        ids.add(n.id);
+        count++;
+        if (n.parentId) ids.add(n.parentId); // highlight parent group too
+      }
+    }
+    return { searchMatches: ids, searchMatchCount: count };
   }, [searchQuery, rfNodes]);
 
   useEffect(() => {
     if (searchMatches.size === 0) return;
-    const t = setTimeout(() => fitView({ nodes: [...searchMatches].map((id) => ({ id })), duration: 500, padding: 0.4 }), 50);
+    // fitView only on top-level nodes (child positions are relative to parent)
+    const topIds = [...searchMatches].filter((id) => !id.includes("__child__"));
+    if (topIds.length === 0) return;
+    const t = setTimeout(() => fitView({ nodes: topIds.map((id) => ({ id })), duration: 500, padding: 0.4 }), 50);
     return () => clearTimeout(t);
   }, [searchMatches, fitView]);
 
@@ -1124,7 +1137,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
           />
           {searchQuery && (
             <>
-              <span className="text-[10px] text-slate-400 tabular-nums shrink-0">{searchMatches.size} match{searchMatches.size !== 1 ? "es" : ""}</span>
+              <span className="text-[10px] text-slate-400 tabular-nums shrink-0">{searchMatchCount} match{searchMatchCount !== 1 ? "es" : ""}</span>
               <button type="button" onClick={() => setSearchQuery("")} className="text-slate-400 hover:text-slate-600 shrink-0">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

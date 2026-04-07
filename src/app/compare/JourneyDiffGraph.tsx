@@ -323,6 +323,7 @@ function PageGroupDiffNodeComponent({ data }: NodeProps) {
     outcomes?: string[];
     diffStatus: DiffStatus;
     modifiedReason?: "script" | "subjourney";
+    isSearchMatch?: boolean;
   };
   const outcomes = d.outcomes ?? [];
   const h = diffPageGroupHeight(Math.max((d.children ?? []).length, 1));
@@ -340,7 +341,11 @@ function PageGroupDiffNodeComponent({ data }: NodeProps) {
 
   return (
     <div
-      className={cn("border-2 border-dashed rounded-xl transition-all cursor-pointer", borderBg())}
+      className={cn(
+        "border-2 border-dashed rounded-xl transition-all cursor-pointer",
+        borderBg(),
+        d.isSearchMatch && "ring-2 ring-amber-400 ring-offset-1",
+      )}
       style={{ width: DIFF_PAGE_GROUP_W, height: h, position: "relative" }}
     >
       <Handle type="target" position={Position.Left} style={{ top: "50%", background: "#94a3b8" }} />
@@ -360,14 +365,18 @@ function PageGroupDiffNodeComponent({ data }: NodeProps) {
 }
 
 function PageChildDiffNodeComponent({ data }: NodeProps) {
-  const d = data as { label: string; nodeType: string; diffStatus: DiffStatus };
+  const d = data as { label: string; nodeType: string; diffStatus: DiffStatus; isSearchMatch?: boolean };
   const borderColor =
     d.diffStatus === "added"    ? "border-emerald-300" :
     d.diffStatus === "removed"  ? "border-red-300"     :
     d.diffStatus === "modified" ? "border-amber-300"   : "border-violet-200";
   return (
     <div
-      className={cn("bg-white border rounded-md shadow-sm px-2 flex flex-col justify-center cursor-pointer hover:ring-1 hover:ring-sky-300 transition-all", borderColor)}
+      className={cn(
+        "bg-white border rounded-md shadow-sm px-2 flex flex-col justify-center cursor-pointer transition-all",
+        borderColor,
+        d.isSearchMatch ? "ring-1 ring-amber-400" : "hover:ring-1 hover:ring-sky-300",
+      )}
       style={{ width: DIFF_PAGE_CHILD_W, height: DIFF_PAGE_CHILD_H }}
     >
       <p className="text-[10px] font-medium text-slate-700 leading-tight truncate">{d.label}</p>
@@ -1138,19 +1147,27 @@ function DiffGraphCanvasInner({
     return set;
   }, [selectedNodeId, filteredEdges]);
 
-  // Search matches
+  // Search matches — include page-child nodes; also add parent group for highlighting
   const searchMatches = useMemo(() => {
     if (!searchQuery.trim()) return new Set<string>();
     const q = searchQuery.toLowerCase();
-    return new Set(
-      nodes.filter((n) => String(n.data.label ?? "").toLowerCase().includes(q)).map((n) => n.id),
-    );
+    const ids = new Set<string>();
+    for (const n of nodes) {
+      if (String(n.data.label ?? "").toLowerCase().includes(q)) {
+        ids.add(n.id);
+        if (n.parentId) ids.add(n.parentId); // highlight parent group too
+      }
+    }
+    return ids;
   }, [searchQuery, nodes]);
 
   useEffect(() => {
     if (searchMatches.size === 0) return;
+    // fitView only on top-level nodes (child positions are relative to parent)
+    const topIds = [...searchMatches].filter((id) => !id.includes("__child__"));
+    if (topIds.length === 0) return;
     const t = setTimeout(() => {
-      void fitView({ nodes: [...searchMatches].map((id) => ({ id })), duration: 500, padding: 0.4 });
+      void fitView({ nodes: topIds.map((id) => ({ id })), duration: 500, padding: 0.4 });
     }, 50);
     return () => clearTimeout(t);
   }, [searchMatches, fitView]);
