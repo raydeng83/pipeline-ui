@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/push", label: "Push" },
   { href: "/promote", label: "Promote" },
   { href: "/configs", label: "Browse" },
+  { href: "/analyze", label: "Analyze" },
   { href: "/compare", label: "Compare" },
   { href: "/logs", label: "Logs" },
   { href: "/history", label: "History" },
