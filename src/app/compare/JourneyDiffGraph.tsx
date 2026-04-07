@@ -536,6 +536,7 @@ interface ScriptEntry {
 function ScriptPanelContent({
   nodeId,
   journeyName,
+  diffStatus,
   files,
   sourceEnv,
   targetEnv,
@@ -543,6 +544,7 @@ function ScriptPanelContent({
   nodeId?: string | null;
   nodeType?: string;
   journeyName?: string;
+  diffStatus?: DiffStatus;
   files: FileDiff[];
   sourceEnv: string;
   targetEnv: string;
@@ -566,8 +568,10 @@ function ScriptPanelContent({
       );
       let nodeContent = nodeConfigFile?.localContent ?? nodeConfigFile?.remoteContent ?? null;
 
+      // Pick the env that actually has this node
+      const env = diffStatus === "added" ? targetEnv : diffStatus === "removed" ? sourceEnv : (sourceEnv || targetEnv);
+
       if (!nodeContent) {
-        const env = sourceEnv || targetEnv;
         if (env && journeyName) {
           try {
             const params = new URLSearchParams({ environment: env, journey: journeyName, nodeId });
@@ -597,7 +601,6 @@ function ScriptPanelContent({
       if (!scriptUuids.length) { setMessage("No scripts linked to this node."); setLoading(false); return; }
 
       // ── Step 3: build entries — diff files first, API fallback for unchanged ──
-      const env = sourceEnv || targetEnv;
       const result: ScriptEntry[] = [];
 
       for (const uuid of scriptUuids) {
@@ -769,7 +772,7 @@ function NodeDetailPanel({
         if (!cancelled) setConfigLoading(false);
         return;
       }
-      const env = sourceEnv || targetEnv;
+      const env = diffStatus === "added" ? targetEnv : diffStatus === "removed" ? sourceEnv : (sourceEnv || targetEnv);
       if (!env || !journeyName) { if (!cancelled) setConfigLoading(false); return; }
       try {
         const params = new URLSearchParams({ environment: env, journey: journeyName, nodeId });
@@ -921,6 +924,7 @@ function NodeDetailPanel({
             nodeId={nodeId}
             nodeType={nodeType}
             journeyName={journeyName}
+            diffStatus={diffStatus}
             files={files}
             sourceEnv={sourceEnv}
             targetEnv={targetEnv}
