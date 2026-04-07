@@ -168,6 +168,58 @@
                     throw { code: 400, message: response.message };
                 }
                 else if (response !== null) {
+                    if (response.rolePreReq && Array.isArray(response.rolePreReq)) {
+                        var prereqSequence = response.prereqSequence
+                            ? (Array.isArray(response.prereqSequence)
+                                ? response.prereqSequence
+                                : Object.values(response.prereqSequence))
+                            : [];
+
+                        var statusGroups = ['COMPLETED', 'PENDING_APPROVAL', 'IN_PROGRESS', 'NOT_STARTED'];
+                        var sequenceNames = prereqSequence.map(function(s) { return s.prereqName; });
+                        var sortedSequence = prereqSequence.slice().sort(function(a, b) { return a.displayOrder - b.displayOrder; });
+
+                        function orderGroup(groupItems) {
+                            var sequenced = sortedSequence
+                                .map(function(seq) {
+                                    return groupItems.find(function(item) {
+                                        return item.prereqName === seq.prereqName;
+                                    });
+                                })
+                                .filter(function(item) { return item !== undefined; });
+
+                            var remaining = groupItems
+                                .filter(function(item) {
+                                    return sequenceNames.indexOf(item.prereqName) === -1;
+                                })
+                                .sort(function(a, b) { return a.displayOrder - b.displayOrder; });
+
+                            return sequenced.concat(remaining);
+                        }
+
+                        var orderedItems = [];
+
+                        statusGroups.forEach(function(status) {
+                            var groupItems = response.rolePreReq.filter(function(item) {
+                                return item.status && item.status.toUpperCase() === status;
+                            });
+                            orderedItems = orderedItems.concat(orderGroup(groupItems));
+                        });
+
+                        var otherItems = response.rolePreReq.filter(function(item) {
+                            return !item.status || statusGroups.indexOf(item.status.toUpperCase()) === -1;
+                        });
+                        orderedItems = orderedItems.concat(orderGroup(otherItems));
+
+                        orderedItems.forEach(function(item, index) {
+                            item.displayOrder = index + 1;
+                        });
+
+                        response.rolePreReq = orderedItems;
+                    }
+                    
+                    logger.error("Reordered User Prereq Summary is --> " + JSON.stringify(response))
+                    
                     return response
                 }
                 else {

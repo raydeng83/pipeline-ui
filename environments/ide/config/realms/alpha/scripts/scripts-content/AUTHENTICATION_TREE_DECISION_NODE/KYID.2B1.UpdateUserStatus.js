@@ -139,6 +139,31 @@ try {
 
     var result = openidm.patch("managed/alpha_user/" + kogID, null, patchArray);
     nodeLogger.error("AUDIT::" + nodeConfig.timestamp + ":: Patched user status: " + JSON.stringify(patchArray));
+
+   // Ben - Remove all user roles/access after termination
+    try {
+        var accessRemovalPayload = {
+            "payload": {
+                "queryFilter": "user/_refResourceId eq '" + kogID + "'",
+                "id": kogID,
+                "confirmation": {
+                    "reason": "Client requested account termination on Self Service Portal",
+                    "comment": "Account terminated - all roles removed"
+                }
+            },
+            "action": "3"
+        };
+        var accessAPIResponse = openidm.create("endpoint/access_v2B", null, accessRemovalPayload);
+        if (accessAPIResponse && accessAPIResponse.responseCode === "0") {
+            nodeLogger.error("AUDIT::" + nodeConfig.timestamp + ":: Role removal successful for user: " + kogID);
+        } else {
+            nodeLogger.error("AUDIT::" + nodeConfig.timestamp + ":: Role removal failed or returned non-zero response: " + JSON.stringify(accessAPIResponse));
+        }
+    } catch (roleRemovalError) {
+        nodeLogger.error("AUDIT::" + nodeConfig.timestamp + ":: Error removing roles: " + roleRemovalError.message);
+        // Continue execution - account is still terminated even if role removal fails
+    }
+    //Ben
     var userId = nodeState.get("userId") || null
     var headerName = "X-Real-IP";
     var headerValues = requestHeaders.get(headerName);

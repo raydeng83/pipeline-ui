@@ -17,15 +17,17 @@
                 <p style="margin-top:50px">
                            A request that was submitted by 
                  
-                  {{object.request.request.custom.requesterUser.requesterUserGivenName}} {{object.request.request.custom.requesterUser.requesterUserSn}} ({{object.request.request.custom.requesterUser.requesterUserMail}}) is waiting for your review.
-                        </p>
+                  {{object.request.request.custom.requesterUser.requesterUserGivenName}} {{object.request.request.custom.requesterUser.requesterUserSn}} ({{object.request.request.custom.requesterUser.requesterUserMail}}) has 
+                  
+                  
+                  <b>expired</b>.
+                        
+                
+                
+                </p>
                 <p> Application Name: {{object.request.request.custom.requesterUser.applicationName}}</p>
                 <p> Role Name: {{object.request.request.custom.requesterUser.roleName}}</p>
                 <br />
-                <p>You can review the request here:</p>
-                <p style="font-size:10pt;margin:10px 0;text-align:left;margin-bottom:25px;color:#5e5e5e;font-family:Arial,Verdana,Helvetica">
-                  <a href="&{esv.portal.url}/dashboard">REVIEW REQUEST</a>
-                </p>
                 <p>
                   Request ID: 
                     
@@ -38,11 +40,17 @@
                   
                   
                   
+              
+                  
+                  
                   <strong>{{object.request.id}}</strong>
                 </p>
                 <p>
-                           You received this notice because you can 
+                           You received this notice because you were requested to  
                     
+                  
+                  
+                  
                   
                   
                   
@@ -75,6 +83,9 @@
                   <b>approve or deny</b> this request.
                         
                   
+                
+                
+                
                 
                 
                 
@@ -141,6 +152,9 @@
                 
                 
                 
+                
+                
+                
                 </p>
                 <br />
                 <p style="text-align:left;line-height:1.6">
@@ -176,11 +190,17 @@
                 
                 
                 
+                
+                
+                
                 </p>
                 <p style="text-align:left;line-height:1.6">
                   <strong>Privacy Notice:</strong> This e-mail message, including any attachments, is for the sole use of the intended recipient(s) and may contain confidential data. Any unauthorized review, use, disclosure, or distribution is strictly prohibited. If you are not the intended recipient, please contact the sender by e-mail and destroy all copies of the original message.
                         
                     
+                
+                
+                
                 
                 
                 

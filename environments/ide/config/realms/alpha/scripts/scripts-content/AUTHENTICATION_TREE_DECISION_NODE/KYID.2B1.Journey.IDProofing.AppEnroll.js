@@ -59,6 +59,15 @@ function main() {
     var response = null;
     var terminatedArray = [];
     var associatedAccountKOGID = []
+    var riskIndicatorMatch = false;
+    var dateCheck = false;
+    var phoneRisk = null;
+    var alternateEmailRisk = null;
+    var exisitingHighRiskOverrideDate = null;
+    var exisitingRiskIndicatorDetails = null;
+    var exisitingRiskIndicator = null;
+    var riskIndicatorDetails = null;
+    var assuranceLevel = null ;
     
     try {
         verifiedLexId = nodeState.get("verifiedLexId");
@@ -76,6 +85,70 @@ function main() {
         var highRisk = response.result[0].ridp_app_enroll_high_risk;
         logger.debug("AppEnroll highRisk flag from query " + highRisk)
 
+        //Changes for override scenario 
+        exisitingHighRiskOverrideDate = nodeState.get("exisitingHighRiskOverrideDate") || null;
+        exisitingRiskIndicatorDetails = nodeState.get("exisitingRiskIndicatorDetails") || null;
+        exisitingRiskIndicator = nodeState.get("exisitingRiskIndicator") ? nodeState.get("exisitingRiskIndicator") : null;
+        riskIndicatorDetails = nodeState.get("riskIndicatorDetails") ? JSON.parse(nodeState.get("riskIndicatorDetails")).riskIndicatorDetails : null;
+    
+    
+        logger.debug("Risk Indicator Details from LexisNexis response is :: " + JSON.stringify(riskIndicatorDetails));
+        logger.debug("Existing Risk Indicator Details is :: " + JSON.stringify(exisitingRiskIndicatorDetails));
+        logger.debug("Existing Risk Indicator is :: " + exisitingRiskIndicator);
+        logger.debug("Risk Indicator is :: " + riskIndicator);
+        logger.debug("Existing High Risk Override Date is :: " + exisitingHighRiskOverrideDate);
+    
+    
+        var isEqual = (obj1, obj2) => {
+            return JSON.stringify(obj1) === JSON.stringify(obj2);
+        };
+    
+    
+        var parseIfNeeded = (data) => {
+            return typeof data === 'string' ? JSON.parse(data) : data;
+        };
+        
+        // Robust Comparison
+        var isEqual = (obj1, obj2) => {
+            var clean1 = parseIfNeeded(obj1);
+            var clean2 = parseIfNeeded(obj2);
+            logger.debug("clean1 is :: " + JSON.stringify(clean1))
+            logger.debug("clean2 is :: " + JSON.stringify(clean2))
+            // Sort keys to ensure order doesn't break the match
+            return JSON.stringify(clean1) === JSON.stringify(clean2);
+        };
+    
+        logger.debug("riskIndicatorDetails is :: " + JSON.stringify(riskIndicatorDetails))
+        
+            if(riskIndicatorDetails && exisitingRiskIndicatorDetails ) {
+            var result = isEqual(riskIndicatorDetails, exisitingRiskIndicatorDetails);
+            nodeLogger.debug("result is :: " + result);
+            riskIndicatorMatch = result;
+        } 
+    
+        if(exisitingHighRiskOverrideDate){
+            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + "Existing High Risk Override Date is :: " + exisitingHighRiskOverrideDate);
+            logger.debug("dateTime" + dateTime);
+            if(dateTime < exisitingHighRiskOverrideDate){
+                dateCheck = true;
+                nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + "Existing High Risk Override is still valid");
+            }
+        }
+    
+        logger.debug("riskIndicator flag is :: " + riskIndicator)
+        logger.debug("highRisk flag1 is :: " + highRisk)
+        logger.debug("riskIndicatorMatch flag is :: " + riskIndicatorMatch)
+        logger.debug("exisitingRiskIndicator flag is :: " +  exisitingRiskIndicator);
+        logger.debug("riskIndicatorMatch flag is :: " +  riskIndicatorMatch);
+        logger.debug("dateCheck flag is :: " + dateCheck)
+    
+        
+        if(((riskIndicator && riskIndicator.toLowerCase() === "high") || (phoneRisk && phoneRisk.toLowerCase() === "high") || (alternateEmailRisk && alternateEmailRisk.toLowerCase() === "high")) && highRisk && highRisk == true && (exisitingRiskIndicator && exisitingRiskIndicator.toLowerCase() == "override") && riskIndicatorMatch == true && dateCheck == true ){
+            highRisk = false;
+        }
+    
+        logger.debug("highRisk flag2 is :: " + highRisk)
+
         if(riskIndicator && riskIndicator.toLowerCase() === "high" && highRisk) {
             //nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node");
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to FARS");
@@ -84,6 +157,11 @@ function main() {
             auditLog("KYID-LN-000", "AppEnroll - High Risk Transaction", true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
             auditLog("KYID-LN-000", `User identity verification failed as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null);
             nodeState.putShared("errorMessage","KYID-LN-000")
+
+                if(riskIndicator){
+                   patchRiskIndicator();
+                }
+            
                 if(!(nodeState.get("flow") && nodeState.get("flow") === "helpdesk")){
                     if(prereqStatus && prereqStatus.toLowerCase() == "reverify"){
                         nodeState.putShared("prereqStatus","PENDING")
@@ -134,7 +212,7 @@ function main() {
             }else{
                  action.goTo("kbaFailedBSP")
              }
-        }else if((riskIndicator.toLowerCase() === "moderate" || riskIndicator.toLowerCase() === "low" || riskIndicator.toLowerCase() === "norisk") && (verificationStatus.toLowerCase() === "fullyverified" || verificationStatus.toLowerCase() === "partiallyverified") && (verifiedLexId!==null && verifiedLexId!=="")){ 
+        }else if((riskIndicator.toLowerCase() === "moderate" || riskIndicator.toLowerCase() === "low" || riskIndicator.toLowerCase() === "norisk" || !highRisk) && (verificationStatus.toLowerCase() === "fullyverified" || verificationStatus.toLowerCase() === "partiallyverified") && (verifiedLexId!==null && verifiedLexId!=="")){ 
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "Risk Indicator is Moderate/Low/noRisk and Verification Status is Fully/Partially Verified ");
 
             searchLoggedInUser = lib.searchUserByKOGID(_id, nodeConfig, transactionid);
@@ -189,6 +267,7 @@ function main() {
                            auditLog("KYID-LN-000", "AppEnroll  - High Risk Transaction", true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                            auditLog("KYID-LN-000", `User identity verification failed as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null);
                         if(!(nodeState.get("flow") && nodeState.get("flow") === "helpdesk")){
+                            nodeState.putShared("errorMessage","KYID-LN-000")
                            if(prereqStatus && prereqStatus.toLowerCase() == "reverify"){
                                 nodeState.putShared("prereqStatus","PENDING")
                                 nodeState.putShared("patchPrereq","false")
@@ -199,6 +278,7 @@ function main() {
                                 action.goTo("highRiskSoftRemove")
                             }
                         }else{
+                             nodeState.putShared("errorMessage","KYID-LN-000")
                             action.goTo("highRiskSoftRemoveBSP")
                         }
                             //action.goTo("highRiskSoftRemove");
@@ -283,6 +363,7 @@ function main() {
                             auditLog("KYID-LN-000", "AppEnroll  - High Risk Transaction", true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                             auditLog("KYID-LN-000", `User identity verification failed as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null);
                             //nodeState.putShared("patchPrereq","false")
+                             nodeState.putShared("errorMessage","KYID-LN-000")
                             if(prereqStatus && prereqStatus.toLowerCase() == "reverify"){
                                 action.goTo("highRiskSoftRemove");
                             }else{
@@ -380,4 +461,125 @@ function auditLog(code, message, helpdeskVisibility, transactionid, useCase, use
     } catch (error) {
         logger.error("Failed to log RIDP verification activity " + error)
     }
+}
+
+
+
+function patchRiskIndicator(){
+    try{
+        var selectedUser = nodeState.get("mail") || nodeState.get("EmailAddress");
+        var auditDetails = require("KYID.2B1.Library.AuditDetails")
+        if (typeof existingSession != 'undefined') {
+            if(existingSession.get("UserId")){
+                var existingID = existingSession.get("UserId")
+            }
+        
+            //logger.error(" existingSession  is ::::::::: " + JSON.stringify(existingSession))
+            if(existingSession.get("emailaddress")){
+                var existingMail = existingSession.get("emailaddress")
+            }
+        }
+        nodeState.putShared("audit_ID",existingID);
+        nodeState.putShared("audit_LOGON",existingMail)
+        var auditData = auditDetails.getAuditDetails("UPDATE", nodeState)
+        logger.debug("auditData is :: " + JSON.stringify(auditData))
+        nodeState.putShared("auditData", auditData)
+        //var pingSearchResponse = openidm.query("managed/alpha_user", {_queryFilter: 'mail eq "' + selectedUser + '"'}, ["*","custom_userIdentity/*"]);
+        logger.debug("selectedUser is :: " + selectedUser)
+        var pingSearchResponse = openidm.query("managed/alpha_user", {_queryFilter: 'mail eq "' + selectedUser + '"'}, ["_id","frIndexedString1","frIndexedString2","userName","custom_organdonor","custom_userIdentity/*"]);
+        logger.debug("pingSearchResponse is :: " + JSON.stringify(pingSearchResponse))
+
+        jsonArray = []
+        if(pingSearchResponse && pingSearchResponse.result && pingSearchResponse.result.length > 0){
+            if(pingSearchResponse.result[0].custom_userIdentity && pingSearchResponse.result[0].custom_userIdentity._id){
+                var alphaUserId = pingSearchResponse.result[0]._id
+                var Id = pingSearchResponse.result[0].custom_userIdentity._id
+                nodeState.putShared("patchUserId",Id)
+                nodeState.putShared("alphaUserId",alphaUserId)
+                logger.debug("_patchUserIdentity id is --> "+Id)
+
+
+                
+                //riskIndicator
+                if(nodeState.get("riskIndicator") ){
+                  var jsonObj = {
+                    "operation": "replace",
+                    "field": "riskIndicator",
+                    "value": nodeState.get("riskIndicator")
+                    }
+                    jsonArray.push(jsonObj)
+                }
+
+                //lastVerificationMethod
+                if( nodeState.get("flowName")){
+                 var jsonObj = {
+                    "operation": "replace",
+                    "field": "lastVerificationMethod",
+                    "value": nodeState.get("flowName")
+                    }
+                    jsonArray.push(jsonObj)
+                }
+
+                // //lastVerificationDate
+                // var jsonObj = {
+                //     "operation": "replace",
+                //     "field": "lastVerificationDate",
+                //     "value": dateTime
+                //     }
+                //     jsonArray.push(jsonObj) 
+
+                //updateDate
+                var jsonObj = {
+                    "operation": "replace",
+                    "field": "updateDate",
+                    "value": dateTime
+                    }
+                    jsonArray.push(jsonObj)
+
+                //updateDateEpoch
+                var jsonObj = {
+                    "operation": "replace",
+                    "field": "updateDateEpoch",
+                    "value": currentTimeEpoch
+                    }
+                    jsonArray.push(jsonObj)
+
+                //Audit Details
+                 jsonArray.push({
+                     "operation": "replace",
+                     "field": "/updatedDateEpoch",
+                     "value": auditData.updatedDateEpoch
+                 });
+            
+                 jsonArray.push({
+                     "operation": "replace",
+                     "field": "/updatedByID",
+                     "value": auditData.updatedByID
+                 });
+            
+                 jsonArray.push({
+                     "operation": "replace",
+                     "field": "/updatedBy",
+                     "value": auditData.updatedBy
+                 });
+            
+                 jsonArray.push({
+                     "operation": "replace",
+                     "field": "/updateDate",
+                     "value": auditData.updatedDate
+                 });
+                }
+            }
+
+             if(jsonArray.length>0){
+                var response = openidm.patch("managed/alpha_kyid_user_identity/" + Id, null, jsonArray);
+                logger.debug("Patch Response -->"+response)
+                if(response){
+                    return true
+                }
+            }
+
+    }catch(error){
+        logger.error("Error in patchRiskIndicator function :: " + error)   
+    } 
 }

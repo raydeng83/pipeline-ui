@@ -161,6 +161,7 @@ function main(){
                     if(nodeState.get("appEnrollRIDPMethod")==="LexisNexis" && nodeState.get("flow")==="helpdesk"){
                        nodeState.putShared("lexisHelpdeskFARS", "true")
                     }
+                    nodeState.putShared("farsContinue","true")
                     action.goTo("FARS")
                 } else if (nodeState.get("prereqStatus") === "PENDING") {
                     if (nodeState.get("LexisNexisFARS") === "true") {
@@ -240,6 +241,14 @@ function auditLog(code, message) {
         eventDetails["OS"] = os;
         eventDetails["applicationName"] = nodeState.get("appName") || systemEnv.getProperty("esv.kyid.portal.name");
         eventDetails["applicationLogo"] = nodeState.get("appLogo") || ""
+        if(nodeState.get("flow") === "helpdesk"){
+            eventDetails["applicationName"] = systemEnv.getProperty("esv.helpdesk.name");
+        }else{
+            eventDetails["applicationName"] = systemEnv.getProperty("esv.kyid.portal.name");
+        }
+
+        eventDetails["requestedApplication"] = nodeState.get("appName") || "";
+        eventDetails["requestedRole"] = nodeState.get("roleName") || "";
         eventDetails["MFATYPE"] = nodeState.get("nextStep") || ""
         var userEmail = nodeState.get("primaryEmail") || nodeState.get("mail") || "";
         var sessionDetails = {}

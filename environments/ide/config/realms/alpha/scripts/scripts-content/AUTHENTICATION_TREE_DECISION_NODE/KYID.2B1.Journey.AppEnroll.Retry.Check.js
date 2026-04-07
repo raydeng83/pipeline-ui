@@ -63,54 +63,59 @@ function main() {
         logger.debug("refreshLimit from query :: " + refreshLimit)
         
         if(nodeState.get("appEnrollRIDPMethod") && nodeState.get("appEnrollRIDPMethod") == "LexisNexis"){
-            if(version && version === "v2"){
-                if(nodeState.get("orig_proofingMethod") && (nodeState.get("orig_proofingMethod") == "4" || nodeState.get("orig_proofingMethod") == "-1" || nodeState.get("orig_proofingMethod") == "2")){
-                    if(retryLimit){
-                        if(verificationAttempt >= retryLimit){
-                            diffInDays = diffInDays();
-                            if(refreshLimit){
-                                logger.debug("refreshLimit in KYID.2B1.Journey.AppEnroll.Retry.Check :: " + refreshLimit)
-                                if(Number(diffInDays) < Number(refreshLimit)){
-
-                                    nodeLogger.debug("Max Retry Attempt Reached. Current Attempt: " + verificationAttempt);
-                                    callbacksBuilder.textOutputCallback(1, '{"pageHeader":"Retry_Limit_Reached"}');
-                                    //callbacksBuilder.textOutputCallback(0,"Unable to verify your identity");
-                                    // callbacksBuilder.textOutputCallback(0,"We are unable to verify your identity based on the submitted information");
-                                    // callbacksBuilder.textOutputCallback(0,"Your reference number for further assistance: " + nodeState.get("ridpReferenceID"));
-                                    // callbacksBuilder.textOutputCallback(0,"Please go through the below option for further assistance");
-                                    helpDeskInfo = helpDesk();  
-                                    if(helpDeskInfo != null){
-                                        outcome["helpDeskContactInfo"] = helpDeskInfo;
+             if(!(nodeState.get("farsContinue") && nodeState.get("farsContinue") == "true")){
+                if(version && version === "v2"){
+                    if(nodeState.get("orig_proofingMethod") && (nodeState.get("orig_proofingMethod") == "4" || nodeState.get("orig_proofingMethod") == "-1" || nodeState.get("orig_proofingMethod") == "2")){
+                        if(retryLimit){
+                            if(verificationAttempt >= retryLimit){
+                                diffInDays = diffInDays();
+                                if(refreshLimit){
+                                    logger.debug("refreshLimit in KYID.2B1.Journey.AppEnroll.Retry.Check :: " + refreshLimit)
+                                    if(Number(diffInDays) < Number(refreshLimit)){
+    
+                                        nodeLogger.debug("Max Retry Attempt Reached. Current Attempt: " + verificationAttempt);
+                                        callbacksBuilder.textOutputCallback(1, '{"pageHeader":"Retry_Limit_Reached"}');
+                                        //callbacksBuilder.textOutputCallback(0,"Unable to verify your identity");
+                                        // callbacksBuilder.textOutputCallback(0,"We are unable to verify your identity based on the submitted information");
+                                        // callbacksBuilder.textOutputCallback(0,"Your reference number for further assistance: " + nodeState.get("ridpReferenceID"));
+                                        // callbacksBuilder.textOutputCallback(0,"Please go through the below option for further assistance");
+                                        helpDeskInfo = helpDesk();  
+                                        if(helpDeskInfo != null){
+                                            outcome["helpDeskContactInfo"] = helpDeskInfo;
+                                        }else{
+                                            outcome["helpDeskContactInfo"] = "";
+                                        }
+                                        outcome["Flow"] = "appenroll";
+                                         outcome["referenceId"] = nodeState.get("ridpReferenceID");
+                                        callbacksBuilder.textOutputCallback(0,JSON.stringify(outcome));
+                                        //callbacksBuilder.textOutputCallback(0,`Please provide the reference number including the dashes: ${nodeState.get("referenceId")}.Once you have verified your identity with [@helpdesk name], please click on the “Continue” button below`)
                                     }else{
-                                        outcome["helpDeskContactInfo"] = "";
+                                        nodeLogger.debug("Retry Attempt Allowed After Date Check. Current Attempt: " + verificationAttempt);
+                                        nodeState.putShared("nextDayRetry", "true");
+                                        action.goTo("true")
                                     }
-                                    outcome["Flow"] = "appenroll";
-                                     outcome["referenceId"] = nodeState.get("ridpReferenceID");
-                                    callbacksBuilder.textOutputCallback(0,JSON.stringify(outcome));
-                                    //callbacksBuilder.textOutputCallback(0,`Please provide the reference number including the dashes: ${nodeState.get("referenceId")}.Once you have verified your identity with [@helpdesk name], please click on the “Continue” button below`)
                                 }else{
-                                    nodeLogger.debug("Retry Attempt Allowed After Date Check. Current Attempt: " + verificationAttempt);
-                                    nodeState.putShared("nextDayRetry", "true");
+                                    nodeLogger.debug("Retry Refresh Allowed. Current Attempt: " + verificationAttempt);
                                     action.goTo("true")
                                 }
                             }else{
-                                nodeLogger.debug("Retry Refresh Allowed. Current Attempt: " + verificationAttempt);
+                                nodeLogger.debug("Retry Attempt Allowed. Current Attempt: " + verificationAttempt);
                                 action.goTo("true")
                             }
                         }else{
-                            nodeLogger.debug("Retry Attempt Allowed. Current Attempt: " + verificationAttempt);
+                            nodeLogger.error("No retry limit set in esv");
                             action.goTo("true")
                         }
                     }else{
-                        nodeLogger.error("No retry limit set in esv");
+                        nodeLogger.error("Proofind Method is 1, no KBA needed");
                         action.goTo("true")
                     }
                 }else{
-                    nodeLogger.error("Proofind Method is 1, no KBA needed");
+                    nodeLogger.error("going to v1");
                     action.goTo("true")
                 }
             }else{
-                nodeLogger.error("going to v1");
+                nodeLogger.error("FARS Scenario, no retry needed");
                 action.goTo("true")
             }
         }else{

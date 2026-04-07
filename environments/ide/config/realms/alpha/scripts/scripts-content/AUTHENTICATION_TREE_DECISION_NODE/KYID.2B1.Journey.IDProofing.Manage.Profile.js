@@ -89,7 +89,8 @@ function main() {
         phoneRisk = nodeState.get("phoneRisk");
         alternateEmailRisk =  nodeState.get("alternateEmailRisk");
         mailRisk = nodeState.get("mailRisk")
-        
+        var unprocessedFlowName = nodeState.get("flowName");
+        logger.error("unprocessedFlowName  " +unprocessedFlowName)
         assuranceLevel = nodeState.get("assuranceLevel") || "0" ;
 
         exisitingHighRiskOverrideDate = nodeState.get("exisitingHighRiskOverrideDate") || null;
@@ -108,8 +109,23 @@ function main() {
 
         response = openidm.query("managed/alpha_kyid_ridp_config", {"_queryFilter" : "true"});
         logger.error("response from query :: " + JSON.stringify(response))
-        highRisk = response.result[0].ridp_first_time_login_high_risk;
-        logger.debug("Create Account highRisk flag from query :: " + highRisk)
+
+        if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "updateprofile"){
+            highRisk = response.result[0].ridp_manage_profile_high_risk;
+            logger.debug("Manage Profile highRisk flag from query :: " + highRisk)
+        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "organdonor"){
+            highRisk = response.result[0].ridp_organ_donor_high_risk;
+            logger.debug("Organ Donor highRisk flag from query :: " + highRisk)
+        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "firstTimeLogin"){
+            highRisk = response.result[0].ridp_first_time_login_high_risk;
+            logger.debug("First Time login highRisk flag from query :: " + highRisk)
+        }else{
+            logger.debug("inside else before " + highRisk)
+            highRisk = false;
+            logger.debug("inside else after" + highRisk)
+        }
+        
+       
 
         var isEqual = (obj1, obj2) => {
           return JSON.stringify(obj1) === JSON.stringify(obj2);
@@ -163,9 +179,9 @@ function main() {
              highRisk = false;
          }
 
-         logger.debug("highRisk flag2 is :: " + highRisk)
-        var unprocessedFlowName = nodeState.get("flowName");
-        if((unprocessedFlowName.toLowerCase() ==="manageprofile" || unprocessedFlowName.toLowerCase() === "organ") && (riskIndicator && riskIndicator.toLowerCase() === "high") && highRisk){
+         logger.error("highRisk flag2 is :: " + highRisk)
+        
+        if((unprocessedFlowName.toLowerCase() ==="updateprofile" || unprocessedFlowName.toLowerCase() === "organdonor") && (riskIndicator && riskIndicator.toLowerCase() === "high") && highRisk){
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node");
             reason = "The LexisNexis response contains high risk indicators";
             title = "User identity verification transaction failed due to a high risk transaction has been detected while verifying user's identity.";
@@ -174,17 +190,19 @@ function main() {
             nodeState.putShared("MCISYNC","false")
             nodeState.putShared("errorMessage","KYID-LN-000")
             nodeState.putShared("patchMFA","true")
-            nodeState.putShared("currentRequestAssuranceLevel","0")        
+            //nodeState.putShared("currentRequestAssuranceLevel","0")        
             if(riskIndicator){
                patchRiskIndicator();
             }
             action.goTo("highRiskManageProfile");
-        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() == "firsttimelogin" && ((riskIndicator && riskIndicator.toLowerCase() === "high") || (phoneRisk && phoneRisk.toLowerCase() === "high" ) || (alternateEmailRisk && alternateEmailRisk.toLowerCase() === "high") || (mailRisk && mailRisk.toLowerCase() === "high"))  && highRisk){
+        }else if((unprocessedFlowName && unprocessedFlowName.toLowerCase() == "firsttimelogin") && ((riskIndicator && riskIndicator.toLowerCase() === "high"))  && highRisk){
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node");
+            logger.debug("riskIndicator flag2 is :: " + riskIndicator)
             reason = "The LexisNexis response contains high risk indicators";
             title = "User identity verification transaction failed due to a high risk transaction has been detected while verifying user's identity.";
             auditLog("KYID-LN-000", `${flowName} - High Risk Transaction`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
             auditLog("KYID-LN-000", `User identity verification failed as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null, true);
+             
             nodeState.putShared("MCISYNC","false")
             nodeState.putShared("errorMessage","KYID-LN-000")
             nodeState.putShared("patchMFA","true")
@@ -216,7 +234,7 @@ function main() {
             nodeState.putShared("MCISYNC","false")
             action.goTo("notVerified");
         }else if(nodeState.get("kbaVerificationStatus") === "failed"){
-            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "KYID-LN-003: KBA Verification Failed");
+            nodeLogger.error(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "KYID-LN-003: KBA Verification Failed");
             var reason = "The user personal information provided to LexisNexis is NOT verified";
             title = "User identity verification transaction failed as identity information couldn’t be verified with LexisNexis."
             auditLog("KYID-LN-005", `${flowName} - Individual is not verified`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
@@ -394,16 +412,16 @@ function main() {
                         }
                     }else{
                         //auditLog("RIDP003", "KYID-LN-004 : Manage Profile - No Accounts found in ping with verified identity");
-                        nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "No Accounts found in Ping for verified LexID "+ verifiedLexId);
+                        nodeLogger.error(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "No Accounts found in Ping for verified LexID "+ verifiedLexId);
                         action.goTo("mciSearch");
                     }
                 }
             }else{
-                nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "Error while searching for loggedin user "+ usrKOGID + " ::" + " Going to Error Node");
+                nodeLogger.error(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "Error while searching for loggedin user "+ usrKOGID + " ::" + " Going to Error Node");
                 action.goTo("error");
             }
         }else{
-            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "Either Risk Indicator is Unknown or Verification Status is Unverified/Failed/Unknown or verifiedLexId is null/empty "+ "::" + " Going to Error Node");
+            nodeLogger.error(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "Either Risk Indicator is Unknown or Verification Status is Unverified/Failed/Unknown or verifiedLexId is null/empty "+ "::" + " Going to Error Node");
             action.goTo("error");
         }
     } catch (error) {

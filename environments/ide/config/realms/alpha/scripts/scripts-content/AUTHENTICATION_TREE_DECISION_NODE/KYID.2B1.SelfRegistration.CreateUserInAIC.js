@@ -221,7 +221,7 @@ try {
         if (altEmailRisk && String(altEmailRisk).toLowerCase() === "high") {
             riskArray.push("Alternate Email");
         }
-        if (riskIndicator) {
+       if (riskIndicator && riskIndicator.toLowerCase() === "high") {
             riskArray.push("Identity");
         }
         
@@ -540,9 +540,11 @@ function createMFAObject(usrKOGID, method, usrMfaValue, status, isRecoveryOnly) 
         //        'riskIndicator': emailPhoneRiskIndicator.riskIndicatorDetails || []
         // };
 
-        if(risk && risk.toLowerCase() === "high"){
-            status = "INACTIVE"
-        }
+        var highRiskFlag =  nodeState.get("highRiskFlag")
+
+        // if(risk && risk.toLowerCase() === "high" && highRiskFlag){
+        //     status = "highrisk"
+        // }
 
         var mfajsonObj = {
             'KOGId': usrKOGID,

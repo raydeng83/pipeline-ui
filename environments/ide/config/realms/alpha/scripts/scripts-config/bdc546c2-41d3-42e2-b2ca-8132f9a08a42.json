@@ -8,7 +8,7 @@
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
   "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
-  "lastModifiedDate": 1774419740934,
+  "lastModifiedDate": 1775559374955,
   "name": "KYID.2B1.Journey.IDProofing.AppEnroll.MCI.Search",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.AppEnroll.MCI.Search.js"

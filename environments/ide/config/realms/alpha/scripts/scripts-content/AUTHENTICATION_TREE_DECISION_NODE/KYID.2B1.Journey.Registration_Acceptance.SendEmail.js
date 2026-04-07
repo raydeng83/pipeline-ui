@@ -138,7 +138,7 @@ try {
         logger.error("primaryEmailComplete : " + nodeState.get("primaryEmailComplete"));
         if (nodeState.get("primaryEmailComplete") === true || (nodeState.get("resend_alternate_mail") === true && nodeState.get("resend_alternate_mail") != null)) {
             logger.error("inside primaryEmailSent true")
-            var email = nodeState.get("alternatemail");
+            var email = nodeState.get("alternateEmail") || nodeState.get("alternatemail");
             logger.error("email 1 : " + email);
             var hotp = nodeState.get("oneTimePassword");
             logger.debug("hotp : " + hotp);

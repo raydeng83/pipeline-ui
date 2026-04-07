@@ -101,6 +101,8 @@ function handleUserResponses() {
         var lexisnexisResponse = nodeState.get("lexisnexisResponse");
         var userInfo = nodeState.get("userInfoJSON1");
         var flowName = Flowname() || nodeState.get("flowName");
+        var emailsWithVerifiedLexID = JSON.parse(nodeState.get("emailsWithVerifiedLexID"));
+        var ListOfPrimaryEmails = nodeState.get("emailsWithVerifiedLexID") ? JSON.parse(nodeState.get("emailsWithVerifiedLexID")) : []
         
         nodeLogger.debug("MCI Search API Call Response: " + responseMCISearchApiCall);
         isResponseValidResult = isResponseValid(responseMCISearchApiCall);
@@ -153,6 +155,9 @@ function handleUserResponses() {
                                     nodeState.putShared("orig_logOn",searchUserInPingResponse.logon)
                                     nodeState.putShared("orig_upn",searchUserInPingResponse.upn)
                                     matchedWithLoggedUser.push(searchUserInPingResponse.mail)
+                                    if(!ListOfPrimaryEmails.includes(searchUserInPingResponse.mail)){
+                                             ListOfPrimaryEmails.push(searchUserInPingResponse.mail)
+                                    }
                                     //action.goTo("UpdateUserIdentity")
                                 }else{
                                     nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + " Input is associated with terminated/susupended account with KOGID "+ "::" + "KYID-LN-001 - Input is associated with terminated/susupended account");
@@ -199,7 +204,18 @@ function handleUserResponses() {
                         //     nodeState.putShared("errorMessage","KYID-LN-002")
                         //     action.goTo("inputLink2TerminatedAccount")
                         // }
-                        else if(matchedWithLoggedUser.length == 0 || inputNoMatch.length>0){
+                        else if(ListOfPrimaryEmails.includes(mail)){
+                            nodeLogger.debug("Inside previous search condition " + JSON.stringify(ListOfPrimaryEmails))
+                           // nodeState.putShared("mail",matchedWithLoggedUser[0])
+                            nodeState.putShared("ListOfPrimaryEmails",matchedWithLoggedUser)
+                            nodeState.putShared("userSelection",null)
+                            reason = "The user personal information provided to LexisNexis is verified";
+                            title = "User identity verification is successful."
+                            auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
+                            auditLog("KYID-LN-007", `Identity Proofing is successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null);
+                            nodeState.putShared("proofingMethod","4")
+                            action.goTo("exactMatch"); 
+                        }else if(matchedWithLoggedUser.length == 0 || inputNoMatch.length>0){
                             // Account exist in ping does not match with logged in user error out
                             reason = "KYID or LexID does not match with the response provided LexisNexis LexID";
                             title = "User identity verification  transaction failed due to user details provided as part of the input does not match with the verified identity."
@@ -217,6 +233,7 @@ function handleUserResponses() {
                             nodeState.putShared("userSelection",null)
                             reason = "The user personal information provided to LexisNexis is verified";
                             title = "User identity verification is successful."
+                            nodeState.putShared("proofingMethod","4")
                             auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                             auditLog("KYID-LN-007", `Identity Proofing is successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null);
                             action.goTo("exactMatch");
@@ -266,6 +283,7 @@ function handleUserResponses() {
                         title = "User identity verification is successful."
                         auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                         auditLog("KYID-LN-007", `Identity Proofing is successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null);
+                        nodeState.putShared("proofingMethod","4")
                         action.goTo("exactMatch");
                     }else if (filteredSearchAccountArray && filteredSearchAccountArray.length == 1 && nodeState.get("accountStatus") && nodeState.get("accountStatus") === "inactive"){
                         reason = "KYID or LexID matches with inactive account (email) associated with the verified identity - LexID";

@@ -7,8 +7,8 @@
   "description": null,
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
-  "lastModifiedBy": "id=95ef9650-e4b7-4a95-ac95-49b66b061073,ou=user,ou=am-config",
-  "lastModifiedDate": 1773209335014,
+  "lastModifiedBy": "id=79b6298e-a610-482d-b475-12a6ba900409,ou=user,ou=am-config",
+  "lastModifiedDate": 1775540126307,
   "name": "KYID.2B1.Journey.IDProofing.Recovery.Email.MCI.Search",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.Recovery.Email.MCI.Search.js"

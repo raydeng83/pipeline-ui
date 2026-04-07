@@ -238,6 +238,7 @@ function handleUserResponses(flowName) {
                        nodeState.putShared("flowContext", "emailAge")
                           text = "Email Verification"
                     }
+                    auditLog("KYID-LN-007", `${flowName} success as part of ${text}`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                     auditLog("KYID-LN-007", `${flowName} success as part of ${text}`, false, transactionid, flowName, mail, null, null, null, null, true);
                     action.goTo("success");
                 }
@@ -404,7 +405,7 @@ function patchHighRisk() {
         // Extract user info
         var usrKOGID = nodeState.get("KOGID");
         var telephoneNumber = nodeState.get("telephoneNumber"); 
-        var secondaryEmail = nodeState.get("alternateEmail") ||nodeState.get("alternateEmailRIDP") ||  nodeState.get("newemail1") 
+        var secondaryEmail = nodeState.get("alternateEmail") ||nodeState.get("alternateEmailRIDP") || nodeState.get("newemail1") 
         var auditDetails = require("KYID.2B1.Library.AuditDetails")
         var auditData = auditDetails.getAuditDetails("CREATE", nodeState)
         var method = null;
@@ -518,12 +519,12 @@ function patchHighRisk() {
                 }
             }
 
-            if (mfaMethodResponses.resultCount > 0) {
+            if (mfaMethodResponses.resultCount > 0) {                
                     var patchObj = [
                 {
                     "operation": "replace",
                     "field": "/MFAStatus",
-                    "value": "high"
+                    "value": "highrisk"
                 },
                 {
                     "operation": "replace",

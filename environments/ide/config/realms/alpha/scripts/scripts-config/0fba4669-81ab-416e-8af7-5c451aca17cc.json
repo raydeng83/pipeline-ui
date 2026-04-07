@@ -7,8 +7,8 @@
   "description": "null",
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
-  "lastModifiedBy": "id=689f50a8-bce4-452a-847f-3ef1a00fb87f,ou=user,ou=am-config",
-  "lastModifiedDate": 1774425012958,
+  "lastModifiedBy": "id=1524b855-45c2-470c-8527-b9f6f1153780,ou=user,ou=am-config",
+  "lastModifiedDate": 1775542491849,
   "name": "KYID.2B1.UpdateUserStatus",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.UpdateUserStatus.js"
