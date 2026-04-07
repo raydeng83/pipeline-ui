@@ -35,16 +35,17 @@ export async function GET(req: NextRequest) {
 
     const relFile = scriptMeta.script?.file;
     if (!relFile) {
-      return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null });
+      return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null, filename: null });
     }
 
     const contentFile = path.join(configDir, "realms", realm, "scripts", relFile);
     if (!fs.existsSync(contentFile)) {
-      return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null });
+      return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null, filename: path.basename(relFile) });
     }
 
     const content = fs.readFileSync(contentFile, "utf-8");
-    return NextResponse.json({ name: scriptMeta.name ?? scriptId, content });
+    const filename = path.basename(relFile);
+    return NextResponse.json({ name: scriptMeta.name ?? scriptId, content, filename });
   }
 
   return NextResponse.json({ error: "Script not found" }, { status: 404 });

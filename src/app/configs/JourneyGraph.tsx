@@ -283,7 +283,7 @@ function parseJourney(json: string, pageConfigs?: Map<string, PageNodeConfig>): 
 
   if (data.entryNodeId && data.staticNodes?.["startNode"]) {
     rfEdges.push({ id: "__start__", source: "startNode", target: data.entryNodeId,
-      type: "bezier", style: { stroke: "#10b981", strokeWidth: 2 } });
+      style: { stroke: "#10b981", strokeWidth: 2 } });
   }
 
   for (const [id, node] of Object.entries(data.nodes ?? {})) {
@@ -338,7 +338,6 @@ function parseJourney(json: string, pageConfigs?: Map<string, PageNodeConfig>): 
         source: id, sourceHandle: outcomeId,
         target: targetId,
         label: outcomeId === "outcome" ? undefined : outcomeId,
-        type: "bezier",
         style: { stroke: toFailure ? "#f87171" : toSuccess ? "#34d399" : "#64748b", strokeWidth: 1.5 },
         labelStyle: { fontSize: 9, fill: "#64748b" },
         labelBgStyle: { fill: "#f8fafc", fillOpacity: 0.9 },
@@ -896,6 +895,68 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     });
   }, [environment, activeJourneyId, pageNodeIds]);
 
+  // Preview modal for ScriptedDecisionNode / InnerTreeEvaluatorNode
+  const [previewModal, setPreviewModal] = useState<{
+    nodeId: string;
+    nodeType: "ScriptedDecisionNode" | "InnerTreeEvaluatorNode";
+    title: string;
+    loading: boolean;
+    scriptName?: string;
+    scriptContent?: string;
+    scriptCopied?: boolean;
+    scriptFullscreen?: boolean;
+    innerJourneyId?: string;
+    innerJourneyJson?: string;
+  } | null>(null);
+
+  // Fetch preview content when modal opens
+  useEffect(() => {
+    if (!previewModal?.loading) return;
+    if (!environment || !activeJourneyId) {
+      setPreviewModal((p) => p ? { ...p, loading: false } : null);
+      return;
+    }
+    const { nodeId, nodeType } = previewModal;
+    let cancelled = false;
+
+    const doFetch = async () => {
+      try {
+        const params = new URLSearchParams({ environment: environment!, journey: activeJourneyId!, nodeId });
+        const res = await fetch(`/api/push/journey-node?${params}`);
+        if (!res.ok || cancelled) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
+        const d = await res.json() as { file?: { content?: string } };
+        const config = d.file?.content ? JSON.parse(d.file.content) as Record<string, unknown> : null;
+
+        if (nodeType === "ScriptedDecisionNode") {
+          const scriptId = typeof config?.script === "string" ? config.script : null;
+          if (!scriptId || cancelled) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
+          const sParams = new URLSearchParams({ environment: environment!, scriptId });
+          const sRes = await fetch(`/api/push/script?${sParams}`);
+          if (!sRes.ok || cancelled) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
+          const sd = await sRes.json() as { name?: string; content?: string };
+          if (cancelled) return;
+          setPreviewModal((p) => p ? { ...p, loading: false, scriptName: sd.name, scriptContent: sd.content ?? undefined } : null);
+        } else {
+          const treeId = typeof config?.tree === "string" ? config.tree : null;
+          if (!treeId || cancelled) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
+          const tParams = new URLSearchParams({ environment: environment!, scope: "journeys", item: treeId });
+          const tRes = await fetch(`/api/push/item?${tParams}`);
+          if (!tRes.ok || cancelled) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
+          const td = await tRes.json() as { files?: Array<{ content?: string }> };
+          const innerJourneyJson = td.files?.[0]?.content;
+          if (cancelled) return;
+          setPreviewModal((p) => p ? { ...p, loading: false, innerJourneyId: treeId, innerJourneyJson } : null);
+        }
+      } catch {
+        if (!cancelled) setPreviewModal((p) => p ? { ...p, loading: false } : null);
+      }
+    };
+
+    void doFetch();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewModal?.nodeId, previewModal?.loading]);
+
   // Fetch script names for ScriptedDecisionNodes (for search)
   const [scriptNames, setScriptNames] = useState<Map<string, string>>(new Map());
   useEffect(() => {
@@ -964,14 +1025,17 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return () => clearTimeout(t);
   }, [flashNodeId]);
 
-  // Escape closes drawer first (capture phase, before fullscreen handler)
+  // Escape closes preview modal first, then drawer (capture phase, before fullscreen handler)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && nodePanel) { setNodePanel(null); e.stopPropagation(); }
+      if (e.key === "Escape") {
+        if (previewModal) { setPreviewModal(null); e.stopPropagation(); return; }
+        if (nodePanel) { setNodePanel(null); e.stopPropagation(); }
+      }
     };
     document.addEventListener("keydown", handler, true);
     return () => document.removeEventListener("keydown", handler, true);
-  }, [nodePanel]);
+  }, [nodePanel, previewModal]);
 
   // Map nodeId → display label (for resolving outcome targets)
   const nodeDisplayMap = useMemo(() => {
@@ -1115,18 +1179,37 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
 
   const handleNodeClick: NodeMouseHandler = useCallback((_e, node) => {
     if (node.parentId) return; // ignore clicks on page child nodes
+    const d = node.data as { label: string; nodeType?: string; outcomes?: string[] };
+
     const isSame = selectedNodeId === node.id;
     setSelectedNodeId(isSame ? null : node.id);
     if (isSame) {
       setNodePanel(null);
     } else {
-      const d = node.data as { label: string; nodeType?: string; outcomes?: string[] };
       const outcomes = (d.outcomes ?? []).map((outcomeId) => {
         const edge = baseEdges.find((e) => e.source === node.id && e.sourceHandle === outcomeId);
         const targetLabel = edge ? (nodeDisplayMap.get(edge.target) ?? edge.target) : "—";
         return { outcomeId, targetLabel };
       });
       setNodePanel({ id: node.id, label: d.label, nodeType: d.nodeType, outcomes });
+    }
+  }, [selectedNodeId, baseEdges, nodeDisplayMap]);
+
+  const handleNodeDoubleClick: NodeMouseHandler = useCallback((_e, node) => {
+    if (node.parentId) return;
+    const d = node.data as { label: string; nodeType?: string; outcomes?: string[] };
+    if (d.nodeType === "ScriptedDecisionNode" || d.nodeType === "InnerTreeEvaluatorNode") {
+      setPreviewModal({ nodeId: node.id, nodeType: d.nodeType, title: d.label ?? node.id, loading: true });
+      // Ensure side panel is also open
+      if (selectedNodeId !== node.id) {
+        setSelectedNodeId(node.id);
+        const outcomes = (d.outcomes ?? []).map((outcomeId) => {
+          const edge = baseEdges.find((e) => e.source === node.id && e.sourceHandle === outcomeId);
+          const targetLabel = edge ? (nodeDisplayMap.get(edge.target) ?? edge.target) : "—";
+          return { outcomeId, targetLabel };
+        });
+        setNodePanel({ id: node.id, label: d.label, nodeType: d.nodeType, outcomes });
+      }
     }
   }, [selectedNodeId, baseEdges, nodeDisplayMap]);
 
@@ -1302,6 +1385,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
             nodeTypes={nodeTypes}
             onNodesChange={onNodesChange}
             onNodeClick={handleNodeClick}
+            onNodeDoubleClick={handleNodeDoubleClick}
             onEdgeMouseEnter={handleEdgeMouseEnter}
             onEdgeMouseLeave={handleEdgeMouseLeave}
             onEdgeClick={handleEdgeClick}
@@ -1341,6 +1425,122 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
           onClose={() => { setNodePanel(null); setSelectedNodeId(null); }}
         />
       </div>
+
+      {/* ── Preview modal (ScriptedDecisionNode / InnerTreeEvaluatorNode) ─────── */}
+      {previewModal && (
+        <>
+          {previewModal.scriptFullscreen && previewModal.scriptContent ? (
+            <ScriptOverlay
+              name={previewModal.scriptName ?? previewModal.title}
+              content={previewModal.scriptContent}
+              onClose={() => setPreviewModal((p) => p ? { ...p, scriptFullscreen: false } : null)}
+            />
+          ) : (
+          <div
+            className="absolute inset-0 z-20 flex items-center justify-center bg-black/40"
+            onClick={() => setPreviewModal(null)}
+          >
+            <div
+              className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden"
+              style={{
+                width:     previewModal.nodeType === "InnerTreeEvaluatorNode" ? "80vw" : "60vw",
+                maxWidth:  960,
+                height:    previewModal.nodeType === "InnerTreeEvaluatorNode" ? "75vh" : "60vh",
+                maxHeight: "90vh",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal header */}
+              <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-slate-800 truncate">{previewModal.title}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    {previewModal.nodeType === "ScriptedDecisionNode" ? "Script preview" : "Inner journey preview"}
+                  </p>
+                </div>
+                {previewModal.nodeType === "InnerTreeEvaluatorNode" && previewModal.innerJourneyId && !previewModal.loading && (
+                  <button
+                    type="button"
+                    onClick={() => { void navigateToTree(previewModal.innerJourneyId!, previewModal.nodeId); setPreviewModal(null); }}
+                    className="px-3 py-1.5 text-xs font-medium rounded border border-sky-600 text-sky-600 hover:bg-sky-50 transition-colors shrink-0"
+                  >
+                    Navigate in →
+                  </button>
+                )}
+                {previewModal.nodeType === "ScriptedDecisionNode" && previewModal.scriptContent && !previewModal.loading && (
+                  <>
+                    <button
+                      type="button"
+                      title="Copy script"
+                      onClick={() => {
+                        void navigator.clipboard.writeText(previewModal.scriptContent!).then(() => {
+                          setPreviewModal((p) => p ? { ...p, scriptCopied: true } : null);
+                          setTimeout(() => setPreviewModal((p) => p ? { ...p, scriptCopied: false } : null), 2000);
+                        });
+                      }}
+                      className="text-slate-400 hover:text-slate-600 shrink-0 transition-colors"
+                    >
+                      {previewModal.scriptCopied ? (
+                        <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                        </svg>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      title="View fullscreen"
+                      onClick={() => setPreviewModal((p) => p ? { ...p, scriptFullscreen: true } : null)}
+                      className="text-slate-400 hover:text-slate-600 shrink-0"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+                <button type="button" onClick={() => setPreviewModal(null)} className="text-slate-400 hover:text-slate-600 shrink-0">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {/* Modal body */}
+              <div className="flex-1 min-h-0 overflow-hidden">
+                {previewModal.loading ? (
+                  <div className="flex items-center justify-center h-full text-sm text-slate-400">Loading…</div>
+                ) : previewModal.nodeType === "ScriptedDecisionNode" ? (
+                  <div className="h-full flex flex-col overflow-hidden bg-slate-950">
+                    {previewModal.scriptName && (
+                      <p className="px-4 pt-3 pb-1 text-[10px] font-medium text-slate-400 shrink-0">{previewModal.scriptName}</p>
+                    )}
+                    {previewModal.scriptContent ? (
+                      <div className="flex-1 overflow-auto">
+                        <pre
+                          className="px-4 pb-4 text-[11px] font-mono leading-relaxed text-slate-300"
+                          dangerouslySetInnerHTML={{ __html: highlightJs(previewModal.scriptContent) }}
+                        />
+                      </div>
+                    ) : (
+                      <p className="px-4 py-4 text-sm text-slate-400">No script content available.</p>
+                    )}
+                  </div>
+                ) : (
+                  previewModal.innerJourneyJson ? (
+                    <JourneyGraph json={previewModal.innerJourneyJson} environment={environment} journeyId={previewModal.innerJourneyId} />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-sm text-slate-400">Could not load inner journey.</div>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

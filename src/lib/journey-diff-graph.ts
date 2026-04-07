@@ -148,7 +148,7 @@ export function parseMergedDiffGraph(
         id: "__start__",
         source: "startNode",
         target: entryId,
-        type: "bezier",
+
         style: makeEdgeStyle(status, entryId),
         data: { diffStatus: status },
       });
@@ -261,7 +261,7 @@ export function parseMergedDiffGraph(
         sourceHandle: outcome,
         target: targetId,
         label: outcome === "outcome" ? undefined : outcome,
-        type: "bezier",
+
         style: makeEdgeStyle(edgeStatus, targetId),
         labelStyle: { fontSize: 9, fill: "#64748b" },
         labelBgStyle: { fill: "#f8fafc", fillOpacity: 0.9 },
@@ -316,7 +316,6 @@ export function parseSingleSideGraph(
       id: "__start__",
       source: "startNode",
       target: data.entryNodeId,
-      type: "bezier",
       style: makeEdgeStyle("unchanged", data.entryNodeId),
       data: { diffStatus: "unchanged" as DiffStatus },
     });
@@ -385,7 +384,7 @@ export function parseSingleSideGraph(
         sourceHandle: outcome,
         target: targetId,
         label: outcome === "outcome" ? undefined : outcome,
-        type: "bezier",
+
         style: makeEdgeStyle("unchanged", targetId),
         labelStyle: { fontSize: 9, fill: "#64748b" },
         labelBgStyle: { fill: "#f8fafc", fillOpacity: 0.9 },
