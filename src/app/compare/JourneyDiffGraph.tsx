@@ -660,7 +660,7 @@ function ScriptPanelContent({
             </svg>
             <span className="text-[11px] font-medium text-slate-700 truncate">{entry.name}</span>
             {!entry.configFile && (
-              <span className="text-[9px] text-slate-400 uppercase font-semibold ml-auto shrink-0">unchanged</span>
+              <span className="ml-auto shrink-0"><DiffStatusBadge status="unchanged" /></span>
             )}
           </div>
 
@@ -701,7 +701,7 @@ function ScriptPanelContent({
               <div key={f.relativePath} className="px-3 pb-1">
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <span className="text-[9px] font-mono text-slate-400 truncate flex-1">{fileLabel}</span>
-                  <span className={cn("text-[9px] font-semibold uppercase", statusColor)}>{f.status}</span>
+                  <DiffStatusBadge status={f.status as DiffStatus} />
                   {changedLines.length > 0 && (
                     <span className="text-[9px] text-slate-400">
                       +{changedLines.filter((l) => l.type === "added").length}
