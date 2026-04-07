@@ -349,138 +349,201 @@ function InlineDiffView({ lines }: { lines: DiffLineLocal[] }) {
   );
 }
 
+interface ScriptEntry {
+  uuid: string;
+  name: string;
+  /** Present when the script is in the diff (changed). */
+  configFile?: FileDiff;
+  contentFile?: FileDiff;
+  /** Present when the script is unchanged and was fetched from the API. */
+  fetchedContent?: string | null;
+}
+
 function ScriptPanelContent({
   nodeId,
+  journeyName,
   files,
+  sourceEnv,
+  targetEnv,
 }: {
   nodeId?: string | null;
   nodeType?: string;
   journeyName?: string;
   files: FileDiff[];
+  sourceEnv: string;
+  targetEnv: string;
 }) {
-  if (!nodeId) return <p className="px-3 py-2 text-xs text-slate-400">No node selected.</p>;
+  const [loading, setLoading]   = useState(false);
+  const [entries, setEntries]   = useState<ScriptEntry[]>([]);
+  const [message, setMessage]   = useState<string | null>(null);
 
-  // Find node config file
-  const nodeConfigFile = files.find(
-    (f) => f.relativePath.includes(`/${nodeId}.json`) && f.relativePath.includes("/nodes/"),
-  );
+  useEffect(() => {
+    if (!nodeId) { setEntries([]); setMessage(null); return; }
 
-  if (!nodeConfigFile) {
-    return <p className="px-3 py-2 text-xs text-slate-400">No config file found for this node.</p>;
-  }
+    let cancelled = false;
+    setLoading(true);
+    setEntries([]);
+    setMessage(null);
 
-  const nodeContent = nodeConfigFile.localContent ?? nodeConfigFile.remoteContent;
-  let nodeJson: Record<string, unknown> | null = null;
-  try { nodeJson = nodeContent ? JSON.parse(nodeContent) : null; } catch { /* ignore */ }
+    const run = async () => {
+      // ── Step 1: resolve node config content ──────────────────────────────
+      const nodeConfigFile = files.find(
+        (f) => f.relativePath.includes(`/${nodeId}.json`) && f.relativePath.includes("/nodes/"),
+      );
+      let nodeContent = nodeConfigFile?.localContent ?? nodeConfigFile?.remoteContent ?? null;
 
-  // Find UUID-valued fields → potential script UUIDs
-  const scriptUuids: string[] = [];
-  if (nodeJson) {
-    for (const val of Object.values(nodeJson)) {
-      if (typeof val === "string" && UUID_RE.test(val)) {
-        scriptUuids.push(val);
+      if (!nodeContent) {
+        const env = sourceEnv || targetEnv;
+        if (env && journeyName) {
+          try {
+            const params = new URLSearchParams({ environment: env, journey: journeyName, nodeId });
+            const res = await fetch(`/api/push/journey-node?${params}`);
+            if (res.ok) {
+              const data = await res.json() as { file?: { content?: string } };
+              nodeContent = data.file?.content ?? null;
+            }
+          } catch { /* ignore */ }
+        }
       }
-    }
-  }
 
-  // For each script UUID, find script config and content files
-  interface ScriptEntry {
-    uuid: string;
-    name: string;
-    configFile?: FileDiff;
-    contentFile?: FileDiff;
-  }
+      if (cancelled) return;
+      if (!nodeContent) { setMessage("No config file found for this node."); setLoading(false); return; }
 
-  const scriptEntries: ScriptEntry[] = [];
-  for (const uuid of scriptUuids) {
-    const configFile = files.find((f) => f.relativePath.includes(`/scripts-config/${uuid}.json`));
-    if (!configFile) continue;
+      // ── Step 2: extract script UUIDs ──────────────────────────────────────
+      let nodeJson: Record<string, unknown> | null = null;
+      try { nodeJson = JSON.parse(nodeContent); } catch { /* ignore */ }
 
-    // Parse name from config
-    let name = uuid;
-    const cfgContent = configFile.localContent ?? configFile.remoteContent;
-    if (cfgContent) {
-      try {
-        const cfgJson = JSON.parse(cfgContent) as Record<string, unknown>;
-        if (typeof cfgJson.name === "string" && cfgJson.name) name = cfgJson.name;
-      } catch { /* ignore */ }
-    }
+      const scriptUuids: string[] = [];
+      if (nodeJson) {
+        for (const val of Object.values(nodeJson)) {
+          if (typeof val === "string" && UUID_RE.test(val)) scriptUuids.push(val);
+        }
+      }
 
-    const contentFile = files.find(
-      (f) =>
-        f.relativePath.includes("/scripts-content/") &&
-        f.relativePath.split("/").pop()?.replace(/\.[^.]+$/, "") === name,
-    );
+      if (!scriptUuids.length) { setMessage("No scripts linked to this node."); setLoading(false); return; }
 
-    scriptEntries.push({ uuid, name, configFile, contentFile });
-  }
+      // ── Step 3: build entries — diff files first, API fallback for unchanged ──
+      const env = sourceEnv || targetEnv;
+      const result: ScriptEntry[] = [];
 
-  if (scriptEntries.length === 0) {
-    return (
-      <div className="px-3 py-2 text-xs text-slate-400">
-        {scriptUuids.length > 0 ? "No script diff files found." : "No scripts linked to this node."}
-      </div>
-    );
-  }
+      for (const uuid of scriptUuids) {
+        if (cancelled) break;
+
+        const configFile = files.find((f) => f.relativePath.includes(`/scripts-config/${uuid}.json`));
+        if (configFile) {
+          let name = uuid;
+          const cfgContent = configFile.localContent ?? configFile.remoteContent;
+          if (cfgContent) {
+            try {
+              const j = JSON.parse(cfgContent) as Record<string, unknown>;
+              if (typeof j.name === "string" && j.name) name = j.name;
+            } catch { /* ignore */ }
+          }
+          const contentFile = files.find(
+            (f) =>
+              f.relativePath.includes("/scripts-content/") &&
+              f.relativePath.split("/").pop()?.replace(/\.[^.]+$/, "") === name,
+          );
+          result.push({ uuid, name, configFile, contentFile });
+        } else if (env) {
+          // Script unchanged — fetch content directly from API
+          try {
+            const params = new URLSearchParams({ environment: env, scriptId: uuid });
+            const res = await fetch(`/api/push/script?${params}`);
+            if (res.ok) {
+              const data = await res.json() as { name?: string; content?: string | null };
+              result.push({ uuid, name: data.name ?? uuid, fetchedContent: data.content ?? null });
+            }
+          } catch { /* ignore */ }
+        }
+      }
+
+      if (cancelled) return;
+      if (!result.length) setMessage("No scripts found for this node.");
+      else setEntries(result);
+      setLoading(false);
+    };
+
+    void run();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodeId, journeyName, sourceEnv, targetEnv, files]);
+
+  if (!nodeId)  return <p className="px-3 py-2 text-xs text-slate-400">No node selected.</p>;
+  if (loading)  return <p className="px-3 py-2 text-xs text-slate-400">Loading scripts…</p>;
+  if (message)  return <div className="px-3 py-2 text-xs text-slate-400">{message}</div>;
 
   return (
     <div className="divide-y divide-slate-100">
-      {scriptEntries.map((entry) => {
-        // Compute diff lines for each relevant file
-        const filesToShow: FileDiff[] = [
-          ...(entry.configFile ? [entry.configFile] : []),
-          ...(entry.contentFile ? [entry.contentFile] : []),
-        ];
+      {entries.map((entry) => (
+        <div key={entry.uuid} className="py-2">
+          <div className="flex items-center gap-1.5 px-3 pb-1">
+            <svg className="w-3 h-3 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+            <span className="text-[11px] font-medium text-slate-700 truncate">{entry.name}</span>
+            {!entry.configFile && (
+              <span className="text-[9px] text-slate-400 uppercase font-semibold ml-auto shrink-0">unchanged</span>
+            )}
+          </div>
 
-        return (
-          <div key={entry.uuid} className="py-2">
-            <div className="flex items-center gap-1.5 px-3 pb-1">
-              <svg className="w-3 h-3 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-              </svg>
-              <span className="text-[11px] font-medium text-slate-700 truncate">{entry.name}</span>
+          {/* Unchanged script fetched from API — render as plain viewer */}
+          {!entry.configFile && entry.fetchedContent !== undefined && (
+            <div className="px-3 pb-1">
+              {entry.fetchedContent ? (
+                <InlineDiffView
+                  lines={entry.fetchedContent.split("\n").map((c) => ({ type: "context" as const, content: c }))}
+                />
+              ) : (
+                <p className="text-[10px] text-slate-400 italic">No content</p>
+              )}
             </div>
-            {filesToShow.map((f) => {
-              const isConfig  = f.relativePath.includes("/scripts-config/");
-              const fileLabel = isConfig ? "config" : f.relativePath.split("/").pop() ?? "content";
-              const statusColor = f.status === "added" ? "text-emerald-600" : f.status === "removed" ? "text-red-500" : f.status === "modified" ? "text-amber-600" : "text-slate-400";
+          )}
 
-              let diffLines: DiffLineLocal[] = [];
-              if (f.diffLines && f.diffLines.length > 0) {
-                diffLines = f.diffLines as DiffLineLocal[];
-              } else if (f.localContent != null && f.remoteContent != null) {
-                diffLines = clientDiff(f.localContent, f.remoteContent);
-              } else if (f.remoteContent != null) {
-                diffLines = f.remoteContent.split("\n").map((c) => ({ type: "added" as const, content: c }));
-              } else if (f.localContent != null) {
-                diffLines = f.localContent.split("\n").map((c) => ({ type: "removed" as const, content: c }));
-              }
+          {/* Changed script — render diff for each file */}
+          {entry.configFile && [
+            ...(entry.configFile  ? [entry.configFile]  : []),
+            ...(entry.contentFile ? [entry.contentFile] : []),
+          ].map((f) => {
+            const isConfig  = f.relativePath.includes("/scripts-config/");
+            const fileLabel = isConfig ? "config" : f.relativePath.split("/").pop() ?? "content";
+            const statusColor = f.status === "added" ? "text-emerald-600" : f.status === "removed" ? "text-red-500" : f.status === "modified" ? "text-amber-600" : "text-slate-400";
 
-              const changedLines = diffLines.filter((l) => l.type !== "context");
+            let diffLines: DiffLineLocal[] = [];
+            if (f.diffLines && f.diffLines.length > 0) {
+              diffLines = f.diffLines as DiffLineLocal[];
+            } else if (f.localContent != null && f.remoteContent != null) {
+              diffLines = clientDiff(f.localContent, f.remoteContent);
+            } else if (f.remoteContent != null) {
+              diffLines = f.remoteContent.split("\n").map((c) => ({ type: "added" as const, content: c }));
+            } else if (f.localContent != null) {
+              diffLines = f.localContent.split("\n").map((c) => ({ type: "removed" as const, content: c }));
+            }
 
-              return (
-                <div key={f.relativePath} className="px-3 pb-1">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[9px] font-mono text-slate-400 truncate flex-1">{fileLabel}</span>
-                    <span className={cn("text-[9px] font-semibold uppercase", statusColor)}>{f.status}</span>
-                    {changedLines.length > 0 && (
-                      <span className="text-[9px] text-slate-400">
-                        +{changedLines.filter((l) => l.type === "added").length}
-                        {" "}-{changedLines.filter((l) => l.type === "removed").length}
-                      </span>
-                    )}
-                  </div>
-                  {diffLines.length > 0 ? (
-                    <InlineDiffView lines={diffLines} />
-                  ) : (
-                    <p className="text-[10px] text-slate-400 italic">No changes</p>
+            const changedLines = diffLines.filter((l) => l.type !== "context");
+
+            return (
+              <div key={f.relativePath} className="px-3 pb-1">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-[9px] font-mono text-slate-400 truncate flex-1">{fileLabel}</span>
+                  <span className={cn("text-[9px] font-semibold uppercase", statusColor)}>{f.status}</span>
+                  {changedLines.length > 0 && (
+                    <span className="text-[9px] text-slate-400">
+                      +{changedLines.filter((l) => l.type === "added").length}
+                      {" "}-{changedLines.filter((l) => l.type === "removed").length}
+                    </span>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        );
-      })}
+                {diffLines.length > 0 ? (
+                  <InlineDiffView lines={diffLines} />
+                ) : (
+                  <p className="text-[10px] text-slate-400 italic">No changes</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
@@ -1147,6 +1210,8 @@ export function JourneyDiffGraphModal({
                 nodeType={activeNode?.nodeType}
                 journeyName={active.name}
                 files={files}
+                sourceEnv={sourceEnv}
+                targetEnv={targetEnv}
               />
             </div>
           </div>
