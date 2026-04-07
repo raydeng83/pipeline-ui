@@ -321,13 +321,15 @@ function getNodeDims(node: Node): [number, number] {
   return [DIFF_NODE_W, diffNodeHeight(outcomes.length)];
 }
 
-function applyLayout(nodes: Node[], edges: Edge[]): Node[] {
+function runDagreLayout(
+  nodes: Node[],
+  edges: Edge[],
+  opts: { nodesep: number; ranksep: number },
+): Node[] {
   if (nodes.length === 0) return nodes;
-
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "LR", nodesep: 60, ranksep: 160, marginx: 40, marginy: 40 });
-
+  g.setGraph({ rankdir: "LR", nodesep: opts.nodesep, ranksep: opts.ranksep, marginx: 40, marginy: 40 });
   nodes.forEach((n) => {
     const [w, h] = getNodeDims(n);
     g.setNode(n.id, { width: w, height: h });
@@ -338,13 +340,20 @@ function applyLayout(nodes: Node[], edges: Edge[]): Node[] {
     }
   });
   dagre.layout(g);
-
   return nodes.map((n) => {
     const pos = g.node(n.id);
     if (!pos) return n;
     const [w, h] = getNodeDims(n);
     return { ...n, position: { x: pos.x - w / 2, y: pos.y - h / 2 } };
   });
+}
+
+function applyLayout(nodes: Node[], edges: Edge[]): Node[] {
+  return runDagreLayout(nodes, edges, { nodesep: 60, ranksep: 160 });
+}
+
+function applyCompactLayout(nodes: Node[], edges: Edge[]): Node[] {
+  return runDagreLayout(nodes, edges, { nodesep: 25, ranksep: 60 });
 }
 
 // ── Path tracing helper ───────────────────────────────────────────────────────
@@ -928,6 +937,7 @@ interface DiffGraphCanvasInnerProps {
   baseNodes: Node[];
   baseEdges: Edge[];
   hideUnchanged: boolean;
+  isCompact: boolean;
   fitKey: number;
   externalViewport: Viewport | null;
   onViewportChange: (vp: Viewport) => void;
@@ -941,6 +951,7 @@ function DiffGraphCanvasInner({
   baseNodes,
   baseEdges,
   hideUnchanged,
+  isCompact,
   fitKey,
   externalViewport,
   onViewportChange,
@@ -955,8 +966,10 @@ function DiffGraphCanvasInner({
   const [pinnedEdgeId, setPinnedEdgeId]       = useState<string | null>(null);
 
   const layoutedNodes = useMemo(
-    () => applyLayout(baseNodes, baseEdges),
-    [baseNodes, baseEdges],
+    () => isCompact
+      ? applyCompactLayout(baseNodes, baseEdges)
+      : applyLayout(baseNodes, baseEdges),
+    [baseNodes, baseEdges, isCompact],
   );
 
   const [nodes, setNodes] = useNodesState(layoutedNodes);
@@ -1224,6 +1237,7 @@ export function JourneyDiffGraphModal({
 }: JourneyDiffGraphModalProps) {
   const [viewMode, setViewMode]             = useState<"merged" | "side-by-side">("merged");
   const [hideUnchanged, setHideUnchanged]   = useState(false);
+  const [isCompact, setIsCompact]           = useState(false);
   const [syncViewports, setSyncViewports]   = useState(true);
   const [fitKey, setFitKey]                 = useState(0);
   // navStack holds ALL levels: [ancestors..., current]. It always has at least one entry.
@@ -1594,6 +1608,25 @@ export function JourneyDiffGraphModal({
           Hide unchanged
         </button>
 
+        {/* Compact layout */}
+        <button
+          type="button"
+          onClick={() => setIsCompact((v) => !v)}
+          title={isCompact ? "Switch to normal layout" : "Switch to compact layout"}
+          className={cn(
+            "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1",
+            isCompact
+              ? "bg-sky-600 text-white border-sky-600"
+              : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+          )}
+        >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+          </svg>
+          Compact
+        </button>
+
         {/* Sync viewports (side-by-side only) */}
         {viewMode === "side-by-side" && (
           <button
@@ -1647,6 +1680,7 @@ export function JourneyDiffGraphModal({
               baseNodes={mergedNodes}
               baseEdges={mergedEdges}
               hideUnchanged={hideUnchanged}
+              isCompact={isCompact}
               fitKey={fitKey}
               externalViewport={null}
               onViewportChange={() => {}}
@@ -1666,6 +1700,7 @@ export function JourneyDiffGraphModal({
                   baseNodes={localNodes}
                   baseEdges={localEdges}
                   hideUnchanged={hideUnchanged}
+                  isCompact={isCompact}
                   fitKey={fitKey}
                   externalViewport={leftExternalVP}
                   onViewportChange={handleLeftMove}
@@ -1684,6 +1719,7 @@ export function JourneyDiffGraphModal({
                   baseNodes={remoteNodes}
                   baseEdges={remoteEdges}
                   hideUnchanged={hideUnchanged}
+                  isCompact={isCompact}
                   fitKey={fitKey}
                   externalViewport={rightExternalVP}
                   onViewportChange={handleRightMove}
