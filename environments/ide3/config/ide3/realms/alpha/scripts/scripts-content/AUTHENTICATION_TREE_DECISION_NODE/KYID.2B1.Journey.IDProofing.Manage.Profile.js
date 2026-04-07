@@ -66,6 +66,7 @@ function main() {
     var dateCheck = false;
     var phoneRisk = null;
     var alternateEmailRisk = null;
+    var mailRisk = null
     var exisitingHighRiskOverrideDate = null;
     var exisitingRiskIndicatorDetails = null;
     var exisitingRiskIndicator = null;
@@ -88,6 +89,8 @@ function main() {
         phoneRisk = nodeState.get("phoneRisk");
         alternateEmailRisk =  nodeState.get("alternateEmailRisk");
         assuranceLevel = nodeState.get("assuranceLevel") || "0" ;
+        mailRisk = nodeState.get("mailRisk")
+        var unprocessedFlowName = nodeState.get("flowName");
 
         exisitingHighRiskOverrideDate = nodeState.get("exisitingHighRiskOverrideDate") || null;
         exisitingRiskIndicatorDetails = nodeState.get("exisitingRiskIndicatorDetails") || null;
@@ -104,9 +107,20 @@ function main() {
         logger.debug("userVerificationStatus is :: " + userVerificationStatus + "verificationStatus is :: " + verificationStatus)
 
         response = openidm.query("managed/alpha_kyid_ridp_config", {"_queryFilter" : "true"});
-        logger.error("response from query :: " + JSON.stringify(response))
-        highRisk = response.result[0].ridp_first_time_login_high_risk;
-        logger.debug("Create Account highRisk flag from query :: " + highRisk)
+        if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "updateprofile"){
+            highRisk = response.result[0].ridp_manage_profile_high_risk;
+            logger.debug("Manage Profile highRisk flag from query :: " + highRisk)
+        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "organdonor"){
+            highRisk = response.result[0].ridp_organ_donor_high_risk;
+            logger.debug("Organ Donor highRisk flag from query :: " + highRisk)
+        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "firstTimeLogin"){
+            highRisk = response.result[0].ridp_first_time_login_high_risk;
+            logger.debug("First Time login highRisk flag from query :: " + highRisk)
+        }else{
+            logger.debug("inside else before " + highRisk)
+            highRisk = false;
+            logger.debug("inside else after" + highRisk)
+        }
 
         var isEqual = (obj1, obj2) => {
           return JSON.stringify(obj1) === JSON.stringify(obj2);
@@ -156,14 +170,18 @@ function main() {
          logger.debug("condition2 is :: " + ((exisitingRiskIndicator && exisitingRiskIndicator.toLowerCase() != "override")) )
          logger.debug("condition3 is :: " + (dateCheck !== true ))
         
-         if(((riskIndicator && riskIndicator.toLowerCase() === "high") || (phoneRisk && phoneRisk.toLowerCase() === "high") || (alternateEmailRisk && alternateEmailRisk.toLowerCase() === "high")) && highRisk && highRisk == true && (exisitingRiskIndicator && exisitingRiskIndicator.toLowerCase() == "override") && riskIndicatorMatch == true && dateCheck == true ){
+         // if(((riskIndicator && riskIndicator.toLowerCase() === "high") || (phoneRisk && phoneRisk.toLowerCase() === "high") || (alternateEmailRisk && alternateEmailRisk.toLowerCase() === "high")) && highRisk && highRisk == true && (exisitingRiskIndicator && exisitingRiskIndicator.toLowerCase() == "override") && riskIndicatorMatch == true && dateCheck == true ){
+         //     highRisk = false;
+         // }
+
+         if(((riskIndicator && riskIndicator.toLowerCase() === "high") || (phoneRisk && phoneRisk.toLowerCase() === "high") || (alternateEmailRisk && alternateEmailRisk.toLowerCase() === "high") || (mailRisk && mailRisk.toLowerCase() === "high")) && highRisk && highRisk == true && (exisitingRiskIndicator && exisitingRiskIndicator.toLowerCase() == "override") && riskIndicatorMatch == true && dateCheck == true ){
              highRisk = false;
          }
 
          logger.debug("highRisk flag2 is :: " + highRisk)
-        var unprocessedFlowName = nodeState.get("flowName");
-        if((unprocessedFlowName.toLowerCase() ==="manageprofile" || unprocessedFlowName.toLowerCase() === "organ") && (riskIndicator && riskIndicator.toLowerCase() === "high") && highRisk){
-            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node");
+
+        if((unprocessedFlowName.toLowerCase() ==="updateprofile" || unprocessedFlowName.toLowerCase() === "organdonor") && (riskIndicator && riskIndicator.toLowerCase() === "high") && highRisk){
+            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node " + unprocessedFlowName);
             reason = "The LexisNexis response contains high risk indicators";
             title = "User identity verification transaction failed due to a high risk transaction has been detected while verifying user's identity.";
             auditLog("KYID-LN-000", `${flowName} - High Risk Transaction`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
@@ -177,7 +195,8 @@ function main() {
             }
             action.goTo("highRiskManageProfile");
         }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() == "firsttimelogin" && (riskIndicator && riskIndicator.toLowerCase() === "high") && highRisk){
-            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node");
+            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node " + unprocessedFlowName);
+            logger.debug("riskIndicator flag2 is :: " + riskIndicator)
             reason = "The LexisNexis response contains high risk indicators";
             title = "User identity verification transaction failed due to a high risk transaction has been detected while verifying user's identity.";
             auditLog("KYID-LN-000", `${flowName} - High Risk Transaction`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
@@ -185,7 +204,6 @@ function main() {
             nodeState.putShared("MCISYNC","false")
             nodeState.putShared("errorMessage","KYID-LN-000")
             nodeState.putShared("patchMFA","true")
-            nodeState.putShared("currentRequestAssuranceLevel","0") 
             if(riskIndicator){
                patchRiskIndicator();
             }
@@ -200,6 +218,7 @@ function main() {
             nodeState.putShared("proofingMethod","-1")
             nodeState.putShared("verificationStatus","notverified")
             nodeState.putShared("errorMessage","KYID-LN-008")
+            nodeState.putShared("currentRequestAssuranceLevel","0") 
             nodeState.putShared("MCISYNC","false")
             action.goTo("assuranceFailed");
         }else if(verificationStatus.toLowerCase() == "notverified"){

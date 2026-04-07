@@ -109,7 +109,9 @@ eventDetails["MFATYPE"] = "Phone";
                    || nodeState.get("journeyNameReporting") === "loginPrerequisite"
                    || nodeState.get("journeyNameReporting") === "ApplicationEnrollment"
                    || nodeState.get("journeyName") === "createAccount"
-                   || nodeState.get("journeyNameReporting") === "RiskBased"){
+                   || nodeState.get("journeyNameReporting") === "RiskBased"
+                   || nodeState.get("journeyNameReporting") === "SelfMFAManagement"
+                   ){
                     eventDetails["action"] = "MFA Performed"
                 }
 
@@ -155,7 +157,7 @@ if(nodeState.get("sessionRefId")){
 }else{
      sessionDetails = {"sessionRefId": ""}
 }
-logger.debug("sessionRefId is " +JSON.stringify(sessionDetails));
+logger.error("sessionRefId is " +JSON.stringify(sessionDetails));
 var transactionId = requestHeaders.get("X-ForgeRock-TransactionId")[0];
 auditLib.auditLogger("VER004",sessionDetails,"Mobile OTP Validation", eventDetails, requesterUserId || userId, userId, transactionId, userEmail , eventDetails.applicationName, sessionDetails.sessionRefId, requestHeaders);
 

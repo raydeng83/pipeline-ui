@@ -8,7 +8,7 @@
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
   "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
-  "lastModifiedDate": 1774941067820,
+  "lastModifiedDate": 1775539991360,
   "name": "KYID.2B1.Journey.IDProofing.Recovery.Decision",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.Recovery.Decision.js"

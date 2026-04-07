@@ -2304,7 +2304,7 @@ function invokeKOGAPI(payload) {
                         return response.response
                     } else if (response.response.ResponseStatus === 1) {
                         logger.error("[KOG-STATUS-API] FAILED - ResponseStatus=1, msg=" + (response.response.ResponseMessage || "") + ", request=" + JSON.stringify(requestBody))
-                        return null
+                        return response.response
                     } else {
                         logger.error("[KOG-STATUS-API] UNEXPECTED ResponseStatus=" + response.response.ResponseStatus + ", response=" + JSON.stringify(response))
                         throw JSON.stringify(response)
@@ -2601,6 +2601,17 @@ function getViewAccountInformation(queryFilter) {
                     "transactionId": "",
                      "methodName":""
                 }
+                var highRiskMFATemplate = {
+                    "_id": "",
+                    "methodType": {},
+                    "methodDetails": "",
+                    // "UsageContexts": "",
+                    "risk": "",
+                    "transactionDate": "",
+                    // "status": "",
+                    "riskIndicators": [],
+                    "transactionId": ""
+                }
                     if (!(mfaMethods[i].MFAMethod.toUpperCase() == "EMAIL") && mfaMethods[i].MFAStatus.toLowerCase() == "active") {
                         let methodUsage = ["MFA"]
                         if (mfaMethods[i].isRecoveryOnly) {
@@ -2621,7 +2632,7 @@ function getViewAccountInformation(queryFilter) {
                             "UsageContexts": methodUsage,
                             "risk": ""
                         }
-                        if (mfaMethods[i].risk && mfaMethods[i].risk.toLowerCase() == "high") {
+                        if (mfaMethods[i].risk && (mfaMethods[i].risk.toLowerCase() == "high" || mfaMethods[i].risk.toLowerCase() == "highrisk") ) {
                             accountRecoveryAndMFAItem.risk = "High Risk"
                             accountRecoveryAndMFAItem.UsageContexts.push("High Risk")
                             highRiskMFATemplate._id = mfaMethods[i]._id,
@@ -2663,6 +2674,11 @@ function getViewAccountInformation(queryFilter) {
 
                         
                     } else if (mfaMethods[i].MFAStatus.toLowerCase() == "highrisk") {
+                      if (mfaMethods[i].MFAMethod === "SECONDARY_EMAIL") {
+                            mfaMethodName = "Alternate email";
+                        } else {
+                            mfaMethodName = mfaMethods[i].MFAMethod;
+                        }
                         // accountRecoveryAndMFAItem.risk = "High Risk With Override"
                         highRiskMFATemplate._id = mfaMethods[i]._id,
                             highRiskMFATemplate.methodType = {
@@ -4197,6 +4213,10 @@ function overrideMFA(input) {
                   const updateMFAMethod = openidm.patch("managed/alpha_kyid_mfa_methods/" + val._id, null, jsonArray2);
                 })
               }
+
+              // Upadte User Email
+
+              // Update KOG
             }
 
             returnPayload = {

@@ -25,7 +25,6 @@
     "$schema": "http://forgerock.org/json-schema#",
     "description": "This managed object maintains the remote identity proofing request object specifications.",
     "icon": "fa-database",
-    "mat-icon": "",
     "order": [
       "requestedUserId",
       "requesterUserId",
@@ -47,9 +46,19 @@
       "updatedByID",
       "userPrerequisite",
       "userRequest",
-      "proofingMethod"
+      "proofingMethod",
+      "failureReason",
+      "applicationName",
+      "roleName"
     ],
     "properties": {
+      "applicationName": {
+        "searchable": false,
+        "title": "Application Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
       "businessAppName": {
         "searchable": false,
         "title": "Business Application Name",
@@ -112,6 +121,13 @@
         "userEditable": false,
         "viewable": true
       },
+      "failureReason": {
+        "searchable": false,
+        "title": "Failure Reason",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
       "proofingMethod": {
         "searchable": false,
         "title": "Proofing Method",
@@ -161,6 +177,13 @@
         "title": "Requester User ID",
         "type": "string",
         "userEditable": false,
+        "viewable": true
+      },
+      "roleName": {
+        "searchable": false,
+        "title": "Role Name",
+        "type": "string",
+        "userEditable": true,
         "viewable": true
       },
       "status": {

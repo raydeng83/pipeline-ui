@@ -290,9 +290,9 @@ function createOrUpdateSecondaryEmailMFA(usrKOGID, verifiedAlternateEmail,purpos
     try {
         logger.debug("Checking existing SECONDARY_EMAIL MFA for KOGID: " + usrKOGID);
 
-        var queryResp = openidm.query("managed/alpha_kyid_mfa_methods", {
-            "_queryFilter": 'KOGId eq "' + usrKOGID + '" AND MFAMethod eq "SECONDARY_EMAIL"'
-        }, ["*"]);
+        //var queryResp = openidm.query("managed/alpha_kyid_mfa_methods", {"_queryFilter": 'KOGId eq "' + usrKOGID + '" AND MFAMethod eq "SECONDARY_EMAIL"'}, ["*"]);
+
+        var queryResp = openidm.query("managed/alpha_kyid_mfa_methods",{ "_queryFilter": 'KOGId eq "' + usrKOGID + '" AND MFAMethod eq "SECONDARY_EMAIL" AND MFAStatus eq "ACTIVE"'},["*"]);
 
         var foundActive = false;
 

@@ -1,6 +1,6 @@
 {
   "_id": "kyid_2B1_MasterLogin",
-  "_rev": "-1633922968",
+  "_rev": "-1636147944",
   "enabled": true,
   "entryNodeId": "42247cf5-4a25-4da6-bb2e-506dda913ade",
   "identityResource": "managed/alpha_user",
@@ -189,8 +189,8 @@
       "displayName": "Script:RedirectOrLogin",
       "nodeType": "ScriptedDecisionNode",
       "version": "1.0",
-      "x": 1179,
-      "y": 1008.3333282470703
+      "x": 1289,
+      "y": 1015.3333282470703
     },
     "9e26bb7c-afb6-4bd8-8ed4-8a47e9700116": {
       "connections": {
@@ -222,8 +222,8 @@
       "displayName": "Configuration Provider",
       "nodeType": "ConfigProviderNode",
       "version": "1.0",
-      "x": 1650,
-      "y": 809.3333282470703
+      "x": 1712,
+      "y": 733.3333282470703
     },
     "a3739131-a854-46b4-85ab-5567acb93487": {
       "connections": {

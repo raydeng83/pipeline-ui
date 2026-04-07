@@ -849,6 +849,66 @@ function patchUserIdentity(selectedUser, verifiedLexId) {
                     "value": dateTime
                     }
                     jsonArray.push(jsonObj) 
+
+
+                //referenceNumber
+                var jsonObj = {
+                    "operation": "replace",
+                    "field": "referenceNumber",
+                    "value": nodeState.get("ridpReferenceID") || ""
+                    }
+                    jsonArray.push(jsonObj) 
+
+                 //applicationName
+                    var jsonObj = {
+                        "operation": "replace",
+                        "field": "applicationName",
+                        "value":  nodeState.get("appName") || systemEnv.getProperty("esv.kyid.portal.name")
+                        }
+                        jsonArray.push(jsonObj) 
+    
+                 //roleName
+                    var jsonObj = {
+                        "operation": "replace",
+                        "field": "roleName",
+                        "value": nodeState.get("roleName") || ""
+                        }
+                        jsonArray.push(jsonObj) 
+
+                //lexisnexisResponse
+                if(nodeState.get("lexisnexisResponse") && nodeState.get("lexisnexisResponse")!= null){
+                    var jsonObj = {
+                        "operation": "replace",
+                        "field": "lexisnexisResponse",
+                        "value": JSON.stringify(nodeState.get("lexisnexisResponse").userAttributes)
+                        }
+                        jsonArray.push(jsonObj) 
+                }else{
+                     var jsonObj = {
+                        "operation": "replace",
+                        "field": "lexisnexisResponse",
+                        "value": ""
+                        }
+                        jsonArray.push(jsonObj) 
+                }
+    
+                //lexisnexisRequest
+                if(nodeState.get("userInfoJSON1") && nodeState.get("userInfoJSON1")!= null){
+                    var jsonObj = {
+                        "operation": "replace",
+                        "field": "lexisnexisRequest",
+                        "value": JSON.stringify(nodeState.get("userInfoJSON1"))
+                        }
+                        jsonArray.push(jsonObj) 
+                }else{
+                     var jsonObj = {
+                        "operation": "replace",
+                        "field": "lexisnexisResponse",
+                        "value": ""
+                        }
+                        jsonArray.push(jsonObj) 
+                }
+                
             
                  
                 //assuranceLevel

@@ -123,11 +123,13 @@ function handleUserResponses() {
                 nodeState.putShared("kbaVerificationStatus", parsedResponse.status);
                 if(flowName && (flowName.toLowerCase() === "updateprofile" || flowName.toLowerCase() === "organdonor" || flowName.toLowerCase() === "appenroll" || flowName.toLowerCase() === "forgotpassword"  || flowName.toLowerCase() === "mfarecovery" || flowName.toLowerCase() === "userverification") && nodeState.get("nextDayRetry") && nodeState.get("nextDayRetry") == "true"){
                     nodeState.putShared("successVerificationAttempts","0")
-                    if(nodeState.get("ishelpdesk") == true){
-                        patchRetryLimitHelpdesk();
-                    }else{
-                        patchRetryLimit();
-                    }  
+                    // if(nodeState.get("ishelpdesk") == true){
+                    //     patchRetryLimitHelpdesk();
+                    // }else{
+                    //     patchRetryLimit();
+                    // }  
+                    patchRetryLimitHelpdesk();
+                    patchRetryLimit();
                 }
                 action.goTo("kbaSuccess");
             }else if(parsedResponse && parsedResponse.status && parsedResponse.status.toLowerCase() === "failed"){

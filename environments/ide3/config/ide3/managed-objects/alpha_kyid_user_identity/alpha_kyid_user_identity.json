@@ -100,7 +100,12 @@
       "riskIndicatorDetails",
       "highRiskOverrideDate",
       "overrideReason",
-      "overrideComment"
+      "overrideComment",
+      "referenceNumber",
+      "applicationName",
+      "roleName",
+      "lexisnexisRequest",
+      "lexisnexisResponse"
     ],
     "properties": {
       "KOGID": {
@@ -174,6 +179,13 @@
       "addressLine2": {
         "searchable": false,
         "title": "Address Line #2",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "applicationName": {
+        "searchable": false,
+        "title": "Application Name",
         "type": "string",
         "userEditable": true,
         "viewable": true
@@ -455,6 +467,20 @@
         "userEditable": false,
         "viewable": true
       },
+      "lexisnexisRequest": {
+        "searchable": false,
+        "title": "LexisNexis Request",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "lexisnexisResponse": {
+        "searchable": false,
+        "title": "LexisNexis Response",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
       "mciKogIDs": {
         "description": null,
         "isVirtual": false,
@@ -596,6 +622,16 @@
         "userEditable": true,
         "viewable": true
       },
+      "referenceNumber": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "RIDP Reference Number",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
       "riskIndicator": {
         "searchable": false,
         "title": "Risk Indicator ",
@@ -634,6 +670,13 @@
         "title": "Risk Indicator Details",
         "type": "array",
         "userEditable": false,
+        "viewable": true
+      },
+      "roleName": {
+        "searchable": false,
+        "title": "Role Name",
+        "type": "string",
+        "userEditable": true,
         "viewable": true
       },
       "sn": {

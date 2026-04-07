@@ -514,7 +514,10 @@ function createMFAObject(usrKOGID, method, usrMfaValue, status, isRecoveryOnly) 
             failureReason = nodeState.get("alternateEmailFailureReason") || "" ;
             auditLog("SECONDARYEMAIL_CREATEACCOUNT_SUCCESS", "SECONDARYEMAIL OTP Success Create Account - MFA Reporting",method)
         }
-        
+
+        if(risk && risk.toLowerCase() === "high"){
+            status = "highrisk"
+        }
         // var mfajsonObj = {
         //        'KOGId': usrKOGID,
         //        'MFAMethod': method,

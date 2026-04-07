@@ -42,6 +42,16 @@ var nodeLogger = {
 
 try
 {
+    //Set the sessiondetails for audit logging
+    var sessionRefId = {
+                sessionRefId: "",
+                city: "",
+                state: "",
+                country: ""
+            }
+    sessionRefId.sessionRefId = generateGUID();
+    nodeState.putShared("sessionRefId", JSON.stringify(sessionRefId));
+    
     var selectedMFAOption=nodeState.get("selectedMethod");
     logger.debug("selectedMFAOption is :: " + selectedMFAOption)
     nodeState.putShared("journeyName","accountRecovery")
@@ -66,4 +76,12 @@ catch(e){
     
 }
 
-
+// Generate a random GUID
+function generateGUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+        .replace(/[xy]/g, function (c) {
+            const r = Math.random() * 16 | 0,
+                value = c == 'x' ? r : (r & 0x3 | 0x8);
+            return value.toString(16);
+        });
+}

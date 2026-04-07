@@ -106,6 +106,7 @@ function handleUserResponses() {
         var title = null;
         var emailsWithVerifiedLexID = JSON.parse(nodeState.get("emailsWithVerifiedLexID"));
         var ListOfPrimaryEmails = nodeState.get("emailsWithVerifiedLexID") ? JSON.parse(nodeState.get("emailsWithVerifiedLexID")) : []
+        var verificationStatus = nodeState.get("verificationStatus");
         
         nodeLogger.debug("MCI Search API Call Response: " + responseMCISearchApiCall);
         isResponseValidResult = isResponseValid(responseMCISearchApiCall)
@@ -245,10 +246,19 @@ function handleUserResponses() {
                             auditLog("KYID-LN-001", `${flowName} - Input NOT matching with the verified identity`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                             auditLog("KYID-LN-001", `User identity verification failed as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null, true);
                             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + " LexID not matched with logged in user with KOGID "+ usrKOGID + "::" + "KYID-LN-001 - Input NOT matching verified identity");                           
-                            nodeState.putShared("verifiedLexId","")
-                            nodeState.putShared("proofingMethod","-1")
-                            nodeState.putShared("MCISYNC","false")
-                            nodeState.putShared("errorMessage","KYID-LN-005")
+                            // nodeState.putShared("verifiedLexId","")
+                            // nodeState.putShared("proofingMethod","-1")
+                            // nodeState.putShared("MCISYNC","false")
+                            // nodeState.putShared("errorMessage","KYID-LN-005") // commented for MCI SYNC changes 
+                            if((verificationStatus.toLowerCase() === "fullyverified" || verificationStatus.toLowerCase() === "partiallyverified")){
+                                nodeState.putShared("MCISYNC","true")
+                            }else{
+                                nodeState.putShared("MCISYNC","false")
+                                nodeState.putShared("errorMessage","KYID-LN-005")
+                                nodeState.putShared("verifiedLexId","")
+                                nodeState.putShared("proofingMethod","-1")
+                            }
+                            
                             action.goTo("NotMatchingWLoggedUser");
                         }else if(terminatedArray.length>0 && terminatedArray.length === mciKogIDs.length){
                             reason = "KYID or LexID does not match with the response provided LexisNexis LexID";

@@ -213,6 +213,7 @@ function handleUserResponses() {
                             title = "User identity verification is successful."
                             auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                             auditLog("KYID-LN-007", `Identity Proofing is successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null);
+                            nodeState.putShared("proofingMethod","4")
                             action.goTo("exactMatch"); 
                         }else if(matchedWithLoggedUser.length == 0 || inputNoMatch.length>0){
                             // Account exist in ping does not match with logged in user error out
@@ -232,6 +233,7 @@ function handleUserResponses() {
                             nodeState.putShared("userSelection",null)
                             reason = "The user personal information provided to LexisNexis is verified";
                             title = "User identity verification is successful."
+                            nodeState.putShared("proofingMethod","4")
                             auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                             auditLog("KYID-LN-007", `Identity Proofing is successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null);
                             action.goTo("exactMatch");
@@ -281,6 +283,7 @@ function handleUserResponses() {
                         title = "User identity verification is successful."
                         auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                         auditLog("KYID-LN-007", `Identity Proofing is successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null);
+                        nodeState.putShared("proofingMethod","4")
                         action.goTo("exactMatch");
                     }else if (filteredSearchAccountArray && filteredSearchAccountArray.length == 1 && nodeState.get("accountStatus") && nodeState.get("accountStatus") === "inactive"){
                         reason = "KYID or LexID matches with inactive account (email) associated with the verified identity - LexID";

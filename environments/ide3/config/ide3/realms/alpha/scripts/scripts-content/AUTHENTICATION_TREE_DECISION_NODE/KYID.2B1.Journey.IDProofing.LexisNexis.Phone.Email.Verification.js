@@ -238,6 +238,7 @@ function handleUserResponses(flowName) {
                        nodeState.putShared("flowContext", "emailAge")
                           text = "Email Verification"
                     }
+                    auditLog("KYID-LN-007", `${flowName} success as part of ${text}`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                     auditLog("KYID-LN-007", `${flowName} success as part of ${text}`, false, transactionid, flowName, mail, null, null, null, null, true);
                     action.goTo("success");
                 }
@@ -523,7 +524,7 @@ function patchHighRisk() {
                 {
                     "operation": "replace",
                     "field": "/MFAStatus",
-                    "value": "high"
+                    "value": "highrisk"
                 },
                 {
                     "operation": "replace",

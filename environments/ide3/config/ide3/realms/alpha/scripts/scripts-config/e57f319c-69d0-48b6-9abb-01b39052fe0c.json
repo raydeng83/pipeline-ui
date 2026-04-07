@@ -7,8 +7,8 @@
   "description": null,
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
-  "lastModifiedBy": "id=81073c37-7e92-4460-a48e-7435a1c0a371,ou=user,ou=am-config",
-  "lastModifiedDate": 1775019397298,
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1775477130334,
   "name": "KYID.2B1.Journey.FirstTimeLogin.AddMFAMethods.RIDP",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.FirstTimeLogin.AddMFAMethods.RIDP.js"

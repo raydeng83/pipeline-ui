@@ -14,6 +14,8 @@ if(nodeState.get("journeyName") === "updateprofile"){
     nodeState.putShared("context","manageprofile")
     action.goTo("updateprofile");
 }else if(nodeState.get("journeyName") && nodeState.get("journeyName").toLowerCase() === "forgotpassword" && nodeState.get("Context") === "id_verification"){
+    nodeState.putShared("ishelpdesk","true")
+    nodeState.putShared("helpdesk","true")
     action.goTo("id_verification");
 }else if(nodeState.get("appEnrollRIDPMethod") === "LexisNexis"){
     action.goTo("appEnroll");

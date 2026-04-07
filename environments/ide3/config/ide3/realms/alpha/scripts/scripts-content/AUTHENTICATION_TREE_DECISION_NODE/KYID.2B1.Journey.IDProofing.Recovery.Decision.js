@@ -221,7 +221,12 @@ function main() {
                                 title = "User identity verification transaction failed due to a high risk transaction has been detected while verifying user's identity"
                                 auditLog("KYID-LN-000", `${flowName} - High Risk Transaction`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                                 auditLog("KYID-LN-000", `User identity verification failed as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null, true);
-                                action.goTo("highRiskSoftRemove");
+                                nodeState.putShared("MCISYNC","false")
+                                nodeState.putShared("verifiedLexId","")
+                                nodeState.putShared("proofingMethod","-1")
+                                nodeState.putShared("MCISYNC","false")
+                                nodeState.putShared("errorMessage","KYID-LN-000")
+                                action.goTo("highRisk");
                             }else{
                                 nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "No High Risk/Terminated accounts found in Ping for verified LexID "+ verifiedLexId + "::" + "Proceeding to Update Profile Node");
                                 searchAccountArray.forEach(searchAccountArrayMail => {
@@ -248,13 +253,12 @@ function main() {
                                 });
 
                                 nodeState.putShared("emailsWithVerifiedLexID",JSON.stringify(emailsWithVerifiedLexID));
+                                filteredSearchAccountArray.push(mail);
+                                nodeState.putShared("filteredSearchAccountArray", JSON.stringify(filteredSearchAccountArray))
+                                nodeState.putShared("accountStatus", "active")
+                                action.goTo("lexMatch");
                             }
                         }
-                        
-                       filteredSearchAccountArray.push(mail);
-                       nodeState.putShared("filteredSearchAccountArray", JSON.stringify(filteredSearchAccountArray))
-                       nodeState.putShared("accountStatus", "active")
-                       action.goTo("lexMatch");
                     }else if(loggedInUserLexId !== verifiedLexId){
                         nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "verified LexID not matching with  logged in user Lexid with KOGID "+ usrKOGID + "::" + "KYID-LN-001 - Input NOT matching verified identity");   
                         reason = "KYID or LexID does not match with the response provided LexisNexis LexID";
@@ -284,7 +288,12 @@ function main() {
                             title = "User identity verification transaction failed due to a high risk transaction has been detected while verifying user's identity"
                             auditLog("KYID-LN-000", `${flowName} - High Risk Transaction`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
                             auditLog("KYID-LN-000", `User identity verification failed as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null, true);
-                            action.goTo("highRiskSoftRemove");
+                            nodeState.putShared("MCISYNC","false")
+                            nodeState.putShared("verifiedLexId","")
+                            nodeState.putShared("proofingMethod","-1")
+                            nodeState.putShared("MCISYNC","false")
+                            nodeState.putShared("errorMessage","KYID-LN-000")
+                            action.goTo("highRisk");
                         }else{
                             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "No High Risk/Terminated accounts found in Ping for verified LexID "+ verifiedLexId + "::" + "Proceeding to Update Profile Node");
                             searchAccountArray.forEach(searchAccountArrayMail => {

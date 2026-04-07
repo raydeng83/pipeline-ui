@@ -215,6 +215,7 @@ function getUserPrereqDetails(userPrereqId) {
             nodeState.putShared("_id",response.result[0].requestedUserAccountId);
             nodeState.putShared("userPrereqStatus",response.result[0].status)
             nodeState.putShared("userPrereqRoleId",response.result[0].associatedRoleIds)
+            nodeState.putShared("enrollmentRequestID",response.result[0].enrollmentRequestId)
             if(response.result[0].roleContext[0] && response.result[0].roleContext[0].applicationId && response.result[0].roleContext[0].roleId){
                 nodeState.putShared("appId",response.result[0].roleContext[0].applicationId)
                 var roleName = getRoleNameFromRoleId(response.result[0].roleContext[0].roleId)

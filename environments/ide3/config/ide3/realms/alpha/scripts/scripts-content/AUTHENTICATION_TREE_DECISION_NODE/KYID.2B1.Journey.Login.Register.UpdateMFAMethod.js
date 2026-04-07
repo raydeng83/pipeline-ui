@@ -711,8 +711,8 @@ function createMFAObject(usrKOGID, method, usrMfaValue, status, isRecoveryOnly,p
             'riskReasonDescription': riskReasonDescription || "",
             'riskBand,': riskBand || "",
             'failureReason': failureReason || "",
-            'riskIndicator': emailPhoneRiskIndicator.riskIndicator || [],
-            'purpose': purpose    //MFA Reporting 1
+            'riskIndicator': emailPhoneRiskIndicator.riskIndicator || []
+            //'purpose': purpose    //MFA Reporting 1
         };
       logger.debug("mfajsonObj is :: " + JSON.stringify(mfajsonObj))
       return openidm.create("managed/alpha_kyid_mfa_methods", null, mfajsonObj);

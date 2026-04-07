@@ -132,7 +132,7 @@ if(nodeState.get("primary_secondary_email") == true && nodeState.get("primary_se
 logger.debug("primaryEmailComplete : "+nodeState.get("primaryEmailComplete"));
 if(nodeState.get("primaryEmailComplete") === true || (nodeState.get("resend_alternate_mail") === true && nodeState.get("resend_alternate_mail") != null)){
     logger.debug("inside primaryEmailSent true")
-    var email = nodeState.get("alternatemail");
+    var email = nodeState.get("alternateEmail") || nodeState.get("alternatemail");
     logger.debug("email 1 : "+email);
     var hotp = nodeState.get("oneTimePassword");  
     logger.debug("hotp : "+hotp);

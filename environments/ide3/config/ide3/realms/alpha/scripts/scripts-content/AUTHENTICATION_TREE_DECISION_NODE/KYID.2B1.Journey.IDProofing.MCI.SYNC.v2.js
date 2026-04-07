@@ -95,6 +95,7 @@ function updateUserInfo(collectedUserInfo, userAttributes) {
         var collectedUserInfo = collectedUserInfo || {};
         var userAttributes = userAttributes || [];
         var UpdatedCollectedUserInfo = {};
+        var UpdatedCollectedUserInfoNoSSN = {}
 
         if(userAttributes.length>0){
             var attrMap = {};
@@ -190,7 +191,7 @@ logger.debug("inside requestCallbacks")
             callbacksBuilder.textOutputCallback(0, JSON.stringify(obj));
 
              // logger.debug("userAttributesForTransaction to sync is " + JSON.stringify( nodeState.get("userAttributesForTransaction")))
-             // logger.debug("obj to sync is " + JSON.stringify(obj))
+              logger.debug("obj to sync is " + JSON.stringify(obj))
             callbacksBuilder.textInputCallback("MCI SYNC");
             callbacksBuilder.confirmationCallback(0, ["next"], 0);
         //}

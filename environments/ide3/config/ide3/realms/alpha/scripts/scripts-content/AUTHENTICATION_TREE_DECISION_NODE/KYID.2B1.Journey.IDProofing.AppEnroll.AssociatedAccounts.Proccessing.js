@@ -195,7 +195,7 @@ function main() {
                 reason = "The user personal information provided to LexisNexis is verified";
                 title = "User identity verification is successful."
                 auditLog("KYID-LN-007", `User identity verification successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null, true);
-                auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
+                auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfoJSON, lexisnexisResponse, reason, title);
                 action.goTo("patchPreReq")
             }
             
@@ -408,7 +408,7 @@ function handleUserResponses(pingAccounts,accessArray,roleId, appID) {
                     reason = "The user personal information provided to LexisNexis is verified";
                     title = "User identity verification is successful."
                     auditLog("KYID-LN-007", `User identity verification successful as part of ${flowName}`, false, transactionid, flowName, mail, null, null, null, null, true);
-                    auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
+                    auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfoJSON, lexisnexisResponse, reason, title);
                     action.goTo("patchPreReq")
                 }
             }else{
