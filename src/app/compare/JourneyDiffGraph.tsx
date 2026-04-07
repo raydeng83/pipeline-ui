@@ -350,19 +350,19 @@ function PageGroupDiffNodeComponent({ data }: NodeProps) {
 
   function borderBg(): string {
     if (d.diffStatus === "modified") {
-      if (d.modifiedReason === "script")     return "border-orange-400 bg-orange-50/60";
-      if (d.modifiedReason === "subjourney") return "border-violet-400 bg-violet-50/60";
-      return "border-amber-400 bg-amber-50/60";
+      if (d.modifiedReason === "script")     return "border-orange-400 bg-violet-50/60 border-dashed";
+      if (d.modifiedReason === "subjourney") return "border-violet-400 bg-violet-50/60 border-dashed";
+      return "border-amber-400 bg-violet-50/60 border-dashed";
     }
-    if (d.diffStatus === "added")   return "border-emerald-400 bg-emerald-50/60";
-    if (d.diffStatus === "removed") return "border-red-400 bg-red-50/60 opacity-70";
-    return "border-violet-300 bg-violet-50/60";
+    if (d.diffStatus === "added")   return "border-emerald-400 bg-violet-50/60 border-dashed";
+    if (d.diffStatus === "removed") return "border-red-400 bg-violet-50/60 opacity-70 border-dashed";
+    return "border-violet-300 bg-violet-50/60"; // unchanged: solid
   }
 
   return (
     <div
       className={cn(
-        "border-2 border-dashed rounded-xl transition-all cursor-pointer",
+        "border-2 rounded-xl transition-all cursor-pointer",
         borderBg(),
         d.isSearchMatch && "ring-2 ring-amber-400 ring-offset-1",
       )}

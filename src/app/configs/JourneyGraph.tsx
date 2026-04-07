@@ -173,7 +173,7 @@ function PageGroupNodeComponent({ data }: NodeProps) {
   return (
     <div
       className={cn(
-        "border-2 border-dashed rounded-xl transition-all cursor-pointer active:cursor-grabbing",
+        "border-2 rounded-xl transition-all cursor-pointer active:cursor-grabbing",
         d.isSelected    ? "border-violet-500 bg-violet-50 ring-2 ring-violet-300" :
         d.isSearchMatch ? "border-amber-400  bg-amber-50  ring-2 ring-amber-200" :
                           "border-violet-300 bg-violet-50/60"
@@ -412,7 +412,7 @@ function Legend() {
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-blue-500 inline-block" /><span>Hover edge</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-violet-500 inline-block" /><span>Pinned edge</span></div>
       <div className="flex items-center gap-1.5">
-        <span className="w-4 h-3.5 border-2 border-dashed border-violet-400 rounded inline-block" />
+        <span className="w-4 h-3.5 border-2 border-violet-400 rounded inline-block" />
         <span>Page node</span>
       </div>
       <p className="pt-1 border-t border-slate-100 text-slate-400">Click node → trace path</p>
