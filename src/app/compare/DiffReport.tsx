@@ -629,6 +629,7 @@ interface ScopeGroup {
   added: number;
   modified: number;
   removed: number;
+  unchanged: number;
 }
 
 function extractScope(relativePath: string): string {
@@ -642,7 +643,6 @@ function extractScope(relativePath: string): string {
 function groupByScope(files: FileDiff[]): ScopeGroup[] {
   const map = new Map<string, FileDiff[]>();
   for (const f of files) {
-    if (f.status === "unchanged") continue;
     const scope = extractScope(f.relativePath);
     if (!map.has(scope)) map.set(scope, []);
     map.get(scope)!.push(f);
@@ -653,9 +653,10 @@ function groupByScope(files: FileDiff[]): ScopeGroup[] {
       scope,
       label: SCOPE_LABELS[scope] ?? scope.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       files: scopeFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath)),
-      added: scopeFiles.filter((f) => f.status === "added").length,
-      modified: scopeFiles.filter((f) => f.status === "modified").length,
-      removed: scopeFiles.filter((f) => f.status === "removed").length,
+      added:     scopeFiles.filter((f) => f.status === "added").length,
+      modified:  scopeFiles.filter((f) => f.status === "modified").length,
+      removed:   scopeFiles.filter((f) => f.status === "removed").length,
+      unchanged: scopeFiles.filter((f) => f.status === "unchanged").length,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 }
@@ -701,6 +702,7 @@ function ScopeSection({
   targetLabel: string;
   forceOpen?: boolean;
 }) {
+  const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
 
   // React to parent expand/collapse all
@@ -713,16 +715,19 @@ function ScopeSection({
   const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
 
   const modified = group.files.filter((f) => f.status === "modified");
-  const added = group.files.filter((f) => f.status === "added");
-  const removed = group.files.filter((f) => f.status === "removed");
+  const added    = group.files.filter((f) => f.status === "added");
+  const removed  = group.files.filter((f) => f.status === "removed");
 
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden">
+    <div className={cn("border rounded-lg overflow-hidden", hasChanges ? "border-slate-200" : "border-slate-100")}>
       <div
-        className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+        className={cn(
+          "flex items-center gap-2 px-4 py-2.5 transition-colors",
+          hasChanges ? "bg-slate-50 cursor-pointer hover:bg-slate-100" : "bg-slate-50/50 cursor-pointer hover:bg-slate-100/60",
+        )}
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="text-sm font-semibold text-slate-700 flex-1">{group.label}</span>
+        <span className={cn("text-sm font-semibold flex-1", hasChanges ? "text-slate-700" : "text-slate-400")}>{group.label}</span>
 
         <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
           {group.modified > 0 && (
@@ -734,6 +739,9 @@ function ScopeSection({
           {group.removed > 0 && (
             <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{group.removed} removed</span>
           )}
+          {!hasChanges && (
+            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-400">no differences</span>
+          )}
           {totalLines > 0 && (
             <span className="text-slate-400">({totalLines} lines)</span>
           )}
@@ -744,9 +752,17 @@ function ScopeSection({
 
       {open && (
         <div className="p-3 space-y-3 bg-white">
-          <StatusGroup label="Modified" files={modified} color="text-amber-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-          <StatusGroup label="Added" files={added} color="text-emerald-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-          <StatusGroup label="Removed" files={removed} color="text-red-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+          {hasChanges ? (
+            <>
+              <StatusGroup label="Modified" files={modified} color="text-amber-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+              <StatusGroup label="Added"    files={added}    color="text-emerald-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+              <StatusGroup label="Removed"  files={removed}  color="text-red-600"    sourceLabel={sourceLabel} targetLabel={targetLabel} />
+            </>
+          ) : (
+            <p className="text-xs text-slate-400 text-center py-2">
+              {group.unchanged} file{group.unchanged !== 1 ? "s" : ""} compared — no differences found.
+            </p>
+          )}
         </div>
       )}
     </div>
