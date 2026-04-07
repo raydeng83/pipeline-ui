@@ -840,6 +840,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           nodeInfos={node.nodes}
           sourceLabel={sourceLabel}
           targetLabel={targetLabel}
+          files={files}
           onClose={() => setGraphOpen(false)}
         />
       )}

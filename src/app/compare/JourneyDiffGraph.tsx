@@ -32,7 +32,7 @@ import {
   DIFF_START_SIZE,
   diffNodeHeight,
 } from "@/lib/journey-diff-graph";
-import type { JourneyNodeInfo } from "@/lib/diff-types";
+import type { FileDiff, JourneyNodeInfo } from "@/lib/diff-types";
 
 // ── Custom node components ────────────────────────────────────────────────────
 
@@ -63,6 +63,17 @@ function statusBadgeLabel(status: DiffStatus): string {
   }
 }
 
+function DiffStatusBadge({ status }: { status?: DiffStatus }) {
+  if (!status) return null;
+  const label = statusBadgeLabel(status);
+  if (!label) return <span className="text-[10px] text-slate-400">unchanged</span>;
+  return (
+    <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded", statusBadgeClass(status))}>
+      {label === "M" ? "modified" : label === "A" ? "added" : "deleted"}
+    </span>
+  );
+}
+
 function JourneyDiffNodeComponent({ data }: NodeProps) {
   const d = data as {
     label: string;
@@ -70,16 +81,19 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
     outcomes: string[];
     diffStatus: DiffStatus;
   };
-  const outcomes  = d.outcomes ?? [];
-  const h         = diffNodeHeight(outcomes.length);
-  const status    = d.diffStatus ?? "unchanged";
+  const outcomes   = d.outcomes ?? [];
+  const h          = diffNodeHeight(outcomes.length);
+  const status     = d.diffStatus ?? "unchanged";
   const badgeLabel = statusBadgeLabel(status);
+  const isInner    = d.nodeType === "InnerTreeEvaluatorNode";
 
   return (
     <div
       className={cn(
         "border rounded-lg shadow-sm overflow-visible relative",
-        statusBorderBg(status),
+        isInner
+          ? "border-amber-300 border-dashed bg-amber-50 cursor-pointer"
+          : statusBorderBg(status),
       )}
       style={{ width: DIFF_NODE_W, height: h }}
     >
@@ -100,6 +114,9 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
       <div className="px-3 pt-2" style={{ paddingRight: outcomes.length > 0 ? 56 : 20 }}>
         <p className="text-[11px] font-medium text-slate-700 leading-snug break-words">{d.label}</p>
         {d.nodeType && <p className="text-[9px] text-slate-400 mt-0.5 truncate">{d.nodeType}</p>}
+        {isInner && (
+          <p className="text-[9px] text-amber-500 mt-0.5 font-medium">⤵ (inner)</p>
+        )}
       </div>
 
       {outcomes.length > 0
@@ -206,6 +223,34 @@ function applyLayout(nodes: Node[], edges: Edge[]): Node[] {
   });
 }
 
+// ── Path tracing helper ───────────────────────────────────────────────────────
+
+function getConnected(nodeId: string, edges: Edge[]) {
+  const ancestors   = new Set<string>();
+  const descendants = new Set<string>();
+  let queue = [nodeId];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    for (const e of edges) {
+      if (e.target === cur && !ancestors.has(e.source)) {
+        ancestors.add(e.source);
+        queue.push(e.source);
+      }
+    }
+  }
+  queue = [nodeId];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    for (const e of edges) {
+      if (e.source === cur && !descendants.has(e.target)) {
+        descendants.add(e.target);
+        queue.push(e.target);
+      }
+    }
+  }
+  return { ancestors, descendants };
+}
+
 // ── Legend ────────────────────────────────────────────────────────────────────
 
 function DiffLegend() {
@@ -216,12 +261,226 @@ function DiffLegend() {
         { label: "Removed",   border: "border-red-400",     bg: "bg-red-50 border-dashed" },
         { label: "Modified",  border: "border-amber-400",   bg: "bg-amber-50" },
         { label: "Unchanged", border: "border-slate-300",   bg: "bg-white" },
+        { label: "Inner",     border: "border-amber-300 border-dashed", bg: "bg-amber-50" },
       ] as const).map(({ label, border, bg }) => (
         <div key={label} className="flex items-center gap-1.5">
           <span className={cn("inline-block w-3.5 h-3.5 rounded border", border, bg)} />
           {label}
         </div>
       ))}
+    </div>
+  );
+}
+
+// ── Script panel content ──────────────────────────────────────────────────────
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function highlightLine(raw: string): string {
+  return escapeHtml(raw).replace(
+    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+    (match) => {
+      let color = "#60a5fa";
+      if (/^"/.test(match)) color = /:$/.test(match) ? "#94a3b8" : "#86efac";
+      else if (/true|false/.test(match)) color = "#fbbf24";
+      else if (/null/.test(match)) color = "#f87171";
+      return `<span style="color:${color}">${match}</span>`;
+    },
+  );
+}
+
+type DiffLineLocal = { type: "added" | "removed" | "context"; content: string };
+
+function clientDiff(aText: string, bText: string): DiffLineLocal[] {
+  const a = aText === "" ? [] : aText.split("\n");
+  const b = bText === "" ? [] : bText.split("\n");
+  const m = a.length, n = b.length;
+  if (m > 2000 || n > 2000) return [{ type: "context", content: "(file too large to diff in browser)" }];
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+  const lines: DiffLineLocal[] = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) { lines.unshift({ type: "context", content: a[i - 1] }); i--; j--; }
+    else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) { lines.unshift({ type: "added", content: b[j - 1] }); j--; }
+    else { lines.unshift({ type: "removed", content: a[i - 1] }); i--; }
+  }
+  return lines;
+}
+
+function InlineDiffView({ lines }: { lines: DiffLineLocal[] }) {
+  const MAX = 300;
+  const visible = lines.slice(0, MAX);
+  return (
+    <div className="overflow-x-auto overflow-y-auto bg-slate-950 text-[10px] font-mono leading-5 max-h-64">
+      <table className="min-w-full border-collapse">
+        <tbody>
+          {visible.map((l, i) => {
+            const bg   = l.type === "added" ? "bg-emerald-950" : l.type === "removed" ? "bg-red-950" : "";
+            const text = l.type === "added" ? "text-emerald-300" : l.type === "removed" ? "text-red-300" : "text-slate-400";
+            const pfx  = l.type === "added" ? "+" : l.type === "removed" ? "-" : " ";
+            const pfxColor = l.type === "added" ? "text-emerald-400" : l.type === "removed" ? "text-red-400" : "text-slate-600";
+            return (
+              <tr key={i} className={bg}>
+                <td className={cn("px-1 py-0 select-none w-4", pfxColor)}>{pfx}</td>
+                <td
+                  className={cn("px-2 py-0 whitespace-pre", text)}
+                  dangerouslySetInnerHTML={{ __html: highlightLine(l.content) }}
+                />
+              </tr>
+            );
+          })}
+          {lines.length > MAX && (
+            <tr>
+              <td colSpan={2} className="text-center text-slate-500 py-1 text-[9px]">
+                …{lines.length - MAX} more lines
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ScriptPanelContent({
+  nodeId,
+  files,
+}: {
+  nodeId?: string | null;
+  nodeType?: string;
+  journeyName?: string;
+  files: FileDiff[];
+}) {
+  if (!nodeId) return <p className="px-3 py-2 text-xs text-slate-400">No node selected.</p>;
+
+  // Find node config file
+  const nodeConfigFile = files.find(
+    (f) => f.relativePath.includes(`/${nodeId}.json`) && f.relativePath.includes("/nodes/"),
+  );
+
+  if (!nodeConfigFile) {
+    return <p className="px-3 py-2 text-xs text-slate-400">No config file found for this node.</p>;
+  }
+
+  const nodeContent = nodeConfigFile.localContent ?? nodeConfigFile.remoteContent;
+  let nodeJson: Record<string, unknown> | null = null;
+  try { nodeJson = nodeContent ? JSON.parse(nodeContent) : null; } catch { /* ignore */ }
+
+  // Find UUID-valued fields → potential script UUIDs
+  const scriptUuids: string[] = [];
+  if (nodeJson) {
+    for (const val of Object.values(nodeJson)) {
+      if (typeof val === "string" && UUID_RE.test(val)) {
+        scriptUuids.push(val);
+      }
+    }
+  }
+
+  // For each script UUID, find script config and content files
+  interface ScriptEntry {
+    uuid: string;
+    name: string;
+    configFile?: FileDiff;
+    contentFile?: FileDiff;
+  }
+
+  const scriptEntries: ScriptEntry[] = [];
+  for (const uuid of scriptUuids) {
+    const configFile = files.find((f) => f.relativePath.includes(`/scripts-config/${uuid}.json`));
+    if (!configFile) continue;
+
+    // Parse name from config
+    let name = uuid;
+    const cfgContent = configFile.localContent ?? configFile.remoteContent;
+    if (cfgContent) {
+      try {
+        const cfgJson = JSON.parse(cfgContent) as Record<string, unknown>;
+        if (typeof cfgJson.name === "string" && cfgJson.name) name = cfgJson.name;
+      } catch { /* ignore */ }
+    }
+
+    const contentFile = files.find(
+      (f) =>
+        f.relativePath.includes("/scripts-content/") &&
+        f.relativePath.split("/").pop()?.replace(/\.[^.]+$/, "") === name,
+    );
+
+    scriptEntries.push({ uuid, name, configFile, contentFile });
+  }
+
+  if (scriptEntries.length === 0) {
+    return (
+      <div className="px-3 py-2 text-xs text-slate-400">
+        {scriptUuids.length > 0 ? "No script diff files found." : "No scripts linked to this node."}
+      </div>
+    );
+  }
+
+  return (
+    <div className="divide-y divide-slate-100">
+      {scriptEntries.map((entry) => {
+        // Compute diff lines for each relevant file
+        const filesToShow: FileDiff[] = [
+          ...(entry.configFile ? [entry.configFile] : []),
+          ...(entry.contentFile ? [entry.contentFile] : []),
+        ];
+
+        return (
+          <div key={entry.uuid} className="py-2">
+            <div className="flex items-center gap-1.5 px-3 pb-1">
+              <svg className="w-3 h-3 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+              </svg>
+              <span className="text-[11px] font-medium text-slate-700 truncate">{entry.name}</span>
+            </div>
+            {filesToShow.map((f) => {
+              const isConfig  = f.relativePath.includes("/scripts-config/");
+              const fileLabel = isConfig ? "config" : f.relativePath.split("/").pop() ?? "content";
+              const statusColor = f.status === "added" ? "text-emerald-600" : f.status === "removed" ? "text-red-500" : f.status === "modified" ? "text-amber-600" : "text-slate-400";
+
+              let diffLines: DiffLineLocal[] = [];
+              if (f.diffLines && f.diffLines.length > 0) {
+                diffLines = f.diffLines as DiffLineLocal[];
+              } else if (f.localContent != null && f.remoteContent != null) {
+                diffLines = clientDiff(f.localContent, f.remoteContent);
+              } else if (f.remoteContent != null) {
+                diffLines = f.remoteContent.split("\n").map((c) => ({ type: "added" as const, content: c }));
+              } else if (f.localContent != null) {
+                diffLines = f.localContent.split("\n").map((c) => ({ type: "removed" as const, content: c }));
+              }
+
+              const changedLines = diffLines.filter((l) => l.type !== "context");
+
+              return (
+                <div key={f.relativePath} className="px-3 pb-1">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-[9px] font-mono text-slate-400 truncate flex-1">{fileLabel}</span>
+                    <span className={cn("text-[9px] font-semibold uppercase", statusColor)}>{f.status}</span>
+                    {changedLines.length > 0 && (
+                      <span className="text-[9px] text-slate-400">
+                        +{changedLines.filter((l) => l.type === "added").length}
+                        {" "}-{changedLines.filter((l) => l.type === "removed").length}
+                      </span>
+                    )}
+                  </div>
+                  {diffLines.length > 0 ? (
+                    <InlineDiffView lines={diffLines} />
+                  ) : (
+                    <p className="text-[10px] text-slate-400 italic">No changes</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -235,6 +494,7 @@ interface DiffGraphCanvasInnerProps {
   fitKey: number;
   externalViewport: Viewport | null;
   onViewportChange: (vp: Viewport) => void;
+  onNodeActivate?: (nodeId: string | null, nodeData: Record<string, unknown>) => void;
 }
 
 function DiffGraphCanvasInner({
@@ -244,8 +504,10 @@ function DiffGraphCanvasInner({
   fitKey,
   externalViewport,
   onViewportChange,
+  onNodeActivate,
 }: DiffGraphCanvasInnerProps) {
   const { fitView, setViewport } = useReactFlow();
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const layoutedNodes = useMemo(
     () => applyLayout(baseNodes, baseEdges),
@@ -296,6 +558,43 @@ function DiffGraphCanvasInner({
     [baseEdges, visibleNodeIds],
   );
 
+  // Path tracing
+  const highlighted = useMemo(() => {
+    if (!selectedNodeId) return null;
+    const { ancestors, descendants } = getConnected(selectedNodeId, filteredEdges);
+    const set = new Set([selectedNodeId, ...ancestors, ...descendants]);
+    return set;
+  }, [selectedNodeId, filteredEdges]);
+
+  // Apply opacity/animation to nodes and edges based on selection
+  const styledNodes = useMemo(() => {
+    if (!highlighted) return filteredNodes;
+    return filteredNodes.map((n) => ({
+      ...n,
+      style: {
+        ...n.style,
+        opacity: highlighted.has(n.id) ? 1 : 0.15,
+        transition: "opacity 0.2s",
+      },
+    }));
+  }, [filteredNodes, highlighted]);
+
+  const styledEdges = useMemo(() => {
+    if (!highlighted) return filteredEdges;
+    return filteredEdges.map((e) => {
+      const onPath = highlighted.has(e.source) && highlighted.has(e.target);
+      return {
+        ...e,
+        animated: onPath,
+        style: {
+          ...e.style,
+          opacity: onPath ? 1 : 0.06,
+          transition: "opacity 0.2s",
+        },
+      };
+    });
+  }, [filteredEdges, highlighted]);
+
   const miniMapNodeColor = useCallback((n: Node): string => {
     switch (n.data.diffStatus as DiffStatus) {
       case "added":     return "#10b981";
@@ -305,12 +604,30 @@ function DiffGraphCanvasInner({
     }
   }, []);
 
+  const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    const nodeData = node.data as Record<string, unknown>;
+    if (selectedNodeId === node.id) {
+      setSelectedNodeId(null);
+      onNodeActivate?.(null, {});
+    } else {
+      setSelectedNodeId(node.id);
+      onNodeActivate?.(node.id, nodeData);
+    }
+  }, [selectedNodeId, onNodeActivate]);
+
+  const handlePaneClick = useCallback(() => {
+    setSelectedNodeId(null);
+    onNodeActivate?.(null, {});
+  }, [onNodeActivate]);
+
   return (
     <ReactFlow
-      nodes={filteredNodes}
-      edges={filteredEdges}
+      nodes={styledNodes}
+      edges={styledEdges}
       nodeTypes={nodeTypes}
       onMove={(_, vp) => onViewportChange(vp)}
+      onNodeClick={handleNodeClick}
+      onPaneClick={handlePaneClick}
       nodesDraggable
       snapToGrid
       snapGrid={[20, 20]}
@@ -318,9 +635,9 @@ function DiffGraphCanvasInner({
       minZoom={0.1}
       maxZoom={2}
     >
-      <Background color="#334155" gap={20} />
+      <Background color="#e2e8f0" gap={20} size={1} />
       <Controls showInteractive={false} />
-      <MiniMap nodeColor={miniMapNodeColor} style={{ background: "#1e293b" }} />
+      <MiniMap nodeColor={miniMapNodeColor} zoomable pannable />
       <Panel position="bottom-right">
         <DiffLegend />
       </Panel>
@@ -353,7 +670,15 @@ export interface JourneyDiffGraphModalProps {
   nodeInfos: JourneyNodeInfo[];
   sourceLabel: string;
   targetLabel: string;
+  files: FileDiff[];
   onClose: () => void;
+}
+
+interface NavEntry {
+  name: string;
+  localContent?: string;
+  remoteContent?: string;
+  nodeInfos: JourneyNodeInfo[];
 }
 
 export function JourneyDiffGraphModal({
@@ -363,40 +688,66 @@ export function JourneyDiffGraphModal({
   nodeInfos,
   sourceLabel,
   targetLabel,
+  files,
   onClose,
 }: JourneyDiffGraphModalProps) {
-  const [viewMode, setViewMode]         = useState<"merged" | "side-by-side">("merged");
-  const [hideUnchanged, setHideUnchanged] = useState(false);
-  const [syncViewports, setSyncViewports] = useState(true);
-  const [fitKey, setFitKey]             = useState(0);
+  const [viewMode, setViewMode]             = useState<"merged" | "side-by-side">("merged");
+  const [hideUnchanged, setHideUnchanged]   = useState(false);
+  const [syncViewports, setSyncViewports]   = useState(true);
+  const [fitKey, setFitKey]                 = useState(0);
+  const [navStack, setNavStack]             = useState<NavEntry[]>([]);
+  const [activeNode, setActiveNode]         = useState<{
+    id: string;
+    label: string;
+    nodeType?: string;
+    diffStatus: DiffStatus;
+  } | null>(null);
 
   const [leftExternalVP,  setLeftExternalVP]  = useState<Viewport | null>(null);
   const [rightExternalVP, setRightExternalVP] = useState<Viewport | null>(null);
   const syncSource = useRef<"left" | "right" | null>(null);
 
-  const hasContent = !!(localContent || remoteContent);
-  const nodesOnly  = !hasContent && nodeInfos.length > 0;
+  // Derive "active" journey from top of nav stack (or fall back to props)
+  const active = navStack.length > 0 ? navStack[navStack.length - 1] : {
+    name: journeyName,
+    localContent,
+    remoteContent,
+    nodeInfos,
+  };
 
-  // ESC closes modal
+  const hasContent = !!(active.localContent || active.remoteContent);
+  const nodesOnly  = !hasContent && active.nodeInfos.length > 0;
+
+  // ESC closes modal (or pops nav stack)
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (navStack.length > 0) {
+          setNavStack((s) => s.slice(0, -1));
+          setActiveNode(null);
+          setFitKey((k) => k + 1);
+        } else {
+          onClose();
+        }
+      }
+    };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [onClose, navStack.length]);
 
   // Build nodeStatusMap
   const nodeStatusMap = useMemo(() => {
     const m = new Map<string, DiffStatus>();
-    for (const n of nodeInfos) m.set(n.uuid, n.status);
+    for (const n of active.nodeInfos) m.set(n.uuid, n.status as DiffStatus);
     return m;
-  }, [nodeInfos]);
+  }, [active.nodeInfos]);
 
   // Build all graphs
   const { mergedNodes, mergedEdges, localNodes, localEdges, remoteNodes, remoteEdges } =
     useMemo(() => {
       if (!hasContent) {
         const { nodes, edges } = parseNodesOnlyGraph(
-          nodeInfos.map((n) => ({ ...n, status: n.status })),
+          active.nodeInfos.map((n) => ({ ...n, status: n.status as DiffStatus })),
         );
         return {
           mergedNodes: nodes, mergedEdges: edges,
@@ -405,12 +756,12 @@ export function JourneyDiffGraphModal({
         };
       }
 
-      const merged = parseMergedDiffGraph(localContent, remoteContent, nodeStatusMap);
-      const local  = localContent
-        ? parseSingleSideGraph(localContent,  nodeStatusMap, "local")
+      const merged = parseMergedDiffGraph(active.localContent, active.remoteContent, nodeStatusMap);
+      const local  = active.localContent
+        ? parseSingleSideGraph(active.localContent,  nodeStatusMap, "local")
         : { nodes: [] as Node[], edges: [] as Edge[] };
-      const remote = remoteContent
-        ? parseSingleSideGraph(remoteContent, nodeStatusMap, "remote")
+      const remote = active.remoteContent
+        ? parseSingleSideGraph(active.remoteContent, nodeStatusMap, "remote")
         : { nodes: [] as Node[], edges: [] as Edge[] };
 
       return {
@@ -418,7 +769,7 @@ export function JourneyDiffGraphModal({
         localNodes:  local.nodes,  localEdges:  local.edges,
         remoteNodes: remote.nodes, remoteEdges: remote.edges,
       };
-    }, [hasContent, localContent, remoteContent, nodeInfos, nodeStatusMap]);
+    }, [hasContent, active.localContent, active.remoteContent, active.nodeInfos, nodeStatusMap]);
 
   const handleLeftMove = useCallback((vp: Viewport) => {
     if (!syncViewports || syncSource.current === "left") return;
@@ -434,6 +785,66 @@ export function JourneyDiffGraphModal({
     setTimeout(() => { syncSource.current = null; }, 150);
   }, [syncViewports]);
 
+  // Navigate into an inner journey
+  const navigateInto = useCallback((nodeId: string, nodeData: Record<string, unknown>) => {
+    // Find node config file
+    const nodeConfigFile = files.find(
+      (f) => f.relativePath.includes(`/${nodeId}.json`) && f.relativePath.includes("/nodes/"),
+    );
+
+    let treeName: string | null = null;
+    if (nodeConfigFile) {
+      const content = nodeConfigFile.localContent ?? nodeConfigFile.remoteContent;
+      if (content) {
+        try {
+          const json = JSON.parse(content) as Record<string, unknown>;
+          if (typeof json.tree === "string" && json.tree) treeName = json.tree;
+        } catch { /* ignore */ }
+      }
+    }
+
+    const displayLabel = typeof nodeData.label === "string" ? nodeData.label : nodeId;
+    const name = treeName ?? displayLabel;
+
+    let subLocalContent: string | undefined;
+    let subRemoteContent: string | undefined;
+
+    if (treeName) {
+      const subFile = files.find((f) => f.relativePath.endsWith(`/journeys/${treeName}/${treeName}.json`));
+      subLocalContent  = subFile?.localContent;
+      subRemoteContent = subFile?.remoteContent;
+    }
+
+    setNavStack((prev) => [...prev, {
+      name,
+      localContent:  subLocalContent,
+      remoteContent: subRemoteContent,
+      nodeInfos:     [],
+    }]);
+    setActiveNode(null);
+    setFitKey((k) => k + 1);
+  }, [files]);
+
+  // Handle node activate from canvas
+  const handleNodeActivate = useCallback((nodeId: string | null, nodeData: Record<string, unknown>) => {
+    if (!nodeId) {
+      setActiveNode(null);
+      return;
+    }
+    const diffStatus = (nodeData.diffStatus as DiffStatus) ?? "unchanged";
+    const label      = typeof nodeData.label    === "string" ? nodeData.label    : nodeId;
+    const nodeType   = typeof nodeData.nodeType === "string" ? nodeData.nodeType : undefined;
+
+    if (nodeType === "InnerTreeEvaluatorNode") {
+      navigateInto(nodeId, nodeData);
+      return;
+    }
+
+    setActiveNode({ id: nodeId, label, nodeType, diffStatus });
+  }, [navigateInto]);
+
+  const showSidePanel = !!activeNode && activeNode.nodeType !== "InnerTreeEvaluatorNode";
+
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-white"
@@ -441,9 +852,41 @@ export function JourneyDiffGraphModal({
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-slate-200 shrink-0">
-        <span className="text-sm font-semibold text-slate-800 truncate flex-1 min-w-0" title={journeyName}>
-          {journeyName}
-        </span>
+        {/* Breadcrumb */}
+        <div className="flex-1 min-w-0">
+          {navStack.length === 0 ? (
+            <span className="text-sm font-semibold text-slate-800 truncate" title={journeyName}>
+              {journeyName}
+            </span>
+          ) : (
+            <nav className="flex items-center gap-1 text-sm min-w-0">
+              <button
+                type="button"
+                onClick={() => { setNavStack([]); setActiveNode(null); setFitKey((k) => k + 1); }}
+                className="font-semibold text-sky-600 hover:text-sky-800 truncate max-w-[150px] shrink-0"
+              >
+                {journeyName}
+              </button>
+              {navStack.map((entry, i) => (
+                <Fragment key={`${entry.name}-${i}`}>
+                  <span className="text-slate-400 shrink-0">›</span>
+                  {i < navStack.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => { setNavStack((prev) => prev.slice(0, i + 1)); setActiveNode(null); setFitKey((k) => k + 1); }}
+                      className="text-sky-600 hover:text-sky-800 truncate max-w-[150px]"
+                    >
+                      {entry.name}
+                    </button>
+                  ) : (
+                    <span className="font-semibold text-slate-800 truncate max-w-[150px]">{entry.name}</span>
+                  )}
+                </Fragment>
+              ))}
+            </nav>
+          )}
+        </div>
+
         {nodesOnly && (
           <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-500 shrink-0">
             nodes only
@@ -527,49 +970,104 @@ export function JourneyDiffGraphModal({
         </button>
       </div>
 
-      {/* Content */}
+      {/* Content area */}
       <div className="flex-1 min-h-0 flex">
-        {viewMode === "merged" ? (
-          <DiffGraphCanvas
-            baseNodes={mergedNodes}
-            baseEdges={mergedEdges}
-            hideUnchanged={hideUnchanged}
-            fitKey={fitKey}
-            externalViewport={null}
-            onViewportChange={() => {}}
-          />
-        ) : (
-          <>
-            {/* Left panel (local / source) */}
-            <div className="flex-1 min-w-0 relative border-r border-slate-200">
-              <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
-                {sourceLabel}
-              </span>
-              <DiffGraphCanvas
-                baseNodes={localNodes}
-                baseEdges={localEdges}
-                hideUnchanged={hideUnchanged}
-                fitKey={fitKey}
-                externalViewport={leftExternalVP}
-                onViewportChange={handleLeftMove}
-              />
-            </div>
+        {/* Graph area */}
+        <div className="flex-1 min-w-0 flex">
+          {viewMode === "merged" ? (
+            <DiffGraphCanvas
+              className="flex-1"
+              baseNodes={mergedNodes}
+              baseEdges={mergedEdges}
+              hideUnchanged={hideUnchanged}
+              fitKey={fitKey}
+              externalViewport={null}
+              onViewportChange={() => {}}
+              onNodeActivate={handleNodeActivate}
+            />
+          ) : (
+            <>
+              {/* Left panel (local / source) */}
+              <div className="flex-1 min-w-0 relative border-r border-slate-200">
+                <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
+                  {sourceLabel}
+                </span>
+                <DiffGraphCanvas
+                  baseNodes={localNodes}
+                  baseEdges={localEdges}
+                  hideUnchanged={hideUnchanged}
+                  fitKey={fitKey}
+                  externalViewport={leftExternalVP}
+                  onViewportChange={handleLeftMove}
+                  onNodeActivate={handleNodeActivate}
+                />
+              </div>
 
-            {/* Right panel (remote / target) */}
-            <div className="flex-1 min-w-0 relative">
-              <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
-                {targetLabel}
+              {/* Right panel (remote / target) */}
+              <div className="flex-1 min-w-0 relative">
+                <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
+                  {targetLabel}
+                </span>
+                <DiffGraphCanvas
+                  baseNodes={remoteNodes}
+                  baseEdges={remoteEdges}
+                  hideUnchanged={hideUnchanged}
+                  fitKey={fitKey}
+                  externalViewport={rightExternalVP}
+                  onViewportChange={handleRightMove}
+                  onNodeActivate={handleNodeActivate}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Side panel */}
+        {showSidePanel && (
+          <div className="w-80 shrink-0 border-l border-slate-200 bg-white flex flex-col overflow-hidden">
+            {/* Panel header */}
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 shrink-0">
+              <span className="text-xs font-semibold text-slate-700 flex-1 truncate" title={activeNode?.label}>
+                {activeNode?.label}
               </span>
-              <DiffGraphCanvas
-                baseNodes={remoteNodes}
-                baseEdges={remoteEdges}
-                hideUnchanged={hideUnchanged}
-                fitKey={fitKey}
-                externalViewport={rightExternalVP}
-                onViewportChange={handleRightMove}
+              <button
+                type="button"
+                onClick={() => setActiveNode(null)}
+                className="text-slate-400 hover:text-slate-600 shrink-0"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {/* Node metadata */}
+            <div className="px-3 py-2 space-y-1 border-b border-slate-100 text-xs shrink-0">
+              <div className="flex gap-2 items-start">
+                <span className="text-slate-400 w-16 shrink-0">Type</span>
+                <span className="text-slate-700 font-mono text-[10px] break-all">{activeNode?.nodeType ?? "—"}</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-slate-400 w-16 shrink-0">Status</span>
+                <DiffStatusBadge status={activeNode?.diffStatus} />
+              </div>
+              <div className="flex gap-2 items-start">
+                <span className="text-slate-400 w-16 shrink-0">ID</span>
+                <span className="text-slate-400 font-mono text-[9px] break-all">{activeNode?.id}</span>
+              </div>
+            </div>
+            {/* Script files */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-3 pt-2 pb-1">
+                <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Scripts</p>
+              </div>
+              <ScriptPanelContent
+                nodeId={activeNode?.id}
+                nodeType={activeNode?.nodeType}
+                journeyName={active.name}
+                files={files}
               />
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
