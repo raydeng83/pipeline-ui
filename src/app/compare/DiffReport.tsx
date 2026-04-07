@@ -982,14 +982,11 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
   const [localForceOpen, setLocalForceOpen] = useState<boolean | undefined>(undefined);
   const [forceSeq, setForceSeq] = useState(0);
 
-  // Respond to parent expand/collapse all
+  // Respond to parent expand/collapse all — only open/close this section, not children
   const prevParentSeq = useRef(parentForceSeq);
   if (parentForceSeq !== undefined && parentForceSeq !== prevParentSeq.current) {
     prevParentSeq.current = parentForceSeq;
-    if (parentForceOpen !== undefined) {
-      setLocalForceOpen(parentForceOpen);
-      setForceSeq((s) => s + 1);
-    }
+    if (parentForceOpen !== undefined) setOpen(parentForceOpen);
   }
 
   const expandAll = () => { setLocalForceOpen(true); setForceSeq((s) => s + 1); };
