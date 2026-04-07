@@ -859,9 +859,10 @@ function NodeDetailPanel({
   const [config, setConfig]               = useState<Record<string, unknown> | null>(null);
   const [configLoading, setConfigLoading] = useState(false);
 
-  const isStaticNode = nodeId === "startNode" || nodeId === DIFF_SUCCESS_ID || nodeId === DIFF_FAILURE_ID;
+  const isStaticNode   = nodeId === "startNode" || nodeId === DIFF_SUCCESS_ID || nodeId === DIFF_FAILURE_ID;
+  const isScriptNode   = nodeType === "ScriptedDecisionNode";
 
-  // Reset tab when node changes
+  // Reset tab when node changes; don't leave on scripts tab if new node isn't a script node
   useEffect(() => { setTab("config"); setConfig(null); }, [nodeId]);
 
   // Fetch node config
@@ -926,8 +927,8 @@ function NodeDetailPanel({
         </button>
       </div>
 
-      {/* Tab bar (hidden for static nodes) */}
-      {!isStaticNode && (
+      {/* Tab bar (hidden for static nodes; scripts tab only for ScriptedDecisionNode) */}
+      {!isStaticNode && isScriptNode && (
         <div className="flex border-b border-slate-200 shrink-0">
           {(["config", "scripts"] as const).map((t) => (
             <button
