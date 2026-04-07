@@ -663,6 +663,13 @@ function DiffGraphCanvas({ className, ...innerProps }: DiffGraphCanvasProps) {
 
 // ── JourneyDiffGraphModal ─────────────────────────────────────────────────────
 
+export interface NavEntry {
+  name: string;
+  localContent?: string;
+  remoteContent?: string;
+  nodeInfos: JourneyNodeInfo[];
+}
+
 export interface JourneyDiffGraphModalProps {
   journeyName: string;
   localContent?: string;
@@ -673,14 +680,9 @@ export interface JourneyDiffGraphModalProps {
   sourceEnv: string;
   targetEnv: string;
   files: FileDiff[];
+  /** Pre-populate the nav stack with ancestor journeys so the user can navigate back up. */
+  ancestorPath?: NavEntry[];
   onClose: () => void;
-}
-
-interface NavEntry {
-  name: string;
-  localContent?: string;
-  remoteContent?: string;
-  nodeInfos: JourneyNodeInfo[];
 }
 
 export function JourneyDiffGraphModal({
@@ -693,13 +695,18 @@ export function JourneyDiffGraphModal({
   sourceEnv,
   targetEnv,
   files,
+  ancestorPath,
   onClose,
 }: JourneyDiffGraphModalProps) {
   const [viewMode, setViewMode]             = useState<"merged" | "side-by-side">("merged");
   const [hideUnchanged, setHideUnchanged]   = useState(false);
   const [syncViewports, setSyncViewports]   = useState(true);
   const [fitKey, setFitKey]                 = useState(0);
-  const [navStack, setNavStack]             = useState<NavEntry[]>([]);
+  // navStack holds ALL levels: [ancestors..., current]. It always has at least one entry.
+  const [navStack, setNavStack]             = useState<NavEntry[]>(() => [
+    ...(ancestorPath ?? []),
+    { name: journeyName, localContent, remoteContent, nodeInfos },
+  ]);
   const [navigating, setNavigating]         = useState(false);
   const [activeNode, setActiveNode]         = useState<{
     id: string;
@@ -712,22 +719,17 @@ export function JourneyDiffGraphModal({
   const [rightExternalVP, setRightExternalVP] = useState<Viewport | null>(null);
   const syncSource = useRef<"left" | "right" | null>(null);
 
-  // Derive "active" journey from top of nav stack (or fall back to props)
-  const active = navStack.length > 0 ? navStack[navStack.length - 1] : {
-    name: journeyName,
-    localContent,
-    remoteContent,
-    nodeInfos,
-  };
+  // Active journey is always the last entry in the stack.
+  const active = navStack[navStack.length - 1] ?? { name: journeyName, localContent, remoteContent, nodeInfos };
 
   const hasContent = !!(active.localContent || active.remoteContent);
   const nodesOnly  = !hasContent && active.nodeInfos.length > 0;
 
-  // ESC closes modal (or pops nav stack)
+  // ESC pops nav stack (or closes modal when at root)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (navStack.length > 0) {
+        if (navStack.length > 1) {
           setNavStack((s) => s.slice(0, -1));
           setActiveNode(null);
           setFitKey((k) => k + 1);
@@ -888,27 +890,20 @@ export function JourneyDiffGraphModal({
       <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-slate-200 shrink-0">
         {/* Breadcrumb */}
         <div className="flex-1 min-w-0">
-          {navStack.length === 0 ? (
-            <span className="text-sm font-semibold text-slate-800 truncate" title={journeyName}>
-              {journeyName}
+          {navStack.length <= 1 ? (
+            <span className="text-sm font-semibold text-slate-800 truncate" title={navStack[0]?.name ?? journeyName}>
+              {navStack[0]?.name ?? journeyName}
             </span>
           ) : (
-            <nav className="flex items-center gap-1 text-sm min-w-0">
-              <button
-                type="button"
-                onClick={() => { setNavStack([]); setActiveNode(null); setFitKey((k) => k + 1); }}
-                className="font-semibold text-sky-600 hover:text-sky-800 truncate max-w-[150px] shrink-0"
-              >
-                {journeyName}
-              </button>
+            <nav className="flex items-center gap-1 text-sm min-w-0 flex-wrap">
               {navStack.map((entry, i) => (
                 <Fragment key={`${entry.name}-${i}`}>
-                  <span className="text-slate-400 shrink-0">›</span>
+                  {i > 0 && <span className="text-slate-400 shrink-0">›</span>}
                   {i < navStack.length - 1 ? (
                     <button
                       type="button"
                       onClick={() => { setNavStack((prev) => prev.slice(0, i + 1)); setActiveNode(null); setFitKey((k) => k + 1); }}
-                      className="text-sky-600 hover:text-sky-800 truncate max-w-[150px]"
+                      className={cn("hover:text-sky-800 truncate max-w-[150px] shrink-0 text-sky-600", i === 0 && "font-semibold")}
                     >
                       {entry.name}
                     </button>

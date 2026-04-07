@@ -4,7 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
-import { JourneyDiffGraphModal } from "./JourneyDiffGraph";
+import { JourneyDiffGraphModal, type NavEntry } from "./JourneyDiffGraph";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -747,7 +747,7 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel }: { sc: Journey
   );
 }
 
-function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string }) {
+function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [] }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[] }) {
   const [open, setOpen] = useState(depth === 0);
   const [graphOpen, setGraphOpen] = useState(false);
   const hasChildren = node.subJourneys.length > 0;
@@ -764,6 +764,13 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
     [files, node.name],
   );
   const canShowGraph = !!(journeyFile?.localContent || journeyFile?.remoteContent) || node.nodes.length > 0;
+
+  // Path to pass to children: ancestors + self (so children can trace back to entry journey)
+  const childAncestorPath = useMemo<NavEntry[]>(
+    () => [...ancestorPath, { name: node.name, localContent: journeyFile?.localContent, remoteContent: journeyFile?.remoteContent, nodeInfos: node.nodes }],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ancestorPath, node.name, journeyFile?.localContent, journeyFile?.remoteContent, node.nodes],
+  );
 
   return (
     <div>
@@ -803,7 +810,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
       {open && (hasChildren || (showScripts && node.scripts.some((s) => s.status !== "unchanged")) || (showNodes && node.nodes.some((n) => n.status !== "unchanged"))) && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
-            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
+            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} />
           ))}
           {showScripts && node.scripts.filter((sc) => sc.status !== "unchanged").length > 0 && (
             <div className="mt-1 space-y-0.5">
@@ -843,6 +850,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           sourceEnv={sourceEnv}
           targetEnv={targetEnv}
           files={files}
+          ancestorPath={ancestorPath}
           onClose={() => setGraphOpen(false)}
         />
       )}
