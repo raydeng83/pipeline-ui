@@ -1058,6 +1058,7 @@ interface DiffGraphCanvasInnerProps {
   searchQuery: string;
   flashNodeId: string | null;
   zoomToNodeId?: string | null;
+  scriptNames?: Map<string, string>;
 }
 
 function DiffGraphCanvasInner({
@@ -1072,6 +1073,7 @@ function DiffGraphCanvasInner({
   searchQuery,
   flashNodeId,
   zoomToNodeId,
+  scriptNames,
 }: DiffGraphCanvasInnerProps) {
   const { fitView, setViewport, getViewport } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
@@ -1167,19 +1169,22 @@ function DiffGraphCanvasInner({
     return set;
   }, [selectedNodeId, filteredEdges]);
 
-  // Search matches — include page-child nodes; also add parent group for highlighting
+  // Search matches — node label or script name; includes page-child nodes
   const searchMatches = useMemo(() => {
     if (!searchQuery.trim()) return new Set<string>();
     const q = searchQuery.toLowerCase();
     const ids = new Set<string>();
     for (const n of nodes) {
-      if (String(n.data.label ?? "").toLowerCase().includes(q)) {
+      const labelMatch  = String(n.data.label ?? "").toLowerCase().includes(q);
+      const scriptMatch = n.data.nodeType === "ScriptedDecisionNode" &&
+        (scriptNames?.get(n.id) ?? "").toLowerCase().includes(q);
+      if (labelMatch || scriptMatch) {
         ids.add(n.id);
         if (n.parentId) ids.add(n.parentId); // highlight parent group too
       }
     }
     return ids;
-  }, [searchQuery, nodes]);
+  }, [searchQuery, nodes, scriptNames]);
 
   useEffect(() => {
     if (searchMatches.size === 0) return;
@@ -1447,40 +1452,74 @@ export function JourneyDiffGraphModal({
     return () => clearTimeout(t);
   }, [flashNodeId]);
 
-  // Fetch PageNode configs for the active journey
+  // Fetch PageNode configs and ScriptedDecisionNode script names for the active journey
   const [pageConfigs, setPageConfigs] = useState<Map<string, PageNodeConfig>>(new Map());
+  const [scriptNames, setScriptNames] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     setPageConfigs(new Map());
+    setScriptNames(new Map());
     const content = active.remoteContent ?? active.localContent;
     if (!content) return;
     const env = targetEnv || sourceEnv;
     if (!env) return;
+
     let pageNodeIds: string[] = [];
+    let scriptNodeIds: string[] = [];
     try {
       const data = JSON.parse(content) as { nodes?: Record<string, { nodeType?: string }> };
-      pageNodeIds = Object.entries(data.nodes ?? {})
-        .filter(([, n]) => n.nodeType === "PageNode")
-        .map(([id]) => id);
+      const entries = Object.entries(data.nodes ?? {});
+      pageNodeIds   = entries.filter(([, n]) => n.nodeType === "PageNode").map(([id]) => id);
+      scriptNodeIds = entries.filter(([, n]) => n.nodeType === "ScriptedDecisionNode").map(([id]) => id);
     } catch { /* ignore */ }
-    if (pageNodeIds.length === 0) return;
 
     let cancelled = false;
-    Promise.all(
-      pageNodeIds.map(async (nodeId) => {
-        const params = new URLSearchParams({ environment: env, journey: active.name, nodeId });
-        try {
-          const res = await fetch(`/api/push/journey-node?${params}`);
-          if (!res.ok) return null;
-          const d = await res.json() as { file?: { content?: string } };
-          if (!d.file?.content) return null;
-          return [nodeId, JSON.parse(d.file.content) as PageNodeConfig] as const;
-        } catch { return null; }
-      })
-    ).then((entries) => {
-      if (cancelled) return;
-      setPageConfigs(new Map(entries.filter((e): e is [string, PageNodeConfig] => e !== null)));
-    });
+
+    // Page configs
+    if (pageNodeIds.length > 0) {
+      Promise.all(
+        pageNodeIds.map(async (nodeId) => {
+          const params = new URLSearchParams({ environment: env, journey: active.name, nodeId });
+          try {
+            const res = await fetch(`/api/push/journey-node?${params}`);
+            if (!res.ok) return null;
+            const d = await res.json() as { file?: { content?: string } };
+            if (!d.file?.content) return null;
+            return [nodeId, JSON.parse(d.file.content) as PageNodeConfig] as const;
+          } catch { return null; }
+        })
+      ).then((entries) => {
+        if (cancelled) return;
+        setPageConfigs(new Map(entries.filter((e): e is [string, PageNodeConfig] => e !== null)));
+      });
+    }
+
+    // Script names for search
+    if (scriptNodeIds.length > 0) {
+      Promise.all(
+        scriptNodeIds.map(async (nodeId) => {
+          try {
+            const params = new URLSearchParams({ environment: env, journey: active.name, nodeId });
+            const res = await fetch(`/api/push/journey-node?${params}`);
+            if (!res.ok) return null;
+            const d = await res.json() as { file?: { content?: string } };
+            if (!d.file?.content) return null;
+            const config = JSON.parse(d.file.content) as Record<string, unknown>;
+            const scriptId = typeof config.script === "string" ? config.script : null;
+            if (!scriptId) return null;
+            const sParams = new URLSearchParams({ environment: env, scriptId });
+            const sRes = await fetch(`/api/push/script?${sParams}`);
+            if (!sRes.ok) return null;
+            const sd = await sRes.json() as { name?: string };
+            return [nodeId, sd.name ?? scriptId] as const;
+          } catch { return null; }
+        })
+      ).then((entries) => {
+        if (cancelled) return;
+        setScriptNames(new Map(entries.filter((e): e is [string, string] => e !== null)));
+      });
+    }
+
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active.name, active.remoteContent, active.localContent, sourceEnv, targetEnv]);
@@ -1891,6 +1930,7 @@ export function JourneyDiffGraphModal({
               searchQuery={searchQuery}
               flashNodeId={flashNodeId}
               zoomToNodeId={zoomToNodeId}
+              scriptNames={scriptNames}
             />
           ) : (
             <>
@@ -1910,6 +1950,7 @@ export function JourneyDiffGraphModal({
                   onNodeActivate={handleNodeActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
+                  scriptNames={scriptNames}
                 />
               </div>
 
@@ -1929,6 +1970,7 @@ export function JourneyDiffGraphModal({
                   onNodeActivate={handleNodeActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
+                  scriptNames={scriptNames}
                 />
               </div>
             </>

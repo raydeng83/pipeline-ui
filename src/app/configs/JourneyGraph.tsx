@@ -861,14 +861,16 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     setSelectedNodeId(null);
   }, [navStack, journeyId]);
 
-  // Detect PageNode IDs in the active journey JSON
-  const pageNodeIds = useMemo(() => {
+  // Detect PageNode and ScriptedDecisionNode IDs in the active journey JSON
+  const [pageNodeIds, scriptNodeIds] = useMemo(() => {
     try {
       const data = JSON.parse(activeJson) as JourneyJson;
-      return Object.entries(data.nodes ?? {})
-        .filter(([, n]) => n.nodeType === "PageNode")
-        .map(([id]) => id);
-    } catch { return []; }
+      const entries = Object.entries(data.nodes ?? {});
+      return [
+        entries.filter(([, n]) => n.nodeType === "PageNode").map(([id]) => id),
+        entries.filter(([, n]) => n.nodeType === "ScriptedDecisionNode").map(([id]) => id),
+      ];
+    } catch { return [[], []]; }
   }, [activeJson]);
 
   // Fetch PageNode configs
@@ -893,6 +895,37 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       setPageConfigs(map);
     });
   }, [environment, activeJourneyId, pageNodeIds]);
+
+  // Fetch script names for ScriptedDecisionNodes (for search)
+  const [scriptNames, setScriptNames] = useState<Map<string, string>>(new Map());
+  useEffect(() => {
+    setScriptNames(new Map());
+    if (!environment || !activeJourneyId || scriptNodeIds.length === 0) return;
+    let cancelled = false;
+    Promise.all(
+      scriptNodeIds.map(async (nodeId) => {
+        try {
+          const params = new URLSearchParams({ environment: environment!, journey: activeJourneyId!, nodeId });
+          const res = await fetch(`/api/push/journey-node?${params}`);
+          if (!res.ok) return null;
+          const d = await res.json() as { file?: { content?: string } };
+          if (!d.file?.content) return null;
+          const config = JSON.parse(d.file.content) as Record<string, unknown>;
+          const scriptId = typeof config.script === "string" ? config.script : null;
+          if (!scriptId) return null;
+          const sParams = new URLSearchParams({ environment: environment!, scriptId });
+          const sRes = await fetch(`/api/push/script?${sParams}`);
+          if (!sRes.ok) return null;
+          const sd = await sRes.json() as { name?: string };
+          return [nodeId, sd.name ?? scriptId] as const;
+        } catch { return null; }
+      })
+    ).then((entries) => {
+      if (cancelled) return;
+      setScriptNames(new Map(entries.filter((e): e is [string, string] => e !== null)));
+    });
+    return () => { cancelled = true; };
+  }, [environment, activeJourneyId, scriptNodeIds]);
 
   const { dagreNodes, baseEdges } = useMemo(() => {
     const { nodes, edges } = parseJourney(activeJson, pageConfigs.size > 0 ? pageConfigs : undefined);
@@ -973,21 +1006,24 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return () => document.removeEventListener("keydown", handler);
   }, [getViewport, setViewport]);
 
-  // Search — match top-level nodes and page-child nodes; also add parent group to set for highlighting
+  // Search — match node label or script name (for ScriptedDecisionNode)
   const { searchMatches, searchMatchCount } = useMemo(() => {
     if (!searchQuery.trim()) return { searchMatches: new Set<string>(), searchMatchCount: 0 };
     const q = searchQuery.toLowerCase();
     const ids = new Set<string>();
     let count = 0;
     for (const n of rfNodes) {
-      if (String(n.data.label ?? "").toLowerCase().includes(q)) {
+      const labelMatch  = String(n.data.label ?? "").toLowerCase().includes(q);
+      const scriptMatch = n.data.nodeType === "ScriptedDecisionNode" &&
+        (scriptNames.get(n.id) ?? "").toLowerCase().includes(q);
+      if (labelMatch || scriptMatch) {
         ids.add(n.id);
         count++;
         if (n.parentId) ids.add(n.parentId); // highlight parent group too
       }
     }
     return { searchMatches: ids, searchMatchCount: count };
-  }, [searchQuery, rfNodes]);
+  }, [searchQuery, rfNodes, scriptNames]);
 
   useEffect(() => {
     if (searchMatches.size === 0) return;
