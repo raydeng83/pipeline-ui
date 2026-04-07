@@ -701,7 +701,52 @@ const JOURNEY_STATUS_STYLES: Record<string, { dot: string; badge: string; label:
   unchanged: { dot: "bg-slate-300",   badge: "bg-slate-100 text-slate-500 border-slate-200", label: "—" },
 };
 
-function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean }) {
+function findScriptFiles(files: FileDiff[], uuid: string, name: string): FileDiff[] {
+  return files.filter((f) => {
+    if (f.relativePath.includes(`/scripts-config/${uuid}.json`)) return true;
+    if (f.relativePath.includes("/scripts-content/")) {
+      const stem = f.relativePath.split("/").pop()?.replace(/\.[^.]+$/, "");
+      return stem === name;
+    }
+    return false;
+  });
+}
+
+function JourneyScriptRow({ sc, files, sourceLabel, targetLabel }: { sc: JourneyScript; files: FileDiff[]; sourceLabel: string; targetLabel: string }) {
+  const [open, setOpen] = useState(false);
+  const ss = JOURNEY_STATUS_STYLES[sc.status] ?? JOURNEY_STATUS_STYLES.unchanged;
+  const scriptFiles = useMemo(() => findScriptFiles(files, sc.uuid, sc.name), [files, sc.uuid, sc.name]);
+  const canExpand = scriptFiles.length > 0;
+
+  return (
+    <div>
+      <div
+        className={cn(
+          "flex items-center gap-1.5 py-0.5 text-xs rounded group",
+          canExpand && "cursor-pointer hover:bg-slate-50",
+        )}
+        onClick={() => canExpand && setOpen((o) => !o)}
+      >
+        <span className="w-3 shrink-0" />
+        <svg className="w-3 h-3 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+        </svg>
+        <span className="text-slate-600 truncate flex-1 min-w-0" title={sc.uuid}>{sc.name}</span>
+        <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ss.badge)}>{ss.label}</span>
+        {canExpand && <span className="text-slate-400 text-[10px] shrink-0">{open ? "▲" : "▼"}</span>}
+      </div>
+      {open && scriptFiles.length > 0 && (
+        <div className="ml-4 mt-1 space-y-1">
+          {scriptFiles.map((f) => (
+            <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string }) {
   const [open, setOpen] = useState(depth === 0);
   const hasChildren = node.subJourneys.length > 0;
   const s = JOURNEY_STATUS_STYLES[node.status] ?? JOURNEY_STATUS_STYLES.unchanged;
@@ -738,23 +783,13 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes 
       {open && (hasChildren || (showScripts && node.scripts.some((s) => s.status !== "unchanged")) || (showNodes && node.nodes.some((n) => n.status !== "unchanged"))) && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
-            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} />
+            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
           ))}
           {showScripts && node.scripts.filter((sc) => sc.status !== "unchanged").length > 0 && (
             <div className="mt-1 space-y-0.5">
-              {node.scripts.filter((sc) => sc.status !== "unchanged").map((sc) => {
-                const ss = JOURNEY_STATUS_STYLES[sc.status] ?? JOURNEY_STATUS_STYLES.unchanged;
-                return (
-                  <div key={sc.uuid} className="flex items-center gap-1.5 py-0.5 text-xs">
-                    <span className="w-3 shrink-0" />
-                    <svg className="w-3 h-3 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-                    </svg>
-                    <span className="text-slate-600 truncate" title={sc.uuid}>{sc.name}</span>
-                    <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ss.badge)}>{ss.label}</span>
-                  </div>
-                );
-              })}
+              {node.scripts.filter((sc) => sc.status !== "unchanged").map((sc) => (
+                <JourneyScriptRow key={sc.uuid} sc={sc} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+              ))}
             </div>
           )}
           {showNodes && node.nodes.filter((nd) => nd.status !== "unchanged").length > 0 && (
@@ -812,7 +847,7 @@ function filterJourneyTree(
   });
 }
 
-function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number }) {
+function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string }) {
   const [open, setOpen] = useState(true);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
@@ -928,7 +963,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
               <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
             ) : (
               filtered.map((node) => (
-                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} />
+                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
               ))
             )}
           </div>
@@ -1203,7 +1238,7 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <>
             {/* Journey tree (shown first if available) */}
             {report.journeyTree && report.journeyTree.length > 0 && (
-              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} />
+              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
             )}
 
             {/* Other scope sections */}
