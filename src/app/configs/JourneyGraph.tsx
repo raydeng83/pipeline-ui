@@ -1025,14 +1025,32 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     return { searchMatches: ids, searchMatchCount: count };
   }, [searchQuery, rfNodes, scriptNames]);
 
+  // Ordered list of top-level match IDs for prev/next navigation
+  const searchMatchList = useMemo(
+    () => rfNodes.filter((n) => !n.parentId && searchMatches.has(n.id)).map((n) => n.id),
+    [rfNodes, searchMatches],
+  );
+
+  const [searchIndex, setSearchIndex] = useState(0);
+
+  // Reset index whenever the match list changes (new query / new journey)
+  useEffect(() => { setSearchIndex(0); }, [searchMatchList]);
+
+  // Zoom to current match
   useEffect(() => {
-    if (searchMatches.size === 0) return;
-    // fitView only on top-level nodes (child positions are relative to parent)
-    const topIds = [...searchMatches].filter((id) => !id.includes("__child__"));
-    if (topIds.length === 0) return;
-    const t = setTimeout(() => fitView({ nodes: topIds.map((id) => ({ id })), duration: 500, padding: 0.4 }), 50);
+    if (searchMatchList.length === 0) return;
+    const id = searchMatchList[Math.min(searchIndex, searchMatchList.length - 1)];
+    if (!id) return;
+    const t = setTimeout(() => fitView({ nodes: [{ id }], duration: 500, padding: 0.4 }), 80);
     return () => clearTimeout(t);
-  }, [searchMatches, fitView]);
+  }, [searchIndex, searchMatchList, fitView]);
+
+  const goSearchPrev = useCallback(() =>
+    setSearchIndex((i) => (i - 1 + searchMatchList.length) % searchMatchList.length),
+    [searchMatchList.length]);
+  const goSearchNext = useCallback(() =>
+    setSearchIndex((i) => (i + 1) % searchMatchList.length),
+    [searchMatchList.length]);
 
   // Path tracing (top-level nodes only; edges only reference top-level IDs)
   const { ancestors, descendants } = useMemo(() => {
@@ -1174,12 +1192,21 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
           />
           {searchQuery && (
             <>
-              <span className="text-[10px] text-slate-400 tabular-nums shrink-0">{searchMatchCount} match{searchMatchCount !== 1 ? "es" : ""}</span>
-              <button type="button" onClick={() => setSearchQuery("")} className="text-slate-400 hover:text-slate-600 shrink-0">
+              <span className="text-[10px] text-slate-400 tabular-nums shrink-0">
+                {searchMatchList.length > 1 ? `${searchIndex + 1} / ${searchMatchList.length}` : `${searchMatchCount} match${searchMatchCount !== 1 ? "es" : ""}`}
+              </span>
+              <button type="button" onClick={() => setSearchQuery("")} title="Clear search" className="text-slate-400 hover:text-slate-600 shrink-0">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+              {searchMatchList.length > 1 && (
+                <>
+                  <div className="w-px h-3.5 bg-slate-200 shrink-0" />
+                  <button type="button" onClick={goSearchPrev} title="Previous match" className="text-slate-400 hover:text-sky-600 shrink-0 text-sm leading-none">‹</button>
+                  <button type="button" onClick={goSearchNext} title="Next match"     className="text-slate-400 hover:text-sky-600 shrink-0 text-sm leading-none">›</button>
+                </>
+              )}
             </>
           )}
         </div>

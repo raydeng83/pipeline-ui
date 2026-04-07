@@ -1583,6 +1583,42 @@ export function JourneyDiffGraphModal({
     return map;
   }, [mergedNodes]);
 
+  // Ordered list of top-level match IDs for prev/next search navigation
+  const searchMatchIds = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    const matchSet = new Set<string>();
+    for (const n of mergedNodes) {
+      const labelMatch  = String(n.data.label ?? "").toLowerCase().includes(q);
+      const scriptMatch = n.data.nodeType === "ScriptedDecisionNode" &&
+        (scriptNames.get(n.id) ?? "").toLowerCase().includes(q);
+      if (labelMatch || scriptMatch) {
+        if (!n.parentId) matchSet.add(n.id);
+        else             matchSet.add(n.parentId);
+      }
+    }
+    return mergedNodes.filter((n) => !n.parentId && matchSet.has(n.id)).map((n) => n.id);
+  }, [searchQuery, mergedNodes, scriptNames]);
+
+  const [searchIndex, setSearchIndex] = useState(0);
+  useEffect(() => {
+    setSearchIndex(0);
+    setZoomToNodeId(searchMatchIds[0] ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchMatchIds]);
+
+  const goSearchPrev = useCallback(() => {
+    const next = (searchIndex - 1 + searchMatchIds.length) % searchMatchIds.length;
+    setSearchIndex(next);
+    setZoomToNodeId(searchMatchIds[next] ?? null);
+  }, [searchIndex, searchMatchIds]);
+
+  const goSearchNext = useCallback(() => {
+    const next = (searchIndex + 1) % searchMatchIds.length;
+    setSearchIndex(next);
+    setZoomToNodeId(searchMatchIds[next] ?? null);
+  }, [searchIndex, searchMatchIds]);
+
   // When the graph has content and a pending focus node, activate + zoom to it
   useEffect(() => {
     if (!pendingFocusNodeId || !hasContent || mergedNodes.length === 0) return;
@@ -1769,11 +1805,23 @@ export function JourneyDiffGraphModal({
             className="text-xs w-28 outline-none text-slate-700 placeholder-slate-400 bg-transparent"
           />
           {searchQuery && (
-            <button type="button" onClick={() => setSearchQuery("")} className="text-slate-400 hover:text-slate-600 shrink-0">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <>
+              <span className="text-[10px] text-slate-400 tabular-nums shrink-0">
+                {searchMatchIds.length > 1 ? `${searchIndex + 1} / ${searchMatchIds.length}` : `${searchMatchIds.length} match${searchMatchIds.length !== 1 ? "es" : ""}`}
+              </span>
+              <button type="button" onClick={() => { setSearchQuery(""); setZoomToNodeId(null); }} title="Clear search" className="text-slate-400 hover:text-slate-600 shrink-0">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              {searchMatchIds.length > 1 && (
+                <>
+                  <div className="w-px h-3.5 bg-slate-200 shrink-0" />
+                  <button type="button" onClick={goSearchPrev} title="Previous match" className="text-slate-400 hover:text-sky-600 shrink-0 text-sm leading-none">‹</button>
+                  <button type="button" onClick={goSearchNext} title="Next match"     className="text-slate-400 hover:text-sky-600 shrink-0 text-sm leading-none">›</button>
+                </>
+              )}
+            </>
           )}
         </div>
 
@@ -1950,6 +1998,7 @@ export function JourneyDiffGraphModal({
                   onNodeActivate={handleNodeActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
+                  zoomToNodeId={zoomToNodeId}
                   scriptNames={scriptNames}
                 />
               </div>
@@ -1970,6 +2019,7 @@ export function JourneyDiffGraphModal({
                   onNodeActivate={handleNodeActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
+                  zoomToNodeId={zoomToNodeId}
                   scriptNames={scriptNames}
                 />
               </div>
