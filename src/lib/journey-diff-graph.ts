@@ -11,8 +11,33 @@ export const DIFF_NODE_H     = 64;
 export const DIFF_TERM_SIZE  = 60;
 export const DIFF_START_SIZE = 48;
 
+// Page group
+export const DIFF_PAGE_GROUP_W   = 199;
+export const DIFF_PAGE_CHILD_W   = 175;
+export const DIFF_PAGE_CHILD_H   = 30;
+export const DIFF_PAGE_GROUP_TOP = 42;
+export const DIFF_PAGE_GROUP_PAD = 12;
+export const DIFF_PAGE_CHILD_GAP = 6;
+
+export interface PageChildConfig {
+  _id: string;
+  displayName: string;
+  nodeType: string;
+}
+
+export interface PageNodeConfig {
+  nodes?: PageChildConfig[];
+}
+
 export function diffNodeHeight(outcomeCount: number): number {
   return Math.max(DIFF_NODE_H, outcomeCount * 22 + 28);
+}
+
+export function diffPageGroupHeight(childCount: number): number {
+  return DIFF_PAGE_GROUP_TOP
+    + childCount * DIFF_PAGE_CHILD_H
+    + Math.max(0, childCount - 1) * DIFF_PAGE_CHILD_GAP
+    + DIFF_PAGE_GROUP_PAD;
 }
 
 // ── Journey JSON shape ────────────────────────────────────────────────────────
@@ -70,6 +95,7 @@ export function parseMergedDiffGraph(
   remoteContent: string | undefined,
   nodeStatusMap: Map<string, DiffStatus>,
   nodeModifiedReasonMap?: Map<string, "script" | "subjourney">,
+  pageConfigs?: Map<string, PageNodeConfig>,
 ): { nodes: Node[]; edges: Edge[] } {
   const local  = localContent  ? parseJson(localContent)  : null;
   const remote = remoteContent ? parseJson(remoteContent) : null;
@@ -160,19 +186,53 @@ export function parseMergedDiffGraph(
     const pos  = { x: node.x, y: node.y };
     const outcomes = Object.keys(node.connections ?? {});
 
-    rfNodes.push({
-      id,
-      type: "journeyDiffNode",
-      position: { x: 0, y: 0 },
-      data: {
-        label:    node.displayName ?? node.nodeType ?? id.slice(0, 8),
-        nodeType: node.nodeType,
-        outcomes,
-        diffStatus: status,
-        modifiedReason: nodeModifiedReasonMap?.get(id),
-        _origPos: pos,
-      },
-    });
+    if (node.nodeType === "PageNode" && pageConfigs) {
+      const pageConfig = pageConfigs.get(id);
+      const children = pageConfig?.nodes ?? [];
+      const groupH   = diffPageGroupHeight(Math.max(children.length, 1));
+      rfNodes.push({
+        id,
+        type: "pageGroup",
+        position: { x: 0, y: 0 },
+        style: { width: DIFF_PAGE_GROUP_W, height: groupH },
+        data: {
+          label:    node.displayName ?? "Page Node",
+          nodeType: "PageNode",
+          children,
+          outcomes,
+          diffStatus: status,
+          modifiedReason: nodeModifiedReasonMap?.get(id),
+          _origPos: pos,
+        },
+      });
+      children.forEach((child, i) => {
+        const childStatus = nodeStatusMap.get(child._id) ?? status;
+        rfNodes.push({
+          id: `${id}__child__${child._id}`,
+          type: "pageChild",
+          position: { x: DIFF_PAGE_GROUP_PAD, y: DIFF_PAGE_GROUP_TOP + i * (DIFF_PAGE_CHILD_H + DIFF_PAGE_CHILD_GAP) },
+          parentId: id,
+          extent: "parent" as const,
+          draggable: false,
+          style: { width: DIFF_PAGE_CHILD_W, height: DIFF_PAGE_CHILD_H },
+          data: { label: child.displayName, nodeType: child.nodeType, diffStatus: childStatus },
+        });
+      });
+    } else {
+      rfNodes.push({
+        id,
+        type: "journeyDiffNode",
+        position: { x: 0, y: 0 },
+        data: {
+          label:    node.displayName ?? node.nodeType ?? id.slice(0, 8),
+          nodeType: node.nodeType,
+          outcomes,
+          diffStatus: status,
+          modifiedReason: nodeModifiedReasonMap?.get(id),
+          _origPos: pos,
+        },
+      });
+    }
 
     // Edges from this node
     const localConns  = lNode?.connections  ?? {};
@@ -227,6 +287,7 @@ export function parseSingleSideGraph(
   nodeStatusMap: Map<string, DiffStatus>,
   side: "local" | "remote",
   nodeModifiedReasonMap?: Map<string, "script" | "subjourney">,
+  pageConfigs?: Map<string, PageNodeConfig>,
 ): { nodes: Node[]; edges: Edge[] } {
   const data = parseJson(content);
   if (!data) return { nodes: [], edges: [] };
@@ -271,18 +332,51 @@ export function parseSingleSideGraph(
 
     const outcomes = Object.keys(node.connections ?? {});
 
-    rfNodes.push({
-      id,
-      type: "journeyDiffNode",
-      position: { x: 0, y: 0 },
-      data: {
-        label:     node.displayName ?? node.nodeType ?? id.slice(0, 8),
-        nodeType:  node.nodeType,
-        outcomes,
-        diffStatus: rawStatus,
-        modifiedReason: nodeModifiedReasonMap?.get(id),
-      },
-    });
+    if (node.nodeType === "PageNode" && pageConfigs) {
+      const pageConfig = pageConfigs.get(id);
+      const children = pageConfig?.nodes ?? [];
+      const groupH   = diffPageGroupHeight(Math.max(children.length, 1));
+      rfNodes.push({
+        id,
+        type: "pageGroup",
+        position: { x: 0, y: 0 },
+        style: { width: DIFF_PAGE_GROUP_W, height: groupH },
+        data: {
+          label:    node.displayName ?? "Page Node",
+          nodeType: "PageNode",
+          children,
+          outcomes,
+          diffStatus: rawStatus,
+          modifiedReason: nodeModifiedReasonMap?.get(id),
+        },
+      });
+      children.forEach((child, i) => {
+        const childStatus = nodeStatusMap.get(child._id) ?? rawStatus;
+        rfNodes.push({
+          id: `${id}__child__${child._id}`,
+          type: "pageChild",
+          position: { x: DIFF_PAGE_GROUP_PAD, y: DIFF_PAGE_GROUP_TOP + i * (DIFF_PAGE_CHILD_H + DIFF_PAGE_CHILD_GAP) },
+          parentId: id,
+          extent: "parent" as const,
+          draggable: false,
+          style: { width: DIFF_PAGE_CHILD_W, height: DIFF_PAGE_CHILD_H },
+          data: { label: child.displayName, nodeType: child.nodeType, diffStatus: childStatus },
+        });
+      });
+    } else {
+      rfNodes.push({
+        id,
+        type: "journeyDiffNode",
+        position: { x: 0, y: 0 },
+        data: {
+          label:     node.displayName ?? node.nodeType ?? id.slice(0, 8),
+          nodeType:  node.nodeType,
+          outcomes,
+          diffStatus: rawStatus,
+          modifiedReason: nodeModifiedReasonMap?.get(id),
+        },
+      });
+    }
 
     for (const [outcome, targetId] of Object.entries(node.connections ?? {})) {
       rfEdges.push({

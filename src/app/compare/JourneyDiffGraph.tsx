@@ -28,14 +28,26 @@ import {
   parseSingleSideGraph,
   parseNodesOnlyGraph,
   type DiffStatus,
+  type PageChildConfig,
+  type PageNodeConfig,
   DIFF_SUCCESS_ID,
   DIFF_FAILURE_ID,
   DIFF_NODE_W,
   DIFF_TERM_SIZE,
   DIFF_START_SIZE,
+  DIFF_PAGE_GROUP_W,
+  DIFF_PAGE_CHILD_W,
+  DIFF_PAGE_CHILD_H,
+  DIFF_PAGE_GROUP_TOP,
+  DIFF_PAGE_GROUP_PAD,
+  DIFF_PAGE_CHILD_GAP,
   diffNodeHeight,
+  diffPageGroupHeight,
 } from "@/lib/journey-diff-graph";
 import type { FileDiff, JourneyNodeInfo } from "@/lib/diff-types";
+import { JourneyOutlineView } from "../configs/JourneyOutlineView";
+import { JourneyTableView   } from "../configs/JourneyTableView";
+import { JourneySwimLaneView } from "../configs/JourneySwimLaneView";
 
 // ── Custom node components ────────────────────────────────────────────────────
 
@@ -304,8 +316,70 @@ function DiffFailureNodeComponent(_: NodeProps) {
   );
 }
 
+function PageGroupDiffNodeComponent({ data }: NodeProps) {
+  const d = data as {
+    label: string;
+    children: PageChildConfig[];
+    outcomes?: string[];
+    diffStatus: DiffStatus;
+    modifiedReason?: "script" | "subjourney";
+  };
+  const outcomes = d.outcomes ?? [];
+  const h = diffPageGroupHeight(Math.max((d.children ?? []).length, 1));
+
+  function borderBg(): string {
+    if (d.diffStatus === "modified") {
+      if (d.modifiedReason === "script")     return "border-orange-400 bg-orange-50/60";
+      if (d.modifiedReason === "subjourney") return "border-violet-400 bg-violet-50/60";
+      return "border-amber-400 bg-amber-50/60";
+    }
+    if (d.diffStatus === "added")   return "border-emerald-400 bg-emerald-50/60";
+    if (d.diffStatus === "removed") return "border-red-400 bg-red-50/60 opacity-70";
+    return "border-violet-300 bg-violet-50/60";
+  }
+
+  return (
+    <div
+      className={cn("border-2 border-dashed rounded-xl transition-all cursor-pointer", borderBg())}
+      style={{ width: DIFF_PAGE_GROUP_W, height: h, position: "relative" }}
+    >
+      <Handle type="target" position={Position.Left} style={{ top: "50%", background: "#94a3b8" }} />
+      <div className="px-3 pt-2 pb-1 border-b border-violet-200/80">
+        <p className="text-[9px] font-semibold text-violet-500 uppercase tracking-wider">Page Node</p>
+        <p className="text-[11px] font-medium text-slate-700 leading-tight truncate">{d.label}</p>
+      </div>
+      {outcomes.length > 0
+        ? outcomes.map((outcome, i) => {
+            const topPct = `${((i + 0.5) / outcomes.length) * 100}%`;
+            return <Handle key={outcome} id={outcome} type="source" position={Position.Right} style={{ top: topPct, background: "#94a3b8" }} />;
+          })
+        : <Handle type="source" position={Position.Right} style={{ top: "50%", background: "#94a3b8" }} />
+      }
+    </div>
+  );
+}
+
+function PageChildDiffNodeComponent({ data }: NodeProps) {
+  const d = data as { label: string; nodeType: string; diffStatus: DiffStatus };
+  const borderColor =
+    d.diffStatus === "added"    ? "border-emerald-300" :
+    d.diffStatus === "removed"  ? "border-red-300"     :
+    d.diffStatus === "modified" ? "border-amber-300"   : "border-violet-200";
+  return (
+    <div
+      className={cn("bg-white border rounded-md shadow-sm px-2 flex flex-col justify-center cursor-pointer hover:ring-1 hover:ring-sky-300 transition-all", borderColor)}
+      style={{ width: DIFF_PAGE_CHILD_W, height: DIFF_PAGE_CHILD_H }}
+    >
+      <p className="text-[10px] font-medium text-slate-700 leading-tight truncate">{d.label}</p>
+      <p className="text-[9px] text-violet-400 truncate">{d.nodeType}</p>
+    </div>
+  );
+}
+
 const nodeTypes = {
   journeyDiffNode: JourneyDiffNodeComponent,
+  pageGroup:       PageGroupDiffNodeComponent,
+  pageChild:       PageChildDiffNodeComponent,
   startNode:       DiffStartNodeComponent,
   successNode:     DiffSuccessNodeComponent,
   failureNode:     DiffFailureNodeComponent,
@@ -317,6 +391,10 @@ function getNodeDims(node: Node): [number, number] {
   if (node.type === "startNode")   return [DIFF_START_SIZE, DIFF_START_SIZE];
   if (node.type === "successNode") return [DIFF_TERM_SIZE,  DIFF_TERM_SIZE];
   if (node.type === "failureNode") return [DIFF_TERM_SIZE,  DIFF_TERM_SIZE];
+  if (node.type === "pageGroup") {
+    const children = (node.data.children as PageChildConfig[] | undefined) ?? [];
+    return [DIFF_PAGE_GROUP_W, diffPageGroupHeight(Math.max(children.length, 1))];
+  }
   const outcomes = (node.data.outcomes as string[] | undefined) ?? [];
   return [DIFF_NODE_W, diffNodeHeight(outcomes.length)];
 }
@@ -330,7 +408,8 @@ function runDagreLayout(
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir: "LR", nodesep: opts.nodesep, ranksep: opts.ranksep, marginx: 40, marginy: 40 });
-  nodes.forEach((n) => {
+  // Only layout top-level nodes; children keep relative position inside parent
+  nodes.filter((n) => !n.parentId).forEach((n) => {
     const [w, h] = getNodeDims(n);
     g.setNode(n.id, { width: w, height: h });
   });
@@ -341,6 +420,7 @@ function runDagreLayout(
   });
   dagre.layout(g);
   return nodes.map((n) => {
+    if (n.parentId) return n; // child: keep relative position
     const pos = g.node(n.id);
     if (!pos) return n;
     const [w, h] = getNodeDims(n);
@@ -1241,6 +1321,7 @@ export function JourneyDiffGraphModal({
   onClose,
 }: JourneyDiffGraphModalProps) {
   const [viewMode, setViewMode]             = useState<"merged" | "side-by-side">("merged");
+  const [displayView, setDisplayView]       = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   const [hideUnchanged, setHideUnchanged]   = useState(false);
   const [isCompact, setIsCompact]           = useState(false);
   const [syncViewports, setSyncViewports]   = useState(true);
@@ -1329,6 +1410,44 @@ export function JourneyDiffGraphModal({
     return () => clearTimeout(t);
   }, [flashNodeId]);
 
+  // Fetch PageNode configs for the active journey
+  const [pageConfigs, setPageConfigs] = useState<Map<string, PageNodeConfig>>(new Map());
+
+  useEffect(() => {
+    setPageConfigs(new Map());
+    const content = active.remoteContent ?? active.localContent;
+    if (!content) return;
+    const env = targetEnv || sourceEnv;
+    if (!env) return;
+    let pageNodeIds: string[] = [];
+    try {
+      const data = JSON.parse(content) as { nodes?: Record<string, { nodeType?: string }> };
+      pageNodeIds = Object.entries(data.nodes ?? {})
+        .filter(([, n]) => n.nodeType === "PageNode")
+        .map(([id]) => id);
+    } catch { /* ignore */ }
+    if (pageNodeIds.length === 0) return;
+
+    let cancelled = false;
+    Promise.all(
+      pageNodeIds.map(async (nodeId) => {
+        const params = new URLSearchParams({ environment: env, journey: active.name, nodeId });
+        try {
+          const res = await fetch(`/api/push/journey-node?${params}`);
+          if (!res.ok) return null;
+          const d = await res.json() as { file?: { content?: string } };
+          if (!d.file?.content) return null;
+          return [nodeId, JSON.parse(d.file.content) as PageNodeConfig] as const;
+        } catch { return null; }
+      })
+    ).then((entries) => {
+      if (cancelled) return;
+      setPageConfigs(new Map(entries.filter((e): e is [string, PageNodeConfig] => e !== null)));
+    });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active.name, active.remoteContent, active.localContent, sourceEnv, targetEnv]);
+
   // Build nodeStatusMap and nodeModifiedReasonMap
   const nodeStatusMap = useMemo(() => {
     const m = new Map<string, DiffStatus>();
@@ -1363,12 +1482,13 @@ export function JourneyDiffGraphModal({
         };
       }
 
-      const merged = parseMergedDiffGraph(active.localContent, active.remoteContent, nodeStatusMap, nodeModifiedReasonMap);
+      const pc = pageConfigs.size > 0 ? pageConfigs : undefined;
+      const merged = parseMergedDiffGraph(active.localContent, active.remoteContent, nodeStatusMap, nodeModifiedReasonMap, pc);
       const local  = active.localContent
-        ? parseSingleSideGraph(active.localContent,  nodeStatusMap, "local",  nodeModifiedReasonMap)
+        ? parseSingleSideGraph(active.localContent,  nodeStatusMap, "local",  nodeModifiedReasonMap, pc)
         : { nodes: [] as Node[], edges: [] as Edge[] };
       const remote = active.remoteContent
-        ? parseSingleSideGraph(active.remoteContent, nodeStatusMap, "remote", nodeModifiedReasonMap)
+        ? parseSingleSideGraph(active.remoteContent, nodeStatusMap, "remote", nodeModifiedReasonMap, pc)
         : { nodes: [] as Node[], edges: [] as Edge[] };
 
       return {
@@ -1376,7 +1496,7 @@ export function JourneyDiffGraphModal({
         localNodes:  local.nodes,  localEdges:  local.edges,
         remoteNodes: remote.nodes, remoteEdges: remote.edges,
       };
-    }, [hasContent, active.localContent, active.remoteContent, active.nodeInfos, nodeStatusMap, nodeModifiedReasonMap]);
+    }, [hasContent, active.localContent, active.remoteContent, active.nodeInfos, nodeStatusMap, nodeModifiedReasonMap, pageConfigs]);
 
   const graphNodeLabels = useMemo(() => {
     const map = new Map<string, string>();
@@ -1505,8 +1625,10 @@ export function JourneyDiffGraphModal({
     const label          = typeof nodeData.label    === "string" ? nodeData.label    : nodeId;
     const nodeType       = typeof nodeData.nodeType === "string" ? nodeData.nodeType : undefined;
     const modifiedReason = (nodeData.modifiedReason as "script" | "subjourney" | undefined);
+    // pageChild IDs are "${groupId}__child__${realUUID}" — use the real UUID for panel
+    const panelId = nodeId.includes("__child__") ? nodeId.split("__child__").pop()! : nodeId;
 
-    setActiveNode({ id: nodeId, label, nodeType, diffStatus, modifiedReason });
+    setActiveNode({ id: panelId, label, nodeType, diffStatus, modifiedReason });
   }, []);
 
   const showSidePanel = !!activeNode;
@@ -1579,75 +1701,98 @@ export function JourneyDiffGraphModal({
           )}
         </div>
 
-        {/* View mode toggle */}
+        {/* Display view toggle */}
         <div className="flex rounded border border-slate-300 overflow-hidden text-[11px] shrink-0">
-          {(["merged", "side-by-side"] as const).map((m) => (
+          {(["graph", "outline", "table", "swimlane", "json"] as const).map((v, i) => (
             <button
-              key={m}
+              key={v}
               type="button"
-              onClick={() => setViewMode(m)}
+              onClick={() => setDisplayView(v)}
               className={cn(
-                "px-3 py-1 transition-colors capitalize",
-                viewMode === m
+                "px-2.5 py-1 transition-colors capitalize",
+                i > 0 && "border-l border-slate-300",
+                displayView === v
                   ? "bg-sky-600 text-white"
                   : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
               )}
             >
-              {m === "side-by-side" ? "Side by side" : "Merged"}
+              {v === "swimlane" ? "Swim" : v.charAt(0).toUpperCase() + v.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Hide unchanged */}
-        <button
-          type="button"
-          onClick={() => setHideUnchanged((v) => !v)}
-          title="Hide unchanged nodes"
-          className={cn(
-            "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
-            hideUnchanged
-              ? "bg-sky-600 text-white border-sky-600"
-              : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
-          )}
-        >
-          Hide unchanged
-        </button>
+        {/* Graph-only controls */}
+        {displayView === "graph" && (<>
+          {/* View mode toggle */}
+          <div className="flex rounded border border-slate-300 overflow-hidden text-[11px] shrink-0">
+            {(["merged", "side-by-side"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setViewMode(m)}
+                className={cn(
+                  "px-3 py-1 transition-colors capitalize",
+                  viewMode === m
+                    ? "bg-slate-600 text-white"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
+                )}
+              >
+                {m === "side-by-side" ? "Side by side" : "Merged"}
+              </button>
+            ))}
+          </div>
 
-        {/* Compact layout */}
-        <button
-          type="button"
-          onClick={() => setIsCompact((v) => !v)}
-          title={isCompact ? "Switch to normal layout" : "Switch to compact layout"}
-          className={cn(
-            "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1",
-            isCompact
-              ? "bg-sky-600 text-white border-sky-600"
-              : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
-          )}
-        >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
-          </svg>
-          Compact
-        </button>
-
-        {/* Sync viewports (side-by-side only) */}
-        {viewMode === "side-by-side" && (
+          {/* Hide unchanged */}
           <button
             type="button"
-            onClick={() => setSyncViewports((v) => !v)}
-            title="Sync viewports between panels"
+            onClick={() => setHideUnchanged((v) => !v)}
+            title="Hide unchanged nodes"
             className={cn(
               "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
-              syncViewports
+              hideUnchanged
                 ? "bg-sky-600 text-white border-sky-600"
                 : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
             )}
           >
-            Sync viewports
+            Hide unchanged
           </button>
-        )}
+
+          {/* Compact layout */}
+          <button
+            type="button"
+            onClick={() => setIsCompact((v) => !v)}
+            title={isCompact ? "Switch to normal layout" : "Switch to compact layout"}
+            className={cn(
+              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1",
+              isCompact
+                ? "bg-sky-600 text-white border-sky-600"
+                : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+            )}
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+            </svg>
+            Compact
+          </button>
+
+          {/* Sync viewports (side-by-side only) */}
+          {viewMode === "side-by-side" && (
+            <button
+              type="button"
+              onClick={() => setSyncViewports((v) => !v)}
+              title="Sync viewports between panels"
+              className={cn(
+                "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
+                syncViewports
+                  ? "bg-sky-600 text-white border-sky-600"
+                  : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+              )}
+            >
+              Sync viewports
+            </button>
+          )}
+        </>)}
 
         {/* Fit view */}
         <button
@@ -1677,9 +1822,25 @@ export function JourneyDiffGraphModal({
 
       {/* Content area */}
       <div className="flex-1 min-h-0 flex">
-        {/* Graph area */}
-        <div className="flex-1 min-w-0 flex">
-          {viewMode === "merged" ? (
+        {/* Main view area */}
+        <div className="flex-1 min-w-0 flex overflow-hidden">
+          {displayView !== "graph" ? (
+            /* Alternate views — show target (remote) content */
+            (() => {
+              const json = active.remoteContent ?? active.localContent ?? "";
+              const env  = targetEnv || sourceEnv;
+              if (!json) return <div className="flex items-center justify-center h-full text-sm text-slate-400">No content available</div>;
+              if (displayView === "outline")  return <div className="flex-1 overflow-auto"><JourneyOutlineView  json={json} /></div>;
+              if (displayView === "table")    return <div className="flex-1 overflow-auto"><JourneyTableView    json={json} environment={env} journeyId={active.name} /></div>;
+              if (displayView === "swimlane") return <div className="flex-1 overflow-auto"><JourneySwimLaneView json={json} /></div>;
+              if (displayView === "json") return (
+                <div className="flex-1 overflow-auto bg-slate-950 p-4">
+                  <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap break-all">{json}</pre>
+                </div>
+              );
+              return null;
+            })()
+          ) : viewMode === "merged" ? (
             <DiffGraphCanvas
               className="flex-1"
               baseNodes={mergedNodes}

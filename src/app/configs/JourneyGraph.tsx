@@ -346,10 +346,13 @@ function parseJourney(json: string, pageConfigs?: Map<string, PageNodeConfig>): 
 
 // ── Dagre layout ──────────────────────────────────────────────────────────────
 
-function applyDagreLayout(nodes: Node[], edges: Edge[]): Node[] {
+function applyDagreLayout(nodes: Node[], edges: Edge[], compact = false): Node[] {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "LR", nodesep: 60, ranksep: 160, marginx: 40, marginy: 40 });
+  g.setGraph(compact
+    ? { rankdir: "LR", nodesep: 25, ranksep: 60,  marginx: 24, marginy: 24 }
+    : { rankdir: "LR", nodesep: 60, ranksep: 160, marginx: 40, marginy: 40 },
+  );
 
   // Only layout top-level nodes — children keep relative position inside group
   nodes.filter((n) => !n.parentId).forEach((n) => {
@@ -818,6 +821,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const [layoutKey,      setLayoutKey]       = useState(0);
   const [nodePanel,      setNodePanel]       = useState<NodePanelData | null>(null);
   const [pageConfigs,    setPageConfigs]     = useState<Map<string, PageNodeConfig>>(new Map());
+  const [isCompact,      setIsCompact]       = useState(false);
 
   // ── Inner-tree navigation stack ───────────────────────────────────────────
   const [navStack,   setNavStack]   = useState<{ journeyId: string; json: string; sourceNodeId: string }[]>([]);
@@ -917,8 +921,8 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
 
   const { dagreNodes, baseEdges } = useMemo(() => {
     const { nodes, edges } = parseJourney(activeJson, pageConfigs.size > 0 ? pageConfigs : undefined);
-    return { dagreNodes: applyDagreLayout(nodes, edges), baseEdges: edges };
-  }, [activeJson, layoutKey, pageConfigs]);
+    return { dagreNodes: applyDagreLayout(nodes, edges, isCompact), baseEdges: edges };
+  }, [activeJson, layoutKey, pageConfigs, isCompact]);
 
   // Reset to dagre positions when layout changes, then fit or restore viewport.
   // Only adjusts viewport when an explicit navigation/layout action set shouldAdjustViewport;
@@ -1117,7 +1121,28 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
       maxZoom={2}
     >
       <Panel position="top-left">
-        <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} onReset={() => { shouldAdjustViewport.current = true; setLayoutKey((k) => k + 1); }} />
+        <div className="flex flex-col gap-2">
+          <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} onReset={() => { shouldAdjustViewport.current = true; setLayoutKey((k) => k + 1); }} />
+          <button
+            type="button"
+            title={isCompact ? "Expand layout" : "Compact layout"}
+            onClick={() => { shouldAdjustViewport.current = true; setIsCompact((v) => !v); }}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-medium shadow-sm transition-colors ${
+              isCompact
+                ? "bg-sky-600 border-sky-700 text-white hover:bg-sky-700"
+                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {isCompact ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              )}
+            </svg>
+            {isCompact ? "Expanded" : "Compact"}
+          </button>
+        </div>
       </Panel>
       {navStack.length > 0 && (
         <Panel position="top-center">
