@@ -194,16 +194,18 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
   const status         = d.diffStatus ?? "unchanged";
   const modifiedReason = d.modifiedReason;
   const isInner        = d.nodeType === "InnerTreeEvaluatorNode";
+  const isScript       = d.nodeType === "ScriptedDecisionNode";
   const isFlashing     = !!d.isFlashing;
   const isSearchMatch  = !!d.isSearchMatch;
 
   // Derive border/bg based on modifiedReason when status is "modified"
   function nodeBorderBg(): string {
     if (status === "modified") {
-      if (modifiedReason === "script")    return "border-orange-400 bg-orange-50";
+      if (modifiedReason === "script")     return "border-orange-400 bg-orange-50";
       if (modifiedReason === "subjourney") return "border-violet-400 bg-violet-50";
     }
-    if (isInner) return "border-amber-300 border-dashed bg-amber-50 cursor-pointer";
+    if (isInner)  return "border-amber-300 border-dashed bg-amber-50";
+    if (isScript && status === "unchanged") return "border-slate-300 bg-violet-50";
     return statusBorderBg(status);
   }
 
