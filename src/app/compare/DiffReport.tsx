@@ -694,6 +694,15 @@ function StatusGroup({
 
 // ── Scope section ───────────────────────────────────────────────────────────
 
+function filterFiles(files: FileDiff[], query: string): FileDiff[] {
+  if (!query) return files;
+  const q = query.toLowerCase();
+  return files.filter((f) => {
+    const { name, detail } = resolveDisplayName(f);
+    return name.toLowerCase().includes(q) || detail.toLowerCase().includes(q) || f.relativePath.toLowerCase().includes(q);
+  });
+}
+
 function ScopeSection({
   group, sourceLabel, targetLabel, forceOpen,
 }: {
@@ -704,6 +713,8 @@ function ScopeSection({
 }) {
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
+  const [itemSearch, setItemSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
 
   // React to parent expand/collapse all
   const prevForce = useRef(forceOpen);
@@ -714,9 +725,11 @@ function ScopeSection({
 
   const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
 
-  const modified = group.files.filter((f) => f.status === "modified");
-  const added    = group.files.filter((f) => f.status === "added");
-  const removed  = group.files.filter((f) => f.status === "removed");
+  const modified = filterFiles(group.files.filter((f) => f.status === "modified"), itemSearch);
+  const added    = filterFiles(group.files.filter((f) => f.status === "added"),    itemSearch);
+  const removed  = filterFiles(group.files.filter((f) => f.status === "removed"),  itemSearch);
+  const totalVisible = modified.length + added.length + removed.length;
+  const totalChanged = group.modified + group.added + group.removed;
 
   return (
     <div className={cn("border rounded-lg overflow-hidden", hasChanges ? "border-slate-200" : "border-slate-100")}>
@@ -751,18 +764,57 @@ function ScopeSection({
       </div>
 
       {open && (
-        <div className="p-3 space-y-3 bg-white">
-          {hasChanges ? (
-            <>
-              <StatusGroup label="Modified" files={modified} color="text-amber-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-              <StatusGroup label="Added"    files={added}    color="text-emerald-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-              <StatusGroup label="Removed"  files={removed}  color="text-red-600"    sourceLabel={sourceLabel} targetLabel={targetLabel} />
-            </>
-          ) : (
-            <p className="text-xs text-slate-400 text-center py-2">
-              {group.unchanged} file{group.unchanged !== 1 ? "s" : ""} compared — no differences found.
-            </p>
+        <div className="bg-white">
+          {/* Item search bar */}
+          {hasChanges && (
+            <div className="px-3 pt-3 pb-2" onClick={(e) => e.stopPropagation()}>
+              <div className="relative">
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={itemSearch}
+                  onChange={(e) => setItemSearch(e.target.value)}
+                  placeholder={`Search ${group.label} items…`}
+                  className="w-full pl-7 pr-7 py-1 text-xs border border-slate-200 rounded bg-slate-50 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-400 focus:bg-white"
+                />
+                <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                {itemSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setItemSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px]"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              {itemSearch && (
+                <p className="text-[10px] text-slate-400 mt-1 px-0.5">
+                  {totalVisible} of {totalChanged} item{totalChanged !== 1 ? "s" : ""} match
+                </p>
+              )}
+            </div>
           )}
+
+          <div className="p-3 pt-1 space-y-3">
+            {hasChanges ? (
+              totalVisible === 0 && itemSearch ? (
+                <p className="text-xs text-slate-400 text-center py-2">No items match &ldquo;{itemSearch}&rdquo;.</p>
+              ) : (
+                <>
+                  <StatusGroup label="Modified" files={modified} color="text-amber-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                  <StatusGroup label="Added"    files={added}    color="text-emerald-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                  <StatusGroup label="Removed"  files={removed}  color="text-red-600"    sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                </>
+              )
+            ) : (
+              <p className="text-xs text-slate-400 text-center py-2">
+                {group.unchanged} file{group.unchanged !== 1 ? "s" : ""} compared — no differences found.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -786,7 +838,13 @@ export function DiffReport({ report }: { report: CompareReport }) {
     ? `${report.target.environment} (${report.target.mode})`
     : report.target.environment;
 
+  const [scopeSearch, setScopeSearch] = useState("");
   const scopeGroups = useMemo(() => groupByScope(files), [files]);
+  const visibleScopeGroups = useMemo(() => {
+    if (!scopeSearch.trim()) return scopeGroups;
+    const q = scopeSearch.trim().toLowerCase();
+    return scopeGroups.filter((g) => g.label.toLowerCase().includes(q) || g.scope.toLowerCase().includes(q));
+  }, [scopeGroups, scopeSearch]);
   const changedCount = summary.added + summary.removed + summary.modified;
 
   return (
@@ -808,7 +866,32 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <Stat count={summary.added}     label="Added"     color="text-emerald-600" bg="bg-emerald-50" />
           <Stat count={summary.removed}   label="Removed"   color="text-red-600"     bg="bg-red-50" />
           <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
-          <span className="ml-auto text-xs text-slate-400 self-center">{total} files · {scopeGroups.length} scopes</span>
+          <span className="ml-auto text-xs text-slate-400 self-center">
+            {total} files · {scopeSearch ? `${visibleScopeGroups.length}/` : ""}{scopeGroups.length} scopes
+          </span>
+        </div>
+
+        {/* Scope search */}
+        <div className="relative">
+          <input
+            type="text"
+            value={scopeSearch}
+            onChange={(e) => setScopeSearch(e.target.value)}
+            placeholder="Search scopes…"
+            className="w-full pl-7 pr-7 py-1 text-xs border border-slate-200 rounded bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+          />
+          <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          {scopeSearch && (
+            <button
+              type="button"
+              onClick={() => setScopeSearch("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Toolbar: expand/collapse all + filters toggle */}
@@ -862,8 +945,12 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <p className="text-sm text-slate-500 text-center py-4">
             No differences found — source and target configs are identical.
           </p>
+        ) : visibleScopeGroups.length === 0 ? (
+          <p className="text-sm text-slate-400 text-center py-4">
+            No scopes match &ldquo;{scopeSearch}&rdquo;.
+          </p>
         ) : (
-          scopeGroups.map((group) => (
+          visibleScopeGroups.map((group) => (
             <ScopeSection
               key={group.scope}
               group={group}
