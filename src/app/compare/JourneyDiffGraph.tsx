@@ -22,6 +22,7 @@ import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
 import { highlightJs } from "@/lib/highlight";
+import { js_beautify } from "js-beautify";
 import { ScriptOverlay } from "../configs/ScriptOverlay";
 import {
   parseMergedDiffGraph,
@@ -561,30 +562,138 @@ function UnchangedScriptViewer({ name, content }: { name: string; content: strin
 /** One file (config or content) inside the Scripts panel for a changed script. */
 function ScriptFileEntry({ f }: { f: FileDiff }) {
   const [fullscreen, setFullscreen] = useState(false);
+  const [fsTab, setFsTab]           = useState<"diff" | "files">("diff");
+  const [fsCopied, setFsCopied]     = useState(false);
+
+  const fmtLocal  = f.localContent  != null ? formatForDisplay(f.localContent,  f.relativePath) : null;
+  const fmtRemote = f.remoteContent != null ? formatForDisplay(f.remoteContent, f.relativePath) : null;
 
   let diffLines: DiffLineLocal[] = [];
-  if (f.diffLines && f.diffLines.length > 0) {
+  if (fmtLocal != null && fmtRemote != null) {
+    diffLines = clientDiff(fmtLocal, fmtRemote);
+  } else if (fmtRemote != null) {
+    diffLines = fmtRemote.split("\n").map((c) => ({ type: "added" as const, content: c }));
+  } else if (fmtLocal != null) {
+    diffLines = fmtLocal.split("\n").map((c) => ({ type: "removed" as const, content: c }));
+  } else if (f.diffLines && f.diffLines.length > 0) {
     diffLines = f.diffLines as DiffLineLocal[];
-  } else if (f.localContent != null && f.remoteContent != null) {
-    diffLines = clientDiff(f.localContent, f.remoteContent);
-  } else if (f.remoteContent != null) {
-    diffLines = f.remoteContent.split("\n").map((c) => ({ type: "added" as const, content: c }));
-  } else if (f.localContent != null) {
-    diffLines = f.localContent.split("\n").map((c) => ({ type: "removed" as const, content: c }));
   }
-
-  const fullscreenContent =
-    f.remoteContent ??
-    f.localContent ??
-    diffLines.filter((l) => l.type !== "removed").map((l) => l.content).join("\n");
 
   const fileLabel    = f.relativePath.split("/").pop() ?? f.relativePath;
   const changedLines = diffLines.filter((l) => l.type !== "context");
+  const hasBothSides = fmtLocal != null && fmtRemote != null;
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [fullscreen]);
 
   return (
     <>
       {fullscreen && (
-        <ScriptOverlay name={fileLabel} content={fullscreenContent} onClose={() => setFullscreen(false)} />
+        <div className="fixed inset-0 z-[80] flex flex-col bg-slate-950 overflow-hidden">
+          {/* Fullscreen header */}
+          <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-800 bg-slate-900 shrink-0">
+            <svg className="w-4 h-4 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+            <span className="text-sm font-mono font-medium text-slate-200 flex-1 truncate">{fileLabel}</span>
+            <DiffStatusBadge status={f.status as DiffStatus} />
+            {changedLines.length > 0 && (
+              <span className="text-[10px] text-slate-400 shrink-0">
+                +{changedLines.filter((l) => l.type === "added").length}
+                {" "}-{changedLines.filter((l) => l.type === "removed").length}
+              </span>
+            )}
+            {hasBothSides && (
+              <div className="flex gap-0.5 bg-slate-800 rounded-md p-0.5 shrink-0">
+                {(["diff", "files"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setFsTab(tab)}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-medium rounded transition-colors",
+                      fsTab === tab
+                        ? "bg-slate-600 text-slate-100 shadow-sm"
+                        : "text-slate-400 hover:text-slate-200",
+                    )}
+                  >
+                    {tab === "diff" ? "Diff" : "Files"}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              title="Copy script"
+              onClick={() => {
+                const copyText = fmtRemote ?? fmtLocal ?? diffLines.filter((l) => l.type !== "removed").map((l) => l.content).join("\n");
+                void navigator.clipboard.writeText(copyText).then(() => {
+                  setFsCopied(true);
+                  setTimeout(() => setFsCopied(false), 2000);
+                });
+              }}
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+            >
+              {fsCopied ? (
+                <>
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-emerald-400">Copied</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                  </svg>
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFullscreen(false)}
+              title="Close (Esc)"
+              className="text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {/* Fullscreen body */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {diffLines.length > 0 ? (
+              hasBothSides && fsTab === "files" ? (
+                <SplitDiffView lines={diffLines} />
+              ) : (
+                <div className="h-full overflow-auto text-[11px] font-mono leading-5">
+                  <table className="w-full border-collapse table-fixed">
+                    <tbody>
+                      {diffLines.map((l, i) => {
+                        const bg  = l.type === "added" ? "bg-emerald-950" : l.type === "removed" ? "bg-red-950" : "";
+                        const txt = l.type === "added" ? "text-emerald-300" : l.type === "removed" ? "text-red-300" : "text-slate-400";
+                        const pfx = l.type === "added" ? "+" : l.type === "removed" ? "-" : " ";
+                        return (
+                          <tr key={i} className={bg}>
+                            <td className={cn("px-2 py-0 select-none w-5 shrink-0", l.type === "added" ? "text-emerald-400" : l.type === "removed" ? "text-red-400" : "text-slate-600")}>{pfx}</td>
+                            <td className={cn("px-2 py-0 whitespace-pre-wrap break-all", txt)}>{l.content}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )
+            ) : (
+              <p className="px-4 py-4 text-sm text-slate-400">No changes</p>
+            )}
+          </div>
+        </div>
       )}
       <div className="px-3 pb-1">
         <div className="flex items-center gap-1.5 mb-0.5">
@@ -596,7 +705,7 @@ function ScriptFileEntry({ f }: { f: FileDiff }) {
               {" "}-{changedLines.filter((l) => l.type === "removed").length}
             </span>
           )}
-          {fullscreenContent && (
+          {diffLines.length > 0 && (
             <button
               type="button"
               title="View fullscreen"
@@ -642,6 +751,17 @@ function highlightLine(raw: string): string {
 
 type DiffLineLocal = { type: "added" | "removed" | "context"; content: string };
 
+function formatForDisplay(content: string, relativePath: string): string {
+  const ext = (relativePath.split(".").pop() ?? "").toLowerCase();
+  if (ext === "json") {
+    try { return JSON.stringify(JSON.parse(content), null, 2); } catch { /* not JSON */ }
+  }
+  if (ext === "js" || ext === "groovy") {
+    try { return js_beautify(content, { indent_size: 2, end_with_newline: true }); } catch { /* ignore */ }
+  }
+  return content;
+}
+
 function clientDiff(aText: string, bText: string): DiffLineLocal[] {
   const a = aText === "" ? [] : aText.split("\n");
   const b = bText === "" ? [] : bText.split("\n");
@@ -659,6 +779,70 @@ function clientDiff(aText: string, bText: string): DiffLineLocal[] {
     else { lines.unshift({ type: "removed", content: a[i - 1] }); i--; }
   }
   return lines;
+}
+
+function SplitDiffView({ lines }: { lines: DiffLineLocal[] }) {
+  type SplitRow = { left: string | null; leftRem: boolean; right: string | null; rightAdd: boolean };
+
+  const rows = useMemo((): SplitRow[] => {
+    const result: SplitRow[] = [];
+    let i = 0;
+    while (i < lines.length) {
+      if (lines[i].type === "context") {
+        result.push({ left: lines[i].content, leftRem: false, right: lines[i].content, rightAdd: false });
+        i++;
+      } else {
+        const removed: string[] = [];
+        const added: string[] = [];
+        while (i < lines.length && lines[i].type !== "context") {
+          if (lines[i].type === "removed") removed.push(lines[i].content);
+          else added.push(lines[i].content);
+          i++;
+        }
+        const len = Math.max(removed.length, added.length);
+        for (let j = 0; j < len; j++) {
+          result.push({
+            left: removed[j] ?? null,
+            leftRem: removed[j] !== undefined,
+            right: added[j] ?? null,
+            rightAdd: added[j] !== undefined,
+          });
+        }
+      }
+    }
+    return result;
+  }, [lines]);
+
+  return (
+    <div className="bg-slate-950 text-[10px] font-mono leading-5">
+      <table className="w-full border-collapse table-fixed">
+        <thead>
+          <tr className="border-b border-slate-700 bg-slate-900 text-[9px] text-slate-500 sticky top-0 z-10">
+            <th className="px-3 py-1 text-left font-normal border-r border-slate-700 w-1/2">Source</th>
+            <th className="px-3 py-1 text-left font-normal w-1/2">Modified</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i}>
+              <td className={cn(
+                "px-3 py-0 whitespace-pre-wrap break-all align-top border-r border-slate-800 w-1/2",
+                row.leftRem ? "bg-red-950 text-red-300" : "text-slate-400",
+              )}>
+                {row.left ?? ""}
+              </td>
+              <td className={cn(
+                "px-3 py-0 whitespace-pre-wrap break-all align-top w-1/2",
+                row.rightAdd ? "bg-emerald-950 text-emerald-300" : "text-slate-400",
+              )}>
+                {row.right ?? ""}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function InlineDiffView({ lines }: { lines: DiffLineLocal[] }) {
@@ -704,6 +888,8 @@ interface ScriptEntry {
   contentFile?: FileDiff;
   /** Present when the script is unchanged and was fetched from the API. */
   fetchedContent?: string | null;
+  /** Full filename (e.g. "myScript.js") — used for formatting fetchedContent. */
+  fetchedFilename?: string;
 }
 
 function ScriptPanelContent({
@@ -785,6 +971,7 @@ function ScriptPanelContent({
         // and get script content as a fallback for unchanged scripts.
         let name = uuid;
         let scriptFilename: string | undefined;
+        let fetchedFilename: string | undefined;
         let fetchedContent: string | null | undefined;
         if (env) {
           try {
@@ -793,7 +980,10 @@ function ScriptPanelContent({
             if (res.ok) {
               const data = await res.json() as { name?: string; content?: string | null; filename?: string };
               if (data.name) name = data.name;
-              if (data.filename) scriptFilename = data.filename.replace(/\.[^.]+$/, "");
+              if (data.filename) {
+                fetchedFilename = data.filename;
+                scriptFilename = data.filename.replace(/\.[^.]+$/, "");
+              }
               fetchedContent = data.content ?? null;
             }
           } catch { /* ignore */ }
@@ -820,7 +1010,7 @@ function ScriptPanelContent({
         if (hasChanges) {
           result.push({ uuid, name, configFile, contentFile });
         } else {
-          result.push({ uuid, name, fetchedContent: fetchedContent ?? null });
+          result.push({ uuid, name, fetchedContent: fetchedContent ?? null, fetchedFilename });
         }
       }
 
@@ -857,7 +1047,12 @@ function ScriptPanelContent({
           {!(entry.configFile || entry.contentFile) && entry.fetchedContent !== undefined && (
             <>
               {entry.fetchedContent ? (
-                <UnchangedScriptViewer name={entry.name} content={entry.fetchedContent} />
+                <UnchangedScriptViewer
+                  name={entry.name}
+                  content={entry.fetchedFilename
+                    ? formatForDisplay(entry.fetchedContent, entry.fetchedFilename)
+                    : entry.fetchedContent}
+                />
               ) : (
                 <p className="px-3 text-[10px] text-slate-400 italic">No content</p>
               )}
@@ -1576,6 +1771,18 @@ export function JourneyDiffGraphModal({
     innerRemoteContent?: string;
   } | null>(null);
 
+  // Lock body scroll and auto-focus modal when open
+  const modalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (previewModal) {
+      document.body.style.overflow = "hidden";
+      modalRef.current?.focus();
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [!!previewModal]);
+
   const [searchQuery, setSearchQuery]   = useState("");
   const [flashNodeId, setFlashNodeId]   = useState<string | null>(null);
   // Pending focus: activate + zoom to this node once the graph content is ready
@@ -1685,6 +1892,7 @@ export function JourneyDiffGraphModal({
           // (the content serves as fallback if no diff file is found in step 2).
           let scriptName: string = scriptId;
           let scriptFilename: string | undefined;  // basename without extension, for file lookup
+          let scriptFullFilename: string | undefined;  // full filename including extension
           let apiFallbackContent: string | undefined;
           try {
             const sParams = new URLSearchParams({ environment: env, scriptId });
@@ -1692,8 +1900,13 @@ export function JourneyDiffGraphModal({
             if (sRes.ok && !cancelled) {
               const sd = await sRes.json() as { name?: string; content?: string; filename?: string };
               if (sd.name) scriptName = sd.name;
-              if (sd.filename) scriptFilename = sd.filename.replace(/\.[^.]+$/, "");
-              apiFallbackContent = sd.content ?? undefined;
+              if (sd.filename) {
+                scriptFullFilename = sd.filename;
+                scriptFilename = sd.filename.replace(/\.[^.]+$/, "");
+              }
+              apiFallbackContent = sd.content != null
+                ? (scriptFullFilename ? formatForDisplay(sd.content, scriptFullFilename) : sd.content)
+                : undefined;
             }
           } catch { /* ignore */ }
           if (cancelled) return;
@@ -1709,15 +1922,17 @@ export function JourneyDiffGraphModal({
             })(),
           );
           if (contentFile) {
-            scriptRemoteContent = contentFile.remoteContent ?? undefined;
-            if (contentFile.diffLines && contentFile.diffLines.length > 0) {
+            const cfLocal  = contentFile.localContent  != null ? formatForDisplay(contentFile.localContent,  contentFile.relativePath) : null;
+            const cfRemote = contentFile.remoteContent != null ? formatForDisplay(contentFile.remoteContent, contentFile.relativePath) : null;
+            scriptRemoteContent = cfRemote ?? undefined;
+            if (cfLocal != null && cfRemote != null) {
+              scriptDiffLines = clientDiff(cfLocal, cfRemote);
+            } else if (cfRemote != null) {
+              scriptDiffLines = cfRemote.split("\n").map((c) => ({ type: "added" as const, content: c }));
+            } else if (cfLocal != null) {
+              scriptDiffLines = cfLocal.split("\n").map((c) => ({ type: "removed" as const, content: c }));
+            } else if (contentFile.diffLines && contentFile.diffLines.length > 0) {
               scriptDiffLines = contentFile.diffLines as DiffLineLocal[];
-            } else if (contentFile.localContent != null && contentFile.remoteContent != null) {
-              scriptDiffLines = clientDiff(contentFile.localContent, contentFile.remoteContent);
-            } else if (contentFile.remoteContent != null) {
-              scriptDiffLines = contentFile.remoteContent.split("\n").map((c) => ({ type: "added" as const, content: c }));
-            } else if (contentFile.localContent != null) {
-              scriptDiffLines = contentFile.localContent.split("\n").map((c) => ({ type: "removed" as const, content: c }));
             }
           }
 
@@ -2074,7 +2289,7 @@ export function JourneyDiffGraphModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-white"
+      className="fixed inset-0 z-50 flex flex-col bg-white overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
@@ -2387,32 +2602,26 @@ export function JourneyDiffGraphModal({
           ?? previewModal.scriptContent
           ?? previewModal.scriptDiffLines?.filter((l) => l.type !== "removed").map((l) => l.content).join("\n");
         const hasScriptContent = previewModal.scriptDiffLines != null || !!scriptCopyContent;
-        const showFullscreen   = previewModal.scriptFullscreen && !!scriptCopyContent;
+        const showFullscreen   = !!previewModal.scriptFullscreen && previewModal.nodeType === "ScriptedDecisionNode";
 
-        return (
-          <>
-            {showFullscreen && (
-              <ScriptOverlay
-                name={previewModal.scriptName ?? previewModal.title}
-                content={scriptCopyContent!}
-                onClose={() => setPreviewModal((p) => p ? { ...p, scriptFullscreen: false } : null)}
-              />
+        const modalInner = (
+          <div
+            ref={modalRef}
+            tabIndex={-1}
+            className={cn(
+              "flex flex-col overflow-hidden outline-none bg-white",
+              showFullscreen
+                ? "fixed inset-0 z-[70]"
+                : "rounded-xl shadow-2xl",
             )}
-            {!showFullscreen && (
-              <div
-                className="absolute inset-0 z-[60] flex items-center justify-center bg-black/40"
-                onClick={() => setPreviewModal(null)}
-              >
-                <div
-                  className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden"
-                  style={{
-                    width:     previewModal.nodeType === "InnerTreeEvaluatorNode" ? "80vw" : "60vw",
-                    maxWidth:  960,
-                    height:    previewModal.nodeType === "InnerTreeEvaluatorNode" ? "75vh" : "60vh",
-                    maxHeight: "90vh",
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
+            style={showFullscreen ? undefined : {
+              width:     previewModal.nodeType === "InnerTreeEvaluatorNode" ? "80vw" : "60vw",
+              maxWidth:  960,
+              height:    previewModal.nodeType === "InnerTreeEvaluatorNode" ? "75vh" : "60vh",
+              maxHeight: "90vh",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
                   {/* Modal header */}
                   <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
                     <div className="flex-1 min-w-0">
@@ -2475,13 +2684,19 @@ export function JourneyDiffGraphModal({
                         </button>
                         <button
                           type="button"
-                          title="View fullscreen"
-                          onClick={() => setPreviewModal((p) => p ? { ...p, scriptFullscreen: true } : null)}
+                          title={showFullscreen ? "Exit fullscreen" : "View fullscreen"}
+                          onClick={() => setPreviewModal((p) => p ? { ...p, scriptFullscreen: !p.scriptFullscreen } : null)}
                           className="text-slate-400 hover:text-slate-600 shrink-0"
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                          </svg>
+                          {showFullscreen ? (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 15v4.5M9 15H4.5M15 9h4.5M15 9V4.5M15 15h4.5M15 15v4.5" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                            </svg>
+                          )}
                         </button>
                       </>
                     )}
@@ -2509,15 +2724,17 @@ export function JourneyDiffGraphModal({
                                 const isConfig  = f.relativePath.includes("/scripts-config/");
                                 const fileLabel = f.relativePath.split("/").pop() ?? f.relativePath;
                                 const statusColor = f.status === "added" ? "text-emerald-400" : f.status === "removed" ? "text-red-400" : "text-amber-400";
+                                const ftLocal  = f.localContent  != null ? formatForDisplay(f.localContent,  f.relativePath) : null;
+                                const ftRemote = f.remoteContent != null ? formatForDisplay(f.remoteContent, f.relativePath) : null;
                                 let diffLines: DiffLineLocal[] = [];
-                                if (f.diffLines && f.diffLines.length > 0) {
+                                if (ftLocal != null && ftRemote != null) {
+                                  diffLines = clientDiff(ftLocal, ftRemote);
+                                } else if (ftRemote != null) {
+                                  diffLines = ftRemote.split("\n").map((c) => ({ type: "added" as const, content: c }));
+                                } else if (ftLocal != null) {
+                                  diffLines = ftLocal.split("\n").map((c) => ({ type: "removed" as const, content: c }));
+                                } else if (f.diffLines && f.diffLines.length > 0) {
                                   diffLines = f.diffLines as DiffLineLocal[];
-                                } else if (f.localContent != null && f.remoteContent != null) {
-                                  diffLines = clientDiff(f.localContent, f.remoteContent);
-                                } else if (f.remoteContent != null) {
-                                  diffLines = f.remoteContent.split("\n").map((c) => ({ type: "added" as const, content: c }));
-                                } else if (f.localContent != null) {
-                                  diffLines = f.localContent.split("\n").map((c) => ({ type: "removed" as const, content: c }));
                                 }
                                 const added   = diffLines.filter((l) => l.type === "added").length;
                                 const removed = diffLines.filter((l) => l.type === "removed").length;
@@ -2538,7 +2755,7 @@ export function JourneyDiffGraphModal({
                                         </span>
                                       )}
                                     </div>
-                                    {diffLines.length > 0 && <InlineDiffView lines={diffLines} />}
+                                    {diffLines.length > 0 && <SplitDiffView lines={diffLines} />}
                                   </div>
                                 );
                               })}
@@ -2570,10 +2787,18 @@ export function JourneyDiffGraphModal({
                       )
                     )}
                   </div>
-                </div>
-              </div>
-            )}
-          </>
+          </div>
+        );
+
+        return showFullscreen ? (
+          modalInner
+        ) : (
+          <div
+            className="absolute inset-0 z-[60] flex items-center justify-center bg-black/40"
+            onClick={() => setPreviewModal(null)}
+          >
+            {modalInner}
+          </div>
         );
       })()}
     </div>

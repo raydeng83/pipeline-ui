@@ -909,6 +909,18 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     innerJourneyJson?: string;
   } | null>(null);
 
+  // Lock body scroll and auto-focus modal when open
+  const modalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (previewModal) {
+      document.body.style.overflow = "hidden";
+      modalRef.current?.focus();
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [!!previewModal]);
+
   // Fetch preview content when modal opens
   useEffect(() => {
     if (!previewModal?.loading) return;
@@ -1223,7 +1235,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   }
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full overflow-hidden">
       {/* ── Header bar ──────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-slate-200 shrink-0">
 
@@ -1441,7 +1453,9 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
             onClick={() => setPreviewModal(null)}
           >
             <div
-              className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden"
+              ref={modalRef}
+              tabIndex={-1}
+              className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden outline-none"
               style={{
                 width:     previewModal.nodeType === "InnerTreeEvaluatorNode" ? "80vw" : "60vw",
                 maxWidth:  960,
