@@ -3,6 +3,41 @@
 import { useState, useMemo, useRef } from "react";
 import type { CompareReport, FileDiff, DiffLine } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
+import { js_beautify } from "js-beautify";
+
+// ── Client-side content formatting ───────────────────────────────────────────
+
+function formatContent(content: string, filePath: string): string {
+  // JSON files — pretty-print (server may have already done this, but handles edge cases)
+  try { return JSON.stringify(JSON.parse(content), null, 2); } catch { /* not JSON */ }
+  // JS / Groovy scripts — use js-beautify
+  if (/\.(js|groovy)$/i.test(filePath)) {
+    return js_beautify(content, { indent_size: 2, end_with_newline: true });
+  }
+  return content;
+}
+
+// ── Client-side LCS diff (mirrors server diff.ts logic) ──────────────────────
+
+function clientDiff(aText: string, bText: string): DiffLine[] {
+  const a = aText === "" ? [] : aText.split("\n");
+  const b = bText === "" ? [] : bText.split("\n");
+  const m = a.length, n = b.length;
+  // Bail on very large files to avoid freezing the browser
+  if (m > 2000 || n > 2000) return [{ type: "context", content: "(file too large to diff in browser)" }];
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  const lines: DiffLine[] = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) { lines.unshift({ type: "context", content: a[i-1] }); i--; j--; }
+    else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { lines.unshift({ type: "added", content: b[j-1] }); j--; }
+    else { lines.unshift({ type: "removed", content: a[i-1] }); i--; }
+  }
+  return lines;
+}
 
 // ── Syntax highlight ──────────────────────────────────────────────────────────
 
@@ -372,6 +407,19 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
   const [view, setView] = useState<ViewMode>("diff");
   const [fullscreen, setFullscreen] = useState(false);
   const [wrap, setWrap] = useState(false);
+  const [format, setFormat] = useState(false);
+
+  // When format is on, pretty-print both sides and recompute diffLines client-side
+  const fmtLocal    = format && file.localContent  != null ? formatContent(file.localContent,  file.relativePath) : file.localContent;
+  const fmtRemote   = format && file.remoteContent != null ? formatContent(file.remoteContent, file.relativePath) : file.remoteContent;
+  const fmtDiffLines: DiffLine[] | undefined = useMemo(() => {
+    if (!format) return file.diffLines;
+    if (fmtLocal != null && fmtRemote != null) return clientDiff(fmtLocal, fmtRemote);
+    if (fmtRemote != null) return fmtRemote.split("\n").map((c) => ({ type: "added"   as const, content: c }));
+    if (fmtLocal  != null) return fmtLocal.split("\n").map((c)  => ({ type: "removed" as const, content: c }));
+    return file.diffLines;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [format, fmtLocal, fmtRemote]);
   const s = STATUS_STYLES[file.status];
   const hasDiff = !!file.diffLines?.length;
   const hasContent = file.localContent !== undefined || file.remoteContent !== undefined;
@@ -390,9 +438,9 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
   });
 
   const viewerContent = open && (
-    view === "diff" && file.diffLines
-      ? <DiffViewer lines={file.diffLines} fullscreen={fullscreen} wrap={wrap} />
-      : <SideBySideViewer localContent={file.localContent} remoteContent={file.remoteContent} diffLines={file.diffLines} sourceLabel={sourceLabel} targetLabel={targetLabel} fullscreen={fullscreen} wrap={wrap} />
+    view === "diff" && fmtDiffLines
+      ? <DiffViewer lines={fmtDiffLines} fullscreen={fullscreen} wrap={wrap} />
+      : <SideBySideViewer localContent={fmtLocal} remoteContent={fmtRemote} diffLines={fmtDiffLines} sourceLabel={sourceLabel} targetLabel={targetLabel} fullscreen={fullscreen} wrap={wrap} />
   );
 
   if (fullscreen && open) {
@@ -440,6 +488,17 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
             )}
           >
             Wrap
+          </button>
+          <button
+            type="button"
+            onClick={() => setFormat((f) => !f)}
+            title="Auto-format content (JSON / JS / Groovy)"
+            className={cn(
+              "px-2 py-0.5 text-[10px] rounded border transition-colors shrink-0",
+              format ? "bg-sky-600 text-white border-sky-600" : "text-slate-400 border-slate-600 hover:bg-slate-800"
+            )}
+          >
+            Format
           </button>
           <button
             type="button"
@@ -512,6 +571,17 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
               )}
             >
               Wrap
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormat((f) => !f)}
+              title="Auto-format content (JSON / JS / Groovy)"
+              className={cn(
+                "px-2 py-0.5 text-[10px] rounded border transition-colors",
+                format ? "bg-slate-900 text-white border-slate-900" : "text-slate-500 border-slate-300 hover:bg-slate-100"
+              )}
+            >
+              Format
             </button>
             <button
               type="button"
