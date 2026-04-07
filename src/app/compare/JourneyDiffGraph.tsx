@@ -16,10 +16,13 @@ import {
   type Edge,
   type NodeProps,
   type Viewport,
+  type EdgeMouseHandler,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
+import { highlightJs } from "@/lib/highlight";
+import { ScriptOverlay } from "../configs/ScriptOverlay";
 import {
   parseMergedDiffGraph,
   parseSingleSideGraph,
@@ -74,18 +77,112 @@ function DiffStatusBadge({ status }: { status?: DiffStatus }) {
   );
 }
 
+// ── Property viewer ───────────────────────────────────────────────────────────
+
+const CONFIG_BLOCKLIST = new Set(["_id", "_rev", "_type", "_outcomes"]);
+
+function PropertyValue({ value }: { value: unknown }) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (value === null || value === undefined) {
+    return <span className="text-slate-400 italic text-[10px]">null</span>;
+  }
+  if (typeof value === "boolean") {
+    return (
+      <span className={cn("text-[10px] font-mono font-medium", value ? "text-emerald-600" : "text-rose-500")}>
+        {String(value)}
+      </span>
+    );
+  }
+  if (typeof value === "number") {
+    return <span className="text-[10px] font-mono text-amber-700">{value}</span>;
+  }
+  if (typeof value === "string") {
+    return <span className="text-[10px] font-mono text-slate-700 break-all">{value}</span>;
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 0) return <span className="text-slate-400 italic text-[10px]">[]</span>;
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="text-[10px] text-sky-600 hover:text-sky-800 font-mono"
+        >
+          {expanded ? "▾" : "▸"} [{value.length}]
+        </button>
+        {expanded && (
+          <div className="mt-1 pl-2 border-l border-slate-200 space-y-1">
+            {value.map((item, i) => (
+              <div key={i} className="flex gap-1 items-start">
+                <span className="text-[9px] text-slate-300 font-mono shrink-0 mt-0.5">{i}</span>
+                <PropertyValue value={item} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  if (typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) return <span className="text-slate-400 italic text-[10px]">{"{}"}</span>;
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="text-[10px] text-sky-600 hover:text-sky-800 font-mono"
+        >
+          {expanded ? "▾" : "▸"} {"{…}"}
+        </button>
+        {expanded && (
+          <div className="mt-1 pl-2 border-l border-slate-200 space-y-1.5">
+            {entries.map(([k, v]) => (
+              <div key={k} className="flex gap-1.5 items-start">
+                <span className="text-[9px] text-slate-500 font-medium shrink-0 mt-0.5">{k}:</span>
+                <PropertyValue value={v} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  return <span className="text-[10px] font-mono text-slate-600">{String(value)}</span>;
+}
+
+function PropertyTable({ config }: { config: Record<string, unknown> }) {
+  const entries = Object.entries(config).filter(([k]) => !CONFIG_BLOCKLIST.has(k));
+  if (entries.length === 0) return <p className="text-[11px] text-slate-400">No properties</p>;
+  return (
+    <div className="space-y-2">
+      {entries.map(([key, value]) => (
+        <div key={key}>
+          <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{key}</p>
+          <PropertyValue value={value} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function JourneyDiffNodeComponent({ data }: NodeProps) {
   const d = data as {
     label: string;
     nodeType?: string;
     outcomes: string[];
     diffStatus: DiffStatus;
+    isFlashing?: boolean;
+    isSearchMatch?: boolean;
   };
-  const outcomes   = d.outcomes ?? [];
-  const h          = diffNodeHeight(outcomes.length);
-  const status     = d.diffStatus ?? "unchanged";
-  const badgeLabel = statusBadgeLabel(status);
-  const isInner    = d.nodeType === "InnerTreeEvaluatorNode";
+  const outcomes      = d.outcomes ?? [];
+  const h             = diffNodeHeight(outcomes.length);
+  const status        = d.diffStatus ?? "unchanged";
+  const badgeLabel    = statusBadgeLabel(status);
+  const isInner       = d.nodeType === "InnerTreeEvaluatorNode";
+  const isFlashing    = !!d.isFlashing;
+  const isSearchMatch = !!d.isSearchMatch;
 
   return (
     <div
@@ -94,6 +191,8 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
         isInner
           ? "border-amber-300 border-dashed bg-amber-50 cursor-pointer"
           : statusBorderBg(status),
+        isFlashing && "ring-2 ring-sky-400 ring-offset-1 animate-pulse",
+        isSearchMatch && "ring-2 ring-amber-400 ring-offset-1",
       )}
       style={{ width: DIFF_NODE_W, height: h }}
     >
@@ -269,6 +368,47 @@ function DiffLegend() {
         </div>
       ))}
     </div>
+  );
+}
+
+// ── Unchanged script viewer ───────────────────────────────────────────────────
+
+function UnchangedScriptViewer({ name, content }: { name: string; content: string }) {
+  const [copied, setCopied]         = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const highlighted = useMemo(() => highlightJs(content), [content]);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <>
+      {fullscreen && <ScriptOverlay name={name} content={content} onClose={() => setFullscreen(false)} />}
+      <div className="border border-slate-200 rounded overflow-hidden mx-3 mb-2">
+        <div className="flex items-center gap-2 px-2 py-1 bg-slate-50 border-b border-slate-200">
+          <svg className="w-3 h-3 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+          </svg>
+          <span className="text-[9px] font-mono text-slate-500 truncate flex-1">{name}</span>
+          <button type="button" onClick={handleCopy} title="Copy" className="text-slate-400 hover:text-slate-600 shrink-0 transition-colors">
+            {copied
+              ? <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              : <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
+            }
+          </button>
+          <button type="button" onClick={() => setFullscreen(true)} title="Fullscreen" className="text-slate-400 hover:text-slate-600 shrink-0">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
+          </button>
+        </div>
+        <div className="bg-slate-950 overflow-auto max-h-64">
+          <pre className="text-[9px] font-mono leading-relaxed p-2 text-slate-300" dangerouslySetInnerHTML={{ __html: highlighted }} />
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -489,15 +629,13 @@ function ScriptPanelContent({
 
           {/* Unchanged script fetched from API — render as plain viewer */}
           {!entry.configFile && entry.fetchedContent !== undefined && (
-            <div className="px-3 pb-1">
+            <>
               {entry.fetchedContent ? (
-                <InlineDiffView
-                  lines={entry.fetchedContent.split("\n").map((c) => ({ type: "context" as const, content: c }))}
-                />
+                <UnchangedScriptViewer name={entry.name} content={entry.fetchedContent} />
               ) : (
-                <p className="text-[10px] text-slate-400 italic">No content</p>
+                <p className="px-3 text-[10px] text-slate-400 italic">No content</p>
               )}
-            </div>
+            </>
           )}
 
           {/* Changed script — render diff for each file */}
@@ -548,6 +686,210 @@ function ScriptPanelContent({
   );
 }
 
+// ── NodeDetailPanel ────────────────────────────────────────────────────────────
+
+function NodeDetailPanel({
+  nodeId, nodeLabel, nodeType, diffStatus,
+  graphEdges, graphNodeLabels,
+  journeyName, files, sourceEnv, targetEnv,
+  navigating, onNavigateInto, onClose,
+}: {
+  nodeId: string;
+  nodeLabel: string;
+  nodeType?: string;
+  diffStatus: DiffStatus;
+  graphEdges: Edge[];
+  graphNodeLabels: Map<string, string>;
+  journeyName: string;
+  files: FileDiff[];
+  sourceEnv: string;
+  targetEnv: string;
+  navigating: boolean;
+  onNavigateInto: (nodeId: string) => void;
+  onClose: () => void;
+}) {
+  const [tab, setTab]                     = useState<"config" | "scripts">("config");
+  const [config, setConfig]               = useState<Record<string, unknown> | null>(null);
+  const [configLoading, setConfigLoading] = useState(false);
+
+  const isStaticNode = nodeId === "startNode" || nodeId === DIFF_SUCCESS_ID || nodeId === DIFF_FAILURE_ID;
+
+  // Reset tab when node changes
+  useEffect(() => { setTab("config"); setConfig(null); }, [nodeId]);
+
+  // Fetch node config
+  useEffect(() => {
+    if (isStaticNode) { setConfig(null); return; }
+    let cancelled = false;
+    setConfigLoading(true);
+    setConfig(null);
+
+    const run = async () => {
+      const fileEntry = files.find(
+        (f) => f.relativePath.includes(`/${nodeId}.json`) && f.relativePath.includes("/nodes/"),
+      );
+      const content = fileEntry?.localContent ?? fileEntry?.remoteContent;
+      if (content) {
+        try { if (!cancelled) setConfig(JSON.parse(content)); } catch { /* ignore */ }
+        if (!cancelled) setConfigLoading(false);
+        return;
+      }
+      const env = sourceEnv || targetEnv;
+      if (!env || !journeyName) { if (!cancelled) setConfigLoading(false); return; }
+      try {
+        const params = new URLSearchParams({ environment: env, journey: journeyName, nodeId });
+        const res = await fetch(`/api/push/journey-node?${params}`);
+        if (res.ok && !cancelled) {
+          const d = await res.json() as { file?: { content?: string } };
+          try { setConfig(JSON.parse(d.file?.content ?? "")); } catch { setConfig(null); }
+        }
+      } catch { /* ignore */ }
+      if (!cancelled) setConfigLoading(false);
+    };
+    void run();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodeId, isStaticNode, sourceEnv, targetEnv, journeyName, files]);
+
+  // Resolve outcomes from edges
+  const outcomes = useMemo(() =>
+    graphEdges
+      .filter((e) => e.source === nodeId && e.id !== "__start__")
+      .map((e) => ({
+        outcomeId: typeof e.label === "string" && e.label ? e.label : "outcome",
+        targetId: e.target,
+        targetLabel: graphNodeLabels.get(e.target) ?? e.target.slice(0, 8),
+      })),
+  [nodeId, graphEdges, graphNodeLabels]);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-start gap-2 px-3 py-2 border-b border-slate-100 shrink-0">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-semibold text-slate-700 truncate" title={nodeLabel}>{nodeLabel}</div>
+          {nodeType && (
+            <div className="text-[9px] text-slate-400 font-mono truncate">{nodeType}</div>
+          )}
+        </div>
+        <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 shrink-0 mt-0.5">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Tab bar (hidden for static nodes) */}
+      {!isStaticNode && (
+        <div className="flex border-b border-slate-200 shrink-0">
+          {(["config", "scripts"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTab(t)}
+              className={cn(
+                "flex-1 py-1.5 text-[11px] font-medium transition-colors border-b-2 capitalize",
+                tab === t ? "border-sky-500 text-sky-700" : "border-transparent text-slate-500 hover:text-slate-700",
+              )}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto">
+        {/* Static node info */}
+        {isStaticNode && (
+          <div className="px-3 py-3 space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Status</span>
+              <DiffStatusBadge status={diffStatus} />
+            </div>
+            <p className="text-[9px] text-slate-400 font-mono break-all">{nodeId}</p>
+          </div>
+        )}
+
+        {/* Config tab */}
+        {!isStaticNode && tab === "config" && (
+          <>
+            {/* Status */}
+            <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2 shrink-0">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Status</span>
+              <DiffStatusBadge status={diffStatus} />
+            </div>
+
+            {/* Outcomes */}
+            {outcomes.length > 0 && (
+              <div className="px-3 py-3 border-b border-slate-100">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Outcomes</p>
+                <div className="space-y-2">
+                  {outcomes.map(({ outcomeId, targetLabel }) => (
+                    <div key={outcomeId} className="flex items-center gap-2 min-w-0">
+                      <span className="text-[10px] font-mono bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 shrink-0">{outcomeId}</span>
+                      <svg className="w-3 h-3 text-slate-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                      <span className="text-[11px] text-slate-700 truncate">{targetLabel}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Descend into inner journey */}
+            {nodeType === "InnerTreeEvaluatorNode" && (
+              <div className="px-3 py-3 border-b border-slate-100">
+                <button
+                  type="button"
+                  disabled={navigating}
+                  onClick={() => onNavigateInto(nodeId)}
+                  className="w-full flex items-center gap-2 text-[11px] font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg px-3 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {navigating ? (
+                    <svg className="w-3.5 h-3.5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  )}
+                  <span className="flex-1 text-left">{navigating ? "Loading…" : "Descend into journey"}</span>
+                  {typeof config?.tree === "string" && config.tree && (
+                    <span className="font-mono text-[10px] text-sky-400 truncate max-w-[100px]">{config.tree}</span>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Configuration properties */}
+            <div className="px-3 py-3">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Configuration</p>
+              {configLoading && <p className="text-[11px] text-slate-400">Loading…</p>}
+              {!configLoading && config && <PropertyTable config={config} />}
+              {!configLoading && !config && <p className="text-[11px] text-slate-400">No configuration file found</p>}
+            </div>
+          </>
+        )}
+
+        {/* Scripts tab */}
+        {!isStaticNode && tab === "scripts" && (
+          <ScriptPanelContent
+            nodeId={nodeId}
+            nodeType={nodeType}
+            journeyName={journeyName}
+            files={files}
+            sourceEnv={sourceEnv}
+            targetEnv={targetEnv}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── DiffGraphCanvasInner ──────────────────────────────────────────────────────
 
 interface DiffGraphCanvasInnerProps {
@@ -558,6 +900,8 @@ interface DiffGraphCanvasInnerProps {
   externalViewport: Viewport | null;
   onViewportChange: (vp: Viewport) => void;
   onNodeActivate?: (nodeId: string | null, nodeData: Record<string, unknown>) => void;
+  searchQuery: string;
+  flashNodeId: string | null;
 }
 
 function DiffGraphCanvasInner({
@@ -568,9 +912,13 @@ function DiffGraphCanvasInner({
   externalViewport,
   onViewportChange,
   onNodeActivate,
+  searchQuery,
+  flashNodeId,
 }: DiffGraphCanvasInnerProps) {
-  const { fitView, setViewport } = useReactFlow();
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const { fitView, setViewport, getViewport } = useReactFlow();
+  const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
+  const [hoveredEdgeId, setHoveredEdgeId]     = useState<string | null>(null);
+  const [pinnedEdgeId, setPinnedEdgeId]       = useState<string | null>(null);
 
   const layoutedNodes = useMemo(
     () => applyLayout(baseNodes, baseEdges),
@@ -598,6 +946,27 @@ function DiffGraphCanvasInner({
       setViewport(externalViewport, { duration: 0 });
     }
   }, [externalViewport, setViewport]);
+
+  // Edge handlers
+  const handleEdgeMouseEnter: EdgeMouseHandler = useCallback((_e, edge) => setHoveredEdgeId(edge.id), []);
+  const handleEdgeMouseLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), []);
+  const handleEdgeClick: EdgeMouseHandler      = useCallback((_e, edge) => setPinnedEdgeId((p) => p === edge.id ? null : edge.id), []);
+
+  // Arrow key panning
+  useEffect(() => {
+    const PAN = 120;
+    const handler = (e: KeyboardEvent) => {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      e.preventDefault();
+      const vp = getViewport();
+      const dx = e.key === "ArrowLeft" ? PAN : e.key === "ArrowRight" ? -PAN : 0;
+      const dy = e.key === "ArrowUp"   ? PAN : e.key === "ArrowDown"  ? -PAN : 0;
+      setViewport({ x: vp.x + dx, y: vp.y + dy, zoom: vp.zoom }, { duration: 100 });
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [getViewport, setViewport]);
 
   // Apply hideUnchanged filter
   const visibleNodeIds = useMemo(() => {
@@ -629,34 +998,72 @@ function DiffGraphCanvasInner({
     return set;
   }, [selectedNodeId, filteredEdges]);
 
+  // Search matches
+  const searchMatches = useMemo(() => {
+    if (!searchQuery.trim()) return new Set<string>();
+    const q = searchQuery.toLowerCase();
+    return new Set(
+      nodes.filter((n) => String(n.data.label ?? "").toLowerCase().includes(q)).map((n) => n.id),
+    );
+  }, [searchQuery, nodes]);
+
+  useEffect(() => {
+    if (searchMatches.size === 0) return;
+    const t = setTimeout(() => {
+      void fitView({ nodes: [...searchMatches].map((id) => ({ id })), duration: 500, padding: 0.4 });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [searchMatches, fitView]);
+
   // Apply opacity/animation to nodes and edges based on selection
   const styledNodes = useMemo(() => {
-    if (!highlighted) return filteredNodes;
-    return filteredNodes.map((n) => ({
-      ...n,
-      style: {
-        ...n.style,
-        opacity: highlighted.has(n.id) ? 1 : 0.15,
-        transition: "opacity 0.2s",
-      },
-    }));
-  }, [filteredNodes, highlighted]);
-
-  const styledEdges = useMemo(() => {
-    if (!highlighted) return filteredEdges;
-    return filteredEdges.map((e) => {
-      const onPath = highlighted.has(e.source) && highlighted.has(e.target);
+    return filteredNodes.map((n) => {
+      const onPath = highlighted ? highlighted.has(n.id) : true;
       return {
-        ...e,
-        animated: onPath,
+        ...n,
+        data: {
+          ...n.data,
+          isFlashing:    n.id === flashNodeId,
+          isSearchMatch: searchMatches.has(n.id),
+        },
         style: {
-          ...e.style,
-          opacity: onPath ? 1 : 0.06,
+          ...n.style,
+          opacity: highlighted ? (onPath ? 1 : 0.15) : 1,
           transition: "opacity 0.2s",
         },
       };
     });
-  }, [filteredEdges, highlighted]);
+  }, [filteredNodes, highlighted, flashNodeId, searchMatches]);
+
+  const styledEdges = useMemo(() => {
+    const activeEdgeId = hoveredEdgeId ?? pinnedEdgeId;
+    return filteredEdges.map((e) => {
+      const isHovered = e.id === hoveredEdgeId;
+      const isPinned  = e.id === pinnedEdgeId;
+      const isActive  = e.id === activeEdgeId;
+      const onPath    = highlighted ? (highlighted.has(e.source) && highlighted.has(e.target)) : true;
+
+      let opacity = 1;
+      if (activeEdgeId)     opacity = isActive ? 1 : 0.06;
+      else if (highlighted) opacity = onPath ? 1 : 0.06;
+
+      const baseStroke = (e.style?.stroke as string | undefined) ?? "#64748b";
+      const stroke = isHovered ? "#3b82f6" : isPinned ? "#7c3aed" : baseStroke;
+
+      return {
+        ...e,
+        style: {
+          ...e.style,
+          opacity,
+          strokeWidth: isActive ? 3 : 1.5,
+          stroke,
+          transition: "opacity 0.15s, stroke-width 0.15s",
+        },
+        animated: !activeEdgeId && onPath && !!highlighted,
+        label: opacity < 0.5 ? undefined : e.label,
+      };
+    });
+  }, [filteredEdges, highlighted, hoveredEdgeId, pinnedEdgeId]);
 
   const miniMapNodeColor = useCallback((n: Node): string => {
     switch (n.data.diffStatus as DiffStatus) {
@@ -691,6 +1098,9 @@ function DiffGraphCanvasInner({
       onMove={(_, vp) => onViewportChange(vp)}
       onNodeClick={handleNodeClick}
       onPaneClick={handlePaneClick}
+      onEdgeMouseEnter={handleEdgeMouseEnter}
+      onEdgeMouseLeave={handleEdgeMouseLeave}
+      onEdgeClick={handleEdgeClick}
       nodesDraggable
       snapToGrid
       snapGrid={[20, 20]}
@@ -731,6 +1141,7 @@ export interface NavEntry {
   localContent?: string;
   remoteContent?: string;
   nodeInfos: JourneyNodeInfo[];
+  sourceNodeId?: string;  // which node was clicked to navigate here
 }
 
 export interface JourneyDiffGraphModalProps {
@@ -777,6 +1188,9 @@ export function JourneyDiffGraphModal({
     nodeType?: string;
     diffStatus: DiffStatus;
   } | null>(null);
+
+  const [searchQuery, setSearchQuery]   = useState("");
+  const [flashNodeId, setFlashNodeId]   = useState<string | null>(null);
 
   const [leftExternalVP,  setLeftExternalVP]  = useState<Viewport | null>(null);
   const [rightExternalVP, setRightExternalVP] = useState<Viewport | null>(null);
@@ -835,6 +1249,13 @@ export function JourneyDiffGraphModal({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose, navStack.length]);
 
+  // Flash auto-clear
+  useEffect(() => {
+    if (!flashNodeId) return;
+    const t = setTimeout(() => setFlashNodeId(null), 1200);
+    return () => clearTimeout(t);
+  }, [flashNodeId]);
+
   // Build nodeStatusMap
   const nodeStatusMap = useMemo(() => {
     const m = new Map<string, DiffStatus>();
@@ -870,6 +1291,15 @@ export function JourneyDiffGraphModal({
         remoteNodes: remote.nodes, remoteEdges: remote.edges,
       };
     }, [hasContent, active.localContent, active.remoteContent, active.nodeInfos, nodeStatusMap]);
+
+  const graphNodeLabels = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const n of mergedNodes) {
+      const label = typeof n.data.label === "string" ? n.data.label : n.id;
+      map.set(n.id, label);
+    }
+    return map;
+  }, [mergedNodes]);
 
   const handleLeftMove = useCallback((vp: Viewport) => {
     if (!syncViewports || syncSource.current === "left") return;
@@ -951,6 +1381,7 @@ export function JourneyDiffGraphModal({
         localContent:  subLocalContent,
         remoteContent: subRemoteContent,
         nodeInfos:     [],
+        sourceNodeId:  nodeId,
       }]);
       setActiveNode(null);
       setFitKey((k) => k + 1);
@@ -995,7 +1426,13 @@ export function JourneyDiffGraphModal({
                   {i < navStack.length - 1 ? (
                     <button
                       type="button"
-                      onClick={() => { setNavStack((prev) => prev.slice(0, i + 1)); setActiveNode(null); setFitKey((k) => k + 1); }}
+                      onClick={() => {
+                        const flashTarget = navStack[i + 1]?.sourceNodeId ?? null;
+                        setNavStack((prev) => prev.slice(0, i + 1));
+                        setActiveNode(null);
+                        setFitKey((k) => k + 1);
+                        if (flashTarget) setFlashNodeId(flashTarget);
+                      }}
                       className={cn("hover:text-sky-800 truncate max-w-[150px] shrink-0 text-sky-600", i === 0 && "font-semibold")}
                     >
                       {entry.name}
@@ -1014,6 +1451,27 @@ export function JourneyDiffGraphModal({
             nodes only
           </span>
         )}
+
+        {/* Search */}
+        <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded px-2 py-1 shrink-0">
+          <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search nodes…"
+            className="text-xs w-28 outline-none text-slate-700 placeholder-slate-400 bg-transparent"
+          />
+          {searchQuery && (
+            <button type="button" onClick={() => setSearchQuery("")} className="text-slate-400 hover:text-slate-600 shrink-0">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {/* View mode toggle */}
         <div className="flex rounded border border-slate-300 overflow-hidden text-[11px] shrink-0">
@@ -1106,6 +1564,8 @@ export function JourneyDiffGraphModal({
               externalViewport={null}
               onViewportChange={() => {}}
               onNodeActivate={handleNodeActivate}
+              searchQuery={searchQuery}
+              flashNodeId={flashNodeId}
             />
           ) : (
             <>
@@ -1122,6 +1582,8 @@ export function JourneyDiffGraphModal({
                   externalViewport={leftExternalVP}
                   onViewportChange={handleLeftMove}
                   onNodeActivate={handleNodeActivate}
+                  searchQuery={searchQuery}
+                  flashNodeId={flashNodeId}
                 />
               </div>
 
@@ -1138,6 +1600,8 @@ export function JourneyDiffGraphModal({
                   externalViewport={rightExternalVP}
                   onViewportChange={handleRightMove}
                   onNodeActivate={handleNodeActivate}
+                  searchQuery={searchQuery}
+                  flashNodeId={flashNodeId}
                 />
               </div>
             </>
@@ -1145,75 +1609,23 @@ export function JourneyDiffGraphModal({
         </div>
 
         {/* Side panel */}
-        {showSidePanel && (
+        {showSidePanel && activeNode && (
           <div className="w-80 shrink-0 border-l border-slate-200 bg-white flex flex-col overflow-hidden">
-            {/* Panel header */}
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 shrink-0">
-              <span className="text-xs font-semibold text-slate-700 flex-1 truncate" title={activeNode?.label}>
-                {activeNode?.label}
-              </span>
-              <button
-                type="button"
-                onClick={() => setActiveNode(null)}
-                className="text-slate-400 hover:text-slate-600 shrink-0"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            {/* Node metadata */}
-            <div className="px-3 py-2 space-y-1 border-b border-slate-100 text-xs shrink-0">
-              <div className="flex gap-2 items-start">
-                <span className="text-slate-400 w-16 shrink-0">Type</span>
-                <span className="text-slate-700 font-mono text-[10px] break-all">{activeNode?.nodeType ?? "—"}</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-slate-400 w-16 shrink-0">Status</span>
-                <DiffStatusBadge status={activeNode?.diffStatus} />
-              </div>
-              <div className="flex gap-2 items-start">
-                <span className="text-slate-400 w-16 shrink-0">ID</span>
-                <span className="text-slate-400 font-mono text-[9px] break-all">{activeNode?.id}</span>
-              </div>
-            </div>
-            {/* Descend into inner journey */}
-            {activeNode?.nodeType === "InnerTreeEvaluatorNode" && (
-              <div className="px-3 py-2 border-b border-slate-100 shrink-0">
-                <button
-                  type="button"
-                  disabled={navigating}
-                  onClick={() => { if (activeNode && !navigating) void navigateInto(activeNode.id, activeNode); }}
-                  className="flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {navigating ? (
-                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                  )}
-                  {navigating ? "Loading…" : "Descend into journey"}
-                </button>
-              </div>
-            )}
-            {/* Script files */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="px-3 pt-2 pb-1">
-                <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Scripts</p>
-              </div>
-              <ScriptPanelContent
-                nodeId={activeNode?.id}
-                nodeType={activeNode?.nodeType}
-                journeyName={active.name}
-                files={files}
-                sourceEnv={sourceEnv}
-                targetEnv={targetEnv}
-              />
-            </div>
+            <NodeDetailPanel
+              nodeId={activeNode.id}
+              nodeLabel={activeNode.label}
+              nodeType={activeNode.nodeType}
+              diffStatus={activeNode.diffStatus}
+              graphEdges={mergedEdges}
+              graphNodeLabels={graphNodeLabels}
+              journeyName={active.name}
+              files={files}
+              sourceEnv={sourceEnv}
+              targetEnv={targetEnv}
+              navigating={navigating}
+              onNavigateInto={(id) => void navigateInto(id, {})}
+              onClose={() => setActiveNode(null)}
+            />
           </div>
         )}
       </div>
