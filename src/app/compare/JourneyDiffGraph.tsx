@@ -972,7 +972,7 @@ function DiffGraphCanvasInner({
     [baseNodes, baseEdges, isCompact],
   );
 
-  const [nodes, setNodes] = useNodesState(layoutedNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
 
   // Sync nodes when layoutedNodes changes and fit view
   useEffect(() => {
@@ -1161,6 +1161,7 @@ function DiffGraphCanvasInner({
       onEdgeMouseEnter={handleEdgeMouseEnter}
       onEdgeMouseLeave={handleEdgeMouseLeave}
       onEdgeClick={handleEdgeClick}
+      onNodesChange={onNodesChange}
       nodesDraggable
       snapToGrid
       snapGrid={[20, 20]}
