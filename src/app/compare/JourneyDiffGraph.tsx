@@ -725,6 +725,36 @@ export function JourneyDiffGraphModal({
   const hasContent = !!(active.localContent || active.remoteContent);
   const nodesOnly  = !hasContent && active.nodeInfos.length > 0;
 
+  // When the active journey has no content (unchanged journey not included in diff),
+  // fetch from the API so wiring/edges can be rendered.
+  useEffect(() => {
+    if (hasContent) return;
+    const env = sourceEnv || targetEnv;
+    if (!env) return;
+    const name = active.name;
+    let cancelled = false;
+    const fetchContent = async () => {
+      try {
+        const params = new URLSearchParams({ environment: env, scope: "journeys", item: name });
+        const res = await fetch(`/api/push/item?${params}`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json() as { files?: Array<{ content?: string }> };
+        const content = data.files?.[0]?.content;
+        if (!content || cancelled) return;
+        // Update the active entry in navStack with the fetched content on both sides
+        // (unchanged journey is identical on both sides).
+        setNavStack((prev) => prev.map((entry, i) =>
+          i === prev.length - 1
+            ? { ...entry, localContent: content, remoteContent: content }
+            : entry,
+        ));
+      } catch { /* ignore */ }
+    };
+    void fetchContent();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active.name, hasContent, sourceEnv, targetEnv]);
+
   // ESC pops nav stack (or closes modal when at root)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
