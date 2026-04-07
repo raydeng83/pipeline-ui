@@ -22,6 +22,9 @@ import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
 import { highlightJs, ScriptOverlay } from "./ScriptOverlay";
+import { JourneyOutlineView  } from "./JourneyOutlineView";
+import { JourneyTableView    } from "./JourneyTableView";
+import { JourneySwimLaneView } from "./JourneySwimLaneView";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -393,40 +396,7 @@ function getConnected(nodeId: string, edges: Edge[]) {
   return { ancestors, descendants };
 }
 
-// ── Panels ────────────────────────────────────────────────────────────────────
-
-function SearchPanel({
-  query, setQuery, matchCount, onReset,
-}: { query: string; setQuery: (q: string) => void; matchCount: number; onReset: () => void }) {
-  return (
-    <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg shadow-md px-3 py-2">
-      <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-      </svg>
-      <input type="text" value={query} onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search nodes…"
-        className="text-xs w-36 outline-none text-slate-700 placeholder-slate-400 bg-transparent" />
-      {query && (
-        <>
-          <span className="text-[10px] text-slate-400 tabular-nums shrink-0">{matchCount} match{matchCount !== 1 ? "es" : ""}</span>
-          <button type="button" onClick={() => setQuery("")} className="text-slate-400 hover:text-slate-600 shrink-0">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </>
-      )}
-      <div className="w-px h-4 bg-slate-200 shrink-0" />
-      <button type="button" onClick={onReset} title="Reset to auto layout"
-        className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-700 shrink-0">
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        Reset
-      </button>
-    </div>
-  );
-}
+// ── Legend ────────────────────────────────────────────────────────────────────
 
 function Legend() {
   return (
@@ -436,7 +406,7 @@ function Legend() {
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-emerald-400 inline-block" /><span>→ Success</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-red-400 inline-block" /><span>→ Failure</span></div>
       <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-blue-500 inline-block" /><span>Hover edge</span></div>
-      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-violet-500 inline-block" /><span>Click edge (pinned)</span></div>
+      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-violet-500 inline-block" /><span>Pinned edge</span></div>
       <div className="flex items-center gap-1.5">
         <span className="w-4 h-3.5 border-2 border-dashed border-violet-400 rounded inline-block" />
         <span>Page node</span>
@@ -822,6 +792,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   const [nodePanel,      setNodePanel]       = useState<NodePanelData | null>(null);
   const [pageConfigs,    setPageConfigs]     = useState<Map<string, PageNodeConfig>>(new Map());
   const [isCompact,      setIsCompact]       = useState(false);
+  const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
 
   // ── Inner-tree navigation stack ───────────────────────────────────────────
   const [navStack,   setNavStack]   = useState<{ journeyId: string; json: string; sourceNodeId: string }[]>([]);
@@ -1101,104 +1072,198 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
   }
 
   return (
-    <div className="relative w-full h-full">
-    <ReactFlow
-      nodes={displayNodes}
-      edges={displayEdges}
-      nodeTypes={nodeTypes}
-      onNodesChange={onNodesChange}
-      onNodeClick={handleNodeClick}
-      onEdgeMouseEnter={handleEdgeMouseEnter}
-      onEdgeMouseLeave={handleEdgeMouseLeave}
-      onEdgeClick={handleEdgeClick}
-      onPaneClick={handlePaneClick}
-      nodesDraggable
-      snapToGrid
-      snapGrid={[20, 20]}
-      fitView
-      fitViewOptions={{ padding: 0.25 }}
-      minZoom={0.1}
-      maxZoom={2}
-    >
-      <Panel position="top-left">
-        <div className="flex flex-col gap-2">
-          <SearchPanel query={searchQuery} setQuery={setSearchQuery} matchCount={searchMatches.size} onReset={() => { shouldAdjustViewport.current = true; setLayoutKey((k) => k + 1); }} />
+    <div className="flex flex-col w-full h-full">
+      {/* ── Header bar ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-slate-200 shrink-0">
+
+        {/* Breadcrumb / title */}
+        <div className="flex-1 min-w-0">
+          {navStack.length === 0 ? (
+            <span className="text-sm font-semibold text-slate-800 truncate">{journeyId ?? "Journey"}</span>
+          ) : (
+            <nav className="flex items-center gap-1 text-sm min-w-0">
+              <button
+                type="button"
+                onClick={() => goToIndex(-1)}
+                className="text-sky-600 hover:text-sky-800 font-semibold truncate max-w-[160px] shrink-0"
+              >
+                {journeyId ?? "Journey"}
+              </button>
+              {navStack.map((entry, i) => (
+                <Fragment key={`${entry.journeyId}-${i}`}>
+                  <span className="text-slate-400 shrink-0">›</span>
+                  {i < navStack.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => goToIndex(i)}
+                      className="text-sky-600 hover:text-sky-800 truncate max-w-[160px]"
+                    >
+                      {entry.journeyId}
+                    </button>
+                  ) : (
+                    <span className="font-semibold text-slate-800 truncate max-w-[160px]">{entry.journeyId}</span>
+                  )}
+                </Fragment>
+              ))}
+              {navLoading && <span className="text-slate-400 ml-1 shrink-0">…</span>}
+            </nav>
+          )}
+        </div>
+
+        {/* Search */}
+        <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded px-2 py-1 shrink-0">
+          <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search nodes…"
+            className="text-xs w-28 outline-none text-slate-700 placeholder-slate-400 bg-transparent"
+          />
+          {searchQuery && (
+            <>
+              <span className="text-[10px] text-slate-400 tabular-nums shrink-0">{searchMatches.size} match{searchMatches.size !== 1 ? "es" : ""}</span>
+              <button type="button" onClick={() => setSearchQuery("")} className="text-slate-400 hover:text-slate-600 shrink-0">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Display view toggle */}
+        <div className="flex rounded border border-slate-300 overflow-hidden text-[11px] shrink-0">
+          {(["graph", "outline", "table", "swimlane", "json"] as const).map((v, i) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setDisplayView(v)}
+              className={cn(
+                "px-2.5 py-1 transition-colors",
+                i > 0 && "border-l border-slate-300",
+                displayView === v
+                  ? "bg-sky-600 text-white"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
+              )}
+            >
+              {v === "swimlane" ? "Swim" : v.charAt(0).toUpperCase() + v.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Graph-only controls */}
+        {displayView === "graph" && (<>
+          {/* Reset layout */}
           <button
             type="button"
-            title={isCompact ? "Expand layout" : "Compact layout"}
-            onClick={() => { shouldAdjustViewport.current = true; setIsCompact((v) => !v); }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-medium shadow-sm transition-colors ${
-              isCompact
-                ? "bg-sky-600 border-sky-700 text-white hover:bg-sky-700"
-                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-            }`}
+            onClick={() => { shouldAdjustViewport.current = true; setLayoutKey((k) => k + 1); }}
+            title="Reset layout"
+            className="text-slate-400 hover:text-sky-600 transition-colors shrink-0"
           >
-            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              {isCompact ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-              )}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
-            {isCompact ? "Expanded" : "Compact"}
           </button>
-        </div>
-      </Panel>
-      {navStack.length > 0 && (
-        <Panel position="top-center">
-          <nav className="flex items-center gap-1 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg shadow-sm px-2.5 py-1.5 text-[11px] max-w-lg">
-            <button
-              type="button"
-              onClick={() => goToIndex(-1)}
-              className="text-sky-600 hover:text-sky-800 font-medium truncate max-w-[160px] shrink-0"
-            >
-              {journeyId ?? "Journey"}
-            </button>
-            {navStack.map((entry, i) => (
-              <Fragment key={`${entry.journeyId}-${i}`}>
-                <span className="text-slate-300 shrink-0">›</span>
-                {i < navStack.length - 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => goToIndex(i)}
-                    className="text-sky-600 hover:text-sky-800 font-medium truncate max-w-[160px]"
-                  >
-                    {entry.journeyId}
-                  </button>
-                ) : (
-                  <span className="text-slate-700 font-semibold truncate max-w-[160px]">{entry.journeyId}</span>
-                )}
-              </Fragment>
-            ))}
-            {navLoading && <span className="text-slate-400 ml-1 shrink-0">…</span>}
-          </nav>
-        </Panel>
-      )}
-      <Panel position="top-right">
-        <Legend />
-      </Panel>
-      <Background color="#e2e8f0" gap={20} size={1} />
-      <Controls showInteractive={false} />
-      <MiniMap
-        nodeColor={(n) =>
-          n.type === "successNode" ? "#34d399" :
-          n.type === "failureNode" ? "#f87171" :
-          n.type === "startNode"   ? "#10b981" :
-          n.type === "pageGroup"   ? "#ddd6fe" :
-          n.type === "pageChild"   ? "#ede9fe" : "#cbd5e1"
-        }
-        zoomable pannable
-      />
-    </ReactFlow>
 
-    <NodeInfoDrawer
-      node={nodePanel}
-      open={!!nodePanel}
-      environment={environment}
-      journeyId={activeJourneyId}
-      onNavigate={navigateToTree}
-      onClose={() => { setNodePanel(null); setSelectedNodeId(null); }}
-    />
+          {/* Compact layout */}
+          <button
+            type="button"
+            onClick={() => { shouldAdjustViewport.current = true; setIsCompact((v) => !v); }}
+            title={isCompact ? "Switch to normal layout" : "Switch to compact layout"}
+            className={cn(
+              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1",
+              isCompact
+                ? "bg-sky-600 text-white border-sky-600"
+                : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+            )}
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+            </svg>
+            Compact
+          </button>
+
+          {/* Fit view */}
+          <button
+            type="button"
+            onClick={() => { shouldAdjustViewport.current = true; fitView({ duration: 400, padding: 0.25 }); }}
+            title="Fit view"
+            className="text-slate-400 hover:text-sky-600 transition-colors shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+            </svg>
+          </button>
+        </>)}
+
+      </div>
+
+      {/* ── Content area ────────────────────────────────────────────────────── */}
+      <div className="flex-1 min-h-0 relative">
+        {displayView !== "graph" ? (
+          (() => {
+            if (!activeJson) return <div className="flex items-center justify-center h-full text-sm text-slate-400">No content available</div>;
+            if (displayView === "outline")  return <div className="h-full overflow-auto"><JourneyOutlineView  json={activeJson} /></div>;
+            if (displayView === "table")    return <div className="h-full overflow-auto"><JourneyTableView    json={activeJson} environment={environment} journeyId={activeJourneyId} /></div>;
+            if (displayView === "swimlane") return <div className="h-full overflow-auto"><JourneySwimLaneView json={activeJson} /></div>;
+            if (displayView === "json") return (
+              <div className="h-full overflow-auto bg-slate-950 p-4">
+                <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap break-all">{activeJson}</pre>
+              </div>
+            );
+            return null;
+          })()
+        ) : (
+          <ReactFlow
+            nodes={displayNodes}
+            edges={displayEdges}
+            nodeTypes={nodeTypes}
+            onNodesChange={onNodesChange}
+            onNodeClick={handleNodeClick}
+            onEdgeMouseEnter={handleEdgeMouseEnter}
+            onEdgeMouseLeave={handleEdgeMouseLeave}
+            onEdgeClick={handleEdgeClick}
+            onPaneClick={handlePaneClick}
+            nodesDraggable
+            snapToGrid
+            snapGrid={[20, 20]}
+            fitView
+            fitViewOptions={{ padding: 0.25 }}
+            minZoom={0.1}
+            maxZoom={2}
+          >
+            <Panel position="bottom-right">
+              <Legend />
+            </Panel>
+            <Background color="#e2e8f0" gap={20} size={1} />
+            <Controls showInteractive={false} />
+            <MiniMap
+              nodeColor={(n) =>
+                n.type === "successNode" ? "#34d399" :
+                n.type === "failureNode" ? "#f87171" :
+                n.type === "startNode"   ? "#10b981" :
+                n.type === "pageGroup"   ? "#ddd6fe" :
+                n.type === "pageChild"   ? "#ede9fe" : "#cbd5e1"
+              }
+              zoomable pannable
+            />
+          </ReactFlow>
+        )}
+
+        <NodeInfoDrawer
+          node={nodePanel}
+          open={!!nodePanel}
+          environment={environment}
+          journeyId={activeJourneyId}
+          onNavigate={navigateToTree}
+          onClose={() => { setNodePanel(null); setSelectedNodeId(null); }}
+        />
+      </div>
     </div>
   );
 }
