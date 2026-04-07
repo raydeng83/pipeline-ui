@@ -673,7 +673,7 @@ function StatusGroup({
   sourceLabel: string;
   targetLabel: string;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   if (files.length === 0) return null;
 
   return (
@@ -974,7 +974,7 @@ function filterJourneyTree(
 }
 
 function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
   const [showScripts, setShowScripts] = useState(true);
