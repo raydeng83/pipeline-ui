@@ -670,6 +670,8 @@ export interface JourneyDiffGraphModalProps {
   nodeInfos: JourneyNodeInfo[];
   sourceLabel: string;
   targetLabel: string;
+  sourceEnv: string;
+  targetEnv: string;
   files: FileDiff[];
   onClose: () => void;
 }
@@ -688,6 +690,8 @@ export function JourneyDiffGraphModal({
   nodeInfos,
   sourceLabel,
   targetLabel,
+  sourceEnv,
+  targetEnv,
   files,
   onClose,
 }: JourneyDiffGraphModalProps) {
@@ -786,12 +790,11 @@ export function JourneyDiffGraphModal({
   }, [syncViewports]);
 
   // Navigate into an inner journey
-  const navigateInto = useCallback((nodeId: string, nodeData: Record<string, unknown>) => {
-    // Find node config file
+  const navigateInto = useCallback(async (nodeId: string, nodeData: Record<string, unknown>) => {
+    // Step 1: attempt to read treeName from node config file (may be absent if file is unchanged)
     const nodeConfigFile = files.find(
       (f) => f.relativePath.includes(`/${nodeId}.json`) && f.relativePath.includes("/nodes/"),
     );
-
     let treeName: string | null = null;
     if (nodeConfigFile) {
       const content = nodeConfigFile.localContent ?? nodeConfigFile.remoteContent;
@@ -803,27 +806,39 @@ export function JourneyDiffGraphModal({
       }
     }
 
+    // Fall back to the node's display label as the journey name
     const displayLabel = typeof nodeData.label === "string" ? nodeData.label : nodeId;
     const name = treeName ?? displayLabel;
 
-    let subLocalContent: string | undefined;
-    let subRemoteContent: string | undefined;
+    // Step 2: find sub-journey file in the already-loaded files (works for changed journeys)
+    const subFile = files.find((f) => f.relativePath.endsWith(`/journeys/${name}/${name}.json`));
+    let subLocalContent  = subFile?.localContent;
+    let subRemoteContent = subFile?.remoteContent;
 
-    if (treeName) {
-      const subFile = files.find((f) => f.relativePath.endsWith(`/journeys/${treeName}/${treeName}.json`));
-      subLocalContent  = subFile?.localContent;
-      subRemoteContent = subFile?.remoteContent;
+    // Step 3: if content is still missing (unchanged sub-journey), fetch from both environments
+    if (!subLocalContent || !subRemoteContent) {
+      const fetchSide = async (env: string): Promise<string | undefined> => {
+        try {
+          const params = new URLSearchParams({ environment: env, scope: "journeys", item: name });
+          const res = await fetch(`/api/push/item?${params}`);
+          if (!res.ok) return undefined;
+          const data = await res.json() as { files?: Array<{ content?: string }> };
+          return data.files?.[0]?.content ?? undefined;
+        } catch { return undefined; }
+      };
+
+      const [fetched1, fetched2] = await Promise.all([
+        !subLocalContent  ? fetchSide(sourceEnv) : Promise.resolve(subLocalContent),
+        !subRemoteContent ? fetchSide(targetEnv) : Promise.resolve(subRemoteContent),
+      ]);
+      subLocalContent  = fetched1;
+      subRemoteContent = fetched2;
     }
 
-    setNavStack((prev) => [...prev, {
-      name,
-      localContent:  subLocalContent,
-      remoteContent: subRemoteContent,
-      nodeInfos:     [],
-    }]);
+    setNavStack((prev) => [...prev, { name, localContent: subLocalContent, remoteContent: subRemoteContent, nodeInfos: [] }]);
     setActiveNode(null);
     setFitKey((k) => k + 1);
-  }, [files]);
+  }, [files, sourceEnv, targetEnv]);
 
   // Handle node activate from canvas
   const handleNodeActivate = useCallback((nodeId: string | null, nodeData: Record<string, unknown>) => {
@@ -1055,7 +1070,7 @@ export function JourneyDiffGraphModal({
               <div className="px-3 py-2 border-b border-slate-100 shrink-0">
                 <button
                   type="button"
-                  onClick={() => { if (activeNode) { navigateInto(activeNode.id, activeNode); setActiveNode(null); } }}
+                  onClick={() => { if (activeNode) void navigateInto(activeNode.id, activeNode); }}
                   className="flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-800 font-medium transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

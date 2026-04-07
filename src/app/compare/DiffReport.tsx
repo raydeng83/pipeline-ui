@@ -747,7 +747,7 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel }: { sc: Journey
   );
 }
 
-function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string }) {
+function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string }) {
   const [open, setOpen] = useState(depth === 0);
   const [graphOpen, setGraphOpen] = useState(false);
   const hasChildren = node.subJourneys.length > 0;
@@ -803,7 +803,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
       {open && (hasChildren || (showScripts && node.scripts.some((s) => s.status !== "unchanged")) || (showNodes && node.nodes.some((n) => n.status !== "unchanged"))) && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
-            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
           ))}
           {showScripts && node.scripts.filter((sc) => sc.status !== "unchanged").length > 0 && (
             <div className="mt-1 space-y-0.5">
@@ -840,6 +840,8 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           nodeInfos={node.nodes}
           sourceLabel={sourceLabel}
           targetLabel={targetLabel}
+          sourceEnv={sourceEnv}
+          targetEnv={targetEnv}
           files={files}
           onClose={() => setGraphOpen(false)}
         />
@@ -879,7 +881,7 @@ function filterJourneyTree(
   });
 }
 
-function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string }) {
+function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string }) {
   const [open, setOpen] = useState(true);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
@@ -995,7 +997,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
               <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
             ) : (
               filtered.map((node) => (
-                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
               ))
             )}
           </div>
@@ -1270,7 +1272,7 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <>
             {/* Journey tree (shown first if available) */}
             {report.journeyTree && report.journeyTree.length > 0 && (
-              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} />
             )}
 
             {/* Other scope sections */}
