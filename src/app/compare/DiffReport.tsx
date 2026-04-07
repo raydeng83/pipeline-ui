@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import type { CompareReport, FileDiff, DiffLine } from "@/lib/diff-types";
+import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
 
@@ -692,6 +692,252 @@ function StatusGroup({
   );
 }
 
+// ── Journey tree view ────────────────────────────────────────────────────────
+
+const JOURNEY_STATUS_STYLES: Record<string, { dot: string; badge: string; label: string }> = {
+  modified:  { dot: "bg-amber-400",   badge: "bg-amber-100 text-amber-700 border-amber-200", label: "M" },
+  added:     { dot: "bg-emerald-400", badge: "bg-emerald-100 text-emerald-700 border-emerald-200", label: "A" },
+  removed:   { dot: "bg-red-400",     badge: "bg-red-100 text-red-700 border-red-200", label: "D" },
+  unchanged: { dot: "bg-slate-300",   badge: "bg-slate-100 text-slate-500 border-slate-200", label: "—" },
+};
+
+function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean }) {
+  const [open, setOpen] = useState(depth === 0);
+  const hasChildren = node.subJourneys.length > 0;
+  const s = JOURNEY_STATUS_STYLES[node.status] ?? JOURNEY_STATUS_STYLES.unchanged;
+
+  const prevSeq = useRef(forceSeq);
+  if (forceSeq !== undefined && forceSeq !== prevSeq.current) {
+    prevSeq.current = forceSeq;
+    if (forceOpen !== undefined) setOpen(forceOpen);
+  }
+
+  return (
+    <div>
+      <div
+        className={cn(
+          "flex items-center gap-1.5 py-0.5 rounded group",
+          hasChildren && "cursor-pointer hover:bg-slate-50",
+        )}
+        onClick={() => hasChildren && setOpen((o) => !o)}
+      >
+        <span className="w-3 shrink-0 text-slate-400 text-[10px]">
+          {hasChildren ? (open ? "▾" : "▸") : ""}
+        </span>
+        <span className={cn("w-2 h-2 rounded-full shrink-0", s.dot)} />
+        <span className={cn("text-xs flex-1 min-w-0 truncate", depth === 0 ? "font-semibold text-slate-800" : "text-slate-700")} title={node.name}>
+          {node.name}
+        </span>
+        {node.status !== "unchanged" && (
+          <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", s.badge)}>{s.label}</span>
+        )}
+        {node.isEntry && (
+          <span className="text-[10px] px-1 py-0 rounded bg-sky-100 text-sky-700 border border-sky-200 shrink-0">Entry</span>
+        )}
+      </div>
+      {open && (hasChildren || (showScripts && node.scripts.some((s) => s.status !== "unchanged")) || (showNodes && node.nodes.some((n) => n.status !== "unchanged"))) && (
+        <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
+          {node.subJourneys.map((child) => (
+            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} />
+          ))}
+          {showScripts && node.scripts.filter((sc) => sc.status !== "unchanged").length > 0 && (
+            <div className="mt-1 space-y-0.5">
+              {node.scripts.filter((sc) => sc.status !== "unchanged").map((sc) => {
+                const ss = JOURNEY_STATUS_STYLES[sc.status] ?? JOURNEY_STATUS_STYLES.unchanged;
+                return (
+                  <div key={sc.uuid} className="flex items-center gap-1.5 py-0.5 text-xs">
+                    <span className="w-3 shrink-0" />
+                    <svg className="w-3 h-3 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                    </svg>
+                    <span className="text-slate-600 truncate" title={sc.uuid}>{sc.name}</span>
+                    <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ss.badge)}>{ss.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {showNodes && node.nodes.filter((nd) => nd.status !== "unchanged").length > 0 && (
+            <div className="mt-1 space-y-0.5">
+              {node.nodes.filter((nd) => nd.status !== "unchanged").map((nd) => {
+                const ns = JOURNEY_STATUS_STYLES[nd.status] ?? JOURNEY_STATUS_STYLES.unchanged;
+                return (
+                  <div key={nd.uuid} className="flex items-center gap-1.5 py-0.5 text-xs">
+                    <span className="w-3 shrink-0" />
+                    <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V19.5m0 2.25l-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
+                    </svg>
+                    <span className="text-slate-500 truncate" title={`${nd.nodeType} (${nd.uuid})`}>{nd.name}</span>
+                    <span className="text-[10px] text-slate-400 shrink-0">{nd.nodeType}</span>
+                    <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ns.badge)}>{ns.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type JourneyStatusFilter = "all" | "modified" | "added" | "removed";
+
+/** Count entry journey statuses (root level only). */
+function countEntryByStatus(nodes: JourneyTreeNode[]): { modified: number; added: number; removed: number } {
+  let modified = 0, added = 0, removed = 0;
+  for (const n of nodes) {
+    if (n.status === "modified") modified++;
+    else if (n.status === "added") added++;
+    else if (n.status === "removed") removed++;
+  }
+  return { modified, added, removed };
+}
+
+/** Filter entry journeys by status (root level) and search (any depth). */
+function filterJourneyTree(
+  tree: JourneyTreeNode[],
+  statusFilter: JourneyStatusFilter,
+  searchQ: string,
+): JourneyTreeNode[] {
+  function nameMatchesInTree(n: JourneyTreeNode): boolean {
+    if (n.name.toLowerCase().includes(searchQ)) return true;
+    return n.subJourneys.some(nameMatchesInTree);
+  }
+
+  return tree.filter((entry) => {
+    const statusOk = statusFilter === "all" || entry.status === statusFilter;
+    const nameOk = !searchQ || nameMatchesInTree(entry);
+    return statusOk && nameOk;
+  });
+}
+
+function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number }) {
+  const [open, setOpen] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
+  const [searchQ, setSearchQ] = useState("");
+  const [showScripts, setShowScripts] = useState(false);
+  const [showNodes, setShowNodes] = useState(false);
+  const [localForceOpen, setLocalForceOpen] = useState<boolean | undefined>(undefined);
+  const [forceSeq, setForceSeq] = useState(0);
+
+  // Respond to parent expand/collapse all
+  const prevParentSeq = useRef(parentForceSeq);
+  if (parentForceSeq !== undefined && parentForceSeq !== prevParentSeq.current) {
+    prevParentSeq.current = parentForceSeq;
+    if (parentForceOpen !== undefined) {
+      setLocalForceOpen(parentForceOpen);
+      setForceSeq((s) => s + 1);
+    }
+  }
+
+  const expandAll = () => { setLocalForceOpen(true); setForceSeq((s) => s + 1); };
+  const collapseAll = () => { setLocalForceOpen(false); setForceSeq((s) => s + 1); };
+
+  const counts = useMemo(() => countEntryByStatus(tree), [tree]);
+  const totalChanged = counts.modified + counts.added + counts.removed;
+
+  const filtered = useMemo(
+    () => filterJourneyTree(tree, statusFilter, searchQ.toLowerCase()),
+    [tree, statusFilter, searchQ],
+  );
+
+  return (
+    <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div
+        className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="text-sm font-semibold text-slate-700 flex-1">Journeys</span>
+        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+          {totalChanged} changed
+        </span>
+        <span className="text-[10px] text-slate-400">{tree.length} entry journeys</span>
+        <span className="text-slate-400 text-xs shrink-0">{open ? "▲" : "▼"}</span>
+      </div>
+      {open && (
+        <div className="space-y-0">
+          {/* Filter bar */}
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-100 bg-white">
+            {/* Expand/Collapse All */}
+            <button type="button" onClick={expandAll} className="text-[10px] text-slate-500 hover:text-slate-700 transition-colors shrink-0">Expand All</button>
+            <button type="button" onClick={collapseAll} className="text-[10px] text-slate-500 hover:text-slate-700 transition-colors shrink-0">Collapse All</button>
+            <span className="text-slate-300 shrink-0">|</span>
+            {/* Status filter pills */}
+            <div className="flex rounded border border-slate-300 overflow-hidden text-[10px] shrink-0">
+              {([
+                { value: "all" as JourneyStatusFilter, label: "All" },
+                { value: "modified" as JourneyStatusFilter, label: `Modified (${counts.modified})` },
+                { value: "added" as JourneyStatusFilter, label: `Added (${counts.added})` },
+                { value: "removed" as JourneyStatusFilter, label: `Removed (${counts.removed})` },
+              ]).map((f) => (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => setStatusFilter(f.value)}
+                  className={cn(
+                    "px-2 py-0.5 transition-colors",
+                    statusFilter === f.value
+                      ? "bg-slate-900 text-white"
+                      : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Search */}
+            <input
+              type="text"
+              value={searchQ}
+              onChange={(e) => setSearchQ(e.target.value)}
+              placeholder="Search journeys…"
+              className="flex-1 text-xs rounded border border-slate-200 px-2.5 py-1 font-mono focus:outline-none focus:ring-1 focus:ring-sky-400"
+            />
+            {searchQ && (
+              <button type="button" onClick={() => setSearchQ("")} className="text-xs text-slate-400 hover:text-slate-600">
+                Clear
+              </button>
+            )}
+            <span className="text-slate-300 shrink-0">|</span>
+            <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer select-none shrink-0">
+              <input
+                type="checkbox"
+                checked={showScripts}
+                onChange={(e) => setShowScripts(e.target.checked)}
+                className="accent-sky-600"
+              />
+              Show scripts
+            </label>
+            <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer select-none shrink-0">
+              <input
+                type="checkbox"
+                checked={showNodes}
+                onChange={(e) => setShowNodes(e.target.checked)}
+                className="accent-sky-600"
+              />
+              Show nodes
+            </label>
+            <span className="text-[10px] text-slate-400 shrink-0">{filtered.length} / {tree.length}</span>
+          </div>
+
+          {/* Tree */}
+          <div className="p-4 space-y-0.5">
+            {filtered.length === 0 ? (
+              <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
+            ) : (
+              filtered.map((node) => (
+                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} />
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Scope section ───────────────────────────────────────────────────────────
 
 function filterFiles(files: FileDiff[], query: string): FileDiff[] {
@@ -704,12 +950,13 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
 }
 
 function ScopeSection({
-  group, sourceLabel, targetLabel, forceOpen,
+  group, sourceLabel, targetLabel, forceOpen, forceSeq,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
   targetLabel: string;
   forceOpen?: boolean;
+  forceSeq?: number;
 }) {
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
@@ -717,10 +964,10 @@ function ScopeSection({
   const searchRef = useRef<HTMLInputElement>(null);
 
   // React to parent expand/collapse all
-  const prevForce = useRef(forceOpen);
-  if (forceOpen !== undefined && forceOpen !== prevForce.current) {
-    prevForce.current = forceOpen;
-    if (open !== forceOpen) setOpen(forceOpen);
+  const prevSeq = useRef(forceSeq);
+  if (forceSeq !== undefined && forceSeq !== prevSeq.current) {
+    prevSeq.current = forceSeq;
+    if (forceOpen !== undefined) setOpen(forceOpen);
   }
 
   const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
@@ -829,6 +1076,7 @@ export function DiffReport({ report }: { report: CompareReport }) {
   const [hideUnchanged, setHideUnchanged] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
+  const [allOpenSeq, setAllOpenSeq] = useState(0);
 
   const sameEnv = report.source.environment === report.target.environment;
   const sourceLabel = sameEnv
@@ -839,7 +1087,13 @@ export function DiffReport({ report }: { report: CompareReport }) {
     : report.target.environment;
 
   const [scopeSearch, setScopeSearch] = useState("");
-  const scopeGroups = useMemo(() => groupByScope(files), [files]);
+  const scopeGroups = useMemo(() => {
+    // Exclude journey files from scope groups when journeyTree is available
+    const filtered = report.journeyTree?.length
+      ? files.filter((f) => !f.relativePath.includes("/journeys/"))
+      : files;
+    return groupByScope(filtered);
+  }, [files, report.journeyTree]);
   const visibleScopeGroups = useMemo(() => {
     if (!scopeSearch.trim()) return scopeGroups;
     const q = scopeSearch.trim().toLowerCase();
@@ -898,14 +1152,14 @@ export function DiffReport({ report }: { report: CompareReport }) {
         <div className="flex items-center gap-3 pt-1">
           <button
             type="button"
-            onClick={() => setAllOpen(true)}
+            onClick={() => { setAllOpen(true); setAllOpenSeq((s) => s + 1); }}
             className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
           >
             Expand All
           </button>
           <button
             type="button"
-            onClick={() => setAllOpen(false)}
+            onClick={() => { setAllOpen(false); setAllOpenSeq((s) => s + 1); }}
             className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
           >
             Collapse All
@@ -945,20 +1199,31 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <p className="text-sm text-slate-500 text-center py-4">
             No differences found — source and target configs are identical.
           </p>
-        ) : visibleScopeGroups.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-4">
-            No scopes match &ldquo;{scopeSearch}&rdquo;.
-          </p>
         ) : (
-          visibleScopeGroups.map((group) => (
-            <ScopeSection
-              key={group.scope}
-              group={group}
-              sourceLabel={sourceLabel}
-              targetLabel={targetLabel}
-              forceOpen={allOpen}
-            />
-          ))
+          <>
+            {/* Journey tree (shown first if available) */}
+            {report.journeyTree && report.journeyTree.length > 0 && (
+              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} />
+            )}
+
+            {/* Other scope sections */}
+            {visibleScopeGroups.length === 0 && !report.journeyTree?.length ? (
+              <p className="text-sm text-slate-400 text-center py-4">
+                {scopeSearch ? `No scopes match "${scopeSearch}".` : "No differences found."}
+              </p>
+            ) : (
+              visibleScopeGroups.map((group) => (
+                <ScopeSection
+                  key={group.scope}
+                  group={group}
+                  sourceLabel={sourceLabel}
+                  targetLabel={targetLabel}
+                  forceOpen={allOpen}
+                  forceSeq={allOpenSeq}
+                />
+              ))
+            )}
+          </>
         )}
         {!hideUnchanged && summary.unchanged > 0 && (
           <p className="text-xs text-slate-400 text-center pt-2">

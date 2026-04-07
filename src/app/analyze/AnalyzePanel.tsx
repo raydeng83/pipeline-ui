@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import type { JourneyInfo, AnalyzeResult, AnalyzeSummary } from "@/app/api/analyze/route";
 
@@ -34,7 +34,12 @@ function StatCard({ value, label, sub, color }: { value: number | string; label:
   );
 }
 
-function SummaryDashboard({ summary }: { summary: AnalyzeSummary }) {
+function SummaryDashboard({ summary, journeys }: { summary: AnalyzeSummary; journeys: JourneyInfo[] }) {
+  const entryJourneys = useMemo(
+    () => journeys.filter((j) => j.calledBy.length === 0 && !j.innerTreeOnly).sort((a, b) => a.name.localeCompare(b.name)),
+    [journeys]
+  );
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -44,6 +49,27 @@ function SummaryDashboard({ summary }: { summary: AnalyzeSummary }) {
         <StatCard value={summary.orphaned}        label="Orphaned"           sub="innerTreeOnly, no callers" color="text-red-500" />
         <StatCard value={summary.maxDepth}        label="Max Depth"          sub="longest chain" color="text-violet-600" />
       </div>
+
+      {/* Entry Journeys */}
+      {entryJourneys.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+            Entry Journeys ({entryJourneys.length})
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+            {entryJourneys.map((j) => (
+              <div key={j.name} className="flex items-center gap-2 text-xs">
+                <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
+                <span className="text-slate-700 truncate" title={j.name}>{j.name}</span>
+                <span className="text-[10px] text-slate-400 shrink-0">{j.nodeCount}n</span>
+                {j.subJourneys.length > 0 && (
+                  <span className="text-[10px] text-violet-500 shrink-0">{j.subJourneys.length} sub</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {summary.mostCalled.length > 0 && (
         <div className="bg-white border border-slate-200 rounded-lg p-4">
@@ -85,15 +111,24 @@ function JourneyTreeNode({
   depth,
   ancestors,
   searchQ,
+  forceOpen,
 }: {
   name: string;
   journeyMap: Map<string, JourneyInfo>;
   depth: number;
   ancestors: Set<string>;
   searchQ: string;
+  forceOpen?: boolean;
 }) {
   const info = journeyMap.get(name);
   const [open, setOpen] = useState(depth === 0);
+
+  // React to parent expand/collapse all
+  const prevForce = useState({ v: forceOpen })[0];
+  if (forceOpen !== undefined && forceOpen !== prevForce.v) {
+    prevForce.v = forceOpen;
+    if (open !== forceOpen) setOpen(forceOpen);
+  }
 
   if (!info) {
     // Referenced but not in config (pulled from different env, etc.)
@@ -158,6 +193,7 @@ function JourneyTreeNode({
               depth={depth + 1}
               ancestors={new Set([...ancestors, name])}
               searchQ={searchQ}
+              forceOpen={forceOpen}
             />
           ))}
         </div>
@@ -170,6 +206,10 @@ function JourneyTreeNode({
 
 function JourneyDependencyTree({ journeys, searchQ }: { journeys: JourneyInfo[]; searchQ: string }) {
   const journeyMap = useMemo(() => new Map(journeys.map((j) => [j.name, j])), [journeys]);
+  const [forceOpen, setForceOpen] = useState<boolean | undefined>(undefined);
+
+  const expandAll = useCallback(() => setForceOpen(true), []);
+  const collapseAll = useCallback(() => setForceOpen(false), []);
 
   const roots = useMemo(
     () => journeys.filter((j) => j.calledBy.length === 0 && !j.innerTreeOnly),
@@ -191,7 +231,17 @@ function JourneyDependencyTree({ journeys, searchQ }: { journeys: JourneyInfo[];
   }, [roots, orphaned, searchQ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Expand/Collapse All */}
+      <div className="flex items-center gap-3">
+        <button type="button" onClick={expandAll} className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
+          Expand All
+        </button>
+        <button type="button" onClick={collapseAll} className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
+          Collapse All
+        </button>
+      </div>
+
       {/* Entry-point journeys */}
       <div className="bg-white border border-slate-200 rounded-lg">
         <div className="px-4 py-2.5 border-b border-slate-100 flex items-center gap-2">
@@ -211,6 +261,7 @@ function JourneyDependencyTree({ journeys, searchQ }: { journeys: JourneyInfo[];
                 depth={0}
                 ancestors={new Set()}
                 searchQ={searchQ}
+                forceOpen={forceOpen}
               />
             ))
           )}
@@ -237,6 +288,7 @@ function JourneyDependencyTree({ journeys, searchQ }: { journeys: JourneyInfo[];
                   depth={0}
                   ancestors={new Set()}
                   searchQ={searchQ}
+                  forceOpen={forceOpen}
                 />
               ))
             )}
@@ -348,7 +400,7 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
             )}
           </div>
 
-          {tab === "summary" && <SummaryDashboard summary={result.summary} />}
+          {tab === "summary" && <SummaryDashboard summary={result.summary} journeys={result.journeys} />}
           {tab === "tree" && <JourneyDependencyTree journeys={result.journeys} searchQ={searchQ.toLowerCase()} />}
         </div>
       )}

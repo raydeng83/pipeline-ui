@@ -25,6 +25,28 @@ export interface DiffOptions {
   ignoreWhitespace?: boolean;
 }
 
+export interface JourneyScript {
+  uuid: string;
+  name: string;
+  status: "modified" | "added" | "removed" | "unchanged";
+}
+
+export interface JourneyNodeInfo {
+  uuid: string;
+  name: string;
+  nodeType: string;
+  status: "modified" | "added" | "removed" | "unchanged";
+}
+
+export interface JourneyTreeNode {
+  name: string;
+  status: "modified" | "added" | "removed" | "unchanged";
+  isEntry: boolean;
+  subJourneys: JourneyTreeNode[];
+  scripts: JourneyScript[];
+  nodes: JourneyNodeInfo[];
+}
+
 export interface CompareReport {
   source: CompareEndpoint;
   target: CompareEndpoint;
@@ -37,4 +59,5 @@ export interface CompareReport {
     unchanged: number;
   };
   files: FileDiff[];
+  journeyTree?: JourneyTreeNode[];
 }

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import type { DiffLine, FileDiff, CompareReport, CompareEndpoint, DiffOptions } from "./diff-types";
+import type { DiffLine, FileDiff, CompareReport, CompareEndpoint, DiffOptions, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "./diff-types";
 
 const MAX_LINES = 2000;
 const MAX_CONTENT_BYTES = 200_000; // 200 KB per side
@@ -297,6 +297,189 @@ export function compareDirs(
   return diffs;
 }
 
+// ── Journey tree builder ─────────────────────────────────────────────────────
+
+interface JourneyNodeMeta {
+  uuid: string;
+  name: string;
+  nodeType: string;
+}
+
+interface JourneyMeta {
+  name: string;
+  innerTreeOnly: boolean;
+  subJourneys: string[];
+  scriptUUIDs: string[];
+  allNodes: JourneyNodeMeta[];
+}
+
+function scanJourneys(configDir: string): Map<string, JourneyMeta> {
+  const map = new Map<string, JourneyMeta>();
+  const realmsDir = path.join(configDir, "realms");
+  if (!fs.existsSync(realmsDir)) return map;
+
+  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
+    if (!realm.isDirectory()) continue;
+    const journeysDir = path.join(realmsDir, realm.name, "journeys");
+    if (!fs.existsSync(journeysDir)) continue;
+
+    for (const jDir of fs.readdirSync(journeysDir, { withFileTypes: true })) {
+      if (!jDir.isDirectory()) continue;
+      const mainFile = path.join(journeysDir, jDir.name, `${jDir.name}.json`);
+      if (!fs.existsSync(mainFile)) continue;
+
+      try {
+        const data = JSON.parse(fs.readFileSync(mainFile, "utf-8"));
+        const nodes = (data.nodes ?? {}) as Record<string, { nodeType?: string }>;
+        const innerTreeUUIDs = new Set<string>();
+        for (const [uuid, node] of Object.entries(nodes)) {
+          if (node.nodeType === "InnerTreeEvaluatorNode") innerTreeUUIDs.add(uuid);
+        }
+
+        const subJourneys: string[] = [];
+        const scriptUUIDs: string[] = [];
+        const allNodes: JourneyNodeMeta[] = [];
+        const nodesDir = path.join(journeysDir, jDir.name, "nodes");
+        if (fs.existsSync(nodesDir)) {
+          for (const nf of fs.readdirSync(nodesDir)) {
+            const fp = path.join(nodesDir, nf);
+            if (fs.statSync(fp).isDirectory()) continue;
+            try {
+              const nd = JSON.parse(fs.readFileSync(fp, "utf-8")) as { tree?: string; script?: string; _type?: { _id?: string; name?: string }; _id?: string };
+              const m = nf.match(/- ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
+              const uuid = m?.[1] ?? nd._id ?? "";
+              const nodeType = nd._type?._id ?? "unknown";
+              const nodeName = nd._type?.name ?? nf.replace(/\s*-\s*[0-9a-f-]+\.json$/i, "");
+              if (m && innerTreeUUIDs.has(m[1]) && nd.tree) subJourneys.push(nd.tree);
+              if (nd.script) scriptUUIDs.push(nd.script);
+              allNodes.push({ uuid, name: nodeName, nodeType });
+            } catch { /* skip */ }
+          }
+        }
+
+        map.set(jDir.name, {
+          name: jDir.name,
+          innerTreeOnly: data.innerTreeOnly ?? false,
+          subJourneys,
+          scriptUUIDs,
+          allNodes,
+        });
+      } catch { /* skip */ }
+    }
+  }
+  return map;
+}
+
+/** Build UUID → script name mapping from scripts-config dir. */
+function buildScriptNameMap(configDir: string): Map<string, string> {
+  const map = new Map<string, string>();
+  const realmsDir = path.join(configDir, "realms");
+  if (!fs.existsSync(realmsDir)) return map;
+  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
+    if (!realm.isDirectory()) continue;
+    const configPath = path.join(realmsDir, realm.name, "scripts", "scripts-config");
+    if (!fs.existsSync(configPath)) continue;
+    for (const f of fs.readdirSync(configPath)) {
+      if (!f.endsWith(".json")) continue;
+      try {
+        const data = JSON.parse(fs.readFileSync(path.join(configPath, f), "utf-8"));
+        if (data._id && data.name) map.set(data._id, data.name);
+      } catch { /* skip */ }
+    }
+  }
+  return map;
+}
+
+function buildJourneyTree(
+  sourceDir: string,
+  targetDir: string,
+  changedJourneys: Map<string, FileDiff["status"]>,
+  changedScripts: Map<string, FileDiff["status"]>,
+  changedNodeFiles: Map<string, FileDiff["status"]>,  // "journeyName/nodeUUID" → status
+): JourneyTreeNode[] {
+  const sourceJourneys = scanJourneys(sourceDir);
+  const targetJourneys = scanJourneys(targetDir);
+
+  // Build script UUID → name from both sides
+  const scriptNames = new Map<string, string>();
+  for (const [k, v] of buildScriptNameMap(sourceDir)) scriptNames.set(k, v);
+  for (const [k, v] of buildScriptNameMap(targetDir)) scriptNames.set(k, v);
+
+  const allNames = new Set([...sourceJourneys.keys(), ...targetJourneys.keys()]);
+  const calledBy = new Map<string, string[]>();
+
+  for (const name of allNames) {
+    const meta = targetJourneys.get(name) ?? sourceJourneys.get(name)!;
+    for (const sub of meta.subJourneys) {
+      if (!calledBy.has(sub)) calledBy.set(sub, []);
+      calledBy.get(sub)!.push(name);
+    }
+  }
+
+  function hasChangedDescendant(name: string, visited: Set<string>): boolean {
+    if (visited.has(name)) return false;
+    visited.add(name);
+    if (changedJourneys.has(name)) return true;
+    const meta = targetJourneys.get(name) ?? sourceJourneys.get(name);
+    if (!meta) return false;
+    // Also consider changed scripts
+    if (meta.scriptUUIDs.some((uuid) => changedScripts.has(uuid))) return true;
+    return meta.subJourneys.some((s) => hasChangedDescendant(s, visited));
+  }
+
+  function buildNode(name: string, visited: Set<string>): JourneyTreeNode | null {
+    if (visited.has(name)) return null;
+    visited.add(name);
+
+    const meta = targetJourneys.get(name) ?? sourceJourneys.get(name);
+    const status = changedJourneys.get(name) ?? "unchanged";
+    const isEntry = !meta?.innerTreeOnly && !(calledBy.get(name)?.length);
+
+    // Resolve scripts for this journey
+    const scripts: JourneyScript[] = [];
+    const nodes: JourneyNodeInfo[] = [];
+    if (meta) {
+      for (const uuid of meta.scriptUUIDs) {
+        const scriptName = scriptNames.get(uuid) ?? uuid;
+        const scriptStatus = changedScripts.get(uuid) ?? "unchanged";
+        scripts.push({ uuid, name: scriptName, status: scriptStatus });
+      }
+      scripts.sort((a, b) => a.name.localeCompare(b.name));
+
+      // Resolve all node statuses
+      for (const nm of meta.allNodes) {
+        const nodeStatus = changedNodeFiles.get(`${name}/${nm.uuid}`) ?? "unchanged";
+        nodes.push({ uuid: nm.uuid, name: nm.name, nodeType: nm.nodeType, status: nodeStatus });
+      }
+      nodes.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const childNodes: JourneyTreeNode[] = [];
+    if (meta) {
+      for (const sub of meta.subJourneys) {
+        const child = buildNode(sub, new Set(visited));
+        if (child) childNodes.push(child);
+      }
+    }
+
+    return { name, status, isEntry, subJourneys: childNodes, scripts, nodes };
+  }
+
+  const roots: JourneyTreeNode[] = [];
+  for (const name of allNames) {
+    const meta = targetJourneys.get(name) ?? sourceJourneys.get(name)!;
+    const parents = calledBy.get(name) ?? [];
+    const isEntry = parents.length === 0 && !meta.innerTreeOnly;
+    if (!isEntry) continue;
+    if (!hasChangedDescendant(name, new Set())) continue;
+
+    const node = buildNode(name, new Set());
+    if (node) roots.push(node);
+  }
+
+  return roots.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export function buildReport(
   source: CompareEndpoint,
   sourceDir: string,
@@ -313,6 +496,72 @@ export function buildReport(
   const files = compareDirs(targetDir, sourceDir, scopes, effectiveOpts);
   const summary = { added: 0, removed: 0, modified: 0, unchanged: 0 };
   for (const f of files) summary[f.status]++;
+
+  // Build journey tree from changed journey and script files
+  const changedJourneys = new Map<string, FileDiff["status"]>();
+  const changedScripts = new Map<string, FileDiff["status"]>(); // UUID → status
+  for (const f of files) {
+    if (f.status === "unchanged") continue;
+    const jm = f.relativePath.match(/(?:^|\/)?journeys\/([^/]+)\//);
+    if (jm) {
+      const existing = changedJourneys.get(jm[1]);
+      if (!existing || f.status === "modified") changedJourneys.set(jm[1], f.status);
+    }
+    // Track changed script content files by extracting script name
+    const sm = f.relativePath.match(/scripts-content\/[^/]+\/(.+)\.\w+$/);
+    if (sm) {
+      // We need UUID for matching — look up from script config
+      // For now, track by content file name; we'll resolve in the tree builder
+    }
+  }
+
+  // Build script name → status map from changed script content files
+  const changedScriptNames = new Map<string, FileDiff["status"]>();
+  for (const f of files) {
+    if (f.status === "unchanged") continue;
+    const sm = f.relativePath.match(/scripts-content\/[^/]+\/(.+)\.\w+$/);
+    if (sm) changedScriptNames.set(sm[1], f.status);
+  }
+
+  // Resolve script name → UUID using config files from both dirs
+  const scriptNameToUUID = new Map<string, string>();
+  for (const dir of [sourceDir, targetDir]) {
+    const realmsDir = path.join(dir, "realms");
+    if (!fs.existsSync(realmsDir)) continue;
+    for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
+      if (!realm.isDirectory()) continue;
+      const cfgDir = path.join(realmsDir, realm.name, "scripts", "scripts-config");
+      if (!fs.existsSync(cfgDir)) continue;
+      for (const f of fs.readdirSync(cfgDir)) {
+        if (!f.endsWith(".json")) continue;
+        try {
+          const d = JSON.parse(fs.readFileSync(path.join(cfgDir, f), "utf-8"));
+          if (d._id && d.name) scriptNameToUUID.set(d.name, d._id);
+        } catch { /* skip */ }
+      }
+    }
+  }
+
+  for (const [name, status] of changedScriptNames) {
+    const uuid = scriptNameToUUID.get(name);
+    if (uuid) changedScripts.set(uuid, status);
+  }
+
+  // Track changed node files: "journeyName/nodeUUID" → status
+  const changedNodeFiles = new Map<string, FileDiff["status"]>();
+  for (const f of files) {
+    if (f.status === "unchanged") continue;
+    const nm = f.relativePath.match(/journeys\/([^/]+)\/nodes\/.*?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
+    if (nm) changedNodeFiles.set(`${nm[1]}/${nm[2]}`, f.status);
+  }
+
+  let journeyTree: JourneyTreeNode[] | undefined;
+  if (changedJourneys.size > 0 || changedScripts.size > 0) {
+    try {
+      journeyTree = buildJourneyTree(sourceDir, targetDir, changedJourneys, changedScripts, changedNodeFiles);
+    } catch { /* ignore */ }
+  }
+
   return {
     source,
     target,
@@ -320,5 +569,6 @@ export function buildReport(
     options: effectiveOpts,
     summary,
     files,
+    journeyTree,
   };
 }
