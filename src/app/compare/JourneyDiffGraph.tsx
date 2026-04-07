@@ -835,15 +835,10 @@ export function JourneyDiffGraphModal({
     const label      = typeof nodeData.label    === "string" ? nodeData.label    : nodeId;
     const nodeType   = typeof nodeData.nodeType === "string" ? nodeData.nodeType : undefined;
 
-    if (nodeType === "InnerTreeEvaluatorNode") {
-      navigateInto(nodeId, nodeData);
-      return;
-    }
-
     setActiveNode({ id: nodeId, label, nodeType, diffStatus });
-  }, [navigateInto]);
+  }, []);
 
-  const showSidePanel = !!activeNode && activeNode.nodeType !== "InnerTreeEvaluatorNode";
+  const showSidePanel = !!activeNode;
 
   return (
     <div
@@ -1055,6 +1050,21 @@ export function JourneyDiffGraphModal({
                 <span className="text-slate-400 font-mono text-[9px] break-all">{activeNode?.id}</span>
               </div>
             </div>
+            {/* Descend into inner journey */}
+            {activeNode?.nodeType === "InnerTreeEvaluatorNode" && (
+              <div className="px-3 py-2 border-b border-slate-100 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => { if (activeNode) { navigateInto(activeNode.id, activeNode); setActiveNode(null); } }}
+                  className="flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-800 font-medium transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                  Descend into journey
+                </button>
+              </div>
+            )}
             {/* Script files */}
             <div className="flex-1 overflow-y-auto">
               <div className="px-3 pt-2 pb-1">
