@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
+import { JourneyDiffGraphModal } from "./JourneyDiffGraph";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -748,6 +749,7 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel }: { sc: Journey
 
 function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string }) {
   const [open, setOpen] = useState(depth === 0);
+  const [graphOpen, setGraphOpen] = useState(false);
   const hasChildren = node.subJourneys.length > 0;
   const s = JOURNEY_STATUS_STYLES[node.status] ?? JOURNEY_STATUS_STYLES.unchanged;
 
@@ -756,6 +758,12 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
     prevSeq.current = forceSeq;
     if (forceOpen !== undefined) setOpen(forceOpen);
   }
+
+  const journeyFile = useMemo(
+    () => files.find((f) => f.relativePath.endsWith(`/journeys/${node.name}/${node.name}.json`)),
+    [files, node.name],
+  );
+  const canShowGraph = !!(journeyFile?.localContent || journeyFile?.remoteContent) || node.nodes.length > 0;
 
   return (
     <div>
@@ -778,6 +786,18 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
         )}
         {node.isEntry && (
           <span className="text-[10px] px-1 py-0 rounded bg-sky-100 text-sky-700 border border-sky-200 shrink-0">Entry</span>
+        )}
+        {canShowGraph && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setGraphOpen(true); }}
+            title="View flow graph"
+            className="text-slate-400 hover:text-sky-500 transition-colors shrink-0 ml-1"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+            </svg>
+          </button>
         )}
       </div>
       {open && (hasChildren || (showScripts && node.scripts.some((s) => s.status !== "unchanged")) || (showNodes && node.nodes.some((n) => n.status !== "unchanged"))) && (
@@ -811,6 +831,17 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
             </div>
           )}
         </div>
+      )}
+      {graphOpen && (
+        <JourneyDiffGraphModal
+          journeyName={node.name}
+          localContent={journeyFile?.localContent}
+          remoteContent={journeyFile?.remoteContent}
+          nodeInfos={node.nodes}
+          sourceLabel={sourceLabel}
+          targetLabel={targetLabel}
+          onClose={() => setGraphOpen(false)}
+        />
       )}
     </div>
   );
