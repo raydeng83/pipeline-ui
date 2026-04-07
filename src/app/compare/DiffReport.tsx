@@ -814,7 +814,7 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel, journeyName, no
 }
 
 function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [] }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[] }) {
-  const [open, setOpen] = useState(depth === 0);
+  const [open, setOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [graphInitialFocusNodeId, setGraphInitialFocusNodeId] = useState<string | null>(null);
 
