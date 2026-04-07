@@ -69,6 +69,7 @@ export function parseMergedDiffGraph(
   localContent: string | undefined,
   remoteContent: string | undefined,
   nodeStatusMap: Map<string, DiffStatus>,
+  nodeModifiedReasonMap?: Map<string, "script" | "subjourney">,
 ): { nodes: Node[]; edges: Edge[] } {
   const local  = localContent  ? parseJson(localContent)  : null;
   const remote = remoteContent ? parseJson(remoteContent) : null;
@@ -168,6 +169,7 @@ export function parseMergedDiffGraph(
         nodeType: node.nodeType,
         outcomes,
         diffStatus: status,
+        modifiedReason: nodeModifiedReasonMap?.get(id),
         _origPos: pos,
       },
     });
@@ -224,6 +226,7 @@ export function parseSingleSideGraph(
   content: string,
   nodeStatusMap: Map<string, DiffStatus>,
   side: "local" | "remote",
+  nodeModifiedReasonMap?: Map<string, "script" | "subjourney">,
 ): { nodes: Node[]; edges: Edge[] } {
   const data = parseJson(content);
   if (!data) return { nodes: [], edges: [] };
@@ -277,6 +280,7 @@ export function parseSingleSideGraph(
         nodeType:  node.nodeType,
         outcomes,
         diffStatus: rawStatus,
+        modifiedReason: nodeModifiedReasonMap?.get(id),
       },
     });
 

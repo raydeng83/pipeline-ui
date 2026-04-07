@@ -311,6 +311,10 @@ interface JourneyMeta {
   subJourneys: string[];
   scriptUUIDs: string[];
   allNodes: JourneyNodeMeta[];
+  /** nodeUUID → script UUID (for ScriptedDecisionNode and similar) */
+  nodeScripts: Map<string, string>;
+  /** nodeUUID → sub-journey name (for InnerTreeEvaluatorNode) */
+  nodeSubJourneys: Map<string, string>;
 }
 
 function scanJourneys(configDir: string): Map<string, JourneyMeta> {
@@ -339,6 +343,8 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
         const subJourneys: string[] = [];
         const scriptUUIDs: string[] = [];
         const allNodes: JourneyNodeMeta[] = [];
+        const nodeScripts = new Map<string, string>();
+        const nodeSubJourneys = new Map<string, string>();
         const nodesDir = path.join(journeysDir, jDir.name, "nodes");
         if (fs.existsSync(nodesDir)) {
           for (const nf of fs.readdirSync(nodesDir)) {
@@ -350,8 +356,14 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
               const uuid = m?.[1] ?? nd._id ?? "";
               const nodeType = nd._type?._id ?? "unknown";
               const nodeName = nd._type?.name ?? nf.replace(/\s*-\s*[0-9a-f-]+\.json$/i, "");
-              if (m && innerTreeUUIDs.has(m[1]) && nd.tree) subJourneys.push(nd.tree);
-              if (nd.script) scriptUUIDs.push(nd.script);
+              if (m && innerTreeUUIDs.has(m[1]) && nd.tree) {
+                subJourneys.push(nd.tree);
+                nodeSubJourneys.set(uuid, nd.tree);
+              }
+              if (nd.script) {
+                scriptUUIDs.push(nd.script);
+                nodeScripts.set(uuid, nd.script);
+              }
               allNodes.push({ uuid, name: nodeName, nodeType });
             } catch { /* skip */ }
           }
@@ -363,6 +375,8 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
           subJourneys,
           scriptUUIDs,
           allNodes,
+          nodeScripts,
+          nodeSubJourneys,
         });
       } catch { /* skip */ }
     }
@@ -448,8 +462,25 @@ function buildJourneyTree(
 
       // Resolve all node statuses
       for (const nm of meta.allNodes) {
-        const nodeStatus = changedNodeFiles.get(`${name}/${nm.uuid}`) ?? "unchanged";
-        nodes.push({ uuid: nm.uuid, name: nm.name, nodeType: nm.nodeType, status: nodeStatus });
+        let nodeStatus = changedNodeFiles.get(`${name}/${nm.uuid}`) ?? "unchanged";
+        let modifiedReason: "script" | "subjourney" | undefined;
+        // ScriptedDecisionNode: mark modified if its referenced script changed
+        if (nodeStatus === "unchanged") {
+          const scriptUuid = meta.nodeScripts.get(nm.uuid);
+          if (scriptUuid && changedScripts.has(scriptUuid)) {
+            nodeStatus = "modified";
+            modifiedReason = "script";
+          }
+        }
+        // InnerTreeEvaluatorNode: mark modified if its sub-journey has changes
+        if (nodeStatus === "unchanged") {
+          const subJourneyName = meta.nodeSubJourneys.get(nm.uuid);
+          if (subJourneyName && hasChangedDescendant(subJourneyName, new Set())) {
+            nodeStatus = "modified";
+            modifiedReason = "subjourney";
+          }
+        }
+        nodes.push({ uuid: nm.uuid, name: nm.name, nodeType: nm.nodeType, status: nodeStatus, modifiedReason });
       }
       nodes.sort((a, b) => a.name.localeCompare(b.name));
     }

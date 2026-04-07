@@ -36,6 +36,8 @@ export interface JourneyNodeInfo {
   name: string;
   nodeType: string;
   status: "modified" | "added" | "removed" | "unchanged";
+  /** Why this node is "modified" — distinguishes script vs sub-journey changes */
+  modifiedReason?: "script" | "subjourney";
 }
 
 export interface JourneyTreeNode {

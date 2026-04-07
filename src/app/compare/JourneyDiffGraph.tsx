@@ -173,24 +173,43 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
     nodeType?: string;
     outcomes: string[];
     diffStatus: DiffStatus;
+    modifiedReason?: "script" | "subjourney";
     isFlashing?: boolean;
     isSearchMatch?: boolean;
   };
-  const outcomes      = d.outcomes ?? [];
-  const h             = diffNodeHeight(outcomes.length);
-  const status        = d.diffStatus ?? "unchanged";
-  const badgeLabel    = statusBadgeLabel(status);
-  const isInner       = d.nodeType === "InnerTreeEvaluatorNode";
-  const isFlashing    = !!d.isFlashing;
-  const isSearchMatch = !!d.isSearchMatch;
+  const outcomes       = d.outcomes ?? [];
+  const h              = diffNodeHeight(outcomes.length);
+  const status         = d.diffStatus ?? "unchanged";
+  const modifiedReason = d.modifiedReason;
+  const isInner        = d.nodeType === "InnerTreeEvaluatorNode";
+  const isFlashing     = !!d.isFlashing;
+  const isSearchMatch  = !!d.isSearchMatch;
+
+  // Derive border/bg based on modifiedReason when status is "modified"
+  function nodeBorderBg(): string {
+    if (status === "modified") {
+      if (modifiedReason === "script")    return "border-orange-400 bg-orange-50";
+      if (modifiedReason === "subjourney") return "border-violet-400 bg-violet-50";
+    }
+    if (isInner) return "border-amber-300 border-dashed bg-amber-50 cursor-pointer";
+    return statusBorderBg(status);
+  }
+
+  function nodeBadgeClass(): string {
+    if (status === "modified") {
+      if (modifiedReason === "script")    return "bg-orange-100 text-orange-700";
+      if (modifiedReason === "subjourney") return "bg-violet-100 text-violet-700";
+    }
+    return statusBadgeClass(status);
+  }
+
+  const badgeLabel = statusBadgeLabel(status);
 
   return (
     <div
       className={cn(
         "border rounded-lg shadow-sm overflow-visible relative",
-        isInner
-          ? "border-amber-300 border-dashed bg-amber-50 cursor-pointer"
-          : statusBorderBg(status),
+        nodeBorderBg(),
         isFlashing && "ring-2 ring-sky-400 ring-offset-1 animate-pulse",
         isSearchMatch && "ring-2 ring-amber-400 ring-offset-1",
       )}
@@ -203,7 +222,7 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
         <span
           className={cn(
             "absolute top-0.5 right-0.5 text-[9px] font-bold px-1 rounded",
-            statusBadgeClass(status),
+            nodeBadgeClass(),
           )}
         >
           {badgeLabel}
@@ -213,7 +232,13 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
       <div className="px-3 pt-2" style={{ paddingRight: outcomes.length > 0 ? 56 : 20 }}>
         <p className="text-[11px] font-medium text-slate-700 leading-snug break-words">{d.label}</p>
         {d.nodeType && <p className="text-[9px] text-slate-400 mt-0.5 truncate">{d.nodeType}</p>}
-        {isInner && (
+        {modifiedReason === "script" && (
+          <p className="text-[9px] text-orange-500 mt-0.5 font-medium">script changed</p>
+        )}
+        {modifiedReason === "subjourney" && (
+          <p className="text-[9px] text-violet-500 mt-0.5 font-medium">sub-journey changed</p>
+        )}
+        {isInner && !modifiedReason && (
           <p className="text-[9px] text-amber-500 mt-0.5 font-medium">⤵ (inner)</p>
         )}
       </div>
@@ -689,7 +714,7 @@ function ScriptPanelContent({
 // ── NodeDetailPanel ────────────────────────────────────────────────────────────
 
 function NodeDetailPanel({
-  nodeId, nodeLabel, nodeType, diffStatus,
+  nodeId, nodeLabel, nodeType, diffStatus, modifiedReason,
   graphEdges, graphNodeLabels,
   journeyName, files, sourceEnv, targetEnv,
   navigating, onNavigateInto, onClose,
@@ -698,6 +723,7 @@ function NodeDetailPanel({
   nodeLabel: string;
   nodeType?: string;
   diffStatus: DiffStatus;
+  modifiedReason?: "script" | "subjourney";
   graphEdges: Edge[];
   graphNodeLabels: Map<string, string>;
   journeyName: string;
@@ -814,9 +840,15 @@ function NodeDetailPanel({
         {!isStaticNode && tab === "config" && (
           <>
             {/* Status */}
-            <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2 shrink-0">
+            <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2 shrink-0 flex-wrap">
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Status</span>
               <DiffStatusBadge status={diffStatus} />
+              {modifiedReason === "script" && (
+                <span className="text-[9px] font-medium text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded">script changed</span>
+              )}
+              {modifiedReason === "subjourney" && (
+                <span className="text-[9px] font-medium text-violet-600 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded">sub-journey changed</span>
+              )}
             </div>
 
             {/* Outcomes */}
@@ -1077,10 +1109,14 @@ function DiffGraphCanvasInner({
   }, [filteredEdges, highlighted, hoveredEdgeId, pinnedEdgeId]);
 
   const miniMapNodeColor = useCallback((n: Node): string => {
+    if (n.data.diffStatus === "modified") {
+      if (n.data.modifiedReason === "script")    return "#f97316"; // orange
+      if (n.data.modifiedReason === "subjourney") return "#8b5cf6"; // violet
+      return "#f59e0b"; // amber
+    }
     switch (n.data.diffStatus as DiffStatus) {
       case "added":     return "#10b981";
       case "removed":   return "#ef4444";
-      case "modified":  return "#f59e0b";
       default:          return "#94a3b8";
     }
   }, []);
@@ -1201,6 +1237,7 @@ export function JourneyDiffGraphModal({
     label: string;
     nodeType?: string;
     diffStatus: DiffStatus;
+    modifiedReason?: "script" | "subjourney";
   } | null>(null);
 
   const [searchQuery, setSearchQuery]   = useState("");
@@ -1273,10 +1310,18 @@ export function JourneyDiffGraphModal({
     return () => clearTimeout(t);
   }, [flashNodeId]);
 
-  // Build nodeStatusMap
+  // Build nodeStatusMap and nodeModifiedReasonMap
   const nodeStatusMap = useMemo(() => {
     const m = new Map<string, DiffStatus>();
     for (const n of active.nodeInfos) m.set(n.uuid, n.status as DiffStatus);
+    return m;
+  }, [active.nodeInfos]);
+
+  const nodeModifiedReasonMap = useMemo(() => {
+    const m = new Map<string, "script" | "subjourney">();
+    for (const n of active.nodeInfos) {
+      if (n.modifiedReason) m.set(n.uuid, n.modifiedReason);
+    }
     return m;
   }, [active.nodeInfos]);
 
@@ -1287,6 +1332,11 @@ export function JourneyDiffGraphModal({
         const { nodes, edges } = parseNodesOnlyGraph(
           active.nodeInfos.map((n) => ({ ...n, status: n.status as DiffStatus })),
         );
+        // Inject modifiedReason into fallback nodes too
+        for (const node of nodes) {
+          const reason = nodeModifiedReasonMap.get(node.id);
+          if (reason) node.data = { ...node.data, modifiedReason: reason };
+        }
         return {
           mergedNodes: nodes, mergedEdges: edges,
           localNodes:  nodes, localEdges:  edges,
@@ -1294,12 +1344,12 @@ export function JourneyDiffGraphModal({
         };
       }
 
-      const merged = parseMergedDiffGraph(active.localContent, active.remoteContent, nodeStatusMap);
+      const merged = parseMergedDiffGraph(active.localContent, active.remoteContent, nodeStatusMap, nodeModifiedReasonMap);
       const local  = active.localContent
-        ? parseSingleSideGraph(active.localContent,  nodeStatusMap, "local")
+        ? parseSingleSideGraph(active.localContent,  nodeStatusMap, "local",  nodeModifiedReasonMap)
         : { nodes: [] as Node[], edges: [] as Edge[] };
       const remote = active.remoteContent
-        ? parseSingleSideGraph(active.remoteContent, nodeStatusMap, "remote")
+        ? parseSingleSideGraph(active.remoteContent, nodeStatusMap, "remote", nodeModifiedReasonMap)
         : { nodes: [] as Node[], edges: [] as Edge[] };
 
       return {
@@ -1307,7 +1357,7 @@ export function JourneyDiffGraphModal({
         localNodes:  local.nodes,  localEdges:  local.edges,
         remoteNodes: remote.nodes, remoteEdges: remote.edges,
       };
-    }, [hasContent, active.localContent, active.remoteContent, active.nodeInfos, nodeStatusMap]);
+    }, [hasContent, active.localContent, active.remoteContent, active.nodeInfos, nodeStatusMap, nodeModifiedReasonMap]);
 
   const graphNodeLabels = useMemo(() => {
     const map = new Map<string, string>();
@@ -1328,6 +1378,7 @@ export function JourneyDiffGraphModal({
         label: typeof node.data.label === "string" ? node.data.label : node.id,
         nodeType: typeof node.data.nodeType === "string" ? node.data.nodeType : undefined,
         diffStatus: (node.data.diffStatus as DiffStatus) ?? "unchanged",
+        modifiedReason: node.data.modifiedReason as "script" | "subjourney" | undefined,
       });
       setFlashNodeId(pendingFocusNodeId);
       setZoomToNodeId(pendingFocusNodeId);
@@ -1431,11 +1482,12 @@ export function JourneyDiffGraphModal({
       setActiveNode(null);
       return;
     }
-    const diffStatus = (nodeData.diffStatus as DiffStatus) ?? "unchanged";
-    const label      = typeof nodeData.label    === "string" ? nodeData.label    : nodeId;
-    const nodeType   = typeof nodeData.nodeType === "string" ? nodeData.nodeType : undefined;
+    const diffStatus     = (nodeData.diffStatus as DiffStatus) ?? "unchanged";
+    const label          = typeof nodeData.label    === "string" ? nodeData.label    : nodeId;
+    const nodeType       = typeof nodeData.nodeType === "string" ? nodeData.nodeType : undefined;
+    const modifiedReason = (nodeData.modifiedReason as "script" | "subjourney" | undefined);
 
-    setActiveNode({ id: nodeId, label, nodeType, diffStatus });
+    setActiveNode({ id: nodeId, label, nodeType, diffStatus, modifiedReason });
   }, []);
 
   const showSidePanel = !!activeNode;
@@ -1652,6 +1704,7 @@ export function JourneyDiffGraphModal({
               nodeLabel={activeNode.label}
               nodeType={activeNode.nodeType}
               diffStatus={activeNode.diffStatus}
+              modifiedReason={activeNode.modifiedReason}
               graphEdges={mergedEdges}
               graphNodeLabels={graphNodeLabels}
               journeyName={active.name}
