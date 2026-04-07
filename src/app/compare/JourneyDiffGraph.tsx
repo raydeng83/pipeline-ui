@@ -198,14 +198,32 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
   const isFlashing     = !!d.isFlashing;
   const isSearchMatch  = !!d.isSearchMatch;
 
-  // Derive border/bg based on modifiedReason when status is "modified"
+  // Special node types (script / inner tree) always keep their type-based bg.
+  // Their border is solid when unchanged, dashed (with diff-status color) when changed.
+  // Regular nodes keep the existing combined border+bg treatment.
   function nodeBorderBg(): string {
+    if (isScript || isInner) {
+      const typeBg = isScript ? "bg-violet-50" : "bg-amber-50";
+      if (status === "unchanged") return `border-slate-300 ${typeBg}`;
+      // changed: dashed border in diff-status color, bg stays type-based
+      const borderColor = (() => {
+        if (status === "modified") {
+          if (modifiedReason === "script")     return "border-orange-400";
+          if (modifiedReason === "subjourney") return "border-violet-400";
+          return "border-amber-400";
+        }
+        if (status === "added")   return "border-emerald-400";
+        if (status === "removed") return "border-red-400";
+        return "border-slate-300";
+      })();
+      const removed = status === "removed" ? "opacity-70" : "";
+      return [borderColor, "border-dashed", typeBg, removed].filter(Boolean).join(" ");
+    }
+    // Regular nodes: existing behavior
     if (status === "modified") {
       if (modifiedReason === "script")     return "border-orange-400 bg-orange-50";
       if (modifiedReason === "subjourney") return "border-violet-400 bg-violet-50";
     }
-    if (isInner)  return "border-amber-300 border-dashed bg-amber-50";
-    if (isScript && status === "unchanged") return "border-slate-300 bg-violet-50";
     return statusBorderBg(status);
   }
 

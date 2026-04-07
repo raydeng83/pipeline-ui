@@ -101,10 +101,6 @@ const SPECIAL_NODE_BG: Partial<Record<string, string>> = {
   InnerTreeEvaluatorNode: "bg-amber-50",
 };
 
-// Default border per node type (overridden by selection/search/flash states)
-const SPECIAL_NODE_BORDER: Partial<Record<string, string>> = {
-  InnerTreeEvaluatorNode: "border-amber-300 border-dashed",
-};
 
 function JourneyNodeComponent({ data }: NodeProps) {
   const d = data as {
@@ -117,8 +113,7 @@ function JourneyNodeComponent({ data }: NodeProps) {
   };
   const outcomes = d.outcomes ?? [];
   const h        = journeyNodeHeight(outcomes.length);
-  const specialBg     = d.nodeType ? (SPECIAL_NODE_BG[d.nodeType]     ?? "bg-white")         : "bg-white";
-  const specialBorder = d.nodeType ? (SPECIAL_NODE_BORDER[d.nodeType] ?? "border-slate-300") : "border-slate-300";
+  const specialBg = d.nodeType ? (SPECIAL_NODE_BG[d.nodeType] ?? "bg-white") : "bg-white";
 
   return (
     <div
@@ -128,7 +123,7 @@ function JourneyNodeComponent({ data }: NodeProps) {
         d.isFlashing    ? "border-sky-400 ring-4 ring-sky-300 ring-opacity-100 animate-pulse" :
         d.isSelected    ? "border-sky-500 ring-2 ring-sky-300 shadow-sky-100" :
         d.isSearchMatch ? "border-amber-400 ring-2 ring-amber-200" :
-                          specialBorder
+                          "border-slate-300"
       )}
       style={{ width: NODE_W, height: h, position: "relative" }}
     >
