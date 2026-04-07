@@ -902,6 +902,7 @@ interface DiffGraphCanvasInnerProps {
   onNodeActivate?: (nodeId: string | null, nodeData: Record<string, unknown>) => void;
   searchQuery: string;
   flashNodeId: string | null;
+  zoomToNodeId?: string | null;
 }
 
 function DiffGraphCanvasInner({
@@ -914,6 +915,7 @@ function DiffGraphCanvasInner({
   onNodeActivate,
   searchQuery,
   flashNodeId,
+  zoomToNodeId,
 }: DiffGraphCanvasInnerProps) {
   const { fitView, setViewport, getViewport } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
@@ -967,6 +969,15 @@ function DiffGraphCanvasInner({
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [getViewport, setViewport]);
+
+  // Zoom to a specific node (used when opening the graph from a script row)
+  useEffect(() => {
+    if (!zoomToNodeId) return;
+    const t = setTimeout(() => {
+      void fitView({ nodes: [{ id: zoomToNodeId }], duration: 600, padding: 0.35 });
+    }, 150);
+    return () => clearTimeout(t);
+  }, [zoomToNodeId, fitView]);
 
   // Apply hideUnchanged filter
   const visibleNodeIds = useMemo(() => {
@@ -1156,6 +1167,8 @@ export interface JourneyDiffGraphModalProps {
   files: FileDiff[];
   /** Pre-populate the nav stack with ancestor journeys so the user can navigate back up. */
   ancestorPath?: NavEntry[];
+  /** When set, the modal will zoom to and activate this node once the graph loads. */
+  initialFocusNodeId?: string;
   onClose: () => void;
 }
 
@@ -1170,6 +1183,7 @@ export function JourneyDiffGraphModal({
   targetEnv,
   files,
   ancestorPath,
+  initialFocusNodeId,
   onClose,
 }: JourneyDiffGraphModalProps) {
   const [viewMode, setViewMode]             = useState<"merged" | "side-by-side">("merged");
@@ -1191,6 +1205,9 @@ export function JourneyDiffGraphModal({
 
   const [searchQuery, setSearchQuery]   = useState("");
   const [flashNodeId, setFlashNodeId]   = useState<string | null>(null);
+  // Pending focus: activate + zoom to this node once the graph content is ready
+  const [pendingFocusNodeId, setPendingFocusNodeId] = useState<string | null>(initialFocusNodeId ?? null);
+  const [zoomToNodeId, setZoomToNodeId] = useState<string | null>(null);
 
   const [leftExternalVP,  setLeftExternalVP]  = useState<Viewport | null>(null);
   const [rightExternalVP, setRightExternalVP] = useState<Viewport | null>(null);
@@ -1300,6 +1317,24 @@ export function JourneyDiffGraphModal({
     }
     return map;
   }, [mergedNodes]);
+
+  // When the graph has content and a pending focus node, activate + zoom to it
+  useEffect(() => {
+    if (!pendingFocusNodeId || !hasContent || mergedNodes.length === 0) return;
+    const node = mergedNodes.find((n) => n.id === pendingFocusNodeId);
+    if (node) {
+      setActiveNode({
+        id: node.id,
+        label: typeof node.data.label === "string" ? node.data.label : node.id,
+        nodeType: typeof node.data.nodeType === "string" ? node.data.nodeType : undefined,
+        diffStatus: (node.data.diffStatus as DiffStatus) ?? "unchanged",
+      });
+      setFlashNodeId(pendingFocusNodeId);
+      setZoomToNodeId(pendingFocusNodeId);
+    }
+    setPendingFocusNodeId(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingFocusNodeId, hasContent, mergedNodes]);
 
   const handleLeftMove = useCallback((vp: Viewport) => {
     if (!syncViewports || syncSource.current === "left") return;
@@ -1566,6 +1601,7 @@ export function JourneyDiffGraphModal({
               onNodeActivate={handleNodeActivate}
               searchQuery={searchQuery}
               flashNodeId={flashNodeId}
+              zoomToNodeId={zoomToNodeId}
             />
           ) : (
             <>

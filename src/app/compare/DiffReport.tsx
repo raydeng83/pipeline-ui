@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
-import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript } from "@/lib/diff-types";
+import { useState, useMemo, useRef, useCallback } from "react";
+import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
 import { JourneyDiffGraphModal, type NavEntry } from "./JourneyDiffGraph";
@@ -713,11 +713,64 @@ function findScriptFiles(files: FileDiff[], uuid: string, name: string): FileDif
   });
 }
 
-function JourneyScriptRow({ sc, files, sourceLabel, targetLabel }: { sc: JourneyScript; files: FileDiff[]; sourceLabel: string; targetLabel: string }) {
-  const [open, setOpen] = useState(false);
+/** Find which node UUID in a journey uses a given script UUID.
+ *  Searches diff files first; falls back to the journey-node API for unchanged node configs. */
+async function findNodeIdForScript(
+  scriptUuid: string,
+  journeyName: string,
+  nodeInfos: JourneyNodeInfo[],
+  files: FileDiff[],
+  env: string,
+): Promise<string | null> {
+  // 1. Search diff files (fast — works when the node config was also changed)
+  for (const f of files) {
+    if (!f.relativePath.includes(`/journeys/${journeyName}/nodes/`)) continue;
+    const content = f.localContent ?? f.remoteContent ?? "";
+    if (content.includes(scriptUuid)) {
+      const m = f.relativePath.match(/\/([^/]+)\.json$/);
+      if (m) return m[1];
+    }
+  }
+  // 2. Fetch node configs from API for ScriptedDecisionNode entries
+  const candidates = nodeInfos.filter((n) => n.nodeType === "ScriptedDecisionNode");
+  for (const nodeInfo of candidates) {
+    try {
+      const params = new URLSearchParams({ environment: env, journey: journeyName, nodeId: nodeInfo.uuid });
+      const res = await fetch(`/api/push/journey-node?${params}`);
+      if (!res.ok) continue;
+      const data = await res.json() as { file?: { content?: string } };
+      if ((data.file?.content ?? "").includes(scriptUuid)) return nodeInfo.uuid;
+    } catch { /* ignore */ }
+  }
+  return null;
+}
+
+function JourneyScriptRow({ sc, files, sourceLabel, targetLabel, journeyName, nodeInfos, sourceEnv, targetEnv, onViewInJourney }: {
+  sc: JourneyScript;
+  files: FileDiff[];
+  sourceLabel: string;
+  targetLabel: string;
+  journeyName: string;
+  nodeInfos: JourneyNodeInfo[];
+  sourceEnv: string;
+  targetEnv: string;
+  onViewInJourney: (nodeId: string | null) => void;
+}) {
+  const [open, setOpen]       = useState(false);
+  const [finding, setFinding] = useState(false);
   const ss = JOURNEY_STATUS_STYLES[sc.status] ?? JOURNEY_STATUS_STYLES.unchanged;
   const scriptFiles = useMemo(() => findScriptFiles(files, sc.uuid, sc.name), [files, sc.uuid, sc.name]);
   const canExpand = scriptFiles.length > 0;
+
+  const handleViewInJourney = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const env = sourceEnv || targetEnv;
+    if (!env) { onViewInJourney(null); return; }
+    setFinding(true);
+    const nodeId = await findNodeIdForScript(sc.uuid, journeyName, nodeInfos, files, env);
+    setFinding(false);
+    onViewInJourney(nodeId);
+  }, [sc.uuid, journeyName, nodeInfos, files, sourceEnv, targetEnv, onViewInJourney]);
 
   return (
     <div>
@@ -734,6 +787,19 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel }: { sc: Journey
         </svg>
         <span className="text-slate-600 truncate flex-1 min-w-0" title={sc.uuid}>{sc.name}</span>
         <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ss.badge)}>{ss.label}</span>
+        {/* View in journey button */}
+        <button
+          type="button"
+          title="View in journey graph"
+          disabled={finding}
+          onClick={handleViewInJourney}
+          className="text-slate-400 hover:text-sky-500 transition-colors shrink-0 disabled:opacity-50"
+        >
+          {finding
+            ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
+            : <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" /></svg>
+          }
+        </button>
         {canExpand && <span className="text-slate-400 text-[10px] shrink-0">{open ? "▲" : "▼"}</span>}
       </div>
       {open && scriptFiles.length > 0 && (
@@ -750,6 +816,12 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel }: { sc: Journey
 function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [] }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[] }) {
   const [open, setOpen] = useState(depth === 0);
   const [graphOpen, setGraphOpen] = useState(false);
+  const [graphInitialFocusNodeId, setGraphInitialFocusNodeId] = useState<string | null>(null);
+
+  const handleViewScriptInJourney = useCallback((nodeId: string | null) => {
+    setGraphInitialFocusNodeId(nodeId);
+    setGraphOpen(true);
+  }, []);
   const hasChildren = node.subJourneys.length > 0;
   const s = JOURNEY_STATUS_STYLES[node.status] ?? JOURNEY_STATUS_STYLES.unchanged;
 
@@ -815,7 +887,18 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           {showScripts && node.scripts.filter((sc) => sc.status !== "unchanged").length > 0 && (
             <div className="mt-1 space-y-0.5">
               {node.scripts.filter((sc) => sc.status !== "unchanged").map((sc) => (
-                <JourneyScriptRow key={sc.uuid} sc={sc} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                <JourneyScriptRow
+                  key={sc.uuid}
+                  sc={sc}
+                  files={files}
+                  sourceLabel={sourceLabel}
+                  targetLabel={targetLabel}
+                  journeyName={node.name}
+                  nodeInfos={node.nodes}
+                  sourceEnv={sourceEnv}
+                  targetEnv={targetEnv}
+                  onViewInJourney={handleViewScriptInJourney}
+                />
               ))}
             </div>
           )}
@@ -851,7 +934,8 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           targetEnv={targetEnv}
           files={files}
           ancestorPath={ancestorPath}
-          onClose={() => setGraphOpen(false)}
+          initialFocusNodeId={graphInitialFocusNodeId ?? undefined}
+          onClose={() => { setGraphOpen(false); setGraphInitialFocusNodeId(null); }}
         />
       )}
     </div>
@@ -893,7 +977,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
   const [open, setOpen] = useState(true);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
-  const [showScripts, setShowScripts] = useState(false);
+  const [showScripts, setShowScripts] = useState(true);
   const [showNodes, setShowNodes] = useState(false);
   const [localForceOpen, setLocalForceOpen] = useState<boolean | undefined>(undefined);
   const [forceSeq, setForceSeq] = useState(0);
