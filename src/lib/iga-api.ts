@@ -15,14 +15,16 @@ import { parseEnvFile } from "./env-parser";
 interface IgaScopeConfig {
   /** IGA REST API endpoint path */
   endpoint: string;
-  /** Subdirectory under configDir/iga/ where files are stored */
+  /** Subdirectory under configDir where files are stored */
   subdir: string;
   /** Field in each result item to use as the file ID */
   idField: string;
-  /** Whether to fetch full item detail by ID (some endpoints only list _id + name) */
+  /** Whether to fetch full item detail by ID (some endpoints only list summary) */
   fetchDetail: boolean;
   /** Whether push (import) is supported */
   pushSupported: boolean;
+  /** Pagination style: "cursor" = searchAfterKey, "offset" = _pagedResultsOffset + _queryFilter */
+  pagination: "cursor" | "offset";
 }
 
 const IGA_SCOPE_CONFIG: Record<string, IgaScopeConfig> = {
@@ -32,6 +34,7 @@ const IGA_SCOPE_CONFIG: Record<string, IgaScopeConfig> = {
     idField: "id",
     fetchDetail: true,
     pushSupported: true,
+    pagination: "cursor",
   },
   "iga-entitlements": {
     endpoint: "/iga/governance/entitlement",
@@ -39,6 +42,15 @@ const IGA_SCOPE_CONFIG: Record<string, IgaScopeConfig> = {
     idField: "id",
     fetchDetail: false,
     pushSupported: false,
+    pagination: "cursor",
+  },
+  "iga-forms": {
+    endpoint: "/iga/governance/requestForms",
+    subdir: "iga/forms",
+    idField: "id",
+    fetchDetail: true,
+    pushSupported: true,
+    pagination: "offset",
   },
   "iga-notifications": {
     endpoint: "/iga/governance/notification",
@@ -46,6 +58,7 @@ const IGA_SCOPE_CONFIG: Record<string, IgaScopeConfig> = {
     idField: "_id",
     fetchDetail: false,
     pushSupported: false,
+    pagination: "cursor",
   },
 };
 
@@ -94,9 +107,10 @@ async function getAccessToken(envVars: Record<string, string>): Promise<string> 
   return data.access_token;
 }
 
-// ── Pagination helper ─────────────────────────────────────────────────────────
+// ── Pagination helpers ────────────────────────────────────────────────────────
 
-async function* paginateIga(
+/** Cursor-based pagination using searchAfterKey (application, entitlement, notification). */
+async function* paginateCursor(
   tenantUrl: string,
   endpoint: string,
   token: string,
@@ -111,13 +125,8 @@ async function* paginateIga(
       url.searchParams.set("_searchAfterKey", JSON.stringify(searchAfterKey));
     }
 
-    const res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) {
-      throw new Error(`IGA API ${res.status}: ${endpoint}`);
-    }
+    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`IGA API ${res.status}: ${endpoint}`);
 
     const data = await res.json() as {
       result?: Record<string, unknown>[];
@@ -126,10 +135,52 @@ async function* paginateIga(
 
     const items = data.result ?? [];
     for (const item of items) yield item;
-
     if (!data.searchAfterKey || items.length === 0) break;
     searchAfterKey = data.searchAfterKey;
   }
+}
+
+/** Offset-based pagination using _pagedResultsOffset + _queryFilter (requestForms). */
+async function* paginateOffset(
+  tenantUrl: string,
+  endpoint: string,
+  token: string,
+  pageSize = 100
+): AsyncGenerator<Record<string, unknown>> {
+  let offset = 0;
+
+  while (true) {
+    const url = new URL(`${tenantUrl}${endpoint}`);
+    url.searchParams.set("_pageSize", String(pageSize));
+    url.searchParams.set("_pagedResultsOffset", String(offset));
+    url.searchParams.set("_queryFilter", "true");
+
+    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`IGA API ${res.status}: ${endpoint}`);
+
+    const data = await res.json() as {
+      result?: Record<string, unknown>[];
+      resultCount?: number;
+      totalCount?: number;
+    };
+
+    const items = data.result ?? [];
+    for (const item of items) yield item;
+    if (items.length < pageSize) break;
+    offset += items.length;
+  }
+}
+
+function paginateIga(
+  tenantUrl: string,
+  endpoint: string,
+  token: string,
+  cfg: IgaScopeConfig,
+  pageSize = 100
+): AsyncGenerator<Record<string, unknown>> {
+  return cfg.pagination === "offset"
+    ? paginateOffset(tenantUrl, endpoint, token, pageSize)
+    : paginateCursor(tenantUrl, endpoint, token, pageSize);
 }
 
 // ── Runner ────────────────────────────────────────────────────────────────────
@@ -188,7 +239,7 @@ export function runIgaApi(options: {
             log(`[${scope}] Fetching from ${tenantUrl}${cfg.endpoint}…`);
             let count = 0;
 
-            for await (const item of paginateIga(tenantUrl, cfg.endpoint, token)) {
+            for await (const item of paginateIga(tenantUrl, cfg.endpoint, token, cfg)) {
               if (aborted) break;
               const rawId = item[cfg.idField];
               const id = typeof rawId === "string" ? rawId : JSON.stringify(rawId);

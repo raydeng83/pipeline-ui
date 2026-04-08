@@ -195,7 +195,7 @@ export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   { value: "locales",          label: "Locales",          group: "UI & Comms", description: "Localization files and translation overrides" },
   // IGA
   { value: "iga-workflows",     label: "IGA Workflows",             group: "IGA", description: "Identity Governance and Administration workflow definitions" },
-  { value: "iga-forms",         label: "IGA Forms",                 group: "IGA", description: "IGA request and approval form definitions (no API endpoint available)", cliSupported: false },
+  { value: "iga-forms",         label: "IGA Forms",                 group: "IGA", description: "IGA request and approval form definitions used in access request workflows", commandType: "iga-api" },
   { value: "iga-notifications", label: "IGA Notifications",         group: "IGA", description: "IGA notification type definitions (certification, access request, etc.)", commandType: "iga-api" },
   { value: "iga-applications",  label: "IGA Applications",          group: "IGA", description: "IGA application catalog entries — application definitions and connector bindings", commandType: "iga-api" },
   { value: "iga-entitlements",  label: "IGA Entitlements",          group: "IGA", description: "Entitlement definitions for access certification and requests", commandType: "iga-api" },

@@ -27,6 +27,7 @@ const SCOPE_DIR: Record<string, string> = {
   "idm-authentication":   "idm-authentication-config",
   "iga-applications":     "iga/applications",
   "iga-entitlements":     "iga/entitlements",
+  "iga-forms":            "iga/forms",
   "iga-notifications":    "iga/notifications",
   "iga-workflows":        "iga/workflows",
   "internal-roles":       "internal-roles",
