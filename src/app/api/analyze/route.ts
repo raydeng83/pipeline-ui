@@ -12,6 +12,13 @@ export interface JourneyInfo {
   calledBy: string[];      // journeys that call this one (computed)
 }
 
+export interface ScriptUsage {
+  uuid: string;
+  name: string;
+  context: string;
+  usedBy: { journey: string; nodeName: string; nodeType: string }[];
+}
+
 export interface AnalyzeSummary {
   total: number;
   roots: number;
@@ -24,6 +31,7 @@ export interface AnalyzeSummary {
 export interface AnalyzeResult {
   journeys: JourneyInfo[];
   summary: AnalyzeSummary;
+  scriptUsage: ScriptUsage[];
 }
 
 function getDepth(name: string, map: Map<string, JourneyInfo>, visited = new Set<string>()): number {
@@ -47,6 +55,7 @@ export async function POST(req: NextRequest) {
   }
 
   const journeyMap = new Map<string, JourneyInfo>();
+  const scriptReverseIndex = new Map<string, { journey: string; nodeName: string; nodeType: string }[]>();
 
   for (const realm of fs.readdirSync(realmsDir)) {
     const journeysDir = path.join(realmsDir, realm, "journeys");
@@ -76,16 +85,29 @@ export async function POST(req: NextRequest) {
         if (node.nodeType === "InnerTreeEvaluatorNode") innerTreeUUIDs.add(uuid);
       }
 
-      // Read node files to resolve the `tree` field (the sub-journey name)
+      // Read node files to resolve sub-journeys and collect script references
       const subJourneys: string[] = [];
+      const nodeScriptRefs: { scriptUuid: string; nodeName: string; nodeType: string }[] = [];
       const nodesDir = path.join(journeyDir, "nodes");
-      if (innerTreeUUIDs.size > 0 && fs.existsSync(nodesDir)) {
+      if (fs.existsSync(nodesDir)) {
         for (const nodeFile of fs.readdirSync(nodesDir)) {
+          const fp = path.join(nodesDir, nodeFile);
+          if (fs.statSync(fp).isDirectory()) continue;
           const uuidMatch = nodeFile.match(/- ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
-          if (!uuidMatch || !innerTreeUUIDs.has(uuidMatch[1])) continue;
           try {
-            const nodeData = JSON.parse(fs.readFileSync(path.join(nodesDir, nodeFile), "utf-8")) as { tree?: string };
-            if (nodeData.tree) subJourneys.push(nodeData.tree);
+            const nodeData = JSON.parse(fs.readFileSync(fp, "utf-8")) as {
+              tree?: string; script?: string; _type?: { _id?: string; name?: string };
+            };
+            if (uuidMatch && innerTreeUUIDs.has(uuidMatch[1]) && nodeData.tree) {
+              subJourneys.push(nodeData.tree);
+            }
+            if (nodeData.script) {
+              nodeScriptRefs.push({
+                scriptUuid: nodeData.script,
+                nodeName: nodeData._type?.name ?? nodeFile.replace(/\s*-\s*[0-9a-f-]+\.json$/i, ""),
+                nodeType: nodeData._type?._id ?? "unknown",
+              });
+            }
           } catch { /* skip malformed file */ }
         }
       }
@@ -98,6 +120,12 @@ export async function POST(req: NextRequest) {
         subJourneys,
         calledBy: [],
       });
+
+      // Store script refs for later reverse-index building
+      for (const ref of nodeScriptRefs) {
+        if (!scriptReverseIndex.has(ref.scriptUuid)) scriptReverseIndex.set(ref.scriptUuid, []);
+        scriptReverseIndex.get(ref.scriptUuid)!.push({ journey: journeyName, nodeName: ref.nodeName, nodeType: ref.nodeType });
+      }
     }
   }
 
@@ -124,8 +152,28 @@ export async function POST(req: NextRequest) {
     .slice(0, 8)
     .map((j) => ({ name: j.name, count: j.calledBy.length }));
 
+  // Build script usage from reverse index + script configs
+  const scriptUsage: ScriptUsage[] = [];
+  for (const realm of fs.readdirSync(realmsDir)) {
+    const configPath = path.join(realmsDir, realm, "scripts", "scripts-config");
+    if (!fs.existsSync(configPath)) continue;
+    for (const f of fs.readdirSync(configPath)) {
+      if (!f.endsWith(".json")) continue;
+      try {
+        const data = JSON.parse(fs.readFileSync(path.join(configPath, f), "utf-8"));
+        const uuid = data._id as string;
+        const name = (data.name as string) ?? uuid;
+        const context = (data.context as string) ?? "";
+        const usedBy = scriptReverseIndex.get(uuid) ?? [];
+        scriptUsage.push({ uuid, name, context, usedBy });
+      } catch { /* skip */ }
+    }
+  }
+  scriptUsage.sort((a, b) => a.name.localeCompare(b.name));
+
   return NextResponse.json({
     journeys,
     summary: { total: journeys.length, roots: roots.length, orphaned: orphaned.length, sharedSubJourneys: sharedSubs.length, maxDepth, mostCalled },
+    scriptUsage,
   } satisfies AnalyzeResult);
 }

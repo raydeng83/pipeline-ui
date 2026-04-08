@@ -103,7 +103,7 @@ export default function DashboardPage() {
   const lastRecord = history[0] ?? null;
 
   // Recent activity (latest 12)
-  const recentActivity = history.slice(0, 12);
+  const recentActivity = history.slice(0, 7);
 
   // Compare reports (latest 6)
   const compareReports = history.filter((r) => r.type === "compare").slice(0, 6);
@@ -142,11 +142,6 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
           <p className="text-slate-500 mt-1">Manage your Ping Advanced Identity Cloud configuration pipeline.</p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Link href="/pull"  className="px-3 py-1.5 rounded-md bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors">Pull</Link>
-          <Link href="/push"  className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors">Push</Link>
-          <Link href="/compare" className="px-3 py-1.5 rounded-md border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">Compare</Link>
         </div>
       </div>
 

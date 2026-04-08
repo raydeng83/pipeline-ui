@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Environment, CONFIG_SCOPES, ConfigScope } from "@/lib/fr-config-types";
 import { FileNode } from "@/app/api/configs/[env]/route";
 import type { ViewableFile } from "@/app/api/push/item/route";
@@ -256,12 +256,39 @@ function SectionsView({ environment }: { environment: string }) {
   const [itemFilter, setItemFilter] = useState("");
   const [fullscreen, setFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [col1Width, setCol1Width] = useState(192);
+  const [col2Width, setCol2Width] = useState(224);
+  const [usageOpen, setUsageOpen] = useState(false);
+  const [usageData, setUsageData] = useState<{ journey: string; nodeName: string; nodeType: string; nodeUuid: string }[] | null>(null);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [focusNodeId, setFocusNodeId] = useState<string | undefined>(undefined);
+  const pendingFocusRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, []);
+
+  const handleColumnDrag = useCallback((setter: (v: number) => void) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = setter === setCol1Width ? col1Width : col2Width;
+    const onMove = (ev: MouseEvent) => {
+      const delta = ev.clientX - startX;
+      setter(Math.max(120, Math.min(500, startW + delta)));
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [col1Width, col2Width]);
 
   // Fetch audit for all scopes when env changes
   useEffect(() => {
@@ -277,17 +304,40 @@ function SectionsView({ environment }: { environment: string }) {
       .finally(() => setAuditLoading(false));
   }, [environment]);
 
+  // Reset usage panel when item changes
+  useEffect(() => { setUsageOpen(false); setUsageData(null); }, [selectedItem]);
+
+  const fetchUsage = useCallback(() => {
+    if (!selectedItem || selectedScope !== "scripts") return;
+    setUsageOpen(true);
+    setUsageLoading(true);
+    fetch(`/api/analyze/script-usage?env=${encodeURIComponent(environment)}&scriptId=${encodeURIComponent(selectedItem.id.replace(".json", ""))}`)
+      .then((r) => r.json())
+      .then((data) => setUsageData(data.usedBy ?? []))
+      .catch(() => setUsageData([]))
+      .finally(() => setUsageLoading(false));
+  }, [environment, selectedScope, selectedItem]);
+
   // Fetch file content when item is selected
   useEffect(() => {
     if (!selectedScope || !selectedItem) { setFiles(null); return; }
     setFileLoading(true);
     setFiles(null);
     setActiveTab(0);
+    setFocusNodeId(undefined);
 
     const params = new URLSearchParams({ environment, scope: selectedScope, item: selectedItem.id });
     fetch(`/api/push/item?${params}`)
       .then((r) => r.json())
-      .then((data: { files: ViewableFile[] }) => setFiles(data.files ?? []))
+      .then((data: { files: ViewableFile[] }) => {
+        setFiles(data.files ?? []);
+        // Apply pending focus after file loads (graph needs time to render)
+        if (pendingFocusRef.current) {
+          const nodeId = pendingFocusRef.current;
+          pendingFocusRef.current = undefined;
+          setTimeout(() => setFocusNodeId(nodeId), 800);
+        }
+      })
       .catch(() => setFiles([]))
       .finally(() => setFileLoading(false));
   }, [environment, selectedScope, selectedItem]);
@@ -312,7 +362,7 @@ function SectionsView({ environment }: { environment: string }) {
     <div className="flex flex-1 min-h-0 rounded-lg border border-slate-200 overflow-hidden">
 
       {/* Column 1 — Scopes */}
-      <div className="w-48 shrink-0 border-r border-slate-200 bg-slate-50 overflow-y-auto">
+      <div className="shrink-0 border-r border-slate-200 bg-slate-50 overflow-y-auto" style={{ width: col1Width }}>
         {auditLoading ? (
           <div className="p-3 space-y-2">
             {[...Array(8)].map((_, i) => (
@@ -357,8 +407,14 @@ function SectionsView({ environment }: { environment: string }) {
         )}
       </div>
 
+      {/* Drag handle 1 */}
+      <div
+        onMouseDown={handleColumnDrag(setCol1Width)}
+        className="w-1 shrink-0 bg-slate-200 hover:bg-sky-400 cursor-col-resize transition-colors"
+      />
+
       {/* Column 2 — Items */}
-      <div className="w-56 shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
+      <div className="shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden" style={{ width: col2Width }}>
         {selectedScope ? (
           <>
             {/* Header */}
@@ -426,6 +482,12 @@ function SectionsView({ environment }: { environment: string }) {
           </div>
         )}
       </div>
+
+      {/* Drag handle 2 */}
+      <div
+        onMouseDown={handleColumnDrag(setCol2Width)}
+        className="w-1 shrink-0 bg-slate-200 hover:bg-sky-400 cursor-col-resize transition-colors"
+      />
 
       {/* Column 3 — File content / Journey graph */}
       <div className={cn(
@@ -498,12 +560,69 @@ function SectionsView({ environment }: { environment: string }) {
                   )}
                 </button>
               )}
+              {selectedScope === "scripts" && (
+                <button
+                  type="button"
+                  onClick={fetchUsage}
+                  className={cn(
+                    "shrink-0 px-2 py-0.5 text-[10px] font-medium rounded transition-colors",
+                    usageOpen
+                      ? "bg-violet-100 text-violet-700"
+                      : "text-slate-400 hover:text-violet-600 hover:bg-violet-50"
+                  )}
+                >
+                  Find Usage
+                </button>
+              )}
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
                 dark={selectedScope !== "journeys"}
               />
             </div>
+
+            {/* Script usage panel */}
+            {usageOpen && selectedScope === "scripts" && (
+              <div className="px-4 py-2.5 border-b border-slate-700 bg-slate-800 shrink-0 max-h-48 overflow-y-auto">
+                {usageLoading ? (
+                  <p className="text-xs text-slate-400">Searching…</p>
+                ) : !usageData || usageData.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">Not used in any journey.</p>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">
+                      Used in {usageData.length} {usageData.length === 1 ? "place" : "places"}
+                    </p>
+                    {usageData.map((ref, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        <span className="w-2 h-2 rounded-full bg-sky-400 shrink-0" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Navigate to the journey and focus on the script node
+                            const journeyItem = auditData
+                              .find((e) => e.scope === "journeys")
+                              ?.items.find((item: { id: string }) => item.id === ref.journey);
+                            if (journeyItem) {
+                              pendingFocusRef.current = ref.nodeUuid;
+                              setSelectedScope("journeys");
+                              setSelectedItem(journeyItem);
+                              setUsageOpen(false);
+                            }
+                          }}
+                          className="text-sky-400 hover:text-sky-300 hover:underline font-medium"
+                        >
+                          {ref.journey}
+                        </button>
+                        <span className="text-slate-500">→</span>
+                        <span className="text-slate-400">{ref.nodeName}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">{ref.nodeType}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Content */}
             <div className="flex-1 overflow-hidden min-h-0">
@@ -519,7 +638,7 @@ function SectionsView({ environment }: { environment: string }) {
               )}
               {!fileLoading && activeFile && selectedScope === "journeys" && (
                 <div className="h-full">
-                  <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} />
+                  <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} focusNodeId={focusNodeId} />
                 </div>
               )}
               {!fileLoading && activeFile && selectedScope !== "journeys" && (

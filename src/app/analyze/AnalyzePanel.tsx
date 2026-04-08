@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import type { JourneyInfo, AnalyzeResult, AnalyzeSummary } from "@/app/api/analyze/route";
+import type { JourneyInfo, AnalyzeResult, AnalyzeSummary, ScriptUsage } from "@/app/api/analyze/route";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -299,6 +299,139 @@ function JourneyDependencyTree({ journeys, searchQ }: { journeys: JourneyInfo[];
   );
 }
 
+// ── Script Usage ─────────────────────────────────────────────────────────────
+
+function ScriptUsagePanel({ scripts }: { scripts: ScriptUsage[] }) {
+  const [search, setSearch] = useState("");
+  const [expandedUuid, setExpandedUuid] = useState<string | null>(null);
+  const [filterMode, setFilterMode] = useState<"all" | "used" | "unused">("all");
+
+  const filtered = useMemo(() => {
+    let list = scripts;
+    if (filterMode === "used") list = list.filter((s) => s.usedBy.length > 0);
+    else if (filterMode === "unused") list = list.filter((s) => s.usedBy.length === 0);
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((s) => s.name.toLowerCase().includes(q) || s.uuid.toLowerCase().includes(q));
+    }
+    return list;
+  }, [scripts, search, filterMode]);
+
+  const usedCount = scripts.filter((s) => s.usedBy.length > 0).length;
+  const unusedCount = scripts.length - usedCount;
+
+  return (
+    <div className="space-y-4">
+      {/* Stats */}
+      <div className="flex flex-wrap gap-3">
+        <div className="bg-white border border-slate-200 rounded-lg px-4 py-2">
+          <span className="text-lg font-bold text-slate-800">{scripts.length}</span>
+          <span className="text-xs text-slate-500 ml-1.5">Total Scripts</span>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-lg px-4 py-2">
+          <span className="text-lg font-bold text-emerald-600">{usedCount}</span>
+          <span className="text-xs text-slate-500 ml-1.5">Used in Journeys</span>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-lg px-4 py-2">
+          <span className="text-lg font-bold text-amber-600">{unusedCount}</span>
+          <span className="text-xs text-slate-500 ml-1.5">Not Used</span>
+        </div>
+      </div>
+
+      {/* Filter + Search */}
+      <div className="flex items-center gap-3">
+        <div className="flex rounded border border-slate-300 overflow-hidden text-xs shrink-0">
+          {([
+            { value: "all" as const, label: "All" },
+            { value: "used" as const, label: `Used (${usedCount})` },
+            { value: "unused" as const, label: `Unused (${unusedCount})` },
+          ]).map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setFilterMode(f.value)}
+              className={cn(
+                "px-2.5 py-1 transition-colors",
+                filterMode === f.value ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search scripts…"
+          className="flex-1 text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-1 focus:ring-sky-400"
+        />
+        {search && (
+          <button type="button" onClick={() => setSearch("")} className="text-xs text-slate-400 hover:text-slate-600">Clear</button>
+        )}
+        <span className="text-xs text-slate-400 shrink-0">{filtered.length} / {scripts.length}</span>
+      </div>
+
+      {/* Script list */}
+      <div className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden">
+        {filtered.length === 0 ? (
+          <div className="p-6 text-center text-sm text-slate-400">No scripts match the filter.</div>
+        ) : (
+          filtered.map((script) => {
+            const isExpanded = expandedUuid === script.uuid;
+            return (
+              <div key={script.uuid}>
+                <div
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2 text-xs cursor-pointer hover:bg-slate-50 transition-colors",
+                    isExpanded && "bg-slate-50"
+                  )}
+                  onClick={() => setExpandedUuid(isExpanded ? null : script.uuid)}
+                >
+                  <svg className="w-3.5 h-3.5 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                  </svg>
+                  <span className="text-slate-700 flex-1 truncate font-medium" title={script.name}>{script.name}</span>
+                  <span className="text-[10px] text-slate-400 font-mono shrink-0">{script.context}</span>
+                  {script.usedBy.length > 0 ? (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 shrink-0">
+                      {script.usedBy.length} {script.usedBy.length === 1 ? "journey" : "journeys"}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 shrink-0">unused</span>
+                  )}
+                  <span className={cn("text-slate-400 text-[10px] transition-transform", isExpanded && "rotate-90")}>▶</span>
+                </div>
+                {isExpanded && (
+                  <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 space-y-2">
+                    <div className="text-[10px] text-slate-400 font-mono">{script.uuid}</div>
+                    {script.usedBy.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">Not referenced by any journey node.</p>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Used in:</p>
+                        {script.usedBy.map((ref, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className="w-2 h-2 rounded-full bg-sky-400 shrink-0" />
+                            <span className="text-slate-700 font-medium">{ref.journey}</span>
+                            <span className="text-slate-400">→</span>
+                            <span className="text-slate-500">{ref.nodeName}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{ref.nodeType}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 export function AnalyzePanel({ environments }: { environments: { name: string }[] }) {
@@ -306,7 +439,7 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeResult | null>(null);
-  const [tab, setTab] = useState<"summary" | "tree">("summary");
+  const [tab, setTab] = useState<"summary" | "tree" | "scripts">("summary");
   const [searchQ, setSearchQ] = useState("");
 
   async function runAnalyze() {
@@ -366,18 +499,22 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
         <div className="space-y-4">
           {/* Tabs */}
           <div className="flex items-center gap-1 border-b border-slate-200">
-            {(["summary", "tree"] as const).map((t) => (
+            {([
+              { key: "summary" as const, label: "Summary" },
+              { key: "tree" as const, label: "Dependency Tree" },
+              { key: "scripts" as const, label: "Script Usage" },
+            ]).map((t) => (
               <button
-                key={t}
-                onClick={() => setTab(t)}
+                key={t.key}
+                onClick={() => setTab(t.key)}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors capitalize",
-                  tab === t
+                  "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+                  tab === t.key
                     ? "border-sky-500 text-sky-600"
                     : "border-transparent text-slate-500 hover:text-slate-700",
                 )}
               >
-                {t === "summary" ? "Summary" : "Dependency Tree"}
+                {t.label}
               </button>
             ))}
 
@@ -402,6 +539,7 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
 
           {tab === "summary" && <SummaryDashboard summary={result.summary} journeys={result.journeys} />}
           {tab === "tree" && <JourneyDependencyTree journeys={result.journeys} searchQ={searchQ.toLowerCase()} />}
+          {tab === "scripts" && <ScriptUsagePanel scripts={result.scriptUsage} />}
         </div>
       )}
     </div>

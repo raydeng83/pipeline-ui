@@ -781,8 +781,8 @@ function NodeInfoDrawer({
 
 // ── Inner graph ───────────────────────────────────────────────────────────────
 
-function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
-  json: string; fitViewKey?: number; environment?: string; journeyId?: string;
+function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNodeId }: {
+  json: string; fitViewKey?: number; environment?: string; journeyId?: string; focusNodeId?: string;
 }) {
   const { fitView, getViewport, setViewport } = useReactFlow();
 
@@ -1065,6 +1065,19 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
     const t = setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 80);
     return () => clearTimeout(t);
   }, [fitViewKey, fitView]);
+
+  // Focus on a specific node (zoom + select)
+  useEffect(() => {
+    if (!focusNodeId) return;
+    const t = setTimeout(() => {
+      const node = rfNodes.find((n) => n.id === focusNodeId);
+      if (!node) return;
+      setSelectedNodeId(focusNodeId);
+      fitView({ nodes: [{ id: focusNodeId }], duration: 500, padding: 0.5, maxZoom: 1.5 });
+    }, 300);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusNodeId]);
 
   // Arrow key panning
   useEffect(() => {
@@ -1561,10 +1574,10 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId }: {
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export function JourneyGraph({ json, fitViewKey, environment, journeyId }: { json: string; fitViewKey?: number; environment?: string; journeyId?: string }) {
+export function JourneyGraph({ json, fitViewKey, environment, journeyId, focusNodeId }: { json: string; fitViewKey?: number; environment?: string; journeyId?: string; focusNodeId?: string }) {
   return (
     <ReactFlowProvider>
-      <JourneyGraphInner json={json} fitViewKey={fitViewKey} environment={environment} journeyId={journeyId} />
+      <JourneyGraphInner json={json} fitViewKey={fitViewKey} environment={environment} journeyId={journeyId} focusNodeId={focusNodeId} />
     </ReactFlowProvider>
   );
 }
