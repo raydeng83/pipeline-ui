@@ -139,12 +139,13 @@ export const CONFIG_SCOPES: { value: ConfigScope; label: string; group: string; 
   // Journeys & Auth
   { value: "journeys",         label: "Journeys",             group: "Journeys & Auth",   description: "Authentication journey trees and their node configurations" },
   { value: "scripts",          label: "Scripts",              group: "Journeys & Auth",   description: "Groovy/JavaScript scripts used within journey nodes and policies" },
-  { value: "authentication",   label: "Authentication",       group: "Journeys & Auth",   description: "Core AM authentication settings, modules, and chains" },
-  { value: "custom-nodes",     label: "Custom Nodes",         group: "Journeys & Auth",   description: "Custom journey node implementations (jar/script-backed)" },
-  { value: "services",         label: "Services",             group: "Journeys & Auth",   description: "AM service configurations (e.g. OAuth2, SAML, social providers)" },
-  { value: "kba",              label: "KBA",                  group: "Journeys & Auth",   description: "Knowledge-based authentication security questions" },
-  { value: "password-policy",  label: "Password Policy",      group: "Journeys & Auth",   description: "Password strength, expiry, and history policies" },
+  { value: "endpoints",        label: "Custom Endpoints",     group: "Journeys & Auth",   description: "Custom REST endpoints exposed via the IDM API" },
   // Identity & Access
+  { value: "authentication",       label: "Authentication",          group: "Identity & Access", description: "Core AM authentication settings, modules, and chains" },
+  { value: "custom-nodes",         label: "Custom Nodes",            group: "Identity & Access", description: "Custom journey node implementations (jar/script-backed)" },
+  { value: "services",             label: "Services",                group: "Identity & Access", description: "AM service configurations (e.g. OAuth2, SAML, social providers)" },
+  { value: "kba",                  label: "KBA",                     group: "Identity & Access", description: "Knowledge-based authentication security questions" },
+  { value: "password-policy",      label: "Password Policy",         group: "Identity & Access", description: "Password strength, expiry, and history policies" },
   { value: "managed-objects",      label: "Managed Objects",         group: "Identity & Access", description: "IDM managed object schema definitions (e.g. user, role, device)" },
   { value: "authz-policies",       label: "Authorization Policies",  group: "Identity & Access", description: "Policy sets and rules controlling access to resources" },
   { value: "access-config",        label: "Access Config",           group: "Identity & Access", description: "AM access management global and realm-level settings" },
@@ -171,7 +172,6 @@ export const CONFIG_SCOPES: { value: ConfigScope; label: string; group: string; 
   { value: "email-provider",   label: "Email Provider",   group: "UI & Comms", description: "SMTP / external email provider connection settings" },
   { value: "locales",          label: "Locales",          group: "UI & Comms", description: "Localization files and translation overrides" },
   // Infrastructure
-  { value: "endpoints",      label: "Custom Endpoints", group: "Infrastructure", description: "Custom REST endpoints exposed via the IDM API" },
   { value: "schedules",      label: "Schedules",        group: "Infrastructure", description: "Scheduled tasks and cron-style recurring jobs" },
   { value: "cors",           label: "CORS",             group: "Infrastructure", description: "Cross-Origin Resource Sharing policy settings" },
   { value: "csp",            label: "CSP",              group: "Infrastructure", description: "Content Security Policy headers for tenant pages" },

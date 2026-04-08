@@ -173,7 +173,9 @@ function auditScope(configDir: string, scope: string) {
   const fileCount = countFiles(scopeDir);
 
   let items: AuditItem[];
-  if (isNameFlag) {
+  if (isNameFlag || isFilenameFilter) {
+    // Both NAME_FLAG and FILENAME_FILTER direct scopes (endpoints, schedules, custom-nodes)
+    // store one directory per item — scripts is realm-based and handled above.
     items = genericItems(scopeDir, "dirs");
   } else {
     items = genericItems(scopeDir, "files");

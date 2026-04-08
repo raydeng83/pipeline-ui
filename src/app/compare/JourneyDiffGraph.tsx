@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { highlightJs } from "@/lib/highlight";
 import { js_beautify } from "js-beautify";
 import { ScriptOverlay } from "../configs/ScriptOverlay";
+import { DiffMinimap } from "./DiffMinimap";
 import {
   parseMergedDiffGraph,
   parseSingleSideGraph,
@@ -564,6 +565,7 @@ function ScriptFileEntry({ f }: { f: FileDiff }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [fsTab, setFsTab]           = useState<"diff" | "files">("diff");
   const [fsCopied, setFsCopied]     = useState(false);
+  const fsScrollRef = useRef<HTMLDivElement>(null);
 
   const fmtLocal  = f.localContent  != null ? formatForDisplay(f.localContent,  f.relativePath) : null;
   const fmtRemote = f.remoteContent != null ? formatForDisplay(f.remoteContent, f.relativePath) : null;
@@ -666,28 +668,36 @@ function ScriptFileEntry({ f }: { f: FileDiff }) {
             </button>
           </div>
           {/* Fullscreen body */}
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden flex">
             {diffLines.length > 0 ? (
               hasBothSides && fsTab === "files" ? (
-                <SplitDiffView lines={diffLines} />
+                <>
+                  <div ref={fsScrollRef} className="flex-1 overflow-auto">
+                    <SplitDiffView lines={diffLines} />
+                  </div>
+                  <DiffMinimap lines={diffLines} scrollRef={fsScrollRef} />
+                </>
               ) : (
-                <div className="h-full overflow-auto text-[11px] font-mono leading-5">
-                  <table className="w-full border-collapse table-fixed">
-                    <tbody>
-                      {diffLines.map((l, i) => {
-                        const bg  = l.type === "added" ? "bg-emerald-950" : l.type === "removed" ? "bg-red-950" : "";
-                        const txt = l.type === "added" ? "text-emerald-300" : l.type === "removed" ? "text-red-300" : "text-slate-400";
-                        const pfx = l.type === "added" ? "+" : l.type === "removed" ? "-" : " ";
-                        return (
-                          <tr key={i} className={bg}>
-                            <td className={cn("px-2 py-0 select-none w-5 shrink-0", l.type === "added" ? "text-emerald-400" : l.type === "removed" ? "text-red-400" : "text-slate-600")}>{pfx}</td>
-                            <td className={cn("px-2 py-0 whitespace-pre-wrap break-all", txt)}>{l.content}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <>
+                  <div ref={fsScrollRef} className="flex-1 overflow-auto text-[11px] font-mono leading-5">
+                    <table className="w-full border-collapse table-fixed">
+                      <tbody>
+                        {diffLines.map((l, i) => {
+                          const bg  = l.type === "added" ? "bg-emerald-950" : l.type === "removed" ? "bg-red-950" : "";
+                          const txt = l.type === "added" ? "text-emerald-300" : l.type === "removed" ? "text-red-300" : "text-slate-400";
+                          const pfx = l.type === "added" ? "+" : l.type === "removed" ? "-" : " ";
+                          return (
+                            <tr key={i} className={bg}>
+                              <td className={cn("px-2 py-0 select-none w-5 shrink-0", l.type === "added" ? "text-emerald-400" : l.type === "removed" ? "text-red-400" : "text-slate-600")}>{pfx}</td>
+                              <td className={cn("px-2 py-0 whitespace-pre-wrap break-all", txt)}>{l.content}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <DiffMinimap lines={diffLines} scrollRef={fsScrollRef} />
+                </>
               )
             ) : (
               <p className="px-4 py-4 text-sm text-slate-400">No changes</p>
@@ -1599,6 +1609,7 @@ function PreviewDiffJourneyGraph({ localContent, remoteContent }: { localContent
 /** Unified diff view with context lines collapsed by default. */
 function ScriptDiffView({ lines }: { lines: DiffLineLocal[] }) {
   const CONTEXT = 3;
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [expandedLines, setExpandedLines] = useState<Set<number>>(new Set());
 
   const defaultVisible = useMemo(() => {
@@ -1649,43 +1660,46 @@ function ScriptDiffView({ lines }: { lines: DiffLineLocal[] }) {
   }
 
   return (
-    <div className="flex-1 overflow-x-auto overflow-y-auto text-[10px] font-mono leading-5">
-      <table className="min-w-full border-collapse">
-        <tbody>
-          {items.map((item) => {
-            if (item.kind === "hunk") {
-              const count = item.endIdx - item.startIdx + 1;
+    <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div ref={scrollRef} className="flex-1 overflow-x-auto overflow-y-auto text-[10px] font-mono leading-5">
+        <table className="min-w-full border-collapse">
+          <tbody>
+            {items.map((item) => {
+              if (item.kind === "hunk") {
+                const count = item.endIdx - item.startIdx + 1;
+                return (
+                  <tr key={`hunk-${item.startIdx}`} className="bg-slate-900">
+                    <td colSpan={2} className="py-0.5">
+                      <button
+                        type="button"
+                        className="w-full text-center text-[9px] text-slate-500 hover:text-slate-300 transition-colors"
+                        onClick={() => expandHunk(item.startIdx, item.endIdx)}
+                      >
+                        ··· {count} unchanged line{count !== 1 ? "s" : ""} ···
+                      </button>
+                    </td>
+                  </tr>
+                );
+              }
+              const { line, idx } = item;
+              const bg       = line.type === "added" ? "bg-emerald-950" : line.type === "removed" ? "bg-red-950" : "";
+              const text     = line.type === "added" ? "text-emerald-300" : line.type === "removed" ? "text-red-300" : "text-slate-400";
+              const pfx      = line.type === "added" ? "+" : line.type === "removed" ? "-" : " ";
+              const pfxColor = line.type === "added" ? "text-emerald-400" : line.type === "removed" ? "text-red-400" : "text-slate-600";
               return (
-                <tr key={`hunk-${item.startIdx}`} className="bg-slate-900">
-                  <td colSpan={2} className="py-0.5">
-                    <button
-                      type="button"
-                      className="w-full text-center text-[9px] text-slate-500 hover:text-slate-300 transition-colors"
-                      onClick={() => expandHunk(item.startIdx, item.endIdx)}
-                    >
-                      ··· {count} unchanged line{count !== 1 ? "s" : ""} ···
-                    </button>
-                  </td>
+                <tr key={idx} className={bg}>
+                  <td className={cn("px-1 py-0 select-none w-4 shrink-0", pfxColor)}>{pfx}</td>
+                  <td
+                    className={cn("px-2 py-0 whitespace-pre", text)}
+                    dangerouslySetInnerHTML={{ __html: highlightLine(line.content) }}
+                  />
                 </tr>
               );
-            }
-            const { line, idx } = item;
-            const bg       = line.type === "added" ? "bg-emerald-950" : line.type === "removed" ? "bg-red-950" : "";
-            const text     = line.type === "added" ? "text-emerald-300" : line.type === "removed" ? "text-red-300" : "text-slate-400";
-            const pfx      = line.type === "added" ? "+" : line.type === "removed" ? "-" : " ";
-            const pfxColor = line.type === "added" ? "text-emerald-400" : line.type === "removed" ? "text-red-400" : "text-slate-600";
-            return (
-              <tr key={idx} className={bg}>
-                <td className={cn("px-1 py-0 select-none w-4 shrink-0", pfxColor)}>{pfx}</td>
-                <td
-                  className={cn("px-2 py-0 whitespace-pre", text)}
-                  dangerouslySetInnerHTML={{ __html: highlightLine(line.content) }}
-                />
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            })}
+          </tbody>
+        </table>
+      </div>
+      <DiffMinimap lines={lines} scrollRef={scrollRef} />
     </div>
   );
 }

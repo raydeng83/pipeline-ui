@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { DiffMinimap } from "./DiffMinimap";
 import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
@@ -94,6 +95,7 @@ function buildHunks(lines: DiffLine[]): HunkItem[] {
 // ── Unified diff viewer ───────────────────────────────────────────────────────
 
 function DiffViewer({ lines, fullscreen, wrap }: { lines: DiffLine[]; fullscreen?: boolean; wrap?: boolean }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const hunks = buildHunks(lines);
 
@@ -108,7 +110,8 @@ function DiffViewer({ lines, fullscreen, wrap }: { lines: DiffLine[]; fullscreen
   let lineIdx = 0;
 
   return (
-    <div className={cn("overflow-x-auto overflow-y-auto bg-slate-950 text-[11px] font-mono leading-5", fullscreen ? "flex-1" : "max-h-[600px]")}>
+    <div className={cn("flex bg-slate-950 overflow-hidden", fullscreen ? "flex-1 min-h-0" : "max-h-[600px]")}>
+      <div ref={scrollRef} className="flex-1 overflow-x-auto overflow-y-auto text-[11px] font-mono leading-5">
       <table className="min-w-full border-collapse">
         <tbody>
           {hunks.map((item, hi) => {
@@ -166,6 +169,8 @@ function DiffViewer({ lines, fullscreen, wrap }: { lines: DiffLine[]; fullscreen
           })}
         </tbody>
       </table>
+      </div>
+      <DiffMinimap lines={lines} scrollRef={scrollRef} />
     </div>
   );
 }
@@ -237,10 +242,25 @@ function SideBySideViewer({
   wrap?: boolean;
 }) {
   const alignedRows = diffLines && diffLines.length > 0 ? buildAlignedRows(diffLines) : null;
+  const leftScrollRef  = useRef<HTMLDivElement>(null);
+  const rightScrollRef = useRef<HTMLDivElement>(null);
+
+  // Sync scroll: whichever pane the user scrolls, mirror to the other
+  useEffect(() => {
+    const left  = leftScrollRef.current;
+    const right = rightScrollRef.current;
+    if (!left || !right) return;
+    let syncing = false;
+    function onLeft()  { if (syncing) return; syncing = true; right!.scrollTop = left!.scrollTop;  syncing = false; }
+    function onRight() { if (syncing) return; syncing = true; left!.scrollTop  = right!.scrollTop; syncing = false; }
+    left.addEventListener("scroll",  onLeft,  { passive: true });
+    right.addEventListener("scroll", onRight, { passive: true });
+    return () => { left.removeEventListener("scroll", onLeft); right.removeEventListener("scroll", onRight); };
+  }, []);
 
   return (
     <div className={cn(
-      "grid grid-cols-2 divide-x divide-slate-700 bg-slate-950 overflow-hidden",
+      "flex divide-x divide-slate-700 bg-slate-950 overflow-hidden",
       fullscreen ? "flex-1 min-h-0" : "h-[600px]"
     )}>
       <FilePane
@@ -250,6 +270,7 @@ function SideBySideViewer({
         rows={alignedRows}
         side="left"
         wrap={wrap}
+        scrollRef={leftScrollRef}
       />
       <FilePane
         label={targetLabel}
@@ -258,7 +279,11 @@ function SideBySideViewer({
         rows={alignedRows}
         side="right"
         wrap={wrap}
+        scrollRef={rightScrollRef}
       />
+      {diffLines && diffLines.length > 0 && (
+        <DiffMinimap lines={diffLines} scrollRef={rightScrollRef} />
+      )}
     </div>
   );
 }
@@ -278,7 +303,7 @@ const ROW_TEXT: Record<AlignedRow["type"], { left: string; right: string }> = {
 };
 
 function FilePane({
-  label, content, absence, rows, side, wrap,
+  label, content, absence, rows, side, wrap, scrollRef,
 }: {
   label: string;
   content?: string;
@@ -286,15 +311,16 @@ function FilePane({
   rows?: AlignedRow[] | null;
   side: "left" | "right";
   wrap?: boolean;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
-    <div className="h-full flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700 shrink-0">
         <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">{label}</span>
       </div>
       {rows ? (
         /* Aligned diff view */
-        <div className="flex-1 overflow-auto text-[11px] font-mono leading-5 min-h-0">
+        <div ref={scrollRef} className="flex-1 overflow-auto text-[11px] font-mono leading-5 min-h-0">
           <table className="min-w-full border-collapse">
             <tbody>
               {rows.map((row, i) => {
@@ -513,7 +539,7 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
           </button>
         </div>
         {/* Fullscreen content */}
-        <div className="flex-1 min-h-0 overflow-auto">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
           {viewerContent}
         </div>
       </div>
