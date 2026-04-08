@@ -193,7 +193,7 @@ if (selectedMFAs.indexOf("i_dont_have_access") === -1) {
     
     if(nodeState.get("showRIDP") && nodeState.get("showRIDP") == true ){
         selectedMFAs.push("i_dont_have_access");
-    }else if(nodeState.get("showRIDP") && nodeState.get("showRIDP") == "false" && userMFAMethods.includes("SECONDARY_EMAIL")){
+    }else if(nodeState.get("showRIDP")!= null && nodeState.get("showRIDP") == "false" && userMFAMethods.includes("SECONDARY_EMAIL")){
         selectedMFAs.push("i_dont_have_access");
     }
 }

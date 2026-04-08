@@ -1,6 +1,6 @@
 {
   "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_Create_Account",
-  "_rev": "-796855053",
+  "_rev": "1389362118",
   "enabled": true,
   "entryNodeId": "d5437205-41a1-4122-a3da-c49b0dcb3a24",
   "identityResource": "managed/alpha_user",
@@ -100,6 +100,6 @@
   "transactionalOnly": false,
   "uiConfig": {
     "annotations": "{\"forNodes\":{},\"structural\":[]}",
-    "categories": "[]"
+    "categories": "[\"RIDP\"]"
   }
 }

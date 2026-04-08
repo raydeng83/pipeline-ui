@@ -1,6 +1,6 @@
 {
   "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v2_Manage_Profile",
-  "_rev": "-819642085",
+  "_rev": "1366575086",
   "description": "Inner Jounrey for RIDP Manage Profile",
   "enabled": true,
   "entryNodeId": "1c005e8f-7a4f-4b05-b9f8-9bb8a3313c5c",
@@ -152,6 +152,6 @@
   "transactionalOnly": false,
   "uiConfig": {
     "annotations": "{\"forNodes\":{},\"structural\":[]}",
-    "categories": "[]"
+    "categories": "[\"RIDP\"]"
   }
 }

@@ -113,7 +113,7 @@ function main() {
         }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "organdonor"){
             highRisk = response.result[0].ridp_organ_donor_high_risk;
             logger.debug("Organ Donor highRisk flag from query :: " + highRisk)
-        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "firstTimeLogin"){
+        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "firsttimelogin"){
             highRisk = response.result[0].ridp_first_time_login_high_risk;
             logger.debug("First Time login highRisk flag from query :: " + highRisk)
         }else{
