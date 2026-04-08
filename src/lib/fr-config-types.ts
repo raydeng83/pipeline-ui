@@ -50,7 +50,7 @@ export interface Environment {
 export const FILENAME_FILTER_SCOPES = ["scripts", "custom-nodes", "endpoints", "schedules"] as const satisfies readonly ConfigScope[];
 
 /** Scopes supporting item-level filtering via --name flag (realm/directory name, one CLI run per item) */
-export const NAME_FLAG_SCOPES = ["journeys", "managed-objects"] as const satisfies readonly ConfigScope[];
+export const NAME_FLAG_SCOPES = ["journeys", "managed-objects", "iga-workflows"] as const satisfies readonly ConfigScope[];
 
 /** Union of all scopes that support sub-scope selection */
 export const FILE_SELECTABLE_SCOPES: readonly ConfigScope[] = [...FILENAME_FILTER_SCOPES, ...NAME_FLAG_SCOPES];
