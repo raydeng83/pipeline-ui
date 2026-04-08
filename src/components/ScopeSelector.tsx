@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { CONFIG_SCOPES, ConfigScope } from "@/lib/fr-config-types";
+import { CONFIG_SCOPES, ConfigScope, ScopeDisplayEntry } from "@/lib/fr-config-types";
 import { cn } from "@/lib/utils";
 
 interface ScopeSelectorProps {
@@ -11,7 +11,10 @@ interface ScopeSelectorProps {
   action?: "pull" | "push" | "compare";
 }
 
-const GROUPS = CONFIG_SCOPES.reduce<Record<string, typeof CONFIG_SCOPES>>((acc, scope) => {
+/** Only scopes fr-config-manager can actually run */
+const CLI_SCOPES = CONFIG_SCOPES.filter((s) => s.cliSupported !== false);
+
+const GROUPS = CONFIG_SCOPES.reduce<Record<string, ScopeDisplayEntry[]>>((acc, scope) => {
   (acc[scope.group] ??= []).push(scope);
   return acc;
 }, {});
@@ -24,7 +27,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
   const [mode, setMode] = useState<Mode>("basic");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const selectedSet = new Set(selected);
-  const allSelected = selected.length === CONFIG_SCOPES.length;
+  const allSelected = selected.length === CLI_SCOPES.length;
 
   const toggleGroupExpand = useCallback((name: string) => {
     setExpandedGroups((prev) => {
@@ -46,8 +49,10 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
     );
   };
 
-  const toggleGroup = (groupScopes: typeof CONFIG_SCOPES) => {
-    const groupValues = groupScopes.map((s) => s.value);
+  const toggleGroup = (groupScopes: ScopeDisplayEntry[]) => {
+    const groupValues = groupScopes
+      .filter((s) => s.cliSupported !== false)
+      .map((s) => s.value as ConfigScope);
     const allGroupSelected = groupValues.every((v) => selectedSet.has(v));
     onChange(
       allGroupSelected
@@ -57,7 +62,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
   };
 
   const toggleAll = () => {
-    onChange(allSelected ? [] : CONFIG_SCOPES.map((s) => s.value));
+    onChange(allSelected ? [] : CLI_SCOPES.map((s) => s.value as ConfigScope));
   };
 
   return (
@@ -101,15 +106,18 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
       {mode === "basic" && (
         <div className="flex flex-wrap gap-2">
           {Object.entries(GROUPS).map(([groupName, scopes]) => {
-            const groupValues = scopes.map((s) => s.value);
-            const allGroupSelected = groupValues.every((v) => selectedSet.has(v));
-            const someGroupSelected = groupValues.some((v) => selectedSet.has(v));
+            const cliGroupValues = scopes
+              .filter((s) => s.cliSupported !== false)
+              .map((s) => s.value as ConfigScope);
+            const allGroupSelected = cliGroupValues.length > 0 && cliGroupValues.every((v) => selectedSet.has(v));
+            const someGroupSelected = cliGroupValues.some((v) => selectedSet.has(v));
+            const hasCliScopes = cliGroupValues.length > 0;
             return (
               <button
                 key={groupName}
                 type="button"
-                onClick={() => toggleGroup(scopes)}
-                disabled={disabled}
+                onClick={() => hasCliScopes ? toggleGroup(scopes) : undefined}
+                disabled={disabled || !hasCliScopes}
                 className={cn(
                   "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors select-none disabled:opacity-40",
                   allGroupSelected
@@ -122,7 +130,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                 {groupName}
                 {someGroupSelected && (
                   <span className={cn("text-[10px] font-normal", allGroupSelected ? "text-sky-200" : "text-sky-600")}>
-                    {groupValues.filter((v) => selectedSet.has(v)).length}/{scopes.length}
+                    {cliGroupValues.filter((v) => selectedSet.has(v)).length}/{cliGroupValues.length}
                   </span>
                 )}
               </button>
@@ -144,11 +152,14 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
         </div>
         <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100">
           {Object.entries(GROUPS).map(([groupName, scopes]) => {
-            const groupValues = scopes.map((s) => s.value);
-            const allGroupSelected = groupValues.every((v) => selectedSet.has(v));
-            const someGroupSelected = groupValues.some((v) => selectedSet.has(v));
-            const selectedCount = groupValues.filter((v) => selectedSet.has(v)).length;
+            const cliGroupValues = scopes
+              .filter((s) => s.cliSupported !== false)
+              .map((s) => s.value as ConfigScope);
+            const allGroupSelected = cliGroupValues.length > 0 && cliGroupValues.every((v) => selectedSet.has(v));
+            const someGroupSelected = cliGroupValues.some((v) => selectedSet.has(v));
+            const selectedCount = cliGroupValues.filter((v) => selectedSet.has(v)).length;
             const isExpanded = expandedGroups.has(groupName);
+            const hasCliScopes = cliGroupValues.length > 0;
 
             return (
               <div key={groupName}>
@@ -164,8 +175,8 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                     </button>
                     <button
                       type="button"
-                      onClick={() => toggleGroup(scopes)}
-                      disabled={disabled}
+                      onClick={() => hasCliScopes ? toggleGroup(scopes) : undefined}
+                      disabled={disabled || !hasCliScopes}
                       className="flex items-center gap-2 disabled:opacity-40"
                     >
                       <span
@@ -197,7 +208,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                   </div>
                   {someGroupSelected && (
                     <span className="text-[10px] text-slate-400 font-mono">
-                      {selectedCount}/{scopes.length}
+                      {selectedCount}/{cliGroupValues.length}
                     </span>
                   )}
                 </div>
@@ -205,23 +216,32 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                 {/* Scope rows (collapsible) */}
                 {isExpanded && (
                   <div className="divide-y divide-slate-50">
-                    {scopes.map(({ value, label, description }) => {
-                      const checked = selectedSet.has(value);
+                    {scopes.map(({ value, label, description, cliSupported }) => {
+                      const isUnsupported = cliSupported === false;
+                      const checked = !isUnsupported && selectedSet.has(value as ConfigScope);
                       return (
                         <label
                           key={value}
                           className={cn(
-                            "flex items-start gap-3 px-3 py-2.5 cursor-pointer transition-colors select-none",
-                            disabled ? "opacity-40 cursor-not-allowed" : "hover:bg-slate-50",
+                            "flex items-start gap-3 px-3 py-2.5 transition-colors select-none",
+                            isUnsupported
+                              ? "opacity-50 cursor-default"
+                              : disabled
+                              ? "opacity-40 cursor-not-allowed"
+                              : "cursor-pointer hover:bg-slate-50",
                             checked && "bg-sky-50/50"
                           )}
                         >
                           <span
                             className={cn(
                               "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
-                              checked ? "bg-sky-600 border-sky-600" : "bg-white border-slate-300"
+                              isUnsupported
+                                ? "bg-slate-100 border-slate-200"
+                                : checked
+                                ? "bg-sky-600 border-sky-600"
+                                : "bg-white border-slate-300"
                             )}
-                            onClick={() => !disabled && toggle(value)}
+                            onClick={() => !disabled && !isUnsupported && toggle(value as ConfigScope)}
                           >
                             {checked && (
                               <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -229,9 +249,19 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                               </svg>
                             )}
                           </span>
-                          <div className="flex-1 min-w-0" onClick={() => !disabled && toggle(value)}>
-                            <div className={cn("text-xs font-medium", checked ? "text-sky-800" : "text-slate-700")}>
-                              {label}
+                          <div
+                            className="flex-1 min-w-0"
+                            onClick={() => !disabled && !isUnsupported && toggle(value as ConfigScope)}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className={cn("text-xs font-medium", checked ? "text-sky-800" : "text-slate-700")}>
+                                {label}
+                              </span>
+                              {isUnsupported && (
+                                <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200 leading-none">
+                                  No CLI
+                                </span>
+                              )}
                             </div>
                             <div className="text-[11px] text-slate-400 leading-snug mt-0.5">
                               {description}

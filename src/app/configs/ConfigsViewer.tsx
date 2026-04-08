@@ -390,6 +390,7 @@ function SectionsView({ environment }: { environment: string }) {
               <div key={group}>
                 <p className="px-3 pt-3 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{group}</p>
                 {groupScopes.map((s) => {
+                  const isUnsupported = s.cliSupported === false;
                   const entry = auditData.find((e) => e.scope === s.value);
                   const count = entry?.items.length ?? 0;
                   const hasFiles = (entry?.fileCount ?? 0) > 0;
@@ -403,11 +404,15 @@ function SectionsView({ environment }: { environment: string }) {
                         selectedScope === s.value
                           ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
                           : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-800",
-                        !hasFiles && "opacity-40"
+                        isUnsupported ? "opacity-50" : !hasFiles && "opacity-40"
                       )}
                     >
-                      <span className="truncate">{s.label}</span>
-                      {entry && (
+                      <span className="truncate flex-1">{s.label}</span>
+                      {isUnsupported ? (
+                        <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-amber-100 text-amber-600 border border-amber-200 leading-none shrink-0">
+                          No CLI
+                        </span>
+                      ) : entry && (
                         <span className="text-[10px] tabular-nums text-slate-400 shrink-0">
                           {entry.selectable ? count : entry.fileCount}
                         </span>
@@ -492,7 +497,9 @@ function SectionsView({ environment }: { environment: string }) {
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-xs text-slate-400 p-4 text-center">
-            Select a scope to browse its items
+            {selectedScope && CONFIG_SCOPES.find((s) => s.value === selectedScope)?.cliSupported === false
+              ? "Not managed by fr-config-manager"
+              : "Select a scope to browse its items"}
           </div>
         )}
       </div>
@@ -792,8 +799,21 @@ function SectionsView({ environment }: { environment: string }) {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-sm text-slate-500">
-            {selectedScope ? "Select an item to view its contents" : "Select a scope and item"}
+          <div className="flex-1 flex flex-col items-center justify-center gap-2 text-sm text-slate-500 p-6 text-center">
+            {selectedScope && CONFIG_SCOPES.find((s) => s.value === selectedScope)?.cliSupported === false ? (
+              <>
+                <span className="text-[11px] font-semibold px-2 py-1 rounded bg-amber-100 text-amber-700 border border-amber-200">
+                  Not supported by fr-config-manager
+                </span>
+                <span className="text-xs text-slate-400">
+                  {CONFIG_SCOPES.find((s) => s.value === selectedScope)?.description}
+                </span>
+              </>
+            ) : selectedScope ? (
+              "Select an item to view its contents"
+            ) : (
+              "Select a scope and item"
+            )}
           </div>
         )}
       </div>

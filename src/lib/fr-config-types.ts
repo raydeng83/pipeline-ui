@@ -6,6 +6,7 @@ export type ConfigScope =
   | "audit"
   | "authentication"
   | "authz-policies"
+  | "config-metadata"
   | "connector-definitions"
   | "connector-mappings"
   | "cookie-domains"
@@ -135,7 +136,21 @@ export const PROMOTE_SUBCOMMANDS: {
   },
 ];
 
-export const CONFIG_SCOPES: { value: ConfigScope; label: string; group: string; description: string }[] = [
+/**
+ * A scope entry in the CONFIG_SCOPES display list.
+ * `cliSupported: false` means the scope is not implemented by fr-config-manager —
+ * it is shown for awareness but cannot be used in push/pull/compare operations.
+ */
+export interface ScopeDisplayEntry {
+  value: string;
+  label: string;
+  group: string;
+  description: string;
+  /** @default true */
+  cliSupported?: boolean;
+}
+
+export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   // Journeys & Auth
   { value: "journeys",         label: "Journeys",             group: "Journeys & Auth",   description: "Authentication journey trees and their node configurations" },
   { value: "scripts",          label: "Scripts",              group: "Journeys & Auth",   description: "Groovy/JavaScript scripts used within journey nodes and policies" },
@@ -159,8 +174,10 @@ export const CONFIG_SCOPES: { value: ConfigScope; label: string; group: string; 
   { value: "idm-authentication",    label: "IDM Authentication",    group: "Connectors & IDM", description: "IDM-side authentication module settings" },
   { value: "service-objects",       label: "Service Objects",       group: "Connectors & IDM", description: "IDM service objects used for system integrations" },
   // Federation
-  { value: "oauth2-agents", label: "OAuth2 Agents",  group: "Federation", description: "OAuth2/OIDC client registrations and agent configurations" },
-  { value: "saml",          label: "SAML Entities",  group: "Federation", description: "SAML 2.0 identity and service provider entity configurations" },
+  { value: "oauth2-agents",   label: "OAuth2 Agents",   group: "Federation", description: "OAuth2/OIDC client registrations and agent configurations" },
+  { value: "saml",            label: "SAML Entities",   group: "Federation", description: "SAML 2.0 identity and service provider entity configurations" },
+  { value: "am-agents",       label: "AM Policy Agents", group: "Federation", description: "Web and Java AM policy agent configurations", cliSupported: false },
+  { value: "oidc-providers",  label: "OIDC Providers",  group: "Federation", description: "External OIDC identity provider configurations", cliSupported: false },
   // Secrets & Variables
   { value: "secrets",         label: "Secrets",           group: "Secrets & Variables", description: "Secret labels and their active/inactive versions" },
   { value: "secret-mappings", label: "Secret Mappings",   group: "Secrets & Variables", description: "Mappings that bind secret labels to AM/IDM services" },
@@ -170,14 +187,22 @@ export const CONFIG_SCOPES: { value: ConfigScope; label: string; group: string; 
   { value: "ui-config",        label: "UI Config",        group: "UI & Comms", description: "Platform UI global configuration and feature flags" },
   { value: "email-templates",  label: "Email Templates",  group: "UI & Comms", description: "Transactional email templates (password reset, registration, etc.)" },
   { value: "email-provider",   label: "Email Provider",   group: "UI & Comms", description: "SMTP / external email provider connection settings" },
+  { value: "sms-provider",     label: "SMS Provider",     group: "UI & Comms", description: "SMS / OTP provider configuration for one-time passcode delivery", cliSupported: false },
   { value: "locales",          label: "Locales",          group: "UI & Comms", description: "Localization files and translation overrides" },
+  // IGA
+  { value: "iga-workflows",     label: "IGA Workflows",             group: "IGA", description: "Identity Governance and Administration workflow definitions" },
+  { value: "iga-forms",         label: "IGA Forms",                 group: "IGA", description: "IGA request and approval form definitions", cliSupported: false },
+  { value: "iga-notifications", label: "IGA Notifications",         group: "IGA", description: "IGA notification templates for approvals and lifecycle events", cliSupported: false },
+  { value: "iga-applications",  label: "IGA Applications",          group: "IGA", description: "IGA application catalog entries managed via governance", cliSupported: false },
+  { value: "iga-entitlements",  label: "IGA Entitlements",          group: "IGA", description: "Entitlement definitions for access certification and requests", cliSupported: false },
+  { value: "iga-assignments",   label: "IGA Assignments",           group: "IGA", description: "Role and entitlement assignment configurations", cliSupported: false },
   // Infrastructure
-  { value: "schedules",      label: "Schedules",        group: "Infrastructure", description: "Scheduled tasks and cron-style recurring jobs" },
-  { value: "cors",           label: "CORS",             group: "Infrastructure", description: "Cross-Origin Resource Sharing policy settings" },
-  { value: "csp",            label: "CSP",              group: "Infrastructure", description: "Content Security Policy headers for tenant pages" },
-  { value: "cookie-domains", label: "Cookie Domains",   group: "Infrastructure", description: "Allowed cookie domains for cross-domain SSO" },
-  { value: "audit",          label: "Audit",            group: "Infrastructure", description: "Audit logging configuration and event handler settings" },
-  { value: "telemetry",      label: "Telemetry",        group: "Infrastructure", description: "Usage telemetry and monitoring configuration" },
-  { value: "iga-workflows",  label: "IGA Workflows",    group: "Infrastructure", description: "Identity Governance and Administration workflow definitions" },
-  { value: "raw",            label: "Raw Config",       group: "Infrastructure", description: "Direct AM config tree endpoints — requires RAW_CONFIG_FILE to be set" },
+  { value: "schedules",        label: "Schedules",        group: "Infrastructure", description: "Scheduled tasks and cron-style recurring jobs" },
+  { value: "cors",             label: "CORS",             group: "Infrastructure", description: "Cross-Origin Resource Sharing policy settings" },
+  { value: "csp",              label: "CSP",              group: "Infrastructure", description: "Content Security Policy headers for tenant pages" },
+  { value: "cookie-domains",   label: "Cookie Domains",   group: "Infrastructure", description: "Allowed cookie domains for cross-domain SSO" },
+  { value: "audit",            label: "Audit",            group: "Infrastructure", description: "Audit logging configuration and event handler settings" },
+  { value: "telemetry",        label: "Telemetry",        group: "Infrastructure", description: "Usage telemetry and monitoring configuration" },
+  { value: "config-metadata",  label: "Config Metadata",  group: "Infrastructure", description: "Pipeline metadata stored alongside pushed configuration (custom-config.metadata)" },
+  { value: "raw",              label: "Raw Config",       group: "Infrastructure", description: "Direct AM config tree endpoints — requires RAW_CONFIG_FILE to be set" },
 ];
