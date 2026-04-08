@@ -127,7 +127,8 @@ function resolveWorkflowFiles(configDir: string, itemId: string): ViewableFile[]
       if (!stepDir.isDirectory()) continue;
       const stepDirPath = path.join(stepsDir, stepDir.name);
       for (const stepFile of fs.readdirSync(stepDirPath, { withFileTypes: true })) {
-        if (!stepFile.isFile() || !stepFile.name.endsWith(".json")) continue;
+        if (!stepFile.isFile()) continue;
+        if (!stepFile.name.endsWith(".json") && !stepFile.name.endsWith(".js")) continue;
         const f = readFile(path.join(stepDirPath, stepFile.name));
         if (f) files.push(f);
       }

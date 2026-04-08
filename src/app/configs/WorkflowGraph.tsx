@@ -427,13 +427,22 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
   const [nodes, setNodes, onNodesChange] = useNodesState(initNodes);
   const [, , onEdgesChange] = useEdgesState(baseEdges);
 
-  const [selectedId,   setSelectedId]   = useState<string | null>(null);
+  const [selectedId,    setSelectedId]    = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [pinnedEdgeId,  setPinnedEdgeId]  = useState<string | null>(null);
-  const [searchQuery,  setSearchQuery]   = useState("");
-  const [searchIndex,  setSearchIndex]   = useState(0);
-  const [displayView,  setDisplayView]   = useState<"graph" | "json">("graph");
-  const [drawerOpen,   setDrawerOpen]    = useState(false);
+  const [searchQuery,   setSearchQuery]   = useState("");
+  const [searchIndex,   setSearchIndex]   = useState(0);
+  const [displayView,   setDisplayView]   = useState<"graph" | "json">("graph");
+  const [drawerOpen,    setDrawerOpen]    = useState(false);
+
+  const [previewModal, setPreviewModal] = useState<{
+    stepName: string;
+    scriptFileName: string;
+    scriptContent: string;
+    copied: boolean;
+    fullscreen: boolean;
+  } | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Fit view on mount
   useEffect(() => {
@@ -458,14 +467,16 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
     return () => document.removeEventListener("keydown", handler);
   }, [getViewport, setViewport]);
 
-  // Escape closes drawer
+  // Escape closes modal first, then drawer
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && drawerOpen) { setDrawerOpen(false); setSelectedId(null); e.stopPropagation(); }
+      if (e.key !== "Escape") return;
+      if (previewModal) { setPreviewModal(null); e.stopPropagation(); return; }
+      if (drawerOpen)   { setDrawerOpen(false); setSelectedId(null); e.stopPropagation(); }
     };
     document.addEventListener("keydown", handler, true);
     return () => document.removeEventListener("keydown", handler, true);
-  }, [drawerOpen]);
+  }, [drawerOpen, previewModal]);
 
   // Search matches
   const searchMatches = useMemo(() => {
@@ -557,11 +568,42 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
     } catch { return undefined; }
   }, [selectedStep, stepFile, files]);
 
+  // Lock body scroll when preview modal is open
+  useEffect(() => {
+    if (previewModal) { document.body.style.overflow = "hidden"; modalRef.current?.focus(); }
+    else              { document.body.style.overflow = ""; }
+    return () => { document.body.style.overflow = ""; };
+  }, [!!previewModal]);
+
   const handleNodeClick: NodeMouseHandler = useCallback((_e, node) => {
     const isSame = selectedId === node.id;
     setSelectedId(isSame ? null : node.id);
     setDrawerOpen(!isSame && node.type === "wfStep");
   }, [selectedId]);
+
+  const handleNodeDoubleClick: NodeMouseHandler = useCallback((_e, node) => {
+    if (node.type !== "wfStep") return;
+    const step = workflow.steps.find((s) => s.id === node.id);
+    if (!step?.hasScript) return;
+    // Find the step JSON file
+    const sf = files.find((f) => {
+      try { return (JSON.parse(f.content) as Record<string, unknown>).name === node.id; }
+      catch { return false; }
+    });
+    if (!sf) return;
+    try {
+      const cfg       = JSON.parse(sf.content) as Record<string, unknown>;
+      const taskCfg   = (cfg.scriptTask ?? cfg.approvalTask) as Record<string, unknown> | undefined;
+      const scriptRef = taskCfg?.script as Record<string, unknown> | undefined;
+      const fileName  = typeof scriptRef?.file === "string" ? scriptRef.file : null;
+      if (!fileName) return;
+      const jsFile = files.find((f) => f.name === fileName);
+      if (!jsFile) return;
+      // Also open the drawer if not already open for this node
+      if (selectedId !== node.id) { setSelectedId(node.id); setDrawerOpen(true); }
+      setPreviewModal({ stepName: step.displayName, scriptFileName: fileName, scriptContent: jsFile.content, copied: false, fullscreen: false });
+    } catch { /* ignore */ }
+  }, [workflow.steps, files, selectedId]);
 
   const handleEdgeMouseEnter: EdgeMouseHandler = useCallback((_e, edge) => setHoveredEdgeId(edge.id), []);
   const handleEdgeMouseLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), []);
@@ -664,6 +706,7 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
             onEdgeMouseEnter={handleEdgeMouseEnter}
             onEdgeMouseLeave={handleEdgeMouseLeave}
             onEdgeClick={handleEdgeClick}
+            onNodeDoubleClick={handleNodeDoubleClick}
             onPaneClick={handlePaneClick}
             nodesDraggable
             snapToGrid
@@ -697,6 +740,89 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
           open={drawerOpen}
           onClose={() => { setDrawerOpen(false); setSelectedId(null); }}
         />
+
+        {/* ── Script preview modal (double-click) ──────────────────────────── */}
+        {previewModal && (
+          <>
+            {previewModal.fullscreen ? (
+              <ScriptOverlay
+                name={previewModal.scriptFileName}
+                content={previewModal.scriptContent}
+                onClose={() => setPreviewModal((p) => p ? { ...p, fullscreen: false } : null)}
+              />
+            ) : (
+              <div
+                className="absolute inset-0 z-20 flex items-center justify-center bg-black/40"
+                onClick={() => setPreviewModal(null)}
+              >
+                <div
+                  ref={modalRef}
+                  tabIndex={-1}
+                  className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden outline-none"
+                  style={{ width: "60vw", maxWidth: 960, height: "60vh", maxHeight: "90vh" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Modal header */}
+                  <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{previewModal.stepName}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Script preview</p>
+                    </div>
+                    {/* Copy */}
+                    <button
+                      type="button"
+                      title="Copy script"
+                      onClick={() => {
+                        void navigator.clipboard.writeText(previewModal.scriptContent).then(() => {
+                          setPreviewModal((p) => p ? { ...p, copied: true } : null);
+                          setTimeout(() => setPreviewModal((p) => p ? { ...p, copied: false } : null), 2000);
+                        });
+                      }}
+                      className="text-slate-400 hover:text-slate-600 shrink-0 transition-colors"
+                    >
+                      {previewModal.copied ? (
+                        <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                        </svg>
+                      )}
+                    </button>
+                    {/* Fullscreen */}
+                    <button
+                      type="button"
+                      title="View fullscreen"
+                      onClick={() => setPreviewModal((p) => p ? { ...p, fullscreen: true } : null)}
+                      className="text-slate-400 hover:text-slate-600 shrink-0"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                      </svg>
+                    </button>
+                    {/* Close */}
+                    <button type="button" onClick={() => setPreviewModal(null)} className="text-slate-400 hover:text-slate-600 shrink-0">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Script content */}
+                  <div className="flex-1 min-h-0 overflow-hidden bg-slate-950">
+                    <p className="px-4 pt-3 pb-1 text-[10px] font-medium text-slate-400 shrink-0">{previewModal.scriptFileName}</p>
+                    <div className="overflow-auto h-full">
+                      <pre
+                        className="px-4 pb-4 text-[11px] font-mono leading-relaxed text-slate-300"
+                        dangerouslySetInnerHTML={{ __html: highlightJs(previewModal.scriptContent) }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
