@@ -690,7 +690,7 @@ function groupByScope(files: FileDiff[]): ScopeGroup[] {
 
 // ── Pagination ───────────────────────────────────────────────────────────────
 
-const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200, 500];
 const DEFAULT_PAGE_SIZE = 20;
 
 function Pagination({
