@@ -8,9 +8,6 @@ import type { AuditItem } from "@/app/api/push/audit/route";
 import { cn } from "@/lib/utils";
 import { highlightJs, highlightJson } from "@/lib/highlight";
 import { JourneyGraph } from "./JourneyGraph";
-import { JourneyOutlineView } from "./JourneyOutlineView";
-import { JourneyTableView } from "./JourneyTableView";
-import { JourneySwimLaneView } from "./JourneySwimLaneView";
 
 function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean; onToggle: () => void; dark?: boolean }) {
   return (
@@ -257,7 +254,6 @@ function SectionsView({ environment }: { environment: string }) {
   const [activeTab, setActiveTab] = useState(0);
   const [fileLoading, setFileLoading] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
-  const [col3View, setCol3View] = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   const [fullscreen, setFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -287,7 +283,6 @@ function SectionsView({ environment }: { environment: string }) {
     setFileLoading(true);
     setFiles(null);
     setActiveTab(0);
-    setCol3View(selectedScope === "journeys" ? "graph" : "json");
 
     const params = new URLSearchParams({ environment, scope: selectedScope, item: selectedItem.id });
     fetch(`/api/push/item?${params}`)
@@ -436,69 +431,23 @@ function SectionsView({ environment }: { environment: string }) {
       <div className={cn(
         "flex flex-col overflow-hidden min-w-0",
         fullscreen ? "fixed inset-0 z-50" : "flex-1",
-        selectedItem && (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
+        selectedItem && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
       )}>
         {selectedItem ? (
           <>
             {/* Header bar */}
             <div className={cn(
               "flex items-center gap-2 px-4 py-2 border-b shrink-0",
-              (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys"
+              selectedScope === "journeys"
                 ? "border-slate-200 bg-white"
                 : "border-slate-700 bg-slate-800"
             )}>
               <span className={cn(
                 "text-xs font-medium truncate flex-1",
-                (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
+                selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
               )}>
                 {selectedItem.label}
               </span>
-
-              {/* Graph / Outline / JSON toggle — journeys only */}
-              {selectedScope === "journeys" && files && files.length > 0 && (
-                <div className="flex rounded border border-slate-200 overflow-hidden text-[10px] font-medium shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setCol3View("graph")}
-                    className={cn(
-                      "px-2.5 py-1 transition-colors",
-                      col3View === "graph" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
-                    )}
-                  >
-                    Graph
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCol3View("outline")}
-                    className={cn(
-                      "px-2.5 py-1 border-l border-slate-200 transition-colors",
-                      col3View === "outline" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
-                    )}
-                  >
-                    Outline
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCol3View("table")}
-                    className={cn(
-                      "px-2.5 py-1 border-l border-slate-200 transition-colors",
-                      col3View === "table" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
-                    )}
-                  >
-                    Table
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCol3View("json")}
-                    className={cn(
-                      "px-2.5 py-1 border-l border-slate-200 transition-colors",
-                      col3View === "json" ? "bg-slate-700 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
-                    )}
-                  >
-                    JSON
-                  </button>
-                </div>
-              )}
 
               {/* File tabs — non-journey multi-file items */}
               {selectedScope !== "journeys" && files && files.length > 1 && (
@@ -533,7 +482,7 @@ function SectionsView({ environment }: { environment: string }) {
                   }}
                   className={cn(
                     "shrink-0 p-1 rounded transition-colors",
-                    (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys"
+                    selectedScope === "journeys"
                       ? "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
                   )}
@@ -552,14 +501,14 @@ function SectionsView({ environment }: { environment: string }) {
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
-                dark={!((col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") && selectedScope === "journeys")}
+                dark={selectedScope !== "journeys"}
               />
             </div>
 
             {/* Content */}
             <div className="flex-1 overflow-hidden min-h-0">
               {fileLoading && (
-                <div className={cn("flex items-center justify-center h-full text-sm", (col3View === "graph" || col3View === "outline" || col3View === "table" || col3View === "swimlane") ? "text-slate-400" : "text-slate-500")}>
+                <div className={cn("flex items-center justify-center h-full text-sm", selectedScope === "journeys" ? "text-slate-400" : "text-slate-500")}>
                   Loading…
                 </div>
               )}
@@ -569,24 +518,8 @@ function SectionsView({ environment }: { environment: string }) {
                 </div>
               )}
               {!fileLoading && activeFile && selectedScope === "journeys" && (
-                <>
-                  <div className={cn("h-full", col3View !== "graph" && "hidden")}>
-                    <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} />
-                  </div>
-                  <div className={cn("h-full", col3View !== "outline" && "hidden")}>
-                    <JourneyOutlineView json={activeFile.content} />
-                  </div>
-                  <div className={cn("h-full", col3View !== "table" && "hidden")}>
-                    <JourneyTableView json={activeFile.content} environment={environment} journeyId={selectedItem?.id} />
-                  </div>
-                  <div className={cn("h-full", col3View !== "swimlane" && "hidden")}>
-                    <JourneySwimLaneView json={activeFile.content} />
-                  </div>
-                </>
-              )}
-              {!fileLoading && activeFile && col3View === "json" && (
-                <div className="overflow-auto h-full">
-                  <FileContent content={activeFile.content} fileName={activeFile.name} />
+                <div className="h-full">
+                  <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} />
                 </div>
               )}
               {!fileLoading && activeFile && selectedScope !== "journeys" && (
