@@ -1278,14 +1278,115 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
   });
 }
 
+/** Wraps FileRow for script config files, adding an inline Find Usage panel. */
+function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv }: {
+  file: FileDiff;
+  sourceLabel: string;
+  targetLabel: string;
+  sourceEnv: string;
+  targetEnv: string;
+}) {
+  const [usageOpen, setUsageOpen]       = useState(false);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [usageData, setUsageData]       = useState<ScriptUsageRef[] | null>(null);
+
+  // Only show Find Usage for scripts-config UUID files
+  const uuid = useMemo(() => {
+    if (!file.relativePath.includes("scripts-config/")) return null;
+    const stem = file.relativePath.split("/").pop()?.replace(/\.json$/, "") ?? "";
+    return UUID_RE.test(stem) ? stem : null;
+  }, [file.relativePath]);
+
+  const handleFindUsage = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (usageOpen) { setUsageOpen(false); return; }
+    setUsageOpen(true);
+    if (usageData !== null) return;
+    setUsageLoading(true);
+    try {
+      const envs = [...new Set([sourceEnv, targetEnv].filter(Boolean))];
+      const results = await Promise.all(
+        envs.map((env) =>
+          fetch(`/api/analyze/script-usage?env=${encodeURIComponent(env)}&scriptId=${encodeURIComponent(uuid!)}`)
+            .then((r) => r.json())
+            .then((d) => (d.usedBy ?? []).map((u: Omit<ScriptUsageRef, "env">) => ({ ...u, env })))
+            .catch(() => [] as ScriptUsageRef[])
+        )
+      );
+      const seen = new Set<string>();
+      const merged: ScriptUsageRef[] = [];
+      for (const ref of results.flat()) {
+        const key = `${ref.journey}::${ref.nodeUuid}`;
+        if (!seen.has(key)) { seen.add(key); merged.push(ref); }
+      }
+      setUsageData(merged);
+    } finally {
+      setUsageLoading(false);
+    }
+  }, [uuid, sourceEnv, targetEnv, usageOpen, usageData]);
+
+  return (
+    <div>
+      <div className="flex items-center gap-1.5">
+        <div className="flex-1 min-w-0">
+          <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+        </div>
+        {uuid && (
+          <button
+            type="button"
+            onClick={handleFindUsage}
+            className={cn(
+              "shrink-0 px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors self-start mt-0.5",
+              usageOpen
+                ? "bg-violet-100 text-violet-700"
+                : "text-slate-400 hover:text-violet-600 hover:bg-violet-50"
+            )}
+          >
+            Find Usage
+          </button>
+        )}
+      </div>
+      {usageOpen && uuid && (
+        <div className="mx-1 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
+          {usageLoading ? (
+            <p className="text-slate-400">Searching…</p>
+          ) : !usageData || usageData.length === 0 ? (
+            <p className="text-slate-400 italic">Not used in any journey.</p>
+          ) : (
+            <div className="space-y-1">
+              <p className="text-[10px] text-violet-600 font-semibold uppercase tracking-wide mb-1">
+                Used in {usageData.length} {usageData.length === 1 ? "place" : "places"}
+              </p>
+              {usageData.map((ref, i) => (
+                <div key={i} className="flex items-center gap-2 text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+                  <span className="text-slate-700 font-medium">{ref.journey}</span>
+                  <span className="text-slate-400">→</span>
+                  <span className="text-slate-600">{ref.nodeName}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">{ref.nodeType}</span>
+                  {ref.env && (
+                    <span className="text-[9px] text-violet-500 bg-violet-100 px-1 rounded">{ref.env}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScopeSection({
-  group, sourceLabel, targetLabel, forceOpen, forceSeq,
+  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
   targetLabel: string;
   forceOpen?: boolean;
   forceSeq?: number;
+  sourceEnv?: string;
+  targetEnv?: string;
 }) {
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
@@ -1405,7 +1506,9 @@ function ScopeSection({
                 </p>
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
-                  <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                  group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
+                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
+                    : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
                 ))
               )
             ) : (
@@ -1579,6 +1682,8 @@ export function DiffReport({ report }: { report: CompareReport }) {
                   targetLabel={targetLabel}
                   forceOpen={allOpen}
                   forceSeq={allOpenSeq}
+                  sourceEnv={report.source.environment}
+                  targetEnv={report.target.environment}
                 />
               ))
             )}
