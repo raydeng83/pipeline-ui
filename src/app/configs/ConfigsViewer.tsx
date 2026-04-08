@@ -5,6 +5,7 @@ import { Environment, CONFIG_SCOPES, ConfigScope } from "@/lib/fr-config-types";
 import { FileNode } from "@/app/api/configs/[env]/route";
 import type { ViewableFile } from "@/app/api/push/item/route";
 import type { AuditItem } from "@/app/api/push/audit/route";
+import type { EndpointUsageRef } from "@/app/api/analyze/endpoint-usage/route";
 import { cn } from "@/lib/utils";
 import { highlightJs, highlightJson } from "@/lib/highlight";
 import { JourneyGraph } from "./JourneyGraph";
@@ -262,6 +263,7 @@ function SectionsView({ environment }: { environment: string }) {
   const [usageOpen, setUsageOpen] = useState(false);
   const [usageData, setUsageData] = useState<{ journey: string; nodeName: string; nodeType: string; nodeUuid: string }[] | null>(null);
   const [usageLoading, setUsageLoading] = useState(false);
+  const [endpointUsageData, setEndpointUsageData] = useState<EndpointUsageRef[] | null>(null);
   const [focusNodeId, setFocusNodeId] = useState<string | undefined>(undefined);
   const pendingFocusRef = useRef<string | undefined>(undefined);
 
@@ -306,7 +308,7 @@ function SectionsView({ environment }: { environment: string }) {
   }, [environment]);
 
   // Reset usage panel when item changes
-  useEffect(() => { setUsageOpen(false); setUsageData(null); }, [selectedItem]);
+  useEffect(() => { setUsageOpen(false); setUsageData(null); setEndpointUsageData(null); }, [selectedItem]);
 
   const fetchUsage = useCallback(() => {
     if (!selectedItem || selectedScope !== "scripts") return;
@@ -316,6 +318,17 @@ function SectionsView({ environment }: { environment: string }) {
       .then((r) => r.json())
       .then((data) => setUsageData(data.usedBy ?? []))
       .catch(() => setUsageData([]))
+      .finally(() => setUsageLoading(false));
+  }, [environment, selectedScope, selectedItem]);
+
+  const fetchEndpointUsage = useCallback(() => {
+    if (!selectedItem || selectedScope !== "endpoints") return;
+    setUsageOpen(true);
+    setUsageLoading(true);
+    fetch(`/api/analyze/endpoint-usage?env=${encodeURIComponent(environment)}&endpointName=${encodeURIComponent(selectedItem.id)}`)
+      .then((r) => r.json())
+      .then((data) => setEndpointUsageData(data.usedBy ?? []))
+      .catch(() => setEndpointUsageData([]))
       .finally(() => setUsageLoading(false));
   }, [environment, selectedScope, selectedItem]);
 
@@ -575,6 +588,20 @@ function SectionsView({ environment }: { environment: string }) {
                   Find Usage
                 </button>
               )}
+              {selectedScope === "endpoints" && (
+                <button
+                  type="button"
+                  onClick={fetchEndpointUsage}
+                  className={cn(
+                    "shrink-0 px-2 py-0.5 text-[10px] font-medium rounded transition-colors",
+                    usageOpen
+                      ? "bg-violet-100 text-violet-700"
+                      : "text-slate-400 hover:text-violet-600 hover:bg-violet-50"
+                  )}
+                >
+                  Find Usage
+                </button>
+              )}
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
@@ -620,6 +647,116 @@ function SectionsView({ environment }: { environment: string }) {
                         <span className="text-[10px] text-slate-500 font-mono">{ref.nodeType}</span>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Endpoint usage panel */}
+            {usageOpen && selectedScope === "endpoints" && (
+              <div className="px-4 py-2.5 border-b border-slate-700 bg-slate-800 shrink-0 max-h-56 overflow-y-auto">
+                {usageLoading ? (
+                  <p className="text-xs text-slate-400">Searching…</p>
+                ) : !endpointUsageData || endpointUsageData.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">Not used in any script, workflow, or endpoint.</p>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">
+                      Used in {endpointUsageData.length} {endpointUsageData.length === 1 ? "place" : "places"}
+                    </p>
+                    {endpointUsageData.map((ref, i) => {
+                      if (ref.type === "script") {
+                        const scriptItem = auditData
+                          .find((e) => e.scope === "scripts")
+                          ?.items.find((item) => item.id === `${ref.scriptId}.json`);
+                        return (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className="w-2 h-2 rounded-full bg-violet-400 shrink-0" />
+                            <span className="text-[10px] text-slate-500 shrink-0">Script</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (scriptItem) {
+                                  setSelectedScope("scripts");
+                                  setSelectedItem(scriptItem);
+                                  setUsageOpen(false);
+                                }
+                              }}
+                              className={cn(
+                                "font-medium truncate",
+                                scriptItem
+                                  ? "text-sky-400 hover:text-sky-300 hover:underline"
+                                  : "text-slate-500 cursor-default"
+                              )}
+                            >
+                              {ref.scriptName ?? ref.scriptId}
+                            </button>
+                          </div>
+                        );
+                      }
+                      if (ref.type === "workflow") {
+                        const workflowItem = auditData
+                          .find((e) => e.scope === "iga-workflows")
+                          ?.items.find((item) => item.id === ref.workflowId);
+                        return (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                            <span className="text-[10px] text-slate-500 shrink-0">Workflow</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (workflowItem) {
+                                  setSelectedScope("iga-workflows");
+                                  setSelectedItem(workflowItem);
+                                  setUsageOpen(false);
+                                }
+                              }}
+                              className={cn(
+                                "font-medium truncate",
+                                workflowItem
+                                  ? "text-sky-400 hover:text-sky-300 hover:underline"
+                                  : "text-slate-500 cursor-default"
+                              )}
+                            >
+                              {ref.workflowId}
+                            </button>
+                            {ref.stepFile && (
+                              <span className="text-[10px] text-slate-500 font-mono truncate">({ref.stepFile})</span>
+                            )}
+                          </div>
+                        );
+                      }
+                      if (ref.type === "endpoint") {
+                        const endpointItem = auditData
+                          .find((e) => e.scope === "endpoints")
+                          ?.items.find((item) => item.id === ref.endpointId);
+                        return (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className="w-2 h-2 rounded-full bg-sky-400 shrink-0" />
+                            <span className="text-[10px] text-slate-500 shrink-0">Endpoint</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (endpointItem) {
+                                  setSelectedScope("endpoints");
+                                  setSelectedItem(endpointItem);
+                                  setUsageOpen(false);
+                                }
+                              }}
+                              className={cn(
+                                "font-medium truncate",
+                                endpointItem
+                                  ? "text-sky-400 hover:text-sky-300 hover:underline"
+                                  : "text-slate-500 cursor-default"
+                              )}
+                            >
+                              {ref.endpointId}
+                            </button>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
                   </div>
                 )}
               </div>
