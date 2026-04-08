@@ -429,7 +429,7 @@ const STATUS_STYLES: Record<FileDiff["status"], { badge: string; icon: string }>
   unchanged: { badge: "bg-slate-100 text-slate-500 border border-slate-200",        icon: "=" },
 };
 
-function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLabel: string; targetLabel: string }) {
+function FileRow({ file, sourceLabel, targetLabel, extraActions }: { file: FileDiff; sourceLabel: string; targetLabel: string; extraActions?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("diff");
   const [fullscreen, setFullscreen] = useState(false);
@@ -610,6 +610,7 @@ function FileRow({ file, sourceLabel, targetLabel }: { file: FileDiff; sourceLab
             >
               Format
             </button>
+            {extraActions}
             <button
               type="button"
               onClick={() => setFullscreen(true)}
@@ -1321,7 +1322,7 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
   });
 }
 
-/** Wraps FileRow for script config files, adding an inline Find Usage panel. */
+/** Wraps FileRow for script files, adding an inline Find Usage panel. */
 function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv }: {
   file: FileDiff;
   sourceLabel: string;
@@ -1333,17 +1334,14 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
   const [usageLoading, setUsageLoading] = useState(false);
   const [usageData, setUsageData]       = useState<ScriptUsageRef[] | null>(null);
 
-  // Only show Find Usage for scripts-config UUID files
+  // Extract UUID from scripts-config path, or fall back to scripts-content name lookup
   const uuid = useMemo(() => {
-    if (!file.relativePath.includes("scripts-config/")) return null;
-    const stem = file.relativePath.split("/").pop()?.replace(/\.json$/, "") ?? "";
-    return UUID_RE.test(stem) ? stem : null;
+    const stem = file.relativePath.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "";
+    if (file.relativePath.includes("scripts-config/") && UUID_RE.test(stem)) return stem;
+    return null;
   }, [file.relativePath]);
 
-  const handleFindUsage = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (usageOpen) { setUsageOpen(false); return; }
-    setUsageOpen(true);
+  const fetchUsage = useCallback(async () => {
     if (usageData !== null) return;
     setUsageLoading(true);
     try {
@@ -1366,29 +1364,33 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
     } finally {
       setUsageLoading(false);
     }
-  }, [uuid, sourceEnv, targetEnv, usageOpen, usageData]);
+  }, [uuid, sourceEnv, targetEnv, usageData]);
+
+  const handleFindUsage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = !usageOpen;
+    setUsageOpen(next);
+    if (next) fetchUsage();
+  }, [usageOpen, fetchUsage]);
+
+  const findUsageButton = uuid ? (
+    <button
+      type="button"
+      onClick={handleFindUsage}
+      className={cn(
+        "px-1.5 py-0.5 text-[10px] font-medium rounded border transition-colors",
+        usageOpen
+          ? "bg-violet-100 text-violet-700 border-violet-200"
+          : "text-slate-500 border-slate-300 hover:text-violet-600 hover:bg-violet-50 hover:border-violet-200"
+      )}
+    >
+      Find Usage
+    </button>
+  ) : null;
 
   return (
     <div>
-      <div className="flex items-center gap-1.5">
-        <div className="flex-1 min-w-0">
-          <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} />
-        </div>
-        {uuid && (
-          <button
-            type="button"
-            onClick={handleFindUsage}
-            className={cn(
-              "shrink-0 px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors self-start mt-0.5",
-              usageOpen
-                ? "bg-violet-100 text-violet-700"
-                : "text-slate-400 hover:text-violet-600 hover:bg-violet-50"
-            )}
-          >
-            Find Usage
-          </button>
-        )}
-      </div>
+      <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} />
       {usageOpen && uuid && (
         <div className="mx-1 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
           {usageLoading ? (
@@ -1552,6 +1554,7 @@ function ScopeSection({
                   group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
                     ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
                     : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+
                 ))
               )
             ) : (
