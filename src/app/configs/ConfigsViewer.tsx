@@ -644,7 +644,7 @@ function SectionsView({ environment }: { environment: string }) {
               )}
               {!fileLoading && files && files.length > 0 && selectedScope === "iga-workflows" && (
                 <div className="h-full">
-                  <WorkflowGraph files={files} />
+                  <WorkflowGraph files={files} workflowId={selectedItem?.id} />
                 </div>
               )}
               {!fileLoading && activeFile && selectedScope !== "journeys" && selectedScope !== "iga-workflows" && (
