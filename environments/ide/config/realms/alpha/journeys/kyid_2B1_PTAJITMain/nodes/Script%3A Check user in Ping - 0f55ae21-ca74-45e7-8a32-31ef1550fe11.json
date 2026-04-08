@@ -12,9 +12,13 @@
     {
       "displayName": "Error",
       "id": "Error"
+    },
+    {
+      "displayName": "InvalidUser",
+      "id": "InvalidUser"
     }
   ],
-  "_rev": "197545262",
+  "_rev": "892998758",
   "_type": {
     "_id": "ScriptedDecisionNode",
     "collection": true,
@@ -27,7 +31,8 @@
   "outcomes": [
     "User Found",
     "User Not Found",
-    "Error"
+    "Error",
+    "InvalidUser"
   ],
   "outputs": [
     "*"

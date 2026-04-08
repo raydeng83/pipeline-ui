@@ -1,6 +1,6 @@
 {
   "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_Create_Account",
-  "_rev": "72179653",
+  "_rev": "837228215",
   "enabled": true,
   "entryNodeId": "d5437205-41a1-4122-a3da-c49b0dcb3a24",
   "identityResource": "managed/alpha_user",
@@ -38,7 +38,7 @@
         "associatedAccounts": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
         "createAccount": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
         "error": "e301438c-0bd0-429c-ab0c-66126501069a",
-        "highRisk": "fafad024-2c90-4454-a178-daa58774dd29",
+        "highRisk": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
         "highRiskMCIDelete": "fafad024-2c90-4454-a178-daa58774dd29",
         "noRiskCreateAccount": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
         "notVerifiedMCISearch": "0a497788-080b-4a77-aca2-7dfbfc3dc5fb",
@@ -68,8 +68,8 @@
       "displayName": "Script: High risk",
       "nodeType": "ScriptedDecisionNode",
       "version": "1.0",
-      "x": 1353,
-      "y": 223.5
+      "x": 1349,
+      "y": 252.5
     }
   },
   "staticNodes": {

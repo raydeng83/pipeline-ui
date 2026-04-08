@@ -220,7 +220,7 @@ if (missingInputs.length > 0) {
         MobilePhone: verifiedTelephoneNumber,
         KYID: "34567890",
         TransactionID: transactionID,
-        ContextID: contextID
+        ContextID: contextID,
     };
     
         if(postalAddressOne){
@@ -230,6 +230,7 @@ if (missingInputs.length > 0) {
         if(postalAddressTwo){
             payload["Address2"] = postalAddressTwo;
         }
+
 
         if(city){
             payload["City"] = city;

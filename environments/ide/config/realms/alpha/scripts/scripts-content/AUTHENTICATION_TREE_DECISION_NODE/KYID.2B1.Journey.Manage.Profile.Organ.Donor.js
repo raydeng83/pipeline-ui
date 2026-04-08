@@ -414,6 +414,7 @@ function handleUserResponses() {
                   nodeState.putShared("organDonor","true")
                   nodeState.putShared("journeyName","organdonor")
                   logger.debug("going to next");
+                  nodeState.putShared("userInfoJSON1", userInfoJSON)
                   action.goTo(NodeOutcome.NEXT);
             }else if (postalAddress.length === 0) {
                 nodeState.putShared("errorMessage", "Address1_is_required");

@@ -1,6 +1,6 @@
 {
   "_id": "kyid_2B1_PTAJITMain",
-  "_rev": "965241290",
+  "_rev": "-1758385746",
   "enabled": true,
   "entryNodeId": "9f673dbd-22b7-4034-9e6b-bfd7b496a56f",
   "identityResource": "managed/alpha_user",
@@ -63,6 +63,7 @@
     "0f55ae21-ca74-45e7-8a32-31ef1550fe11": {
       "connections": {
         "Error": "90b991ef-9a93-43e3-8a6f-f132b2b46d0b",
+        "InvalidUser": "56251930-0f5b-400e-b567-14ffbc1dfa70",
         "User Found": "826b84d5-e9c2-434c-a1fb-c460cb985f4a",
         "User Not Found": "0a800926-50f7-4236-80c7-eb6ea50c016c"
       },
@@ -282,8 +283,8 @@
       "displayName": "PTA: Internal User Lockout",
       "nodeType": "ScriptedDecisionNode",
       "version": "1.0",
-      "x": 4174,
-      "y": 46
+      "x": 4184,
+      "y": 60
     },
     "b208caa2-8ca4-4c8b-b09b-2f670b677bcc": {
       "connections": {

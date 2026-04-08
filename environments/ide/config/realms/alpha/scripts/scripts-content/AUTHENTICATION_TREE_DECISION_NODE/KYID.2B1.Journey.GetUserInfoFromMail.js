@@ -38,7 +38,7 @@ function queryUserByMail(mail) {
         logger.debug("mail in Get User Script" + mail);
         var userQueryResult = openidm.query("managed/alpha_user", {
             "_queryFilter": 'mail eq "' + mail + '"'
-        }, ["_id", "userName", "mail", "frIndexedString2", "frIndexedString1", "custom_selfEnrollMFA", "frUnindexedString1","custom_userIdentity/*"]);
+        }, ["_id", "userName", "mail", "frIndexedString2", "frIndexedString1", "accountStatus" , "custom_selfEnrollMFA", "frUnindexedString1","custom_userIdentity/*"]);
         if (userQueryResult && userQueryResult.result && userQueryResult.result.length === 1) {
             if(userQueryResult.result[0].custom_userIdentity && userQueryResult.result[0].custom_userIdentity.languagePreference){
                 nodeState.putShared("languagePreference", userQueryResult.result[0].custom_userIdentity.languagePreference)
@@ -114,7 +114,9 @@ try {
     logger.debug("the mail in KYID.2B1.Journey.GetUserInfoFromMail" + mail);
     if (mail) {
         var user = queryUserByMail(mail);
-        if (user && user._id) {
+        if (user && user._id ) {
+            logger.error("user.accountStatus is :: " + user.accountStatus)
+            if(user.accountStatus && user.accountStatus.toLowerCase() == "active"){
             nodeState.putShared("_id", user._id);
             nodeState.putShared("userId", user._id);
             nodeState.putShared("mail", user.mail);
@@ -147,6 +149,11 @@ try {
 
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.begin + " Session valid for user " + user.mail);
             action.goTo(NodeOutcome.FOUND);
+            }else{
+                nodeLogger.error(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.begin + " User data is incomplete or user not found.");
+                auditLog("LOG004", "Invalid User");
+                action.goTo("InvalidUser");
+            }
         } else {
             nodeLogger.error(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.begin + " User data is incomplete or user not found.");
             auditLog("LOG004", "Invalid User");

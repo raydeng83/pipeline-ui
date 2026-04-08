@@ -135,7 +135,7 @@ function handleUserResponses() {
             parsedResponse = JSON.parse(response);
             logger.debug("User Response1: " + JSON.stringify(parsedResponse))
             response = removeSSN(parsedResponse)
-            logger.debug("User Response2: " + JSON.stringify(response))
+            logger.error("User Response2: " + JSON.stringify(response))
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.begin + "::" + "User Response: " + JSON.stringify(response));
             nodeState.putShared("lexisnexisResponse", response)
            // var parsedResponse = JSON.parse(response);
@@ -308,7 +308,7 @@ function handleUserResponses() {
             }
 
         }else {
-            nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.end + "::" + "back button clicked");
+            nodeLogger.error(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.end + "::" + "back button clicked");
             action.goTo("error");
         }
     } catch (error) {

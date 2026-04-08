@@ -118,7 +118,10 @@ function getUserRequestByRequestedUserAccountIdAndStatus(requestedUserAccountId,
       var userPrereqList = response.result;
       var prereqIDs = []
       var usrPrereqRecord = []
+      var finalResult = []
+      
       for (var i = 0; i < userPrereqList.length; i++) {
+           
        //Fix 201545# To display unique user prerequisite records only - Rajat 11/11 ---Start
         // Checking if PrereqID and PrereqType Present -- Narendra 1/9/2025 - Defect No:- 210676
        if(userPrereqList[i].preRequisiteId){
@@ -132,6 +135,13 @@ function getUserRequestByRequestedUserAccountIdAndStatus(requestedUserAccountId,
         else{
          usrPrereqRecord.push(userPrereqList[i])
         }
+
+        /*if(userPrereqList[i].preRequisiteId && userPrereqList[i].preRequisiteTypeId){
+           logger.error("PreRequisiteId and PrereqTypeId found =>"+userPrereqList[i])
+           finalResult.push(userPrereqList[i])
+         } else {
+           logger.error("PreRequisiteId and PrereqTypeId notfound")
+         }*/
 
 
         logger.error("alpha_kyid_enrollment_user_prerequisites userPrereqList" + JSON.stringify(userPrereqList[i]));
@@ -175,6 +185,7 @@ function getUserRequestByRequestedUserAccountIdAndStatus(requestedUserAccountId,
        //Fix 201545# To display unique user prerequisite records only - Rajat 11/11 ---Start
       if(usrPrereqRecord.length>0){
         resp.result = usrPrereqRecord
+        //resp.result = finalResult
       }
       return resp
       // ---End
