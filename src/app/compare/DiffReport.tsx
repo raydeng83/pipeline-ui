@@ -571,6 +571,12 @@ function FileRow({ file, sourceLabel, targetLabel, extraActions }: { file: FileD
           </span>
         )}
 
+        {extraActions && (
+          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+            {extraActions}
+          </div>
+        )}
+
         {open && (
           <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center rounded border border-slate-300 overflow-hidden text-[10px]">
@@ -610,7 +616,6 @@ function FileRow({ file, sourceLabel, targetLabel, extraActions }: { file: FileD
             >
               Format
             </button>
-            {extraActions}
             <button
               type="button"
               onClick={() => setFullscreen(true)}
