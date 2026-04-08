@@ -690,35 +690,61 @@ function groupByScope(files: FileDiff[]): ScopeGroup[] {
 
 // ── Pagination ───────────────────────────────────────────────────────────────
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+const DEFAULT_PAGE_SIZE = 20;
 
-function Pagination({ page, total, onChange }: { page: number; total: number; onChange: (p: number) => void }) {
-  const pages = Math.ceil(total / PAGE_SIZE);
-  if (pages <= 1) return null;
-  const start = page * PAGE_SIZE + 1;
-  const end   = Math.min((page + 1) * PAGE_SIZE, total);
+function Pagination({
+  page, total, pageSize, onChange, onPageSizeChange,
+}: {
+  page: number;
+  total: number;
+  pageSize: number;
+  onChange: (p: number) => void;
+  onPageSizeChange: (size: number) => void;
+}) {
+  const pages = Math.ceil(total / pageSize);
+  if (total === 0) return null;
+  const start = page * pageSize + 1;
+  const end   = Math.min((page + 1) * pageSize, total);
   return (
     <div className="flex items-center justify-between px-3 py-2 border-t border-slate-100 text-[10px] text-slate-500">
-      <span>{start}–{end} of {total}</span>
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          disabled={page === 0}
-          onClick={() => onChange(page - 1)}
-          className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
-        >
-          ‹ Prev
-        </button>
-        <span className="px-1">{page + 1} / {pages}</span>
-        <button
-          type="button"
-          disabled={page >= pages - 1}
-          onClick={() => onChange(page + 1)}
-          className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
-        >
-          Next ›
-        </button>
+      <div className="flex items-center gap-1.5">
+        <span>{start}–{end} of {total}</span>
+        <span className="text-slate-300">·</span>
+        <label className="flex items-center gap-1">
+          <span>Per page:</span>
+          <select
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+            className="border border-slate-200 rounded px-1 py-0 text-[10px] text-slate-600 bg-white focus:outline-none focus:ring-1 focus:ring-sky-400"
+          >
+            {PAGE_SIZE_OPTIONS.map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+        </label>
       </div>
+      {pages > 1 && (
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            disabled={page === 0}
+            onClick={() => onChange(page - 1)}
+            className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+          >
+            ‹ Prev
+          </button>
+          <span className="px-1">{page + 1} / {pages}</span>
+          <button
+            type="button"
+            disabled={page >= pages - 1}
+            onClick={() => onChange(page + 1)}
+            className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+          >
+            Next ›
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1039,6 +1065,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [showScripts, setShowScripts] = useState(true);
   const [showNodes, setShowNodes] = useState(false);
   const [localForceOpen, setLocalForceOpen] = useState<boolean | undefined>(undefined);
@@ -1147,12 +1174,16 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
             {filtered.length === 0 ? (
               <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
             ) : (
-              filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((node) => (
+              filtered.slice(page * pageSize, (page + 1) * pageSize).map((node) => (
                 <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
               ))
             )}
           </div>
-          <Pagination page={page} total={filtered.length} onChange={setPage} />
+          <Pagination
+            page={page} total={filtered.length} pageSize={pageSize}
+            onChange={setPage}
+            onPageSizeChange={(s) => { setPageSize(s); setPage(0); }}
+          />
         </div>
       )}
     </div>
@@ -1184,6 +1215,7 @@ function ScopeSection({
   const [itemSearch, setItemSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "modified" | "added" | "removed">("all");
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // React to parent expand/collapse all
@@ -1295,7 +1327,7 @@ function ScopeSection({
                   {itemSearch ? `No items match "${itemSearch}".` : "No items match the selected filter."}
                 </p>
               ) : (
-                visibleFiles.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((f) => (
+                visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
                   <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
                 ))
               )
@@ -1305,7 +1337,13 @@ function ScopeSection({
               </p>
             )}
           </div>
-          {hasChanges && <Pagination page={page} total={totalVisible} onChange={setPage} />}
+          {hasChanges && (
+            <Pagination
+              page={page} total={totalVisible} pageSize={pageSize}
+              onChange={setPage}
+              onPageSizeChange={(s) => { setPageSize(s); setPage(0); }}
+            />
+          )}
         </div>
       )}
     </div>
