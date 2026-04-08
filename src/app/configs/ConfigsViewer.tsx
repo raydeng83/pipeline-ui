@@ -8,6 +8,7 @@ import type { AuditItem } from "@/app/api/push/audit/route";
 import { cn } from "@/lib/utils";
 import { highlightJs, highlightJson } from "@/lib/highlight";
 import { JourneyGraph } from "./JourneyGraph";
+import { WorkflowGraph } from "./WorkflowGraph";
 
 function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean; onToggle: () => void; dark?: boolean }) {
   return (
@@ -493,14 +494,14 @@ function SectionsView({ environment }: { environment: string }) {
       <div className={cn(
         "flex flex-col overflow-hidden min-w-0",
         fullscreen ? "fixed inset-0 z-50" : "flex-1",
-        selectedItem && selectedScope === "journeys" ? "bg-slate-50" : "bg-slate-900"
+        selectedItem && (selectedScope === "journeys" || selectedScope === "iga-workflows") ? "bg-slate-50" : "bg-slate-900"
       )}>
         {selectedItem ? (
           <>
             {/* Header bar */}
             <div className={cn(
               "flex items-center gap-2 px-4 py-2 border-b shrink-0",
-              selectedScope === "journeys"
+              (selectedScope === "journeys" || selectedScope === "iga-workflows")
                 ? "border-slate-200 bg-white"
                 : "border-slate-700 bg-slate-800"
             )}>
@@ -511,8 +512,8 @@ function SectionsView({ environment }: { environment: string }) {
                 {selectedItem.label}
               </span>
 
-              {/* File tabs — non-journey multi-file items */}
-              {selectedScope !== "journeys" && files && files.length > 1 && (
+              {/* File tabs — non-journey/workflow multi-file items */}
+              {selectedScope !== "journeys" && selectedScope !== "iga-workflows" && files && files.length > 1 && (
                 <div className="flex gap-0 overflow-x-auto">
                   {files.map((f, i) => (
                     <button
@@ -544,7 +545,7 @@ function SectionsView({ environment }: { environment: string }) {
                   }}
                   className={cn(
                     "shrink-0 p-1 rounded transition-colors",
-                    selectedScope === "journeys"
+                    (selectedScope === "journeys" || selectedScope === "iga-workflows")
                       ? "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
                   )}
@@ -577,7 +578,7 @@ function SectionsView({ environment }: { environment: string }) {
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
-                dark={selectedScope !== "journeys"}
+                dark={selectedScope !== "journeys" && selectedScope !== "iga-workflows"}
               />
             </div>
 
@@ -641,7 +642,12 @@ function SectionsView({ environment }: { environment: string }) {
                   <JourneyGraph json={activeFile.content} fitViewKey={fullscreen ? 1 : 0} environment={environment} journeyId={selectedItem?.id} focusNodeId={focusNodeId} />
                 </div>
               )}
-              {!fileLoading && activeFile && selectedScope !== "journeys" && (
+              {!fileLoading && files && files.length > 0 && selectedScope === "iga-workflows" && (
+                <div className="h-full">
+                  <WorkflowGraph files={files} />
+                </div>
+              )}
+              {!fileLoading && activeFile && selectedScope !== "journeys" && selectedScope !== "iga-workflows" && (
                 <div className="overflow-auto h-full">
                   <FileContent content={activeFile.content} fileName={activeFile.name} />
                 </div>

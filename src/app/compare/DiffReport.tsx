@@ -6,6 +6,7 @@ import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript,
 import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
 import { JourneyDiffGraphModal, type NavEntry } from "./JourneyDiffGraph";
+import { WorkflowDiffGraphModal } from "./WorkflowDiffGraph";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -1475,6 +1476,82 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
   );
 }
 
+// ── Workflow scope ────────────────────────────────────────────────────────────
+
+/** Extract the workflow name from an iga-workflows file path. */
+function workflowNameFromPath(relativePath: string): string | null {
+  // iga/workflows/{name}/... or realms/x/iga/workflows/{name}/...
+  const m = relativePath.match(/\/workflows\/([^/]+)\//);
+  return m?.[1] ?? null;
+}
+
+function WorkflowGroupRow({
+  workflowName,
+  changedFiles,
+  allFiles,
+  sourceLabel,
+  targetLabel,
+}: {
+  workflowName: string;
+  changedFiles: FileDiff[];
+  allFiles: FileDiff[];
+  sourceLabel: string;
+  targetLabel: string;
+}) {
+  const [graphOpen, setGraphOpen] = useState(false);
+
+  const added    = changedFiles.filter((f) => f.status === "added").length;
+  const removed  = changedFiles.filter((f) => f.status === "removed").length;
+  const modified = changedFiles.filter((f) => f.status === "modified").length;
+
+  const workflowDiffFiles = useMemo(
+    () => allFiles.filter((f) => workflowNameFromPath(f.relativePath) === workflowName),
+    [allFiles, workflowName],
+  );
+
+  return (
+    <>
+      <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-slate-50 border border-slate-200">
+        {/* Workflow icon */}
+        <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+        </svg>
+        <span className="text-xs font-medium text-slate-700 flex-1 truncate">{workflowName}</span>
+        {/* Diff badges */}
+        <div className="flex items-center gap-1 text-[9px] font-mono shrink-0">
+          {modified > 0 && <span className="px-1 py-0.5 rounded bg-amber-100 text-amber-700">{modified} modified</span>}
+          {added    > 0 && <span className="px-1 py-0.5 rounded bg-emerald-100 text-emerald-700">{added} added</span>}
+          {removed  > 0 && <span className="px-1 py-0.5 rounded bg-red-100 text-red-700">{removed} removed</span>}
+        </div>
+        {/* Graph button */}
+        <button
+          type="button"
+          title="View workflow graph"
+          onClick={(e) => { e.stopPropagation(); setGraphOpen(true); }}
+          className="shrink-0 p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+          </svg>
+        </button>
+      </div>
+      {/* Individual changed file rows */}
+      {changedFiles.map((f) => (
+        <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+      ))}
+      {graphOpen && (
+        <WorkflowDiffGraphModal
+          workflowName={workflowName}
+          workflowFiles={workflowDiffFiles}
+          sourceLabel={sourceLabel}
+          targetLabel={targetLabel}
+          onClose={() => setGraphOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
 function ScopeSection({
   group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles,
 }: {
@@ -1603,12 +1680,31 @@ function ScopeSection({
                 <p className="text-xs text-slate-400 text-center py-2">
                   {itemSearch ? `No items match "${itemSearch}".` : "No items match the selected filter."}
                 </p>
+              ) : group.scope === "iga-workflows" ? (
+                // Group workflow files by workflow name, show one row per workflow
+                (() => {
+                  const grouped = new Map<string, FileDiff[]>();
+                  for (const f of visibleFiles.slice(page * pageSize, (page + 1) * pageSize)) {
+                    const name = workflowNameFromPath(f.relativePath) ?? f.relativePath;
+                    if (!grouped.has(name)) grouped.set(name, []);
+                    grouped.get(name)!.push(f);
+                  }
+                  return Array.from(grouped.entries()).map(([name, files]) => (
+                    <WorkflowGroupRow
+                      key={name}
+                      workflowName={name}
+                      changedFiles={files}
+                      allFiles={allFiles ?? []}
+                      sourceLabel={sourceLabel}
+                      targetLabel={targetLabel}
+                    />
+                  ));
+                })()
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
                   group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
                     ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} />
                     : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
-
                 ))
               )
             ) : (

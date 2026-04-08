@@ -113,6 +113,29 @@ function resolveScriptFiles(configDir: string, itemId: string): ViewableFile[] {
   return [];
 }
 
+function resolveWorkflowFiles(configDir: string, itemId: string): ViewableFile[] {
+  const workflowDir = path.join(configDir, "iga", "workflows", itemId);
+  if (!fs.existsSync(workflowDir)) return [];
+  const files: ViewableFile[] = [];
+  // Top-level JSON
+  const topFile = readFile(path.join(workflowDir, `${itemId}.json`));
+  if (topFile) files.push(topFile);
+  // Step JSONs (skip .js script sidecars — content is inlined when parsing)
+  const stepsDir = path.join(workflowDir, "steps");
+  if (fs.existsSync(stepsDir)) {
+    for (const stepDir of fs.readdirSync(stepsDir, { withFileTypes: true })) {
+      if (!stepDir.isDirectory()) continue;
+      const stepDirPath = path.join(stepsDir, stepDir.name);
+      for (const stepFile of fs.readdirSync(stepDirPath, { withFileTypes: true })) {
+        if (!stepFile.isFile() || !stepFile.name.endsWith(".json")) continue;
+        const f = readFile(path.join(stepDirPath, stepFile.name));
+        if (f) files.push(f);
+      }
+    }
+  }
+  return files;
+}
+
 function resolveJourneyFiles(configDir: string, itemId: string): ViewableFile[] {
   const realms = getRealms(configDir);
   for (const realm of realms) {
@@ -125,8 +148,9 @@ function resolveJourneyFiles(configDir: string, itemId: string): ViewableFile[] 
 }
 
 function resolveItemFiles(configDir: string, scope: string, itemId: string): ViewableFile[] {
-  if (scope === "scripts") return resolveScriptFiles(configDir, itemId);
-  if (scope === "journeys") return resolveJourneyFiles(configDir, itemId);
+  if (scope === "scripts")       return resolveScriptFiles(configDir, itemId);
+  if (scope === "journeys")      return resolveJourneyFiles(configDir, itemId);
+  if (scope === "iga-workflows") return resolveWorkflowFiles(configDir, itemId);
 
   // Realm-based scope — item is a directory name
   if (scope in REALM_SCOPE_SUBDIR) {
