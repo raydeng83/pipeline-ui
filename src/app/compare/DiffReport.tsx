@@ -688,6 +688,41 @@ function groupByScope(files: FileDiff[]): ScopeGroup[] {
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
+// ── Pagination ───────────────────────────────────────────────────────────────
+
+const PAGE_SIZE = 20;
+
+function Pagination({ page, total, onChange }: { page: number; total: number; onChange: (p: number) => void }) {
+  const pages = Math.ceil(total / PAGE_SIZE);
+  if (pages <= 1) return null;
+  const start = page * PAGE_SIZE + 1;
+  const end   = Math.min((page + 1) * PAGE_SIZE, total);
+  return (
+    <div className="flex items-center justify-between px-3 py-2 border-t border-slate-100 text-[10px] text-slate-500">
+      <span>{start}–{end} of {total}</span>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          disabled={page === 0}
+          onClick={() => onChange(page - 1)}
+          className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+        >
+          ‹ Prev
+        </button>
+        <span className="px-1">{page + 1} / {pages}</span>
+        <button
+          type="button"
+          disabled={page >= pages - 1}
+          onClick={() => onChange(page + 1)}
+          className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+        >
+          Next ›
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Status sub-group (collapsible) ──────────────────────────────────────────
 
 function StatusGroup({
@@ -1003,6 +1038,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
   const [open, setOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
+  const [page, setPage] = useState(0);
   const [showScripts, setShowScripts] = useState(true);
   const [showNodes, setShowNodes] = useState(false);
   const [localForceOpen, setLocalForceOpen] = useState<boolean | undefined>(undefined);
@@ -1058,7 +1094,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
                 <button
                   key={f.value}
                   type="button"
-                  onClick={() => setStatusFilter(f.value)}
+                  onClick={() => { setStatusFilter(f.value); setPage(0); }}
                   className={cn(
                     "px-2 py-0.5 transition-colors",
                     statusFilter === f.value
@@ -1075,7 +1111,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
             <input
               type="text"
               value={searchQ}
-              onChange={(e) => setSearchQ(e.target.value)}
+              onChange={(e) => { setSearchQ(e.target.value); setPage(0); }}
               placeholder="Search journeys…"
               className="flex-1 text-xs rounded border border-slate-200 px-2.5 py-1 font-mono focus:outline-none focus:ring-1 focus:ring-sky-400"
             />
@@ -1111,11 +1147,12 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
             {filtered.length === 0 ? (
               <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
             ) : (
-              filtered.map((node) => (
+              filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((node) => (
                 <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
               ))
             )}
           </div>
+          <Pagination page={page} total={filtered.length} onChange={setPage} />
         </div>
       )}
     </div>
@@ -1146,6 +1183,7 @@ function ScopeSection({
   const [open, setOpen] = useState(forceOpen ?? false);
   const [itemSearch, setItemSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "modified" | "added" | "removed">("all");
+  const [page, setPage] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // React to parent expand/collapse all
@@ -1212,7 +1250,7 @@ function ScopeSection({
                   <button
                     key={f.value}
                     type="button"
-                    onClick={() => setStatusFilter(f.value)}
+                    onClick={() => { setStatusFilter(f.value); setPage(0); }}
                     className={cn(
                       "px-2 py-0.5 transition-colors",
                       statusFilter === f.value
@@ -1230,7 +1268,7 @@ function ScopeSection({
                   ref={searchRef}
                   type="text"
                   value={itemSearch}
-                  onChange={(e) => setItemSearch(e.target.value)}
+                  onChange={(e) => { setItemSearch(e.target.value); setPage(0); }}
                   placeholder={`Search ${group.label} items…`}
                   className="w-full pl-7 pr-7 py-1 text-xs border border-slate-200 rounded bg-slate-50 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-400 focus:bg-white"
                 />
@@ -1257,7 +1295,7 @@ function ScopeSection({
                   {itemSearch ? `No items match "${itemSearch}".` : "No items match the selected filter."}
                 </p>
               ) : (
-                visibleFiles.map((f) => (
+                visibleFiles.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((f) => (
                   <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
                 ))
               )
@@ -1267,6 +1305,7 @@ function ScopeSection({
               </p>
             )}
           </div>
+          {hasChanges && <Pagination page={page} total={totalVisible} onChange={setPage} />}
         </div>
       )}
     </div>
