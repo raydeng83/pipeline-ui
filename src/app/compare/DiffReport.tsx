@@ -1145,6 +1145,7 @@ function ScopeSection({
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
   const [itemSearch, setItemSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "modified" | "added" | "removed">("all");
   const searchRef = useRef<HTMLInputElement>(null);
 
   // React to parent expand/collapse all
@@ -1156,10 +1157,11 @@ function ScopeSection({
 
   const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
 
-  const modified = filterFiles(group.files.filter((f) => f.status === "modified"), itemSearch);
-  const added    = filterFiles(group.files.filter((f) => f.status === "added"),    itemSearch);
-  const removed  = filterFiles(group.files.filter((f) => f.status === "removed"),  itemSearch);
-  const totalVisible = modified.length + added.length + removed.length;
+  const visibleFiles = filterFiles(
+    group.files.filter((f) => f.status !== "unchanged" && (statusFilter === "all" || f.status === statusFilter)),
+    itemSearch,
+  );
+  const totalVisible = visibleFiles.length;
   const totalChanged = group.modified + group.added + group.removed;
 
   return (
@@ -1196,10 +1198,34 @@ function ScopeSection({
 
       {open && (
         <div className="bg-white">
-          {/* Item search bar */}
+          {/* Filter + search bar */}
           {hasChanges && (
-            <div className="px-3 pt-3 pb-2" onClick={(e) => e.stopPropagation()}>
-              <div className="relative">
+            <div className="px-3 pt-3 pb-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              {/* Status filter pills */}
+              <div className="flex rounded border border-slate-300 overflow-hidden text-[10px] shrink-0">
+                {([
+                  { value: "all"      as const, label: `All (${totalChanged})` },
+                  { value: "modified" as const, label: `Modified (${group.modified})` },
+                  { value: "added"    as const, label: `Added (${group.added})` },
+                  { value: "removed"  as const, label: `Removed (${group.removed})` },
+                ]).map((f) => (
+                  <button
+                    key={f.value}
+                    type="button"
+                    onClick={() => setStatusFilter(f.value)}
+                    className={cn(
+                      "px-2 py-0.5 transition-colors",
+                      statusFilter === f.value
+                        ? "bg-slate-900 text-white"
+                        : "bg-white text-slate-500 hover:bg-slate-50"
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+              {/* Search */}
+              <div className="relative flex-1">
                 <input
                   ref={searchRef}
                   type="text"
@@ -1221,24 +1247,19 @@ function ScopeSection({
                   </button>
                 )}
               </div>
-              {itemSearch && (
-                <p className="text-[10px] text-slate-400 mt-1 px-0.5">
-                  {totalVisible} of {totalChanged} item{totalChanged !== 1 ? "s" : ""} match
-                </p>
-              )}
             </div>
           )}
 
-          <div className="p-3 pt-1 space-y-3">
+          <div className="p-3 pt-1 space-y-1.5">
             {hasChanges ? (
-              totalVisible === 0 && itemSearch ? (
-                <p className="text-xs text-slate-400 text-center py-2">No items match &ldquo;{itemSearch}&rdquo;.</p>
+              totalVisible === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-2">
+                  {itemSearch ? `No items match "${itemSearch}".` : "No items match the selected filter."}
+                </p>
               ) : (
-                <>
-                  <StatusGroup label="Modified" files={modified} color="text-amber-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-                  <StatusGroup label="Added"    files={added}    color="text-emerald-600" sourceLabel={sourceLabel} targetLabel={targetLabel} />
-                  <StatusGroup label="Removed"  files={removed}  color="text-red-600"    sourceLabel={sourceLabel} targetLabel={targetLabel} />
-                </>
+                visibleFiles.map((f) => (
+                  <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                ))
               )
             ) : (
               <p className="text-xs text-slate-400 text-center py-2">
