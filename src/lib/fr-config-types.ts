@@ -138,15 +138,19 @@ export const PROMOTE_SUBCOMMANDS: {
 
 /**
  * A scope entry in the CONFIG_SCOPES display list.
- * `cliSupported: false` means the scope is not implemented by fr-config-manager —
- * it is shown for awareness but cannot be used in push/pull/compare operations.
+ * - `commandType: "fr-config"` (default) — managed by fr-config-manager CLI
+ * - `commandType: "frodo"` — managed by Frodo CLI (frodo agent / frodo idp)
+ * - `commandType: "iga-api"` — managed by direct IGA REST API calls
+ * - `cliSupported: false` — not yet implemented by any tool (display only)
  */
 export interface ScopeDisplayEntry {
   value: string;
   label: string;
   group: string;
   description: string;
-  /** @default true */
+  /** @default "fr-config" */
+  commandType?: "fr-config" | "frodo" | "iga-api";
+  /** @default true — false means no tool supports this scope yet */
   cliSupported?: boolean;
 }
 
@@ -176,8 +180,8 @@ export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   // Federation
   { value: "oauth2-agents",   label: "OAuth2 Agents",   group: "Federation", description: "OAuth2/OIDC client registrations and agent configurations" },
   { value: "saml",            label: "SAML Entities",   group: "Federation", description: "SAML 2.0 identity and service provider entity configurations" },
-  { value: "am-agents",       label: "AM Policy Agents", group: "Federation", description: "Web and Java AM policy agent configurations", cliSupported: false },
-  { value: "oidc-providers",  label: "OIDC Providers",  group: "Federation", description: "External OIDC identity provider configurations", cliSupported: false },
+  { value: "am-agents",       label: "AM Policy Agents", group: "Federation", description: "Web and Java AM policy agent configurations", commandType: "frodo" },
+  { value: "oidc-providers",  label: "OIDC Providers",  group: "Federation", description: "External OIDC/social identity provider configurations", commandType: "frodo" },
   // Secrets & Variables
   { value: "secrets",         label: "Secrets",           group: "Secrets & Variables", description: "Secret labels and their active/inactive versions" },
   { value: "secret-mappings", label: "Secret Mappings",   group: "Secrets & Variables", description: "Mappings that bind secret labels to AM/IDM services" },
@@ -187,15 +191,15 @@ export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   { value: "ui-config",        label: "UI Config",        group: "UI & Comms", description: "Platform UI global configuration and feature flags" },
   { value: "email-templates",  label: "Email Templates",  group: "UI & Comms", description: "Transactional email templates (password reset, registration, etc.)" },
   { value: "email-provider",   label: "Email Provider",   group: "UI & Comms", description: "SMTP / external email provider connection settings" },
-  { value: "sms-provider",     label: "SMS Provider",     group: "UI & Comms", description: "SMS / OTP provider configuration for one-time passcode delivery", cliSupported: false },
+  { value: "sms-provider",     label: "SMS Provider",     group: "UI & Comms", description: "SMS / OTP provider configuration for one-time passcode delivery (no tool support)", cliSupported: false },
   { value: "locales",          label: "Locales",          group: "UI & Comms", description: "Localization files and translation overrides" },
   // IGA
   { value: "iga-workflows",     label: "IGA Workflows",             group: "IGA", description: "Identity Governance and Administration workflow definitions" },
-  { value: "iga-forms",         label: "IGA Forms",                 group: "IGA", description: "IGA request and approval form definitions", cliSupported: false },
-  { value: "iga-notifications", label: "IGA Notifications",         group: "IGA", description: "IGA notification templates for approvals and lifecycle events", cliSupported: false },
-  { value: "iga-applications",  label: "IGA Applications",          group: "IGA", description: "IGA application catalog entries managed via governance", cliSupported: false },
-  { value: "iga-entitlements",  label: "IGA Entitlements",          group: "IGA", description: "Entitlement definitions for access certification and requests", cliSupported: false },
-  { value: "iga-assignments",   label: "IGA Assignments",           group: "IGA", description: "Role and entitlement assignment configurations", cliSupported: false },
+  { value: "iga-forms",         label: "IGA Forms",                 group: "IGA", description: "IGA request and approval form definitions (no API endpoint available)", cliSupported: false },
+  { value: "iga-notifications", label: "IGA Notifications",         group: "IGA", description: "IGA notification type definitions (certification, access request, etc.)", commandType: "iga-api" },
+  { value: "iga-applications",  label: "IGA Applications",          group: "IGA", description: "IGA application catalog entries — application definitions and connector bindings", commandType: "iga-api" },
+  { value: "iga-entitlements",  label: "IGA Entitlements",          group: "IGA", description: "Entitlement definitions for access certification and requests", commandType: "iga-api" },
+  { value: "iga-assignments",   label: "IGA Assignments",           group: "IGA", description: "Role and entitlement assignment configurations (no API endpoint available)", cliSupported: false },
   // Infrastructure
   { value: "schedules",        label: "Schedules",        group: "Infrastructure", description: "Scheduled tasks and cron-style recurring jobs" },
   { value: "cors",             label: "CORS",             group: "Infrastructure", description: "Cross-Origin Resource Sharing policy settings" },

@@ -4,6 +4,37 @@ import { parseEnvFile } from "@/lib/env-parser";
 import { autoCommit, analyzeChanges, scopeLabel as getScopeLabel } from "@/lib/git";
 import { appendHistory, createHistoryRecord } from "@/lib/history";
 import type { ScopeDetail, LogEntry } from "@/lib/history";
+import { CONFIG_SCOPES } from "@/lib/fr-config-types";
+import { spawnFrodo, FRODO_SCOPES } from "@/lib/frodo";
+import { runIgaApi, IGA_API_SCOPES } from "@/lib/iga-api";
+
+/** Concatenate multiple streams sequentially into one, emitting a single final exit event. */
+function mergeStreams(streams: ReadableStream<string>[]): ReadableStream<string> {
+  if (streams.length === 1) return streams[0];
+  return new ReadableStream<string>({
+    async start(controller) {
+      let lastCode = 0;
+      for (const s of streams) {
+        const reader = s.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          // Re-emit everything except the exit line from sub-streams
+          for (const line of value.split("\n")) {
+            if (!line.trim()) continue;
+            try {
+              const p = JSON.parse(line) as { type: string; code?: number };
+              if (p.type === "exit") { lastCode = Math.max(lastCode, p.code ?? 0); continue; }
+            } catch { /* pass through */ }
+            controller.enqueue(line + "\n");
+          }
+        }
+      }
+      controller.enqueue(JSON.stringify({ type: "exit", code: lastCode, ts: Date.now() }) + "\n");
+      controller.close();
+    },
+  });
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -65,11 +96,19 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { stream: pullStream } = spawnFrConfig({
-    command: "fr-config-pull",
-    environment,
-    scopes,
-  });
+  // Partition scopes by command type
+  const allScopes = scopesList.length ? scopesList : (CONFIG_SCOPES.filter(s => s.cliSupported !== false).map(s => s.value) as ConfigScope[]);
+  const frodoScopes = allScopes.filter((s) => FRODO_SCOPES.includes(s));
+  const igaScopes   = allScopes.filter((s) => IGA_API_SCOPES.includes(s));
+  const frScopes    = allScopes.filter((s) => !FRODO_SCOPES.includes(s) && !IGA_API_SCOPES.includes(s)) as ConfigScope[];
+
+  // Build a combined stream from all runners
+  const streams: ReadableStream<string>[] = [];
+  if (frScopes.length)   streams.push(spawnFrConfig({ command: "fr-config-pull", environment, scopes: frScopes }).stream);
+  if (frodoScopes.length) streams.push(spawnFrodo({ command: "fr-config-pull", environment, scopes: frodoScopes }).stream);
+  if (igaScopes.length)   streams.push(runIgaApi({ command: "fr-config-pull", environment, scopes: igaScopes }).stream);
+
+  const pullStream = mergeStreams(streams);
 
   // Wrap the pull stream to inject git events before and after
   const startTime = Date.now();

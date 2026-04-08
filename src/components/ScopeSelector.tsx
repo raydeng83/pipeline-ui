@@ -216,7 +216,8 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                 {/* Scope rows (collapsible) */}
                 {isExpanded && (
                   <div className="divide-y divide-slate-50">
-                    {scopes.map(({ value, label, description, cliSupported }) => {
+                    {scopes.map((scopeEntry) => {
+                      const { value, label, description, cliSupported, commandType } = scopeEntry;
                       const isUnsupported = cliSupported === false;
                       const checked = !isUnsupported && selectedSet.has(value as ConfigScope);
                       return (
@@ -260,6 +261,16 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                               {isUnsupported && (
                                 <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200 leading-none">
                                   No CLI
+                                </span>
+                              )}
+                              {!isUnsupported && commandType === "frodo" && (
+                                <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200 leading-none">
+                                  frodo
+                                </span>
+                              )}
+                              {!isUnsupported && commandType === "iga-api" && (
+                                <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-teal-100 text-teal-700 border border-teal-200 leading-none">
+                                  IGA API
                                 </span>
                               )}
                             </div>
