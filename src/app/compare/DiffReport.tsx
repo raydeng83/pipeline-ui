@@ -703,9 +703,18 @@ function Pagination({
   onPageSizeChange: (size: number) => void;
 }) {
   const pages = Math.ceil(total / pageSize);
+  const [inputVal, setInputVal] = useState("");
+
   if (total === 0) return null;
   const start = page * pageSize + 1;
   const end   = Math.min((page + 1) * pageSize, total);
+
+  function commitPageInput() {
+    const n = parseInt(inputVal, 10);
+    if (!isNaN(n) && n >= 1 && n <= pages) onChange(n - 1);
+    setInputVal("");
+  }
+
   return (
     <div className="flex items-center justify-between px-3 py-2 border-t border-slate-100 text-[10px] text-slate-500">
       <div className="flex items-center gap-1.5">
@@ -726,6 +735,16 @@ function Pagination({
       </div>
       {pages > 1 && (
         <div className="flex items-center gap-1">
+          {/* First */}
+          <button
+            type="button"
+            disabled={page === 0}
+            onClick={() => onChange(0)}
+            title="First page"
+            className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+          >
+            «
+          </button>
           <button
             type="button"
             disabled={page === 0}
@@ -734,7 +753,21 @@ function Pagination({
           >
             ‹ Prev
           </button>
-          <span className="px-1">{page + 1} / {pages}</span>
+          {/* Page input */}
+          <div className="flex items-center gap-1 px-1">
+            <input
+              type="number"
+              min={1}
+              max={pages}
+              value={inputVal}
+              placeholder={String(page + 1)}
+              onChange={(e) => setInputVal(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") commitPageInput(); }}
+              onBlur={commitPageInput}
+              className="w-10 text-center border border-slate-200 rounded px-1 py-0 text-[10px] text-slate-600 bg-white focus:outline-none focus:ring-1 focus:ring-sky-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <span>/ {pages}</span>
+          </div>
           <button
             type="button"
             disabled={page >= pages - 1}
@@ -742,6 +775,16 @@ function Pagination({
             className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
           >
             Next ›
+          </button>
+          {/* Last */}
+          <button
+            type="button"
+            disabled={page >= pages - 1}
+            onClick={() => onChange(pages - 1)}
+            title="Last page"
+            className="px-2 py-0.5 rounded border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+          >
+            »
           </button>
         </div>
       )}
