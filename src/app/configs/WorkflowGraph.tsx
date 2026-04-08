@@ -21,6 +21,7 @@ import {
   type EdgeMouseHandler,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
 import { highlightJs, ScriptOverlay } from "./ScriptOverlay";
 import { parseWorkflowData, type WorkflowData, type WorkflowStep, type WorkflowStepKind } from "@/lib/workflow-graph";
@@ -151,6 +152,31 @@ function buildGraph(workflow: WorkflowData): { nodes: Node[]; edges: Edge[] } {
   }
 
   return { nodes, edges };
+}
+
+// ── Dagre layout (compact mode) ───────────────────────────────────────────────
+
+function applyDagreLayout(nodes: Node[], edges: Edge[], compact = false): Node[] {
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph(compact
+    ? { rankdir: "LR", nodesep: 25, ranksep: 60,  marginx: 24, marginy: 24 }
+    : { rankdir: "LR", nodesep: 60, ranksep: 160, marginx: 40, marginy: 40 },
+  );
+  nodes.forEach((n) => {
+    const isCircle = n.type === "wfStart" || n.type === "wfEnd";
+    g.setNode(n.id, { width: isCircle ? CIRCLE_SZ : NODE_W, height: isCircle ? CIRCLE_SZ : NODE_H });
+  });
+  edges.forEach((e) => g.setEdge(e.source, e.target));
+  dagre.layout(g);
+  return nodes.map((n) => {
+    const pos = g.node(n.id);
+    if (!pos) return n;
+    const isCircle = n.type === "wfStart" || n.type === "wfEnd";
+    const w = isCircle ? CIRCLE_SZ : NODE_W;
+    const h = isCircle ? CIRCLE_SZ : NODE_H;
+    return { ...n, position: { x: pos.x - w / 2, y: pos.y - h / 2 } };
+  });
 }
 
 // ── Path tracing helper ───────────────────────────────────────────────────────
@@ -423,9 +449,25 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
 }) {
   const { fitView, getViewport, setViewport } = useReactFlow();
 
-  const { nodes: initNodes, edges: baseEdges } = useMemo(() => buildGraph(workflow), [workflow]);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initNodes);
+  const { nodes: baseNodes, edges: baseEdges } = useMemo(() => buildGraph(workflow), [workflow]);
+
+  const [isCompact, setIsCompact] = useState(false);
+
+  const layoutedNodes = useMemo(
+    () => isCompact ? applyDagreLayout(baseNodes, baseEdges, true) : baseNodes,
+    [baseNodes, baseEdges, isCompact],
+  );
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [, , onEdgesChange] = useEdgesState(baseEdges);
+
+  // Sync nodes + fit view when layout changes
+  useEffect(() => {
+    setNodes(layoutedNodes);
+    const t = setTimeout(() => { void fitView({ padding: 0.15, duration: 300 }); }, 80);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layoutedNodes, setNodes]);
 
   const [selectedId,    setSelectedId]    = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
@@ -443,13 +485,6 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
     fullscreen: boolean;
   } | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-
-  // Fit view on mount
-  useEffect(() => {
-    const t = setTimeout(() => { void fitView({ padding: 0.15, duration: 200 }); }, 80);
-    return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fitView, workflow]);
 
   // Arrow key panning
   useEffect(() => {
@@ -675,15 +710,37 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
           ))}
         </div>
 
-        {/* Fit view */}
+        {/* Graph-only controls */}
         {displayView === "graph" && (
-          <button type="button" onClick={() => void fitView({ duration: 400, padding: 0.15 })}
-            title="Fit view" className="text-slate-400 hover:text-sky-600 transition-colors shrink-0">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-            </svg>
-          </button>
+          <>
+            {/* Compact toggle */}
+            <button
+              type="button"
+              onClick={() => setIsCompact((v) => !v)}
+              title={isCompact ? "Switch to original layout" : "Switch to compact layout"}
+              className={cn(
+                "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1",
+                isCompact
+                  ? "bg-sky-600 text-white border-sky-600"
+                  : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+              )}
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+              </svg>
+              Compact
+            </button>
+
+            {/* Fit view */}
+            <button type="button" onClick={() => void fitView({ duration: 400, padding: 0.15 })}
+              title="Fit view" className="text-slate-400 hover:text-sky-600 transition-colors shrink-0">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+              </svg>
+            </button>
+          </>
         )}
       </div>
 
