@@ -3,9 +3,32 @@ import { getConfigDir } from "@/lib/fr-config";
 import fs from "fs";
 import path from "path";
 
+/** Resolve script UUID(s) from a human-readable name by scanning scripts-config dirs. */
+function resolveScriptIdsByName(realmsDir: string, scriptName: string): string[] {
+  const ids: string[] = [];
+  if (!fs.existsSync(realmsDir)) return ids;
+  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
+    if (!realm.isDirectory()) continue;
+    const scriptsConfigDir = path.join(realmsDir, realm.name, "scripts", "scripts-config");
+    if (!fs.existsSync(scriptsConfigDir)) continue;
+    for (const file of fs.readdirSync(scriptsConfigDir)) {
+      const fp = path.join(scriptsConfigDir, file);
+      try {
+        const json = JSON.parse(fs.readFileSync(fp, "utf-8"));
+        if (json.name === scriptName) {
+          const uuid = path.basename(file, ".json");
+          if (!ids.includes(uuid)) ids.push(uuid);
+        }
+      } catch { /* skip */ }
+    }
+  }
+  return ids;
+}
+
 export async function GET(req: NextRequest) {
   const env = req.nextUrl.searchParams.get("env");
   const scriptId = req.nextUrl.searchParams.get("scriptId");
+  const scriptName = req.nextUrl.searchParams.get("scriptName");
 
   if (!env) return NextResponse.json({ error: "env required" }, { status: 400 });
 
@@ -14,6 +37,13 @@ export async function GET(req: NextRequest) {
 
   const realmsDir = path.join(configDir, "realms");
   if (!fs.existsSync(realmsDir)) return NextResponse.json({ usedBy: [] });
+
+  // If only a name is provided, resolve it to UUID(s) first
+  let resolvedIds: string[] | null = null;
+  if (!scriptId && scriptName) {
+    resolvedIds = resolveScriptIdsByName(realmsDir, scriptName);
+    if (resolvedIds.length === 0) return NextResponse.json({ usedBy: [] });
+  }
 
   // If scriptId is provided, find usage for that specific script
   // If not, return all script usages (for the full panel)
@@ -39,6 +69,7 @@ export async function GET(req: NextRequest) {
           };
           if (!nd.script) continue;
           if (scriptId && nd.script !== scriptId) continue;
+          if (!scriptId && resolvedIds && !resolvedIds.includes(nd.script)) continue;
           const nodeUuidMatch = nf.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
           usedBy.push({
             journey: jDir.name,

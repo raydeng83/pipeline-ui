@@ -189,7 +189,7 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
     outcomes: string[];
     diffStatus: DiffStatus;
     modifiedReason?: "script" | "subjourney";
-    isFlashing?: boolean;
+    isFocused?: boolean;
     isSearchMatch?: boolean;
   };
   const outcomes       = d.outcomes ?? [];
@@ -198,7 +198,7 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
   const modifiedReason = d.modifiedReason;
   const isInner        = d.nodeType === "InnerTreeEvaluatorNode";
   const isScript       = d.nodeType === "ScriptedDecisionNode";
-  const isFlashing     = !!d.isFlashing;
+  const isFocused      = !!d.isFocused;
   const isSearchMatch  = !!d.isSearchMatch;
 
   // Special node types (script / inner tree) always keep their type-based bg.
@@ -245,7 +245,7 @@ function JourneyDiffNodeComponent({ data }: NodeProps) {
       className={cn(
         "border rounded-lg shadow-sm overflow-visible relative",
         nodeBorderBg(),
-        isFlashing && "ring-2 ring-sky-400 ring-offset-1 animate-pulse",
+        isFocused && "ring-4 ring-red-500 ring-offset-2",
         isSearchMatch && "ring-2 ring-amber-400 ring-offset-1",
       )}
       style={{ width: DIFF_NODE_W, height: h }}
@@ -1309,6 +1309,7 @@ interface DiffGraphCanvasInnerProps {
   onNodeDoubleClick?: (nodeId: string, nodeData: Record<string, unknown>) => void;
   searchQuery: string;
   flashNodeId: string | null;
+  onPaneClearFocus?: () => void;
   zoomToNodeId?: string | null;
   scriptNames?: Map<string, string>;
 }
@@ -1325,6 +1326,7 @@ function DiffGraphCanvasInner({
   onNodeDoubleClick: onNodeDoubleClickProp,
   searchQuery,
   flashNodeId,
+  onPaneClearFocus,
   zoomToNodeId,
   scriptNames,
 }: DiffGraphCanvasInnerProps) {
@@ -1342,12 +1344,13 @@ function DiffGraphCanvasInner({
 
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
 
-  // Sync nodes when layoutedNodes changes and fit view
+  // Sync nodes when layoutedNodes changes and fit view (skip all-fit when a node-specific zoom is pending)
   useEffect(() => {
     setNodes(layoutedNodes);
+    if (zoomToNodeId) return; // node-specific zoom will handle fit
     const t = setTimeout(() => { void fitView({ duration: 200 }); }, 80);
     return () => clearTimeout(t);
-  }, [layoutedNodes, setNodes, fitView]);
+  }, [layoutedNodes, setNodes, fitView, zoomToNodeId]);
 
   // Fit view when fitKey changes
   useEffect(() => {
@@ -1383,12 +1386,14 @@ function DiffGraphCanvasInner({
     return () => document.removeEventListener("keydown", handler);
   }, [getViewport, setViewport]);
 
-  // Zoom to a specific node (used when opening the graph from a script row)
+  // Zoom to a specific node (used when opening the graph from a script row).
+  // Delay must exceed the layoutedNodes effect's fitView(all) window (80ms start + 200ms anim = 280ms)
+  // to avoid the all-fit animation overriding the node-specific zoom.
   useEffect(() => {
     if (!zoomToNodeId) return;
     const t = setTimeout(() => {
       void fitView({ nodes: [{ id: zoomToNodeId }], duration: 600, padding: 0.35 });
-    }, 150);
+    }, 350);
     return () => clearTimeout(t);
   }, [zoomToNodeId, fitView]);
 
@@ -1458,7 +1463,7 @@ function DiffGraphCanvasInner({
         ...n,
         data: {
           ...n.data,
-          isFlashing:    n.id === flashNodeId,
+          isFocused:     n.id === flashNodeId,
           isSearchMatch: searchMatches.has(n.id),
         },
         style: {
@@ -1532,7 +1537,8 @@ function DiffGraphCanvasInner({
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
     onNodeActivate?.(null, {});
-  }, [onNodeActivate]);
+    onPaneClearFocus?.();
+  }, [onNodeActivate, onPaneClearFocus]);
 
   return (
     <ReactFlow
@@ -1799,8 +1805,8 @@ export function JourneyDiffGraphModal({
 
   const [searchQuery, setSearchQuery]   = useState("");
   const [flashNodeId, setFlashNodeId]   = useState<string | null>(null);
-  // Pending focus: activate + zoom to this node once the graph content is ready
-  const [pendingFocusNodeId, setPendingFocusNodeId] = useState<string | null>(initialFocusNodeId ?? null);
+  // Ref-based focus: applied once when mergedNodes first contains the target node
+  const initialFocusApplied = useRef(false);
   const [zoomToNodeId, setZoomToNodeId] = useState<string | null>(null);
 
   const [leftExternalVP,  setLeftExternalVP]  = useState<Viewport | null>(null);
@@ -1861,12 +1867,7 @@ export function JourneyDiffGraphModal({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose, navStack.length, previewModal]);
 
-  // Flash auto-clear
-  useEffect(() => {
-    if (!flashNodeId) return;
-    const t = setTimeout(() => setFlashNodeId(null), 1200);
-    return () => clearTimeout(t);
-  }, [flashNodeId]);
+  const clearFocusNode = useCallback(() => setFlashNodeId(null), []);
 
   // Fetch preview content when modal opens
   useEffect(() => {
@@ -2160,24 +2161,23 @@ export function JourneyDiffGraphModal({
     setZoomToNodeId(searchMatchIds[next] ?? null);
   }, [searchIndex, searchMatchIds]);
 
-  // When the graph has content and a pending focus node, activate + zoom to it
+  // When mergedNodes is ready and contains the initial focus node, activate + zoom to it (once)
   useEffect(() => {
-    if (!pendingFocusNodeId || !hasContent || mergedNodes.length === 0) return;
-    const node = mergedNodes.find((n) => n.id === pendingFocusNodeId);
-    if (node) {
-      setActiveNode({
-        id: node.id,
-        label: typeof node.data.label === "string" ? node.data.label : node.id,
-        nodeType: typeof node.data.nodeType === "string" ? node.data.nodeType : undefined,
-        diffStatus: (node.data.diffStatus as DiffStatus) ?? "unchanged",
-        modifiedReason: node.data.modifiedReason as "script" | "subjourney" | undefined,
-      });
-      setFlashNodeId(pendingFocusNodeId);
-      setZoomToNodeId(pendingFocusNodeId);
-    }
-    setPendingFocusNodeId(null);
+    if (initialFocusApplied.current || !initialFocusNodeId || mergedNodes.length === 0) return;
+    const node = mergedNodes.find((n) => n.id === initialFocusNodeId);
+    if (!node) return; // not yet in mergedNodes — retry on next change
+    initialFocusApplied.current = true;
+    setActiveNode({
+      id: node.id,
+      label: typeof node.data.label === "string" ? node.data.label : node.id,
+      nodeType: typeof node.data.nodeType === "string" ? node.data.nodeType : undefined,
+      diffStatus: (node.data.diffStatus as DiffStatus) ?? "unchanged",
+      modifiedReason: node.data.modifiedReason as "script" | "subjourney" | undefined,
+    });
+    setFlashNodeId(initialFocusNodeId);
+    setZoomToNodeId(initialFocusNodeId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingFocusNodeId, hasContent, mergedNodes]);
+  }, [initialFocusNodeId, mergedNodes]);
 
   const handleLeftMove = useCallback((vp: Viewport) => {
     if (!syncViewports || syncSource.current === "left") return;
@@ -2534,6 +2534,7 @@ export function JourneyDiffGraphModal({
               onNodeDoubleClick={handleNodeDoubleActivate}
               searchQuery={searchQuery}
               flashNodeId={flashNodeId}
+              onPaneClearFocus={clearFocusNode}
               zoomToNodeId={zoomToNodeId}
               scriptNames={scriptNames}
             />
@@ -2556,6 +2557,7 @@ export function JourneyDiffGraphModal({
               onNodeDoubleClick={handleNodeDoubleActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
+                  onPaneClearFocus={clearFocusNode}
                   zoomToNodeId={zoomToNodeId}
                   scriptNames={scriptNames}
                 />
@@ -2578,6 +2580,7 @@ export function JourneyDiffGraphModal({
               onNodeDoubleClick={handleNodeDoubleActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
+                  onPaneClearFocus={clearFocusNode}
                   zoomToNodeId={zoomToNodeId}
                   scriptNames={scriptNames}
                 />

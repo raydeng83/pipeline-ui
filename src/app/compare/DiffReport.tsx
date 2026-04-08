@@ -1323,35 +1323,43 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
 }
 
 /** Wraps FileRow for script files, adding an inline Find Usage panel. */
-function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles }: {
+function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles, allFiles }: {
   file: FileDiff;
   sourceLabel: string;
   targetLabel: string;
   sourceEnv: string;
   targetEnv: string;
   groupFiles: FileDiff[];
+  allFiles: FileDiff[];
 }) {
   const [usageOpen, setUsageOpen]       = useState(false);
   const [usageLoading, setUsageLoading] = useState(false);
   const [usageData, setUsageData]       = useState<ScriptUsageRef[] | null>(null);
+  const [graphTarget, setGraphTarget]   = useState<{ journeyName: string; nodeUuid: string } | null>(null);
 
-  // Extract UUID: config files have it in the filename; content files look up the
-  // sibling config file by matching the script name in its JSON.
-  const uuid = useMemo(() => {
+  // Extract UUID from config file path, or script name from content file path.
+  // Config files (scripts-config/<uuid>.json) are skipped by the diff builder by default,
+  // so content files (scripts-content/<type>/<name>.js) are what normally appears in the list.
+  const { uuid, scriptName } = useMemo(() => {
     const stem = file.relativePath.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "";
-    if (file.relativePath.includes("scripts-config/") && UUID_RE.test(stem)) return stem;
+    if (file.relativePath.includes("scripts-config/") && UUID_RE.test(stem)) {
+      return { uuid: stem, scriptName: null };
+    }
     if (file.relativePath.includes("scripts-content/")) {
+      // Try sibling config files first (only present when includeMetadata=true)
       for (const f of groupFiles) {
         if (!f.relativePath.includes("scripts-config/")) continue;
         const cfgStem = f.relativePath.split("/").pop()?.replace(/\.json$/, "") ?? "";
         if (!UUID_RE.test(cfgStem)) continue;
         try {
           const json = JSON.parse(f.localContent ?? f.remoteContent ?? "");
-          if (json.name === stem) return cfgStem;
+          if (json.name === stem) return { uuid: cfgStem, scriptName: null };
         } catch { /* skip */ }
       }
+      // Fall back to name-based lookup (API will resolve UUID from scripts-config)
+      return { uuid: null, scriptName: stem };
     }
-    return null;
+    return { uuid: null, scriptName: null };
   }, [file.relativePath, groupFiles]);
 
   const fetchUsage = useCallback(async () => {
@@ -1360,12 +1368,16 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
     try {
       const envs = [...new Set([sourceEnv, targetEnv].filter(Boolean))];
       const results = await Promise.all(
-        envs.map((env) =>
-          fetch(`/api/analyze/script-usage?env=${encodeURIComponent(env)}&scriptId=${encodeURIComponent(uuid!)}`)
+        envs.map((env) => {
+          const params = new URLSearchParams({ env });
+          if (uuid) params.set("scriptId", uuid);
+          else if (scriptName) params.set("scriptName", scriptName);
+          else return Promise.resolve([] as ScriptUsageRef[]);
+          return fetch(`/api/analyze/script-usage?${params}`)
             .then((r) => r.json())
             .then((d) => (d.usedBy ?? []).map((u: Omit<ScriptUsageRef, "env">) => ({ ...u, env })))
-            .catch(() => [] as ScriptUsageRef[])
-        )
+            .catch(() => [] as ScriptUsageRef[]);
+        })
       );
       const seen = new Set<string>();
       const merged: ScriptUsageRef[] = [];
@@ -1377,7 +1389,7 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
     } finally {
       setUsageLoading(false);
     }
-  }, [uuid, sourceEnv, targetEnv, usageData]);
+  }, [uuid, scriptName, sourceEnv, targetEnv, usageData]);
 
   const handleFindUsage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1401,6 +1413,13 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
     </button>
   );
 
+  const graphJourneyFile = useMemo(
+    () => graphTarget
+      ? allFiles.find((f) => f.relativePath.endsWith(`/journeys/${graphTarget.journeyName}/${graphTarget.journeyName}.json`))
+      : undefined,
+    [allFiles, graphTarget],
+  );
+
   return (
     <div>
       <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} />
@@ -1418,7 +1437,13 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
               {usageData.map((ref, i) => (
                 <div key={i} className="flex items-center gap-2 text-[11px]">
                   <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
-                  <span className="text-slate-700 font-medium">{ref.journey}</span>
+                  <button
+                    type="button"
+                    className="text-violet-700 font-medium hover:underline text-left"
+                    onClick={() => setGraphTarget({ journeyName: ref.journey, nodeUuid: ref.nodeUuid })}
+                  >
+                    {ref.journey}
+                  </button>
                   <span className="text-slate-400">→</span>
                   <span className="text-slate-600">{ref.nodeName}</span>
                   <span className="text-[10px] text-slate-400 font-mono">{ref.nodeType}</span>
@@ -1431,12 +1456,27 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
           )}
         </div>
       )}
+      {graphTarget && (
+        <JourneyDiffGraphModal
+          journeyName={graphTarget.journeyName}
+          localContent={graphJourneyFile?.localContent}
+          remoteContent={graphJourneyFile?.remoteContent}
+          nodeInfos={[]}
+          sourceLabel={sourceLabel}
+          targetLabel={targetLabel}
+          sourceEnv={sourceEnv}
+          targetEnv={targetEnv}
+          files={allFiles}
+          initialFocusNodeId={graphTarget.nodeUuid}
+          onClose={() => setGraphTarget(null)}
+        />
+      )}
     </div>
   );
 }
 
 function ScopeSection({
-  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv,
+  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
@@ -1445,6 +1485,7 @@ function ScopeSection({
   forceSeq?: number;
   sourceEnv?: string;
   targetEnv?: string;
+  allFiles?: FileDiff[];
 }) {
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
@@ -1565,7 +1606,7 @@ function ScopeSection({
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
                   group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
-                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} />
+                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} />
                     : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
 
                 ))
@@ -1743,6 +1784,7 @@ export function DiffReport({ report }: { report: CompareReport }) {
                   forceSeq={allOpenSeq}
                   sourceEnv={report.source.environment}
                   targetEnv={report.target.environment}
+                  allFiles={report.files}
                 />
               ))
             )}
