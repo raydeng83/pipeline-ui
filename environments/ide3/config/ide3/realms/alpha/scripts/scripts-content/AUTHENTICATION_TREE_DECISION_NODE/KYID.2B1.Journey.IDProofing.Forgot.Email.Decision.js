@@ -43,6 +43,8 @@ function main() {
     var userAttributes = null;
     var searchUserWithLexID = [];
     var emailsWithVerifiedLexID = [];
+    var unprocessedFlowName = nodeState.get("flowName");
+    var highRisk = false;
     try {
         verifiedLexId = nodeState.get("verifiedLexId");
         flowName = nodeState.get("flowName");
@@ -50,8 +52,19 @@ function main() {
         verificationStatus = nodeState.get("verificationStatus");
         userAttributes = nodeState.get("userAttributes");
 
+        if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "standaloneRIDP"){
+            highRisk = response.result[0].ridp_standalone_high_risk;
+            logger.debug("standaloneRIDP highRisk flag from query :: " + highRisk)
+        }else if(unprocessedFlowName && unprocessedFlowName.toLowerCase() === "forgotemail"){
+            highRisk = response.result[0].ridp_forgot_email_high_risk;
+            logger.debug("forgotemail highRisk flag from query :: " + highRisk)
+        }else{
+            highRisk = false;
+        }
 
-        if(riskIndicator && riskIndicator.toLowerCase() === "high") {
+        logger.debug("highRisk flag is :: " + highRisk)
+        
+        if(riskIndicator && riskIndicator.toLowerCase() === "high" && highRisk ) {
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + "KYID-LN-000: High Risk Transaction, Going to High Risk Node");
             //auditLog("KYID-LN-000", "Forgot Email - High Risk Transaction");
             nodeState.putShared("MCISYNC","false")
@@ -78,7 +91,7 @@ function main() {
             nodeState.putShared("MCISYNC","false")
             nodeState.putShared("errorMessage","KYID-LN-005")
             action.goTo("kbaFailed");
-        }else if((riskIndicator.toLowerCase() === "moderate" || riskIndicator.toLowerCase() === "low" || riskIndicator.toLowerCase() === "norisk") && (verificationStatus.toLowerCase() === "fullyverified" || verificationStatus.toLowerCase() === "partiallyverified") && (verifiedLexId!==null && verifiedLexId!=="")){ 
+        }else if((riskIndicator.toLowerCase() === "moderate" || riskIndicator.toLowerCase() === "low" || riskIndicator.toLowerCase() === "norisk" || !highRisk) && (verificationStatus.toLowerCase() === "fullyverified" || verificationStatus.toLowerCase() === "partiallyverified") && (verifiedLexId!==null && verifiedLexId!=="")){ 
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName  + "::" + "Risk Indicator is Moderate/Low/noRisk and Verification Status is Fully/Partially Verified ");
             searchUserWithLexID = lib.queryPingByLexiID(verifiedLexId, nodeConfig, transactionid);
             isHighRisk = lib.isHighRiskAccount(searchUserWithLexID, nodeConfig, transactionid);

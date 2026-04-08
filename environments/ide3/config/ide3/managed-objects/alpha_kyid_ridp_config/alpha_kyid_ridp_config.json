@@ -44,7 +44,8 @@
       "ridp_organ_donor_refresh_limit",
       "ridp_user_verification_retry_limit",
       "ridp_user_verification_refresh_limit",
-      "ridp_userIdentity_maxOverrideDays"
+      "ridp_userIdentity_maxOverrideDays",
+      "ridp_standalone_high_risk"
     ],
     "properties": {
       "ridp_app_enroll_high_risk": {
@@ -300,6 +301,15 @@
         "isVirtual": false,
         "searchable": true,
         "title": "Show New Display BSP",
+        "type": "boolean",
+        "userEditable": false,
+        "viewable": true
+      },
+      "ridp_standalone_high_risk": {
+        "description": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Standalone High Risk",
         "type": "boolean",
         "userEditable": false,
         "viewable": true
