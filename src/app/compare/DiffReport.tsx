@@ -571,12 +571,6 @@ function FileRow({ file, sourceLabel, targetLabel, extraActions }: { file: FileD
           </span>
         )}
 
-        {extraActions && (
-          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-            {extraActions}
-          </div>
-        )}
-
         {open && (
           <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center rounded border border-slate-300 overflow-hidden text-[10px]">
@@ -616,6 +610,7 @@ function FileRow({ file, sourceLabel, targetLabel, extraActions }: { file: FileD
             >
               Format
             </button>
+            {extraActions}
             <button
               type="button"
               onClick={() => setFullscreen(true)}
@@ -1328,23 +1323,36 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
 }
 
 /** Wraps FileRow for script files, adding an inline Find Usage panel. */
-function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv }: {
+function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles }: {
   file: FileDiff;
   sourceLabel: string;
   targetLabel: string;
   sourceEnv: string;
   targetEnv: string;
+  groupFiles: FileDiff[];
 }) {
   const [usageOpen, setUsageOpen]       = useState(false);
   const [usageLoading, setUsageLoading] = useState(false);
   const [usageData, setUsageData]       = useState<ScriptUsageRef[] | null>(null);
 
-  // Extract UUID from scripts-config path, or fall back to scripts-content name lookup
+  // Extract UUID: config files have it in the filename; content files look up the
+  // sibling config file by matching the script name in its JSON.
   const uuid = useMemo(() => {
     const stem = file.relativePath.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "";
     if (file.relativePath.includes("scripts-config/") && UUID_RE.test(stem)) return stem;
+    if (file.relativePath.includes("scripts-content/")) {
+      for (const f of groupFiles) {
+        if (!f.relativePath.includes("scripts-config/")) continue;
+        const cfgStem = f.relativePath.split("/").pop()?.replace(/\.json$/, "") ?? "";
+        if (!UUID_RE.test(cfgStem)) continue;
+        try {
+          const json = JSON.parse(f.localContent ?? f.remoteContent ?? "");
+          if (json.name === stem) return cfgStem;
+        } catch { /* skip */ }
+      }
+    }
     return null;
-  }, [file.relativePath]);
+  }, [file.relativePath, groupFiles]);
 
   const fetchUsage = useCallback(async () => {
     if (usageData !== null) return;
@@ -1378,7 +1386,7 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
     if (next) fetchUsage();
   }, [usageOpen, fetchUsage]);
 
-  const findUsageButton = uuid ? (
+  const findUsageButton = (
     <button
       type="button"
       onClick={handleFindUsage}
@@ -1391,12 +1399,12 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
     >
       Find Usage
     </button>
-  ) : null;
+  );
 
   return (
     <div>
       <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} />
-      {usageOpen && uuid && (
+      {usageOpen && (
         <div className="mx-1 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
           {usageLoading ? (
             <p className="text-slate-400">Searching…</p>
@@ -1557,7 +1565,7 @@ function ScopeSection({
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
                   group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
-                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
+                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} />
                     : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
 
                 ))
