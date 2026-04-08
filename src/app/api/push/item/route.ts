@@ -28,6 +28,7 @@ const SCOPE_DIR: Record<string, string> = {
   "iga-applications":     "iga/applications",
   "iga-entitlements":     "iga/entitlements",
   "iga-forms":            "iga/forms",
+  "iga-assignments":      "iga/assignments",
   "iga-notifications":    "iga/notifications",
   "iga-workflows":        "iga/workflows",
   "internal-roles":       "internal-roles",

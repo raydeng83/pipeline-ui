@@ -52,6 +52,14 @@ const IGA_SCOPE_CONFIG: Record<string, IgaScopeConfig> = {
     pushSupported: true,
     pagination: "offset",
   },
+  "iga-assignments": {
+    endpoint: "/iga/governance/requestFormAssignments",
+    subdir: "iga/assignments",
+    idField: "formId",           // no unique ID; use formId+objectId composite for filename
+    fetchDetail: false,
+    pushSupported: true,
+    pagination: "offset",
+  },
   "iga-notifications": {
     endpoint: "/iga/governance/notification",
     subdir: "iga/notifications",
@@ -241,16 +249,27 @@ export function runIgaApi(options: {
 
             for await (const item of paginateIga(tenantUrl, cfg.endpoint, token, cfg)) {
               if (aborted) break;
-              const rawId = item[cfg.idField];
-              const id = typeof rawId === "string" ? rawId : JSON.stringify(rawId);
-              if (!id) continue;
+
+              // Build a safe filename — for assignments use formId+objectId composite
+              let fileId: string;
+              if (scope === "iga-assignments") {
+                const formId  = String(item["formId"]  ?? "unknown");
+                const objId   = String(item["objectId"] ?? "");
+                // objectId = "workflow/name/node/nodeId" → sanitize slashes
+                const safePart = objId.replace(/\//g, "__");
+                fileId = `${formId}__${safePart}`;
+              } else {
+                const rawId = item[cfg.idField];
+                fileId = typeof rawId === "string" ? rawId : JSON.stringify(rawId);
+              }
+              if (!fileId) continue;
 
               let fullItem = item;
 
               // Fetch full detail if the list only returns a summary
               if (cfg.fetchDetail) {
                 const detailRes = await fetch(
-                  `${tenantUrl}${cfg.endpoint}/${encodeURIComponent(id)}`,
+                  `${tenantUrl}${cfg.endpoint}/${encodeURIComponent(fileId)}`,
                   { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (detailRes.ok) {
@@ -258,8 +277,9 @@ export function runIgaApi(options: {
                 }
               }
 
-              const fileName = path.join(scopeDir, `${id}.json`);
-              fs.writeFileSync(fileName, JSON.stringify(fullItem, null, 2));
+              // Sanitize filename (remove chars unsafe on most filesystems)
+              const safeFileName = fileId.replace(/[<>:"/\\|?*]/g, "_");
+              fs.writeFileSync(path.join(scopeDir, `${safeFileName}.json`), JSON.stringify(fullItem, null, 2));
               count++;
               if (count % 10 === 0) log(`[${scope}] Saved ${count} items…`);
             }

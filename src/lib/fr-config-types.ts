@@ -199,7 +199,7 @@ export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   { value: "iga-notifications", label: "IGA Notifications",         group: "IGA", description: "IGA notification type definitions (certification, access request, etc.)", commandType: "iga-api" },
   { value: "iga-applications",  label: "IGA Applications",          group: "IGA", description: "IGA application catalog entries — application definitions and connector bindings", commandType: "iga-api" },
   { value: "iga-entitlements",  label: "IGA Entitlements",          group: "IGA", description: "Entitlement definitions for access certification and requests", commandType: "iga-api" },
-  { value: "iga-assignments",   label: "IGA Assignments",           group: "IGA", description: "Role and entitlement assignment configurations (no API endpoint available)", cliSupported: false },
+  { value: "iga-assignments",   label: "IGA Assignments",           group: "IGA", description: "Form-to-object assignment configurations linking request forms to workflows, managed objects, and roles", commandType: "iga-api" },
   // Infrastructure
   { value: "schedules",        label: "Schedules",        group: "Infrastructure", description: "Scheduled tasks and cron-style recurring jobs" },
   { value: "cors",             label: "CORS",             group: "Infrastructure", description: "Cross-Origin Resource Sharing policy settings" },
