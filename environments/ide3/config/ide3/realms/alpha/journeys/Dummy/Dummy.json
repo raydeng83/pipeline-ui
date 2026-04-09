@@ -1,0 +1,67 @@
+{
+  "_id": "Dummy",
+  "_rev": "1961034167",
+  "enabled": true,
+  "entryNodeId": "99f3d591-7b97-4ead-a342-35654d85fd5b",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "930305f1-0350-4d02-a36c-fad1492b0018": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 905,
+      "y": 425.015625
+    },
+    "99f3d591-7b97-4ead-a342-35654d85fd5b": {
+      "connections": {
+        "true": "e41c52be-4027-4aaf-ba88-a9fbed6165d2"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 164,
+      "y": 153.015625
+    },
+    "e41c52be-4027-4aaf-ba88-a9fbed6165d2": {
+      "connections": {
+        "false": "930305f1-0350-4d02-a36c-fad1492b0018",
+        "true": "e4ad14ff-fa28-4cc5-81db-13d46ae7e3fc"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 355,
+      "y": 260.015625
+    },
+    "e4ad14ff-fa28-4cc5-81db-13d46ae7e3fc": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 792,
+      "y": 181.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1025,
+      "y": 113
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1117,
+      "y": 299
+    },
+    "startNode": {
+      "x": 70,
+      "y": 209
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

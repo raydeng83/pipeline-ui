@@ -1,0 +1,260 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "all": [
+          "prerequisiteId",
+          "prerequisiteSourceName"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "LoginPrerequisiteStagingData",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "LoginPrerequisiteStagingData",
+  "enableSync": false,
+  "name": "LoginPrerequisiteStagingData",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "Name",
+      "target": "name"
+    },
+    {
+      "source": "PrerequisiteId",
+      "target": "prerequisiteId"
+    },
+    {
+      "source": "PreRequisiteSourceName",
+      "target": "prerequisiteSourceName"
+    },
+    {
+      "source": "",
+      "target": "displayName",
+      "transform": {
+        "globals": {},
+        "source": "var displayDetails = source;\nvar displayResults = null;\nvar spanish_prefix = \"ES_\";\nif (displayDetails != null) {\n  try {\n    displayResults = {\n      \"en\": displayDetails.DisplayName,\n      \"es\": spanish_prefix + displayDetails.DisplayName\n    };\n  } catch (error) {\n    logger.error(\"Error processing display details: \" + error);\n    displayResults = null;\n  }\n} else {\n  displayResults = null;\n}\ndisplayResults;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "Description",
+      "target": "description"
+    },
+    {
+      "source": "",
+      "target": "displayDescription",
+      "transform": {
+        "globals": {},
+        "source": "var displayDetails = source;\nvar displayResults = null;\nvar spanish_prefix = \"ES_\";\nif (displayDetails != null) {\n  try {\n    displayResults = {\n      \"en\": displayDetails.DisplayDescription,\n      \"es\": spanish_prefix + displayDetails.DisplayDescription\n    };\n  } catch (error) {\n    logger.error(\"Error processing Display: \" + error);\n    displayResults = null;\n  }\n} else {\n  displayResults = null;\n}\ndisplayResults;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "default": false,
+      "source": "DontAllow",
+      "target": "reverificationDontAllow"
+    },
+    {
+      "default": false,
+      "source": "DontAllowExpiry",
+      "target": "reverificationDontAllowExpiry"
+    },
+    {
+      "source": "",
+      "target": "disenrollmentActionSettings",
+      "transform": {
+        "globals": {},
+        "source": "var disenrollmentActionSettings = source;\nvar disenrollmentActionResults = null;\n\nif (disenrollmentActionSettings != null) {\n  try {\n    disenrollmentActionResults = {\n      \"removePrerequisite\": disenrollmentActionSettings.RemovePrerequisite === 1\n    };\n  } catch (error) {\n    logger.error(\"Error processing disenrollment action settings: \" + error);\n    disenrollmentActionResults = null;\n  }\n} else {\n  disenrollmentActionResults = null;\n}\ndisenrollmentActionResults;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "LoginTriggerCondition",
+      "transform": {
+        "globals": {},
+        "source": "var loginTriggerCondition = source;\nvar loginTriggerConditionResults = null;\n \nif (loginTriggerCondition != null) {\n  try {\n\t  var auLevel2;\n\t \n\t  var auLevel2Array = [];\n\t  logger.error(\"source.AULevel2Code : \"+source.AULevel2Code);\n\t  if(!source.AULevel2Code == null || !source.AULevel2Code == \"\"){\n\t\t  auLevel2 = source.AULevel2Code;\n\t\t  var splitAULevel2 = auLevel2.split(\",\");\n\t\t  logger.error(\"splitAULevel2 : \"+splitAULevel2);\t\t  \n\t\t  logger.error(\"splitAULevel2 length : \"+splitAULevel2.length);\n\t\t  for(var i = 0; i < splitAULevel2.length; i++){\n\t\t\t  auLevel2Array.push(splitAULevel2[i]);\n\t\t\t  logger.error(\"auLevel2Array 1: \"+auLevel2Array);\n\t\t  }\n\t\t  \n\t  }else{\n\t\t  auLevel2Array.push(null);\n\t\t  logger.error(\"auLevel2Array 2: \"+auLevel2Array);\n\t  }\n\t  \n\t  var auLevel3;\n\t  var auLevel3Array = [];\n\t  logger.error(\"source.AULevel3Code : \"+source.AULevel3Code);\n\t  if(!source.AULevel3Code == null || !source.AULevel3Code == \"\"){\n\t\t  auLevel3 = source.AULevel3Code;\n\t\t  var splitAULevel3 = auLevel3.split(\",\");\n\t\t  logger.error(\"splitAULevel3 : \"+splitAULevel3);\t\t  \n\t\t  logger.error(\"splitAULevel3 length : \"+splitAULevel3.length);\n\t\t  for(var i = 0; i < splitAULevel3.length; i++){\n\t\t\t  auLevel3Array.push(splitAULevel3[i]);\n\t\t\t  logger.error(\"auLevel3Array 1: \"+auLevel3Array);\n\t\t  }\n\t\t  \n\t  }else{\n\t\t  auLevel3Array.push(null);\n\t\t  logger.error(\"auLevel3Array 2: \"+auLevel3Array);\n\t  }\n\t  \n    loginTriggerConditionResults = {\n      \"accountType\": [],\n      \"approvalUnit1\": [],\n      \"approvalUnit2\": auLevel2Array,\n      \"approvalUnit3\": auLevel3Array,\n      \"approvalUnit4\": [],\n      \"approvalUnit5\": [],\n      \"triggerStartDate\": loginTriggerCondition.StartDate,\n\t  \"triggerEndDate\": loginTriggerCondition.EndDate\n    };\n  } catch (error) {\n    logger.error(\"Error processing LoginTriggerCondition settings: \" + error);\n    loginTriggerConditionResults = null;\n  }\n} else {\n  loginTriggerConditionResults = null;\n}\nloginTriggerConditionResults;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "LoginDisplayCriteria",
+      "transform": {
+        "globals": {},
+        "source": "var loginDisplayCriteria = source;\nvar loginDisplayCriteriaResults = null;\n  try {\n\t  \n\t  \n    loginDisplayCriteriaResults = {\n\t  \"frequencyInDays\": loginDisplayCriteria.FrequencyInDays,\n\t  \"login\": loginDisplayCriteria.IsRequiredEveryTime,\n      \"numberOfDaysBeforeDueDate\": loginDisplayCriteria.NumberOfDaysBeforeDueDate,\n\t  \"skipOption\": loginDisplayCriteria.SkipOption,\n    };\n    loginDisplayCriteriaResults;\n  } catch (error) {\n    logger.error(\"Error processing LoginDisplayCriteria settings: \" + error);\n    loginDisplayCriteriaResults = null;\n  }\n",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "LoginDueCompletion",
+      "transform": {
+        "globals": {},
+        "source": "var loginDueCompletion = source;\nvar loginDueCompletionResults = null;\n\nif (loginDueCompletion != null) {\n  try {\n    loginDueCompletionResults = {\n      \"dueDate\": \"\",\n      \"gracePeriodinDays\": loginDueCompletion.GracePeriodInDays,\n      \"inDays\": loginDueCompletion.InDays\n\t  \n    };\n  } catch (error) {\n    logger.error(\"Error processing LoginDueCompletion settings: \" + error);\n    loginDueCompletionResults = null;\n  }\n} else {\n  loginDueCompletionResults = null;\n}\n\nloginDueCompletionResults;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "RecordState",
+      "target": "recordState",
+      "transform": {
+        "globals": {},
+        "source": "  if(source == 0){\n      \"ACTIVE\";\n  }else if(source == 1){\n    \"1\";\n  }else{\n  \t\"ACTIVE\";\n  }\n",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "RecordSource",
+      "target": "recordSource"
+    },
+    {
+      "source": "",
+      "target": "expiry",
+      "transform": {
+        "globals": {},
+        "source": "var expiryDetails = source;\nvar expiryResults = null;\n\nif (expiryDetails != null) {\n  try {\n    expiryResults = {\n      \"dueDateType\": expiryDetails.FrequencyType,\n      \"dueDateValue\": expiryDetails.FrequencyValue,\n      \"loginActionOnExpiry\": expiryDetails.LoginActionOnExpiry,\n      \"standaloneActionOnExpiry\": expiryDetails.StandaloneActionOnExpiry\n    };\n  } catch (error) {\n    logger.error(\"Error processing expiry details: \" + error);\n    expiryResults = null;\n  }\n} else {\n  expiryResults = null;\n}\nexpiryResults;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "enrollmentActionSettings",
+      "transform": {
+        "globals": {},
+        "source": "var enrollmentActionSettings = source;\nvar enrollmentActionResults = null;\n\nif (enrollmentActionSettings != null) {\n  try {\n    enrollmentActionResults = {\n      \"triggerAlways\": Number(enrollmentActionSettings.Trigger_Always) === 1,\n      \"allowReuse\": enrollmentActionSettings.AllowReuse === 1,\n      \"allowReuseIfDaysOld\": enrollmentActionSettings.AllowReuseIfDaysOld != null ? enrollmentActionSettings.AllowReuseIfDaysOld.toString() : null,\n      \"saveInput\": Number(enrollmentActionSettings.Save_Input) === 1\n    };\n  } catch (error) {\n    logger.error(\"Error processing enrollment action settings: \" + error);\n    enrollmentActionResults = null;\n  }\n} else {\n  enrollmentActionResults = null;\n}\n\nenrollmentActionResults;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "prereqTypeId",
+      "transform": {
+        "globals": {},
+        "source": "logger.info(\"Source object: \" + JSON.stringify(source));\nvar prerequisiteId = source.PrerequisiteId;\nvar sourceName = source.PreRequisiteSourceName;\ntry {\n    var typeResponse = openidm.query(\n        \"managed/alpha_kyid_enrollment_prerequisite_type\",\n        {\n            \"_queryFilter\": 'prerequisiteId eq \"' + prerequisiteId + '\" and prerequisiteSourceName eq \"' + sourceName + '\"'\n        },\n        [\"_id\"]\n    ); \n    if (typeResponse.result && typeResponse.result.length > 0) {\n\t\tvar prereqId = typeResponse.result[0]._id;\n\t\tvar prereqRef = { \"_ref\": \"managed/alpha_kyid_enrollment_prerequisite_type/\" + prereqId };\n    } else {\n\t\tlogger.error(\"Exception occurred in else\" );\n\t\tnull;\n    }\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);  \n}\nprereqRef;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "roleId",
+      "transform": {
+        "globals": {},
+        "source": "logger.error(\"Source exclusion roles: \" + JSON.stringify(source));\nvar sourceRoleIds = source.RoleId;\nvar resultArray = [];\ntry {\n    var uniqueRoles = Array.from(new Set(sourceRoleIds.split(\",\").map(function(item) { return item.trim(); })));\n    // Process each unique role\n    uniqueRoles.forEach(function(sourceRoleId) {\n        var roleResponse = openidm.query(\n            \"managed/alpha_role\",\n            {\n                \"_queryFilter\": 'businessRoleId eq \"' + sourceRoleId + '\"'\n            },\n            [\"_id\"]\n        );\n        if (roleResponse.result && roleResponse.result.length > 0) {\n            var roleId = roleResponse.result[0]._id;\n            var roleRef = { \"_ref\": \"managed/alpha_role/\" + roleId };\n            resultArray.push(roleRef);\n        }\n    });\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);\n}\nresultArray;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "applicationId",
+      "transform": {
+        "globals": {},
+        "source": "logger.info(\"Source object: \" + JSON.stringify(source));\nvar applicationNames = source.ApplicationName;\nvar resultArray = [];\ntry {\n    var uniqueAppNames = Array.from(new Set(applicationNames.split(\"|\").map(function(item) { return item.trim(); })));\n    uniqueAppNames.forEach(function(applicationName) {\n        var applicationResponse = openidm.query(\n            \"managed/alpha_kyid_businessapplication\",\n            {\n                \"_queryFilter\": 'name eq \"' + applicationName + '\"'\n            },\n            [\"_id\"]\n        );\n        if (applicationResponse.result && applicationResponse.result.length > 0) {\n            var appId = applicationResponse.result[0]._id;\n            var appRef = { \"_ref\": \"managed/alpha_kyid_businessapplication/\" + appId };\n            resultArray.push(appRef);\n        }\n    });\n} catch (e) {\n    logger.error(\"Exception occurred: \" + e);\n}\nresultArray;",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "CreateDate",
+      "target": "createDate"
+    },
+    {
+      "source": "UpdateDate",
+      "target": "updateDate"
+    },
+    {
+      "source": "CreateDateEpoch",
+      "target": "createDateEpoch"
+    },
+    {
+      "source": "UpdateDateEpoch",
+      "target": "updateDateEpoch"
+    },
+    {
+      "source": "CreateUserId",
+      "target": "createdByID"
+    },
+    {
+      "source": "UpdateUserId",
+      "target": "updatedByID"
+    },
+    {
+      "source": "SrcCreateDate",
+      "target": "createdBy"
+    },
+    {
+      "source": "SrcUpdateDate",
+      "target": "updatedBy"
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "system/DBConnector_PrerequisiteLPStaging/__ACCOUNT__",
+  "sourceQuery": {
+    "_queryFilter": "ReconFlag eq \"yes\""
+  },
+  "sourceQueryFullEntry": true,
+  "target": "managed/alpha_kyid_enrollment_prerequisite",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "_id": "c31c9c74-7468-4f62-835d-99bf57643810",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "625973518",
+  "_type": {
+    "_id": "DataStoreDecisionNode",
+    "collection": true,
+    "name": "Data Store Decision",
+    "version": "1.0"
+  }
+}

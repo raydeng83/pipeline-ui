@@ -1,0 +1,22 @@
+{
+  "_id": "300d225b-1a0a-46cb-b14b-bcfaa96e578f",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1636296962",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_Registration_Acceptance_PhoneRegistration"
+}

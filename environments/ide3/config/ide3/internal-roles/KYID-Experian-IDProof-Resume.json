@@ -1,0 +1,152 @@
+{
+  "_id": "691e8012-2f96-4f18-bb23-231e746a06d2",
+  "_rev": "14aad3af-ffa4-46fc-9d39-f79a16f1ba40-96176",
+  "condition": null,
+  "description": "KYID Experian IDProof Resume",
+  "name": "KYID-Experian-IDProof-Resume",
+  "privileges": [
+    {
+      "accessFlags": [
+        {
+          "attribute": "name",
+          "readOnly": true
+        },
+        {
+          "attribute": "description",
+          "readOnly": true
+        },
+        {
+          "attribute": "applicationURL",
+          "readOnly": true
+        },
+        {
+          "attribute": "logoURL",
+          "readOnly": true
+        },
+        {
+          "attribute": "application",
+          "readOnly": true
+        },
+        {
+          "attribute": "tags",
+          "readOnly": true
+        },
+        {
+          "attribute": "content",
+          "readOnly": true
+        },
+        {
+          "attribute": "requiredMFAMethod",
+          "readOnly": true
+        },
+        {
+          "attribute": "kogAppId",
+          "readOnly": true
+        },
+        {
+          "attribute": "roleId",
+          "readOnly": true
+        },
+        {
+          "attribute": "kogParentAppName",
+          "readOnly": true
+        },
+        {
+          "attribute": "adminDescription",
+          "readOnly": true
+        },
+        {
+          "attribute": "applicationSystemName",
+          "readOnly": true
+        },
+        {
+          "attribute": "softLogoutURL",
+          "readOnly": true
+        },
+        {
+          "attribute": "userName",
+          "readOnly": true
+        },
+        {
+          "attribute": "createDate",
+          "readOnly": true
+        },
+        {
+          "attribute": "updateDate",
+          "readOnly": true
+        },
+        {
+          "attribute": "createDateEpoch",
+          "readOnly": true
+        },
+        {
+          "attribute": "updateDateEpoch",
+          "readOnly": true
+        },
+        {
+          "attribute": "createdBy",
+          "readOnly": true
+        },
+        {
+          "attribute": "updatedBy",
+          "readOnly": true
+        },
+        {
+          "attribute": "roleAppId",
+          "readOnly": true
+        },
+        {
+          "attribute": "applicationHelpdeskContact",
+          "readOnly": true
+        },
+        {
+          "attribute": "forgerockAppId",
+          "readOnly": true
+        },
+        {
+          "attribute": "needClaims",
+          "readOnly": true
+        },
+        {
+          "attribute": "auth0id",
+          "readOnly": true
+        },
+        {
+          "attribute": "kogAppUrl",
+          "readOnly": true
+        },
+        {
+          "attribute": "kogDBUrl",
+          "readOnly": true
+        },
+        {
+          "attribute": "environment",
+          "readOnly": true
+        },
+        {
+          "attribute": "kogClaimsAppId",
+          "readOnly": true
+        },
+        {
+          "attribute": "createdByID",
+          "readOnly": true
+        },
+        {
+          "attribute": "updatedByID",
+          "readOnly": true
+        },
+        {
+          "attribute": "_id",
+          "readOnly": true
+        }
+      ],
+      "actions": [],
+      "name": "alpha_kyid_businessapplications",
+      "path": "managed/alpha_kyid_businessapplication",
+      "permissions": [
+        "VIEW"
+      ]
+    }
+  ],
+  "temporalConstraints": []
+}

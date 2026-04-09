@@ -1,0 +1,98 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_roleactiontype",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "name",
+      "description",
+      "type",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch"
+    ],
+    "properties": {
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "description": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "alpha_kyid_roleactiontype",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

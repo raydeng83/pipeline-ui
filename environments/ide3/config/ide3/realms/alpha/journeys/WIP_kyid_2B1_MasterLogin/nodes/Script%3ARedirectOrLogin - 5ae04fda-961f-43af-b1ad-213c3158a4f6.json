@@ -1,0 +1,31 @@
+{
+  "_id": "5ae04fda-961f-43af-b1ad-213c3158a4f6",
+  "_outcomes": [
+    {
+      "displayName": "login",
+      "id": "login"
+    },
+    {
+      "displayName": "redirect",
+      "id": "redirect"
+    }
+  ],
+  "_rev": "696981590",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "login",
+    "redirect"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "bdd66325-6724-464b-99f2-1adc88397b96"
+}

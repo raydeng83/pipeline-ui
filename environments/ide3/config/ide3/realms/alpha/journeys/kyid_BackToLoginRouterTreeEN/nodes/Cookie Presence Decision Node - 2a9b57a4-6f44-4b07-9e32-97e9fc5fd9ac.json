@@ -1,0 +1,21 @@
+{
+  "_id": "2a9b57a4-6f44-4b07-9e32-97e9fc5fd9ac",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-135715987",
+  "_type": {
+    "_id": "CookiePresenceDecisionNode",
+    "collection": true,
+    "name": "Cookie Presence Decision Node",
+    "version": "1.0"
+  },
+  "cookieName": "UserLanguagePreference"
+}

@@ -1,0 +1,25 @@
+{
+  "_id": "9df1c35e-800d-4da2-a8db-41365f671b0d",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1306582195",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Unknown Error"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

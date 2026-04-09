@@ -1,0 +1,16 @@
+{
+  "_id": "6a3e8860-c076-471d-bf9e-956b63458e63",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320078356,
+  "default": false,
+  "description": "This script displays msg if there is any issue with connecting to AD",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950813339,
+  "name": "KYID.Journey.PTAConnectionFailMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.PTAConnectionFailMsg.js"
+  }
+}

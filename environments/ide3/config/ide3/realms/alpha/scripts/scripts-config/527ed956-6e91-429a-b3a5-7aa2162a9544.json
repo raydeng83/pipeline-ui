@@ -1,0 +1,16 @@
+{
+  "_id": "527ed956-6e91-429a-b3a5-7aa2162a9544",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320029589,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801155,
+  "name": "KYID.2B1.journey.Registration_Acceptance_PhoneRegistration.Existing_Phone_number_Message",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.journey.Registration_Acceptance_PhoneRegistration.Existing_Phone_number_Message.js"
+  }
+}

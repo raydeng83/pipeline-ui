@@ -1,0 +1,6 @@
+{
+  "_id": "esv-forgot-authenticator-ssp-refresh-limit",
+  "description": "",
+  "expressionType": "number",
+  "valueBase64": "${ESV_FORGOT_AUTHENTICATOR_SSP_REFRESH_LIMIT}"
+}

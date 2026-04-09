@@ -1,0 +1,30 @@
+{
+  "_id": "14501cb6-fcb2-42bd-a132-12336d4da6cb",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-101866971",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "93541fdc-f093-4164-b38a-bcb2e068a67b",
+      "displayName": "Email Collector",
+      "nodeType": "AttributeCollectorNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "With passkeys, you don't need to remember complex passwords."
+  },
+  "pageHeader": {
+    "en": "Create a passkey"
+  }
+}

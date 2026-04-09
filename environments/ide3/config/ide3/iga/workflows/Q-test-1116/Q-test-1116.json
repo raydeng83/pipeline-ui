@@ -1,0 +1,205 @@
+{
+  "_rev": 1,
+  "childType": false,
+  "description": "Q-test-1116 generic workflow",
+  "displayName": "Q-test-1116 Workflow",
+  "id": "Q-test-1116",
+  "mutable": true,
+  "name": "Q-test-1116",
+  "staticNodes": {
+    "endNode": {
+      "_outcomes": [],
+      "connections": {},
+      "displayDetails": {
+        "icon": "checkmark",
+        "value": "Success",
+        "variant": "success"
+      },
+      "displayType": "SingleInput",
+      "hasError": false,
+      "id": "endNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "End",
+      "nodeType": "SingleInput",
+      "schema": null,
+      "template": null,
+      "x": 3301,
+      "y": 233.5
+    },
+    "startNode": {
+      "_outcomes": [
+        {
+          "displayName": "start",
+          "id": "start"
+        }
+      ],
+      "connections": {
+        "start": "scriptTask-70b2da1a0483"
+      },
+      "displayDetails": {
+        "icon": "play_arrow",
+        "value": "Start",
+        "variant": "info"
+      },
+      "displayType": "IconOutcomeNode",
+      "hasError": false,
+      "id": "startNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "Start",
+      "nodeType": "IconOutcomeNode",
+      "schema": null,
+      "template": null,
+      "x": 70,
+      "y": 225.5
+    },
+    "uiConfig": {
+      "approvalTask-27b7f3b9d10e": {
+        "actors": [],
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 7,
+          "expirationDateType": "duration",
+          "expirationDateVariable": "",
+          "expirationTimeSpan": "day(s)",
+          "reassignedActors": [
+            {
+              "id": ""
+            }
+          ],
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 1594,
+        "y": 159.5
+      },
+      "approvalTask-36de7246f5e0": {
+        "actors": [],
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 7,
+          "expirationDateType": "duration",
+          "expirationDateVariable": "",
+          "expirationTimeSpan": "day(s)",
+          "reassignedActors": [
+            {
+              "id": ""
+            }
+          ],
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 1949,
+        "y": 247.5
+      },
+      "approvalTask-95a73e18cff6": {
+        "actors": [],
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 7,
+          "expirationDateType": "duration",
+          "expirationDateVariable": "",
+          "expirationTimeSpan": "day(s)",
+          "reassignedActors": [
+            {
+              "id": ""
+            }
+          ],
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 756,
+        "y": 112.5
+      },
+      "approvalTask-ca89c676a630": {
+        "actors": [],
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 7,
+          "expirationDateType": "duration",
+          "expirationDateVariable": "",
+          "expirationTimeSpan": "day(s)",
+          "reassignedActors": [
+            {
+              "id": ""
+            }
+          ],
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 1071,
+        "y": 318.5
+      },
+      "exclusiveGateway-19779330b754": {
+        "x": 752,
+        "y": 478.5
+      },
+      "exclusiveGateway-34047e616c13": {
+        "x": 2702,
+        "y": 294.8333333333333
+      },
+      "exclusiveGateway-514d593f4037": {
+        "x": 1684,
+        "y": 573.5
+      },
+      "exclusiveGateway-63953f0126f4": {
+        "x": 440,
+        "y": 200.5
+      },
+      "exclusiveGateway-7f1777e228ba": {
+        "x": 2702,
+        "y": 101.66666666666667
+      },
+      "scriptTask-05efed9a34f3": {
+        "x": 2249,
+        "y": 130
+      },
+      "scriptTask-302a3b749c83": {
+        "x": 1203,
+        "y": 623
+      },
+      "scriptTask-37be22411bf7": {
+        "x": 2981,
+        "y": 235
+      },
+      "scriptTask-70b2da1a0483": {
+        "x": 210,
+        "y": 229
+      },
+      "scriptTask-74c5710a88c8": {
+        "x": 2981,
+        "y": 382
+      },
+      "scriptTask-ab1048cb15af": {
+        "x": 2235,
+        "y": 469
+      },
+      "scriptTask-ba0f2a0ca56e": {
+        "x": 454,
+        "y": 516
+      },
+      "scriptTask-ef98df825107": {
+        "x": 2981,
+        "y": 88
+      },
+      "scriptTask-f289b027502f": {
+        "x": 1230,
+        "y": 106
+      },
+      "scriptTask-f5f10ce57cad": {
+        "x": 1953.3333129882812,
+        "y": 15.333328247070312
+      }
+    }
+  },
+  "status": "published"
+}

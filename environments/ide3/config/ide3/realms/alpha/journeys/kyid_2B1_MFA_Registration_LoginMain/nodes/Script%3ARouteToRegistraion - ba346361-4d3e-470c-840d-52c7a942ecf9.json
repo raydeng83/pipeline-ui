@@ -1,0 +1,36 @@
+{
+  "_id": "ba346361-4d3e-470c-840d-52c7a942ecf9",
+  "_outcomes": [
+    {
+      "displayName": "phone",
+      "id": "phone"
+    },
+    {
+      "displayName": "authenticator",
+      "id": "authenticator"
+    },
+    {
+      "displayName": "failed",
+      "id": "failed"
+    }
+  ],
+  "_rev": "-2087434935",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "phone",
+    "authenticator",
+    "failed"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "fdccce23-2c31-4e2a-aecc-679b9821bf96"
+}

@@ -1,0 +1,22 @@
+{
+  "_id": "7143c00e-8628-4a54-a6f9-d5bd649e007f",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-46948897",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_PTA_JIT"
+}

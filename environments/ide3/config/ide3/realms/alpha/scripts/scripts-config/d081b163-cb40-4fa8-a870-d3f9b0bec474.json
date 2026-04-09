@@ -1,0 +1,16 @@
+{
+  "_id": "d081b163-cb40-4fa8-a870-d3f9b0bec474",
+  "context": "LIBRARY",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1752252630221,
+  "default": false,
+  "description": "This script contains all the util functions for the prerequisites enrolment.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798771,
+  "name": "KYID.2B1.Library.PrerequisiteUtils",
+  "script": {
+    "file": "scripts-content/LIBRARY/KYID.2B1.Library.PrerequisiteUtils.js"
+  }
+}

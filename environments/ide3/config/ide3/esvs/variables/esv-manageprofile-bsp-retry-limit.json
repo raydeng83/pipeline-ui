@@ -1,0 +1,6 @@
+{
+  "_id": "esv-manageprofile-bsp-retry-limit",
+  "description": "",
+  "expressionType": "number",
+  "valueBase64": "${ESV_MANAGEPROFILE_BSP_RETRY_LIMIT}"
+}

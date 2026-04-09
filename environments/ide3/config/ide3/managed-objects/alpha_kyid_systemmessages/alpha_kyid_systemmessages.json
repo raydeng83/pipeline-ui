@@ -1,0 +1,200 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_systemmessages",
+  "onCreate": {
+    "file": "alpha_kyid_systemmessages.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_systemmessages.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "messageId",
+      "messageType",
+      "messageContent",
+      "startTime",
+      "endTime",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch"
+    ],
+    "properties": {
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "endTime": {
+        "searchable": false,
+        "title": "End Time",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "messageContent": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "title",
+            "content"
+          ],
+          "properties": {
+            "content": {
+              "description": null,
+              "isVirtual": false,
+              "nullable": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "description": null,
+                  "format": null,
+                  "isVirtual": false,
+                  "searchable": true,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "description": null,
+                  "format": null,
+                  "isVirtual": false,
+                  "searchable": true,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "searchable": false,
+              "title": "Content",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "title": {
+              "description": null,
+              "isVirtual": false,
+              "nullable": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "description": null,
+                  "format": null,
+                  "isVirtual": false,
+                  "searchable": true,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "description": null,
+                  "format": null,
+                  "isVirtual": false,
+                  "searchable": true,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "searchable": false,
+              "title": "Title",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "nullable": false,
+        "searchable": true,
+        "title": "Message Content",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "messageId": {
+        "searchable": false,
+        "title": "Message ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "messageType": {
+        "searchable": false,
+        "title": "Message Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "startTime": {
+        "searchable": false,
+        "title": "Start Time",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "alpha_kyid_systemmessages",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

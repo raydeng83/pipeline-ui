@@ -1,0 +1,26 @@
+{
+  "_id": "c3814b87-da2c-40fc-b568-efb474a13648",
+  "_outcomes": [
+    {
+      "displayName": "cancel",
+      "id": "cancel"
+    }
+  ],
+  "_rev": "770816050",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "cancel"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "17fef1cf-a845-4b2d-a86f-5be54713fccc"
+}

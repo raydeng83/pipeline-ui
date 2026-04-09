@@ -1,0 +1,16 @@
+{
+  "_id": "f38a233a-bb9d-4c45-ad0e-ed3652dd9ecf",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320028633,
+  "default": false,
+  "description": "This function is used to removed user KOG profile information from sharedstate.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950814194,
+  "name": "KYID.Journey.ClearUserKOGProfileFromSharedState",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ClearUserKOGProfileFromSharedState.js"
+  }
+}

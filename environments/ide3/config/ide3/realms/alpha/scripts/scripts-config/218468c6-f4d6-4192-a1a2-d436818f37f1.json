@@ -1,0 +1,16 @@
+{
+  "_id": "218468c6-f4d6-4192-a1a2-d436818f37f1",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1761741818225,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950790826,
+  "name": "TBD.logger",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/TBD.logger.js"
+  }
+}

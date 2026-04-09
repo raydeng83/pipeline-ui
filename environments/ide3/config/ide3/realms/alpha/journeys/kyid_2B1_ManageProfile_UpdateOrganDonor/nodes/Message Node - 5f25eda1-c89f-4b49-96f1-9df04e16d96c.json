@@ -1,0 +1,25 @@
+{
+  "_id": "5f25eda1-c89f-4b49-96f1-9df04e16d96c",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "132398976",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Invalid Session"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

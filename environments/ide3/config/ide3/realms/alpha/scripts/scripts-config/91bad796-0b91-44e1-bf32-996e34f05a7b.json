@@ -1,0 +1,16 @@
+{
+  "_id": "91bad796-0b91-44e1-bf32-996e34f05a7b",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320023826,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798759,
+  "name": "KYID.Journey.MFAAuthentication.SymantecResponseCodeCheck",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAAuthentication.SymantecResponseCodeCheck.js"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "displayName": "PostStep1-L1",
+  "name": "scriptTask-29eda75367cf",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "exclusiveGateway-a68108b91c54"
+      }
+    ],
+    "script": {
+      "file": "PostStep1-L1 - scriptTask-29eda75367cf.js"
+    }
+  },
+  "type": "scriptTask"
+}

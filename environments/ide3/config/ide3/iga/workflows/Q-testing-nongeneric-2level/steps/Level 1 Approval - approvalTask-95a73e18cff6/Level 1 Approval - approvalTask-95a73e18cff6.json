@@ -1,0 +1,60 @@
+{
+  "approvalMode": "any",
+  "approvalTask": {
+    "actors": [
+      {
+        "id": "managed/user/9364b8ee-6e38-45b2-887f-c1fd0c312972",
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      }
+    ],
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "kyidRequestAssigned"
+      },
+      "expiration": {
+        "action": "reject",
+        "actors": [
+          {
+            "id": ""
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(7*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 7,
+        "notification": "kyidRequestAssignedExpiration"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "kyidRequestAssignedReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "APPROVE",
+        "step": "scriptTask-f289b027502f"
+      },
+      {
+        "condition": null,
+        "outcome": "REJECT",
+        "step": "scriptTask-ba0f2a0ca56e"
+      }
+    ]
+  },
+  "displayName": "Level 1 Approval",
+  "name": "approvalTask-95a73e18cff6",
+  "type": "approvalTask"
+}

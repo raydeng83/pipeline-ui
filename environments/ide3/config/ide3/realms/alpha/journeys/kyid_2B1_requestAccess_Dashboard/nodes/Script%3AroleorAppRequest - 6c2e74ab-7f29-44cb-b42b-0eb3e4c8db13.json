@@ -1,0 +1,31 @@
+{
+  "_id": "6c2e74ab-7f29-44cb-b42b-0eb3e4c8db13",
+  "_outcomes": [
+    {
+      "displayName": "enrollRoleWid",
+      "id": "enrollRoleWid"
+    },
+    {
+      "displayName": "enrollAppWid",
+      "id": "enrollAppWid"
+    }
+  ],
+  "_rev": "2015347444",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "enrollRoleWid",
+    "enrollAppWid"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "d737ed1b-8c8a-461b-9a2a-1408752b17df"
+}

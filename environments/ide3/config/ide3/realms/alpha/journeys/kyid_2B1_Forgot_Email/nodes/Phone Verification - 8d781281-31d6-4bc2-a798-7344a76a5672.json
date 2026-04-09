@@ -1,0 +1,22 @@
+{
+  "_id": "8d781281-31d6-4bc2-a798-7344a76a5672",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "183071189",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_Registration_CreateAccount_Phone_Verification"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "998f7438-4a6b-42e1-8ab4-93e0923619ef",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=227964d5-9d01-4383-bc8e-5f0e381573b0,ou=user,ou=am-config",
+  "creationDate": 1761139665947,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801228,
+  "name": "Aaron_Next_Gen",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Aaron_Next_Gen.js"
+  }
+}

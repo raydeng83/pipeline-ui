@@ -1,0 +1,31 @@
+{
+  "_id": "878ca7b1-0f1c-4e55-a1ad-78ebe03510cf",
+  "_outcomes": [
+    {
+      "displayName": "mail",
+      "id": "mail"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "622963036",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "mail",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "92ef75d2-7812-4a22-802f-fae8505d41c0"
+}

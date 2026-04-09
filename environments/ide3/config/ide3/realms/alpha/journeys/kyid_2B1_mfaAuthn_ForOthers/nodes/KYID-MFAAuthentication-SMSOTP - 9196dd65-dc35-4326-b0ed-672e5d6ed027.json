@@ -1,0 +1,22 @@
+{
+  "_id": "9196dd65-dc35-4326-b0ed-672e5d6ed027",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "164448452",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_mfaAuthnSMSOTP_SelfandOthers"
+}

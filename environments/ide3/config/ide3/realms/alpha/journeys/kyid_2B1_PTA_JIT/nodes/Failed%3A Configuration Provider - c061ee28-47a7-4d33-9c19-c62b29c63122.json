@@ -1,0 +1,26 @@
+{
+  "_id": "c061ee28-47a7-4d33-9c19-c62b29c63122",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    },
+    {
+      "displayName": "Configuration failure",
+      "id": "CONFIGURATION_FAILED"
+    }
+  ],
+  "_rev": "1447630551",
+  "_type": {
+    "_id": "ConfigProviderNode",
+    "collection": true,
+    "name": "Configuration Provider",
+    "version": "1.0"
+  },
+  "nodeType": "SetFailureUrlNode",
+  "nodeVersion": 1,
+  "script": "c3598aed-8db9-4e1b-911a-90b969184a30",
+  "scriptInputs": [
+    "*"
+  ]
+}

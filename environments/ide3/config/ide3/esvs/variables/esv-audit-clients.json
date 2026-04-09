@@ -1,0 +1,6 @@
+{
+  "_id": "esv-audit-clients",
+  "description": "Add client coma separated only.",
+  "expressionType": "string",
+  "valueBase64": "${ESV_AUDIT_CLIENTS}"
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "616c94c1-b4bf-4b8c-913f-b5a2dcb1138f",
+  "_outcomes": [
+    {
+      "displayName": "hasSession",
+      "id": "hasSession"
+    },
+    {
+      "displayName": "noSession",
+      "id": "noSession"
+    },
+    {
+      "displayName": "SetLocaleInURL",
+      "id": "SetLocaleInURL"
+    }
+  ],
+  "_rev": "391379910",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "hasSession",
+    "noSession",
+    "SetLocaleInURL"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "fb417377-70d7-4ddc-b0a1-0958d88d9df3"
+}

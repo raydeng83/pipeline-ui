@@ -1,0 +1,23 @@
+{
+  "displayName": "Validation Gateway",
+  "name": "exclusiveGateway-0d9531afe1d6",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "approverLevel1 == null && approverLevel2 == null && isBackupApprovalL1Require == false && isBackupApprovalL2Require == false",
+        "outcome": "validationSuccess",
+        "step": "scriptTask-8506123e6208"
+      },
+      {
+        "condition": "approverLevel1 != null || approverLevel2 != null || isBackupApprovalL1Require == true || isBackupApprovalL2Require == true",
+        "outcome": "validationFailure",
+        "step": "exclusiveGateway-8cd9decab2e4"
+      }
+    ],
+    "script": {
+      "file": "Validation Gateway - exclusiveGateway-0d9531afe1d6.js"
+    }
+  },
+  "type": "scriptTask"
+}

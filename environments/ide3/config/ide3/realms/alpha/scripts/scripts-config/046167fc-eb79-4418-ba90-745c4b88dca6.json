@@ -1,0 +1,16 @@
+{
+  "_id": "046167fc-eb79-4418-ba90-745c4b88dca6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320015123,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798706,
+  "name": "KYID.Journey.UserDoesnotExist",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.UserDoesnotExist.js"
+  }
+}

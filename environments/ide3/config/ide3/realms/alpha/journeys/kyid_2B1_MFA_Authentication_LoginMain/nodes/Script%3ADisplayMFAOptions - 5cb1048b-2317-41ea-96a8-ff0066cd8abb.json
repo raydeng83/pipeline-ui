@@ -1,0 +1,51 @@
+{
+  "_id": "5cb1048b-2317-41ea-96a8-ff0066cd8abb",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "phone",
+      "id": "phone"
+    },
+    {
+      "displayName": "authenticator",
+      "id": "authenticator"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "noaccess",
+      "id": "noaccess"
+    },
+    {
+      "displayName": "firsttimeback",
+      "id": "firsttimeback"
+    }
+  ],
+  "_rev": "761590701",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "email",
+    "phone",
+    "authenticator",
+    "false",
+    "noaccess",
+    "firsttimeback"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "472e61e2-5bb3-47b9-a1f1-c25e43f95958"
+}

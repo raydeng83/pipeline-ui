@@ -1,0 +1,46 @@
+{
+  "_id": "75048d36-827a-4b70-9003-9aadd449f5f1",
+  "_outcomes": [
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "invalidEmail",
+      "id": "invalidEmail"
+    },
+    {
+      "displayName": "invalidName",
+      "id": "invalidName"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "max limit",
+      "id": "max limit"
+    }
+  ],
+  "_rev": "-457342721",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "8460bd1e-1768-4c2e-9348-6e28f0c6a5d8",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

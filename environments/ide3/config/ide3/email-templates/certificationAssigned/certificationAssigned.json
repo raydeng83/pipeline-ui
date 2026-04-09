@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/certificationAssigned",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "certificationAssigned.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "certificationAssigned.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "certificationAssigned.css"
+  },
+  "subject": {
+    "en": "ATTENTION: Certification Task Assigned"
+  }
+}

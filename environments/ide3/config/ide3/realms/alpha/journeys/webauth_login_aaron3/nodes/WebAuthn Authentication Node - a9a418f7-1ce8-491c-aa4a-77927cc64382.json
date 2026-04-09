@@ -1,0 +1,39 @@
+{
+  "_id": "a9a418f7-1ce8-491c-aa4a-77927cc64382",
+  "_outcomes": [
+    {
+      "displayName": "Unsupported",
+      "id": "unsupported"
+    },
+    {
+      "displayName": "No Device Registered",
+      "id": "noDevice"
+    },
+    {
+      "displayName": "Success",
+      "id": "success"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failure"
+    },
+    {
+      "displayName": "Client Error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-1441367188",
+  "_type": {
+    "_id": "WebAuthnAuthenticationNode",
+    "collection": true,
+    "name": "WebAuthn Authentication Node",
+    "version": "1.0"
+  },
+  "asScript": false,
+  "detectSignCountMismatch": false,
+  "isRecoveryCodeAllowed": false,
+  "origins": [],
+  "requiresResidentKey": true,
+  "timeout": 60,
+  "userVerificationRequirement": "PREFERRED"
+}

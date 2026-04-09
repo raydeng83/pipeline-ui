@@ -1,0 +1,16 @@
+{
+  "_id": "9f6fda74-398b-4c46-9a9e-1b4693c358ee",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3b72fc4d-9aae-4eb9-a34d-3e2328f2584d,ou=user,ou=am-config",
+  "creationDate": 1759057081251,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950799072,
+  "name": "KYID.2B1.Journey.RouteToSuccessURL_revised",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.RouteToSuccessURL_revised.js"
+  }
+}

@@ -284,7 +284,11 @@ if(missingInputs.length>0){
     action.goTo(nodeOutcome.ERROR);
 
 } else {
-    if(nodeState.get("accountStatus") && nodeState.get("accountStatus").toLowerCase() == "active"){
+    logger.error("accountStatus :: " + nodeState.get("accountStatus"))
+    var raw = nodeState.get("accountStatus"); // could be null/undefined/non-string
+    var status = (raw == null) ? null : String(raw).trim().toLowerCase();
+    logger.debug("status is :: " + status)
+    if (status === null || status === "active") {
     nodeState.putShared("ConnectorName",ConnectorName);
     nodeState.putShared("isinternaluser",isinternaluser);
     //ConnectorName="kyid";

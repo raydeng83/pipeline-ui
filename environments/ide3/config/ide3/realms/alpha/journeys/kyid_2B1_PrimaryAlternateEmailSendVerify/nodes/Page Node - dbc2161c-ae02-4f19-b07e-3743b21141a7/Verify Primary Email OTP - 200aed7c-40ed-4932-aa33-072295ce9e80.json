@@ -1,0 +1,76 @@
+{
+  "_id": "200aed7c-40ed-4932-aa33-072295ce9e80",
+  "_outcomes": [
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "expired",
+      "id": "expired"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "Choose Another",
+      "id": "Choose Another"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    },
+    {
+      "displayName": "MaxLimit",
+      "id": "MaxLimit"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "backLimit",
+      "id": "backLimit"
+    },
+    {
+      "displayName": "Send Alternate OTP",
+      "id": "Send Alternate OTP"
+    },
+    {
+      "displayName": "Resend Code Primary Email",
+      "id": "Resend Code Primary Email"
+    }
+  ],
+  "_rev": "1388463974",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "false",
+    "Verify",
+    "expired",
+    "Resend Code",
+    "Choose Another",
+    "BlankOTP",
+    "MaxLimit",
+    "error",
+    "backLimit",
+    "Send Alternate OTP",
+    "Resend Code Primary Email"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "cfa3c68c-ef07-4b05-ab01-b7b5bd1e76b1"
+}

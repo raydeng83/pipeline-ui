@@ -1,0 +1,66 @@
+{
+  "_id": "5e721cdf-93ce-490f-9ffd-42202f9ad6b2",
+  "_outcomes": [
+    {
+      "displayName": "MCISearch",
+      "id": "MCISearch"
+    },
+    {
+      "displayName": "highRisk",
+      "id": "highRisk"
+    },
+    {
+      "displayName": "unableToVerify",
+      "id": "unableToVerify"
+    },
+    {
+      "displayName": "MCISYNC",
+      "id": "MCISYNC"
+    },
+    {
+      "displayName": "createAccount",
+      "id": "createAccount"
+    },
+    {
+      "displayName": "firstTimeLogin",
+      "id": "firstTimeLogin"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "FARS",
+      "id": "FARS"
+    },
+    {
+      "displayName": "updateprofile_organdonor",
+      "id": "updateprofile_organdonor"
+    }
+  ],
+  "_rev": "-2086404138",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "MCISearch",
+    "highRisk",
+    "unableToVerify",
+    "MCISYNC",
+    "createAccount",
+    "firstTimeLogin",
+    "error",
+    "FARS",
+    "updateprofile_organdonor"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "df19e6f9-5f79-49b6-b23e-5be4dfff10aa"
+}

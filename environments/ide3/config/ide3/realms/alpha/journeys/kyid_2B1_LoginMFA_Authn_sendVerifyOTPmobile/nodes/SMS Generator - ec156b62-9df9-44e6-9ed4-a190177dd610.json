@@ -1,0 +1,41 @@
+{
+  "_id": "ec156b62-9df9-44e6-9ed4-a190177dd610",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "InvalidNumber",
+      "id": "InvalidNumber"
+    },
+    {
+      "displayName": "MaxSendReached",
+      "id": "MaxSendReached"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-49474471",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "InvalidNumber",
+    "MaxSendReached",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c3da6cf5-87f5-48d6-96c8-32efd1b8d30f"
+}

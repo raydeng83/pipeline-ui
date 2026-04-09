@@ -1,0 +1,17 @@
+{
+  "_id": "cd7f1805-06ad-4fb1-b8ca-6e7b096f9a8a",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-608341601",
+  "_type": {
+    "_id": "SetFailureUrlNode",
+    "collection": true,
+    "name": "Failure URL",
+    "version": "1.0"
+  },
+  "failureUrl": "https://ide3.kyid.ky.gov/"
+}

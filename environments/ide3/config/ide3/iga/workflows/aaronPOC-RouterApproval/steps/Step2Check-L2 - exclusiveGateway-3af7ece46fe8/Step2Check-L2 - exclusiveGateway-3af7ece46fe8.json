@@ -1,0 +1,23 @@
+{
+  "displayName": "Step2Check-L2",
+  "name": "exclusiveGateway-3af7ece46fe8",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "hasStep2 == 'yes'",
+        "outcome": "yes",
+        "step": "approvalTask-69afe5ba97f7"
+      },
+      {
+        "condition": "hasStep2 == 'no'",
+        "outcome": "no",
+        "step": "scriptTask-d4731d303429"
+      }
+    ],
+    "script": {
+      "file": "Step2Check-L2 - exclusiveGateway-3af7ece46fe8.js"
+    }
+  },
+  "type": "scriptTask"
+}

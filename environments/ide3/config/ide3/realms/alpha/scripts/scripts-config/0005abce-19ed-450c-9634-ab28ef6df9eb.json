@@ -1,0 +1,16 @@
+{
+  "_id": "0005abce-19ed-450c-9634-ab28ef6df9eb",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319423158,
+  "default": false,
+  "description": "This script is used to obtain the role request workflow status.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950785907,
+  "name": "KYID.2B1.Journey.PrerequisiteRoleRequestStatus",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.PrerequisiteRoleRequestStatus.js"
+  }
+}

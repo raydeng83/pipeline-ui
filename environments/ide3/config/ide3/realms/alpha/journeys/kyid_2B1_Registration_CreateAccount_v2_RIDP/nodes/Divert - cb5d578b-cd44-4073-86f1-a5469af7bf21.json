@@ -1,0 +1,36 @@
+{
+  "_id": "cb5d578b-cd44-4073-86f1-a5469af7bf21",
+  "_outcomes": [
+    {
+      "displayName": "AlternateEmailVerification",
+      "id": "AlternateEmailVerification"
+    },
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "PhoneEmailVerification",
+      "id": "PhoneEmailVerification"
+    }
+  ],
+  "_rev": "693247612",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "AlternateEmailVerification",
+    "next",
+    "PhoneEmailVerification"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "fbb3032c-6352-471a-980c-764c076b20ce"
+}

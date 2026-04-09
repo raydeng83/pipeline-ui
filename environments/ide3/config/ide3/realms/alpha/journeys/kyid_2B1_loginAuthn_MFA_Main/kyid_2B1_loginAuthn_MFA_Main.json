@@ -1,0 +1,323 @@
+{
+  "_id": "kyid_2B1_loginAuthn_MFA_Main",
+  "_rev": "946630264",
+  "enabled": true,
+  "entryNodeId": "84b47cc8-9908-478e-bef6-6cc977eb0abf",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "07bff872-916f-4ae2-80be-75c405152a6b": {
+      "connections": {
+        "authenticator": "b9f546b7-56e4-441d-8a84-93b7a9e5bf7e",
+        "email": "3c5e3863-950a-402b-ba11-a7ca507089b5",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "helpdesk": "7e32b57c-462f-4ab3-bdd0-877bf1375a58",
+        "idProofing": "09488e87-4311-4f53-b544-227e0d02c8d2",
+        "primary and secondary email": "7e555771-36c2-4774-be93-af78af75d734",
+        "sms": "b1bcc6ec-7f98-4053-ac5b-10e60f42369a"
+      },
+      "displayName": "Script:SelectMFAList",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1391,
+      "y": 590.5
+    },
+    "09488e87-4311-4f53-b544-227e0d02c8d2": {
+      "connections": {
+        "v1": "8da9f774-503e-4a18-822f-dbb271fc8a5f",
+        "v2": "240a382f-9eb7-4258-a8a6-e9a57118f462"
+      },
+      "displayName": "Script: RIDP Version ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1725,
+      "y": 981
+    },
+    "240a382f-9eb7-4258-a8a6-e9a57118f462": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a3448fab-4532-4907-81fc-e31fe92efc18"
+      },
+      "displayName": "IJ: RIDP V2",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2043,
+      "y": 1174.8333333333333
+    },
+    "3c5e3863-950a-402b-ba11-a7ca507089b5": {
+      "connections": {
+        "false": "b52bde68-fc5e-48bc-b48c-db1bf6aa02bc",
+        "true": "5ddb3a4f-5663-42e0-b69b-115e5288ddac"
+      },
+      "displayName": "Email",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1711,
+      "y": 213
+    },
+    "52a1701f-f65b-4e54-8112-6e737194f8a8": {
+      "connections": {
+        "User Found": "07bff872-916f-4ae2-80be-75c405152a6b"
+      },
+      "displayName": "Script:GetUserInfo",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1101,
+      "y": 649.8333333333334
+    },
+    "55ddeedb-7ffe-4fbe-a72f-5555b5bd495f": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "b9f546b7-56e4-441d-8a84-93b7a9e5bf7e"
+      },
+      "displayName": "Script:GoBacktoAuthenticatorList",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2304,
+      "y": 712.6666666666666
+    },
+    "5ddb3a4f-5663-42e0-b69b-115e5288ddac": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "07bff872-916f-4ae2-80be-75c405152a6b"
+      },
+      "displayName": "Script:GoBack",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2045,
+      "y": 347.5
+    },
+    "5e1b15f7-9fc7-4cb6-acdb-a2982634f2f1": {
+      "connections": {
+        "false": "b52bde68-fc5e-48bc-b48c-db1bf6aa02bc",
+        "true": "55ddeedb-7ffe-4fbe-a72f-5555b5bd495f"
+      },
+      "displayName": "Symantec",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2031,
+      "y": 531.5
+    },
+    "6b4af9ab-c93e-49cc-b0c1-af594bc240c4": {
+      "connections": {
+        "true": "dac3f537-412c-48a8-abf6-3754e7ddc10e"
+      },
+      "displayName": "KOGID-ForgotPassword",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1074,
+      "y": 903.6666666666667
+    },
+    "6e35eb5d-15f7-4563-986b-c0a6d152571e": {
+      "connections": {
+        "false": "b52bde68-fc5e-48bc-b48c-db1bf6aa02bc",
+        "true": "7b269b24-36b1-4557-8964-752d88f9a19c"
+      },
+      "displayName": "PUSH",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2305,
+      "y": 397
+    },
+    "7b269b24-36b1-4557-8964-752d88f9a19c": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "b9f546b7-56e4-441d-8a84-93b7a9e5bf7e"
+      },
+      "displayName": "Script:GoBacktoFRTOTPPUSHLIST",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2587,
+      "y": 553.6
+    },
+    "7e32b57c-462f-4ab3-bdd0-877bf1375a58": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Display Helpdesk Details",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1734,
+      "y": 1175
+    },
+    "7e555771-36c2-4774-be93-af78af75d734": {
+      "connections": {
+        "false": "b52bde68-fc5e-48bc-b48c-db1bf6aa02bc",
+        "true": "5ddb3a4f-5663-42e0-b69b-115e5288ddac"
+      },
+      "displayName": "Primary Secondary Email Verify",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1723,
+      "y": 813
+    },
+    "84b47cc8-9908-478e-bef6-6cc977eb0abf": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "aa9d38e4-5db0-4885-80ca-cc9ffa8b4eee"
+      },
+      "displayName": "Script:CheckJourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 645.5
+    },
+    "8da9f774-503e-4a18-822f-dbb271fc8a5f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a3448fab-4532-4907-81fc-e31fe92efc18"
+      },
+      "displayName": "IJ: RIDP V1",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2042,
+      "y": 1006.75
+    },
+    "9eb617af-18b3-4500-8845-8512b43c09aa": {
+      "connections": {
+        "false": "6b4af9ab-c93e-49cc-b0c1-af594bc240c4",
+        "true": "52a1701f-f65b-4e54-8112-6e737194f8a8"
+      },
+      "displayName": "Check if First Time FP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 786,
+      "y": 750.3333333333334
+    },
+    "a0c4b3ee-bc71-4e2a-8882-b765b8a4c5a6": {
+      "connections": {
+        "anotherMethod": "dac3f537-412c-48a8-abf6-3754e7ddc10e",
+        "back": "dac3f537-412c-48a8-abf6-3754e7ddc10e",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Check back",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2624,
+      "y": 898.7333333333333
+    },
+    "a3448fab-4532-4907-81fc-e31fe92efc18": {
+      "connections": {
+        "continue": "a0c4b3ee-bc71-4e2a-8882-b765b8a4c5a6",
+        "differentMethod": "dac3f537-412c-48a8-abf6-3754e7ddc10e",
+        "retry": "09488e87-4311-4f53-b544-227e0d02c8d2"
+      },
+      "displayName": "Script: Retry",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2343,
+      "y": 1005.5
+    },
+    "a907c5c6-3231-4147-acae-6c6227ce45f9": {
+      "connections": {
+        "false": "b52bde68-fc5e-48bc-b48c-db1bf6aa02bc",
+        "true": "7b269b24-36b1-4557-8964-752d88f9a19c"
+      },
+      "displayName": "TOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2307,
+      "y": 559
+    },
+    "aa9d38e4-5db0-4885-80ca-cc9ffa8b4eee": {
+      "connections": {
+        "hasSession": "cfda3562-7100-41b0-9121-862363b56285",
+        "noSession": "9eb617af-18b3-4500-8845-8512b43c09aa"
+      },
+      "displayName": "Script:CheckSessionValidity",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 494,
+      "y": 640.5
+    },
+    "b1bcc6ec-7f98-4053-ac5b-10e60f42369a": {
+      "connections": {
+        "false": "b52bde68-fc5e-48bc-b48c-db1bf6aa02bc",
+        "true": "5ddb3a4f-5663-42e0-b69b-115e5288ddac"
+      },
+      "displayName": "Phone",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1716,
+      "y": 380
+    },
+    "b52bde68-fc5e-48bc-b48c-db1bf6aa02bc": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:UnexpectedError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2648,
+      "y": 251.2
+    },
+    "b8771cc2-be7b-400b-a62d-76e0fb3ccaef": {
+      "connections": {
+        "FRPUSH": "6e35eb5d-15f7-4563-986b-c0a6d152571e",
+        "FRTOTP": "a907c5c6-3231-4147-acae-6c6227ce45f9",
+        "back": "b9f546b7-56e4-441d-8a84-93b7a9e5bf7e"
+      },
+      "displayName": "Script:FRTOTPPUSH",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2035,
+      "y": 706.875
+    },
+    "b9f546b7-56e4-441d-8a84-93b7a9e5bf7e": {
+      "connections": {
+        "back": "5ddb3a4f-5663-42e0-b69b-115e5288ddac",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "forgerock": "b8771cc2-be7b-400b-a62d-76e0fb3ccaef",
+        "googleTOTP": "a907c5c6-3231-4147-acae-6c6227ce45f9",
+        "microsoftTOTP": "a907c5c6-3231-4147-acae-6c6227ce45f9",
+        "symantec": "5e1b15f7-9fc7-4cb6-acdb-a2982634f2f1"
+      },
+      "displayName": "Script:AuthenticatorList",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1718,
+      "y": 534
+    },
+    "cfda3562-7100-41b0-9121-862363b56285": {
+      "connections": {
+        "true": "52a1701f-f65b-4e54-8112-6e737194f8a8"
+      },
+      "displayName": "Script:getKOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 789,
+      "y": 579.6666666666667
+    },
+    "dac3f537-412c-48a8-abf6-3754e7ddc10e": {
+      "connections": {
+        "true": "07bff872-916f-4ae2-80be-75c405152a6b"
+      },
+      "displayName": "Script: Retry Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1393,
+      "y": 978.8
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2968,
+      "y": 402.66666666666663
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2968,
+      "y": 425.3333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 673
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}"
+  }
+}

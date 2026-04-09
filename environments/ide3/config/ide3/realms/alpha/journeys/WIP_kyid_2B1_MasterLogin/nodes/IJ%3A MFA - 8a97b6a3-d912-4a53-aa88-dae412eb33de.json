@@ -1,0 +1,22 @@
+{
+  "_id": "8a97b6a3-d912-4a53-aa88-dae412eb33de",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-2044965427",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_MFA_RegistrationAndAuthentication"
+}

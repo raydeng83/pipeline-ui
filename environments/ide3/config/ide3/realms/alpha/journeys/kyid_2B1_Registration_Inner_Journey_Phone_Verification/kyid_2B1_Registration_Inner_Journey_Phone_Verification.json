@@ -1,0 +1,101 @@
+{
+  "_id": "kyid_2B1_Registration_Inner_Journey_Phone_Verification",
+  "_rev": "-404288279",
+  "description": "Registration Acceptance for Invited Users",
+  "enabled": true,
+  "entryNodeId": "9f44fe18-85e1-4651-b503-b5730552c12b",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "28b62b3e-e447-4396-bac2-8412bbdcbc31": {
+      "connections": {
+        "back": "9851dc3b-c838-4597-ba65-4736b6773205",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "skip": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 884.015625,
+      "y": 228.53125
+    },
+    "300d225b-1a0a-46cb-b14b-bcfaa96e578f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "28b62b3e-e447-4396-bac2-8412bbdcbc31"
+      },
+      "displayName": "Phone Verification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 583.015625,
+      "y": 287.03125
+    },
+    "788ff259-bd19-4825-b6c7-98ae15af183f": {
+      "connections": {
+        "true": "9851dc3b-c838-4597-ba65-4736b6773205"
+      },
+      "displayName": "Error: Invalid Phone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 254,
+      "y": 578.6666717529297
+    },
+    "9851dc3b-c838-4597-ba65-4736b6773205": {
+      "connections": {
+        "back": "28b62b3e-e447-4396-bac2-8412bbdcbc31",
+        "dontVerify": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "invalidPhone": "788ff259-bd19-4825-b6c7-98ae15af183f",
+        "max limit": "dcaeedb3-2450-4cd2-8273-4a4780cf509f",
+        "skip": "28b62b3e-e447-4396-bac2-8412bbdcbc31",
+        "verify": "300d225b-1a0a-46cb-b14b-bcfaa96e578f"
+      },
+      "displayName": "Collect Phone Number",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 189,
+      "y": 168.8159637451172
+    },
+    "9f44fe18-85e1-4651-b503-b5730552c12b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "9851dc3b-c838-4597-ba65-4736b6773205"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 127,
+      "y": 32
+    },
+    "dcaeedb3-2450-4cd2-8273-4a4780cf509f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max limit reached for back",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 685,
+      "y": 524.1000061035156
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1266,
+      "y": 129
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1263,
+      "y": 448
+    },
+    "startNode": {
+      "x": 6,
+      "y": 220
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

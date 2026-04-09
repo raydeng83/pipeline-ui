@@ -1,0 +1,16 @@
+{
+  "_id": "e0f1d77d-62fd-4144-89ba-d03cd9796b5d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320017090,
+  "default": false,
+  "description": "This script will remove the mfa methods for which the user has registered for",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801433,
+  "name": "KYID.Journey.MFAMethodRemoveFromUser",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAMethodRemoveFromUser.js"
+  }
+}

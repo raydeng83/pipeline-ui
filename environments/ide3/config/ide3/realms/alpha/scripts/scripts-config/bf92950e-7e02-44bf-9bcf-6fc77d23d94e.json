@@ -1,0 +1,16 @@
+{
+  "_id": "bf92950e-7e02-44bf-9bcf-6fc77d23d94e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "creationDate": 1770626985239,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1773828809195,
+  "name": "KYID.2B1.Journey.Password.Recovery.RIDP.Version.Flag",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Password.Recovery.RIDP.Version.Flag.js"
+  }
+}

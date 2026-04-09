@@ -1,0 +1,22 @@
+{
+  "_id": "190915ba-b5a6-4ca6-90a9-b3d9af0dec71",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1225797554",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_mfaAuthenticationEmailOTPHasSession"
+}

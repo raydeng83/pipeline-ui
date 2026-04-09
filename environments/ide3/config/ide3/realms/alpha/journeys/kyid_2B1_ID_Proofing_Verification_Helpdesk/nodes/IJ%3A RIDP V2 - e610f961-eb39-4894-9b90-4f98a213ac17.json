@@ -1,0 +1,22 @@
+{
+  "_id": "e610f961-eb39-4894-9b90-4f98a213ac17",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-2134771871",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v2"
+}

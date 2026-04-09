@@ -1,0 +1,16 @@
+{
+  "_id": "09bbb528-7aa3-4b82-9beb-341e5babaa9a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1751966873842,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=81073c37-7e92-4460-a48e-7435a1c0a371,ou=user,ou=am-config",
+  "lastModifiedDate": 1769525378583,
+  "name": "KYID.2B1.CheckUserTypeForJIT",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.CheckUserTypeForJIT.js"
+  }
+}

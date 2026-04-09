@@ -1,0 +1,16 @@
+{
+  "_id": "d8fec061-0093-48e3-946b-7379ff2aa063",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1752045680562,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950800939,
+  "name": "KYID.2B1.Journey.ShowErrorWhenUserCreationFailedinAD",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ShowErrorWhenUserCreationFailedinAD.js"
+  }
+}

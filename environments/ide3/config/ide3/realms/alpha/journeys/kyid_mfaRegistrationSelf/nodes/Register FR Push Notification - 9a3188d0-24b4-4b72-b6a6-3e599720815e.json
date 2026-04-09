@@ -1,0 +1,22 @@
+{
+  "_id": "9a3188d0-24b4-4b72-b6a6-3e599720815e",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1490952302",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_mfaRegistrationRegisterFRPush.SelfandOthers"
+}

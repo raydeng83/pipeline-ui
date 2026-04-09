@@ -1,0 +1,16 @@
+{
+  "_id": "b62ca05d-de96-4ec4-932a-a8d5146ad17d",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319427783,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798075,
+  "name": "KYID.Journey.SetUserLanguagePreferenceCookieES",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetUserLanguagePreferenceCookieES.js"
+  }
+}

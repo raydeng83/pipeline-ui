@@ -1,0 +1,34 @@
+{
+  "name": "alpha_CustomObject2",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "custom_Type",
+      "address"
+    ],
+    "properties": {
+      "address": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "address",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "custom_Type": {
+        "searchable": false,
+        "title": "Pre Req Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "customobject2",
+    "type": "object"
+  }
+}

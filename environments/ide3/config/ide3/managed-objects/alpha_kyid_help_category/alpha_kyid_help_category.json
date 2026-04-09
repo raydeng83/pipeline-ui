@@ -1,0 +1,240 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_help_category",
+  "onCreate": {
+    "file": "alpha_kyid_help_category.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "alpha_kyid_help_category.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onValidate": {
+    "file": "alpha_kyid_help_category.onValidate.js",
+    "globals": {
+      "_humanReadableEventName_": "Help Category (onValidate)"
+    },
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "alpha_kyid_help_category.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "alpha_kyid_help_category.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "name",
+      "description",
+      "logo",
+      "sequence",
+      "isVisible",
+      "localizedContent",
+      "updateDate",
+      "createDate",
+      "updatedBy",
+      "createdBy",
+      "updateDateEpoch",
+      "createDateEpoch",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "createDate": {
+        "searchable": false,
+        "title": "Create  Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "Created By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "description": {
+        "searchable": false,
+        "title": "Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "isVisible": {
+        "searchable": false,
+        "title": "Is Visible?",
+        "type": "boolean",
+        "userEditable": true,
+        "viewable": true
+      },
+      "localizedContent": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "title",
+            "description"
+          ],
+          "properties": {
+            "description": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Category Description",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            },
+            "title": {
+              "description": null,
+              "isVirtual": false,
+              "order": [
+                "en",
+                "es"
+              ],
+              "properties": {
+                "en": {
+                  "searchable": false,
+                  "title": "English",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                },
+                "es": {
+                  "searchable": false,
+                  "title": "Spanish",
+                  "type": "string",
+                  "userEditable": true,
+                  "viewable": true
+                }
+              },
+              "required": [],
+              "searchable": false,
+              "title": "Category Title",
+              "type": "object",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "nullable": false,
+        "searchable": false,
+        "title": "Localized Content",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "logo": {
+        "searchable": false,
+        "title": "Logo Image url",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "policies": [
+          {
+            "params": {},
+            "policyId": "unique"
+          }
+        ],
+        "searchable": true,
+        "title": "Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "sequence": {
+        "searchable": false,
+        "title": "Sequence",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "Updated By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "title": "Help Category",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-unregisteredusrmsg-en",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_UNREGISTEREDUSRMSG_EN}"
+}

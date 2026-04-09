@@ -1,0 +1,25 @@
+{
+  "_id": "1760fda7-ac1f-449f-b56e-8eb540bf9c62",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "475697532",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User Not Found in AIC"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

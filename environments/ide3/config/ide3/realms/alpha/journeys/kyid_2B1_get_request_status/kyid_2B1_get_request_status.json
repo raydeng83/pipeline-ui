@@ -1,0 +1,52 @@
+{
+  "_id": "kyid_2B1_get_request_status",
+  "_rev": "430422788",
+  "enabled": true,
+  "entryNodeId": "fe39ac88-ae75-49ce-9e80-f033ac07a645",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "a9aba42b-90e0-466f-8ad3-27e6b76b8f99": {
+      "connections": {
+        "Back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script - Prerequisite Role Request Workflow Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 629,
+      "y": 193.8159637451172
+    },
+    "fe39ac88-ae75-49ce-9e80-f033ac07a645": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a9aba42b-90e0-466f-8ad3-27e6b76b8f99"
+      },
+      "displayName": "Script - isKYID2BJourney",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 222.015625,
+      "y": 219.5390625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1042,
+      "y": 158
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1036,
+      "y": 351
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

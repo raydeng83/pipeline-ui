@@ -1,0 +1,176 @@
+{
+  "_id": "kyid_2B1_LoginMFA_Register_Symantec",
+  "_rev": "-1654193956",
+  "enabled": true,
+  "entryNodeId": "24fcc30e-5a9f-471d-b937-f0f7d18ad1db",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "196df880-48a1-402e-90e1-a89005d5c784": {
+      "connections": {
+        "false": "47525d6a-e1a6-4938-a985-bfa87ad78ad3",
+        "true": "60378fd5-dc90-413b-9828-6cd16a75571a"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 1426,
+      "y": 235.5
+    },
+    "24fcc30e-5a9f-471d-b937-f0f7d18ad1db": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "9d98e35d-29ce-4bd5-9f09-ac9d9135900d"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 235.5
+    },
+    "2595c891-c5d0-4f9a-8e89-4cb9fc4a5f1a": {
+      "connections": {
+        "True": "80d6dc6e-c727-4131-94f6-c2b992d4b04d"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2604,
+      "y": 262
+    },
+    "260ed7b0-0a17-4dd7-b795-92a896fc4615": {
+      "connections": {
+        "false": "60378fd5-dc90-413b-9828-6cd16a75571a",
+        "true": "2595c891-c5d0-4f9a-8e89-4cb9fc4a5f1a"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2339,
+      "y": 235.5
+    },
+    "26a5cfd3-9600-4d99-b9cb-8ae0e1164aa7": {
+      "connections": {
+        "failure": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "success": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "MFA Added - Send Mail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3128,
+      "y": 133.66666666666666
+    },
+    "47525d6a-e1a6-4938-a985-bfa87ad78ad3": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1718,
+      "y": 80
+    },
+    "4bd970a5-4792-4946-b8b9-f0a5667ecda2": {
+      "connections": {
+        "ERROR": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "NOMATCHRESPONSE": "260ed7b0-0a17-4dd7-b795-92a896fc4615"
+      },
+      "displayName": "Symantec Activation Call",
+      "nodeType": "RESTNode",
+      "version": "1.0",
+      "x": 2024,
+      "y": 133
+    },
+    "60378fd5-dc90-413b-9828-6cd16a75571a": {
+      "connections": {
+        "Back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "BlankOTP": "bd256d4f-08ab-4cec-93fb-6bc94d962b72",
+        "Duplicate": "bd256d4f-08ab-4cec-93fb-6bc94d962b72",
+        "Verify": "4bd970a5-4792-4946-b8b9-f0a5667ecda2",
+        "skip": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Collects  Symantec Cred ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1718,
+      "y": 285
+    },
+    "80d6dc6e-c727-4131-94f6-c2b992d4b04d": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "26a5cfd3-9600-4d99-b9cb-8ae0e1164aa7"
+      },
+      "displayName": "Update Method",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2869,
+      "y": 235.5
+    },
+    "9d98e35d-29ce-4bd5-9f09-ac9d9135900d": {
+      "connections": {
+        "byPass": "dec1d607-b625-47fe-92d8-2bc158fd0ff1",
+        "hasSession": "d2678b01-67b7-4586-8d5e-ea41f08e34cd",
+        "noSession": "dec1d607-b625-47fe-92d8-2bc158fd0ff1"
+      },
+      "displayName": "Script - Is Session Exist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 486,
+      "y": 222.5
+    },
+    "bd256d4f-08ab-4cec-93fb-6bc94d962b72": {
+      "connections": {
+        "true": "60378fd5-dc90-413b-9828-6cd16a75571a"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2024,
+      "y": 311.5
+    },
+    "d2678b01-67b7-4586-8d5e-ea41f08e34cd": {
+      "connections": {
+        "Error": "47525d6a-e1a6-4938-a985-bfa87ad78ad3",
+        "Success": "196df880-48a1-402e-90e1-a89005d5c784"
+      },
+      "displayName": "Script - Read User Info from Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1106,
+      "y": 235.5
+    },
+    "dec1d607-b625-47fe-92d8-2bc158fd0ff1": {
+      "connections": {
+        "Error": "47525d6a-e1a6-4938-a985-bfa87ad78ad3",
+        "Success": "196df880-48a1-402e-90e1-a89005d5c784",
+        "hasSession": "d2678b01-67b7-4586-8d5e-ea41f08e34cd"
+      },
+      "displayName": "Script: Read userInfo without a session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 786,
+      "y": 222.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3431,
+      "y": 263
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3128,
+      "y": 311.8333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 263
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

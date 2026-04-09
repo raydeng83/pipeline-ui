@@ -1,0 +1,16 @@
+{
+  "_id": "9f34d6b8-5683-4b2c-bb7e-4d672c10618d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=914dffcd-3392-46ab-bc96-b6dbf382c08a,ou=user,ou=am-config",
+  "creationDate": 1753401115260,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950816403,
+  "name": "km_testscript",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/km_testscript.js"
+  }
+}

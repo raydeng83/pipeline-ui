@@ -1,0 +1,30 @@
+{
+  "_id": "d474703c-380a-4bb1-a0f2-fe9431c3877c",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "SUCCESS"
+    },
+    {
+      "displayName": "Error",
+      "id": "ERROR"
+    }
+  ],
+  "_rev": "-118629531",
+  "_type": {
+    "_id": "IdentityAssertionDecisionNode",
+    "collection": true,
+    "name": "Identity Assertion",
+    "version": "1.0"
+  },
+  "route": "/identityassertion3",
+  "serverId": "IG-Identity-assertion [/alpha]",
+  "serverToSharedStateMap": {
+    "aud": "ig-aud",
+    "identity": "ig-identity",
+    "principal": "username"
+  },
+  "sharedStateToServerMap": {
+    "username": "sub"
+  }
+}

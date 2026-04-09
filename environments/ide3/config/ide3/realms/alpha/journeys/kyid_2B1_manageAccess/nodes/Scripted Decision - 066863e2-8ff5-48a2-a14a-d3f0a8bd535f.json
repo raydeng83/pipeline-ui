@@ -1,0 +1,56 @@
+{
+  "_id": "066863e2-8ff5-48a2-a14a-d3f0a8bd535f",
+  "_outcomes": [
+    {
+      "displayName": "requestRole",
+      "id": "requestRole"
+    },
+    {
+      "displayName": "removeRole",
+      "id": "removeRole"
+    },
+    {
+      "displayName": "refresh",
+      "id": "refresh"
+    },
+    {
+      "displayName": "invalidjson",
+      "id": "invalidjson"
+    },
+    {
+      "displayName": "invalidRoleId",
+      "id": "invalidRoleId"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-1227695524",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "requestRole",
+    "removeRole",
+    "refresh",
+    "invalidjson",
+    "invalidRoleId",
+    "back",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "a3a1c5a5-fd3c-4732-b88c-27d9530f2487"
+}

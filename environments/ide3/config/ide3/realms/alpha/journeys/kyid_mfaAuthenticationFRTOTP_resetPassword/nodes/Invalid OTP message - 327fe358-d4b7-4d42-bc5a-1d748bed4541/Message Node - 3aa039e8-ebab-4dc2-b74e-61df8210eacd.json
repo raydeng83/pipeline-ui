@@ -1,0 +1,32 @@
+{
+  "_id": "3aa039e8-ebab-4dc2-b74e-61df8210eacd",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-367132472",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "<div class='error-message'>You have provided an incorrect verification code. Please choose option below to continue.</div>",
+    "es": "<div class='error-message'>Ha proporcionado un código de verificación incorrecto. Elija una opción a continuación para continuar.</div>"
+  },
+  "messageNo": {
+    "en": "Return to authenticator list",
+    "es": "Volver a la lista de autenticadores"
+  },
+  "messageYes": {
+    "en": "Re-Enter code",
+    "es": "Vuelva a ingresar el código"
+  }
+}

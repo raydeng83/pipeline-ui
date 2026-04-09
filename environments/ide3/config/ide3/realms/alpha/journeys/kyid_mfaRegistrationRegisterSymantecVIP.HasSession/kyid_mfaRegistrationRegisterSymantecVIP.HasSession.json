@@ -1,0 +1,194 @@
+{
+  "_id": "kyid_mfaRegistrationRegisterSymantecVIP.HasSession",
+  "_rev": "-290145521",
+  "description": "MFA Registration for Symantec VIP",
+  "enabled": true,
+  "entryNodeId": "b414a172-302a-4179-a512-ce745c943da1",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "067da99b-3fc5-4008-920b-57810d26f462": {
+      "connections": {
+        "true": "6c6a2fba-ce88-4c25-a2b1-e0bfd9d8b013"
+      },
+      "displayName": "Update Node State Symantec",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1254,
+      "y": 203.33333333333331
+    },
+    "0744762b-169b-4cb9-b9a3-125f6c12c476": {
+      "connections": {
+        "ERROR": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "NOMATCHRESPONSE": "8a190ac3-0e0c-4a0d-9011-9bbfa59748ae"
+      },
+      "displayName": "Symantec Activation Call",
+      "nodeType": "RESTNode",
+      "version": "1.0",
+      "x": 702,
+      "y": 265
+    },
+    "202b428a-28a9-42d0-9c11-f2038c6b580b": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1556,
+      "y": 203.33333333333331
+    },
+    "24ca58b6-58d4-4fd3-957f-069634b831f9": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "dc8a6cce-62fe-4ee1-a15d-18ede3272341"
+      },
+      "displayName": "Script: FirstTimeLoginUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2139,
+      "y": 332.5
+    },
+    "2e4036b0-c283-4f5f-867e-173b58db0ae3": {
+      "connections": {
+        "False": "202b428a-28a9-42d0-9c11-f2038c6b580b",
+        "True": "d1c933c9-33d8-466b-b277-d326aae2f993"
+      },
+      "displayName": "Symantec:BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 702,
+      "y": 450
+    },
+    "5c1d4e7a-ada1-43da-8d0d-39852a19ad77": {
+      "connections": {
+        "False": "202b428a-28a9-42d0-9c11-f2038c6b580b",
+        "True": "d1c933c9-33d8-466b-b277-d326aae2f993"
+      },
+      "displayName": "Registration Failure",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1254,
+      "y": 276.6666666666667
+    },
+    "66df717b-3637-4b15-b250-8779ad0ed79d": {
+      "connections": {
+        "true": "d1c933c9-33d8-466b-b277-d326aae2f993"
+      },
+      "displayName": "Script: Duplicate Symantec CredID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 702,
+      "y": 635
+    },
+    "6a3a803f-ca74-4826-9c9b-4d8f7aea0eba": {
+      "connections": {
+        "true": "24ca58b6-58d4-4fd3-957f-069634b831f9"
+      },
+      "displayName": "Script: Set IDPAuthType",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1876,
+      "y": 357.5
+    },
+    "6c6a2fba-ce88-4c25-a2b1-e0bfd9d8b013": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "6a3a803f-ca74-4826-9c9b-4d8f7aea0eba"
+      },
+      "displayName": "Add MFA Method to user",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1556,
+      "y": 276.6666666666667
+    },
+    "8a190ac3-0e0c-4a0d-9011-9bbfa59748ae": {
+      "connections": {
+        "false": "5c1d4e7a-ada1-43da-8d0d-39852a19ad77",
+        "true": "067da99b-3fc5-4008-920b-57810d26f462"
+      },
+      "displayName": "Registration Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1022,
+      "y": 332.5
+    },
+    "9a31cfc8-225f-4713-aac7-7153f01278c0": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetUp additional security methods",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2665,
+      "y": 357.5
+    },
+    "ac9bc954-be22-4a21-804f-863a45e6975d": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 702,
+      "y": 80
+    },
+    "b414a172-302a-4179-a512-ce745c943da1": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "d1c933c9-33d8-466b-b277-d326aae2f993"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 332.5
+    },
+    "d1c933c9-33d8-466b-b277-d326aae2f993": {
+      "connections": {
+        "BlankOTP": "2e4036b0-c283-4f5f-867e-173b58db0ae3",
+        "Choose Another Method": "ac9bc954-be22-4a21-804f-863a45e6975d",
+        "Duplicate": "66df717b-3637-4b15-b250-8779ad0ed79d",
+        "Verify": "0744762b-169b-4cb9-b9a3-125f6c12c476",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Collect credID and Token",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 457,
+      "y": 231.5
+    },
+    "dc8a6cce-62fe-4ee1-a15d-18ede3272341": {
+      "connections": {
+        "false": "9a31cfc8-225f-4713-aac7-7153f01278c0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Registration Success",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2420,
+      "y": 180.66666666666669
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2985,
+      "y": 350
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2420,
+      "y": 368.3333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 350
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

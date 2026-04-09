@@ -1,0 +1,203 @@
+{
+  "clusteredSourceReconEnabled": true,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "businessRoleId"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "MainRoleStaging",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "MainRoleStaging",
+  "enableSync": false,
+  "name": "MainRoleStaging",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "CREATE",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "__NAME__",
+      "target": "businessRoleId"
+    },
+    {
+      "source": "Name",
+      "target": "name"
+    },
+    {
+      "source": "AdminDescription",
+      "target": "description"
+    },
+    {
+      "source": "ADGroupName",
+      "target": "adGroupName"
+    },
+    {
+      "source": "ADGroupType",
+      "target": "adGroupType"
+    },
+    {
+      "default": false,
+      "source": "DoesProvideFTIAccess",
+      "target": "doesProvideFTIAccess"
+    },
+    {
+      "default": false,
+      "source": "DoesProvideElevatedAccess",
+      "target": "doesProvideElevatedAccess"
+    },
+    {
+      "default": false,
+      "source": "DoesProvidePriviledgedAccess",
+      "target": "doesProvidePriviledgedAccess"
+    },
+    {
+      "default": false,
+      "source": "IsDelegatable",
+      "target": "isDelegable"
+    },
+    {
+      "default": false,
+      "source": "IsForwardDelegatable",
+      "target": "isForwardDelegable"
+    },
+    {
+      "source": "RequiredMFAMethod",
+      "target": "requiredMFAMethod"
+    },
+    {
+      "default": false,
+      "source": "IsOrgScopedRole",
+      "target": "isOrgScopedRole"
+    },
+    {
+      "source": "",
+      "target": "content",
+      "transform": {
+        "globals": {},
+        "source": "var dbString = source;\nvar resultArray = [];\nvar spanishPrefix = \"ES_\";\nif (dbString != null) {\n\ttry{\n\t\tvar displayName = source.DisplayName;\n\t\tvar displayDescription = source.DisplayDescription;\n\t\tresultArray = [{\"name\":{\"en\":displayName,\"es\":spanishPrefix + displayName},\"description\":{\"en\":displayDescription,\"es\":spanishPrefix+displayDescription}}];\n\t\tresultArray;\t\n  }catch(error){\n\t  logger.error(\"exception : \"+error);\n  }\n}",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "",
+      "target": "recordState",
+      "transform": {
+        "globals": {},
+        "source": "\"ACTIVE\"",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "ApplicationId",
+      "target": "applicationId",
+      "transform": {
+        "globals": {},
+        "source": "source.toString();",
+        "type": "text/javascript"
+      }
+    },
+    {
+      "source": "CreateDate",
+      "target": "createDate"
+    },
+    {
+      "source": "UpdateDate",
+      "target": "updateDate"
+    },
+    {
+      "source": "CreateDateEpoch",
+      "target": "createDateEpoch"
+    },
+    {
+      "source": "updateDateEpoch",
+      "target": "updateDateEpoch"
+    },
+    {
+      "source": "CreateUserId",
+      "target": "createdByID"
+    },
+    {
+      "source": "UpdateUserId",
+      "target": "updatedByID"
+    },
+    {
+      "source": "SrcCreateUserId",
+      "target": "createdBy"
+    },
+    {
+      "source": "SrcUpdateUserId",
+      "target": "updatedBy"
+    }
+  ],
+  "reconSourceQueryPageSize": {
+    "$int": "&{esv.dbconnector.querypagesize}"
+  },
+  "reconSourceQueryPaging": true,
+  "runTargetPhase": false,
+  "source": "system/DBConnector_BusinessRolesStaging/__ACCOUNT__",
+  "sourceQuery": {
+    "_queryFilter": "ReconFlag eq \"yes\"",
+    "_sortKeys": "BusinessRoleID,ReconFlag"
+  },
+  "sourceQueryFullEntry": true,
+  "target": "managed/alpha_role",
+  "taskThreads": {
+    "$int": "&{esv.dbconnector.taskthreads}"
+  }
+}

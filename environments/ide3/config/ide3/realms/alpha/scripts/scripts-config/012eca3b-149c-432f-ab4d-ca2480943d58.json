@@ -1,0 +1,16 @@
+{
+  "_id": "012eca3b-149c-432f-ab4d-ca2480943d58",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1751452805517,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950804841,
+  "name": "KYID.2B1.Journey.CreateUserinPing.SelfRegistration",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.CreateUserinPing.SelfRegistration.js"
+  }
+}

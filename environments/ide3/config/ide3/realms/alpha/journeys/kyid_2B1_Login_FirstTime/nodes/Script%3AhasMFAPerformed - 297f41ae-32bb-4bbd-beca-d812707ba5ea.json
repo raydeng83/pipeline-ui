@@ -1,0 +1,31 @@
+{
+  "_id": "297f41ae-32bb-4bbd-beca-d812707ba5ea",
+  "_outcomes": [
+    {
+      "displayName": "noMFAtrigger",
+      "id": "noMFAtrigger"
+    },
+    {
+      "displayName": "MFAtrigger",
+      "id": "MFAtrigger"
+    }
+  ],
+  "_rev": "45399164",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "noMFAtrigger",
+    "MFAtrigger"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "f3cb4007-5bdf-403f-bce1-a83f96544300"
+}

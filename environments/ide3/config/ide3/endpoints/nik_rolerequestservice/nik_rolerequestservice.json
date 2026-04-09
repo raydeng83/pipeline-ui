@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/nik_rolerequestservice",
+  "description": "Role request service",
+  "file": "nik_rolerequestservice.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

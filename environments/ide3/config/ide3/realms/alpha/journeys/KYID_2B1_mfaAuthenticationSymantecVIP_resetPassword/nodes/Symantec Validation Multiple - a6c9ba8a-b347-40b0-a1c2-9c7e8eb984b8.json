@@ -1,0 +1,39 @@
+{
+  "_id": "a6c9ba8a-b347-40b0-a1c2-9c7e8eb984b8",
+  "_outcomes": [
+    {
+      "displayName": "Default Response",
+      "id": "NOMATCHRESPONSE"
+    },
+    {
+      "displayName": "Error",
+      "id": "ERROR"
+    }
+  ],
+  "_rev": "318986238",
+  "_type": {
+    "_id": "RESTNode",
+    "collection": true,
+    "name": "HTTP Client",
+    "version": "1.0"
+  },
+  "basicAuthn": false,
+  "basicAuthnPassword": "",
+  "basicAuthnUsername": "",
+  "bodyReturn": "responsebody",
+  "bodyType": "XML",
+  "disableCertChecks": false,
+  "headersMap": {},
+  "jpToOutcomeMapper": {},
+  "jpToSSMapper": {},
+  "payload": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"                    xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\"                    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"                    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"                    xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"                    xmlns:ns1=\"https://schemas.vip.symantec.com/2006/08/vipservice\">     <SOAP-ENV:Body>         <ValidateMultiple xmlns=\"https://schemas.vip.symantec.com/2006/08/vipservice\"                           xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"                           xsi:schemaLocation=\"https://schemas.vip.symantec.com/2006/08/vipservice\"                           Version=\"3.1\"                           Id=\"${Id}\">${CredID}<OTP>${securityCode}</OTP>             <SendSuccessfulTokenId>true</SendSuccessfulTokenId>         </ValidateMultiple>     </SOAP-ENV:Body> </SOAP-ENV:Envelope>",
+  "privateKey": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
+  "publicCert": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+  "queryParamsMap": {},
+  "requestMode": "POST",
+  "responseCodes": [],
+  "restURL": "https://services-auth.vip.symantec.com/val/soap",
+  "statusCodeReturn": "responsecode",
+  "timeout": 30,
+  "usemTLS": true
+}

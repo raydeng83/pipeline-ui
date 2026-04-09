@@ -1,0 +1,16 @@
+{
+  "_id": "88daa9c9-1f09-4ab5-aea2-6e50084e5262",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319427675,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950815160,
+  "name": "KYID.2B1.Journey.MFARegistration.Twilio.VoiceGenerator",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.MFARegistration.Twilio.VoiceGenerator.js"
+  }
+}

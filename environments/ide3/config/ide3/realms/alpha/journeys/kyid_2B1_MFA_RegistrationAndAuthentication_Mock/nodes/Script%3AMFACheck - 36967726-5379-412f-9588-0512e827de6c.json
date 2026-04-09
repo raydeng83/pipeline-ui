@@ -1,0 +1,31 @@
+{
+  "_id": "36967726-5379-412f-9588-0512e827de6c",
+  "_outcomes": [
+    {
+      "displayName": "firstTimeMFACheck",
+      "id": "firstTimeMFACheck"
+    },
+    {
+      "displayName": "MFACheck",
+      "id": "MFACheck"
+    }
+  ],
+  "_rev": "2078306572",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "firstTimeMFACheck",
+    "MFACheck"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "5eab3b40-b486-4fd5-a08a-4a8c46b7d666"
+}

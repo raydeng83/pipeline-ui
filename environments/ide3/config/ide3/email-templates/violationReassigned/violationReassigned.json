@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/violationReassigned",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "violationReassigned.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "violationReassigned.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "violationReassigned.css"
+  },
+  "subject": {
+    "en": "ATTENTION: Violation Reassigned"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "mail"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "systemAaroncsv__ACCOUNT___managedAlpha_user",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "systemAaroncsv__ACCOUNT___managedAlpha_user",
+  "name": "systemAaroncsv__ACCOUNT___managedAlpha_user",
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "Last_name",
+      "target": "sn"
+    },
+    {
+      "source": "First_name",
+      "target": "givenName"
+    },
+    {
+      "source": "Login_email",
+      "target": "mail"
+    },
+    {
+      "source": "Phones",
+      "target": "telephoneNumber"
+    }
+  ],
+  "runTargetPhase": false,
+  "source": "system/aaroncsvinboundpoc/__ACCOUNT__",
+  "target": "managed/alpha_user"
+}

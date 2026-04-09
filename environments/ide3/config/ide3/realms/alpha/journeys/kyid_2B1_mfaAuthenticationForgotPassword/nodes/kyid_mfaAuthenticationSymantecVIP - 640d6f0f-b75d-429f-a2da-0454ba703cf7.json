@@ -1,0 +1,22 @@
+{
+  "_id": "640d6f0f-b75d-429f-a2da-0454ba703cf7",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1917651368",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "KYID_2B1_mfaAuthenticationSymantecVIP_resetPassword"
+}

@@ -1,0 +1,25 @@
+{
+  "_id": "6283e33a-6855-4a68-bc17-c0f8553f799e",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "238947592",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Not a helpdesk user"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-journey-execution-flag",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_JOURNEY_EXECUTION_FLAG}"
+}

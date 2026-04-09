@@ -1,0 +1,70 @@
+{
+  "displayName": "Fulfillment Task",
+  "fulfillmentTask": {
+    "actors": [
+      {
+        "id": "managed/user/3515830b-dbce-4237-818b-d5b73d383490",
+        "permissions": {
+          "comment": true,
+          "deny": true,
+          "fulfill": true,
+          "modify": true,
+          "reassign": true
+        }
+      }
+    ],
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "requestAssigned"
+      },
+      "escalation": {
+        "actors": [
+          {
+            "id": "managed/user/32c9374a-35d9-4c4c-8351-a88adc7273f2"
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(5*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 5,
+        "notification": "requestEscalated"
+      },
+      "expiration": {
+        "action": "reject",
+        "actors": [],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(7*24*60*60*1000))).toISOString()"
+        },
+        "notification": "requestExpired"
+      },
+      "reassign": {
+        "notification": "requestReassigned"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "requestReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "FULFILL",
+        "step": null
+      },
+      {
+        "condition": null,
+        "outcome": "DENY",
+        "step": null
+      }
+    ]
+  },
+  "name": "fulfillmentTask-3d28449415cc",
+  "type": "fulfillmentTask"
+}

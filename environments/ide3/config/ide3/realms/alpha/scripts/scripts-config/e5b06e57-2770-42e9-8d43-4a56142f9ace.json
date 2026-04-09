@@ -1,0 +1,16 @@
+{
+  "_id": "e5b06e57-2770-42e9-8d43-4a56142f9ace",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747385355679,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=5708fb1a-9d2d-4b8f-a6e0-3c38f1b823f5,ou=user,ou=am-config",
+  "lastModifiedDate": 1775129141014,
+  "name": "KYID.2B1.Journey.Login.Register.EnrollMFA",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Login.Register.EnrollMFA.js"
+  }
+}

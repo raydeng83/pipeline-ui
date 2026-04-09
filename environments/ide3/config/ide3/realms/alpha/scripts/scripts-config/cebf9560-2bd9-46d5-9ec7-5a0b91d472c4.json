@@ -1,0 +1,16 @@
+{
+  "_id": "cebf9560-2bd9-46d5-9ec7-5a0b91d472c4",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320026852,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798207,
+  "name": "KYID.Journey.setLoginRequestDetailsInCookie",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.setLoginRequestDetailsInCookie.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "4e41756b-e969-484d-ac1a-f0dc03ed5418",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320032648,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801157,
+  "name": "KYID.Journey.MFARegistration.DisplayNotRegisteredMFAMethods.Self",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFARegistration.DisplayNotRegisteredMFAMethods.Self.js"
+  }
+}

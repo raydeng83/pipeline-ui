@@ -1,0 +1,16 @@
+{
+  "_id": "1b84b843-07ef-4c11-83f2-681a3391c7a6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319428023,
+  "default": false,
+  "description": "Symantec Enter Credential and Tokens",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950793871,
+  "name": "KYID.Journey.SymantecEnterCredentialandToken",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.SymantecEnterCredentialandToken.js"
+  }
+}

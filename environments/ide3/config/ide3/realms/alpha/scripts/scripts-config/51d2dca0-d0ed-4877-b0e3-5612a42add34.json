@@ -1,0 +1,16 @@
+{
+  "_id": "51d2dca0-d0ed-4877-b0e3-5612a42add34",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1751966853614,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950801436,
+  "name": "KYID.2B1.Journey.KOGAPIMissingParamsErrMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.KOGAPIMissingParamsErrMsg.js"
+  }
+}

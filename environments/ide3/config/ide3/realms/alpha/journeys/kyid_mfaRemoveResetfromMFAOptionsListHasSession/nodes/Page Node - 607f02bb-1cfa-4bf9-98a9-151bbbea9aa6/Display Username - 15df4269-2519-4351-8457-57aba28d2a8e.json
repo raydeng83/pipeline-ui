@@ -1,0 +1,18 @@
+{
+  "_id": "15df4269-2519-4351-8457-57aba28d2a8e",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1926496999",
+  "_type": {
+    "_id": "DisplayUserNameNode",
+    "collection": true,
+    "name": "Display Username",
+    "version": "1.0"
+  },
+  "identityAttribute": "mail",
+  "userName": "mail"
+}

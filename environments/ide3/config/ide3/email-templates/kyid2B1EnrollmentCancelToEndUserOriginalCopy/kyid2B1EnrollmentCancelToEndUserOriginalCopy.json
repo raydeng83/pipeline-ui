@@ -1,0 +1,26 @@
+{
+  "_id": "emailTemplate/kyid2B1EnrollmentCancelToEndUserOriginalCopy",
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "kyid2B1EnrollmentCancelToEndUser original_copy",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyid2B1EnrollmentCancelToEndUserOriginalCopy.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyid2B1EnrollmentCancelToEndUserOriginalCopy.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "kyid2B1EnrollmentCancelToEndUserOriginalCopy.css"
+  },
+  "subject": {
+    "en": "KYID Account Notification: Cancel Enrollment"
+  },
+  "templateId": "kyid2B1EnrollmentCancelToEndUserOriginalCopy"
+}

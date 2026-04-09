@@ -1,0 +1,308 @@
+{
+  "_id": "provisioner.openicf/DBConnector_ApplicationAccessDelegationStaging_POC",
+  "configurationProperties": {
+    "abandonWhenPercentageFull": 0,
+    "accessToUnderlyingConnectionAllowed": true,
+    "allNative": false,
+    "alternateUsernameAllowed": false,
+    "changeLogColumn": null,
+    "commitOnReturn": false,
+    "connectionProperties": null,
+    "defaultAutoCommit": null,
+    "defaultCatalog": null,
+    "defaultReadOnly": null,
+    "defaultTransactionIsolation": -1,
+    "disablePaging": false,
+    "driverClassName": "&{esv.dbconnector.jdbcdriver}",
+    "enableEmptyString": false,
+    "fairQueue": true,
+    "ignoreExceptionOnPreLoad": false,
+    "inclusiveSync": false,
+    "initSQL": null,
+    "initialSize": "10",
+    "jdbcInterceptors": null,
+    "jmxEnabled": true,
+    "keyColumn": "ApplicationAccessDelegation_PrimaryId",
+    "logAbandoned": false,
+    "logValidationErrors": false,
+    "maxActive": "100",
+    "maxAge": "0",
+    "maxIdle": "100",
+    "maxWait": "30000",
+    "minEvictableIdleTimeMillis": "60000",
+    "minIdle": "50",
+    "name": "Tomcat Connection Pool[1-812553708]",
+    "nativeTimestamps": false,
+    "numTestsPerEvictionRun": 0,
+    "password": "&{esv.dbconnector.password}",
+    "propagateInterruptState": false,
+    "quoting": "NONE",
+    "removeAbandoned": false,
+    "removeAbandonedTimeout": 60,
+    "rethrowAllSQLExceptions": true,
+    "returnGeneratedKeys": true,
+    "rollbackOnReturn": false,
+    "suppressPassword": true,
+    "suspectTimeout": 0,
+    "table": "ApplicationAccessDelegationStaging_POC",
+    "testOnBorrow": false,
+    "testOnConnect": false,
+    "testOnReturn": false,
+    "testWhileIdle": false,
+    "timeBetweenEvictionRunsMillis": "5000",
+    "url": "&{esv.dbconnector.jdbcurl}",
+    "useDisposableConnectionFacade": true,
+    "useEquals": true,
+    "useLock": false,
+    "useStatementFacade": true,
+    "username": "&{esv.dbconnector.username}",
+    "validationInterval": "3000",
+    "validationQuery": null,
+    "validationQueryTimeout": "-1",
+    "validatorClassName": null
+  },
+  "connectorRef": {
+    "bundleName": "org.forgerock.openicf.connectors.databasetable-connector",
+    "bundleVersion": "1.5.20.22",
+    "connectorHostRef": "rcs-connector-external-1",
+    "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector",
+    "displayName": "Database Table Connector",
+    "systemType": "provisioner.openicf"
+  },
+  "enabled": true,
+  "objectTypes": {
+    "__ACCOUNT__": {
+      "$schema": "http://json-schema.org/draft-03/schema",
+      "id": "__ACCOUNT__",
+      "nativeType": "__ACCOUNT__",
+      "properties": {
+        "ApplicationAccessDelegationStagingId": {
+          "nativeName": "ApplicationAccessDelegationStagingId",
+          "nativeType": "integer",
+          "required": true,
+          "type": "integer"
+        },
+        "ApplicationAccessDelegation_PrimaryId": {
+          "nativeName": "ApplicationAccessDelegation_PrimaryId",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "ApplicationId": {
+          "nativeName": "ApplicationId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "ApplicationIdentifier": {
+          "nativeName": "ApplicationIdentifier",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "ApplicationName": {
+          "nativeName": "ApplicationName",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "AuthorizationId": {
+          "nativeName": "AuthorizationId",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "CreateCycleNumber": {
+          "nativeName": "CreateCycleNumber",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "CreateDate": {
+          "nativeName": "CreateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CreateDateEpoch": {
+          "nativeName": "CreateDateEpoch",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CreateJobRunId": {
+          "nativeName": "CreateJobRunId",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "CreateUserId": {
+          "nativeName": "CreateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CurrentDelegatorId": {
+          "nativeName": "CurrentDelegatorId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CurrentDelegatorIdentifierId": {
+          "nativeName": "CurrentDelegatorIdentifierId",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "DelegationAssignedDate": {
+          "nativeName": "DelegationAssignedDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "DelegationAssignedDateEpoch": {
+          "nativeName": "DelegationAssignedDateEpoch",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "DelegationExpiryDate": {
+          "nativeName": "DelegationExpiryDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "DelegationExpiryDateEpoch": {
+          "nativeName": "DelegationExpiryDateEpoch",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "IsForwardDelegable": {
+          "nativeName": "IsForwardDelegable",
+          "nativeType": "boolean",
+          "type": "boolean"
+        },
+        "OrganizationBusinessKeyName": {
+          "nativeName": "OrganizationBusinessKeyName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "OrganizationBusinessKeyValue": {
+          "nativeName": "OrganizationBusinessKeyValue",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "OrganizationId": {
+          "nativeName": "OrganizationId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "OrganizationSourceUniqueId": {
+          "nativeName": "OrganizationSourceUniqueId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "OrganizationTypeName": {
+          "nativeName": "OrganizationTypeName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "OrganizationTypeSystemName": {
+          "nativeName": "OrganizationTypeSystemName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "OriginalDelegatorId": {
+          "nativeName": "OriginalDelegatorId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "OriginalDelegatorIdentifierId": {
+          "nativeName": "OriginalDelegatorIdentifierId",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "ReconFlag": {
+          "nativeName": "ReconFlag",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "RecordSource": {
+          "nativeName": "RecordSource",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "RecordState": {
+          "nativeName": "RecordState",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "RoleId": {
+          "nativeName": "RoleId",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        },
+        "RoleIdentifier": {
+          "nativeName": "RoleIdentifier",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "RoleName": {
+          "nativeName": "RoleName",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "UpdateDate": {
+          "nativeName": "UpdateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UpdateDateEpoch": {
+          "nativeName": "UpdateDateEpoch",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UpdateUserId": {
+          "nativeName": "UpdateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UserId": {
+          "nativeName": "UserId",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        },
+        "UserIdentifier": {
+          "nativeName": "UserIdentifier",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "__NAME__": {
+          "nativeName": "__NAME__",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "operationTimeout": {
+    "AUTHENTICATE": -1,
+    "CREATE": -1,
+    "DELETE": -1,
+    "GET": -1,
+    "RESOLVEUSERNAME": -1,
+    "SCHEMA": -1,
+    "SCRIPT_ON_CONNECTOR": -1,
+    "SCRIPT_ON_RESOURCE": -1,
+    "SEARCH": -1,
+    "SYNC": -1,
+    "TEST": -1,
+    "UPDATE": -1,
+    "VALIDATE": -1
+  },
+  "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableCaseInsensitiveFilter": false,
+    "enableFilteredResultsHandler": false,
+    "enableNormalizingResultsHandler": false
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "a01ae22c-4942-4546-85a3-5ed7db6cea77",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319425408,
+  "default": false,
+  "description": "This script is used to check if domain is CIT or not.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798630,
+  "name": "KYID.Journey.IsDomainCIT",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.IsDomainCIT.js"
+  }
+}

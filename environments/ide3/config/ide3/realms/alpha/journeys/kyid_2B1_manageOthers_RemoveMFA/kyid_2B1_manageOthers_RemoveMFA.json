@@ -1,0 +1,105 @@
+{
+  "_id": "kyid_2B1_manageOthers_RemoveMFA",
+  "_rev": "-835653228",
+  "enabled": true,
+  "entryNodeId": "771450a6-0a39-44e7-9ed2-60218b1ca461",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "02812931-b1ea-40d8-8e85-9988e30e8b2a": {
+      "connections": {
+        "True": "3b2012f4-4c91-42a9-807f-a9c9d1571203",
+        "noMFA": "1e366bcd-8fca-40dd-be86-2464193af930"
+      },
+      "displayName": "MFALeft",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1020,
+      "y": 269.015625
+    },
+    "1e366bcd-8fca-40dd-be86-2464193af930": {
+      "connections": {},
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1251,
+      "y": 407.015625
+    },
+    "3b2012f4-4c91-42a9-807f-a9c9d1571203": {
+      "connections": {
+        "false": "7278dd2b-13d3-4747-a165-ecee849119a2",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1249,
+      "y": 161.015625
+    },
+    "4d3887fd-4e68-49dd-9c84-d60c9ecd80a2": {
+      "connections": {
+        "Confirm": "771450a6-0a39-44e7-9ed2-60218b1ca461",
+        "GoBack": "7278dd2b-13d3-4747-a165-ecee849119a2"
+      },
+      "displayName": "ConfirmOrGoBack",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 483,
+      "y": 65.015625
+    },
+    "7278dd2b-13d3-4747-a165-ecee849119a2": {
+      "connections": {
+        "email": "4d3887fd-4e68-49dd-9c84-d60c9ecd80a2",
+        "otp": "4d3887fd-4e68-49dd-9c84-d60c9ecd80a2",
+        "sms": "4d3887fd-4e68-49dd-9c84-d60c9ecd80a2",
+        "swk": "4d3887fd-4e68-49dd-9c84-d60c9ecd80a2",
+        "symantec": "4d3887fd-4e68-49dd-9c84-d60c9ecd80a2"
+      },
+      "displayName": "MFAListForRemoval",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 214,
+      "y": 53.015625
+    },
+    "771450a6-0a39-44e7-9ed2-60218b1ca461": {
+      "connections": {
+        "True": "f912b3ee-9db7-418d-887d-6c635c28df38"
+      },
+      "displayName": "GetAccessToken",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 337,
+      "y": 470.015625
+    },
+    "f912b3ee-9db7-418d-887d-6c635c28df38": {
+      "connections": {
+        "true": "02812931-b1ea-40d8-8e85-9988e30e8b2a"
+      },
+      "displayName": "RemoveMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1006,
+      "y": 75.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1553,
+      "y": 75
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1569,
+      "y": 501
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

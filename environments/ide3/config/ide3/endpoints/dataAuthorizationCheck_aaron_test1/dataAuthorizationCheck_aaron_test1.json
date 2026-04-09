@@ -1,0 +1,6 @@
+{
+  "_id": "endpoint/dataAuthorizationCheck_aaron_test1",
+  "description": "Data authorization check endpoint - userId version",
+  "file": "dataAuthorizationCheck_aaron_test1.js",
+  "type": "text/javascript"
+}

@@ -1,0 +1,22 @@
+{
+  "_id": "32bc6a27-d47c-42a5-81f5-583d11bc4e88",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "838024743",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_mfaRegistrationRegisterFRPush.HasSession"
+}

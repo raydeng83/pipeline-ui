@@ -1,0 +1,41 @@
+{
+  "_id": "843d9d2a-4dcd-45c3-bc67-a54a7bb435c0",
+  "_outcomes": [
+    {
+      "displayName": "Invalid",
+      "id": "Invalid"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "invalidName",
+      "id": "invalidName"
+    }
+  ],
+  "_rev": "2043913880",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "1e19e807-1047-41dd-a075-a095ca8a1755",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "Update_Basic_Information"
+  },
+  "pageHeader": {},
+  "stage": "{\"submitButtonText\":{}}"
+}

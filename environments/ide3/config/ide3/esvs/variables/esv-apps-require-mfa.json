@@ -1,0 +1,6 @@
+{
+  "_id": "esv-apps-require-mfa",
+  "description": "List of applications which requires MFA authentication context during SSO",
+  "expressionType": "string",
+  "valueBase64": "${ESV_APPS_REQUIRE_MFA}"
+}

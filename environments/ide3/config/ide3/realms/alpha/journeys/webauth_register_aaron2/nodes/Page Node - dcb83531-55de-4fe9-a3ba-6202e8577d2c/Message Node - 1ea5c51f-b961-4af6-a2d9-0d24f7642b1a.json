@@ -1,0 +1,27 @@
+{
+  "_id": "1ea5c51f-b961-4af6-a2d9-0d24f7642b1a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-206581768",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "<h2>Passkey successfully created</h2>\n<p>Your passkey has been created and added to your account.</p>\n<p>Your can manage your passkey from you Account settings.</p>"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Continue to my account"
+  }
+}

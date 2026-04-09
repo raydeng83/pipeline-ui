@@ -1,0 +1,16 @@
+{
+  "_id": "d3ab8fe8-6fe9-4e43-91e4-3ab07c6463d7",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=227964d5-9d01-4383-bc8e-5f0e381573b0,ou=user,ou=am-config",
+  "creationDate": 1761147002289,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950803777,
+  "name": "session_exist_check_aaron",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/session_exist_check_aaron.js"
+  }
+}

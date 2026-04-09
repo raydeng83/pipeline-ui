@@ -1,0 +1,16 @@
+{
+  "_id": "fd309039-45f9-43e3-9770-d447264c0af0",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1756120120149,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950807176,
+  "name": "KYID.2B1.Journey.GoBack.AlternateEmailVerification.FirstTimeLogin",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.GoBack.AlternateEmailVerification.FirstTimeLogin.js"
+  }
+}

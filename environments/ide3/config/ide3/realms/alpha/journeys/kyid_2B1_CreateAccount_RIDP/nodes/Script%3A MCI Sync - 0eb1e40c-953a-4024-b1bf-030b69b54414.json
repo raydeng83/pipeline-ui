@@ -1,0 +1,46 @@
+{
+  "_id": "0eb1e40c-953a-4024-b1bf-030b69b54414",
+  "_outcomes": [
+    {
+      "displayName": "success",
+      "id": "success"
+    },
+    {
+      "displayName": "failed",
+      "id": "failed"
+    },
+    {
+      "displayName": "errorMessage",
+      "id": "errorMessage"
+    },
+    {
+      "displayName": "noSync",
+      "id": "noSync"
+    },
+    {
+      "displayName": "highRisk",
+      "id": "highRisk"
+    }
+  ],
+  "_rev": "1096964516",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "success",
+    "failed",
+    "errorMessage",
+    "noSync",
+    "highRisk"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "76ecfc6f-aad5-45ab-b48e-a9c3e4bf942c"
+}

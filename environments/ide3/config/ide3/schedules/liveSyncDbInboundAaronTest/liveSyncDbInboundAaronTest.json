@@ -1,0 +1,13 @@
+{
+  "_id": "schedule/liveSyncDbInboundAaronTest",
+  "enabled": true,
+  "invokeContext": {
+    "action": "liveSync",
+    "source": "system/dbConnectorAaronTestInbound/__ACCOUNT__"
+  },
+  "invokeService": "provisioner",
+  "misfirePolicy": "fireAndProceed",
+  "persisted": true,
+  "schedule": "0/10 * * * * ?",
+  "type": "cron"
+}

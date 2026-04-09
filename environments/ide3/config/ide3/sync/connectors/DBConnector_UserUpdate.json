@@ -1,0 +1,125 @@
+{
+  "_id": "provisioner.openicf/DBConnector_UserUpdate",
+  "configurationProperties": {
+    "abandonWhenPercentageFull": 0,
+    "accessToUnderlyingConnectionAllowed": true,
+    "allNative": false,
+    "alternateUsernameAllowed": false,
+    "changeLogColumn": null,
+    "commitOnReturn": false,
+    "connectionProperties": null,
+    "defaultAutoCommit": null,
+    "defaultCatalog": null,
+    "defaultReadOnly": null,
+    "defaultTransactionIsolation": -1,
+    "disablePaging": false,
+    "driverClassName": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+    "enableEmptyString": false,
+    "fairQueue": true,
+    "ignoreExceptionOnPreLoad": false,
+    "inclusiveSync": false,
+    "initSQL": null,
+    "initialSize": "10",
+    "jdbcInterceptors": null,
+    "jmxEnabled": true,
+    "keyColumn": "AlphaUserUpdateStagingId",
+    "logAbandoned": false,
+    "logValidationErrors": false,
+    "maxActive": "100",
+    "maxAge": "0",
+    "maxIdle": "100",
+    "maxWait": "30000",
+    "minEvictableIdleTimeMillis": "60000",
+    "minIdle": "10",
+    "name": "Tomcat Connection Pool[1-35534346]",
+    "nativeTimestamps": false,
+    "numTestsPerEvictionRun": 0,
+    "passwordColumn": null,
+    "propagateInterruptState": false,
+    "quoting": "NONE",
+    "removeAbandoned": false,
+    "removeAbandonedTimeout": 60,
+    "rethrowAllSQLExceptions": true,
+    "returnGeneratedKeys": true,
+    "rollbackOnReturn": false,
+    "suppressPassword": true,
+    "suspectTimeout": 0,
+    "table": "AlphaUserUpdateStaging",
+    "testOnBorrow": false,
+    "testOnConnect": false,
+    "testOnReturn": false,
+    "testWhileIdle": false,
+    "timeBetweenEvictionRunsMillis": "5000",
+    "url": "jdbc:sqlserver://;serverName=HFS1VD-SQNE104.chfs.ds.ky.gov;port=1961;databaseName=KYIDConversion1",
+    "useDisposableConnectionFacade": true,
+    "useEquals": true,
+    "useLock": false,
+    "useStatementFacade": true,
+    "username": "SQD-SAPBodsUser",
+    "validationInterval": "3000",
+    "validationQuery": null,
+    "validationQueryTimeout": "-1",
+    "validatorClassName": null
+  },
+  "connectorRef": {
+    "bundleName": "org.forgerock.openicf.connectors.databasetable-connector",
+    "bundleVersion": "1.5.20.22",
+    "connectorHostRef": "rcs-connector-external-1",
+    "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector",
+    "displayName": "Database Table Connector",
+    "systemType": "provisioner.openicf"
+  },
+  "enabled": true,
+  "objectTypes": {
+    "__ACCOUNT__": {
+      "$schema": "http://json-schema.org/draft-03/schema",
+      "id": "__ACCOUNT__",
+      "nativeType": "__ACCOUNT__",
+      "properties": {
+        "KOGID": {
+          "nativeName": "KOGID",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "PrimaryEmailAddress": {
+          "nativeName": "PrimaryEmailAddress",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UpdateBy": {
+          "nativeName": "UpdateBy",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "__NAME__": {
+          "nativeName": "__NAME__",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "operationTimeout": {
+    "AUTHENTICATE": -1,
+    "CREATE": -1,
+    "DELETE": -1,
+    "GET": -1,
+    "RESOLVEUSERNAME": -1,
+    "SCHEMA": -1,
+    "SCRIPT_ON_CONNECTOR": -1,
+    "SCRIPT_ON_RESOURCE": -1,
+    "SEARCH": -1,
+    "SYNC": -1,
+    "TEST": -1,
+    "UPDATE": -1,
+    "VALIDATE": -1
+  },
+  "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableCaseInsensitiveFilter": false,
+    "enableFilteredResultsHandler": false,
+    "enableNormalizingResultsHandler": false
+  }
+}

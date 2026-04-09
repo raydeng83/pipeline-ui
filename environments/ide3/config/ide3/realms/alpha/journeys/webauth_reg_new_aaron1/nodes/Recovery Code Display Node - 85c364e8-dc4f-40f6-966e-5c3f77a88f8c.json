@@ -1,0 +1,16 @@
+{
+  "_id": "85c364e8-dc4f-40f6-966e-5c3f77a88f8c",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "1909014020",
+  "_type": {
+    "_id": "RecoveryCodeDisplayNode",
+    "collection": true,
+    "name": "Recovery Code Display Node",
+    "version": "1.0"
+  }
+}

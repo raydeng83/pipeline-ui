@@ -1,0 +1,60 @@
+{
+  "_id": "3426469a-8c00-4578-8fe5-83c6b3567792",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "266960618",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "776aebeb-c01d-4594-90a1-82230d9f743b",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "1bf2b2ce-b173-4c8b-aac1-51d7fedf9b45",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify identity with a security method</h5></div>\n<a href=\"&{esv.kog.help.mfa.for.self}\"target=\"_blank\">Need Assistance?</a>\n<div class=\"page-header-content\">Verify with one of the following security methods to manage the registered methods.</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verifique con uno de los siguientes métodos de seguridad para administrar los métodos registrados.</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.for.self}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">Verifique con uno de los siguientes métodos de seguridad para administrar los métodos registrados.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nBack to Application</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Help</a></span>\\n</div>\\n\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nVolver a la solicitud</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

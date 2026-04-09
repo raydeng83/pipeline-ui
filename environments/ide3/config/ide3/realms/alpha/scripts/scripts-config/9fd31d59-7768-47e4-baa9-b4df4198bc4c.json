@@ -1,0 +1,16 @@
+{
+  "_id": "9fd31d59-7768-47e4-baa9-b4df4198bc4c",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320020439,
+  "default": false,
+  "description": "This script is used to get the UserID information from existing session",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1773744213956,
+  "name": "KYID.2B1.Journey.ReadUserIdInfo",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ReadUserIdInfo.js"
+  }
+}

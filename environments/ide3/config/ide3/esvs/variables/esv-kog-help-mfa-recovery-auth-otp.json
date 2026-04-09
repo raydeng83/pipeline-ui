@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kog-help-mfa-recovery-auth-otp",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KOG_HELP_MFA_RECOVERY_AUTH_OTP}"
+}

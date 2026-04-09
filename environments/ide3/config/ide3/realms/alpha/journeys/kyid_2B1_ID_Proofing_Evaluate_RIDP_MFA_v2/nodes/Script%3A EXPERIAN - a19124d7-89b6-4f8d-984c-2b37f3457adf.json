@@ -1,0 +1,36 @@
+{
+  "_id": "a19124d7-89b6-4f8d-984c-2b37f3457adf",
+  "_outcomes": [
+    {
+      "displayName": "notVerified",
+      "id": "notVerified"
+    },
+    {
+      "displayName": "MCISearch",
+      "id": "MCISearch"
+    },
+    {
+      "displayName": "errorMessage",
+      "id": "errorMessage"
+    }
+  ],
+  "_rev": "23172649",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "notVerified",
+    "MCISearch",
+    "errorMessage"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "e1c82219-d580-43ea-8337-3460e1704ee4"
+}

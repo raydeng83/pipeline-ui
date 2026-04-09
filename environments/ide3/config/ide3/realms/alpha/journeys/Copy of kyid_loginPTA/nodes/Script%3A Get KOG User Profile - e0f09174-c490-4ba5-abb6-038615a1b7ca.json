@@ -1,0 +1,51 @@
+{
+  "_id": "e0f09174-c490-4ba5-abb6-038615a1b7ca",
+  "_outcomes": [
+    {
+      "displayName": "Successful",
+      "id": "Successful"
+    },
+    {
+      "displayName": "Failed",
+      "id": "Failed"
+    },
+    {
+      "displayName": "Invalid",
+      "id": "Invalid"
+    },
+    {
+      "displayName": "StubAccount",
+      "id": "StubAccount"
+    },
+    {
+      "displayName": "NotFound",
+      "id": "NotFound"
+    },
+    {
+      "displayName": "missingMandatoryConfig",
+      "id": "missingMandatoryConfig"
+    }
+  ],
+  "_rev": "-520764706",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Successful",
+    "Failed",
+    "Invalid",
+    "StubAccount",
+    "NotFound",
+    "missingMandatoryConfig"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "45582893-55c0-40ed-88b8-98676af88544"
+}

@@ -1,0 +1,60 @@
+{
+  "_id": "b42842cc-9a1b-40dd-b313-6788ae2c7e15",
+  "_outcomes": [
+    {
+      "displayName": "SMS",
+      "id": "SMS"
+    },
+    {
+      "displayName": "Voice",
+      "id": "Voice"
+    },
+    {
+      "displayName": "anotherMethod",
+      "id": "anotherMethod"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Duplicate",
+      "id": "Duplicate"
+    },
+    {
+      "displayName": "InvalidPhoneNumber",
+      "id": "InvalidPhoneNumber"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    }
+  ],
+  "_rev": "8972727",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "87188be9-24ec-4a96-9562-ed9308074437",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "d86699f4-08bb-4d38-90b1-e9e82b95c5e1",
+      "displayName": "Get Telephone Number and options to register",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Set up phone authentication</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.sms.url}\" target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">\nEnter your phone number to receive a verification code via SMS or Voice. Carrier messaging charges may apply.\n</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Configurar la autenticación del teléfono</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.sms.url}\" target=\"_blank\">¿Necesita\nayuda?</a>\n</div>\n<div class=\"page-header-content\">\nIngrese su número de teléfono para recibir un código de verificación vía SMS o voz. Se pueden aplicar cargos por mensajes del operador.\n</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

@@ -1,0 +1,108 @@
+{
+  "_id": "webauth_reg_new_aaron1",
+  "_rev": "608290726",
+  "enabled": true,
+  "entryNodeId": "31c7fe55-3ca6-4061-afd6-5ba44445bd74",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "31c7fe55-3ca6-4061-afd6-5ba44445bd74": {
+      "connections": {
+        "outcome": "cd5b34bd-ac4f-4718-9fe1-c17315e90073"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 313,
+      "y": 206.6125030517578
+    },
+    "46151525-37e3-44fc-a6c5-3051dc6907fc": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1130,
+      "y": 90.61250305175781
+    },
+    "85c364e8-dc4f-40f6-966e-5c3f77a88f8c": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Recovery Code Display Node",
+      "nodeType": "RecoveryCodeDisplayNode",
+      "version": "1.0",
+      "x": 1345,
+      "y": 161.6125030517578
+    },
+    "928daccb-0e6e-4e40-8a4d-9c23871c9044": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1264,
+      "y": 602.6125030517578
+    },
+    "b11c2a89-be06-4dda-8cbd-303172a29aae": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1258,
+      "y": 315.6125030517578
+    },
+    "cd5b34bd-ac4f-4718-9fe1-c17315e90073": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "ea296083-25b9-4594-931a-d8b7a359d162"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 613,
+      "y": 270.6125030517578
+    },
+    "ea296083-25b9-4594-931a-d8b7a359d162": {
+      "connections": {
+        "error": "928daccb-0e6e-4e40-8a4d-9c23871c9044",
+        "failure": "b11c2a89-be06-4dda-8cbd-303172a29aae",
+        "success": "85c364e8-dc4f-40f6-966e-5c3f77a88f8c",
+        "unsupported": "46151525-37e3-44fc-a6c5-3051dc6907fc"
+      },
+      "displayName": "WebAuthn Registration Node",
+      "nodeType": "WebAuthnRegistrationNode",
+      "version": "1.0",
+      "x": 931,
+      "y": 268.6125030517578
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1822,
+      "y": 90
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1823,
+      "y": 752
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

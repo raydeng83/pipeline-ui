@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/violationExpired",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "violationExpired.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "violationExpired.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "violationExpired.css"
+  },
+  "subject": {
+    "en": "ATTENTION: Expiration of Violation"
+  }
+}

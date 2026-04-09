@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/businessapplication_v2B_xiaohan_test",
+  "description": "",
+  "file": "businessapplication_v2B_xiaohan_test.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

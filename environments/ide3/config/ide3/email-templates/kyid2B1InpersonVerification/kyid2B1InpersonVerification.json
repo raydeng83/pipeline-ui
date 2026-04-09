@@ -1,0 +1,31 @@
+{
+  "_id": "emailTemplate/kyid2B1InpersonVerification",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "KYID_2B1_INPERSON_VERIFICATION",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyid2B1InpersonVerification.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyid2B1InpersonVerification.en.md"
+    },
+    "es": {
+      "file": "kyid2B1InpersonVerification.es.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "kyid2B1InpersonVerification.css"
+  },
+  "subject": {
+    "en": "KYID In-Person Identity Verification Successful ",
+    "es": "Verificación de identidad en persona de KYID exitosa"
+  },
+  "templateId": "kyid2B1InpersonVerification"
+}

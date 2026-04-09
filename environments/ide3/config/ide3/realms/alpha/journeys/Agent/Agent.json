@@ -1,0 +1,85 @@
+{
+  "_id": "Agent",
+  "_rev": "-209772491",
+  "description": "https://backstage.forgerock.com/docs/ig/2024.11/gateway-guide/preface.html#authenticate-agent-am",
+  "enabled": true,
+  "entryNodeId": "98ce6159-2032-4524-98c9-94a85f55bc4f",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "51e2cd24-cf1f-4313-8af0-35ea9e04d2fe": {
+      "connections": {
+        "false": "cbd1f1af-eb0a-4274-a762-adacf04c7080",
+        "true": "6736a00a-fc65-438e-b4ea-23f66b4a8739"
+      },
+      "displayName": "Zero Page Login Collector",
+      "nodeType": "ZeroPageLoginNode",
+      "version": "1.0",
+      "x": 163,
+      "y": 225
+    },
+    "6736a00a-fc65-438e-b4ea-23f66b4a8739": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Agent Data Store Decision",
+      "nodeType": "AgentDataStoreDecisionNode",
+      "version": "1.0",
+      "x": 762,
+      "y": 243
+    },
+    "98ce6159-2032-4524-98c9-94a85f55bc4f": {
+      "connections": {
+        "ERROR": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "NOMATCHRESPONSE": "edf9a1c2-9541-4b97-979f-2aa349360d2e"
+      },
+      "displayName": "HTTP Client",
+      "nodeType": "RESTNode",
+      "version": "1.0",
+      "x": 499,
+      "y": 131.015625
+    },
+    "cbd1f1af-eb0a-4274-a762-adacf04c7080": {
+      "connections": {
+        "outcome": "6736a00a-fc65-438e-b4ea-23f66b4a8739"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 477,
+      "y": 324
+    },
+    "edf9a1c2-9541-4b97-979f-2aa349360d2e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 812,
+      "y": 74.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1065,
+      "y": 206
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1064,
+      "y": 394
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Authentication\"]"
+  }
+}

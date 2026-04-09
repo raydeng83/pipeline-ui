@@ -32,7 +32,7 @@
     "types": [
       {
         "attrKey": "/application",
-        "modified": "2026-04-08T10:56:31.61Z",
+        "modified": "2026-04-09T09:03:20.839Z",
         "type": "entityType/id/realm"
       }
     ]
@@ -48,12 +48,12 @@
     },
     "glossaries": {
       "/application": {
-        "entityType/id/realm": "2026-04-08T10:56:31.61Z"
+        "entityType/id/realm": "2026-04-09T09:03:20.839Z"
       }
     }
   },
   "metadata": {
-    "modifiedDate": "2026-04-08T11:08:21.091Z",
+    "modifiedDate": "2026-04-09T09:25:50.641Z",
     "createdDate": "2026-03-05T07:02:47.060258345Z"
   },
   "permissions": {

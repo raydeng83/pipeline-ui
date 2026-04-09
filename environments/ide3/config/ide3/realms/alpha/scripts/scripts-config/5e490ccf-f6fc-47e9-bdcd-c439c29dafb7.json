@@ -1,0 +1,16 @@
+{
+  "_id": "5e490ccf-f6fc-47e9-bdcd-c439c29dafb7",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747385358074,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950802731,
+  "name": "KYID.2B1.Journey.Login.Register.MFA.Select.Authenticators",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.Login.Register.MFA.Select.Authenticators.js"
+  }
+}

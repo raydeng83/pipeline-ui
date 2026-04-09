@@ -1,0 +1,25 @@
+{
+  "_id": "f199316d-9a1a-40f9-825a-67c52a3ee7ed",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1539210698",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Role not found"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "3303795c-3926-4610-99c9-f8aa954ad391",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320030841,
+  "default": false,
+  "description": "This script is used to display Login Email to the user and store username of IDM user in the sharedState.   ",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950803777,
+  "name": "KYID.Journey.ReadLoginEmailAddress",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ReadLoginEmailAddress.js"
+  }
+}

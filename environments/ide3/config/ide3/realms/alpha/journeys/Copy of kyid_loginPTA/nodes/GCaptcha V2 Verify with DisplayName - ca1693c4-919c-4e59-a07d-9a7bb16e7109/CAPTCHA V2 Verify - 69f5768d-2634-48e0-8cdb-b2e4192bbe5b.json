@@ -1,0 +1,28 @@
+{
+  "_id": "69f5768d-2634-48e0-8cdb-b2e4192bbe5b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1060130602",
+  "_type": {
+    "_id": "product-CaptchaNode",
+    "collection": true,
+    "name": "CAPTCHA",
+    "version": "1.0"
+  },
+  "apiUri": "https://www.google.com/recaptcha/api.js",
+  "captchaUri": "https://www.google.com/recaptcha/api/siteverify",
+  "disableSubmission": true,
+  "divClass": "g-recaptcha",
+  "reCaptchaV3": false,
+  "scoreThreshold": "0.0",
+  "secretKey": "&{esv.kyid.v2grecaptcha.secret}",
+  "siteKey": "&{esv.kyid.v2grecaptcha.key}"
+}

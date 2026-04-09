@@ -1,0 +1,172 @@
+{
+  "_id": "KYID_2B1_Manage_Profile",
+  "_rev": "-685125042",
+  "enabled": true,
+  "entryNodeId": "65937481-a05b-4593-81e3-258e517cbde8",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "16312456-a138-4b60-a146-bff61b567d60": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 714,
+      "y": 558.015625
+    },
+    "2aba8eba-d97a-4d37-b47f-ca7cc43cba9c": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1246,
+      "y": 72.015625
+    },
+    "45a42338-a57e-4a71-bbf7-48ccebb88509": {
+      "connections": {
+        "Error": "be22c4b3-c860-48f7-b39f-e8d0020e58c3",
+        "User Found": "819945df-87ab-47b3-9e7b-71d0980016e4",
+        "User Not Found": "be22c4b3-c860-48f7-b39f-e8d0020e58c3"
+      },
+      "displayName": "Script:GetUserID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 925,
+      "y": 387.5
+    },
+    "5a3d13c5-872a-4d4d-94a0-46ab549e2647": {
+      "connections": {
+        "true": "45a42338-a57e-4a71-bbf7-48ccebb88509"
+      },
+      "displayName": "Profile updated successfully",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1780,
+      "y": 216.3333282470703
+    },
+    "65937481-a05b-4593-81e3-258e517cbde8": {
+      "connections": {
+        "true": "45a42338-a57e-4a71-bbf7-48ccebb88509"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 229,
+      "y": 210.015625
+    },
+    "7b5860a1-df72-41aa-8e48-eb6f48cc6478": {
+      "connections": {
+        "hasSession": "a2bfabae-9382-498a-b1ce-bc94a6aaccdd",
+        "noSession": "16312456-a138-4b60-a146-bff61b567d60"
+      },
+      "displayName": "Script:ValidSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 295,
+      "y": 434.5
+    },
+    "819945df-87ab-47b3-9e7b-71d0980016e4": {
+      "connections": {
+        "error": "9df1c35e-800d-4da2-a8db-41365f671b0d",
+        "false": "ba6408eb-a07f-4930-a6ff-eef584a1ab1a",
+        "true": "843d9d2a-4dcd-45c3-bc67-a54a7bb435c0"
+      },
+      "displayName": "Display User Details",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1173,
+      "y": 466.75
+    },
+    "843d9d2a-4dcd-45c3-bc67-a54a7bb435c0": {
+      "connections": {
+        "back": "819945df-87ab-47b3-9e7b-71d0980016e4",
+        "invalidName": "f97b11e0-aaa1-4665-9903-c5e2be7732bb",
+        "next": "2aba8eba-d97a-4d37-b47f-ca7cc43cba9c"
+      },
+      "displayName": "Update Profile",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1480,
+      "y": 310
+    },
+    "90e3dc8d-4b3d-4ec0-8f06-46d08080a3e7": {
+      "connections": {
+        "true": "5a3d13c5-872a-4d4d-94a0-46ab549e2647"
+      },
+      "displayName": "Patch",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1521,
+      "y": 101.015625
+    },
+    "9df1c35e-800d-4da2-a8db-41365f671b0d": {
+      "connections": {},
+      "displayName": "Error",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 512,
+      "y": 921.25
+    },
+    "a2bfabae-9382-498a-b1ce-bc94a6aaccdd": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "45a42338-a57e-4a71-bbf7-48ccebb88509"
+      },
+      "displayName": "Script:GetKOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 551,
+      "y": 282.5
+    },
+    "ba6408eb-a07f-4930-a6ff-eef584a1ab1a": {
+      "connections": {
+        "true": "5a3d13c5-872a-4d4d-94a0-46ab549e2647"
+      },
+      "displayName": "IJ: Organ Donor ",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1532,
+      "y": 769.015625
+    },
+    "be22c4b3-c860-48f7-b39f-e8d0020e58c3": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "UserNotFound",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 937,
+      "y": 826.875
+    },
+    "f97b11e0-aaa1-4665-9903-c5e2be7732bb": {
+      "connections": {
+        "true": "843d9d2a-4dcd-45c3-bc67-a54a7bb435c0"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1831,
+      "y": 506.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2375,
+      "y": 262
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2375,
+      "y": 321
+    },
+    "startNode": {
+      "x": 70,
+      "y": 465.25
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

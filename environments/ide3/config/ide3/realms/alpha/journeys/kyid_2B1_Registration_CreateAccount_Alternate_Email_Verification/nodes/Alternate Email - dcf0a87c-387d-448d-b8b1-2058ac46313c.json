@@ -1,0 +1,46 @@
+{
+  "_id": "dcf0a87c-387d-448d-b8b1-2058ac46313c",
+  "_outcomes": [
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "skip",
+      "id": "skip"
+    },
+    {
+      "displayName": "invalidEmail",
+      "id": "invalidEmail"
+    },
+    {
+      "displayName": "max limit",
+      "id": "max limit"
+    }
+  ],
+  "_rev": "-460472350",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "back",
+    "next",
+    "skip",
+    "invalidEmail",
+    "max limit"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "517696bf-c043-4d2b-96f5-90ddd3c236e4"
+}

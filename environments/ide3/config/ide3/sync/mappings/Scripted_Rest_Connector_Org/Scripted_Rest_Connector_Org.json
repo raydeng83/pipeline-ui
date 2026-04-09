@@ -1,0 +1,104 @@
+{
+  "consentRequired": false,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "all": [
+          "name"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "Scripted_Rest_Connector_Org",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "Scripted_Rest_Connector_Org",
+  "icon": null,
+  "name": "Scripted_Rest_Connector_Org",
+  "onCreate": {
+    "file": "Scripted_Rest_Connector_Org.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "CREATE",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "name",
+      "target": "__NAME__"
+    },
+    {
+      "source": "description",
+      "target": "description"
+    },
+    {
+      "source": "name",
+      "target": "name"
+    },
+    {
+      "source": "members",
+      "target": "members"
+    }
+  ],
+  "source": "managed/alpha_organization",
+  "sourceQuery": {
+    "_queryFilter": "/name eq \"audittest\""
+  },
+  "target": "system/testscriptedrestPOC/__ORGANIZATION__",
+  "targetQuery": {
+    "_queryFilter": "/name eq \"audittest\""
+  }
+}

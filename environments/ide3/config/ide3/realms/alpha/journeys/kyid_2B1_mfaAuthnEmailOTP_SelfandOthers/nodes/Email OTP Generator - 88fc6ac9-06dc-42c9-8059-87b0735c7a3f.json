@@ -1,0 +1,17 @@
+{
+  "_id": "88fc6ac9-06dc-42c9-8059-87b0735c7a3f",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1107201443",
+  "_type": {
+    "_id": "OneTimePasswordGeneratorNode",
+    "collection": true,
+    "name": "HOTP Generator",
+    "version": "1.0"
+  },
+  "length": 8
+}

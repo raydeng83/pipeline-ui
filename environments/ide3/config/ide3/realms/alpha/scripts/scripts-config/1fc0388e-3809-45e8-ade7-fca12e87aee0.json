@@ -1,0 +1,16 @@
+{
+  "_id": "1fc0388e-3809-45e8-ade7-fca12e87aee0",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320075340,
+  "default": false,
+  "description": "This script is used to redirect user for needKOGvisit",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950791006,
+  "name": "KYID.Journey.RedirectToKOGPortal",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.RedirectToKOGPortal.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "c9c7f766-baff-4e20-b19d-3bffa2c90fcc",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1753929499721,
+  "default": false,
+  "description": "This script is used to fetch the user information by using mail",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1775720327344,
+  "name": "KYID.2B1.Journey.GetUserInfoFromMail",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.GetUserInfoFromMail.js"
+  }
+}

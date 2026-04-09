@@ -1,0 +1,21 @@
+{
+  "_id": "ae35e86e-a6ad-4c2b-a2bf-ff2f0e6588f0",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1435955680",
+  "_type": {
+    "_id": "CookiePresenceDecisionNode",
+    "collection": true,
+    "name": "Cookie Presence Decision Node",
+    "version": "1.0"
+  },
+  "cookieName": "clocale"
+}

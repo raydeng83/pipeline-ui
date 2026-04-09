@@ -1,0 +1,25 @@
+{
+  "_id": "5df9fffc-28be-4906-9124-5b4bff17c15a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1042083858",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Error in JIT"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

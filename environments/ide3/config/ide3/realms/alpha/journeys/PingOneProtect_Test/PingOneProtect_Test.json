@@ -1,0 +1,67 @@
+{
+  "_id": "PingOneProtect_Test",
+  "_rev": "1227511955",
+  "enabled": true,
+  "entryNodeId": "56172434-4286-4bb5-a30b-f5c33ef1d6ef",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "56172434-4286-4bb5-a30b-f5c33ef1d6ef": {
+      "connections": {
+        "true": "77dee3f5-da4f-4bbd-aecc-6867ec716ebc"
+      },
+      "displayName": "PingOne Protect Initialize",
+      "nodeType": "product-PingOneProtectInitializeNode",
+      "version": "1.0",
+      "x": 168,
+      "y": 115.015625
+    },
+    "62be1c0b-84e6-4fa8-8e58-3f6d27f551bf": {
+      "connections": {},
+      "displayName": "PingOne Protect Result",
+      "nodeType": "product-PingOneProtectResultNode",
+      "version": "1.0",
+      "x": 1058,
+      "y": 94.015625
+    },
+    "77dee3f5-da4f-4bbd-aecc-6867ec716ebc": {
+      "connections": {
+        "outcome": "c6263336-c886-47ef-b066-51fdd2d5acee"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 202,
+      "y": 292.015625
+    },
+    "c6263336-c886-47ef-b066-51fdd2d5acee": {
+      "connections": {},
+      "displayName": "PingOne Protect Evaluation",
+      "nodeType": "product-PingOneProtectEvaluationNode",
+      "version": "1.0",
+      "x": 667,
+      "y": 76.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1297,
+      "y": 31
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1343,
+      "y": 332
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

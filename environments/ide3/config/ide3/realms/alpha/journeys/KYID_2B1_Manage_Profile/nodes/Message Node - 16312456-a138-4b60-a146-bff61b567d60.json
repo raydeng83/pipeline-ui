@@ -1,0 +1,23 @@
+{
+  "_id": "16312456-a138-4b60-a146-bff61b567d60",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1875268079",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {},
+  "messageNo": {},
+  "messageYes": {}
+}

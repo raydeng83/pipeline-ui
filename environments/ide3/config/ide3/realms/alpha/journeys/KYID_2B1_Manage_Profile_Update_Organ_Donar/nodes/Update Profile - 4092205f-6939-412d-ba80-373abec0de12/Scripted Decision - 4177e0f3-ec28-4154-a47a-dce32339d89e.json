@@ -1,0 +1,51 @@
+{
+  "_id": "4177e0f3-ec28-4154-a47a-dce32339d89e",
+  "_outcomes": [
+    {
+      "displayName": "Empty",
+      "id": "Empty"
+    },
+    {
+      "displayName": "Mismatch",
+      "id": "Mismatch"
+    },
+    {
+      "displayName": "Invalid",
+      "id": "Invalid"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "donotagree",
+      "id": "donotagree"
+    }
+  ],
+  "_rev": "-485315488",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Empty",
+    "Mismatch",
+    "Invalid",
+    "back",
+    "next",
+    "donotagree"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "9f4dd181-c2cd-40e7-8b8c-47493b98b5eb"
+}

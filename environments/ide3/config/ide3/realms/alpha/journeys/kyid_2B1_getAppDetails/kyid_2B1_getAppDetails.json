@@ -1,0 +1,58 @@
+{
+  "_id": "kyid_2B1_getAppDetails",
+  "_rev": "-2109948471",
+  "enabled": true,
+  "entryNodeId": "272c51c5-6b79-43a5-8a24-55cac5c67f59",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "272c51c5-6b79-43a5-8a24-55cac5c67f59": {
+      "connections": {
+        "cancel": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "false": "3f017cf8-f950-401d-9e63-80bf9166159d",
+        "true": "a093bbab-2c7f-412b-b146-3aab8eaaa7b8"
+      },
+      "displayName": "Script:ViewAppDetails",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 229,
+      "y": 196
+    },
+    "3f017cf8-f950-401d-9e63-80bf9166159d": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 491,
+      "y": 327
+    },
+    "a093bbab-2c7f-412b-b146-3aab8eaaa7b8": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 492,
+      "y": 133
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 792,
+      "y": 96
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 828,
+      "y": 290
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "_id": "provisioner.openicf/DBConnector_AlphaUserApplicationRoleAssocStaging",
+  "configurationProperties": {
+    "abandonWhenPercentageFull": 0,
+    "accessToUnderlyingConnectionAllowed": true,
+    "allNative": false,
+    "alternateUsernameAllowed": false,
+    "changeLogColumn": null,
+    "commitOnReturn": false,
+    "connectionProperties": null,
+    "defaultAutoCommit": null,
+    "defaultCatalog": null,
+    "defaultReadOnly": null,
+    "defaultTransactionIsolation": -1,
+    "disablePaging": false,
+    "driverClassName": "&{esv.dbconnector.jdbcdriver}",
+    "enableEmptyString": false,
+    "fairQueue": true,
+    "ignoreExceptionOnPreLoad": false,
+    "inclusiveSync": false,
+    "initSQL": null,
+    "initialSize": "10",
+    "jdbcInterceptors": null,
+    "jmxEnabled": true,
+    "keyColumn": "KOGID",
+    "logAbandoned": false,
+    "logValidationErrors": false,
+    "maxActive": "100",
+    "maxAge": "0",
+    "maxIdle": "100",
+    "maxWait": "30000",
+    "minEvictableIdleTimeMillis": "60000",
+    "minIdle": "&{esv.dbconnector.min.idle}",
+    "name": "Tomcat Connection Pool[1-35534346]",
+    "nativeTimestamps": false,
+    "numTestsPerEvictionRun": 0,
+    "password": "&{esv.dbconnector.password}",
+    "passwordColumn": null,
+    "propagateInterruptState": false,
+    "quoting": "NONE",
+    "removeAbandoned": false,
+    "removeAbandonedTimeout": 60,
+    "rethrowAllSQLExceptions": true,
+    "returnGeneratedKeys": true,
+    "rollbackOnReturn": false,
+    "suppressPassword": true,
+    "suspectTimeout": 0,
+    "table": "AlphaUserApplicationRoleAssocStaging",
+    "testOnBorrow": false,
+    "testOnConnect": false,
+    "testOnReturn": false,
+    "testWhileIdle": false,
+    "timeBetweenEvictionRunsMillis": "5000",
+    "url": "&{esv.dbconnector.jdbcurl}",
+    "useDisposableConnectionFacade": true,
+    "useEquals": true,
+    "useLock": false,
+    "useStatementFacade": true,
+    "username": "&{esv.dbconnector.username}",
+    "validationInterval": "3000",
+    "validationQuery": null,
+    "validationQueryTimeout": "-1",
+    "validatorClassName": null
+  },
+  "connectorRef": {
+    "bundleName": "org.forgerock.openicf.connectors.databasetable-connector",
+    "bundleVersion": "[1.5.20.12, 1.6.0.0)",
+    "connectorHostRef": "rcs-connector-external-1",
+    "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector",
+    "displayName": "Database Table Connector",
+    "systemType": "provisioner.openicf"
+  },
+  "enabled": true,
+  "objectTypes": {
+    "__ACCOUNT__": {
+      "$schema": "http://json-schema.org/draft-03/schema",
+      "id": "__ACCOUNT__",
+      "nativeType": "__ACCOUNT__",
+      "properties": {
+        "AlphaUserId": {
+          "nativeName": "AlphaUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "ApplicationId": {
+          "nativeName": "ApplicationId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CreateCycleNumber": {
+          "nativeName": "CreateCycleNumber",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "CreateDate": {
+          "nativeName": "CreateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "CreateJobRunId": {
+          "nativeName": "CreateJobRunId",
+          "nativeType": "integer",
+          "type": "integer"
+        },
+        "CreateUserId": {
+          "nativeName": "CreateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "KOGID": {
+          "nativeName": "KOGID",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "PrimaryEmailAddress": {
+          "nativeName": "PrimaryEmailAddress",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "ReconFlag": {
+          "nativeName": "ReconFlag",
+          "nativeType": "string",
+          "required": false,
+          "type": "string"
+        },
+        "Roleid": {
+          "nativeName": "Roleid",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UpdateDate": {
+          "nativeName": "UpdateDate",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "UpdateUserId": {
+          "nativeName": "UpdateUserId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "__NAME__": {
+          "nativeName": "__NAME__",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "operationTimeout": {
+    "AUTHENTICATE": 10000,
+    "CREATE": 15000,
+    "DELETE": 15000,
+    "GET": 15000,
+    "RESOLVEUSERNAME": -1,
+    "SCHEMA": 5000,
+    "SCRIPT_ON_CONNECTOR": 15000,
+    "SCRIPT_ON_RESOURCE": 15000,
+    "SEARCH": 15000,
+    "SYNC": 15000,
+    "TEST": 5000,
+    "UPDATE": 15000,
+    "VALIDATE": 5000
+  },
+  "poolConfigOption": {
+    "maxIdle": 10,
+    "maxObjects": 10,
+    "maxWait": 10,
+    "minEvictableIdleTimeMillis": 10,
+    "minIdle": 10
+  },
+  "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableCaseInsensitiveFilter": false,
+    "enableFilteredResultsHandler": false,
+    "enableNormalizingResultsHandler": false
+  }
+}

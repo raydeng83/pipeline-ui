@@ -1,0 +1,16 @@
+{
+  "_id": "49303d10-8d82-411b-9465-3df13c0a8e1f",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319427695,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950793887,
+  "name": "KYID.2B1.journey.RegistrationAcceptance.RedirectLoginRoleID",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.journey.RegistrationAcceptance.RedirectLoginRoleID.js"
+  }
+}

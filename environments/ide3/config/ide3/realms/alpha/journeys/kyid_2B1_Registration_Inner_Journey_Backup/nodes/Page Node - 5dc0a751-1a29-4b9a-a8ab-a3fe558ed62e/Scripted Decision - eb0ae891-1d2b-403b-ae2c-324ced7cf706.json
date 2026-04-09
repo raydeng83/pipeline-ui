@@ -1,0 +1,31 @@
+{
+  "_id": "eb0ae891-1d2b-403b-ae2c-324ced7cf706",
+  "_outcomes": [
+    {
+      "displayName": "Back",
+      "id": "Back"
+    },
+    {
+      "displayName": "Create Account",
+      "id": "Create Account"
+    }
+  ],
+  "_rev": "-666962786",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Back",
+    "Create Account"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "8b558d59-8d13-4979-a68f-c3ffca39a1a5"
+}

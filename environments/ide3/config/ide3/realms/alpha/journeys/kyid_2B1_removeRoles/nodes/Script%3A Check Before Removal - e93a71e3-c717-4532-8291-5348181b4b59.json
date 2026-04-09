@@ -1,0 +1,41 @@
+{
+  "_id": "e93a71e3-c717-4532-8291-5348181b4b59",
+  "_outcomes": [
+    {
+      "displayName": "proceed",
+      "id": "proceed"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "internaluser",
+      "id": "internaluser"
+    },
+    {
+      "displayName": "donotremove",
+      "id": "donotremove"
+    }
+  ],
+  "_rev": "-1696406706",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "proceed",
+    "error",
+    "internaluser",
+    "donotremove"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "5f4bdeaa-661f-47e4-9dd3-7c2c74f4a9a4"
+}

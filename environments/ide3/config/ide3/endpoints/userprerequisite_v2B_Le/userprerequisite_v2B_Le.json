@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/userprerequisite_v2B_Le",
+  "description": "",
+  "file": "userprerequisite_v2B_Le.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

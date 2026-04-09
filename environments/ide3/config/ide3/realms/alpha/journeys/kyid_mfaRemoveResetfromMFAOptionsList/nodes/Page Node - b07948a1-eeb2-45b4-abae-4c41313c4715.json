@@ -1,0 +1,64 @@
+{
+  "_id": "b07948a1-eeb2-45b4-abae-4c41313c4715",
+  "_outcomes": [
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "Remove/Reset MFA Methods",
+      "id": "Remove/Reset MFA Methods"
+    },
+    {
+      "displayName": "Restablecer/Eliminar Métodos MFA",
+      "id": "Restablecer/Eliminar Métodos MFA"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "1378731428",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "be026b00-3d1b-4f3f-9ad3-7ca805022923",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "4436e03f-c0ae-484e-8a35-95e93fb18c43",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'><br>\n<a href=\"&{esv.kog.needassistance.url}\"target=\"_blank\">Need Assistance?</a>",
+    "es": "<div class='page-footer-horizontal'><br>\n<a href=\"&{esv.kog.needassistance.url}\"target=\"_blank\">¿Necesita ayuda?</a>"
+  },
+  "pageHeader": {},
+  "stage": "{\"submitButtonText\":{\"en\":\"Continue\"},\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

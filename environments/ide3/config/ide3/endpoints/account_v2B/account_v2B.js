@@ -2669,6 +2669,8 @@ function getViewAccountInformation(queryFilter) {
                                 highRiskMFATemplate.methodName = mfaMethods[i].MFAMethod
                             highRiskMFA.push(highRiskMFATemplate)
                           accountRecoveryAndMFA.push(accountRecoveryAndMFAItem);
+                        }else{
+                          accountRecoveryAndMFA.push(accountRecoveryAndMFAItem);
                         }
 
 
@@ -2676,7 +2678,10 @@ function getViewAccountInformation(queryFilter) {
                     } else if (mfaMethods[i].MFAStatus.toLowerCase() == "highrisk") {
                       if (mfaMethods[i].MFAMethod === "SECONDARY_EMAIL") {
                             mfaMethodName = "Alternate email";
-                        } else {
+                        }else if(mfaMethods[i].MFAMethod === "EMAIL"){
+                          mfaMethodName = "Primary Email";
+                        }
+                        else {
                             mfaMethodName = mfaMethods[i].MFAMethod;
                         }
                         // accountRecoveryAndMFAItem.risk = "High Risk With Override"

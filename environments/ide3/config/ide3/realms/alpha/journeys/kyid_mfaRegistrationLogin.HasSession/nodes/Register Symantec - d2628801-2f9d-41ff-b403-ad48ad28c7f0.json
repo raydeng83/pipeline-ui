@@ -1,0 +1,22 @@
+{
+  "_id": "d2628801-2f9d-41ff-b403-ad48ad28c7f0",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1307888768",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_mfaRegistrationRegisterSymantecVIP.HasSession"
+}

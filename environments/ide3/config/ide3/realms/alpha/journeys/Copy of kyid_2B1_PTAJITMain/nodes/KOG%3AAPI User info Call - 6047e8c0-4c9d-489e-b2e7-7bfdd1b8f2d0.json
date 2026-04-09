@@ -1,0 +1,41 @@
+{
+  "_id": "6047e8c0-4c9d-489e-b2e7-7bfdd1b8f2d0",
+  "_outcomes": [
+    {
+      "displayName": "Successful",
+      "id": "Successful"
+    },
+    {
+      "displayName": "Failed",
+      "id": "Failed"
+    },
+    {
+      "displayName": "Invalid",
+      "id": "Invalid"
+    },
+    {
+      "displayName": "StubAccount",
+      "id": "StubAccount"
+    }
+  ],
+  "_rev": "-1186711323",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Successful",
+    "Failed",
+    "Invalid",
+    "StubAccount"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "a104b99e-b256-4655-b475-e4ce72158dcb"
+}

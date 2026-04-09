@@ -1,0 +1,25 @@
+{
+  "_id": "f694c5fb-141e-4fe6-9f8c-c9cff5333a1b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "745278525",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Processing the request."
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

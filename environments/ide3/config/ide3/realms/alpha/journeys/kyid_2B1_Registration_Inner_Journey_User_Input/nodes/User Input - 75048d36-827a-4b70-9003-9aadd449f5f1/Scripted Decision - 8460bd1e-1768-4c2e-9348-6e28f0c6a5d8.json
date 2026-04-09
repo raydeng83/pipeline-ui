@@ -1,0 +1,51 @@
+{
+  "_id": "8460bd1e-1768-4c2e-9348-6e28f0c6a5d8",
+  "_outcomes": [
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "invalidEmail",
+      "id": "invalidEmail"
+    },
+    {
+      "displayName": "invalidName",
+      "id": "invalidName"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "max limit",
+      "id": "max limit"
+    }
+  ],
+  "_rev": "1684800972",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "next",
+    "invalidEmail",
+    "invalidName",
+    "error",
+    "back",
+    "max limit"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c78c6675-f686-4b17-83ba-50d91119f142"
+}

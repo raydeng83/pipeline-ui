@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/access_v2B_aaron_test4",
+  "description": "Aaron test4 - access_v2B copy with auth check removed + role-based data authorization filter",
+  "file": "access_v2B_aaron_test4.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

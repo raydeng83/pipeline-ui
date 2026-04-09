@@ -1,0 +1,22 @@
+{
+  "_id": "1401e877-fe89-4474-ad5c-4f2fda535c60",
+  "_outcomes": [
+    {
+      "displayName": "Done",
+      "id": "DONE"
+    }
+  ],
+  "_rev": "1209468754",
+  "_type": {
+    "_id": "PollingWaitNode",
+    "collection": true,
+    "name": "Polling Wait Node",
+    "version": "1.0"
+  },
+  "exitMessage": {},
+  "exitable": false,
+  "secondsToWait": 5,
+  "spamDetectionEnabled": false,
+  "spamDetectionTolerance": 3,
+  "waitingMessage": {}
+}

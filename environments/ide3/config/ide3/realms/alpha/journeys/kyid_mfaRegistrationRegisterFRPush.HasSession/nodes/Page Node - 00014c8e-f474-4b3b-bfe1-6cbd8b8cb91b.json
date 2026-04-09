@@ -1,0 +1,31 @@
+{
+  "_id": "00014c8e-f474-4b3b-bfe1-6cbd8b8cb91b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1222778281",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "dd36ac5d-9f27-48a9-a845-5eb5b58ea9ba",
+      "displayName": "Expired Message",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\\n\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"}}"
+}

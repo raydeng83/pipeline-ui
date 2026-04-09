@@ -1,0 +1,16 @@
+{
+  "_id": "ee8fa86e-c8e4-490f-bd07-673790b703fb",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "creationDate": 1754484001005,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950802850,
+  "name": "ESV_Test",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/ESV_Test.js"
+  }
+}

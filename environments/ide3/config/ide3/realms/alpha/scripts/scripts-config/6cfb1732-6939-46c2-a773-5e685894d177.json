@@ -1,0 +1,16 @@
+{
+  "_id": "6cfb1732-6939-46c2-a773-5e685894d177",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747320020984,
+  "default": false,
+  "description": "Symantec VIP Authentication and registration OTP Invalid OTP error message",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950798075,
+  "name": "KYID.Journey.errormessage.SymantecVIPAuthenticationRegistration.InvalidOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.errormessage.SymantecVIPAuthenticationRegistration.InvalidOTP.js"
+  }
+}

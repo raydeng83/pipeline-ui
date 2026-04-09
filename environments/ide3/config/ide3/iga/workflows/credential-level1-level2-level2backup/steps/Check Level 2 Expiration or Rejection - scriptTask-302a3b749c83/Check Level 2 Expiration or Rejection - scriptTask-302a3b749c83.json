@@ -1,0 +1,18 @@
+{
+  "displayName": "Check Level 2 Expiration or Rejection",
+  "name": "scriptTask-302a3b749c83",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "exclusiveGateway-514d593f4037"
+      }
+    ],
+    "script": {
+      "file": "Check Level 2 Expiration or Rejection - scriptTask-302a3b749c83.js"
+    }
+  },
+  "type": "scriptTask"
+}

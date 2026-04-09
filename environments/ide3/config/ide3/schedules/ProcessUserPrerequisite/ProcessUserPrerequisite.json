@@ -1,0 +1,23 @@
+{
+  "_id": "schedule/ProcessUserPrerequisite",
+  "concurrentExecution": false,
+  "enabled": true,
+  "endTime": null,
+  "invokeContext": {
+    "script": {
+      "file": "ProcessUserPrerequisite.js",
+      "globals": {},
+      "type": "text/javascript"
+    }
+  },
+  "invokeLogLevel": "info",
+  "invokeService": "script",
+  "isCron": false,
+  "misfirePolicy": "fireAndProceed",
+  "persisted": true,
+  "recoverable": false,
+  "repeatCount": 1,
+  "repeatInterval": 31536000000,
+  "startTime": null,
+  "type": "simple"
+}

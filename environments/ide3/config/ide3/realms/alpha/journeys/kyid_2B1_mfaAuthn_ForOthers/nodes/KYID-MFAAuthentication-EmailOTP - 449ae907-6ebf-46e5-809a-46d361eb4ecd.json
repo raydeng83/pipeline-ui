@@ -1,0 +1,22 @@
+{
+  "_id": "449ae907-6ebf-46e5-809a-46d361eb4ecd",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1547470986",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_mfaAuthnEmailOTP_SelfandOthers"
+}

@@ -1,0 +1,93 @@
+{
+  "displayName": "systemCsvconnectoraarontest2_managedUserMOAaronTst",
+  "name": "systemCsvconnectoraarontest2_managedUserMOAaronTst",
+  "onCreate": {
+    "file": "systemCsvconnectoraarontest2_managedUserMOAaronTst.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onError": {
+    "file": "systemCsvconnectoraarontest2_managedUserMOAaronTst.onError.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "systemCsvconnectoraarontest2_managedUserMOAaronTst.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "policies": [
+    {
+      "action": "ASYNC",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "MISSING"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "__NAME__",
+      "target": "userName"
+    },
+    {
+      "source": "email",
+      "target": "email"
+    },
+    {
+      "source": "firstName",
+      "target": "firstName"
+    },
+    {
+      "source": "lastName",
+      "target": "lastName"
+    }
+  ],
+  "source": "system/csvConnectorAaronTest2/__ACCOUNT__",
+  "target": "managed/userMOAaronTest"
+}

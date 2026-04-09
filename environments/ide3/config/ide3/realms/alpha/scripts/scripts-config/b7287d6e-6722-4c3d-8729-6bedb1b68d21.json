@@ -1,0 +1,16 @@
+{
+  "_id": "b7287d6e-6722-4c3d-8729-6bedb1b68d21",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "creationDate": 1765432238852,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950800217,
+  "name": "KYID.2B1.Journey.IDProofing.Recovery.UnableToVerify",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IDProofing.Recovery.UnableToVerify.js"
+  }
+}

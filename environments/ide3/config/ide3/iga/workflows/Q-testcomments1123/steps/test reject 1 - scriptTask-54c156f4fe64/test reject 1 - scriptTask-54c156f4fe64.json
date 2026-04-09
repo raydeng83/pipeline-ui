@@ -1,0 +1,18 @@
+{
+  "displayName": "test reject 1",
+  "name": "scriptTask-54c156f4fe64",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "scriptTask-ba0f2a0ca56e"
+      }
+    ],
+    "script": {
+      "file": "test reject 1 - scriptTask-54c156f4fe64.js"
+    }
+  },
+  "type": "scriptTask"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "9fbfde8d-fc72-4f7c-a2f6-2e4550a5a39e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319425887,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950815216,
+  "name": "KYID.2B1.Journey.IsUserExistInPingAIC",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IsUserExistInPingAIC.js"
+  }
+}

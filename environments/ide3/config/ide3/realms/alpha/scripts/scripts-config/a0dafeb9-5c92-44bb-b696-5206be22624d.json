@@ -1,0 +1,16 @@
+{
+  "_id": "a0dafeb9-5c92-44bb-b696-5206be22624d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3c4fd600-5fb3-47b9-ae57-e481f8122dc8,ou=user,ou=am-config",
+  "creationDate": 1751902243892,
+  "default": false,
+  "description": "To determine if the journey is for Enrollment Context or Verified Pre Requisites",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950812320,
+  "name": "KYID.2B1.Journey.IsVerifiedPreReq",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.IsVerifiedPreReq.js"
+  }
+}

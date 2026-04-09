@@ -1,0 +1,6 @@
+{
+  "_id": "esv-errorupdatepwdexternaladmsg-en",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERRORUPDATEPWDEXTERNALADMSG_EN}"
+}

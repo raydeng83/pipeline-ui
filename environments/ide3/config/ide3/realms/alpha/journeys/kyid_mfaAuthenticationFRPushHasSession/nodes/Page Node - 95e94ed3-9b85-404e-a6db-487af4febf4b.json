@@ -1,0 +1,40 @@
+{
+  "_id": "95e94ed3-9b85-404e-a6db-487af4febf4b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1235475064",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "4f417a89-c745-46dd-a79a-90b96ae91f6c",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "9a27bffa-fc7f-4943-94b9-7b6a0d8c23e9",
+      "displayName": "Push Notification expired",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify with your ForgeRock Authenticator App</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.auth.forgerock.push.url}\"target=\"_blank\">Need Assistance?</a><br>\n</div>\n",
+    "es": "<div class='page-footer-horizontal'><br>\n<a href=\"&{esv.kog.help.mfa.auth.forgerock.push.url}\"target=\"_blank\">¿Necesita ayuda?\n</a><br>\n<br>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"}}"
+}

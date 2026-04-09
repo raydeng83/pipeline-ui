@@ -1,0 +1,31 @@
+{
+  "_id": "1da6a2ca-c8e5-4d21-861e-557a48abfacf",
+  "_outcomes": [
+    {
+      "displayName": "skipMobile",
+      "id": "skipMobile"
+    },
+    {
+      "displayName": "Mobile",
+      "id": "Mobile"
+    }
+  ],
+  "_rev": "-885933420",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "skipMobile",
+    "Mobile"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "3fa03431-8832-4863-8d56-49ff2f795111"
+}

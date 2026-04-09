@@ -1,0 +1,25 @@
+{
+  "_id": "33231b8a-7732-44ff-b793-f27809c01891",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1538361302",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User Provisioned Successfully !"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

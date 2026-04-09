@@ -1,0 +1,29 @@
+{
+  "_id": "ed9be0c1-d61a-4f92-b527-48a223cac10a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1229372654",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "The selected security method has been reset.",
+    "es": "Se ha restablecido el método de seguridad seleccionado."
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Click here to continue",
+    "es": "Haga clic aquí para continuar"
+  }
+}

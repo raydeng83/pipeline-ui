@@ -1,0 +1,6 @@
+{
+  "_id": "esv-ridp-user-verification-version-flag",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_RIDP_USER_VERIFICATION_VERSION_FLAG}"
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "0f3e62f1-add1-4d1a-9fb5-628cfcfcc408",
+  "_outcomes": [
+    {
+      "displayName": "Invitation",
+      "id": "Invitation"
+    },
+    {
+      "displayName": "AppCreated",
+      "id": "AppCreated"
+    },
+    {
+      "displayName": "Error",
+      "id": "Error"
+    }
+  ],
+  "_rev": "1100771785",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Invitation",
+    "AppCreated",
+    "Error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "ac40c782-0751-4df4-b67c-3cc4a30850f7"
+}

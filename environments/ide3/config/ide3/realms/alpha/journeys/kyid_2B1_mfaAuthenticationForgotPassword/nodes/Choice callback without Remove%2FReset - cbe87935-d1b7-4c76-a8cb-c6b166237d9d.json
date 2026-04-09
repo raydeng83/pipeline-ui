@@ -1,0 +1,62 @@
+{
+  "_id": "cbe87935-d1b7-4c76-a8cb-c6b166237d9d",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-1512808982",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "835c6b6d-8a4f-4f63-91b4-1b8d9626fd84",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "e088590a-f1b7-4b82-aa8b-614a55009a74",
+      "displayName": "Script",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "5eff10e8-d8dc-4868-b2ed-f11e85ebfa4e",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify_your_account</h5></div>\n<div class=\"page-element\">\n</div>\n<div class=\"page-header-content\">\nHow_would_you_like_to_verify_your_account\n</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\">Verifica tu cuenta</h5>\n<br>\n<h5 style=\"color:#5e5e5e;\">\n¿Cómo le gustaría verificar su cuenta?</h5>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "581cbca3-0061-46d4-b83c-ae6304705e80",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319428020,
+  "default": false,
+  "description": "Redirects from Ping AIC to Create Account Form Page in KOG ",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950800509,
+  "name": "KYID.Journey.RedirectToKOGCreateAccountForm",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.RedirectToKOGCreateAccountForm.js"
+  }
+}

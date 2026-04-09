@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/accessduplicate",
+  "description": "CREATE, DELETE /access",
+  "file": "accessduplicate.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

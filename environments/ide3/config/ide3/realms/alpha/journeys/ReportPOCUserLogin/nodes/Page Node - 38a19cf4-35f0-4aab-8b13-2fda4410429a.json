@@ -1,0 +1,26 @@
+{
+  "_id": "38a19cf4-35f0-4aab-8b13-2fda4410429a",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "256787670",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "243e18e6-7497-4d1d-a715-8b90cbae18cc",
+      "displayName": "Platform Username",
+      "nodeType": "ValidatedUsernameNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

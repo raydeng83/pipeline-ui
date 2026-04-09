@@ -1,0 +1,6 @@
+{
+  "_id": "esv-mailserver-fromemailaddress",
+  "description": "Email Address for  \"FROM\"  - For Email OTP ",
+  "expressionType": "string",
+  "valueBase64": "${ESV_MAILSERVER_FROMEMAILADDRESS}"
+}

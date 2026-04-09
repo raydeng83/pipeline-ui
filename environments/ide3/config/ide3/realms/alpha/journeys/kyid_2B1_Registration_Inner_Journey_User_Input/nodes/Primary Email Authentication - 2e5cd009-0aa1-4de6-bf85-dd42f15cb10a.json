@@ -1,0 +1,22 @@
+{
+  "_id": "2e5cd009-0aa1-4de6-bf85-dd42f15cb10a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1922844866",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "kyid_2B1_RegistrationAcceptance_EmailAuthentication"
+}

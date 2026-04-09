@@ -1,0 +1,32 @@
+{
+  "_id": "4842e211-ebec-4ca2-abb1-d9d6d93463ab",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1553214677",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "The selected security method has been removed.",
+    "es": "Se ha eliminado el método de seguridad seleccionado."
+  },
+  "messageNo": {
+    "en": "Remove Additional Security Methods",
+    "es": "Eliminar métodos de seguridad adicionales"
+  },
+  "messageYes": {
+    "en": "Click here to Continue",
+    "es": "Haga clic aquí para continuar"
+  }
+}

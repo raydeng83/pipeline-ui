@@ -1,0 +1,118 @@
+{
+  "_id": "webauth_register_aaron2",
+  "_rev": "98072722",
+  "enabled": true,
+  "entryNodeId": "919ef1cc-ed83-4192-b8b3-21ebe63c68b0",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "14501cb6-fcb2-42bd-a132-12336d4da6cb": {
+      "connections": {
+        "outcome": "af15d339-75e8-4afc-a72b-5372b715e664"
+      },
+      "displayName": "Email Collector",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 456,
+      "y": 181.5
+    },
+    "58b4b3e5-fd87-45a6-8e7e-69c8b2a0f5c5": {
+      "connections": {
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "dcb83531-55de-4fe9-a3ba-6202e8577d2c"
+      },
+      "displayName": "WebAuthn Device Storage Node",
+      "nodeType": "WebAuthnDeviceStorageNode",
+      "version": "1.0",
+      "x": 1710,
+      "y": 194
+    },
+    "6e4c2f3b-29a9-48dc-8279-ab9c8db93286": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "920bf329-9d27-4202-95a9-5aad87cff968",
+        "unsupported": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "WebAuthn Registration Node",
+      "nodeType": "WebAuthnRegistrationNode",
+      "version": "1.0",
+      "x": 1070,
+      "y": 167.5
+    },
+    "919ef1cc-ed83-4192-b8b3-21ebe63c68b0": {
+      "connections": {
+        "false": "14501cb6-fcb2-42bd-a132-12336d4da6cb",
+        "true": "14501cb6-fcb2-42bd-a132-12336d4da6cb"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 194
+    },
+    "920bf329-9d27-4202-95a9-5aad87cff968": {
+      "connections": {
+        "save": "58b4b3e5-fd87-45a6-8e7e-69c8b2a0f5c5",
+        "skip": "58b4b3e5-fd87-45a6-8e7e-69c8b2a0f5c5"
+      },
+      "displayName": "webauth_deviceNameCollector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1390,
+      "y": 194
+    },
+    "af15d339-75e8-4afc-a72b-5372b715e664": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "6e4c2f3b-29a9-48dc-8279-ab9c8db93286"
+      },
+      "displayName": "webauth_getUsernameFromEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 750,
+      "y": 193
+    },
+    "b5370118-6219-450f-ad0e-31bf9da98657": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 2294,
+      "y": 220.5
+    },
+    "dcb83531-55de-4fe9-a3ba-6202e8577d2c": {
+      "connections": {
+        "true": "b5370118-6219-450f-ad0e-31bf9da98657"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2030,
+      "y": 80
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2524,
+      "y": 221
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2030,
+      "y": 362
+    },
+    "startNode": {
+      "x": 70,
+      "y": 221
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

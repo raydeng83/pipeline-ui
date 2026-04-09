@@ -1,0 +1,99 @@
+{
+  "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v3_StandAlone_WIP_RIDP",
+  "_rev": "-1051506834",
+  "description": "Inner Journey for standalone RIDP Flow",
+  "enabled": true,
+  "entryNodeId": "653f42e7-e34f-4af3-aa26-5654ee6cdc2c",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "45e7f5bf-502d-4246-a0e4-1482a2d1971a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Identity Proofing Success",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 2062,
+      "y": 600.0625
+    },
+    "653f42e7-e34f-4af3-aa26-5654ee6cdc2c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "df305a05-45dd-4a18-be05-4c26e66e2e46"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 309.5
+    },
+    "cc1cb252-51ba-49bb-bab2-6f608ec380c4": {
+      "connections": {
+        "emailsWithVerifiedLexID": "45e7f5bf-502d-4246-a0e4-1482a2d1971a",
+        "exactMatch": "45e7f5bf-502d-4246-a0e4-1482a2d1971a",
+        "highRiskTransaction": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8",
+        "inputLink2TerminatedAccount": "45e7f5bf-502d-4246-a0e4-1482a2d1971a",
+        "inputNotMatchingVerifiedIdentity": "45e7f5bf-502d-4246-a0e4-1482a2d1971a",
+        "jitProvisioning": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8",
+        "lexIdMismatch": "45e7f5bf-502d-4246-a0e4-1482a2d1971a",
+        "noKOGAccount": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8",
+        "noKOGAccountFound": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8",
+        "noMatchPartialMatch": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8"
+      },
+      "displayName": "Script: MCI Search Standalone",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 848,
+      "y": 241.5
+    },
+    "df305a05-45dd-4a18-be05-4c26e66e2e46": {
+      "connections": {
+        "highRisk": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8",
+        "kbaFailed": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8",
+        "lexMisMatch": "45e7f5bf-502d-4246-a0e4-1482a2d1971a",
+        "mciSearch": "cc1cb252-51ba-49bb-bab2-6f608ec380c4",
+        "notVerified": "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8"
+      },
+      "displayName": "Script: Standalone Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 479,
+      "y": 301
+    },
+    "ecdd4bc4-b709-4b5a-9103-66b5a4d7e1c8": {
+      "connections": {
+        "differentMethod": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Retry Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1609.6666870117188,
+      "y": 287.3333282470703
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2579,
+      "y": 787
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2810,
+      "y": 637
+    },
+    "startNode": {
+      "x": 70,
+      "y": 299
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "_id": "esv-generic-workflow-api",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_GENERIC_WORKFLOW_API}"
+}

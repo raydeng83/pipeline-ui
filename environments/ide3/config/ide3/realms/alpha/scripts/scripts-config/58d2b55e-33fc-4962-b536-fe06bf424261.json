@@ -1,0 +1,16 @@
+{
+  "_id": "58d2b55e-33fc-4962-b536-fe06bf424261",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=3c4fd600-5fb3-47b9-ae57-e481f8122dc8,ou=user,ou=am-config",
+  "creationDate": 1751902245391,
+  "default": false,
+  "description": "Soft delete the Pre-Requisite in request managed object",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950797790,
+  "name": "KYID.2B1.Journey.VerifiedPrerequisites.SoftDelete",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.VerifiedPrerequisites.SoftDelete.js"
+  }
+}

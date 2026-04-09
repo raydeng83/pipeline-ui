@@ -1,0 +1,25 @@
+{
+  "_id": "7ea36b14-eee5-4269-85b1-85d644e6a8e9",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1677624711",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Error_in_sending_email_invite"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

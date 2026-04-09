@@ -1,0 +1,27 @@
+{
+  "_id": "emailTemplate/kyidUserActiveOriginalCopy",
+  "advancedEditor": true,
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "kyidUserActive original_copy",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyidUserActiveOriginalCopy.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyidUserActiveOriginalCopy.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "kyidUserActiveOriginalCopy.css"
+  },
+  "subject": {
+    "en": ""
+  },
+  "templateId": "kyidUserActiveOriginalCopy"
+}

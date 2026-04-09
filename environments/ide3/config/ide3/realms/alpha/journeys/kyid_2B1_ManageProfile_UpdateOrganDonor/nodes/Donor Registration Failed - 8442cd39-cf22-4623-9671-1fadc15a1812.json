@@ -1,0 +1,25 @@
+{
+  "_id": "8442cd39-cf22-4623-9671-1fadc15a1812",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1069538201",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "{\"pageHeader\":\"Organ Donor Registration Failed\"}"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

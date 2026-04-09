@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-default-contextid",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_DEFAULT_CONTEXTID}"
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "ffc79031-4840-422f-8682-b4a9cd743bfc",
+  "_outcomes": [
+    {
+      "displayName": "CMSFARS",
+      "id": "CMSFARS"
+    },
+    {
+      "displayName": "lexisNexisRetry",
+      "id": "lexisNexisRetry"
+    },
+    {
+      "displayName": "PrereqCompleted",
+      "id": "PrereqCompleted"
+    }
+  ],
+  "_rev": "364325367",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "CMSFARS",
+    "lexisNexisRetry",
+    "PrereqCompleted"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "96d474b5-9b68-4cb9-b743-a53ca1d0c949"
+}

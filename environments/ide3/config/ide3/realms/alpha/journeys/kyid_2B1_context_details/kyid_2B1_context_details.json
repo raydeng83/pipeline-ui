@@ -1,0 +1,95 @@
+{
+  "_id": "kyid_2B1_context_details",
+  "_rev": "122398659",
+  "enabled": true,
+  "entryNodeId": "f3f1953d-130c-45a8-a8b8-de4c605e1fd3",
+  "identityResource": "managed/user",
+  "innerTreeOnly": true,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0505e692-8117-4ec4-a661-61e6866534bf": {
+      "connections": {
+        "false": "950020f6-3d9c-406e-a48d-89c86158363b",
+        "true": "b78be949-a398-404f-8803-f2b164bcea31"
+      },
+      "displayName": "create_kyid_kyid_account_1",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 141,
+      "y": 0
+    },
+    "7804e7cf-abfc-4586-a742-1dfca2da534c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "ca8fdb69-9627-4e40-b46b-8ca795a294be"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 302,
+      "y": 324.8802185058594
+    },
+    "950020f6-3d9c-406e-a48d-89c86158363b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b78be949-a398-404f-8803-f2b164bcea31"
+      },
+      "displayName": "V2 Captcha",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 521,
+      "y": 23
+    },
+    "b78be949-a398-404f-8803-f2b164bcea31": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set Failure",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 572,
+      "y": 337.66665840148926
+    },
+    "ca8fdb69-9627-4e40-b46b-8ca795a294be": {
+      "connections": {
+        "True": "b78be949-a398-404f-8803-f2b164bcea31"
+      },
+      "displayName": "create_kyid_kyid_account_1",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 615.6666584014893
+    },
+    "f3f1953d-130c-45a8-a8b8-de4c605e1fd3": {
+      "connections": {
+        "False": "ca8fdb69-9627-4e40-b46b-8ca795a294be",
+        "True": "0505e692-8117-4ec4-a661-61e6866534bf"
+      },
+      "displayName": "Is Captcha Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 82,
+      "y": 460.66665840148926
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 830,
+      "y": 115
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1091,
+      "y": 486
+    },
+    "startNode": {
+      "x": 0,
+      "y": 295
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "_id": "kyid_2B1_Registration_Inner_Journey_User_Input",
+  "_rev": "-656543917",
+  "description": "Registration Acceptance for Invited Users",
+  "enabled": true,
+  "entryNodeId": "10599ab0-b856-4b69-a800-6874151c636a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "10599ab0-b856-4b69-a800-6874151c636a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "75048d36-827a-4b70-9003-9aadd449f5f1"
+      },
+      "displayName": "Journey Flag Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 6,
+      "y": 378
+    },
+    "2e5cd009-0aa1-4de6-bf85-dd42f15cb10a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "7540fdb1-0f5c-49a3-b24f-98b0459f0cc4"
+      },
+      "displayName": "Primary Email Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 836.015625,
+      "y": 127.03125
+    },
+    "75048d36-827a-4b70-9003-9aadd449f5f1": {
+      "connections": {
+        "back": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "invalidEmail": "8ce2bc95-7c6d-4aad-a9ce-fe7840104db6",
+        "invalidName": "aef44a0b-c4c6-4b5d-ae56-826aff786e0b",
+        "max limit": "9cd37b5b-4af7-4357-a538-f6a81c9a99ed",
+        "next": "7b076a87-5ecb-4fcd-a0c5-92ce39c56ff8"
+      },
+      "displayName": "User Input",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 299,
+      "y": 278.8159637451172
+    },
+    "7540fdb1-0f5c-49a3-b24f-98b0459f0cc4": {
+      "connections": {
+        "back": "75048d36-827a-4b70-9003-9aadd449f5f1",
+        "next": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1235,
+      "y": 126
+    },
+    "7b076a87-5ecb-4fcd-a0c5-92ce39c56ff8": {
+      "connections": {
+        "dontVerify": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "userExist": "c4aed5bb-7570-49b9-94df-93ad81caac42",
+        "verifyEmail": "2e5cd009-0aa1-4de6-bf85-dd42f15cb10a"
+      },
+      "displayName": "Check Verificaton Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 529.015625,
+      "y": 371.03125
+    },
+    "8ce2bc95-7c6d-4aad-a9ce-fe7840104db6": {
+      "connections": {
+        "true": "75048d36-827a-4b70-9003-9aadd449f5f1"
+      },
+      "displayName": "Error: Invalid Email Format",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 178,
+      "y": 174.5
+    },
+    "9cd37b5b-4af7-4357-a538-f6a81c9a99ed": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max limit for back reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 891,
+      "y": 752.1000061035156
+    },
+    "aef44a0b-c4c6-4b5d-ae56-826aff786e0b": {
+      "connections": {
+        "true": "75048d36-827a-4b70-9003-9aadd449f5f1"
+      },
+      "displayName": "Error: Invalid Name",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 306,
+      "y": 656.3125
+    },
+    "c4aed5bb-7570-49b9-94df-93ad81caac42": {
+      "connections": {
+        "try again": "75048d36-827a-4b70-9003-9aadd449f5f1"
+      },
+      "displayName": "Existing Account",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 883.2291564941406,
+      "y": 386.3333282470703
+    },
+    "d673e3ae-81ab-4696-a375-514697109492": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1498,
+      "y": 81.33332824707031
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2149,
+      "y": 312
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1396,
+      "y": 813
+    },
+    "startNode": {
+      "x": 40,
+      "y": 252
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

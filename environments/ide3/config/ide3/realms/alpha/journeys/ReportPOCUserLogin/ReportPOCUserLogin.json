@@ -1,0 +1,62 @@
+{
+  "_id": "ReportPOCUserLogin",
+  "_rev": "1953569089",
+  "enabled": true,
+  "entryNodeId": "38a19cf4-35f0-4aab-8b13-2fda4410429a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "11953610-e6c1-4c63-9c2b-df2be8b17bcd": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 974,
+      "y": 171.015625
+    },
+    "38a19cf4-35f0-4aab-8b13-2fda4410429a": {
+      "connections": {
+        "outcome": "7aedb36a-b0a8-4ca8-adff-9dd616c3d977"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 267,
+      "y": 162.015625
+    },
+    "7aedb36a-b0a8-4ca8-adff-9dd616c3d977": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "11953610-e6c1-4c63-9c2b-df2be8b17bcd"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 662,
+      "y": 265.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 500,
+      "y": 50
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 500,
+      "y": 350
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

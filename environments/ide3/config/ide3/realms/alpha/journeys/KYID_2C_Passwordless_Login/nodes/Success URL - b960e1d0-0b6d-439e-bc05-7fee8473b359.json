@@ -1,0 +1,17 @@
+{
+  "_id": "b960e1d0-0b6d-439e-bc05-7fee8473b359",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "2019509845",
+  "_type": {
+    "_id": "SetSuccessUrlNode",
+    "collection": true,
+    "name": "Success URL",
+    "version": "1.0"
+  },
+  "successUrl": "https://sso.ide3.kyid.ky.gov/enduser/?realm=alpha#/auth-devices"
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "fc7137e2-d66d-4516-affd-91434ebf73fb",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319427531,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950814987,
+  "name": "KYID.Journey.GetUserLanguagePreference.MFAforSelf",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.GetUserLanguagePreference.MFAforSelf.js"
+  }
+}

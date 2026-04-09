@@ -1,0 +1,23 @@
+{
+  "displayName": "Check More Levels",
+  "name": "exclusiveGateway-de406ecf8b04",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "currentLevel < totalLevels",
+        "outcome": "continue",
+        "step": "approvalTask-2584ed8baa74"
+      },
+      {
+        "condition": "currentLevel >= totalLevels",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "Check More Levels - exclusiveGateway-de406ecf8b04.js"
+    }
+  },
+  "type": "scriptTask"
+}

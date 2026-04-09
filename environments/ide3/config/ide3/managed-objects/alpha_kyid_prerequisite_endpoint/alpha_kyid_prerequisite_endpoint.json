@@ -1,0 +1,431 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_prerequisite_endpoint",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "url",
+      "method",
+      "requestType",
+      "action",
+      "protectionType",
+      "credentials",
+      "headers",
+      "requestmapping",
+      "responsemapping",
+      "endpointrequestmapping",
+      "endpointresponsemapping",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch"
+    ],
+    "properties": {
+      "action": {
+        "description": "This property stores the action details",
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Action",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "credentials": {
+        "description": "This property stores the username and password",
+        "isVirtual": false,
+        "order": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": false,
+            "title": "Password",
+            "type": "string",
+            "userEditable": false,
+            "viewable": true
+          },
+          "username": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": false,
+            "title": "Username",
+            "type": "string",
+            "userEditable": false,
+            "viewable": true
+          }
+        },
+        "searchable": false,
+        "title": "Credentials",
+        "type": "object",
+        "userEditable": false,
+        "viewable": true
+      },
+      "endpointrequestmapping": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "prereqType",
+            "pageElement",
+            "requestElement",
+            "pageNumber"
+          ],
+          "properties": {
+            "pageElement": {
+              "description": null,
+              "format": null,
+              "isVirtual": false,
+              "searchable": true,
+              "title": "Page Element",
+              "type": "string",
+              "userEditable": false,
+              "viewable": true
+            },
+            "pageNumber": {
+              "description": null,
+              "isVirtual": false,
+              "searchable": true,
+              "title": "Page Number",
+              "type": "number",
+              "userEditable": false,
+              "viewable": true
+            },
+            "prereqType": {
+              "description": null,
+              "format": null,
+              "isVirtual": false,
+              "searchable": true,
+              "title": "Prerequisite Type",
+              "type": "string",
+              "userEditable": false,
+              "viewable": true
+            },
+            "requestElement": {
+              "description": null,
+              "format": null,
+              "isVirtual": false,
+              "searchable": true,
+              "title": "Request Element",
+              "type": "string",
+              "userEditable": false,
+              "viewable": true
+            }
+          },
+          "required": [
+            "prereqType",
+            "pageElement",
+            "requestElement",
+            "pageNumber"
+          ],
+          "type": "object"
+        },
+        "searchable": true,
+        "title": "Endpoint Request Mapping",
+        "type": "array",
+        "userEditable": false,
+        "viewable": true
+      },
+      "endpointresponsemapping": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "items": {
+            "order": [
+              "prereqtype",
+              "pageresponseelement",
+              "requestresponseelement",
+              "pagenumber"
+            ],
+            "properties": {
+              "pagenumber": {
+                "description": null,
+                "isVirtual": false,
+                "searchable": true,
+                "title": "Page Number",
+                "type": "number",
+                "userEditable": false,
+                "viewable": true
+              },
+              "pageresponseelement": {
+                "searchable": false,
+                "title": "Page Response Element",
+                "type": "string",
+                "userEditable": true,
+                "viewable": true
+              },
+              "prereqtype": {
+                "description": null,
+                "format": null,
+                "isVirtual": false,
+                "searchable": true,
+                "title": "Prerequisite Type",
+                "type": "string",
+                "userEditable": false,
+                "viewable": true
+              },
+              "requestresponseelement": {
+                "searchable": false,
+                "title": "Request Response Element",
+                "type": "string",
+                "userEditable": true,
+                "viewable": true
+              }
+            },
+            "required": [
+              "prereqtype",
+              "pageresponseelement",
+              "requestresponseelement",
+              "pagenumber"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "nullable": false,
+        "searchable": true,
+        "title": "Endpoint Response Mapping",
+        "type": "array",
+        "userEditable": false,
+        "viewable": true
+      },
+      "headers": {
+        "description": "This property stores the endpoint headers information",
+        "isVirtual": false,
+        "order": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": false,
+            "title": "Name",
+            "type": "string",
+            "userEditable": false,
+            "viewable": true
+          },
+          "value": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": false,
+            "title": "Value",
+            "type": "string",
+            "userEditable": false,
+            "viewable": true
+          }
+        },
+        "searchable": false,
+        "title": "Headers",
+        "type": "object",
+        "userEditable": false,
+        "viewable": true
+      },
+      "method": {
+        "description": "This property stores REST API invocation method",
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Method",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "protectionType": {
+        "description": "This property stores the protection type details",
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Protection Type",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "requestType": {
+        "description": "This property stores the request type",
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Request Type",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "requestmapping": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_prerequisite_endpoint:requestmapping",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_prerequisite_endpoint:requestmapping:items",
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_kyid_endpointrequestmapping",
+              "notify": false,
+              "path": "managed/alpha_kyid_endpointrequestmapping",
+              "query": {
+                "fields": [
+                  "prereqType",
+                  "pageElement",
+                  "requestElement",
+                  "pageNumber"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": false,
+        "searchable": false,
+        "title": "Request Mapping",
+        "type": "array",
+        "userEditable": false,
+        "viewable": true
+      },
+      "responsemapping": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_prerequisite_endpoint:responsemapping",
+        "items": {
+          "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_kyid_prerequisite_endpoint:responsemapping:items",
+          "notifySelf": false,
+          "properties": {
+            "_ref": {
+              "type": "string"
+            },
+            "_refProperties": {
+              "properties": {
+                "_id": {
+                  "propName": "_id",
+                  "required": false,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "resourceCollection": [
+            {
+              "label": "Alpha_kyid_endpointresponsemapping",
+              "notify": false,
+              "path": "managed/alpha_kyid_endpointresponsemapping",
+              "query": {
+                "fields": [
+                  "prereqtype",
+                  "pageresponseelement",
+                  "requestresponseelement",
+                  "pagenumber"
+                ],
+                "queryFilter": "true",
+                "sortKeys": []
+              }
+            }
+          ],
+          "reversePropertyName": null,
+          "reverseRelationship": false,
+          "type": "relationship",
+          "validate": true
+        },
+        "returnByDefault": false,
+        "searchable": false,
+        "title": "Response Mapping",
+        "type": "array",
+        "userEditable": false,
+        "viewable": true
+      },
+      "updateDate": {
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "url": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "URL",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      }
+    },
+    "required": [
+      "url",
+      "method",
+      "requestType",
+      "protectionType",
+      "endpointrequestmapping",
+      "endpointresponsemapping"
+    ],
+    "title": "alpha_kyid_prerequisite_endpoint",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

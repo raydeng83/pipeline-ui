@@ -1,0 +1,27 @@
+{
+  "_id": "3fd98b19-5e72-43cb-8983-b0d4b205dd0d",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1310663080",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "<div class='error-message'>Invalid email format: example@domain.com</div>"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Back to Sign In"
+  }
+}

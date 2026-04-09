@@ -1,0 +1,1 @@
+<html><body>Your certification task for {{object.campaign.name}} has expired due to inactivity.</body></html>

@@ -1,0 +1,16 @@
+{
+  "_id": "c1cc8656-25b2-4f24-ba31-312e99c810b5",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747319427197,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950799240,
+  "name": "KYID.JourneyForgotPassword.FirstTimeLoginRouterScript",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.JourneyForgotPassword.FirstTimeLoginRouterScript.js"
+  }
+}

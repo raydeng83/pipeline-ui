@@ -1,0 +1,66 @@
+{
+  "_id": "6493e581-f78e-4346-96ba-fa7975f46ecb",
+  "_outcomes": [
+    {
+      "displayName": "highRiskTransaction",
+      "id": "highRiskTransaction"
+    },
+    {
+      "displayName": "lexIdMismatch",
+      "id": "lexIdMismatch"
+    },
+    {
+      "displayName": "UpdateUserIdentity",
+      "id": "UpdateUserIdentity"
+    },
+    {
+      "displayName": "jitProvisioning",
+      "id": "jitProvisioning"
+    },
+    {
+      "displayName": "noMatchPartialMatch",
+      "id": "noMatchPartialMatch"
+    },
+    {
+      "displayName": "exactMatch",
+      "id": "exactMatch"
+    },
+    {
+      "displayName": "NotMatchingWLoggedUser",
+      "id": "NotMatchingWLoggedUser"
+    },
+    {
+      "displayName": "LinkWTerminatedAccount",
+      "id": "LinkWTerminatedAccount"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-1125225482",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "highRiskTransaction",
+    "lexIdMismatch",
+    "UpdateUserIdentity",
+    "jitProvisioning",
+    "noMatchPartialMatch",
+    "exactMatch",
+    "NotMatchingWLoggedUser",
+    "LinkWTerminatedAccount",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "acad430c-2ccd-47ef-ae41-ec6e6382256f"
+}

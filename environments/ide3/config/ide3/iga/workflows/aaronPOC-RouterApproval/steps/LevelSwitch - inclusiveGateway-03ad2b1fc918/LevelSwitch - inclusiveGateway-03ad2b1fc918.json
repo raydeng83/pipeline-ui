@@ -1,0 +1,34 @@
+{
+  "displayName": "LevelSwitch",
+  "name": "inclusiveGateway-03ad2b1fc918",
+  "scriptTask": {
+    "gatewayType": "inclusive",
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "nextLevel == 'level1'",
+        "outcome": "level1",
+        "step": "approvalTask-7218958f3c14"
+      },
+      {
+        "condition": "nextLevel == 'level2'",
+        "outcome": "level2",
+        "step": "approvalTask-eb2ad37f90a7"
+      },
+      {
+        "condition": "nextLevel == 'level3'",
+        "outcome": "level3",
+        "step": "approvalTask-bea4771b1286"
+      },
+      {
+        "condition": "nextLevel == 'done'",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "LevelSwitch - inclusiveGateway-03ad2b1fc918.js"
+    }
+  },
+  "type": "scriptTask"
+}

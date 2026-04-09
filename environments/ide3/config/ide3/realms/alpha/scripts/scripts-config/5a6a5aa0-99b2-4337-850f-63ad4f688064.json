@@ -1,0 +1,16 @@
+{
+  "_id": "5a6a5aa0-99b2-4337-850f-63ad4f688064",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1754194055776,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950815416,
+  "name": "COPY.KYID.2B1.Journey.IDProofing.PatchUserPrereqAppEnroll",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/COPY.KYID.2B1.Journey.IDProofing.PatchUserPrereqAppEnroll.js"
+  }
+}

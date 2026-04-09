@@ -1,0 +1,433 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "KYID_CustomUITemplate",
+  "onCreate": {
+    "file": "KYID_CustomUITemplate.onCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "onUpdate": {
+    "file": "KYID_CustomUITemplate.onUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postCreate": {
+    "file": "KYID_CustomUITemplate.postCreate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "postUpdate": {
+    "file": "KYID_CustomUITemplate.postUpdate.js",
+    "globals": {},
+    "type": "text/javascript"
+  },
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "KYID Custom UI Template",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "name",
+      "titleen",
+      "titlees",
+      "message",
+      "errors",
+      "pagename",
+      "fields",
+      "footerfields",
+      "actions",
+      "MaxChar",
+      "AllowedChar",
+      "createDate",
+      "updateDate",
+      "createdBy",
+      "updatedBy",
+      "createDateEpoch",
+      "updateDateEpoch",
+      "createdByID",
+      "updatedByID"
+    ],
+    "properties": {
+      "AllowedChar": {
+        "searchable": false,
+        "title": "AllowedChar",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "MaxChar": {
+        "searchable": false,
+        "title": "MaxChar",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "actions": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "type": "string"
+        },
+        "searchable": true,
+        "title": "actions",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDate": {
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createDateEpoch": {
+        "searchable": false,
+        "title": "Create Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdBy": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "createdByID": {
+        "searchable": false,
+        "title": "Created By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "errors": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "title",
+            "message"
+          ],
+          "properties": {
+            "message": {
+              "searchable": false,
+              "title": "message",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "title": {
+              "searchable": false,
+              "title": "title",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": true,
+        "title": "errors",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "fields": {
+        "default": [
+          {
+            "allowedChar": null,
+            "callback_type": null,
+            "isactive": false,
+            "isrequired": false,
+            "labelen": null,
+            "labeles": null,
+            "maxLength": 0,
+            "minLength": 0,
+            "name": null,
+            "type": null
+          },
+          {
+            "allowedChar": null,
+            "callback_type": null,
+            "isactive": false,
+            "isrequired": false,
+            "labelpen": null,
+            "labelpes": null,
+            "maxLength": 0,
+            "minLength": 0,
+            "name": null,
+            "password_allowedChar": null,
+            "type": null
+          }
+        ],
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "type",
+            "callback_type",
+            "name",
+            "labelen",
+            "isrequired",
+            "isactive",
+            "labeles",
+            "minLength",
+            "allowedChar",
+            "maxLength",
+            "labelpen",
+            "labelpes",
+            "password_allowedChar"
+          ],
+          "properties": {
+            "allowedChar": {
+              "searchable": false,
+              "title": "allowedChar",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "callback_type": {
+              "searchable": false,
+              "title": "callback_type",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "isactive": {
+              "searchable": false,
+              "title": "isactive",
+              "type": "boolean",
+              "userEditable": true,
+              "viewable": true
+            },
+            "isrequired": {
+              "searchable": false,
+              "title": "isrequired",
+              "type": "boolean",
+              "userEditable": true,
+              "viewable": true
+            },
+            "labelen": {
+              "searchable": false,
+              "title": "labelen",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "labeles": {
+              "searchable": false,
+              "title": "labeles",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "labelpen": {
+              "searchable": false,
+              "title": "labelpen",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "labelpes": {
+              "searchable": false,
+              "title": "labelpes",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "maxLength": {
+              "searchable": false,
+              "title": "maxLength",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "minLength": {
+              "searchable": false,
+              "title": "minLength",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "name": {
+              "searchable": false,
+              "title": "name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "password_allowedChar": {
+              "searchable": false,
+              "title": "password_allowedChar",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "type": {
+              "searchable": false,
+              "title": "type",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": true,
+        "title": "fields",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "footerfields": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "type",
+            "name",
+            "labelen",
+            "labeles",
+            "values",
+            "isactive"
+          ],
+          "properties": {
+            "isactive": {
+              "searchable": false,
+              "title": "isactive",
+              "type": "boolean",
+              "userEditable": true,
+              "viewable": true
+            },
+            "labelen": {
+              "searchable": false,
+              "title": "labelen",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "labeles": {
+              "searchable": false,
+              "title": "labeles",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "name": {
+              "searchable": false,
+              "title": "name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "type": {
+              "searchable": false,
+              "title": "type",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "values": {
+              "items": {
+                "type": "string"
+              },
+              "searchable": false,
+              "title": "values",
+              "type": "array",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": true,
+        "title": "footerfields",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "message": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "message",
+        "type": "string",
+        "userEditable": false,
+        "viewable": true
+      },
+      "name": {
+        "searchable": false,
+        "title": "name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "pagename": {
+        "default": "login-email",
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "pagename",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "titleen": {
+        "searchable": false,
+        "title": "titleen",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "titlees": {
+        "searchable": false,
+        "title": "titlees",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDate": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updateDateEpoch": {
+        "searchable": false,
+        "title": "Update Date in Epoch Format",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedBy": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updatedByID": {
+        "searchable": false,
+        "title": "Updated By ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "KYID-CustomUITemplate",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

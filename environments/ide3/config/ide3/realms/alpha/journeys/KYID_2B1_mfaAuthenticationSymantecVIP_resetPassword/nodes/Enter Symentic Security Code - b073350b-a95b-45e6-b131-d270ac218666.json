@@ -1,0 +1,52 @@
+{
+  "_id": "b073350b-a95b-45e6-b131-d270ac218666",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "AnotherMethod",
+      "id": "AnotherMethod"
+    },
+    {
+      "displayName": "singlesymantec",
+      "id": "singlesymantec"
+    },
+    {
+      "displayName": "EmptyCode",
+      "id": "EmptyCode"
+    }
+  ],
+  "_rev": "-1506177368",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "5a1b0ebe-635e-4c0a-9a46-15a7b0f07af1",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "b390f7de-b3bb-412c-a5ca-1b21787421e2",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>\nVerify with Symantec VIP</h5>\n</div>\n<div class=\"page-element\">\n</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Verificación con Symantec VIP</h5>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

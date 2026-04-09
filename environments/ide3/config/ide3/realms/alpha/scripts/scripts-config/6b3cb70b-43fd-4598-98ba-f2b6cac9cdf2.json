@@ -1,0 +1,16 @@
+{
+  "_id": "6b3cb70b-43fd-4598-98ba-f2b6cac9cdf2",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "creationDate": 1747385357864,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=53efca5d-5f18-4189-9665-f87004ef8555,ou=user,ou=am-config",
+  "lastModifiedDate": 1765950800647,
+  "name": "KYID.2B1.Journey.SetEncodedRequestURL",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.2B1.Journey.SetEncodedRequestURL.js"
+  }
+}

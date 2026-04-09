@@ -1,0 +1,35 @@
+{
+  "_id": "afadbd24-84d1-4b53-b72f-b27dadde8f32",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    },
+    {
+      "displayName": "Not registered",
+      "id": "notRegisteredOutcome"
+    }
+  ],
+  "_rev": "2101068242",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "247f0665-71dc-40da-ab26-aec9be582225",
+      "displayName": "OATH Token Verifier",
+      "nodeType": "OathTokenVerifierNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\">\\nBack to Application</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\">\\nVolver a la solicitud</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\">Ayuda</a></span>\\n</div>\"}}"
+}

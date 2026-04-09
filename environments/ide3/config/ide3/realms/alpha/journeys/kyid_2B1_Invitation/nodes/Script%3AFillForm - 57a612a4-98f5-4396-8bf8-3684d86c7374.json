@@ -1,0 +1,51 @@
+{
+  "_id": "57a612a4-98f5-4396-8bf8-3684d86c7374",
+  "_outcomes": [
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "Phone Number Existing",
+      "id": "Phone Number Existing"
+    },
+    {
+      "displayName": "Invalid Number",
+      "id": "Invalid Number"
+    },
+    {
+      "displayName": "InvalidEmailFormat",
+      "id": "InvalidEmailFormat"
+    },
+    {
+      "displayName": "EmptyEmail",
+      "id": "EmptyEmail"
+    },
+    {
+      "displayName": "InvalidName",
+      "id": "InvalidName"
+    }
+  ],
+  "_rev": "1567905081",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "next",
+    "Phone Number Existing",
+    "Invalid Number",
+    "InvalidEmailFormat",
+    "EmptyEmail",
+    "InvalidName"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "24d9878c-322a-436a-b4f0-8ba6becaf93f"
+}

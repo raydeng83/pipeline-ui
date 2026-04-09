@@ -1,0 +1,16 @@
+{
+  "_id": "5c82b2db-a043-49a8-a240-cd76543a4ca5",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=5708fb1a-9d2d-4b8f-a6e0-3c38f1b823f5,ou=user,ou=am-config",
+  "creationDate": 1770999203899,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=5708fb1a-9d2d-4b8f-a6e0-3c38f1b823f5,ou=user,ou=am-config",
+  "lastModifiedDate": 1771331020040,
+  "name": "KYID.2B1.Journey.checkIfAppRequiresMFA",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.checkIfAppRequiresMFA.js"
+  }
+}

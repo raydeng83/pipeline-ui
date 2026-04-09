@@ -1,0 +1,238 @@
+{
+  "_id": "kyid_2B1_PrerequisitesEnrolment_Duplicate",
+  "_rev": "-473505769",
+  "description": "This is a duplicate prerequisite enrolment Journey",
+  "enabled": true,
+  "entryNodeId": "37190f8f-0b7f-430b-b2e8-39dbe7479824",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "37190f8f-0b7f-430b-b2e8-39dbe7479824": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "6aa2fc96-6133-4028-a73d-781f74e2be88"
+      },
+      "displayName": "Script - isKYID2BJourney",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 501.5
+    },
+    "42d0894d-5f50-4268-ba9e-1faf0fbdc025": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message - TBD",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3015,
+      "y": 89.75
+    },
+    "49a3dc5d-374a-4bb9-8639-e5833259d54d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "691f16a7-b2f5-40d9-96c1-8d9692fc6929"
+      },
+      "displayName": "IJ01 - Invoke Role Request Workflow",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2408,
+      "y": 345.5
+    },
+    "524a09f0-5fcc-407f-b302-f6d9f739a27f": {
+      "connections": {
+        "Error": "bc3fa598-0ab2-40c7-9b89-04a4cee5ddba",
+        "Success": "b0a1316b-e68b-4fc8-9f70-b91506b54351"
+      },
+      "displayName": "Script - Read ContextID Info",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1452,
+      "y": 501.5
+    },
+    "551485c2-aaa1-4198-9b22-81c823a7a93b": {
+      "connections": {
+        "enroll": "524a09f0-5fcc-407f-b302-f6d9f739a27f",
+        "verified": "dc401fc8-160f-4cdd-b87c-3fcaf775ee01"
+      },
+      "displayName": "Script - IsVerifiedPreReq",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1141,
+      "y": 501.5
+    },
+    "691f16a7-b2f5-40d9-96c1-8d9692fc6929": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Next": "b0a1316b-e68b-4fc8-9f70-b91506b54351"
+      },
+      "displayName": "Script - Validate Workflow Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2414,
+      "y": 524
+    },
+    "6aa2fc96-6133-4028-a73d-781f74e2be88": {
+      "connections": {
+        "outcome": "ff69b889-6d63-405c-bd07-b661e5680d83"
+      },
+      "displayName": "Read ContextID from Request URL",
+      "nodeType": "QueryParameterNode",
+      "version": "1.0",
+      "x": 521,
+      "y": 528
+    },
+    "9aca8319-addc-41ee-b430-d709335fae12": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b0a1316b-e68b-4fc8-9f70-b91506b54351"
+      },
+      "displayName": "IJ02 - Pending Approval Status",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2100,
+      "y": 795
+    },
+    "9c9eae72-2f84-44d8-bcd1-e020094e46f1": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "false": "f26a2f83-65fb-4baa-9da0-c388291011bf",
+        "true": "a49a1cd1-78e1-4811-adf2-69af74a7ba8a"
+      },
+      "displayName": "Script: Is Role Provisioned",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2091,
+      "y": 582
+    },
+    "a49a1cd1-78e1-4811-adf2-69af74a7ba8a": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Prerequisite Completion Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2765,
+      "y": 708.6666666666666
+    },
+    "b0a1316b-e68b-4fc8-9f70-b91506b54351": {
+      "connections": {
+        "View pending approval": "9aca8319-addc-41ee-b430-d709335fae12",
+        "done": "9c9eae72-2f84-44d8-bcd1-e020094e46f1",
+        "error": "bc3fa598-0ab2-40c7-9b89-04a4cee5ddba",
+        "next": "dc401fc8-160f-4cdd-b87c-3fcaf775ee01"
+      },
+      "displayName": "List Prerequisites",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1771,
+      "y": 425.16666666666663
+    },
+    "b16541a8-8857-40d9-bfe9-151069718ede": {
+      "connections": {
+        "Back": "dc401fc8-160f-4cdd-b87c-3fcaf775ee01",
+        "Next": "42d0894d-5f50-4268-ba9e-1faf0fbdc025",
+        "No": "e2967301-c1c7-4357-8a6b-87556551101a",
+        "Pending": "dc401fc8-160f-4cdd-b87c-3fcaf775ee01"
+      },
+      "displayName": " Script - Process Prerequisite Form Values",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2706,
+      "y": 130
+    },
+    "bc3fa598-0ab2-40c7-9b89-04a4cee5ddba": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script - Handle Error Messages",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3058,
+      "y": 898
+    },
+    "c62e0934-ca40-4844-b2d4-8002fef5a335": {
+      "connections": {
+        "Back": "dc401fc8-160f-4cdd-b87c-3fcaf775ee01",
+        "Next": "b16541a8-8857-40d9-bfe9-151069718ede"
+      },
+      "displayName": "Script - To move back and forth",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2402,
+      "y": 154.75
+    },
+    "dc401fc8-160f-4cdd-b87c-3fcaf775ee01": {
+      "connections": {
+        "Back": "b0a1316b-e68b-4fc8-9f70-b91506b54351",
+        "Completed": "b0a1316b-e68b-4fc8-9f70-b91506b54351",
+        "Next": "c62e0934-ca40-4844-b2d4-8002fef5a335",
+        "No": "bc3fa598-0ab2-40c7-9b89-04a4cee5ddba",
+        "VerfiedBack": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "VerfiedCompleted": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "Workflow": "49a3dc5d-374a-4bb9-8639-e5833259d54d",
+        "WorkflowReject": "b0a1316b-e68b-4fc8-9f70-b91506b54351",
+        "WorkflowStatus": "691f16a7-b2f5-40d9-96c1-8d9692fc6929"
+      },
+      "displayName": "Script - List Prerequisite Attributes",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2089,
+      "y": 229.5
+    },
+    "e2967301-c1c7-4357-8a6b-87556551101a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Message - Error",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3017,
+      "y": 271.375
+    },
+    "f26a2f83-65fb-4baa-9da0-c388291011bf": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "a49a1cd1-78e1-4811-adf2-69af74a7ba8a"
+      },
+      "displayName": "IJ03 - Role Provisioning",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2420,
+      "y": 711.25
+    },
+    "ff69b889-6d63-405c-bd07-b661e5680d83": {
+      "connections": {
+        "hasSession": "551485c2-aaa1-4198-9b22-81c823a7a93b",
+        "noSession": "bc3fa598-0ab2-40c7-9b89-04a4cee5ddba"
+      },
+      "displayName": "Script - Is Session Exist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 841,
+      "y": 501.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3432,
+      "y": 124.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3374,
+      "y": 706.3333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 528.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"kyid_2B1_Prerequisites\"]"
+  }
+}

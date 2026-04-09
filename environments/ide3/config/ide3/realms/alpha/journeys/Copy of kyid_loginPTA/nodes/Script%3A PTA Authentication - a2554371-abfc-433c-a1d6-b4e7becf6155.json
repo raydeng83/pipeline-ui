@@ -1,0 +1,41 @@
+{
+  "_id": "a2554371-abfc-433c-a1d6-b4e7becf6155",
+  "_outcomes": [
+    {
+      "displayName": "Successful",
+      "id": "Successful"
+    },
+    {
+      "displayName": "connFail",
+      "id": "connFail"
+    },
+    {
+      "displayName": "pwdExpire",
+      "id": "pwdExpire"
+    },
+    {
+      "displayName": "failOrInactive",
+      "id": "failOrInactive"
+    }
+  ],
+  "_rev": "-1821351384",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Successful",
+    "connFail",
+    "pwdExpire",
+    "failOrInactive"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c8755411-bdbb-43ab-966a-950e10c22467"
+}

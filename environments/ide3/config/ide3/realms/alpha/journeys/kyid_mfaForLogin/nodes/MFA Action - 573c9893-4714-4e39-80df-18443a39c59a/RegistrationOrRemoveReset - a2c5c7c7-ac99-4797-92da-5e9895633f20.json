@@ -1,0 +1,31 @@
+{
+  "_id": "a2c5c7c7-ac99-4797-92da-5e9895633f20",
+  "_outcomes": [
+    {
+      "displayName": "MFA Registration",
+      "id": "MFA Registration"
+    },
+    {
+      "displayName": "Remove/Reset",
+      "id": "Remove/Reset"
+    }
+  ],
+  "_rev": "-1229559811",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "MFA Registration",
+    "Remove/Reset"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "4a119ee0-52fc-4289-b393-4f7f63adb62f"
+}

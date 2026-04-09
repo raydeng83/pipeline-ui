@@ -1,0 +1,31 @@
+{
+  "_id": "bfc40e01-e0c1-43a1-8587-48cfa09ddbab",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "kyid",
+      "id": "kyid"
+    }
+  ],
+  "_rev": "405594649",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "kyid"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "30eb2568-cc09-4622-a9ee-bea9c2b0ee76"
+}

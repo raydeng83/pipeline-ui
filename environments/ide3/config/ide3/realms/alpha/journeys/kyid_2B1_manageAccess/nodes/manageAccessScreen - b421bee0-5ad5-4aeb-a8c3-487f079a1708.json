@@ -1,0 +1,56 @@
+{
+  "_id": "b421bee0-5ad5-4aeb-a8c3-487f079a1708",
+  "_outcomes": [
+    {
+      "displayName": "requestRole",
+      "id": "requestRole"
+    },
+    {
+      "displayName": "removeRole",
+      "id": "removeRole"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    },
+    {
+      "displayName": "refresh",
+      "id": "refresh"
+    },
+    {
+      "displayName": "invalidJson",
+      "id": "invalidJson"
+    },
+    {
+      "displayName": "invalidRoleId",
+      "id": "invalidRoleId"
+    }
+  ],
+  "_rev": "1710953517",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "requestRole",
+    "removeRole",
+    "back",
+    "error",
+    "refresh",
+    "invalidJson",
+    "invalidRoleId"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "aaa816b2-2ea5-46ea-8231-661ea01d00a6"
+}

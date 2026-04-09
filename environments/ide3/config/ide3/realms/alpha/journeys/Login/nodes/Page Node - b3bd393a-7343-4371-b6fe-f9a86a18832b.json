@@ -1,0 +1,30 @@
+{
+  "_id": "b3bd393a-7343-4371-b6fe-f9a86a18832b",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    }
+  ],
+  "_rev": "104338207",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "17383ac6-70f7-4d00-aa55-0205cd2376bc",
+      "displayName": "OATH Registration",
+      "nodeType": "OathRegistrationNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

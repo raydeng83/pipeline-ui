@@ -1,0 +1,25 @@
+{
+  "_id": "3da1c411-a8e0-4193-94c6-fc9c982d4cf2",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1870867804",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User is not provisioned in Target System, Please Try later"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

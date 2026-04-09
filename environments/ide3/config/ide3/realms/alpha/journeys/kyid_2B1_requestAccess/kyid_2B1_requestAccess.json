@@ -1,0 +1,158 @@
+{
+  "_id": "kyid_2B1_requestAccess",
+  "_rev": "55907154",
+  "enabled": true,
+  "entryNodeId": "1ce5fe62-0036-47f8-b376-1e2656b9b9d8",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "08234f01-1ed0-4580-becc-9f4af0baf71a": {
+      "connections": {
+        "enrollAppWid": "7ff7f87d-5246-4146-a4e0-4b64ab562035",
+        "enrollRoleWid": "6d84ce2e-030b-41bf-b56d-22db92a7dca0"
+      },
+      "displayName": "Script:roleorAppRequest",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 407,
+      "y": 43.015625
+    },
+    "1ce5fe62-0036-47f8-b376-1e2656b9b9d8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "8158c07a-4fda-4080-8ce4-62a00955c169"
+      },
+      "displayName": "Script:CheckJourneyFlag",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 109.66666603088379,
+      "y": 44.33332824707031
+    },
+    "211f0313-6650-4d71-90d9-7947351a27b5": {
+      "connections": {
+        "true": "7ff7f87d-5246-4146-a4e0-4b64ab562035"
+      },
+      "displayName": "Error:SetInvalidJSONError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1129,
+      "y": 295.015625
+    },
+    "25baf528-363a-4577-a9cf-1ad3bb8ced52": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script:SetGoBackNodeState",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1172,
+      "y": 85.015625
+    },
+    "2b11e055-e62a-46e7-b99a-7538751cc1fb": {
+      "connections": {
+        "true": "7ff7f87d-5246-4146-a4e0-4b64ab562035"
+      },
+      "displayName": "Refresh",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1140,
+      "y": 212.2222137451172
+    },
+    "613794ef-4d84-4f1c-9b80-7b6707543cc0": {
+      "connections": {
+        "false": "9171745f-1ca6-49ec-8dbf-41de9897758a",
+        "true": "08234f01-1ed0-4580-becc-9f4af0baf71a"
+      },
+      "displayName": "Script:ExtOrIntUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 488,
+      "y": 471.015625
+    },
+    "6d84ce2e-030b-41bf-b56d-22db92a7dca0": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script:RedirectURL",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1156,
+      "y": 477.015625
+    },
+    "7ff7f87d-5246-4146-a4e0-4b64ab562035": {
+      "connections": {
+        "back": "25baf528-363a-4577-a9cf-1ad3bb8ced52",
+        "continue": "6d84ce2e-030b-41bf-b56d-22db92a7dca0",
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "invalidJSON": "211f0313-6650-4d71-90d9-7947351a27b5",
+        "invalidRoles": "f41b87e8-a1f5-4213-a8d5-b2445836ff4a",
+        "refresh": "2b11e055-e62a-46e7-b99a-7538751cc1fb"
+      },
+      "displayName": "Script:ListofRolesforRequest",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 734,
+      "y": 34.3125
+    },
+    "8158c07a-4fda-4080-8ce4-62a00955c169": {
+      "connections": {
+        "false": "08234f01-1ed0-4580-becc-9f4af0baf71a",
+        "true": "f83b7d0e-b50e-47a2-b35a-733427ebd99f"
+      },
+      "displayName": "Script:GetKOGID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 194,
+      "y": 241.015625
+    },
+    "9171745f-1ca6-49ec-8dbf-41de9897758a": {
+      "connections": {},
+      "displayName": "Script:EmptyDashboard",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 756,
+      "y": 463.015625
+    },
+    "f41b87e8-a1f5-4213-a8d5-b2445836ff4a": {
+      "connections": {
+        "true": "7ff7f87d-5246-4146-a4e0-4b64ab562035"
+      },
+      "displayName": "Error:SetInvalidRolesError",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1131,
+      "y": 382.015625
+    },
+    "f83b7d0e-b50e-47a2-b35a-733427ebd99f": {
+      "connections": {
+        "User Found": "613794ef-4d84-4f1c-9b80-7b6707543cc0"
+      },
+      "displayName": "Script:GetUserDetails",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 192,
+      "y": 431.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1662,
+      "y": 63
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1676,
+      "y": 397
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

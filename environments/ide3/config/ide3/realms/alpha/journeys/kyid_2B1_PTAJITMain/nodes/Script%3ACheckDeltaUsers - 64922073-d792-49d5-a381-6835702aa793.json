@@ -1,0 +1,31 @@
+{
+  "_id": "64922073-d792-49d5-a381-6835702aa793",
+  "_outcomes": [
+    {
+      "displayName": "wait",
+      "id": "wait"
+    },
+    {
+      "displayName": "proceed",
+      "id": "proceed"
+    }
+  ],
+  "_rev": "-930068435",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "wait",
+    "proceed"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "ccef7387-fccb-4fa8-a149-479e6204d074"
+}

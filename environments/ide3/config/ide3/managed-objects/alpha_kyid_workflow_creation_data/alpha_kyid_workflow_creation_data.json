@@ -1,0 +1,419 @@
+{
+  "name": "alpha_kyid_workflow_creation_data",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "name",
+      "description",
+      "recordState",
+      "prerequisitesForWorkflowCreation",
+      "approverList"
+    ],
+    "properties": {
+      "approverList": {
+        "description": null,
+        "isVirtual": false,
+        "items": {
+          "order": [
+            "approverListID",
+            "prerequisiteRecordID",
+            "approverType",
+            "approverLogonID",
+            "approverEmailAddress",
+            "approverApplicationName",
+            "approverRoleName",
+            "approverForgeRockID",
+            "approverSequence",
+            "primaryOrBackup",
+            "isDelete",
+            "userExists",
+            "roleExists",
+            "approverUserType",
+            "createUserId",
+            "createDate",
+            "updateUserId",
+            "updateDate",
+            "isRoleAssigned",
+            "approverTimeOut",
+            "kogPrerequisiteID"
+          ],
+          "properties": {
+            "approverApplicationName": {
+              "searchable": false,
+              "title": "Approver Application Name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverEmailAddress": {
+              "searchable": false,
+              "title": "Approver Email Address",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverForgeRockID": {
+              "searchable": false,
+              "title": "Approver ForgeRock ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverListID": {
+              "searchable": false,
+              "title": "Approver List ID",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverLogonID": {
+              "searchable": false,
+              "title": "Approver Logon ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverRoleName": {
+              "searchable": false,
+              "title": "Approver Role Name",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverSequence": {
+              "searchable": false,
+              "title": "Approver Sequence",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverTimeOut": {
+              "searchable": false,
+              "title": "Approver Timeout",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverType": {
+              "searchable": false,
+              "title": "Approver Type",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "approverUserType": {
+              "searchable": false,
+              "title": "Approver User Type",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "createDate": {
+              "searchable": false,
+              "title": "Create Date",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "createUserId": {
+              "searchable": false,
+              "title": "Create User ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "isDelete": {
+              "searchable": false,
+              "title": "Is Delete",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "isRoleAssigned": {
+              "searchable": false,
+              "title": "Is Role Assigned",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "kogPrerequisiteID": {
+              "searchable": false,
+              "title": "KOG Prerequisite ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "prerequisiteRecordID": {
+              "searchable": false,
+              "title": "Prerequisite Record ID",
+              "type": "number",
+              "userEditable": true,
+              "viewable": true
+            },
+            "primaryOrBackup": {
+              "searchable": false,
+              "title": "Primary or Backup",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "roleExists": {
+              "searchable": false,
+              "title": "Role Exists",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "updateDate": {
+              "searchable": false,
+              "title": "Update Date",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "updateUserId": {
+              "searchable": false,
+              "title": "Update User ID",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            },
+            "userExists": {
+              "searchable": false,
+              "title": "User Exists",
+              "type": "string",
+              "userEditable": true,
+              "viewable": true
+            }
+          },
+          "required": [],
+          "type": "object"
+        },
+        "searchable": false,
+        "title": "Approver List",
+        "type": "array",
+        "userEditable": true,
+        "viewable": true
+      },
+      "description": {
+        "searchable": false,
+        "title": "Workflow Data Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Workflow Data Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "prerequisitesForWorkflowCreation": {
+        "description": null,
+        "isVirtual": false,
+        "nullable": false,
+        "order": [
+          "prerequisiteRecordID",
+          "kogPrerequisiteID",
+          "prerequisiteSourceName",
+          "prerequisiteName",
+          "forgeRockPrerequisiteID",
+          "onSubmitServiceEndpointName",
+          "workflowType",
+          "createWorkflow",
+          "workflowURL",
+          "statusCode",
+          "errorMessage",
+          "isWorkflowCreated",
+          "isDelete",
+          "prerequisiteTypeIdentifier",
+          "serviceCallName",
+          "updateUserId",
+          "createUserId",
+          "createDate",
+          "updateDate",
+          "workflowCreationDateTime"
+        ],
+        "properties": {
+          "createDate": {
+            "searchable": false,
+            "title": "Create Date",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "createUserId": {
+            "searchable": false,
+            "title": "Create User ID",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "createWorkflow": {
+            "searchable": false,
+            "title": "Create Workflow",
+            "type": "number",
+            "userEditable": true,
+            "viewable": true
+          },
+          "errorMessage": {
+            "searchable": false,
+            "title": "Error Message",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "forgeRockPrerequisiteID": {
+            "searchable": false,
+            "title": "ForgeRock Prerequisite ID",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "isDelete": {
+            "searchable": false,
+            "title": "Is Delete",
+            "type": "number",
+            "userEditable": true,
+            "viewable": true
+          },
+          "isWorkflowCreated": {
+            "searchable": false,
+            "title": "Is Workflow Created",
+            "type": "number",
+            "userEditable": true,
+            "viewable": true
+          },
+          "kogPrerequisiteID": {
+            "searchable": false,
+            "title": "KOG Prerequisite ID",
+            "type": "number",
+            "userEditable": true,
+            "viewable": true
+          },
+          "onSubmitServiceEndpointName": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": true,
+            "title": "On Submit Service Endpoint Name",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "prerequisiteName": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": true,
+            "title": "Prerequisite Name",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "prerequisiteRecordID": {
+            "searchable": false,
+            "title": "Prerequisite Record ID",
+            "type": "number",
+            "userEditable": true,
+            "viewable": true
+          },
+          "prerequisiteSourceName": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": false,
+            "title": "Prerequisite Source Name",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "prerequisiteTypeIdentifier": {
+            "searchable": false,
+            "title": "Prerequisite Type Identifier",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "serviceCallName": {
+            "searchable": false,
+            "title": "Service Call Name",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "statusCode": {
+            "searchable": false,
+            "title": "Status Code",
+            "type": "number",
+            "userEditable": true,
+            "viewable": true
+          },
+          "updateDate": {
+            "searchable": false,
+            "title": "Update Date",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "updateUserId": {
+            "searchable": false,
+            "title": "Update User ID",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "workflowCreationDateTime": {
+            "searchable": false,
+            "title": "Workflow Creation Date Time",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "workflowType": {
+            "description": null,
+            "format": null,
+            "isVirtual": false,
+            "searchable": true,
+            "title": "Workflow Type",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          },
+          "workflowURL": {
+            "searchable": false,
+            "title": "Workflow URL",
+            "type": "string",
+            "userEditable": true,
+            "viewable": true
+          }
+        },
+        "searchable": false,
+        "title": "Prerequisite for Workflow Creation",
+        "type": "object",
+        "userEditable": true,
+        "viewable": true
+      },
+      "recordState": {
+        "searchable": false,
+        "title": "Record State",
+        "type": "number",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "name",
+      "recordState",
+      "prerequisitesForWorkflowCreation"
+    ],
+    "title": "alpha_kyid_workflow_creation_data",
+    "type": "object"
+  }
+}
