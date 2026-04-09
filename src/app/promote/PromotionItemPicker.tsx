@@ -68,9 +68,18 @@ function ScopeRow({
   const query = filter.trim().toLowerCase();
   const filtered = query ? entry.items.filter((i) => i.label.toLowerCase().includes(query)) : entry.items;
 
-  const pageCount = Math.ceil(filtered.length / PAGE_SIZE);
+  // Selected items float to the top (only when not "all selected", to avoid a no-op sort)
+  const sorted = allSelected
+    ? filtered
+    : [...filtered].sort((a, b) => {
+        const aChecked = selectedSet.has(a.id) ? 0 : 1;
+        const bChecked = selectedSet.has(b.id) ? 0 : 1;
+        return aChecked - bChecked;
+      });
+
+  const pageCount = Math.ceil(sorted.length / PAGE_SIZE);
   const safePage = Math.min(page, Math.max(0, pageCount - 1));
-  const visible = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+  const visible = sorted.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
   const needsPagination = filtered.length > PAGE_SIZE;
 
   // Non-selectable scopes: entire header row is the toggle
