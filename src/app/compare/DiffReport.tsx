@@ -69,7 +69,19 @@ function pathToTaskScopeAndItem(relativePath: string): { scope: string; itemId: 
   }
   if (FILE_SELECTABLE_PATH_SCOPES.has(scope)) {
     if (relativePath.includes("scripts-content/")) return { scope, itemId: null };
-    return { scope, itemId: parts[parts.length - 1] };
+
+    // Scripts are realm-based (realms/<realm>/scripts/scripts-config/<uuid>.json).
+    // The item ID is the filename (UUID), matching what scriptItems() returns in the audit API.
+    if (scope === "scripts") return { scope, itemId: parts[parts.length - 1] };
+
+    // All other FILE_SELECTABLE scopes (endpoints, schedules, custom-nodes) store items as
+    // directories. The audit API lists those directory names as item IDs.
+    // Path: <scope>/<item>/...  →  item = parts[1]
+    // custom-nodes has an extra nodes/ level: custom-nodes/nodes/<item>/...  →  item = parts[2]
+    const scopeIdx = parts.indexOf(scope);
+    let itemIdx = scopeIdx + 1;
+    if (scope === "custom-nodes" && parts[itemIdx] === "nodes") itemIdx++;
+    return { scope, itemId: parts[itemIdx] ?? null };
   }
   return { scope, itemId: null };
 }

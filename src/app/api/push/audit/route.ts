@@ -189,7 +189,10 @@ function auditScope(configDir: string, scope: string) {
 
   let items: AuditItem[];
   if (isNameFlag || isFilenameFilter || DIR_BASED_SCOPES.has(scope)) {
-    items = genericItems(scopeDir, "dirs");
+    // custom-nodes stores nodes under a nodes/ subdirectory: custom-nodes/nodes/<name>/
+    const nodesSubDir = path.join(scopeDir, "nodes");
+    const itemsDir = (scope === "custom-nodes" && fs.existsSync(nodesSubDir)) ? nodesSubDir : scopeDir;
+    items = genericItems(itemsDir, "dirs");
   } else {
     items = genericItems(scopeDir, "files");
   }
