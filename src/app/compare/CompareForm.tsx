@@ -105,54 +105,40 @@ function PanelHeader({ label }: { label: string }) {
   );
 }
 
-// ── Main form ─────────────────────────────────────────────────────────────────
+// ── Module-level cache — survives React unmount/remount from tab navigation ───
 
-const SESSION_KEY = "compare-form-state";
-
-function loadSession() {
-  if (typeof window === "undefined") return null;
-  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "null"); } catch { return null; }
+interface FormCache {
+  source?: Endpoint;
+  target?: Endpoint;
+  scopes?: ConfigScope[];
+  includeMetadata?: boolean;
+  report?: import("@/lib/diff-types").CompareReport | null;
 }
+const formCache: FormCache = {};
+
+// ── Main form ─────────────────────────────────────────────────────────────────
 
 export function CompareForm({ environments, tasks = [] }: { environments: Environment[]; tasks?: PromotionTask[] }) {
   const defaultEnv = environments[0]?.name ?? "";
 
-  const [source, setSource] = useState<Endpoint>({ environment: defaultEnv, mode: "local" });
-  const [target, setTarget] = useState<Endpoint>({ environment: defaultEnv, mode: "remote" });
-  const [scopes, setScopes] = useState<ConfigScope[]>([]);
-  const [includeMetadata, setIncludeMetadata] = useState<boolean>(false);
-  const [savedReport, setSavedReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
-  const [sessionLoaded, setSessionLoaded] = useState(false);
+  const [source, setSource] = useState<Endpoint>(formCache.source ?? { environment: defaultEnv, mode: "local" });
+  const [target, setTarget] = useState<Endpoint>(formCache.target ?? { environment: defaultEnv, mode: "remote" });
+  const [scopes, setScopes] = useState<ConfigScope[]>(formCache.scopes ?? []);
+  const [includeMetadata, setIncludeMetadata] = useState<boolean>(formCache.includeMetadata ?? false);
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
   const { setBusy } = useBusyState();
 
-  // Restore from sessionStorage on mount (client-only — avoids SSR/hydration mismatch)
-  useEffect(() => {
-    const saved = loadSession();
-    if (saved) {
-      if (saved.source) setSource(saved.source);
-      if (saved.target) setTarget(saved.target);
-      if (saved.scopes) setScopes(saved.scopes);
-      if (saved.includeMetadata !== undefined) setIncludeMetadata(saved.includeMetadata);
-      if (saved.report) setSavedReport(saved.report);
-    }
-    setSessionLoaded(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Write-through: keep cache in sync with form inputs
+  useEffect(() => { formCache.source = source; }, [source]);
+  useEffect(() => { formCache.target = target; }, [target]);
+  useEffect(() => { formCache.scopes = scopes; }, [scopes]);
+  useEffect(() => { formCache.includeMetadata = includeMetadata; }, [includeMetadata]);
+  useEffect(() => { if (report) formCache.report = report; }, [report]);
 
-  // Persist state to sessionStorage after session has been restored
-  useEffect(() => {
-    if (!sessionLoaded) return;
-    try {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ source, target, scopes, includeMetadata, report: report ?? savedReport }));
-    } catch { /* ignore quota errors */ }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, target, scopes, includeMetadata, report, sessionLoaded]);
-
-  // Track the latest finished report (live report from hook takes priority)
-  const displayReport = report ?? savedReport;
+  // Live report takes priority; fall back to cache from previous run
+  const displayReport = report ?? formCache.report ?? null;
 
   useEffect(() => { setBusy(running); }, [running, setBusy]);
 
