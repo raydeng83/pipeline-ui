@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DiffMinimap } from "./DiffMinimap";
 import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
@@ -1833,6 +1834,7 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
   const [allOpenSeq, setAllOpenSeq] = useState(0);
 
+  const router = useRouter();
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [addingToTask, setAddingToTask] = useState(false);
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
@@ -1881,6 +1883,7 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
       if (res.ok) {
         setAddSuccess(task.name);
         setSelectedPaths(new Set());
+        router.refresh(); // invalidate router cache so Promote page gets fresh task data
         setTimeout(() => setAddSuccess(null), 3000);
       }
     } finally {
