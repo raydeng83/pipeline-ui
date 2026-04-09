@@ -149,10 +149,21 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
             disabled={running}
           />
 
-          <div className="flex items-center justify-center shrink-0 self-center mt-5">
+          <div className="flex flex-col items-center justify-center shrink-0 self-center mt-5 gap-1.5">
             <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
+            <button
+              type="button"
+              title="Swap source and target"
+              disabled={running}
+              onClick={() => { setSource(target); setTarget(source); }}
+              className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+            </button>
           </div>
 
           <EndpointSelector
