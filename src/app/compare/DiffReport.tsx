@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
 import { JourneyDiffGraphModal, type NavEntry } from "./JourneyDiffGraph";
 import { WorkflowDiffGraphModal } from "./WorkflowDiffGraph";
+import type { PromotionTask } from "@/lib/promotion-tasks";
+import type { ScopeSelection, ConfigScope } from "@/lib/fr-config-types";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -46,6 +48,64 @@ function clientDiff(aText: string, bText: string): DiffLine[] {
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// ── Task integration helpers ──────────────────────────────────────────────────
+
+const FILE_SELECTABLE_PATH_SCOPES = new Set(["scripts", "custom-nodes", "endpoints", "schedules"]);
+const NAME_FLAG_PATH_SCOPES = new Set(["journeys", "managed-objects", "iga-workflows"]);
+
+/** Map a relativePath from the diff to a { scope, itemId } for promotion task merge.
+ *  itemId === null means the whole scope (no item-level selection). */
+function pathToTaskScopeAndItem(relativePath: string): { scope: string; itemId: string | null } {
+  const parts = relativePath.split("/");
+  const scope = extractScope(relativePath);
+
+  if (NAME_FLAG_PATH_SCOPES.has(scope)) {
+    const scopeIdx = parts.findIndex((p) => p === scope);
+    const itemId = scopeIdx >= 0 && parts.length > scopeIdx + 1 ? parts[scopeIdx + 1] : null;
+    return { scope, itemId };
+  }
+  if (FILE_SELECTABLE_PATH_SCOPES.has(scope)) {
+    if (relativePath.includes("scripts-content/")) return { scope, itemId: null };
+    return { scope, itemId: parts[parts.length - 1] };
+  }
+  return { scope, itemId: null };
+}
+
+/** Merge selected diff paths into the existing task items. */
+function mergePathsIntoItems(
+  selectedPaths: Set<string>,
+  existingItems: ScopeSelection[],
+): ScopeSelection[] {
+  const scopeMap = new Map<string, Set<string> | null>();
+  for (const path of selectedPaths) {
+    const { scope, itemId } = pathToTaskScopeAndItem(path);
+    if (!scopeMap.has(scope)) {
+      scopeMap.set(scope, itemId === null ? null : new Set([itemId]));
+    } else {
+      const cur = scopeMap.get(scope);
+      if (cur == null || itemId === null) scopeMap.set(scope, null);
+      else cur.add(itemId);
+    }
+  }
+  const result: ScopeSelection[] = [...existingItems];
+  for (const [scope, itemIds] of scopeMap) {
+    const idx = result.findIndex((s) => s.scope === scope);
+    if (itemIds === null) {
+      if (idx >= 0) result[idx] = { scope: scope as ConfigScope, items: undefined };
+      else result.push({ scope: scope as ConfigScope });
+    } else {
+      const newIds = [...itemIds];
+      if (idx >= 0) {
+        const prev = result[idx].items;
+        result[idx] = { scope: scope as ConfigScope, items: prev === undefined ? undefined : [...new Set([...prev, ...newIds])] };
+      } else {
+        result.push({ scope: scope as ConfigScope, items: newIds });
+      }
+    }
+  }
+  return result;
 }
 
 function highlightLine(raw: string): string {
@@ -430,7 +490,7 @@ const STATUS_STYLES: Record<FileDiff["status"], { badge: string; icon: string }>
   unchanged: { badge: "bg-slate-100 text-slate-500 border border-slate-200",        icon: "=" },
 };
 
-function FileRow({ file, sourceLabel, targetLabel, extraActions }: { file: FileDiff; sourceLabel: string; targetLabel: string; extraActions?: React.ReactNode }) {
+function FileRow({ file, sourceLabel, targetLabel, extraActions, checked, onToggle }: { file: FileDiff; sourceLabel: string; targetLabel: string; extraActions?: React.ReactNode; checked?: boolean; onToggle?: () => void }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("diff");
   const [fullscreen, setFullscreen] = useState(false);
@@ -557,6 +617,15 @@ function FileRow({ file, sourceLabel, targetLabel, extraActions }: { file: FileD
         )}
         onClick={() => hasDiff && setOpen((o) => !o)}
       >
+        {onToggle !== undefined && (
+          <input
+            type="checkbox"
+            checked={!!checked}
+            onChange={onToggle}
+            onClick={(e) => e.stopPropagation()}
+            className="shrink-0 w-3.5 h-3.5 accent-sky-600"
+          />
+        )}
         <span className={cn("inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold shrink-0", s.badge)}>
           {s.icon}
         </span>
@@ -1022,7 +1091,7 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel, journeyName, no
   );
 }
 
-function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [] }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[] }) {
+function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [], selectedPaths, onTogglePath }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[]; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void }) {
   const [open, setOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [graphInitialFocusNodeId, setGraphInitialFocusNodeId] = useState<string | null>(null);
@@ -1062,6 +1131,15 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
         )}
         onClick={() => hasChildren && setOpen((o) => !o)}
       >
+        {depth === 0 && onTogglePath !== undefined && (
+          <input
+            type="checkbox"
+            checked={selectedPaths?.has(`journeys/${node.name}`) ?? false}
+            onChange={() => onTogglePath(`journeys/${node.name}`)}
+            onClick={(e) => e.stopPropagation()}
+            className="shrink-0 w-3.5 h-3.5 accent-sky-600"
+          />
+        )}
         <span className="w-3 shrink-0 text-slate-400 text-[10px]">
           {hasChildren ? (open ? "▾" : "▸") : ""}
         </span>
@@ -1091,7 +1169,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
       {open && (hasChildren || (showScripts && node.scripts.some((s) => s.status !== "unchanged")) || (showNodes && node.nodes.some((n) => n.status !== "unchanged"))) && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
-            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} />
+            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
           ))}
           {showScripts && node.scripts.filter((sc) => sc.status !== "unchanged").length > 0 && (
             <div className="mt-1 space-y-0.5">
@@ -1182,7 +1260,7 @@ function filterJourneyTree(
   });
 }
 
-function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string }) {
+function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv, selectedPaths, onTogglePath }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void }) {
   const [open, setOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
@@ -1297,7 +1375,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
               <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
             ) : (
               filtered.slice(page * pageSize, (page + 1) * pageSize).map((node) => (
-                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} />
+                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
               ))
             )}
           </div>
@@ -1324,7 +1402,7 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
 }
 
 /** Wraps FileRow for script files, adding an inline Find Usage panel. */
-function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles, allFiles }: {
+function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles, allFiles, checked, onToggle }: {
   file: FileDiff;
   sourceLabel: string;
   targetLabel: string;
@@ -1332,6 +1410,8 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
   targetEnv: string;
   groupFiles: FileDiff[];
   allFiles: FileDiff[];
+  checked?: boolean;
+  onToggle?: () => void;
 }) {
   const [usageOpen, setUsageOpen]       = useState(false);
   const [usageLoading, setUsageLoading] = useState(false);
@@ -1423,7 +1503,7 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
 
   return (
     <div>
-      <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} />
+      <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} checked={checked} onToggle={onToggle} />
       {usageOpen && (
         <div className="mx-1 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
           {usageLoading ? (
@@ -1491,12 +1571,16 @@ function WorkflowGroupRow({
   allFiles,
   sourceLabel,
   targetLabel,
+  checked,
+  onToggle,
 }: {
   workflowName: string;
   changedFiles: FileDiff[];
   allFiles: FileDiff[];
   sourceLabel: string;
   targetLabel: string;
+  checked?: boolean;
+  onToggle?: () => void;
 }) {
   const [graphOpen, setGraphOpen] = useState(false);
 
@@ -1512,6 +1596,15 @@ function WorkflowGroupRow({
   return (
     <>
       <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-slate-50 border border-slate-200">
+        {onToggle !== undefined && (
+          <input
+            type="checkbox"
+            checked={!!checked}
+            onChange={onToggle}
+            onClick={(e) => e.stopPropagation()}
+            className="shrink-0 w-3.5 h-3.5 accent-sky-600"
+          />
+        )}
         {/* Workflow icon */}
         <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
@@ -1553,7 +1646,7 @@ function WorkflowGroupRow({
 }
 
 function ScopeSection({
-  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles,
+  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
@@ -1563,6 +1656,8 @@ function ScopeSection({
   sourceEnv?: string;
   targetEnv?: string;
   allFiles?: FileDiff[];
+  selectedPaths?: Set<string>;
+  onTogglePath?: (path: string) => void;
 }) {
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
@@ -1697,14 +1792,16 @@ function ScopeSection({
                       allFiles={allFiles ?? []}
                       sourceLabel={sourceLabel}
                       targetLabel={targetLabel}
+                      checked={selectedPaths?.has(`${group.scope}/${name}`)}
+                      onToggle={onTogglePath ? () => onTogglePath(`${group.scope}/${name}`) : undefined}
                     />
                   ));
                 })()
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
                   group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
-                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} />
-                    : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} />
+                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
+                    : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
                 ))
               )
             ) : (
@@ -1728,13 +1825,18 @@ function ScopeSection({
 
 // ── Main report ─────────────────────────────────────────────────────────────
 
-export function DiffReport({ report }: { report: CompareReport }) {
+export function DiffReport({ report, tasks = [] }: { report: CompareReport; tasks?: PromotionTask[] }) {
   const { summary, files } = report;
   const total = summary.added + summary.removed + summary.modified + summary.unchanged;
   const [hideUnchanged, setHideUnchanged] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
   const [allOpenSeq, setAllOpenSeq] = useState(0);
+
+  const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
+  const [addingToTask, setAddingToTask] = useState(false);
+  const [addSuccess, setAddSuccess] = useState<string | null>(null);
+  const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
   const sameEnv = report.source.environment === report.target.environment;
   const sourceLabel = sameEnv
@@ -1758,6 +1860,43 @@ export function DiffReport({ report }: { report: CompareReport }) {
     return scopeGroups.filter((g) => g.label.toLowerCase().includes(q) || g.scope.toLowerCase().includes(q));
   }, [scopeGroups, scopeSearch]);
   const changedCount = summary.added + summary.removed + summary.modified;
+
+  const togglePath = (path: string) =>
+    setSelectedPaths((prev) => {
+      const next = new Set(prev);
+      next.has(path) ? next.delete(path) : next.add(path);
+      return next;
+    });
+
+  const handleAddToTask = async (task: PromotionTask) => {
+    setTaskDropdownOpen(false);
+    setAddingToTask(true);
+    const newItems = mergePathsIntoItems(selectedPaths, task.items);
+    try {
+      const res = await fetch(`/api/promotion-tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...task, items: newItems }),
+      });
+      if (res.ok) {
+        setAddSuccess(task.name);
+        setSelectedPaths(new Set());
+        setTimeout(() => setAddSuccess(null), 3000);
+      }
+    } finally {
+      setAddingToTask(false);
+    }
+  };
+
+  const selectedCount = selectedPaths.size;
+  const selectedScopeCount = new Set([...selectedPaths].map((p) => extractScope(p))).size;
+
+  useEffect(() => {
+    if (!taskDropdownOpen) return;
+    const handler = () => setTaskDropdownOpen(false);
+    window.addEventListener("click", handler);
+    return () => window.removeEventListener("click", handler);
+  }, [taskDropdownOpen]);
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -1861,7 +2000,7 @@ export function DiffReport({ report }: { report: CompareReport }) {
           <>
             {/* Journey tree (shown first if available) */}
             {report.journeyTree && report.journeyTree.length > 0 && (
-              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} />
+              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} />
             )}
 
             {/* Other scope sections */}
@@ -1881,6 +2020,8 @@ export function DiffReport({ report }: { report: CompareReport }) {
                   sourceEnv={report.source.environment}
                   targetEnv={report.target.environment}
                   allFiles={report.files}
+                  selectedPaths={selectedPaths}
+                  onTogglePath={togglePath}
                 />
               ))
             )}
@@ -1892,6 +2033,67 @@ export function DiffReport({ report }: { report: CompareReport }) {
           </p>
         )}
       </div>
+
+      {/* Floating action bar */}
+      {(selectedCount > 0 || addSuccess) && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
+          {addSuccess && (
+            <div className="bg-emerald-600 text-white rounded-full shadow-lg px-4 py-2 text-xs font-medium whitespace-nowrap">
+              ✓ Added to &quot;{addSuccess}&quot;
+            </div>
+          )}
+          {selectedCount > 0 && (
+            <div className="bg-white border border-slate-200 rounded-full shadow-lg px-3 py-2 flex items-center gap-3 text-xs">
+              <span className="text-slate-700 font-medium whitespace-nowrap">
+                {selectedCount} item{selectedCount !== 1 ? "s" : ""} selected
+                {selectedScopeCount > 1 && <span className="text-slate-400"> · {selectedScopeCount} scopes</span>}
+              </span>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setTaskDropdownOpen((o) => !o)}
+                  disabled={addingToTask || tasks.length === 0}
+                  className="flex items-center gap-1 px-3 py-1 bg-sky-600 text-white rounded-full text-xs font-medium hover:bg-sky-700 disabled:opacity-50 transition-colors"
+                >
+                  {addingToTask ? "Adding…" : "Add to Task"}
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {taskDropdownOpen && (
+                  <div className="absolute bottom-full mb-1.5 left-0 bg-white border border-slate-200 rounded-lg shadow-xl min-w-[200px] py-1 z-50">
+                    {tasks.length === 0 ? (
+                      <p className="px-3 py-2 text-xs text-slate-400 italic">No tasks available</p>
+                    ) : tasks.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => handleAddToTask(t)}
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors"
+                      >
+                        <span className="font-medium text-slate-700">{t.name}</span>
+                        {t.items.length > 0 && (
+                          <span className="ml-1.5 text-slate-400">({t.items.length} scope{t.items.length !== 1 ? "s" : ""})</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPaths(new Set())}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+                title="Clear selection"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

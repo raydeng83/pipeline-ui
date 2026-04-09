@@ -8,6 +8,7 @@ import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { DiffReport } from "./DiffReport";
 import { cn } from "@/lib/utils";
+import type { PromotionTask } from "@/lib/promotion-tasks";
 
 type Mode = "local" | "remote";
 
@@ -106,7 +107,7 @@ function PanelHeader({ label }: { label: string }) {
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
-export function CompareForm({ environments }: { environments: Environment[] }) {
+export function CompareForm({ environments, tasks = [] }: { environments: Environment[]; tasks?: PromotionTask[] }) {
   const defaultEnv = environments[0]?.name ?? "";
   const [source, setSource] = useState<Endpoint>({ environment: defaultEnv, mode: "local" });
   const [target, setTarget] = useState<Endpoint>({ environment: defaultEnv, mode: "remote" });
@@ -232,7 +233,7 @@ export function CompareForm({ environments }: { environments: Environment[] }) {
       )}
 
       {/* ── Diff report ──────────────────────────────────────────────────── */}
-      {report && !running && <DiffReport report={report} />}
+      {report && !running && <DiffReport report={report} tasks={tasks} />}
     </div>
   );
 }
