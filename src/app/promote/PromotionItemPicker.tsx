@@ -68,16 +68,24 @@ function ScopeRow({
   const query = filter.trim().toLowerCase();
   const filtered = query ? entry.items.filter((i) => i.label.toLowerCase().includes(query)) : entry.items;
 
-  // When specific items are checked, pin ALL of them above the fold (no pagination).
-  // Only the remaining unselected items are paginated.
-  const hasSpecificSelection = !allSelected && selectedSet.size > 0;
-  const pinnedItems = hasSpecificSelection ? filtered.filter((i) => selectedSet.has(i.id)) : [];
-  const unpinnedItems = hasSpecificSelection ? filtered.filter((i) => !selectedSet.has(i.id)) : filtered;
+  // Selected items float to the top inside the list
+  const sorted = allSelected
+    ? filtered
+    : [...filtered].sort((a, b) => {
+        const aChecked = selectedSet.has(a.id) ? 0 : 1;
+        const bChecked = selectedSet.has(b.id) ? 0 : 1;
+        return aChecked - bChecked;
+      });
 
-  const pageCount = Math.ceil(unpinnedItems.length / PAGE_SIZE);
+  const pageCount = Math.ceil(sorted.length / PAGE_SIZE);
   const safePage = Math.min(page, Math.max(0, pageCount - 1));
-  const visibleUnpinned = unpinnedItems.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
-  const needsPagination = unpinnedItems.length > PAGE_SIZE;
+  const visible = sorted.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+  const needsPagination = sorted.length > PAGE_SIZE;
+
+  // Pills: selected items resolved to { id, label } for display outside the accordion
+  const selectedPills = !allSelected && selectedSet.size > 0
+    ? [...selectedSet].map((id) => entry.items.find((i) => i.id === id) ?? { id, label: id.replace(/\.json$/, "") })
+    : [];
 
   const headerIsToggle = !entry.selectable;
 
@@ -154,6 +162,21 @@ function ScopeRow({
         )}
       </div>
 
+      {/* Selected item pills — always visible when specific items are checked */}
+      {selectedPills.length > 0 && (
+        <div className="px-3 py-2 flex flex-wrap gap-1 bg-white border-b border-slate-100">
+          {selectedPills.map((item) => (
+            <span
+              key={item.id}
+              title={item.id !== item.label ? item.id : undefined}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-medium bg-sky-50 border-sky-200 text-sky-700"
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Filter */}
       {open && entry.items.length > 0 && (
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border-b border-slate-100">
@@ -184,70 +207,41 @@ function ScopeRow({
       {/* Items */}
       {open && entry.items.length > 0 && (
         <div className="px-3 pb-2 pt-0.5 space-y-0.5 bg-slate-50/60">
-          {pinnedItems.length === 0 && visibleUnpinned.length === 0 ? (
+          {visible.length === 0 ? (
             <p className="text-[11px] text-slate-400 py-2 text-center">No matches</p>
-          ) : (
-            <>
-              {/* Pinned selected items — always visible, no pagination */}
-              {pinnedItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-2 py-0.5">
+          ) : visible.map((item) => {
+            const checked = allSelected || selectedSet.has(item.id);
+            return (
+              <div key={item.id} className="flex items-center gap-2 py-0.5">
+                {entry.selectable ? (
                   <input
                     type="checkbox"
-                    checked
+                    checked={checked}
                     onChange={(e) => onToggleItem(item.id, e.target.checked)}
                     className="w-3 h-3 accent-sky-600 shrink-0 cursor-pointer"
                   />
-                  <button
-                    type="button"
-                    onClick={() => onViewItem(item)}
-                    className="text-[11px] truncate text-left hover:underline hover:text-sky-600 transition-colors text-slate-700 font-medium"
-                  >
-                    {item.label}
-                  </button>
-                </div>
-              ))}
+                ) : (
+                  <span className="w-3 h-3 shrink-0" />
+                )}
+                <button
+                  type="button"
+                  onClick={() => onViewItem(item)}
+                  className={cn(
+                    "text-[11px] truncate text-left hover:underline hover:text-sky-600 transition-colors",
+                    checked ? "text-slate-600" : "text-slate-400",
+                  )}
+                >
+                  {item.label}
+                </button>
+              </div>
+            );
+          })}
 
-              {/* Divider between pinned and unpinned */}
-              {pinnedItems.length > 0 && visibleUnpinned.length > 0 && (
-                <div className="border-t border-slate-200 my-1" />
-              )}
-
-              {/* Remaining (unselected) items — paginated */}
-              {visibleUnpinned.map((item) => {
-                const checked = allSelected || selectedSet.has(item.id);
-                return (
-                  <div key={item.id} className="flex items-center gap-2 py-0.5">
-                    {entry.selectable ? (
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={(e) => onToggleItem(item.id, e.target.checked)}
-                        className="w-3 h-3 accent-sky-600 shrink-0 cursor-pointer"
-                      />
-                    ) : (
-                      <span className="w-3 h-3 shrink-0" />
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => onViewItem(item)}
-                      className={cn(
-                        "text-[11px] truncate text-left hover:underline hover:text-sky-600 transition-colors",
-                        checked ? "text-slate-600" : "text-slate-400",
-                      )}
-                    >
-                      {item.label}
-                    </button>
-                  </div>
-                );
-              })}
-            </>
-          )}
-
-          {/* Pagination (for unselected items only) */}
+          {/* Pagination */}
           {needsPagination && (
             <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-slate-200">
               <span className="text-[10px] text-slate-400 tabular-nums">
-                {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, unpinnedItems.length)} of {unpinnedItems.length}
+                {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, sorted.length)} of {sorted.length}
               </span>
               <div className="flex items-center gap-0.5">
                 <button
