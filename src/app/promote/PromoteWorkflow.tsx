@@ -221,7 +221,24 @@ function TaskForm({
 
         {/* Selected items summary — mirrors the task view */}
         {form.items.length > 0 && (
-          <ScopesSummary items={form.items} sourceEnvironment={form.source.environment} />
+          <ScopesSummary
+            items={form.items}
+            sourceEnvironment={form.source.environment}
+            onRemoveScope={(scope) => {
+              onChange({ items: form.items.filter((i) => i.scope !== scope) });
+            }}
+            onRemoveItem={(scope, itemId) => {
+              const updated = form.items.map((i) => {
+                if (i.scope !== scope) return i;
+                // If all items selected (items undefined/null), we can't remove one without knowing the full list
+                // So just remove the whole scope for now — the picker will reload
+                if (!i.items) return null;
+                const remaining = i.items.filter((id) => id !== itemId);
+                return remaining.length > 0 ? { ...i, items: remaining } : null;
+              }).filter((i): i is ScopeSelection => i !== null);
+              onChange({ items: updated });
+            }}
+          />
         )}
 
         {/* Items to promote */}
@@ -282,9 +299,13 @@ const ITEM_CHIP: Record<string, string> = {
 function ScopesSummary({
   items,
   sourceEnvironment,
+  onRemoveScope,
+  onRemoveItem,
 }: {
   items: ScopeSelection[];
   sourceEnvironment: string;
+  onRemoveScope?: (scope: string) => void;
+  onRemoveItem?: (scope: string, itemId: string) => void;
 }) {
   const [open, setOpen] = useState(true);
   const [auditMap, setAuditMap] = useState<Record<string, ScopeAuditEntry>>({});
@@ -326,6 +347,18 @@ function ScopesSummary({
                 <span className="text-[9px] px-1 rounded bg-white/80">
                   {isAll ? "all" : `×${count}`}
                 </span>
+                {onRemoveScope && (
+                  <button
+                    type="button"
+                    onClick={() => onRemoveScope(scope)}
+                    title={`Remove ${scopeLabel(scope)}`}
+                    className="text-slate-400 hover:text-red-500 transition-colors ml-0.5"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </span>
             );
           })}
@@ -382,9 +415,21 @@ function ScopesSummary({
                       <span
                         key={item.id}
                         title={item.id !== item.label ? item.id : undefined}
-                        className={cn("px-1.5 py-0.5 rounded text-[10px] border", ITEM_CHIP[cmdType])}
+                        className={cn("inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] border", ITEM_CHIP[cmdType])}
                       >
                         {item.label}
+                        {onRemoveItem && (
+                          <button
+                            type="button"
+                            onClick={() => onRemoveItem(scope, item.id)}
+                            title={`Remove ${item.label}`}
+                            className="text-slate-300 hover:text-red-500 transition-colors"
+                          >
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
                       </span>
                     ))}
                   </div>
