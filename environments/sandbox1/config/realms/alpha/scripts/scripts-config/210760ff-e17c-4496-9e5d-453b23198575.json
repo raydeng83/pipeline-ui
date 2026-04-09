@@ -1,0 +1,16 @@
+{
+  "_id": "210760ff-e17c-4496-9e5d-453b23198575",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1739779335580,
+  "default": false,
+  "description": "Phase 2B",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1739937012719,
+  "name": "KYID.Journey.ChangePrimaryEmail",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.ChangePrimaryEmail.js"
+  }
+}

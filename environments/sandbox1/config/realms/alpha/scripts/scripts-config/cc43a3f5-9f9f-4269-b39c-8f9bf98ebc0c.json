@@ -1,0 +1,16 @@
+{
+  "_id": "cc43a3f5-9f9f-4269-b39c-8f9bf98ebc0c",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "creationDate": 1742885429349,
+  "default": false,
+  "description": "This script checks whether the user has chosen another method or if an existing phone is detected.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1743082168607,
+  "name": "KYID.2B1.Journey.DiverttoList",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.DiverttoList.js"
+  }
+}

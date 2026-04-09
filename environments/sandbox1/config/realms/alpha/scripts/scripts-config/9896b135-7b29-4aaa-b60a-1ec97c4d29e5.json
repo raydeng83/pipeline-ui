@@ -1,0 +1,16 @@
+{
+  "_id": "9896b135-7b29-4aaa-b60a-1ec97c4d29e5",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1739870878648,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=76f44fc4-0eb6-4d5e-8995-a4c8054672c2,ou=user,ou=am-config",
+  "lastModifiedDate": 1741011757414,
+  "name": "KYID.Journey.OIDCRedirect",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.OIDCRedirect.js"
+  }
+}

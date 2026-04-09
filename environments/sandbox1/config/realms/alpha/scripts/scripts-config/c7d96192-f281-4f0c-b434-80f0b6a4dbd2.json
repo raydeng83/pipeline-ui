@@ -1,0 +1,16 @@
+{
+  "_id": "c7d96192-f281-4f0c-b434-80f0b6a4dbd2",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1740462912482,
+  "default": false,
+  "description": "Sending OTP by SMS or Voice",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "lastModifiedDate": 1740466305792,
+  "name": "Kyid.Journey.Check_SMS_Voice",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.Check_SMS_Voice.js"
+  }
+}

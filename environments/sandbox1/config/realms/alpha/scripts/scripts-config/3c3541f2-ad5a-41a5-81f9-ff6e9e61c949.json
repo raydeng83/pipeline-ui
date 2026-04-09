@@ -1,0 +1,16 @@
+{
+  "_id": "3c3541f2-ad5a-41a5-81f9-ff6e9e61c949",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "creationDate": 1740134006571,
+  "default": false,
+  "description": "This script is used to authenticate user against remote LDAP directory.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "lastModifiedDate": 1740134010929,
+  "name": "KYID.Journey.PTAAuthentication copy",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.PTAAuthentication copy.js"
+  }
+}

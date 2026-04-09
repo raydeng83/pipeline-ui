@@ -1,0 +1,16 @@
+{
+  "_id": "ebea4408-94b0-4255-a284-21d0d08a6567",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1737542927185,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683280575,
+  "name": "KYID.Journey.FetchEmailFromCookie",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.FetchEmailFromCookie.js"
+  }
+}

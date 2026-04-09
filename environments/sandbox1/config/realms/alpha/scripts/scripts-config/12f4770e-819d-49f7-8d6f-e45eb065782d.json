@@ -1,0 +1,16 @@
+{
+  "_id": "12f4770e-819d-49f7-8d6f-e45eb065782d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1737603319164,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1737603319164,
+  "name": "KYID.Journey.SetGotoUrl",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.SetGotoUrl.js"
+  }
+}

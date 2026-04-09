@@ -1,0 +1,16 @@
+{
+  "_id": "743f3c81-9067-41da-8820-15f3a81d2231",
+  "context": "LIBRARY",
+  "createdBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "creationDate": 1742980331949,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "lastModifiedDate": 1742993193316,
+  "name": "KYID.Library.ValidationFunctions",
+  "script": {
+    "file": "scripts-content/LIBRARY/KYID.Library.ValidationFunctions.js"
+  }
+}

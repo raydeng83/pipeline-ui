@@ -1,0 +1,16 @@
+{
+  "_id": "7242d37a-b990-49cc-be5a-b0a6881a2235",
+  "context": "SAML2_IDP_ATTRIBUTE_MAPPER",
+  "createdBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "creationDate": 1741630973529,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1741635014466,
+  "name": "TBD.KYID.SAML2.IDPAttributeMapper",
+  "script": {
+    "file": "scripts-content/SAML2_IDP_ATTRIBUTE_MAPPER/TBD.KYID.SAML2.IDPAttributeMapper.js"
+  }
+}

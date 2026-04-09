@@ -1,0 +1,16 @@
+{
+  "_id": "82333faf-4009-4510-a21e-b760d0d31de6",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536948441,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683275181,
+  "name": "KYID.Journey.SetReturnUrlCookie",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetReturnUrlCookie.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "aeab5cd2-9450-40d5-8f31-e598999a7ac6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "creationDate": 1742886078794,
+  "default": false,
+  "description": "This script handles a confirmation prompt with options to proceed or cancel.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1743059956705,
+  "name": "kyid.journey.Terms&Conditions.updated",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/kyid.journey.Terms&Conditions.updated.js"
+  }
+}

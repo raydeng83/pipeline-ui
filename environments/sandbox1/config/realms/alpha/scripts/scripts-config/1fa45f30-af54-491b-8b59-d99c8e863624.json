@@ -1,0 +1,16 @@
+{
+  "_id": "1fa45f30-af54-491b-8b59-d99c8e863624",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=c769a4c6-17fd-4cfb-811c-fecbccaa9802,ou=user,ou=am-config",
+  "creationDate": 1741160847023,
+  "default": false,
+  "description": "Invalid Phone Number",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c769a4c6-17fd-4cfb-811c-fecbccaa9802,ou=user,ou=am-config",
+  "lastModifiedDate": 1742378318370,
+  "name": "Invalid_Phone_Number_SMS",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Invalid_Phone_Number_SMS.js"
+  }
+}

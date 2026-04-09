@@ -1,0 +1,16 @@
+{
+  "_id": "82542390-111d-40da-b4a5-35046bde8a6a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1740392236516,
+  "default": false,
+  "description": "To divert to Authenticator list",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "lastModifiedDate": 1742884674175,
+  "name": "Kyid.Journey.Divert_to_list",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.Divert_to_list.js"
+  }
+}

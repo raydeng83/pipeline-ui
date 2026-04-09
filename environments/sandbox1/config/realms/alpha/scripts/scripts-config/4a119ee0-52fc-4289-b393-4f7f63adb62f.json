@@ -1,0 +1,16 @@
+{
+  "_id": "4a119ee0-52fc-4289-b393-4f7f63adb62f",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536946716,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1738306620483,
+  "name": "KYID.Journey.MFAAction.MFAForSelf",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAAction.MFAForSelf.js"
+  }
+}

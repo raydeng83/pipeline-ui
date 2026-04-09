@@ -1,0 +1,16 @@
+{
+  "_id": "289f9fc7-aae3-4656-95f6-41f80d7c9675",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1740544260112,
+  "default": false,
+  "description": "checking Otp through SMS or Voice",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c769a4c6-17fd-4cfb-811c-fecbccaa9802,ou=user,ou=am-config",
+  "lastModifiedDate": 1742121575651,
+  "name": "Kyid.Journey.Check_SMS_Voice",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.Check_SMS_Voice.js"
+  }
+}

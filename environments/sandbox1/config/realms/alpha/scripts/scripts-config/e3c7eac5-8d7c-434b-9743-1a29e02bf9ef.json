@@ -1,0 +1,16 @@
+{
+  "_id": "e3c7eac5-8d7c-434b-9743-1a29e02bf9ef",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "creationDate": 1742886290722,
+  "default": false,
+  "description": "This script manages MFA registration based on user preferences using the alpha environment.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "lastModifiedDate": 1742886290722,
+  "name": "SelfRegistrationCreateSecondryMFAEmail,updated",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/SelfRegistrationCreateSecondryMFAEmail,updated.js"
+  }
+}

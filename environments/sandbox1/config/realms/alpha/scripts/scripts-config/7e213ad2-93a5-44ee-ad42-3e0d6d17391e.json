@@ -1,0 +1,16 @@
+{
+  "_id": "7e213ad2-93a5-44ee-ad42-3e0d6d17391e",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "creationDate": 1742285739303,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "lastModifiedDate": 1742290981097,
+  "name": "KYID.Journey.SetLastNameCookie",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetLastNameCookie.js"
+  }
+}

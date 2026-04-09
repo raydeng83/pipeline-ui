@@ -1,0 +1,16 @@
+{
+  "_id": "649ba880-575b-4ae7-8cb8-b2618edd0d23",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "creationDate": 1743079454338,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1743081044362,
+  "name": "KYID.2B1.Journey.InValidPassword",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.InValidPassword.js"
+  }
+}

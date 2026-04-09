@@ -1,0 +1,16 @@
+{
+  "_id": "22460011-1d2e-4bb0-9c00-c6484a061154",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1740312155380,
+  "default": false,
+  "description": "Checking email and send mail",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "lastModifiedDate": 1740312198846,
+  "name": "Kyid.Journey.Forget_Username_Email_check",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.Forget_Username_Email_check.js"
+  }
+}

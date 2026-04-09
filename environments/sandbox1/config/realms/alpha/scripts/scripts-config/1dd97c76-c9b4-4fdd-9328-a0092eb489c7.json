@@ -1,0 +1,16 @@
+{
+  "_id": "1dd97c76-c9b4-4fdd-9328-a0092eb489c7",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536946535,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1737601224657,
+  "name": "KYID.Journey.ForgotPwdRedirection",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.ForgotPwdRedirection.js"
+  }
+}

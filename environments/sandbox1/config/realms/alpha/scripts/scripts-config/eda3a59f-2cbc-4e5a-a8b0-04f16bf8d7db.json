@@ -1,0 +1,16 @@
+{
+  "_id": "eda3a59f-2cbc-4e5a-a8b0-04f16bf8d7db",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "creationDate": 1741762095217,
+  "default": false,
+  "description": "Script to authenticate users with either mail or mobile",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "lastModifiedDate": 1741864564663,
+  "name": "Authenticate with email/mobile",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Authenticate with email%2Fmobile.js"
+  }
+}

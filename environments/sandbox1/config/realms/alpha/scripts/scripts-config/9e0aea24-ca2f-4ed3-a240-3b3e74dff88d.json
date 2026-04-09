@@ -1,0 +1,16 @@
+{
+  "_id": "9e0aea24-ca2f-4ed3-a240-3b3e74dff88d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1740029044196,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1740031320364,
+  "name": "KYID.Journey.2B1.EmailUpdatedSuccess",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.2B1.EmailUpdatedSuccess.js"
+  }
+}

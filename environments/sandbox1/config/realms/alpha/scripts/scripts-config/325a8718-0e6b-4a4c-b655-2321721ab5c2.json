@@ -1,0 +1,16 @@
+{
+  "_id": "325a8718-0e6b-4a4c-b655-2321721ab5c2",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536948019,
+  "default": false,
+  "description": "This script is used to count the authentication success number for each app.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "lastModifiedDate": 1731546263136,
+  "name": "KYID.Journey.AppSuccessCount",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.AppSuccessCount.js"
+  }
+}

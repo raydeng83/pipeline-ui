@@ -1,0 +1,16 @@
+{
+  "_id": "1efca266-10d0-4a75-8be1-c8bb41e8633f",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "creationDate": 1738683282971,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=3132618a-533a-4b84-8ab6-9cbe2db77cf9,ou=user,ou=am-config",
+  "lastModifiedDate": 1770402495541,
+  "name": "KYID.Journey.GetAcceptLanguageFromHeader",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.GetAcceptLanguageFromHeader.js"
+  }
+}

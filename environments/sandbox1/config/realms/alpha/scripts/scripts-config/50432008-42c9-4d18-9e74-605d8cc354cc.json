@@ -1,0 +1,16 @@
+{
+  "_id": "50432008-42c9-4d18-9e74-605d8cc354cc",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731544436678,
+  "default": false,
+  "description": "Print All SharedState Data",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683273533,
+  "name": "PrintAllSharedState",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/PrintAllSharedState.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "96954be1-132e-4703-a9b4-44666cc31fa3",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=c6ce715c-2301-48bb-99c5-a161f3e74105,ou=user,ou=am-config",
+  "creationDate": 1751301960482,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c6ce715c-2301-48bb-99c5-a161f3e74105,ou=user,ou=am-config",
+  "lastModifiedDate": 1751304540786,
+  "name": "SP_API_Testing",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/SP_API_Testing.js"
+  }
+}

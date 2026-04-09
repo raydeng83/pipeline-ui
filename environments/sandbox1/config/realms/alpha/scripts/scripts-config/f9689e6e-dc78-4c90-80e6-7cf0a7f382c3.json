@@ -1,0 +1,16 @@
+{
+  "_id": "f9689e6e-dc78-4c90-80e6-7cf0a7f382c3",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "creationDate": 1742833327627,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "lastModifiedDate": 1742833329120,
+  "name": "KYID.Journey.PasswordExpired",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.PasswordExpired.js"
+  }
+}

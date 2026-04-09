@@ -1,0 +1,16 @@
+{
+  "_id": "d18e0f5e-6a8c-4dde-a49e-f5de135faa6a",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1739885418818,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1739936260191,
+  "name": "POC_2B_KYID.Journey.MFAAuthentication.EnterEmailOTP",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/POC_2B_KYID.Journey.MFAAuthentication.EnterEmailOTP.js"
+  }
+}

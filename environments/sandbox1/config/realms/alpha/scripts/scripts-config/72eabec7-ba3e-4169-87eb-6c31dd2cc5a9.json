@@ -1,0 +1,16 @@
+{
+  "_id": "72eabec7-ba3e-4169-87eb-6c31dd2cc5a9",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=dd5835c6-f34e-4fd2-b177-28701f577c5e,ou=user,ou=am-config",
+  "creationDate": 1758755548620,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c6ce715c-2301-48bb-99c5-a161f3e74105,ou=user,ou=am-config",
+  "lastModifiedDate": 1771341694047,
+  "name": "Le-test-script2",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Le-test-script2.js"
+  }
+}

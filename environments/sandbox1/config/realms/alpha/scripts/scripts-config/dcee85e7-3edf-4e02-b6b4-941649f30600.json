@@ -1,0 +1,16 @@
+{
+  "_id": "dcee85e7-3edf-4e02-b6b4-941649f30600",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1739955086466,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "lastModifiedDate": 1740400243647,
+  "name": "KYID.Journey.DisplayBlankOptionSelected",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.DisplayBlankOptionSelected.js"
+  }
+}

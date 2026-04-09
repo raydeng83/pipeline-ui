@@ -1,0 +1,16 @@
+{
+  "_id": "94786b50-55ea-4e12-b19d-77e3738dbe35",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1740295593395,
+  "default": false,
+  "description": "Existed email address in MFA Object",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "lastModifiedDate": 1740306224247,
+  "name": "Kyid.Journey.ExistedEmailAddress",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.ExistedEmailAddress.js"
+  }
+}

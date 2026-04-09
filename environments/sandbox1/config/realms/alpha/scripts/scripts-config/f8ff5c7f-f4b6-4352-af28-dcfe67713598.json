@@ -1,0 +1,16 @@
+{
+  "_id": "f8ff5c7f-f4b6-4352-af28-dcfe67713598",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "creationDate": 1742886647841,
+  "default": false,
+  "description": "This script creates a user in the alpha environment. It also handles MFA registration if required.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "lastModifiedDate": 1742886647841,
+  "name": "SelfRegistrationCreateUserInAIC_v2.updated",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/SelfRegistrationCreateUserInAIC_v2.updated.js"
+  }
+}

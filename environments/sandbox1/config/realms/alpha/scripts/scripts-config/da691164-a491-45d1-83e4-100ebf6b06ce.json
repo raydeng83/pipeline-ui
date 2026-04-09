@@ -1,0 +1,16 @@
+{
+  "_id": "da691164-a491-45d1-83e4-100ebf6b06ce",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536949986,
+  "default": false,
+  "description": "To display JIT Stub account Error Message",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683279961,
+  "name": "KYID.Journey.JITStubAccountErrorMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.JITStubAccountErrorMsg.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "96436c8d-27e0-49ab-a124-7bad8fedbbec",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "creationDate": 1741086697137,
+  "default": false,
+  "description": "just to test the pre-filled values are populated",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1741087335168,
+  "name": "TBD.KYID.Journey.SymantecEnterCredentialandToken",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/TBD.KYID.Journey.SymantecEnterCredentialandToken.js"
+  }
+}

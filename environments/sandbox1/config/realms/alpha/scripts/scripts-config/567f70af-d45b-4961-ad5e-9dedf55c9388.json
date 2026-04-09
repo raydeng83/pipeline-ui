@@ -1,0 +1,16 @@
+{
+  "_id": "567f70af-d45b-4961-ad5e-9dedf55c9388",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1739885840880,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "lastModifiedDate": 1739886428859,
+  "name": "Kyid.SelfRegistration_create_obj_password",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.SelfRegistration_create_obj_password.js"
+  }
+}

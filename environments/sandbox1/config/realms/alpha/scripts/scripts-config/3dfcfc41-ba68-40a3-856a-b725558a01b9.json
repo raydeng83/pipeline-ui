@@ -1,0 +1,16 @@
+{
+  "_id": "3dfcfc41-ba68-40a3-856a-b725558a01b9",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "creationDate": 1742930933905,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1743081692064,
+  "name": "KYID.2B1.Journey.ChooseAnotherMethod",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.ChooseAnotherMethod.js"
+  }
+}

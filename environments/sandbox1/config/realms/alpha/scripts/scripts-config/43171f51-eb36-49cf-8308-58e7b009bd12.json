@@ -1,0 +1,16 @@
+{
+  "_id": "43171f51-eb36-49cf-8308-58e7b009bd12",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "creationDate": 1742302448102,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "lastModifiedDate": 1742834106157,
+  "name": "Create_User_in_AIC",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Create_User_in_AIC.js"
+  }
+}

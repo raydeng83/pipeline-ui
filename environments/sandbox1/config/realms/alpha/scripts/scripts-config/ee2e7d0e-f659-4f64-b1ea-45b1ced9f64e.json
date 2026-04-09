@@ -1,0 +1,16 @@
+{
+  "_id": "ee2e7d0e-f659-4f64-b1ea-45b1ced9f64e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "creationDate": 1742229089807,
+  "default": false,
+  "description": "Determine when the user input is mail or telephoneNumber",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "lastModifiedDate": 1742320600729,
+  "name": "KYID.Journey.EmailMobileSegregation ",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.EmailMobileSegregation(character) = encodeURIComponent(character).js"
+  }
+}

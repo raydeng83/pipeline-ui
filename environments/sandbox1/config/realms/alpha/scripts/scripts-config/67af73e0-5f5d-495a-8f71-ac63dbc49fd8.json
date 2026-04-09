@@ -1,0 +1,16 @@
+{
+  "_id": "67af73e0-5f5d-495a-8f71-ac63dbc49fd8",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536949305,
+  "default": false,
+  "description": "This script is used to query user against AD",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683276382,
+  "name": "KYID.Journey.GetEmailAddressFromAD",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.GetEmailAddressFromAD.js"
+  }
+}

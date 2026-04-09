@@ -1,0 +1,16 @@
+{
+  "_id": "c5aa5456-72c1-4f4b-b62f-da224e6b3663",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536948018,
+  "default": false,
+  "description": "To set clocale cookie in spanish",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683274861,
+  "name": "KYID.Journey.SetcLocaleCookieES",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetcLocaleCookieES.js"
+  }
+}

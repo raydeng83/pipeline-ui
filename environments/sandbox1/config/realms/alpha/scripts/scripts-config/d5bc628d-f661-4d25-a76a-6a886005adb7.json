@@ -1,0 +1,16 @@
+{
+  "_id": "d5bc628d-f661-4d25-a76a-6a886005adb7",
+  "context": "LIBRARY",
+  "createdBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "creationDate": 1742554254613,
+  "default": false,
+  "description": "Library for openidm query calls",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "lastModifiedDate": 1742991366412,
+  "name": "KYID.Library.CRUDFunctions",
+  "script": {
+    "file": "scripts-content/LIBRARY/KYID.Library.CRUDFunctions.js"
+  }
+}

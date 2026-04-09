@@ -1,0 +1,16 @@
+{
+  "_id": "600a88e8-03e0-4a6c-82ca-a08da0ec96a1",
+  "context": "OIDC_CLAIMS",
+  "createdBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "creationDate": 1741251976305,
+  "default": false,
+  "description": "Claim Script for kyid-portal-ui client",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=6577c553-c881-4432-8ae6-1892c782b952,ou=user,ou=am-config",
+  "lastModifiedDate": 1741328937182,
+  "name": "Alpha_OIDC_Claims Script _Copy",
+  "script": {
+    "file": "scripts-content/OIDC_CLAIMS/Alpha_OIDC_Claims Script _Copy.js"
+  }
+}

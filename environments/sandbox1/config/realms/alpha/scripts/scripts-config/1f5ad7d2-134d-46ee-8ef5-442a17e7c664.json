@@ -1,0 +1,16 @@
+{
+  "_id": "1f5ad7d2-134d-46ee-8ef5-442a17e7c664",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=c769a4c6-17fd-4cfb-811c-fecbccaa9802,ou=user,ou=am-config",
+  "creationDate": 1740987236255,
+  "default": false,
+  "description": "Wrong Otp",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1742842376637,
+  "name": "Kyid.Journey.SelfRegistrationOtpFailed",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.SelfRegistrationOtpFailed.js"
+  }
+}

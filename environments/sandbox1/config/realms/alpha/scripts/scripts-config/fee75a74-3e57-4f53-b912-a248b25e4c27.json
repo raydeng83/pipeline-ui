@@ -1,0 +1,16 @@
+{
+  "_id": "fee75a74-3e57-4f53-b912-a248b25e4c27",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536950474,
+  "default": false,
+  "description": "Redirects to KOG Account Verification Form Page",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683757137,
+  "name": "KYID.Journey.RedirectToKOGAccountVerificationForm",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.RedirectToKOGAccountVerificationForm.js"
+  }
+}

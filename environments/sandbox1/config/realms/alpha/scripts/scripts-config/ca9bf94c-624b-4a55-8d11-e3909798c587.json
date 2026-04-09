@@ -1,0 +1,16 @@
+{
+  "_id": "ca9bf94c-624b-4a55-8d11-e3909798c587",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1737542926812,
+  "default": false,
+  "description": "This script is used to to manage client-side session monitoring and redirection. It ensures that user's session is continuously monitored on the client-side and user should be redirected to a specified URL if their session expires.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c6ce715c-2301-48bb-99c5-a161f3e74105,ou=user,ou=am-config",
+  "lastModifiedDate": 1747216684854,
+  "name": "KYID.Journey.MonitorAuthnSession",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MonitorAuthnSession.js"
+  }
+}

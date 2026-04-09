@@ -1,0 +1,16 @@
+{
+  "_id": "3c7c7753-56d0-472f-a19a-8937a33ab856",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731544437088,
+  "default": false,
+  "description": "This journey script displays the success message of MFA registration.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "lastModifiedDate": 1731546263698,
+  "name": "kyid.journey.registration.mfa.success",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/kyid.journey.registration.mfa.success.js"
+  }
+}

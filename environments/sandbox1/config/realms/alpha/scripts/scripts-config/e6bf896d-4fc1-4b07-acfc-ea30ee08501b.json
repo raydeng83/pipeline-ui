@@ -1,0 +1,16 @@
+{
+  "_id": "e6bf896d-4fc1-4b07-acfc-ea30ee08501b",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536947661,
+  "default": false,
+  "description": "Print All Shared State Data",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "lastModifiedDate": 1731546263899,
+  "name": "KYID-Journey-PrintAllSharedStateData",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID-Journey-PrintAllSharedStateData.js"
+  }
+}

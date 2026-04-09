@@ -1,0 +1,16 @@
+{
+  "_id": "9c6b753f-f906-4c9b-b2be-cdff94d8e969",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "creationDate": 1739894616955,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1739896028676,
+  "name": "SelfRegistrationChooseAnotherMethodCheckPOC",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/SelfRegistrationChooseAnotherMethodCheckPOC.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "d099620d-57a2-4faf-82d1-8730e12738a3",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536948438,
+  "default": false,
+  "description": "null",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "lastModifiedDate": 1731546263124,
+  "name": "KYID.Journey.JWTValidateSuccessURL",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.JWTValidateSuccessURL.js"
+  }
+}

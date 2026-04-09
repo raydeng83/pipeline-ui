@@ -1,0 +1,16 @@
+{
+  "_id": "f468517b-e677-4fb0-9380-b8feba65c542",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536950551,
+  "default": false,
+  "description": "This script is used to redirect user for needKOGvisit",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683276229,
+  "name": "KYID.Journey.needKOGVisitRedirection",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.needKOGVisitRedirection.js"
+  }
+}

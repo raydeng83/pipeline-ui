@@ -1,0 +1,16 @@
+{
+  "_id": "220eb861-1860-4988-a2f9-8edb4cf5a339",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536949438,
+  "default": false,
+  "description": "To display JIT Account Not Found Error Message",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1738683279579,
+  "name": "KYID.Journey.JITAccountNotFoundErrorMsg",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.JITAccountNotFoundErrorMsg.js"
+  }
+}

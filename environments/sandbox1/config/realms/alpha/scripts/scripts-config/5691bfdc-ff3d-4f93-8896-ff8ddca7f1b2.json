@@ -1,0 +1,16 @@
+{
+  "_id": "5691bfdc-ff3d-4f93-8896-ff8ddca7f1b2",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "creationDate": 1742993966779,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "lastModifiedDate": 1742994016382,
+  "name": "KYID.Journey.HasSession",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.HasSession.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "a78fcd82-11a5-4b03-b9e6-0d14d85a83de",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1739858277016,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1739873471736,
+  "name": "TBD",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/TBD.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "ddd63bf7-3a27-4d47-9f64-2c2d3e17f9d7",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=c769a4c6-17fd-4cfb-811c-fecbccaa9802,ou=user,ou=am-config",
+  "creationDate": 1741253397596,
+  "default": false,
+  "description": "Taking Additional Email ID",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "lastModifiedDate": 1742884834031,
+  "name": "Kyid.Journey.SelfRegistrationAdditionalEmail",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.SelfRegistrationAdditionalEmail.js"
+  }
+}

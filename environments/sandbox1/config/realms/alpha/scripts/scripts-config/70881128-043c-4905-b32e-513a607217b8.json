@@ -1,0 +1,16 @@
+{
+  "_id": "70881128-043c-4905-b32e-513a607217b8",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "creationDate": 1742810129274,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c0a63d1f-038c-4bee-a3a9-5a9e927f4bda,ou=user,ou=am-config",
+  "lastModifiedDate": 1742967561736,
+  "name": "KYID.2B1.journey.Entitlement_Request",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.journey.Entitlement_Request.js"
+  }
+}

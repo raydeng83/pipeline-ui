@@ -1,0 +1,16 @@
+{
+  "_id": "43972407-d14b-434b-a2d6-47815da80497",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1740307753675,
+  "default": false,
+  "description": "Phone No. Existing",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "lastModifiedDate": 1740307831107,
+  "name": "Kyid.Journey.PhoneNoExist",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey.PhoneNoExist.js"
+  }
+}

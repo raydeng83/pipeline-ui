@@ -1,0 +1,16 @@
+{
+  "_id": "9bb50de8-078a-4c24-8467-c892023043b6",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "creationDate": 1741751243209,
+  "default": false,
+  "description": "For 2B helpdesk functionality",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=a294c996-cc16-4c94-9034-8bbf54d221c5,ou=user,ou=am-config",
+  "lastModifiedDate": 1741752799411,
+  "name": "KYID.2B.isUserExist",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B.isUserExist.js"
+  }
+}

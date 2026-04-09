@@ -1,0 +1,16 @@
+{
+  "_id": "79374a92-8b65-41e0-bf5f-c41880e9e7cb",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536949306,
+  "default": false,
+  "description": "To set clocale in cookie",
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "lastModifiedDate": 1750238876702,
+  "name": "KYID.Journey.SetcLocaleCookie",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.SetcLocaleCookie.js"
+  }
+}

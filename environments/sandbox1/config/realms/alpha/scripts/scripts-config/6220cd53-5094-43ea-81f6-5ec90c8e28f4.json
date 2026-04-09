@@ -1,0 +1,16 @@
+{
+  "_id": "6220cd53-5094-43ea-81f6-5ec90c8e28f4",
+  "context": "CONFIG_PROVIDER_NODE",
+  "createdBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "creationDate": 1740129674130,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "1.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1740130543622,
+  "name": "KYID.Journey.OIDC.RedirectionURL",
+  "script": {
+    "file": "scripts-content/CONFIG_PROVIDER_NODE/KYID.Journey.OIDC.RedirectionURL.js"
+  }
+}

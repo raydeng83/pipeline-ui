@@ -1,0 +1,16 @@
+{
+  "_id": "8eea88df-6bea-401e-bd10-efb034519f8d",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536949916,
+  "default": false,
+  "description": "This script is used to display password form.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "lastModifiedDate": 1744361633554,
+  "name": "KYID.Journey.DisplayPasswordPTA",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.DisplayPasswordPTA.js"
+  }
+}

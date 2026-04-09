@@ -1,0 +1,16 @@
+{
+  "_id": "293430c9-4048-4033-bebc-f6698ce2c75f",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731543526980,
+  "default": false,
+  "description": "[11-1-2024] Copy Before making change for ChildSupport application\nThis function is used to get KOG app claims through KOG UserClaims API.",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "lastModifiedDate": 1731546263523,
+  "name": "Bkup-11-01-2024-KYID.Journey.ReadKOGApplicationClaims",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Bkup-11-01-2024-KYID.Journey.ReadKOGApplicationClaims.js"
+  }
+}

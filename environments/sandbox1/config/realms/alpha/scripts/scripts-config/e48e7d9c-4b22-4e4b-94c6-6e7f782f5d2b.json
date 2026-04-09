@@ -1,0 +1,16 @@
+{
+  "_id": "e48e7d9c-4b22-4e4b-94c6-6e7f782f5d2b",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=69d31ee0-c933-4688-ac45-9854bb204724,ou=user,ou=am-config",
+  "creationDate": 1740122825878,
+  "default": false,
+  "description": "checking the primary and secondary mail",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=c769a4c6-17fd-4cfb-811c-fecbccaa9802,ou=user,ou=am-config",
+  "lastModifiedDate": 1742104977132,
+  "name": "Kyid.Journey_Checking_primary_mail_secondary_mail",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/Kyid.Journey_Checking_primary_mail_secondary_mail.js"
+  }
+}

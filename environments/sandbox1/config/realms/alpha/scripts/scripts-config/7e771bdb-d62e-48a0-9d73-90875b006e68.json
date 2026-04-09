@@ -1,0 +1,16 @@
+{
+  "_id": "7e771bdb-d62e-48a0-9d73-90875b006e68",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536948016,
+  "default": false,
+  "description": "MFA for others - user is unauthorized",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=59467349-22e0-4423-bbf8-fd1cec770795,ou=user,ou=am-config",
+  "lastModifiedDate": 1738309406792,
+  "name": "KYID.Journey.errormessage.unauthorizedhelpdeskuser",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.errormessage.unauthorizedhelpdeskuser.js"
+  }
+}

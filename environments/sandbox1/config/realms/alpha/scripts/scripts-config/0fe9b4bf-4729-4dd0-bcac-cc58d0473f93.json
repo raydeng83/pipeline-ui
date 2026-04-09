@@ -1,0 +1,16 @@
+{
+  "_id": "0fe9b4bf-4729-4dd0-bcac-cc58d0473f93",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536950474,
+  "default": false,
+  "description": "language pref",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "lastModifiedDate": 1740394974496,
+  "name": "KYID.Journey.MFAAuthenticationAndRegistration.MFAAuthenticationWithRemoveReset",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.MFAAuthenticationAndRegistration.MFAAuthenticationWithRemoveReset.js"
+  }
+}

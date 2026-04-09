@@ -1,0 +1,16 @@
+{
+  "_id": "e642796d-9af9-449b-bc1a-e143858a525e",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "creationDate": 1740655354193,
+  "default": false,
+  "description": null,
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=35b1e6a3-ecf5-4ddc-b9dd-f26f37b2a8a1,ou=user,ou=am-config",
+  "lastModifiedDate": 1740655867196,
+  "name": "KYID.2B1.journey.ForgotPassword.ReadingEmailFromURL",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.journey.ForgotPassword.ReadingEmailFromURL.js"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "47804743-facb-45d6-9805-ed74b49db8b5",
+  "context": "AUTHENTICATION_TREE_DECISION_NODE",
+  "createdBy": "id=4457bbed-e100-419a-b946-76121d9779e6,ou=user,ou=am-config",
+  "creationDate": 1731536948019,
+  "default": false,
+  "description": "To display Password Form",
+  "evaluatorVersion": "2.0",
+  "language": "JAVASCRIPT",
+  "lastModifiedBy": "id=b1402e05-bdc3-4a7b-9f7b-36dae766e86a,ou=user,ou=am-config",
+  "lastModifiedDate": 1744715023959,
+  "name": "KYID.Journey.DisplayPassword",
+  "script": {
+    "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.Journey.DisplayPassword.js"
+  }
+}
