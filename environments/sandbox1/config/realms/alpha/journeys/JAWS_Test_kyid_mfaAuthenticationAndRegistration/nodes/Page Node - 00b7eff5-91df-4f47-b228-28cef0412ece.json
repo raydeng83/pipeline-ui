@@ -1,0 +1,76 @@
+{
+  "_id": "00b7eff5-91df-4f47-b228-28cef0412ece",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "Registration",
+      "id": "Registration"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "RecoveryMFA",
+      "id": "RecoveryMFA"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    },
+    {
+      "displayName": "True",
+      "id": "True"
+    }
+  ],
+  "_rev": "1300296092",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "d36b6af4-2663-4897-9701-a9ecdefcac60",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "59ab2afd-033f-467c-ad3c-223a221e6a59",
+      "displayName": "MFA Authentication or Registration",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'><br>\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">Need Assistance?</a>",
+    "es": "<div class='page-footer-horizontal'><br>\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">¿Necesita ayuda?</a>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a>\\n</div>\"}}"
+}

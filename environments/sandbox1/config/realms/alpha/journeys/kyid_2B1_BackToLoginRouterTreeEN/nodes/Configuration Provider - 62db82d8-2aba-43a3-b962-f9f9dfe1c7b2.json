@@ -1,0 +1,26 @@
+{
+  "_id": "62db82d8-2aba-43a3-b962-f9f9dfe1c7b2",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    },
+    {
+      "displayName": "Configuration failure",
+      "id": "CONFIGURATION_FAILED"
+    }
+  ],
+  "_rev": "-758795003",
+  "_type": {
+    "_id": "ConfigProviderNode",
+    "collection": true,
+    "name": "Configuration Provider",
+    "version": "1.0"
+  },
+  "nodeType": "SetCustomCookieNode",
+  "nodeVersion": 1,
+  "script": "ba60b1ab-1f93-49b7-aa21-748ed8726ea1",
+  "scriptInputs": [
+    "*"
+  ]
+}

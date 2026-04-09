@@ -1,0 +1,18 @@
+{
+  "displayName": "Script Task",
+  "name": "scriptTask-85f37b5a334f",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "scriptTask-3ffae9ad152c"
+      }
+    ],
+    "script": {
+      "file": "Script Task - scriptTask-85f37b5a334f.js"
+    }
+  },
+  "type": "scriptTask"
+}

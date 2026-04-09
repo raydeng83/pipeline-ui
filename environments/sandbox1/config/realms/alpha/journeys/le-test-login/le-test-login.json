@@ -1,0 +1,51 @@
+{
+  "_id": "le-test-login",
+  "_rev": "-658524734",
+  "enabled": true,
+  "entryNodeId": "49f7607b-adbb-45fb-a6e7-71129abf08b5",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "49f7607b-adbb-45fb-a6e7-71129abf08b5": {
+      "connections": {
+        "outcome": "ced709ee-f101-4949-a5b2-22aa4aa03972"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 201,
+      "y": 167.015625
+    },
+    "ced709ee-f101-4949-a5b2-22aa4aa03972": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 516,
+      "y": 219.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 934,
+      "y": 111
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 927,
+      "y": 400
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

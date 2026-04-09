@@ -1,0 +1,44 @@
+{
+  "_id": "84e6525d-e142-4968-ba65-b6a4519ee60d",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Another Factor",
+      "id": "Another Factor"
+    }
+  ],
+  "_rev": "1097712492",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "8fbf46b5-4c47-4b66-a61c-43591b0ffd56",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "446a44a1-9cc5-4db6-a457-f8c1e828f91d",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify_with_your_phone_number</h5></div>\n<div class=\"page-element\">\n</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5>Verifique_con_su_teléfono</h5>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

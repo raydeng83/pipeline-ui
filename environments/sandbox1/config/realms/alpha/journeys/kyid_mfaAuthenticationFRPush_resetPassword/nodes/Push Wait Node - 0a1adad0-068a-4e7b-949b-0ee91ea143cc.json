@@ -1,0 +1,26 @@
+{
+  "_id": "0a1adad0-068a-4e7b-949b-0ee91ea143cc",
+  "_outcomes": [
+    {
+      "displayName": "Done",
+      "id": "DONE"
+    },
+    {
+      "displayName": "Exit",
+      "id": "EXITED"
+    }
+  ],
+  "_rev": "-1210868055",
+  "_type": {
+    "_id": "PushWaitNode",
+    "collection": true,
+    "name": "Push Wait Node",
+    "version": "1.0"
+  },
+  "challengeMessage": {},
+  "exitMessage": {},
+  "secondsToWait": 10,
+  "waitingMessage": {
+    "en": "Push notification sent. Please authorize this in the ForgeRock Authenticator app on your registered device."
+  }
+}

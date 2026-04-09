@@ -1,0 +1,32 @@
+{
+  "_id": "98563e21-56cf-4d37-99ef-4cdc904ae521",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "565772809",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "You have successfully set up the required security method. We recommend that you also set up at least one more optional security method.",
+    "es": "Ha configurado correctamente el método de seguridad requerido. Le recomendamos que también configure al menos un método de seguridad opcional más."
+  },
+  "messageNo": {
+    "en": "Set up Additional Security Methods",
+    "es": "Configurar métodos de seguridad adicionales"
+  },
+  "messageYes": {
+    "en": "Continue",
+    "es": "Continuar"
+  }
+}

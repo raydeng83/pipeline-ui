@@ -1,0 +1,18 @@
+{
+  "displayName": "Auto Approval",
+  "name": "scriptTask-0e5b6187ea62",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "scriptTask-626899b6e99a"
+      }
+    ],
+    "script": {
+      "file": "Auto Approval - scriptTask-0e5b6187ea62.js"
+    }
+  },
+  "type": "scriptTask"
+}

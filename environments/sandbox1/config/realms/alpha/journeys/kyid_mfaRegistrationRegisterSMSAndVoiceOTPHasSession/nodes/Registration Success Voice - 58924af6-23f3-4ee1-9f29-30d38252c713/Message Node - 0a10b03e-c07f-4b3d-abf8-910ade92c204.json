@@ -1,0 +1,25 @@
+{
+  "_id": "0a10b03e-c07f-4b3d-abf8-910ade92c204",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1278927340",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "You have successfully set up the required security method. We recommend that you also set up at least one more optional security method."
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

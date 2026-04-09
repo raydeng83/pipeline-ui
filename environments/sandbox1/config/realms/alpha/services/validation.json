@@ -1,0 +1,16 @@
+{
+  "_id": "",
+  "_rev": "1102610906",
+  "_type": {
+    "_id": "validation",
+    "collection": false,
+    "name": "Validation Service"
+  },
+  "validGotoDestinations": [
+    "&{am.server.protocol|https}://&{fqdn}/*?*",
+    "https://ig.dev.kyid.ky.gov:443/*",
+    "https://ig.dev.kyid.ky.gov:443/*?*",
+    "https://dev.kog.ky.gov/account/AccessDenied.aspx#DivAlertContainer",
+    "https://localhost:5173/"
+  ]
+}

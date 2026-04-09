@@ -1,0 +1,25 @@
+{
+  "_id": "134c0ad1-75a8-4af4-bc6c-c7e39b1c5e1f",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-740864503",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "OIDCapp and needkogvisit is yes"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

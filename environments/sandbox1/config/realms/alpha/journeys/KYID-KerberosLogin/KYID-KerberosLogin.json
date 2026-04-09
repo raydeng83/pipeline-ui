@@ -1,0 +1,51 @@
+{
+  "_id": "KYID-KerberosLogin",
+  "_rev": "1085339600",
+  "enabled": true,
+  "entryNodeId": "c930f51c-5f27-4987-9da0-33ff7e37aa3c",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "4545692a-d9df-4476-94f2-c40fd3842e43": {
+      "connections": {
+        "DONE": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Kerberos AuthN Failure Msg.",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 420.18359375,
+      "y": 326.0625
+    },
+    "c930f51c-5f27-4987-9da0-33ff7e37aa3c": {
+      "connections": {
+        "ERROR": "4545692a-d9df-4476-94f2-c40fd3842e43",
+        "SUCCESS": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Identity Assertion",
+      "nodeType": "IdentityAssertionDecisionNode",
+      "version": "1.0",
+      "x": 205.2578125,
+      "y": 233.0625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 676,
+      "y": 201
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 673,
+      "y": 330
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"KYID\"]"
+  }
+}

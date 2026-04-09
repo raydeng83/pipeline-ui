@@ -1,0 +1,6 @@
+{
+  "_id": "esv-error-usernotfound-helpdesk-es",
+  "description": "Error Message:  MFA for Others End user not found in Spanish",
+  "expressionType": "string",
+  "valueBase64": "${ESV_ERROR_USERNOTFOUND_HELPDESK_ES}"
+}

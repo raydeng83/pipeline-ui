@@ -1,0 +1,22 @@
+{
+  "_id": "2a8c5ae6-7bfc-49c5-a129-09a04f02299a",
+  "_outcomes": [
+    {
+      "displayName": "Retry",
+      "id": "Retry"
+    },
+    {
+      "displayName": "Reject",
+      "id": "Reject"
+    }
+  ],
+  "_rev": "1233595903",
+  "_type": {
+    "_id": "RetryLimitDecisionNode",
+    "collection": true,
+    "name": "Retry Limit Decision",
+    "version": "1.0"
+  },
+  "incrementUserAttributeOnFailure": true,
+  "retryLimit": 2
+}

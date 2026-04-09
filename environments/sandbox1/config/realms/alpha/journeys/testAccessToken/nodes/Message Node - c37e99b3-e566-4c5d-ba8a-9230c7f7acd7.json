@@ -1,0 +1,25 @@
+{
+  "_id": "c37e99b3-e566-4c5d-ba8a-9230c7f7acd7",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1183417803",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Hello"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

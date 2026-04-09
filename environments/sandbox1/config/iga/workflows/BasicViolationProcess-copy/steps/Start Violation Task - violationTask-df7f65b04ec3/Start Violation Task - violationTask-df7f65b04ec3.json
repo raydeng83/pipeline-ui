@@ -1,0 +1,81 @@
+{
+  "displayName": "Start Violation Task",
+  "name": "violationTask-df7f65b04ec3",
+  "type": "violationTask",
+  "violationTask": {
+    "actors": [
+      {
+        "id": {
+          "isExpression": true,
+          "value": "violation.policyRule.violationOwner.id"
+        },
+        "permissions": {
+          "allow": true,
+          "comment": true,
+          "exception": true,
+          "reassign": true,
+          "remediate": true
+        }
+      }
+    ],
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "violationAssigned"
+      },
+      "escalation": {
+        "actors": [
+          {
+            "id": "managed/user/10eb7d7e-9222-487e-b8e0-aff49140bc28"
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(8*1*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 8,
+        "notification": "violationEscalated"
+      },
+      "expiration": {
+        "action": {
+          "isExpression": true,
+          "value": "violation.policyRule.violationLifecycle.expiration.expires ? violation.policyRule.violationLifecycle.expiration.action : null"
+        },
+        "actors": [
+          {
+            "id": "managed/user/10eb7d7e-9222-487e-b8e0-aff49140bc28"
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(1*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 1,
+        "notification": "violationExpired"
+      },
+      "reassign": {
+        "notification": "violationReassigned"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*1*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "violationReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "REMEDIATE",
+        "step": "scriptTask-690cd5adc1b6"
+      },
+      {
+        "condition": null,
+        "outcome": "ALLOW",
+        "step": "scriptTask-313f487929a4"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "6a6038f4-ad70-4022-b185-71e02899244b",
+  "_outcomes": [
+    {
+      "displayName": "userNotFound",
+      "id": "userNotFound"
+    },
+    {
+      "displayName": "userProvisioned",
+      "id": "userProvisioned"
+    },
+    {
+      "displayName": "userNotProvisioned",
+      "id": "userNotProvisioned"
+    }
+  ],
+  "_rev": "-1547150718",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "userNotFound",
+    "userProvisioned",
+    "userNotProvisioned"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "cfa7f85c-fbb0-42dc-a6ea-63185ac352e3"
+}

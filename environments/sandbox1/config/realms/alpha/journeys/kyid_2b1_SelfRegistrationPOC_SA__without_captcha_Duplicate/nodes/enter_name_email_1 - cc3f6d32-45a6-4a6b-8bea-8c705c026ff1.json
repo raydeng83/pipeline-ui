@@ -1,0 +1,37 @@
+{
+  "_id": "cc3f6d32-45a6-4a6b-8bea-8c705c026ff1",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    }
+  ],
+  "_rev": "1146326990",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "1f9d0e45-ee11-4189-b0b9-c49b7fe0d830",
+      "displayName": "Attribute Collector",
+      "nodeType": "AttributeCollectorNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "3ec0b2ec-3730-44a4-b4f8-2ff733dc7920",
+      "displayName": "Display text",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "Your email will serve as a username for your KYID account"
+  },
+  "pageHeader": {
+    "en": "1_Enter your name and email"
+  },
+  "stage": "{\"submitButtonText\":{\"en\":\"Next\"},\"pageFooter\":{\"en\":\"What If I don't have email ?\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

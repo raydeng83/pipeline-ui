@@ -1,0 +1,24 @@
+{
+  "_id": "abd3f2b5-3969-4289-a4b3-98558015225a",
+  "_outcomes": [
+    {
+      "displayName": "Done",
+      "id": "DONE"
+    }
+  ],
+  "_rev": "-613974313",
+  "_type": {
+    "_id": "PollingWaitNode",
+    "collection": true,
+    "name": "Polling Wait Node",
+    "version": "1.0"
+  },
+  "exitMessage": {},
+  "exitable": false,
+  "secondsToWait": 2,
+  "spamDetectionEnabled": false,
+  "spamDetectionTolerance": 3,
+  "waitingMessage": {
+    "en": "Searching Account. Please wait don't close the browser"
+  }
+}

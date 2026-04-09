@@ -1,0 +1,22 @@
+{
+  "_id": "8fba9363-b6fe-4ee5-906a-8b1c396726d8",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-392177792",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "SelfRegistrationPhoneRegistrationPOC_V2_PhoneAuth"
+}

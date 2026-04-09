@@ -1,0 +1,60 @@
+{
+  "_id": "8da0138a-fdf2-4dfb-83cd-6aaad84eb8ab",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Remove/Reset MFA Method",
+      "id": "Remove/Reset MFA Method"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-740636259",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "f05b0a7b-8505-4ac5-a99b-a380c19376b1",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "4c6766d5-696c-4644-b397-a9df10070681",
+      "displayName": "Dynamic Choice",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\">Verify identity with a security method</div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">Verify with one of the following security methods to manage the registered methods.</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\">Verifique con uno de los siguientes métodos de seguridad</div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">Verifique con uno de los siguientes métodos de seguridad para administrar los métodos registrados.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.helpdesk.successurl}\\\">\\nBack to Application</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.helpdesk.successurl}\\\">\\nVolver a la aplicación</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\"\\n >Ayuda</a></span>\\n</div>\"}}"
+}

@@ -1,0 +1,40 @@
+{
+  "_id": "28e628af-72b6-4847-a185-052996bb201a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1386670472",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "a1ae01e2-1616-427f-816b-520218027233",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "4ce1cfa1-0747-4d69-bfd2-1a57899016cf",
+      "displayName": "Push Notification expired",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify_with_your_ForgeRock_Authenticator_App</h5></div>\n<div class=\"page-element\">\n<br>\n</div>",
+    "es": "<div class='page-footer-horizontal'>\n<br>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div style=\\\"text-align:left;\\\">\\n</div>\\n<div class='page-footer-horizontal'>\",\"es\":\"<div style=\\\"text-align:left;\\\">\\n</div>\\n<div class='page-footer-horizontal'>\"}}"
+}

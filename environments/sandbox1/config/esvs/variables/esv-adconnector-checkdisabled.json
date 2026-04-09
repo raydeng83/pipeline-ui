@@ -1,0 +1,6 @@
+{
+  "_id": "esv-adconnector-checkdisabled",
+  "description": "if the disabled AD connector need to be check or not",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_ADCONNECTOR_CHECKDISABLED}"
+}

@@ -1,0 +1,55 @@
+{
+  "name": "Alpha_Kyid_Identity",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "firstname",
+      "lastname",
+      "gender",
+      "dateOfBirth",
+      "address"
+    ],
+    "properties": {
+      "address": {
+        "searchable": false,
+        "title": "Address",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "dateOfBirth": {
+        "searchable": false,
+        "title": "DOB",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "firstname": {
+        "searchable": false,
+        "title": "First Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "gender": {
+        "searchable": false,
+        "title": "Gender",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "lastname": {
+        "searchable": false,
+        "title": "Last Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "Identity",
+    "type": "object"
+  }
+}

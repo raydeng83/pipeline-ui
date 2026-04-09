@@ -1,0 +1,142 @@
+{
+  "_id": "kyid_2B1_loginJIT",
+  "_rev": "745649417",
+  "enabled": true,
+  "entryNodeId": "79fc8d2d-ff11-49ac-a1dc-fb8fe50fac61",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1710a272-dc07-4f0d-a69b-509ec148c0d5": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "NotFound: Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1218,
+      "y": 454.3125
+    },
+    "1f7601f8-097e-42a1-9dfe-1325974a8946": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Failed: Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1217,
+      "y": 279.3125
+    },
+    "408a4742-3a99-4c33-8d82-90ff5a56a2be": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Invalid: Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1228,
+      "y": 626.3125
+    },
+    "67817b23-daf6-4c90-8a04-4962a2fc8b0f": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "74bdf6d6-9522-47b9-9d4a-b0048bf75dcf"
+      },
+      "displayName": "Script: Update User Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1575,
+      "y": 299.1666666666667
+    },
+    "74bdf6d6-9522-47b9-9d4a-b0048bf75dcf": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Clear KOG Profile from sharedState",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1880,
+      "y": 126.015625
+    },
+    "79fc8d2d-ff11-49ac-a1dc-fb8fe50fac61": {
+      "connections": {
+        "No": "febc5932-242a-4a29-a0d8-edc409f34881",
+        "Yes": "7e53bb23-21ae-4245-81d1-b54379f987ab"
+      },
+      "displayName": "Script: Is KOGUserProfile in SharedState",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 459,
+      "y": 406
+    },
+    "7e53bb23-21ae-4245-81d1-b54379f987ab": {
+      "connections": {
+        "No": "f02b498e-45ca-4763-8929-ef9bd95e60d8",
+        "Yes": "67817b23-daf6-4c90-8a04-4962a2fc8b0f"
+      },
+      "displayName": "Script: Is KOGID Exist in Ping AIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1200,
+      "y": 98
+    },
+    "e095b06c-57a9-4dde-8e16-6ac36051c537": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Stub: Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1250,
+      "y": 799.3125
+    },
+    "f02b498e-45ca-4763-8929-ef9bd95e60d8": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "74bdf6d6-9522-47b9-9d4a-b0048bf75dcf"
+      },
+      "displayName": "Script: Create User With KOG Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1546,
+      "y": 94.33333333333331
+    },
+    "febc5932-242a-4a29-a0d8-edc409f34881": {
+      "connections": {
+        "Failed": "1f7601f8-097e-42a1-9dfe-1325974a8946",
+        "Invalid": "408a4742-3a99-4c33-8d82-90ff5a56a2be",
+        "NotFound": "1710a272-dc07-4f0d-a69b-509ec148c0d5",
+        "StubAccount": "e095b06c-57a9-4dde-8e16-6ac36051c537",
+        "Successful": "7e53bb23-21ae-4245-81d1-b54379f987ab"
+      },
+      "displayName": "Script: Get KOG User Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 879,
+      "y": 396.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2218,
+      "y": 122.83333333333331
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2228,
+      "y": 425.6666666666667
+    },
+    "startNode": {
+      "x": 70,
+      "y": 367.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Login\"]"
+  }
+}

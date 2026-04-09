@@ -1,0 +1,31 @@
+{
+  "_id": "db25dd88-12c4-4884-a4cf-797cfee06e01",
+  "_outcomes": [
+    {
+      "displayName": "Confirm",
+      "id": "Confirm"
+    },
+    {
+      "displayName": "GoBack",
+      "id": "GoBack"
+    }
+  ],
+  "_rev": "1779812694",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "cb00cece-21a3-47d7-b948-6ee755832214",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nBack to Application</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">Volver a la solicitud\\n</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

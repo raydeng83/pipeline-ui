@@ -1,0 +1,34 @@
+{
+  "_id": "9f6c992f-7752-44d9-b2f0-a0956de09873",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    }
+  ],
+  "_rev": "955686694",
+  "_type": {
+    "_id": "OathRegistrationNode",
+    "collection": true,
+    "name": "OATH Registration",
+    "version": "1.0"
+  },
+  "accountName": "USERNAME",
+  "addChecksum": false,
+  "algorithm": "TOTP",
+  "bgColor": "032b75",
+  "generateRecoveryCodes": true,
+  "imgUrl": "",
+  "issuer": "ForgeRock",
+  "minSharedSecretLength": 32,
+  "passwordLength": "SIX_DIGITS",
+  "postponeDeviceProfileStorage": false,
+  "scanQRCodeMessage": {},
+  "totpHashAlgorithm": "HMAC_SHA1",
+  "totpTimeInterval": 30,
+  "truncationOffset": -1
+}

@@ -1,0 +1,51 @@
+{
+  "_id": "f96e4335-ce8a-4f22-a0b9-3e2c4f6b4ada",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    },
+    {
+      "displayName": "Via SMS",
+      "id": "Via SMS"
+    },
+    {
+      "displayName": "Via voice",
+      "id": "Via voice"
+    }
+  ],
+  "_rev": "1231527601",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Verify",
+    "Choose Another Method",
+    "false",
+    "BlankOTP",
+    "Via SMS",
+    "Via voice"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "d2052182-1489-4895-a06f-de62f0f78998"
+}

@@ -1,0 +1,66 @@
+{
+  "_id": "68ebd81e-ef40-46ea-ba37-c4556f15e1b1",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Remove/Reset MFA Method",
+      "id": "Remove/Reset MFA Method"
+    },
+    {
+      "displayName": "RecoveryMFA",
+      "id": "RecoveryMFA"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-408649099",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "email",
+    "sms",
+    "otp",
+    "swk",
+    "voice",
+    "symantec",
+    "Remove/Reset MFA Method",
+    "RecoveryMFA",
+    "Default"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "b0770be3-9caa-426b-8f9e-a4f9b655954d"
+}

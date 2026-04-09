@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/list_enrolment_prerequisites",
+  "description": "This endpoint returns a list of prerequisite types corresponding to enrolment contextID",
+  "file": "list_enrolment_prerequisites.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

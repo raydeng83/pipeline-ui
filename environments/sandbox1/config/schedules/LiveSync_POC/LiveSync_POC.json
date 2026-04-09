@@ -1,0 +1,20 @@
+{
+  "_id": "schedule/LiveSync_POC",
+  "concurrentExecution": false,
+  "enabled": true,
+  "endTime": null,
+  "invokeContext": {
+    "action": "liveSync",
+    "source": "system/Scripted_Rest_Connector/__ALL__"
+  },
+  "invokeLogLevel": "debug",
+  "invokeService": "provisioner",
+  "misfirePolicy": "fireAndProceed",
+  "persisted": true,
+  "recoverable": false,
+  "repeatCount": 0,
+  "repeatInterval": 0,
+  "schedule": "0 */2 * * * ?",
+  "startTime": null,
+  "type": "cron"
+}

@@ -1,0 +1,35 @@
+{
+  "_id": "a78458ab-7236-4a5c-b376-aa392a0b7369",
+  "_outcomes": [
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    }
+  ],
+  "_rev": "-253894034",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "aa7a2df8-8299-46a5-9b12-57f95db2cb84",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "Your recovery method is used to help you get back into your KYID Account if you forget your password or have trouble signing in"
+  },
+  "pageHeader": {
+    "en": "2_account_recovery"
+  },
+  "stage": "{\"pageFooter\":{\"en\":\"Additional_recovery_methods\"}}"
+}

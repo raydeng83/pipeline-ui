@@ -1,0 +1,25 @@
+{
+  "_id": "2f33fce7-2b5a-4f70-8b8c-aed487974d10",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-677353700",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Patch Failed"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

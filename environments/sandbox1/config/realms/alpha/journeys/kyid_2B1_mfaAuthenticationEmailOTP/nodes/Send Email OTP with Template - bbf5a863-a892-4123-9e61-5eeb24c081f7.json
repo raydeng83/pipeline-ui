@@ -1,0 +1,36 @@
+{
+  "_id": "bbf5a863-a892-4123-9e61-5eeb24c081f7",
+  "_outcomes": [
+    {
+      "displayName": "sent",
+      "id": "sent"
+    },
+    {
+      "displayName": "noMail",
+      "id": "noMail"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-301502170",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "sent",
+    "noMail",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "ba171b21-a666-4404-8915-09d5806f28f5"
+}

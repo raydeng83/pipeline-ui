@@ -1,0 +1,36 @@
+{
+  "_id": "e881e2e5-49d0-4261-8ecf-8f33b6a9eb0a",
+  "_outcomes": [
+    {
+      "displayName": "additionalEmail",
+      "id": "additionalEmail"
+    },
+    {
+      "displayName": "recoveryMFASetup",
+      "id": "recoveryMFASetup"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-793619325",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "additionalEmail",
+    "recoveryMFASetup",
+    "error"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "18243c45-bf3a-4429-9e94-c79a969d1a12"
+}

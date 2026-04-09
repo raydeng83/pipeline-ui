@@ -1,0 +1,22 @@
+{
+  "_id": "5c654991-00ed-45eb-bd04-1ede4a9f63dc",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-363886050",
+  "_type": {
+    "_id": "InnerTreeEvaluatorNode",
+    "collection": true,
+    "name": "Inner Tree Evaluator",
+    "version": "1.0"
+  },
+  "displayErrorOutcome": false,
+  "tree": "SelfRegistrationPhoneRegistrationPOC_SA_Duplicate"
+}

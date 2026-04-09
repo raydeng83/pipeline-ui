@@ -1,0 +1,230 @@
+{
+  "_id": "kyid_2B1_manageMFAForOthers",
+  "_rev": "-99359366",
+  "description": "MFA for others use case for phase 2B",
+  "enabled": true,
+  "entryNodeId": "dde66eea-2cba-41ee-ba45-b5e0196fdfb5",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "02a1be70-0dd9-42f3-9474-e1bba655f9e6": {
+      "connections": {
+        "true": "9aca822b-1945-40dc-af6c-9eaf1d25e6a1"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1298,
+      "y": 364
+    },
+    "17854236-9999-476f-85db-c624fb551e56": {
+      "connections": {
+        "false": "876d1e85-f280-4a8f-bdd4-7017f965d406",
+        "true": "876d1e85-f280-4a8f-bdd4-7017f965d406"
+      },
+      "displayName": "No MFA Left Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 3820,
+      "y": 71.5
+    },
+    "2760937a-1bc4-4afb-aa66-02ab116fe6ea": {
+      "connections": {
+        "true": "9aca822b-1945-40dc-af6c-9eaf1d25e6a1"
+      },
+      "displayName": "Script:GetIDofHelpeskUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 809,
+      "y": 385
+    },
+    "3c7f722b-fb98-47a3-a338-eb0c45dfe7b5": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "2760937a-1bc4-4afb-aa66-02ab116fe6ea"
+      },
+      "displayName": "Fetch KOGID from existing session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 527,
+      "y": 89.33333333333333
+    },
+    "62af8541-9457-4e1a-8096-cc2bfcc1a352": {
+      "connections": {
+        "true": "fa8c4e90-5027-4c52-b187-5212ae2cb2f0"
+      },
+      "displayName": "Script: Set MFAContext",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2288,
+      "y": 105
+    },
+    "67dd8224-9b57-41df-aaec-fab3ab194d3d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "8a17920d-f5ad-4c2e-b65e-4b5c326d377b"
+      },
+      "displayName": "MFAReset/RemoveforOther",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3078,
+      "y": 317
+    },
+    "6f7bf3de-fc21-4790-a9cc-bc61ef0c8e35": {
+      "connections": {
+        "false": "ac20cbc3-93d6-4439-b883-30ae54ea9a4c",
+        "true": "720c763c-d7fa-4263-8ed9-d85d90ed8e8f"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1704,
+      "y": 182
+    },
+    "720c763c-d7fa-4263-8ed9-d85d90ed8e8f": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "User Found": "62af8541-9457-4e1a-8096-cc2bfcc1a352",
+        "User Not Found": "dfa04f67-3c4b-4632-a7b6-019bc586bc3c"
+      },
+      "displayName": "MFAforOthers_isUserExist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1964,
+      "y": 65
+    },
+    "7c5b905c-8dfb-4389-b49c-af504453a697": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "02a1be70-0dd9-42f3-9474-e1bba655f9e6"
+      },
+      "displayName": "Fetch KOGID from Login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1082,
+      "y": 186
+    },
+    "876d1e85-f280-4a8f-bdd4-7017f965d406": {
+      "connections": {
+        "True": "a937e2b2-618c-4cb7-8dd2-9e9e73e87dcd"
+      },
+      "displayName": "Script:SetHelpDeskEmail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3939,
+      "y": 479
+    },
+    "8a17920d-f5ad-4c2e-b65e-4b5c326d377b": {
+      "connections": {
+        "False": "876d1e85-f280-4a8f-bdd4-7017f965d406",
+        "True": "17854236-9999-476f-85db-c624fb551e56"
+      },
+      "displayName": "Script: No MFA Method Left For Removal",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3212,
+      "y": 86.66666666666667
+    },
+    "9aca822b-1945-40dc-af6c-9eaf1d25e6a1": {
+      "connections": {
+        "True": "6f7bf3de-fc21-4790-a9cc-bc61ef0c8e35"
+      },
+      "displayName": "Fetch RequestID from RequestURL Cookie",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1348,
+      "y": 186
+    },
+    "a937e2b2-618c-4cb7-8dd2-9e9e73e87dcd": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success URL",
+      "nodeType": "SetSuccessUrlNode",
+      "version": "1.0",
+      "x": 4102,
+      "y": 598
+    },
+    "ac20cbc3-93d6-4439-b883-30ae54ea9a4c": {
+      "connections": {
+        "Click here to redirect to Helpdesk KOG App": "a937e2b2-618c-4cb7-8dd2-9e9e73e87dcd"
+      },
+      "displayName": "Unauthorized User",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1981,
+      "y": 246
+    },
+    "acab8811-29b1-4b76-b087-673e9cd35b6d": {
+      "connections": {
+        "true": "67dd8224-9b57-41df-aaec-fab3ab194d3d"
+      },
+      "displayName": "kyid_MFAforOthers_isMFAPerformed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2897,
+      "y": 125
+    },
+    "d56a62a4-eae3-48db-b418-34018fe459b9": {
+      "connections": {
+        "outcome": "62af8541-9457-4e1a-8096-cc2bfcc1a352"
+      },
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "version": "1.0",
+      "x": 2293,
+      "y": 300
+    },
+    "dde66eea-2cba-41ee-ba45-b5e0196fdfb5": {
+      "connections": {
+        "hasSession": "3c7f722b-fb98-47a3-a338-eb0c45dfe7b5"
+      },
+      "displayName": "kyid.CheckForSessionValidation",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 186
+    },
+    "dfa04f67-3c4b-4632-a7b6-019bc586bc3c": {
+      "connections": {
+        "Click here to redirect to Helpdesk KOG App": "a937e2b2-618c-4cb7-8dd2-9e9e73e87dcd"
+      },
+      "displayName": "Error: EndUser does not exist",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2271,
+      "y": 418.3333333333333
+    },
+    "fa8c4e90-5027-4c52-b187-5212ae2cb2f0": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "acab8811-29b1-4b76-b087-673e9cd35b6d"
+      },
+      "displayName": "MFAAuthentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2620,
+      "y": 91
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 4214,
+      "y": 125
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 4074,
+      "y": 274.3333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 203
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

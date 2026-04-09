@@ -1,0 +1,52 @@
+{
+  "_id": "crudPOC",
+  "_rev": "-549745946",
+  "description": "crudPOC",
+  "enabled": true,
+  "entryNodeId": "e38b0b35-e12e-4daa-8d53-d6034891998b",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "d9094fd5-8b1d-430a-8266-8d6f96a543c0": {
+      "connections": {
+        "EnrollmentContext": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 495,
+      "y": 80
+    },
+    "e38b0b35-e12e-4daa-8d53-d6034891998b": {
+      "connections": {
+        "false": "d9094fd5-8b1d-430a-8266-8d6f96a543c0",
+        "true": "d9094fd5-8b1d-430a-8266-8d6f96a543c0"
+      },
+      "displayName": "Inner Tree Evaluator",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 92.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 770,
+      "y": 119
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 70,
+      "y": 308
+    },
+    "startNode": {
+      "x": 70,
+      "y": 119
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

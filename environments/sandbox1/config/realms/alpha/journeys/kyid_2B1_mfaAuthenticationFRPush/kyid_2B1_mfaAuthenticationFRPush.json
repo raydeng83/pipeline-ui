@@ -1,0 +1,165 @@
+{
+  "_id": "kyid_2B1_mfaAuthenticationFRPush",
+  "_rev": "-1647159336",
+  "description": "Phase 2B",
+  "enabled": true,
+  "entryNodeId": "f33499ee-cf55-454f-ad58-b9e4f21f3b76",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "28e628af-72b6-4847-a185-052996bb201a": {
+      "connections": {
+        "false": "9173d66c-7d84-4b92-b321-dfc31851d135",
+        "true": "f9b93ea2-7ae6-48dc-a1ea-44d3bd2884b0"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1159,
+      "y": 282.6666666666667
+    },
+    "42d0150e-5351-4b25-b5f8-aa7287b803d3": {
+      "connections": {
+        "DONE": "e89388c3-3002-48b4-bc83-68898440d573",
+        "EXITED": "c9adafd0-99a9-41b8-a0c1-02531d33dd43"
+      },
+      "displayName": "Push Wait Node",
+      "nodeType": "PushWaitNode",
+      "version": "1.0",
+      "x": 918,
+      "y": 426.3333333333333
+    },
+    "728bca20-7fb5-4bcc-a6c7-fc253ef8dc8b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "f9b93ea2-7ae6-48dc-a1ea-44d3bd2884b0"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 281.7875061035156,
+      "y": 621.2125015258789
+    },
+    "8acb0d79-ae0f-47a6-964a-c3eee9b4cf08": {
+      "connections": {
+        "failureOutcome": "28e628af-72b6-4847-a185-052996bb201a",
+        "successOutcome": "f9b93ea2-7ae6-48dc-a1ea-44d3bd2884b0",
+        "timeoutOutcome": "28e628af-72b6-4847-a185-052996bb201a"
+      },
+      "displayName": "Push Registration",
+      "nodeType": "PushRegistrationNode",
+      "version": "1.0",
+      "x": 537,
+      "y": 232
+    },
+    "9173d66c-7d84-4b92-b321-dfc31851d135": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Choose Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1508,
+      "y": 165
+    },
+    "ab6f70f0-9bc9-4239-bf39-5ba6fd3cb7ac": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Push Noti",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1169,
+      "y": 139.33333333333334
+    },
+    "b678935d-b050-44d9-b216-2b4827d83b0b": {
+      "connections": {
+        "failureOutcome": "28e628af-72b6-4847-a185-052996bb201a",
+        "successOutcome": "f9b93ea2-7ae6-48dc-a1ea-44d3bd2884b0",
+        "timeoutOutcome": "28e628af-72b6-4847-a185-052996bb201a"
+      },
+      "displayName": "Push Registration",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 527,
+      "y": 411
+    },
+    "c9adafd0-99a9-41b8-a0c1-02531d33dd43": {
+      "connections": {
+        "false": "42d0150e-5351-4b25-b5f8-aa7287b803d3",
+        "true": "42d0150e-5351-4b25-b5f8-aa7287b803d3"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1157,
+      "y": 595.015625
+    },
+    "e89388c3-3002-48b4-bc83-68898440d573": {
+      "connections": {
+        "EXPIRED": "28e628af-72b6-4847-a185-052996bb201a",
+        "FALSE": "28e628af-72b6-4847-a185-052996bb201a",
+        "TRUE": "ab6f70f0-9bc9-4239-bf39-5ba6fd3cb7ac",
+        "WAITING": "f515d627-99fd-4a13-913e-4b8ffc1d0180"
+      },
+      "displayName": "Push Result Verifier Node",
+      "nodeType": "PushResultVerifierNode",
+      "version": "1.0",
+      "x": 831,
+      "y": 56
+    },
+    "f33499ee-cf55-454f-ad58-b9e4f21f3b76": {
+      "connections": {
+        "true": "728bca20-7fb5-4bcc-a6c7-fc253ef8dc8b"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 54,
+      "y": 679.3333282470703
+    },
+    "f515d627-99fd-4a13-913e-4b8ffc1d0180": {
+      "connections": {
+        "DONE": "e89388c3-3002-48b4-bc83-68898440d573"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 506,
+      "y": 70.33332824707031
+    },
+    "f9b93ea2-7ae6-48dc-a1ea-44d3bd2884b0": {
+      "connections": {
+        "NOT_REGISTERED": "b678935d-b050-44d9-b216-2b4827d83b0b",
+        "SENT": "e89388c3-3002-48b4-bc83-68898440d573"
+      },
+      "displayName": "Push Sender",
+      "nodeType": "PushAuthenticationSenderNode",
+      "version": "1.0",
+      "x": 287,
+      "y": 186.33333333333331
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1713,
+      "y": 331
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1455,
+      "y": 317
+    },
+    "startNode": {
+      "x": 70,
+      "y": 582
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

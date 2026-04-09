@@ -1,0 +1,20 @@
+{
+  "_id": "8b630a4d-10be-47f7-a85a-833dddf4b606",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1489640125",
+  "_type": {
+    "_id": "QueryParameterNode",
+    "collection": true,
+    "name": "Query Parameter Node",
+    "version": "1.0"
+  },
+  "allowedQueryParameters": {
+    "contextID": "contextID"
+  },
+  "queryParametersToBeDelimited": []
+}

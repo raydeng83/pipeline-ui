@@ -1,0 +1,27 @@
+{
+  "_id": "15b50ce7-1a13-4dc7-85a8-dc709403534f",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-66456728",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Email Sent Successfully"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Send Another Email ?"
+  }
+}

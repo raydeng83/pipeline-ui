@@ -1,0 +1,173 @@
+{
+  "_id": "SelfRegistrationPOC_SA",
+  "_rev": "-1093285027",
+  "enabled": true,
+  "entryNodeId": "8183077d-c8ed-451c-9af5-3410d256c32a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "197ee413-9a80-4551-b6f4-daa50d452d74": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 683,
+      "y": 306
+    },
+    "263bc218-0178-40f0-b63b-a388d91a6a76": {
+      "connections": {
+        "email": "f4497612-423f-4ed7-bc82-087389c4bebe",
+        "phone": "ac80f80b-a8d9-4a13-a530-8f5ac9b62a3f"
+      },
+      "displayName": "Select account recovery method",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 727.5625,
+      "y": 430.5
+    },
+    "2c1c22b3-24f0-4336-a608-f02f8e79e629": {
+      "connections": {
+        "true": "b8485430-9ddf-4007-97f6-f600ca8fa47c"
+      },
+      "displayName": "Email Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 860,
+      "y": 152
+    },
+    "4010fa61-4ce8-433c-a256-dc935d625043": {
+      "connections": {},
+      "displayName": "Failure URL",
+      "nodeType": "SetFailureUrlNode",
+      "version": "1.0",
+      "x": 867,
+      "y": 10.5
+    },
+    "5ed4d532-0c84-4a1a-928a-f3e9dad47021": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1186,
+      "y": 77.5
+    },
+    "67e5bba0-cf88-4af4-b297-7b58a85efec2": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1437,
+      "y": 449
+    },
+    "8183077d-c8ed-451c-9af5-3410d256c32a": {
+      "connections": {
+        "outcome": "cc178a75-78e3-431d-85a2-de3a485e97d4"
+      },
+      "displayName": "enter_name_email_1",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 149,
+      "y": 91.5
+    },
+    "9c38deb4-0cfd-4842-82da-d4f9985befc9": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 761,
+      "y": 60
+    },
+    "ac80f80b-a8d9-4a13-a530-8f5ac9b62a3f": {
+      "connections": {
+        "true": "67e5bba0-cf88-4af4-b297-7b58a85efec2"
+      },
+      "displayName": "create phone object",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1119,
+      "y": 513.5
+    },
+    "b8485430-9ddf-4007-97f6-f600ca8fa47c": {
+      "connections": {
+        "True": "263bc218-0178-40f0-b63b-a388d91a6a76"
+      },
+      "displayName": "Create User in AIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 520,
+      "y": 416
+    },
+    "cc178a75-78e3-431d-85a2-de3a485e97d4": {
+      "connections": {
+        "false": "2c1c22b3-24f0-4336-a608-f02f8e79e629",
+        "true": "da96a964-210d-4280-9bf7-50b341785228"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 326,
+      "y": 273.5
+    },
+    "cd8dc03c-0a70-424d-a38e-834ba2cd07cb": {
+      "connections": {
+        "true": "67e5bba0-cf88-4af4-b297-7b58a85efec2"
+      },
+      "displayName": "create mail object",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1216,
+      "y": 389.5
+    },
+    "d61716ad-adab-420b-9dbb-151371c3d8d1": {
+      "connections": {
+        "true": "2c1c22b3-24f0-4336-a608-f02f8e79e629"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 625,
+      "y": 177
+    },
+    "da96a964-210d-4280-9bf7-50b341785228": {
+      "connections": {
+        "false": "197ee413-9a80-4551-b6f4-daa50d452d74",
+        "true": "9c38deb4-0cfd-4842-82da-d4f9985befc9"
+      },
+      "displayName": "Existing Account",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 402,
+      "y": 0
+    },
+    "f4497612-423f-4ed7-bc82-087389c4bebe": {
+      "connections": {
+        "true": "cd8dc03c-0a70-424d-a38e-834ba2cd07cb"
+      },
+      "displayName": "Inner Tree Evaluator",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1282.5555419921875,
+      "y": 258.2222137451172
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1478,
+      "y": 64
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1686,
+      "y": 109
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "_id": "ce5420e1-81e5-4bc5-81a2-1653df81f21f",
+  "_outcomes": [
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "expired",
+      "id": "expired"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "Choose Another",
+      "id": "Choose Another"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    },
+    {
+      "displayName": "MaxLimit",
+      "id": "MaxLimit"
+    }
+  ],
+  "_rev": "-625851746",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "2bc4a0d4-5249-42d6-ace4-e732d1050ba6",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "1_verify_email"
+  }
+}

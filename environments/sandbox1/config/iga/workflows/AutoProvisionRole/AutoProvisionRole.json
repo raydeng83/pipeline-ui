@@ -1,0 +1,69 @@
+{
+  "_rev": 0,
+  "childType": false,
+  "description": "AutoProvisionRole",
+  "displayName": "AutoProvisionRole",
+  "id": "autoProvisionRole",
+  "mutable": true,
+  "name": "AutoProvisionRole",
+  "staticNodes": {
+    "endNode": {
+      "_outcomes": [],
+      "connections": {},
+      "displayDetails": {
+        "icon": "checkmark",
+        "value": "Success",
+        "variant": "success"
+      },
+      "displayType": "SingleInput",
+      "hasError": false,
+      "id": "endNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "End",
+      "nodeType": "SingleInput",
+      "schema": null,
+      "template": null,
+      "x": 500,
+      "y": 50
+    },
+    "startNode": {
+      "_outcomes": [
+        {
+          "displayName": "start",
+          "id": "start"
+        }
+      ],
+      "connections": {
+        "start": "scriptTask-78012ce6f95b"
+      },
+      "displayDetails": {
+        "icon": "play_arrow",
+        "value": "Start",
+        "variant": "info"
+      },
+      "displayType": "IconOutcomeNode",
+      "hasError": false,
+      "id": "startNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "Start",
+      "nodeType": "IconOutcomeNode",
+      "schema": null,
+      "template": null,
+      "x": 50,
+      "y": 250
+    },
+    "uiConfig": {
+      "scriptTask-78012ce6f95b": {
+        "x": 301.6666564941406,
+        "y": 143.66665649414062
+      }
+    }
+  },
+  "status": "published"
+}

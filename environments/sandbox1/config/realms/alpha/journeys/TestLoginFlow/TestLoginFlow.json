@@ -1,0 +1,61 @@
+{
+  "_id": "TestLoginFlow",
+  "_rev": "-165206996",
+  "enabled": true,
+  "entryNodeId": "5ae35bb1-2f13-4e68-94f8-ed8737f3fca0",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "5ae35bb1-2f13-4e68-94f8-ed8737f3fca0": {
+      "connections": {
+        "outcome": "ac7cce99-fd68-4fa1-8be6-83dc17f15df3"
+      },
+      "displayName": "Username Collector",
+      "nodeType": "UsernameCollectorNode",
+      "version": "1.0",
+      "x": 327.625,
+      "y": 226.015625
+    },
+    "ac7cce99-fd68-4fa1-8be6-83dc17f15df3": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b45bba5a-0d42-494c-bd88-e138bb6288f3"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 670,
+      "y": 281.015625
+    },
+    "b45bba5a-0d42-494c-bd88-e138bb6288f3": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set Session Properties",
+      "nodeType": "SetSessionPropertiesNode",
+      "version": "1.0",
+      "x": 655.0625,
+      "y": 535.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 500,
+      "y": 50
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 500,
+      "y": 350
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

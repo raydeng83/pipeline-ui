@@ -1,0 +1,64 @@
+{
+  "_id": "5b286a38-7317-4416-b7ba-fa84a749f039",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-1693974353",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "403b0530-3048-4a64-bd76-6449cfc7ac25",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "2ba72033-ba38-4d19-9870-c164a6e9848b",
+      "displayName": "Display MFA methods as per MFA context that are not registered",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'><br>\n<div class=\"page-header-title\"><h5>Set up security methods</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">Security methods help protect your Kentucky Online Gateway account by ensuring only you have access.</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<div class=\"page-header-title\"><h5>Configurar métodos de seguridad</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">Los métodos de seguridad ayudan a proteger su cuenta de Kentucky Online Gateway al garantizar que solo usted tenga acceso.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

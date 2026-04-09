@@ -1,0 +1,27 @@
+{
+  "_id": "aaff634a-7a21-409f-b3d7-4ab0c6b46dfc",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "2134196729",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "es": "<div class='error-message'>\nFormato de correo electrónico no válido: ejemplo@dominio.com</div>"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "es": "Volver a iniciar sesión"
+  }
+}

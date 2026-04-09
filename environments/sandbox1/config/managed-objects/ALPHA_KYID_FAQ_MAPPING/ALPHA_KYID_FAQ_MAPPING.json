@@ -1,0 +1,39 @@
+{
+  "name": "ALPHA_KYID_FAQ_MAPPING",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "This manage object is created to map the pages with their respective FAQ topics",
+    "icon": "fa-database",
+    "order": [
+      "Page_ID",
+      "FAQ_ID",
+      "Policy_ID"
+    ],
+    "properties": {
+      "FAQ_ID": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "Page_ID": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "Policy_ID": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "FAQ Mapping Object",
+    "type": "object"
+  }
+}

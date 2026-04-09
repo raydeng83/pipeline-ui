@@ -1,0 +1,52 @@
+{
+  "_id": "70122565-9c71-46a1-9a78-9f47a1774bcb",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "expired",
+      "id": "expired"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "Choose Another",
+      "id": "Choose Another"
+    },
+    {
+      "displayName": "Method",
+      "id": "Method"
+    }
+  ],
+  "_rev": "-1836484658",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "182817fa-f993-4129-8716-deb869722a16",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "3_Verify_email"
+  }
+}

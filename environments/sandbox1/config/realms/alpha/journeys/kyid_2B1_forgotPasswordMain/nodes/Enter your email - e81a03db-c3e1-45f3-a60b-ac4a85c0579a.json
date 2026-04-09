@@ -1,0 +1,32 @@
+{
+  "_id": "e81a03db-c3e1-45f3-a60b-ac4a85c0579a",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-123604615",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "303fcea3-c13b-403f-8179-db2711d11617",
+      "displayName": "Enter Email",
+      "nodeType": "AttributeCollectorNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "Enter_your_KYID_account_email_address.",
+    "es": "Ingrese la dirección de correo electrónico de su cuenta KYID."
+  },
+  "pageHeader": {
+    "en": "Enter_your_email",
+    "es": "Introduce_tu_correo_electrónico"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "_id": "6b4cb544-66f4-4b9e-9af9-c79c8d5cb902",
+  "_outcomes": [
+    {
+      "displayName": "userClaimsAPIError",
+      "id": "userClaimsAPIError"
+    },
+    {
+      "displayName": "firstTimeError",
+      "id": "firstTimeError"
+    },
+    {
+      "displayName": "jitUnknownError",
+      "id": "jitUnknownError"
+    },
+    {
+      "displayName": "jitNotFoundError",
+      "id": "jitNotFoundError"
+    },
+    {
+      "displayName": "jitInvalidAccountError",
+      "id": "jitInvalidAccountError"
+    },
+    {
+      "displayName": "jitStubAccountError",
+      "id": "jitStubAccountError"
+    },
+    {
+      "displayName": "CITDomainPart",
+      "id": "CITDomainPart"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "expiredIntUserPwdUpdate",
+      "id": "expiredIntUserPwdUpdate"
+    }
+  ],
+  "_rev": "1954408512",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "userClaimsAPIError",
+    "firstTimeError",
+    "jitUnknownError",
+    "jitNotFoundError",
+    "jitInvalidAccountError",
+    "jitStubAccountError",
+    "CITDomainPart",
+    "false",
+    "expiredIntUserPwdUpdate"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "4d315734-712b-4182-b947-3bf73276eba8"
+}

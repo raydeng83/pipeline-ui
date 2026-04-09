@@ -1,0 +1,29 @@
+{
+  "_id": "uilocale/es-MX",
+  "login": {
+    "common": {
+      "next": "Próxima",
+      "onMobileDevice": "¿En un dispositivo móvil?",
+      "policyValidationMessages": {
+        "VALID_EMAIL_ADDRESS_FORMAT": "Formato de correo electrónico no válido (ejemplo{'@'}ejemplo.com)"
+      },
+      "submit": "Entregar"
+    },
+    "login": {
+      "next": "Próxima",
+      "submit": "Entregar"
+    },
+    "overrides": {
+      "Anotherfactor": "¿Otro factor?",
+      "EmailAddress": "Correo electrónico",
+      "Enterverificationcode": "Ingrese el código de verificación",
+      "Next": "Próxima",
+      "Password": "Contraseña",
+      "Rememberme": "Acuérdate de mí",
+      "Resendpush": "Reenviar envío",
+      "Selectyourchoice": "¡Selecciona tu elección!",
+      "Submit": "Entregar",
+      "mail": "Correo electrónico"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "0746ce5a-7b6f-452b-8c01-60bf51ff2096",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "phone",
+      "id": "phone"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    }
+  ],
+  "_rev": "-1980724434",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "email",
+    "phone",
+    "back"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "48731970-4a35-4a2c-9297-28f7b1df74f5"
+}

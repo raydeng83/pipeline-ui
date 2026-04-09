@@ -1,0 +1,18 @@
+{
+  "displayName": "Remove Grants Auto",
+  "name": "scriptTask-6e8507beca08",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "Remove Grants Auto - scriptTask-6e8507beca08.js"
+    }
+  },
+  "type": "scriptTask"
+}

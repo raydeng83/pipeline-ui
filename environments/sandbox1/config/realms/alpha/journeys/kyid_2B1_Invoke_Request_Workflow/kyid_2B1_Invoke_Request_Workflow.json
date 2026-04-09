@@ -1,0 +1,170 @@
+{
+  "_id": "kyid_2B1_Invoke_Request_Workflow",
+  "_rev": "1004810404",
+  "enabled": true,
+  "entryNodeId": "fbe35548-4a5a-43cb-98ba-da6163c5b60b",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "008641a0-63fd-4198-9b71-a6b0e39c086a": {
+      "connections": {
+        "error": "f8848393-52d5-4cb6-afd7-3e055115b8b4",
+        "true": "1ba3d153-ac12-4b27-b218-29e734393ff5"
+      },
+      "displayName": "Creating Entitlement Request",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 837,
+      "y": 227
+    },
+    "1760fda7-ac1f-449f-b56e-8eb540bf9c62": {
+      "connections": {
+        "false": "fbe35548-4a5a-43cb-98ba-da6163c5b60b",
+        "true": "fbe35548-4a5a-43cb-98ba-da6163c5b60b"
+      },
+      "displayName": "User Not Found",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 170,
+      "y": 571
+    },
+    "1ba3d153-ac12-4b27-b218-29e734393ff5": {
+      "connections": {
+        "userNotFound": "9f162672-59db-411e-b51e-ad05f549233c",
+        "userNotProvisioned": "9f162672-59db-411e-b51e-ad05f549233c",
+        "userProvisioned": "33231b8a-7732-44ff-b793-f27809c01891"
+      },
+      "displayName": "Checking Provisioning against AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1218,
+      "y": 174
+    },
+    "218af273-09db-495b-b1a0-9e83b6dcb3ab": {
+      "connections": {
+        "false": "1760fda7-ac1f-449f-b56e-8eb540bf9c62",
+        "true": "6a6038f4-ad70-4022-b185-71e02899244b"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 132.234375,
+      "y": 385
+    },
+    "2f64f5ce-c347-4296-891f-6ae22fcfb597": {
+      "connections": {
+        "Reject": "3da1c411-a8e0-4193-94c6-fc9c982d4cf2",
+        "Retry": "1ba3d153-ac12-4b27-b218-29e734393ff5"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 1253,
+      "y": 519
+    },
+    "302fbb90-ff5e-4a00-bcf3-cd42e66e12bb": {
+      "connections": {
+        "false": "fbe35548-4a5a-43cb-98ba-da6163c5b60b",
+        "true": "fbe35548-4a5a-43cb-98ba-da6163c5b60b"
+      },
+      "displayName": "User Not Found",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 617,
+      "y": 134.5555419921875
+    },
+    "33231b8a-7732-44ff-b793-f27809c01891": {
+      "connections": {
+        "false": "fbe35548-4a5a-43cb-98ba-da6163c5b60b",
+        "true": "fbe35548-4a5a-43cb-98ba-da6163c5b60b"
+      },
+      "displayName": "User Provisioned",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1617,
+      "y": 190
+    },
+    "3da1c411-a8e0-4193-94c6-fc9c982d4cf2": {
+      "connections": {
+        "false": "fbe35548-4a5a-43cb-98ba-da6163c5b60b",
+        "true": "fbe35548-4a5a-43cb-98ba-da6163c5b60b"
+      },
+      "displayName": "Error Occured ",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1595,
+      "y": 554.3333282470703
+    },
+    "6a6038f4-ad70-4022-b185-71e02899244b": {
+      "connections": {
+        "userNotFound": "302fbb90-ff5e-4a00-bcf3-cd42e66e12bb",
+        "userNotProvisioned": "008641a0-63fd-4198-9b71-a6b0e39c086a",
+        "userProvisioned": "b95eb55c-3067-4bf0-be00-e2aa3230f8e2"
+      },
+      "displayName": "Search User Against AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 393,
+      "y": 322.5555419921875
+    },
+    "9f162672-59db-411e-b51e-ad05f549233c": {
+      "connections": {
+        "DONE": "2f64f5ce-c347-4296-891f-6ae22fcfb597"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1255,
+      "y": 402
+    },
+    "b95eb55c-3067-4bf0-be00-e2aa3230f8e2": {
+      "connections": {
+        "false": "fbe35548-4a5a-43cb-98ba-da6163c5b60b",
+        "true": "fbe35548-4a5a-43cb-98ba-da6163c5b60b"
+      },
+      "displayName": "Is Already Provisioned",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 561.3333320617676,
+      "y": 524.7777557373047
+    },
+    "f8848393-52d5-4cb6-afd7-3e055115b8b4": {
+      "connections": {},
+      "displayName": "Error While Creating Request",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 862,
+      "y": 441
+    },
+    "fbe35548-4a5a-43cb-98ba-da6163c5b60b": {
+      "connections": {
+        "true": "218af273-09db-495b-b1a0-9e83b6dcb3ab"
+      },
+      "displayName": "User Inputs",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 197,
+      "y": 218.3333282470703
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2031,
+      "y": 138
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2036,
+      "y": 600
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

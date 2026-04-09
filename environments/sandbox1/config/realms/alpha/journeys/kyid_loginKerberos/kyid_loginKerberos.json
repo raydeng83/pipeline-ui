@@ -1,0 +1,347 @@
+{
+  "_id": "kyid_loginKerberos",
+  "_rev": "-804361525",
+  "description": "Journey used for IG Communication with Identity Assertion service Integrated in Test Journey",
+  "enabled": true,
+  "entryNodeId": "deda48e0-50f3-45d1-9a7b-370243814d13",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "011d0b90-1d9c-47a8-ae92-46fed6469431": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: KOG Profile API Errors",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 5450,
+      "y": 271.875
+    },
+    "09d4e019-13b2-40ae-abcb-f1f0899d3cc4": {
+      "connections": {
+        "false": "e34033a8-9d03-4f0c-80c6-8bc9593926eb",
+        "true": "d07da5f5-d4fe-4e72-bcb6-2858f0465cb3"
+      },
+      "displayName": "Cookie Presence Decision Node",
+      "nodeType": "CookiePresenceDecisionNode",
+      "version": "1.0",
+      "x": 2598,
+      "y": 364
+    },
+    "100e5b78-55e0-43e2-a59a-27f5df1b679e": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "09d4e019-13b2-40ae-abcb-f1f0899d3cc4"
+      },
+      "displayName": "Config: cLocale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 2680,
+      "y": 590
+    },
+    "135a52d9-72a9-4713-835f-22819a6965d5": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Remove Error Message",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3609,
+      "y": 330
+    },
+    "1f5f731b-d03b-4c40-9415-b105f1ded96d": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "fbbc2a1f-93f0-4c8a-befd-94e2c7bf946a"
+      },
+      "displayName": "Config: Set Language Preference",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 2307,
+      "y": 760
+    },
+    "3b172a5c-f0a9-4efa-8e01-e72e6ba11aa2": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "f066421e-3ec8-431a-90f9-639f78495f23"
+      },
+      "displayName": "Script: Get EmailAddress from AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3614,
+      "y": 39
+    },
+    "4f6da482-84f6-41f6-b573-7e52dffb8242": {
+      "connections": {
+        "False": "9c9044f9-c6b5-48eb-8a5e-1234402ba0d2",
+        "True": "011d0b90-1d9c-47a8-ae92-46fed6469431"
+      },
+      "displayName": "Script: User Not Allowed To Login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4669,
+      "y": 585.3333282470703
+    },
+    "52e156a1-8871-49bb-8b6d-a235b5c672ca": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Store idpauthtype param",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 5110,
+      "y": 793
+    },
+    "5f7a904e-9fc6-4aea-8531-ed120b048c02": {
+      "connections": {
+        "False": "9c9044f9-c6b5-48eb-8a5e-1234402ba0d2",
+        "True": "011d0b90-1d9c-47a8-ae92-46fed6469431"
+      },
+      "displayName": "Script: Invalid Account Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4977,
+      "y": 280
+    },
+    "748c451d-b40d-4aa1-b189-cf3726558084": {
+      "connections": {
+        "False": "9c9044f9-c6b5-48eb-8a5e-1234402ba0d2",
+        "True": "011d0b90-1d9c-47a8-ae92-46fed6469431"
+      },
+      "displayName": "Script: Stub Account Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 5066,
+      "y": 622
+    },
+    "7c198ca5-26a3-4184-aa0f-f5952a87492c": {
+      "connections": {
+        "false": "1f5f731b-d03b-4c40-9415-b105f1ded96d",
+        "true": "fbbc2a1f-93f0-4c8a-befd-94e2c7bf946a"
+      },
+      "displayName": "Cookie Presence Decision Node",
+      "nodeType": "CookiePresenceDecisionNode",
+      "version": "1.0",
+      "x": 1952,
+      "y": 618
+    },
+    "8249f1b5-1d05-43ff-a23a-002c89d10883": {
+      "connections": {
+        "False": "9c9044f9-c6b5-48eb-8a5e-1234402ba0d2",
+        "True": "011d0b90-1d9c-47a8-ae92-46fed6469431"
+      },
+      "displayName": "Script: Unknown Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 5130,
+      "y": 80
+    },
+    "8e2c35f5-c902-4bec-83e1-30fd789b2fe2": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Remove SetSkipKerberos Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1281,
+      "y": 232.16666666666663
+    },
+    "9c9044f9-c6b5-48eb-8a5e-1234402ba0d2": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 5450,
+      "y": 193.75
+    },
+    "b140fcca-81d1-4d09-bf51-48b0ca5a3aaa": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3367.666748046875,
+      "y": 562.0138854980469
+    },
+    "b3731e59-59e7-47d1-9d12-48ceab2d39f3": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 3568.666748046875,
+      "y": 413.0138854980469
+    },
+    "baeec6d6-632b-49cf-b962-95ce3f58c53c": {
+      "connections": {
+        "False": "ed1abd26-ec79-4401-afc9-07c651f21290",
+        "IdentityAssertionCompleted": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "True": "8e2c35f5-c902-4bec-83e1-30fd789b2fe2"
+      },
+      "displayName": "Script: Check Skip Kerberos Cookie",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 847,
+      "y": 334.5
+    },
+    "d07da5f5-d4fe-4e72-bcb6-2858f0465cb3": {
+      "connections": {
+        "False": "d474703c-380a-4bb1-a0f2-fe9431c3877c",
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: CheckOldJWT",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3123,
+      "y": 273.015625
+    },
+    "d474703c-380a-4bb1-a0f2-fe9431c3877c": {
+      "connections": {
+        "ERROR": "135a52d9-72a9-4713-835f-22819a6965d5",
+        "SUCCESS": "3b172a5c-f0a9-4efa-8e01-e72e6ba11aa2"
+      },
+      "displayName": "Identity Assertion",
+      "nodeType": "IdentityAssertionDecisionNode",
+      "version": "1.0",
+      "x": 3285,
+      "y": 107
+    },
+    "de2eb2eb-0d93-4e0f-95ad-f04cf3ff7571": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "7c198ca5-26a3-4184-aa0f-f5952a87492c"
+      },
+      "displayName": "Script: Enable Kerberos Authentication",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1545,
+      "y": 735
+    },
+    "deda48e0-50f3-45d1-9a7b-370243814d13": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "f6b9eb1c-cec2-41b2-9e58-39f3ea58895f"
+      },
+      "displayName": "Config: Set RequestURL Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 255,
+      "y": 427.1666666666667
+    },
+    "e34033a8-9d03-4f0c-80c6-8bc9593926eb": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "d07da5f5-d4fe-4e72-bcb6-2858f0465cb3"
+      },
+      "displayName": "Config: Locale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 2998,
+      "y": 522
+    },
+    "e3550dae-2b2a-431e-92ca-131439c75768": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "d474703c-380a-4bb1-a0f2-fe9431c3877c"
+      },
+      "displayName": "Script: Check IG Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 417,
+      "y": 174.375
+    },
+    "ed1abd26-ec79-4401-afc9-07c651f21290": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "de2eb2eb-0d93-4e0f-95ad-f04cf3ff7571"
+      },
+      "displayName": "Remove SetSkipKerberos Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1238,
+      "y": 473.33333333333326
+    },
+    "f066421e-3ec8-431a-90f9-639f78495f23": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "f1f8717d-5580-4afb-9092-08ba84656f1c"
+      },
+      "displayName": "Config: Set Email Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 3933,
+      "y": 253
+    },
+    "f1f8717d-5580-4afb-9092-08ba84656f1c": {
+      "connections": {
+        "Failed": "8249f1b5-1d05-43ff-a23a-002c89d10883",
+        "Invalid": "5f7a904e-9fc6-4aea-8531-ed120b048c02",
+        "NotAllowed": "4f6da482-84f6-41f6-b573-7e52dffb8242",
+        "NotFound": "f55a5e2b-2f22-430f-ab21-0c75bf05b3b5",
+        "StubAccount": "748c451d-b40d-4aa1-b189-cf3726558084",
+        "Successful": "52e156a1-8871-49bb-8b6d-a235b5c672ca"
+      },
+      "displayName": "Script: Get KOG User Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4384,
+      "y": 208.5
+    },
+    "f55a5e2b-2f22-430f-ab21-0c75bf05b3b5": {
+      "connections": {
+        "False": "9c9044f9-c6b5-48eb-8a5e-1234402ba0d2",
+        "True": "011d0b90-1d9c-47a8-ae92-46fed6469431"
+      },
+      "displayName": "Script: Don't create Profile Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 5130,
+      "y": 450
+    },
+    "f6b9eb1c-cec2-41b2-9e58-39f3ea58895f": {
+      "connections": {
+        "External": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Fail": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Internal": "baeec6d6-632b-49cf-b962-95ce3f58c53c"
+      },
+      "displayName": "Script: Internal IP Check",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 577,
+      "y": 584
+    },
+    "fbbc2a1f-93f0-4c8a-befd-94e2c7bf946a": {
+      "connections": {
+        "false": "100e5b78-55e0-43e2-a59a-27f5df1b679e",
+        "true": "09d4e019-13b2-40ae-abcb-f1f0899d3cc4"
+      },
+      "displayName": "Cookie Presence Decision Node",
+      "nodeType": "CookiePresenceDecisionNode",
+      "version": "1.0",
+      "x": 2296,
+      "y": 449
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 5618,
+      "y": 418.9166666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 3735,
+      "y": 719.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 479.5833333333333
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[\"Authentication\"]"
+  }
+}

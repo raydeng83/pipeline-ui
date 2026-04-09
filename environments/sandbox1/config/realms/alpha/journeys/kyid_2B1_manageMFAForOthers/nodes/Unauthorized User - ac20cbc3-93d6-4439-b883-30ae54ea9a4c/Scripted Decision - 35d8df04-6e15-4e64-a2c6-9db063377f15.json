@@ -1,0 +1,26 @@
+{
+  "_id": "35d8df04-6e15-4e64-a2c6-9db063377f15",
+  "_outcomes": [
+    {
+      "displayName": "Click here to redirect to Helpdesk KOG App",
+      "id": "Click here to redirect to Helpdesk KOG App"
+    }
+  ],
+  "_rev": "626885073",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Click here to redirect to Helpdesk KOG App"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "7e771bdb-d62e-48a0-9d73-90875b006e68"
+}

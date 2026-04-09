@@ -1,0 +1,25 @@
+{
+  "_id": "ded23277-1d76-46e1-8d2e-4860ca68c019",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "435460207",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Redirecting you to Login"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

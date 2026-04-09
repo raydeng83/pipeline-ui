@@ -1,0 +1,31 @@
+{
+  "_id": "63936b34-1d0d-4244-9977-9270483937ed",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "phone",
+      "id": "phone"
+    }
+  ],
+  "_rev": "-376280441",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "email",
+    "phone"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "a563ca0f-f174-4004-a4c3-44b2f4579668"
+}

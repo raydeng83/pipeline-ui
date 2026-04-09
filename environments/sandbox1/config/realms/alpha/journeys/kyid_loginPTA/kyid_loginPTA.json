@@ -1,0 +1,695 @@
+{
+  "_id": "kyid_loginPTA",
+  "_rev": "-992632052",
+  "enabled": true,
+  "entryNodeId": "bfeaf24c-9867-4ce0-a780-32aaa12fa0e9",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "077b0601-df37-4d82-b491-8f8dd8c92c7f": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: User Claims API Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 560.7777786254883,
+      "y": 364.15625
+    },
+    "0d8b03ad-b893-4591-b7cc-9313cc0ad436": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: JIT InValid Account Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 572,
+      "y": 850.15625
+    },
+    "10499b96-77a9-43b6-90f9-abcb9bf71031": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1068.3333435058594,
+      "y": 929.3333282470703
+    },
+    "123c006a-dbf4-4541-944d-87112979a647": {
+      "connections": {
+        "CONFIGURATION_FAILED": "b2072ca7-8114-4a5c-be09-61477d4e913c",
+        "outcome": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "Configuration Provider",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 2540,
+      "y": 15
+    },
+    "16307f7d-40a5-47e9-95a4-520866dc7df0": {
+      "connections": {
+        "True": "6989153e-e05f-4b81-a294-8cea87c0781c"
+      },
+      "displayName": "Login without GCaptcha",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2240.2222900390625,
+      "y": 429.15625
+    },
+    "1be8c530-51b4-4bfb-9bd7-a84c7ee60f02": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "PTA: Int User AD Account Lockout",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4062,
+      "y": 383
+    },
+    "1dbaaad9-a174-48a7-9892-ab1420f0c8be": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "IJ : Back To Login EN",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3189.4444580078125,
+      "y": 35
+    },
+    "1e0e87a2-b3c9-4612-8eed-a124ee5016a2": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "Script: Stub Account Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4005,
+      "y": 623.3333282470703
+    },
+    "1ec0e3c1-e4b8-469f-bd84-7faa9db1049b": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: CIT Domain Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 560.4444427490234,
+      "y": 201.15625
+    },
+    "20a49c16-6881-4c06-aae7-af72c080ad3c": {
+      "connections": {
+        "en": "e71beae1-50a2-4b87-b646-95e1f6dc4a96",
+        "es": "9a7b395f-9d22-42d0-b011-4b0f87fce09d"
+      },
+      "displayName": "Script: Read Locale",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2560.6666259765625,
+      "y": 230.69442749023438
+    },
+    "222e3506-1c7a-4119-ae21-445e8a58d1b3": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: JIT Unknown Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 566,
+      "y": 518.15625
+    },
+    "22b1c007-9029-4af4-8fad-fde24b80df77": {
+      "connections": {
+        "ExtUserlockout": "84be9078-bf02-4362-b40b-271e870a646c",
+        "IntUserlockout": "1be8c530-51b4-4bfb-9bd7-a84c7ee60f02",
+        "IntUserlockoutNonProd": "7e935558-eb41-4403-b25d-5926a0c34bfa",
+        "Successful": "4354cabc-5a04-4b26-a556-73f69042d5ca",
+        "connFail": "a77c6fc4-9e7a-4394-ac62-245d923b02de",
+        "failOrInactive": "84be9078-bf02-4362-b40b-271e870a646c",
+        "pwdExpire": "bcf0af27-ea0a-4cf0-bc7d-fc5bad3a4748"
+      },
+      "displayName": "Script: PTA Authentication",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4623,
+      "y": 44.3125
+    },
+    "2cc5796e-1b58-4da3-95f4-a47a177fbecd": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "Script: Unknown Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2570,
+      "y": 696.3333282470703
+    },
+    "3144db3c-29a3-4d0f-ba08-4d1dcc777658": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "Script: Don't create Profile Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2877,
+      "y": 880.3333282470703
+    },
+    "3c8a8430-a81e-433d-9a47-b711a56b703c": {
+      "connections": {
+        "false": "fdcf1443-a95b-443e-9874-beae06b9a5c2",
+        "true": "6989153e-e05f-4b81-a294-8cea87c0781c"
+      },
+      "displayName": "Login",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1860,
+      "y": 3
+    },
+    "4354cabc-5a04-4b26-a556-73f69042d5ca": {
+      "connections": {
+        "CONFIGURATION_FAILED": "7ce7f9a7-1429-4168-9f67-cd05164591f6",
+        "outcome": "7ce7f9a7-1429-4168-9f67-cd05164591f6"
+      },
+      "displayName": "Config:FirstName Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 5091.333251953125,
+      "y": 350.3333282470703
+    },
+    "44df202b-ae78-4e58-b09d-a817997c9ad8": {
+      "connections": {
+        "CONFIGURATION_FAILED": "22b1c007-9029-4af4-8fad-fde24b80df77",
+        "outcome": "22b1c007-9029-4af4-8fad-fde24b80df77"
+      },
+      "displayName": "Config: Email Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 4372,
+      "y": 81.3125
+    },
+    "52a7d186-d94e-47ee-91bc-ee1695fac2c0": {
+      "connections": {
+        "Failed": "2cc5796e-1b58-4da3-95f4-a47a177fbecd",
+        "Invalid": "709dd12c-214d-4a4f-a8f3-8fe201b47c8a",
+        "NotAllowed": "ad6c145c-22df-4a83-8621-8596ff3882d0",
+        "NotFound": "3144db3c-29a3-4d0f-ba08-4d1dcc777658",
+        "StubAccount": "1e0e87a2-b3c9-4612-8eed-a124ee5016a2",
+        "Successful": "44df202b-ae78-4e58-b09d-a817997c9ad8",
+        "missingMandatoryConfig": "10499b96-77a9-43b6-90f9-abcb9bf71031"
+      },
+      "displayName": "Script: Get KOG User Profile",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4078,
+      "y": 3
+    },
+    "5505bae7-667f-40a8-89ea-e49d0d943fe5": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Store idpauthtype param",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 5033.222229003906,
+      "y": 0
+    },
+    "5a0b1951-a455-43e0-b289-6dac5d8be52c": {
+      "connections": {
+        "False": "db32451a-c524-4ba2-a2d3-d6c35a5c169e",
+        "True": "52a7d186-d94e-47ee-91bc-ee1695fac2c0"
+      },
+      "displayName": "Password without DisplayName",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 954,
+      "y": 240.015625
+    },
+    "63654287-d05a-4c1e-ac8f-b1ccac8c23b8": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "IJ: Back To Login ES",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 3187.4444580078125,
+      "y": 372.3472137451172
+    },
+    "6551b056-be72-4217-aa3d-f84efdb14236": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: First Time Login Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 628,
+      "y": 49.015625
+    },
+    "6989153e-e05f-4b81-a294-8cea87c0781c": {
+      "connections": {
+        "False": "20a49c16-6881-4c06-aae7-af72c080ad3c",
+        "True": "123c006a-dbf4-4541-944d-87112979a647"
+      },
+      "displayName": "Script: Get Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2312.015625,
+      "y": 78.5390625
+    },
+    "6ec41ae4-576b-4c7a-b7af-5804309b487c": {
+      "connections": {
+        "GotoURLAbsent": "c2fa5c09-dbed-470d-bb52-a005af1130dc",
+        "GotoURLPresent": "8412f64c-31b7-4dae-ba92-c6aa39ceafe5"
+      },
+      "displayName": "Script: Read Login Request",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1032,
+      "y": 61.3125
+    },
+    "709dd12c-214d-4a4f-a8f3-8fe201b47c8a": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "Script: Invalid Account Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3528,
+      "y": 774.3333282470703
+    },
+    "7ce7f9a7-1429-4168-9f67-cd05164591f6": {
+      "connections": {
+        "CONFIGURATION_FAILED": "5505bae7-667f-40a8-89ea-e49d0d943fe5",
+        "outcome": "5505bae7-667f-40a8-89ea-e49d0d943fe5"
+      },
+      "displayName": "Config: LastName Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 5037.333251953125,
+      "y": 102.33332824707031
+    },
+    "7e935558-eb41-4403-b25d-5926a0c34bfa": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "PTA: Int User AD Account Lockout For NonProd",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4399,
+      "y": 297.88021087646484
+    },
+    "8412f64c-31b7-4dae-ba92-c6aa39ceafe5": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "9b6cef8a-f8af-4c33-a4f1-ed17738afb5f"
+      },
+      "displayName": "Config: Request URL Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1395,
+      "y": 63.3125
+    },
+    "84be9078-bf02-4362-b40b-271e870a646c": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "PTA: InActive in AD Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4996,
+      "y": 629.3333282470703
+    },
+    "877c8071-b9e5-40cc-8acf-c2942e19ad83": {
+      "connections": {
+        "false": "f2054774-06de-493a-9fc2-11eb61997a21",
+        "true": "ce1eab37-ac94-4e15-9042-82ca08211508"
+      },
+      "displayName": "GCaptcha V2 Verify with DisplayName",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 3547,
+      "y": 353
+    },
+    "8a91c1eb-4ac6-41de-9f9b-499c1abd2d4a": {
+      "connections": {
+        "false": "93d128ff-0bfa-4d3f-a0ff-58bef4d49776",
+        "true": "c69d0fd0-e013-4bfb-8270-a9386455b6bb"
+      },
+      "displayName": "Cookie Presence Decision Node",
+      "nodeType": "CookiePresenceDecisionNode",
+      "version": "1.0",
+      "x": 1392.984375,
+      "y": 993.5390625
+    },
+    "93d128ff-0bfa-4d3f-a0ff-58bef4d49776": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "c69d0fd0-e013-4bfb-8270-a9386455b6bb"
+      },
+      "displayName": "Config: Locale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1413.515625,
+      "y": 1167.5390625
+    },
+    "9a7b395f-9d22-42d0-b011-4b0f87fce09d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "63654287-d05a-4c1e-ac8f-b1ccac8c23b8"
+      },
+      "displayName": "Error Msg: Invalid Email Format in Spanish",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2903.4444580078125,
+      "y": 320.3472137451172
+    },
+    "9b6cef8a-f8af-4c33-a4f1-ed17738afb5f": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "c2fa5c09-dbed-470d-bb52-a005af1130dc"
+      },
+      "displayName": "Config: Return URL cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1388.078125,
+      "y": 210.015625
+    },
+    "9b8fec18-276b-4f58-8c13-b287ae4f2275": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: User Not Allowed To Login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 192,
+      "y": 892.6666717529297
+    },
+    "a10135f8-6930-43a9-9f7b-d63b11933703": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: JIT Not Found Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 571,
+      "y": 687.15625
+    },
+    "a77c6fc4-9e7a-4394-ac62-245d923b02de": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "PTA: Connection Failure Error Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4341,
+      "y": 645.3333282470703
+    },
+    "ad6c145c-22df-4a83-8621-8596ff3882d0": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "b2072ca7-8114-4a5c-be09-61477d4e913c"
+      },
+      "displayName": "Script: User Not Allowed To Login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4754.666748046875,
+      "y": 692.3333282470703
+    },
+    "ae35e86e-a6ad-4c2b-a2bf-ff2f0e6588f0": {
+      "connections": {
+        "false": "b087aa4e-4bf1-44cd-92b4-af47a19a60e7",
+        "true": "c69d0fd0-e013-4bfb-8270-a9386455b6bb"
+      },
+      "displayName": "Cookie Presence Decision Node",
+      "nodeType": "CookiePresenceDecisionNode",
+      "version": "1.0",
+      "x": 1397,
+      "y": 665.3125
+    },
+    "aee8e98a-9b74-4ffb-ad46-6c418983cd8e": {
+      "connections": {
+        "CITDomainPart": "1ec0e3c1-e4b8-469f-bd84-7faa9db1049b",
+        "expiredIntUserPwdUpdate": "f7bf0bba-8a15-497c-8c19-842196f57b43",
+        "false": "6ec41ae4-576b-4c7a-b7af-5804309b487c",
+        "firstTimeError": "6551b056-be72-4217-aa3d-f84efdb14236",
+        "jitInvalidAccountError": "0d8b03ad-b893-4591-b7cc-9313cc0ad436",
+        "jitNotAllowedError": "9b8fec18-276b-4f58-8c13-b287ae4f2275",
+        "jitNotFoundError": "a10135f8-6930-43a9-9f7b-d63b11933703",
+        "jitStubAccountError": "e90f869d-67f8-4841-af9b-442e79fba8ff",
+        "jitUnknownError": "222e3506-1c7a-4119-ae21-445e8a58d1b3",
+        "userClaimsAPIError": "077b0601-df37-4d82-b491-8f8dd8c92c7f"
+      },
+      "displayName": "Script: Display Error PTA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 240,
+      "y": 250.3333282470703
+    },
+    "b087aa4e-4bf1-44cd-92b4-af47a19a60e7": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "8a91c1eb-4ac6-41de-9f9b-499c1abd2d4a"
+      },
+      "displayName": "Config: cLocale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1394.2222290039062,
+      "y": 821.15625
+    },
+    "b2072ca7-8114-4a5c-be09-61477d4e913c": {
+      "connections": {
+        "Failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "False": "b920f7fc-fffb-434d-803c-851101aba015",
+        "GCaptchaV2WithDisplayName": "877c8071-b9e5-40cc-8acf-c2942e19ad83",
+        "GCaptchaV2WithoutDisplayName": "fd80ad62-2c7f-4cf1-b95e-e2c9ac7812eb",
+        "True": "ce1eab37-ac94-4e15-9042-82ca08211508"
+      },
+      "displayName": "Script: IsUserExistInPingAIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3470.33349609375,
+      "y": 49.15625
+    },
+    "b920f7fc-fffb-434d-803c-851101aba015": {
+      "connections": {
+        "CONFIGURATION_FAILED": "5a0b1951-a455-43e0-b289-6dac5d8be52c",
+        "outcome": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "WithoutDisplayNameEmailCookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 3815,
+      "y": 349
+    },
+    "bac2275c-b881-426b-844d-40d21dfe949d": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "ae35e86e-a6ad-4c2b-a2bf-ff2f0e6588f0"
+      },
+      "displayName": "Configuration Provider: Set Language Preference",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1395.6666870117188,
+      "y": 516.3784790039062
+    },
+    "bcf0af27-ea0a-4cf0-bc7d-fc5bad3a4748": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5505bae7-667f-40a8-89ea-e49d0d943fe5"
+      },
+      "displayName": "IJ01: Update Expired Password",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 4207,
+      "y": 507.3125
+    },
+    "bfeaf24c-9867-4ce0-a780-32aaa12fa0e9": {
+      "connections": {
+        "false": "aee8e98a-9b74-4ffb-ad46-6c418983cd8e",
+        "true": "aee8e98a-9b74-4ffb-ad46-6c418983cd8e"
+      },
+      "displayName": "PingOne Protect Initialize",
+      "nodeType": "product-PingOneProtectInitializeNode",
+      "version": "1.0",
+      "x": 0,
+      "y": 455.015625
+    },
+    "c2fa5c09-dbed-470d-bb52-a005af1130dc": {
+      "connections": {
+        "false": "bac2275c-b881-426b-844d-40d21dfe949d",
+        "true": "ae35e86e-a6ad-4c2b-a2bf-ff2f0e6588f0"
+      },
+      "displayName": "Cookie Presence Decision Node",
+      "nodeType": "CookiePresenceDecisionNode",
+      "version": "1.0",
+      "x": 1390.6666870117188,
+      "y": 368.37847900390625
+    },
+    "c69d0fd0-e013-4bfb-8270-a9386455b6bb": {
+      "connections": {
+        "False": "16307f7d-40a5-47e9-95a4-520866dc7df0",
+        "True": "d5723bf1-9981-49ae-9099-6c02f4925f70"
+      },
+      "displayName": "Script: Is Captcha Required",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 214,
+      "y": 0
+    },
+    "cdc947ca-fba4-4b97-b966-e43fba32ddf0": {
+      "connections": {
+        "false": "f2054774-06de-493a-9fc2-11eb61997a21",
+        "true": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "GCaptcha V2 Verify without DisplayName",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2508,
+      "y": 442
+    },
+    "ce1eab37-ac94-4e15-9042-82ca08211508": {
+      "connections": {
+        "False": "e16bf901-3b6e-4a86-9c66-17508c93124d",
+        "True": "52a7d186-d94e-47ee-91bc-ee1695fac2c0"
+      },
+      "displayName": "Password with DisplayName",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 3785,
+      "y": 2
+    },
+    "d5723bf1-9981-49ae-9099-6c02f4925f70": {
+      "connections": {
+        "false": "3c8a8430-a81e-433d-9a47-b711a56b703c",
+        "true": "16307f7d-40a5-47e9-95a4-520866dc7df0"
+      },
+      "displayName": "Script - By Pass Captcha ",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1766,
+      "y": 469
+    },
+    "db32451a-c524-4ba2-a2d3-d6c35a5c169e": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: Empty Password Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1045.2222290039062,
+      "y": 518.3472137451172
+    },
+    "e16bf901-3b6e-4a86-9c66-17508c93124d": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "ce1eab37-ac94-4e15-9042-82ca08211508"
+      },
+      "displayName": "Script: Empty Password Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3992,
+      "y": 836.3333282470703
+    },
+    "e71beae1-50a2-4b87-b646-95e1f6dc4a96": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1dbaaad9-a174-48a7-9892-ab1420f0c8be"
+      },
+      "displayName": "Error Msg: Invalid Email Format in English",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2894.4444580078125,
+      "y": 60.34721374511719
+    },
+    "e90f869d-67f8-4841-af9b-442e79fba8ff": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: JIT Stub Account Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 578,
+      "y": 1018.15625
+    },
+    "f2054774-06de-493a-9fc2-11eb61997a21": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Google ReCaptcha Fail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2513,
+      "y": 902.015625
+    },
+    "f7bf0bba-8a15-497c-8c19-842196f57b43": {
+      "connections": {
+        "False": "10499b96-77a9-43b6-90f9-abcb9bf71031",
+        "True": "5a0b1951-a455-43e0-b289-6dac5d8be52c"
+      },
+      "displayName": "Script: Expired Internal User Change Password Link Msg",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 588,
+      "y": 1190.6666641235352
+    },
+    "fd80ad62-2c7f-4cf1-b95e-e2c9ac7812eb": {
+      "connections": {
+        "CONFIGURATION_FAILED": "cdc947ca-fba4-4b97-b966-e43fba32ddf0",
+        "outcome": "cdc947ca-fba4-4b97-b966-e43fba32ddf0"
+      },
+      "displayName": "WithoutDisplayGCaptchaNameEmailCookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 3167.333251953125,
+      "y": 216.2222137451172
+    },
+    "fdcf1443-a95b-443e-9874-beae06b9a5c2": {
+      "connections": {
+        "True": "6989153e-e05f-4b81-a294-8cea87c0781c"
+      },
+      "displayName": "Script: GCaptcha V3 Verify Status",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2161,
+      "y": 296.6666603088379
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 5372,
+      "y": 82.66666666666663
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 4618,
+      "y": 829.3333333333335
+    },
+    "startNode": {
+      "x": 70,
+      "y": 177
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Login\"]"
+  }
+}

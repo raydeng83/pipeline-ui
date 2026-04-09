@@ -1,0 +1,19 @@
+{
+  "_id": "87c0415d-bae6-473d-8e01-05e2d866d7c3",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1469410087",
+  "_type": {
+    "_id": "DeviceSaveNode",
+    "collection": true,
+    "name": "Device Profile Save",
+    "version": "1.0"
+  },
+  "maxSavedProfiles": 5,
+  "saveDeviceLocation": true,
+  "saveDeviceMetadata": true
+}

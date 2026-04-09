@@ -1,0 +1,37 @@
+{
+  "_id": "c3ca193c-7b58-4a66-9c97-571182d08b1d",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    }
+  ],
+  "_rev": "-825876023",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "84bba8e9-4cd1-46f8-9440-1029cd5477d4",
+      "displayName": "Attribute Collector",
+      "nodeType": "AttributeCollectorNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "31c38cba-e287-464d-a430-b3b72a3d7779",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "email_as_username"
+  },
+  "pageHeader": {
+    "en": "1_enter_name_email"
+  },
+  "stage": "{\"submitButtonText\":{\"en\":\"Next\"},\"themeId\":\"ad0c7178-859b-4eb0-ace3-3110aba3d31b\"}"
+}

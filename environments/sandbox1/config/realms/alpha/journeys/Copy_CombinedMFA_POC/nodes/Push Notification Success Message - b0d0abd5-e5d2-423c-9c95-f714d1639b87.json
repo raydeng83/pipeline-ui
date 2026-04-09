@@ -1,0 +1,25 @@
+{
+  "_id": "b0d0abd5-e5d2-423c-9c95-f714d1639b87",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1349327842",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Push Notification Verification Successful"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

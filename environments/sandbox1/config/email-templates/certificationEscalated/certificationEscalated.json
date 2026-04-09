@@ -1,0 +1,23 @@
+{
+  "_id": "emailTemplate/certificationEscalated",
+  "defaultLocale": "en",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "certificationEscalated.en.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "certificationEscalated.en.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "certificationEscalated.css"
+  },
+  "subject": {
+    "en": "<html>ATTENTION: Certification Task(s) Escalation</html>"
+  }
+}

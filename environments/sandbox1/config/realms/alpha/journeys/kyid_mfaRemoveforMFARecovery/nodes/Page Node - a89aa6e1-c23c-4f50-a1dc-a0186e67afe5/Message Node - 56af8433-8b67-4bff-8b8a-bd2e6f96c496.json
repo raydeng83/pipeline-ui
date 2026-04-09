@@ -1,0 +1,32 @@
+{
+  "_id": "56af8433-8b67-4bff-8b8a-bd2e6f96c496",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1382858973",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Would you like to remove the selected MFA Method?",
+    "es": "¿Desea eliminar el método MFA seleccionado?"
+  },
+  "messageNo": {
+    "en": "Return to authenticator list",
+    "es": "Volver a la lista de autenticadores"
+  },
+  "messageYes": {
+    "en": "Confirm",
+    "es": "Confirmar"
+  }
+}

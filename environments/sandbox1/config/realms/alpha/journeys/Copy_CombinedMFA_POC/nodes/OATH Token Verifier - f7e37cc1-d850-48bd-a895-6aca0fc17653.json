@@ -1,0 +1,31 @@
+{
+  "_id": "f7e37cc1-d850-48bd-a895-6aca0fc17653",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    },
+    {
+      "displayName": "Not registered",
+      "id": "notRegisteredOutcome"
+    }
+  ],
+  "_rev": "-456509421",
+  "_type": {
+    "_id": "OathTokenVerifierNode",
+    "collection": true,
+    "name": "OATH Token Verifier",
+    "version": "1.0"
+  },
+  "algorithm": "TOTP",
+  "hotpWindowSize": 100,
+  "isRecoveryCodeAllowed": false,
+  "maximumAllowedClockDrift": 5,
+  "totpHashAlgorithm": "HMAC_SHA1",
+  "totpTimeInterval": 30,
+  "totpTimeSteps": 2
+}

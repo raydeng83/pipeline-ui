@@ -1,0 +1,17 @@
+{
+  "_id": "4010fa61-4ce8-433c-a256-dc935d625043",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "1470260392",
+  "_type": {
+    "_id": "SetFailureUrlNode",
+    "collection": true,
+    "name": "Failure URL",
+    "version": "1.0"
+  },
+  "failureUrl": "am/XUI/?realm=alpha&authIndexType=service&authIndexValue=SelfRegistrationPOC_SA"
+}

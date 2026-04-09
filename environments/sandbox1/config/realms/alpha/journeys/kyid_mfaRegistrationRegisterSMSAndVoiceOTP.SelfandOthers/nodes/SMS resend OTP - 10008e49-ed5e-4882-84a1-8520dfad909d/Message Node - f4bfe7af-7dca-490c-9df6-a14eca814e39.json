@@ -1,0 +1,32 @@
+{
+  "_id": "f4bfe7af-7dca-490c-9df6-a14eca814e39",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-515991826",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "A One time password has been sent to your mobile",
+    "es": "Se ha enviado una contraseña de un solo uso a su móvil"
+  },
+  "messageNo": {
+    "en": "Click here to choose another method",
+    "es": "Click here to choose another method"
+  },
+  "messageYes": {
+    "en": "Click here to re-send OTP",
+    "es": "Haga clic aquí para volver a enviar OTP"
+  }
+}

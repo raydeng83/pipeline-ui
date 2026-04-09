@@ -1,0 +1,39 @@
+{
+  "_id": "f1af3086-7244-465d-a842-bc0fe64e4bf4",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "679208547",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "c72ffbd8-735c-447d-a988-7260e285f423",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "58a972a2-4f50-49d5-af11-91747936394f",
+      "displayName": "OTP Collector Decision",
+      "nodeType": "OneTimePasswordCollectorDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "Verify your email"
+  },
+  "stage": "{\"submitButtonText\":{\"en\":\"verify\"}}"
+}

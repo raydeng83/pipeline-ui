@@ -1,0 +1,6 @@
+{
+  "_id": "esv-iddw-redirecturl",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_IDDW_REDIRECTURL}"
+}

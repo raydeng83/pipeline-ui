@@ -1,0 +1,96 @@
+{
+  "_id": "kyid_mfaAuthenticationFRTOTPHasSession",
+  "_rev": "-1674452321",
+  "enabled": true,
+  "entryNodeId": "f7ed47da-9379-4a79-8a14-97d7b5cbb5db",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "2130e102-1a68-403b-a867-9f7030c688a5": {
+      "connections": {
+        "failureOutcome": "7ac93650-f9d4-475a-a7ac-f000a0b663b3",
+        "notRegisteredOutcome": "afae0126-4bd3-4a2a-833d-994d3f931008",
+        "successOutcome": "e65f09c3-f65b-44a9-96e3-dd57538bb201"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 281.4444351196289
+    },
+    "375a3ee9-a163-4a25-b161-20152efcdcaf": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 723,
+      "y": 83.6
+    },
+    "7ac93650-f9d4-475a-a7ac-f000a0b663b3": {
+      "connections": {
+        "false": "375a3ee9-a163-4a25-b161-20152efcdcaf",
+        "true": "2130e102-1a68-403b-a867-9f7030c688a5"
+      },
+      "displayName": "Invalid OTP message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 439,
+      "y": 442
+    },
+    "afae0126-4bd3-4a2a-833d-994d3f931008": {
+      "connections": {
+        "successOutcome": "2130e102-1a68-403b-a867-9f7030c688a5"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 688,
+      "y": 302.55554962158203
+    },
+    "e65f09c3-f65b-44a9-96e3-dd57538bb201": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 435,
+      "y": 138
+    },
+    "f7ed47da-9379-4a79-8a14-97d7b5cbb5db": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "2130e102-1a68-403b-a867-9f7030c688a5"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 179.78750610351562,
+      "y": 111.61250305175781
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1043,
+      "y": 289.6666666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1043,
+      "y": 199.33333333333331
+    },
+    "startNode": {
+      "x": 70,
+      "y": 334
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

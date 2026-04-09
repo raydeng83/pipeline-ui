@@ -1,0 +1,228 @@
+{
+  "_id": "provisioner.openicf/Myconnector",
+  "configurationProperties": {
+    "debug": false,
+    "defaultAuthMethod": "BASIC_PREEMPTIVE",
+    "defaultContentType": "application/json",
+    "defaultRequestHeaders": [
+      null
+    ],
+    "disabledGlobalASTTransformations": null,
+    "minimumRecompilationInterval": 100,
+    "password": {
+      "$crypto": {
+        "type": "x-simple-encryption",
+        "value": {
+          "cipher": "AES/CBC/PKCS5Padding",
+          "data": "5Yht5kENmvmJYo4vplsOpw==",
+          "iv": "iW2aRYNxcr/58i1HqhmqhA==",
+          "keySize": 16,
+          "mac": "mGg2fTkf3+16gIhI4htk0w==",
+          "purpose": "idm.config.encryption",
+          "salt": "/7PcJO3fRWr3bu6NvUuciQ==",
+          "stableId": "openidm-sym-default"
+        }
+      }
+    },
+    "proxyAddress": null,
+    "proxyPassword": null,
+    "proxyUsername": null,
+    "recompileGroovySource": false,
+    "schemaScriptFileName": "SchemaScript.groovy",
+    "scriptBaseClass": null,
+    "scriptExtensions": [
+      "groovy"
+    ],
+    "scriptRoots": [
+      "scripts"
+    ],
+    "searchScriptFileName": "SearchScriptbkpreturn2025.groovy",
+    "serviceAddress": "https://67c70cd4c19eb8753e786529.mockapi.io/api/test",
+    "sourceEncoding": "UTF-8",
+    "targetDirectory": null,
+    "tolerance": 10,
+    "username": "idm",
+    "verbose": false,
+    "warningLevel": 1
+  },
+  "connectorRef": {
+    "bundleName": "org.forgerock.openicf.connectors.scriptedrest-connector",
+    "bundleVersion": "[1.5.20.11, 1.6.0.0)",
+    "connectorHostRef": "rcs-cluster-external",
+    "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector",
+    "displayName": "Scripted REST Connector",
+    "systemType": "provisioner.openicf"
+  },
+  "enabled": false,
+  "objectTypes": {
+    "account": {
+      "$schema": "http://json-schema.org/draft-03/schema",
+      "id": "__ACCOUNT__",
+      "nativeType": "__ACCOUNT__",
+      "properties": {
+        "created": {
+          "flags": [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "created",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "displayName": {
+          "nativeName": "displayName",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        },
+        "emailAddress": {
+          "nativeName": "emailAddress",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "familyName": {
+          "nativeName": "familyName",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        },
+        "givenName": {
+          "nativeName": "givenName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "groups": {
+          "items": {
+            "nativeType": "object",
+            "type": "object"
+          },
+          "nativeName": "groups",
+          "nativeType": "object",
+          "type": "array"
+        },
+        "managerDisplayName": {
+          "flags": [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "managerDisplayName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "managerId": {
+          "nativeName": "managerId",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "password": {
+          "flags": [
+            "NOT_UPDATEABLE",
+            "NOT_READABLE",
+            "NOT_RETURNED_BY_DEFAULT"
+          ],
+          "nativeName": "password",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "telephoneNumber": {
+          "nativeName": "telephoneNumber",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "uid": {
+          "flags": [
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "__NAME__",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        },
+        "userName": {
+          "flags": [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "userName",
+          "nativeType": "string",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "group": {
+      "$schema": "http://json-schema.org/draft-03/schema",
+      "id": "__GROUP__",
+      "nativeType": "__GROUP__",
+      "properties": {
+        "cn": {
+          "flags": [
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "__NAME__",
+          "nativeType": "string",
+          "required": true,
+          "type": "string"
+        },
+        "created": {
+          "flags": [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "created",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "displayName": {
+          "flags": [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "displayName",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "lastModified": {
+          "flags": [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ],
+          "nativeName": "lastModified",
+          "nativeType": "string",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "nativeType": "object",
+            "type": "object"
+          },
+          "nativeName": "members",
+          "nativeType": "object",
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "operationTimeout": {
+    "AUTHENTICATE": -1,
+    "CREATE": -1,
+    "DELETE": -1,
+    "GET": -1,
+    "RESOLVEUSERNAME": -1,
+    "SCHEMA": -1,
+    "SCRIPT_ON_CONNECTOR": -1,
+    "SCRIPT_ON_RESOURCE": -1,
+    "SEARCH": -1,
+    "SYNC": -1,
+    "TEST": -1,
+    "UPDATE": -1,
+    "VALIDATE": -1
+  },
+  "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableCaseInsensitiveFilter": false,
+    "enableFilteredResultsHandler": true,
+    "enableNormalizingResultsHandler": true
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "approvalMode": "any",
+  "approvalTask": {
+    "actors": [
+      {
+        "id": {
+          "isExpression": true,
+          "value": "\"managed/user/\" + ((requestIndex.entitlementOwner && requestIndex.entitlementOwner.length > 0) ? requestIndex.entitlementOwner[0].id : requestIndex.applicationOwner[0].id)"
+        },
+        "permissions": {
+          "approve": true,
+          "comment": true,
+          "modify": true,
+          "reassign": true,
+          "reject": true
+        }
+      }
+    ],
+    "approvalMode": "any",
+    "events": {
+      "assignment": {
+        "notification": "requestAssigned"
+      },
+      "escalation": {
+        "actors": [
+          {
+            "id": {
+              "isExpression": true,
+              "value": "\"managed/user/\" + ((requestIndex.entitlementOwner && requestIndex.entitlementOwner.length > 0) ? requestIndex.entitlementOwner[0].id : requestIndex.applicationOwner[0].id)"
+            }
+          }
+        ],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(5*1*24*60*60*1000))).toISOString()"
+        },
+        "notification": "requestEscalated"
+      },
+      "expiration": {
+        "action": "reject",
+        "actors": [],
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(7*24*60*60*1000))).toISOString()"
+        },
+        "notification": "requestExpired"
+      },
+      "reassign": {
+        "notification": "requestReassigned"
+      },
+      "reminder": {
+        "date": {
+          "isExpression": true,
+          "value": "(new Date(new Date().getTime()+(3*1*24*60*60*1000))).toISOString()"
+        },
+        "frequency": 3,
+        "notification": "requestReminder"
+      }
+    },
+    "nextStep": [
+      {
+        "condition": null,
+        "outcome": "EXPIRATION",
+        "step": null
+      },
+      {
+        "condition": null,
+        "outcome": "APPROVE",
+        "step": "scriptTask-3eab1948f1ec"
+      },
+      {
+        "condition": null,
+        "outcome": "REJECT",
+        "step": "scriptTask-aec6c36b3a45"
+      }
+    ]
+  },
+  "displayName": "Approval Task",
+  "name": "approvalTask-74cf85c35437",
+  "type": "approvalTask"
+}

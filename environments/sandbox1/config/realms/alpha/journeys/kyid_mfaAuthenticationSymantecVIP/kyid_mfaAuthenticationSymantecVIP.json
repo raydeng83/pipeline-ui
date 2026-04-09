@@ -1,0 +1,141 @@
+{
+  "_id": "kyid_mfaAuthenticationSymantecVIP",
+  "_rev": "-184856607",
+  "enabled": true,
+  "entryNodeId": "3227ff08-5b60-4faa-8c7b-c4b8b44ea803",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "193a4a6d-bc61-4bdb-b03d-fa5f3802b7de": {
+      "connections": {
+        "ERROR": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "NOMATCHRESPONSE": "42b9e29f-8c06-414f-8f7e-60c299fa6952"
+      },
+      "displayName": "Symantec Validation Multiple",
+      "nodeType": "RESTNode",
+      "version": "1.0",
+      "x": 496,
+      "y": 43
+    },
+    "208c3d0f-75aa-473f-8315-dc03458b5323": {
+      "connections": {
+        "AnotherMethod": "8ca3749a-036f-41c0-805e-d2ab4cdb72f5",
+        "EmptyCode": "a289e86e-554a-4bd8-9914-204e22596ad6",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "singlesymantec": "a9fc02fa-88d3-4abe-8529-6e31bd2d8bc0",
+        "true": "193a4a6d-bc61-4bdb-b03d-fa5f3802b7de"
+      },
+      "displayName": "Enter Symentic Security Code",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 263,
+      "y": 110
+    },
+    "3227ff08-5b60-4faa-8c7b-c4b8b44ea803": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "208c3d0f-75aa-473f-8315-dc03458b5323"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 140.796875,
+      "y": 465.015625
+    },
+    "42b9e29f-8c06-414f-8f7e-60c299fa6952": {
+      "connections": {
+        "false": "4425c028-48b8-483d-80ef-9ae46b0d0450",
+        "true": "53f6217c-286f-458b-a52c-064f4826d1f9"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 806,
+      "y": 151.5
+    },
+    "4425c028-48b8-483d-80ef-9ae46b0d0450": {
+      "connections": {
+        "False": "872401a4-d2d6-49ce-bf3e-961f15818c43",
+        "True": "208c3d0f-75aa-473f-8315-dc03458b5323"
+      },
+      "displayName": "Symantec:Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1056,
+      "y": 91.66666666666667
+    },
+    "53f6217c-286f-458b-a52c-064f4826d1f9": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: Set IDP Auth Type",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1181.3333129882812,
+      "y": 355.0104064941406
+    },
+    "872401a4-d2d6-49ce-bf3e-961f15818c43": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1313,
+      "y": 147.5
+    },
+    "8ca3749a-036f-41c0-805e-d2ab4cdb72f5": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Node State Another factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 556,
+      "y": 279
+    },
+    "a289e86e-554a-4bd8-9914-204e22596ad6": {
+      "connections": {
+        "False": "872401a4-d2d6-49ce-bf3e-961f15818c43",
+        "True": "208c3d0f-75aa-473f-8315-dc03458b5323"
+      },
+      "displayName": "Error: Symantec Blank OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 859,
+      "y": 312.015625
+    },
+    "a9fc02fa-88d3-4abe-8529-6e31bd2d8bc0": {
+      "connections": {
+        "ERROR": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "NOMATCHRESPONSE": "42b9e29f-8c06-414f-8f7e-60c299fa6952"
+      },
+      "displayName": "Symantec Validation Single",
+      "nodeType": "RESTNode",
+      "version": "1.0",
+      "x": 502,
+      "y": 545.3125
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1623,
+      "y": 343.8333333333333
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1626,
+      "y": 190
+    },
+    "startNode": {
+      "x": 70,
+      "y": 270.8333333333333
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

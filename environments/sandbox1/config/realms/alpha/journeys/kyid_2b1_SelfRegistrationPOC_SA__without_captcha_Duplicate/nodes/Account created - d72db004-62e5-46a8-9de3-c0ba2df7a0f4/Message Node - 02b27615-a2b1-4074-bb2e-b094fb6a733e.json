@@ -1,0 +1,25 @@
+{
+  "_id": "02b27615-a2b1-4074-bb2e-b094fb6a733e",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "101316729",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User Patched"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

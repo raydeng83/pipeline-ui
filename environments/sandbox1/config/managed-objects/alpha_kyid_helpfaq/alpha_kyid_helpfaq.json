@@ -1,0 +1,291 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "alpha_kyid_helpfaq",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "Help FAQs for KYID",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "faq_key",
+      "faq_topic_id",
+      "question_en",
+      "answer_en",
+      "question_es",
+      "answer_es",
+      "question_ar",
+      "answer_ar",
+      "question_sw",
+      "answer_sw",
+      "question_rw",
+      "answer_rw",
+      "question_my",
+      "answer_my",
+      "question_ht",
+      "answer_ht",
+      "question_so",
+      "answer_so",
+      "question_fr",
+      "answer_fr",
+      "question_ne",
+      "answer_ne",
+      "question_ru",
+      "answer_ru",
+      "question_kar",
+      "answer_kar",
+      "question_ps",
+      "answer_ps",
+      "faq_topic"
+    ],
+    "properties": {
+      "answer_ar": {
+        "searchable": false,
+        "title": "Arabic Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_en": {
+        "searchable": false,
+        "title": "English Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_es": {
+        "searchable": false,
+        "title": "Spanish Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_fr": {
+        "searchable": false,
+        "title": "French Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_ht": {
+        "searchable": false,
+        "title": "Haitian Creole Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_kar": {
+        "searchable": false,
+        "title": "Karen Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_my": {
+        "searchable": false,
+        "title": "Burmese Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_ne": {
+        "searchable": false,
+        "title": "Nepali Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_ps": {
+        "searchable": false,
+        "title": "Pashto Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_ru": {
+        "searchable": false,
+        "title": "Russian Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_rw": {
+        "searchable": false,
+        "title": "Kinyarwanda Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_so": {
+        "searchable": false,
+        "title": "Somali Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "answer_sw": {
+        "searchable": false,
+        "title": "Swahili Answer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "faq_key": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "FAQ Key",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "faq_topic": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Kyid_alpha_help_FAQ:faq_topic",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Kyid_alpha_help_faq_topics",
+            "notify": false,
+            "path": "managed/Kyid_alpha_help_FAQ_topics",
+            "query": {
+              "fields": [
+                "topic_title"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": false,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": false,
+        "title": "Faq_topic",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "faq_topic_id": {
+        "searchable": false,
+        "title": "Topic ID of FAQ",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_ar": {
+        "searchable": false,
+        "title": "Arabic Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_en": {
+        "searchable": false,
+        "title": "English Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_es": {
+        "searchable": false,
+        "title": "Spanish Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_fr": {
+        "searchable": false,
+        "title": "French Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_ht": {
+        "searchable": false,
+        "title": "Haitian Creole Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_kar": {
+        "searchable": false,
+        "title": "Karen Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_my": {
+        "searchable": false,
+        "title": "Burmese Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_ne": {
+        "searchable": false,
+        "title": "Nepali Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_ps": {
+        "searchable": false,
+        "title": "Pashto Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_ru": {
+        "searchable": false,
+        "title": "Russian Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_rw": {
+        "searchable": false,
+        "title": "Kinyarwanda Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_so": {
+        "searchable": false,
+        "title": "Somali Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "question_sw": {
+        "searchable": false,
+        "title": "Swahili Question",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "faq_key"
+    ],
+    "title": "Help FAQ",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

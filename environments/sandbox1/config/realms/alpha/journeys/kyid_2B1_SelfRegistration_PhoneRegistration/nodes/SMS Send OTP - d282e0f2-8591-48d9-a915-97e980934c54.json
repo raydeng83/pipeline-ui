@@ -1,0 +1,56 @@
+{
+  "_id": "d282e0f2-8591-48d9-a915-97e980934c54",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    },
+    {
+      "displayName": "Via SMS",
+      "id": "Via SMS"
+    },
+    {
+      "displayName": "Via voice",
+      "id": "Via voice"
+    },
+    {
+      "displayName": "MaxLimit",
+      "id": "MaxLimit"
+    }
+  ],
+  "_rev": "1407731544",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "83172b6f-7a91-4659-a649-bed8685be8e4",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Configure_your _phone_no\n</h5><br>\n</a>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Configurar la autenticación del teléfono\n</h5><br>\n<a href=\"&{esv.kog.help.mfa.reg.sms.url}\" target=\"_blank\">¿Necesita ayuda?\n</a>"
+  },
+  "pageHeader": {
+    "en": "2_verify_phone_number"
+  },
+  "stage": "{\"themeId\":\"ad0c7178-859b-4eb0-ace3-3110aba3d31b\"}"
+}

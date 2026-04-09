@@ -1,0 +1,279 @@
+{
+  "_id": "SelfRegistrationPhoneRegistrationPOC_V2_duplicate",
+  "_rev": "-1336299705",
+  "enabled": true,
+  "entryNodeId": "79a4f231-979b-4410-bb0f-7528b77c20a5",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0566a99d-4679-4caa-9498-db65165f0f5d": {
+      "connections": {
+        "InvalidNumber": "79a4f231-979b-4410-bb0f-7528b77c20a5",
+        "MaxSendReached": "e85257ad-fe6d-4715-8e7c-2f98b18e1423",
+        "false": "31d99e9f-255e-4557-9285-3a158a68c53e",
+        "true": "a75d5b1a-4134-46d9-b8cd-90fa79c8e83c"
+      },
+      "displayName": "Voice Generator",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 165.33333587646484,
+      "y": 485.5555477142334
+    },
+    "0c9b1c9d-b8f9-4157-a74d-f4f9efa42170": {
+      "connections": {
+        "Reject": "1f2c1825-3c75-4cf1-a67b-6398953fa93f",
+        "Retry": "a784df95-7861-4cd8-b76f-1399a557f1d4"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 611,
+      "y": 250
+    },
+    "1f2c1825-3c75-4cf1-a67b-6398953fa93f": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Max Limit Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 839,
+      "y": 441
+    },
+    "25a5ddda-a56f-4021-8a4d-3f59e606eb9f": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1644,
+      "y": 257.83333333333337
+    },
+    "2db00771-01f3-4697-9c50-c15680b29118": {
+      "connections": {
+        "Reject": "1f2c1825-3c75-4cf1-a67b-6398953fa93f",
+        "Retry": "50afe905-ae1c-4b58-8e1e-1d14a6220019"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 42,
+      "y": 91
+    },
+    "31d99e9f-255e-4557-9285-3a158a68c53e": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 435,
+      "y": 420.5
+    },
+    "37f553c4-170a-4f48-b432-e9ada90f1768": {
+      "connections": {
+        "False": "25a5ddda-a56f-4021-8a4d-3f59e606eb9f",
+        "True": "ac2a497f-5c3e-40bd-8855-a40e107f17f8"
+      },
+      "displayName": "SMS:BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1326,
+      "y": 534
+    },
+    "50afe905-ae1c-4b58-8e1e-1d14a6220019": {
+      "connections": {
+        "InvalidNumber": "fcd90260-9b36-4f1f-b473-72ef47ba1e3f",
+        "MaxSendReached": "e85257ad-fe6d-4715-8e7c-2f98b18e1423",
+        "false": "31d99e9f-255e-4557-9285-3a158a68c53e",
+        "true": "ac2a497f-5c3e-40bd-8855-a40e107f17f8"
+      },
+      "displayName": "SMS Generator",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 330,
+      "y": 33.85714285714286
+    },
+    "56c271c1-ae6d-455f-a753-18bbe0bd1813": {
+      "connections": {
+        "False": "25a5ddda-a56f-4021-8a4d-3f59e606eb9f",
+        "True": "a75d5b1a-4134-46d9-b8cd-90fa79c8e83c"
+      },
+      "displayName": "Voice:BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 1039
+    },
+    "58cf61e8-4bb7-47e9-89c1-d683a9b0c9c3": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Max Limit Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 656,
+      "y": 1095.999984741211
+    },
+    "6b1a68e3-35a7-40c8-a271-79216037e169": {
+      "connections": {
+        "Reject": "58cf61e8-4bb7-47e9-89c1-d683a9b0c9c3",
+        "Retry": "0566a99d-4679-4caa-9498-db65165f0f5d"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 199,
+      "y": 1155.3333282470703
+    },
+    "6b793bc4-2010-4650-94a6-3ae98850121b": {
+      "connections": {
+        "Reject": "58cf61e8-4bb7-47e9-89c1-d683a9b0c9c3",
+        "Retry": "91c877bd-a39b-4bd5-8d5a-f5d996c788b0"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 315,
+      "y": 784.9999961853027
+    },
+    "79a4f231-979b-4410-bb0f-7528b77c20a5": {
+      "connections": {
+        "sms": "50afe905-ae1c-4b58-8e1e-1d14a6220019",
+        "voice": "0566a99d-4679-4caa-9498-db65165f0f5d"
+      },
+      "displayName": "Check SMS/Voice",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 121,
+      "y": 300.2222137451172
+    },
+    "80628bf2-af52-4887-98de-9ce20de0e330": {
+      "connections": {
+        "true": "0566a99d-4679-4caa-9498-db65165f0f5d"
+      },
+      "displayName": "Script: Voice Resend Code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 1225
+    },
+    "90ad054c-51b0-476f-8dc0-24218c785a83": {
+      "connections": {
+        "true": "50afe905-ae1c-4b58-8e1e-1d14a6220019"
+      },
+      "displayName": "Script: SMS Resend Code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 720
+    },
+    "91c877bd-a39b-4bd5-8d5a-f5d996c788b0": {
+      "connections": {
+        "true": "a75d5b1a-4134-46d9-b8cd-90fa79c8e83c"
+      },
+      "displayName": "Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 144,
+      "y": 982.9999847412109
+    },
+    "99670025-21f9-46ba-8b79-2830c7c8c610": {
+      "connections": {
+        "False": "25a5ddda-a56f-4021-8a4d-3f59e606eb9f",
+        "True": "a75d5b1a-4134-46d9-b8cd-90fa79c8e83c"
+      },
+      "displayName": "Twilio:Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 1360
+    },
+    "a75d5b1a-4134-46d9-b8cd-90fa79c8e83c": {
+      "connections": {
+        "BlankOTP": "56c271c1-ae6d-455f-a753-18bbe0bd1813",
+        "Choose Another Method": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "Resend Code": "6b1a68e3-35a7-40c8-a271-79216037e169",
+        "Verify": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "false": "6b793bc4-2010-4650-94a6-3ae98850121b"
+      },
+      "displayName": "Twilio Send OTP / Another factor",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1023,
+      "y": 526.6
+    },
+    "a784df95-7861-4cd8-b76f-1399a557f1d4": {
+      "connections": {
+        "true": "ac2a497f-5c3e-40bd-8855-a40e107f17f8"
+      },
+      "displayName": "Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 552,
+      "y": 22
+    },
+    "ac2a497f-5c3e-40bd-8855-a40e107f17f8": {
+      "connections": {
+        "BlankOTP": "56c271c1-ae6d-455f-a753-18bbe0bd1813",
+        "Choose Another Method": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "Resend Code": "2db00771-01f3-4697-9c50-c15680b29118",
+        "Verify": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "false": "0c9b1c9d-b8f9-4157-a74d-f4f9efa42170"
+      },
+      "displayName": "SMS Send OTP",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 946,
+      "y": 83.19999999999999
+    },
+    "e85257ad-fe6d-4715-8e7c-2f98b18e1423": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Error: Max SMS Send Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1022,
+      "y": 1031.3
+    },
+    "f28ebb59-c777-48be-9da5-654a62c25850": {
+      "connections": {
+        "False": "25a5ddda-a56f-4021-8a4d-3f59e606eb9f",
+        "True": "ac2a497f-5c3e-40bd-8855-a40e107f17f8"
+      },
+      "displayName": "SMS:Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 855
+    },
+    "fcd90260-9b36-4f1f-b473-72ef47ba1e3f": {
+      "connections": {},
+      "displayName": "Error: Invalid Phone Number",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 969,
+      "y": 908.0666666666667
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1909,
+      "y": 922.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2472,
+      "y": 497.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 737.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

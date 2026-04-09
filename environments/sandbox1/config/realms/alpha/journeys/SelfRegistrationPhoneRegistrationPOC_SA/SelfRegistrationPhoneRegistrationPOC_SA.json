@@ -1,0 +1,273 @@
+{
+  "_id": "SelfRegistrationPhoneRegistrationPOC_SA",
+  "_rev": "-550385076",
+  "enabled": true,
+  "entryNodeId": "27ea95ee-755e-4a3b-835d-20f726caac1f",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0974afca-1a6f-41c8-bfe8-105da7423983": {
+      "connections": {
+        "False": "d4292c3d-be18-4b41-a0cd-654f820f494c",
+        "True": "910f9eab-f9be-4ac7-899c-ff1955128e06"
+      },
+      "displayName": "SMS:Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 855
+    },
+    "10571fd7-42ef-443e-a73b-bc8af045618f": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "SMS-Voice Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 350
+    },
+    "1b3c26f8-d971-4da1-aa74-5cb9d94c3d5e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "6c91a5b1-03b1-4613-b8ad-007734a16a37"
+      },
+      "displayName": "Update MFA Method SMS | Voice",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1605,
+      "y": 461.6666666666667
+    },
+    "27ea95ee-755e-4a3b-835d-20f726caac1f": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fe8f0096-1537-4260-be99-78668e39f0d4"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 180,
+      "y": 657
+    },
+    "32618377-ed66-4726-b747-98036ce8cc38": {
+      "connections": {
+        "true": "1b3c26f8-d971-4da1-aa74-5cb9d94c3d5e"
+      },
+      "displayName": "Update Node State SMS",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1395,
+      "y": 99
+    },
+    "35ad7306-3691-4dd5-9bcb-31aa2bff6e8b": {
+      "connections": {},
+      "displayName": "Error: Invalid Phone Number",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 969,
+      "y": 908.0666666666667
+    },
+    "6026b83f-addd-4559-a5c0-99749076fff5": {
+      "connections": {},
+      "displayName": "Script: Voice Resend Code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 1225
+    },
+    "6aba4e10-21f0-4838-81fb-77e0d339cc57": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetUp additional security methods",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2717,
+      "y": 745
+    },
+    "6c91a5b1-03b1-4613-b8ad-007734a16a37": {
+      "connections": {
+        "true": "f25ae2bf-4676-43dd-9fa1-d7f1d5d9c851"
+      },
+      "displayName": "IDPAuth type sms|voice",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1925,
+      "y": 745
+    },
+    "76bc3c7c-a23a-45e4-a9e1-9ffdf6ecaf93": {
+      "connections": {},
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 435,
+      "y": 420.5
+    },
+    "787218bb-c5de-4dc8-a7ed-ada7cd416b16": {
+      "connections": {
+        "true": "835cada1-77f2-4e90-997f-dfd5aefb0ffc"
+      },
+      "displayName": "Script: SMS Resend Code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 720
+    },
+    "835cada1-77f2-4e90-997f-dfd5aefb0ffc": {
+      "connections": {
+        "InvalidNumber": "35ad7306-3691-4dd5-9bcb-31aa2bff6e8b",
+        "MaxSendReached": "8e78a614-0e05-4bc6-863a-01b5507e0f79",
+        "false": "76bc3c7c-a23a-45e4-a9e1-9ffdf6ecaf93",
+        "true": "910f9eab-f9be-4ac7-899c-ff1955128e06"
+      },
+      "displayName": "SMS Generator",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 330,
+      "y": 33.85714285714286
+    },
+    "8e78a614-0e05-4bc6-863a-01b5507e0f79": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Error: Max SMS Send Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1022,
+      "y": 1031.3
+    },
+    "910f9eab-f9be-4ac7-899c-ff1955128e06": {
+      "connections": {
+        "BlankOTP": "b9172f06-b03d-4734-a40f-8786465d2555",
+        "Resend Code": "787218bb-c5de-4dc8-a7ed-ada7cd416b16",
+        "Verify": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "SMS Send OTP",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 924,
+      "y": 108.19999999999999
+    },
+    "9f76c259-6f15-4357-bda9-5f170b3ca190": {
+      "connections": {
+        "False": "d4292c3d-be18-4b41-a0cd-654f820f494c",
+        "True": "ca83231c-b3c9-4845-a4ef-c3db951beb1e"
+      },
+      "displayName": "Twilio:Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 1360
+    },
+    "aaa37434-9508-46a6-9575-4abde4a30606": {
+      "connections": {
+        "true": "1b3c26f8-d971-4da1-aa74-5cb9d94c3d5e"
+      },
+      "displayName": "Update Node State VOICE",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 215
+    },
+    "b9172f06-b03d-4734-a40f-8786465d2555": {
+      "connections": {
+        "False": "d4292c3d-be18-4b41-a0cd-654f820f494c",
+        "True": "ca83231c-b3c9-4845-a4ef-c3db951beb1e"
+      },
+      "displayName": "Voice:BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 1039
+    },
+    "ca83231c-b3c9-4845-a4ef-c3db951beb1e": {
+      "connections": {
+        "BlankOTP": "b9172f06-b03d-4734-a40f-8786465d2555",
+        "Choose Another Method": "10571fd7-42ef-443e-a73b-bc8af045618f",
+        "Resend Code": "6026b83f-addd-4559-a5c0-99749076fff5",
+        "Verify": "aaa37434-9508-46a6-9575-4abde4a30606",
+        "false": "9f76c259-6f15-4357-bda9-5f170b3ca190"
+      },
+      "displayName": "Twilio Send OTP / Another factor",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1023,
+      "y": 526.6
+    },
+    "d4292c3d-be18-4b41-a0cd-654f820f494c": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1644,
+      "y": 257.83333333333337
+    },
+    "ee1c5811-9944-4158-acbd-a86cd0b275e1": {
+      "connections": {
+        "False": "d4292c3d-be18-4b41-a0cd-654f820f494c",
+        "True": "910f9eab-f9be-4ac7-899c-ff1955128e06"
+      },
+      "displayName": "SMS:BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1327,
+      "y": 534
+    },
+    "f25ae2bf-4676-43dd-9fa1-d7f1d5d9c851": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "fe22cce0-7287-46b7-a80a-be29110efff9"
+      },
+      "displayName": "Script: FirstTimeLoginUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2191,
+      "y": 720
+    },
+    "fe22cce0-7287-46b7-a80a-be29110efff9": {
+      "connections": {
+        "false": "6aba4e10-21f0-4838-81fb-77e0d339cc57",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Registration Success",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2534,
+      "y": 828
+    },
+    "fe8f0096-1537-4260-be99-78668e39f0d4": {
+      "connections": {
+        "false": "835cada1-77f2-4e90-997f-dfd5aefb0ffc",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "check existing",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 138,
+      "y": 336
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3037,
+      "y": 737.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2472,
+      "y": 497.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 737.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

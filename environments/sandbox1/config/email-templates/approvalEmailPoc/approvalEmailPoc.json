@@ -1,0 +1,110 @@
+{
+  "_id": "emailTemplate/approvalEmailPoc",
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "ApprovalEmailPOC",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "ar": {
+      "file": "approvalEmailPoc.ar.html"
+    },
+    "en": {
+      "file": "approvalEmailPoc.en.html"
+    },
+    "es": {
+      "file": "approvalEmailPoc.es.html"
+    },
+    "fr": {
+      "file": "approvalEmailPoc.fr.html"
+    },
+    "ht": {
+      "file": "approvalEmailPoc.ht.html"
+    },
+    "kar": {
+      "file": "approvalEmailPoc.kar.html"
+    },
+    "my": {
+      "file": "approvalEmailPoc.my.html"
+    },
+    "ne": {
+      "file": "approvalEmailPoc.ne.html"
+    },
+    "ps": {
+      "file": "approvalEmailPoc.ps.html"
+    },
+    "ru": {
+      "file": "approvalEmailPoc.ru.html"
+    },
+    "rw": {
+      "file": "approvalEmailPoc.rw.html"
+    },
+    "so": {
+      "file": "approvalEmailPoc.so.html"
+    },
+    "sw": {
+      "file": "approvalEmailPoc.sw.html"
+    }
+  },
+  "message": {
+    "ar": {
+      "file": "approvalEmailPoc.ar.md"
+    },
+    "en": {
+      "file": "approvalEmailPoc.en.md"
+    },
+    "es": {
+      "file": "approvalEmailPoc.es.md"
+    },
+    "fr": {
+      "file": "approvalEmailPoc.fr.md"
+    },
+    "ht": {
+      "file": "approvalEmailPoc.ht.md"
+    },
+    "kar": {
+      "file": "approvalEmailPoc.kar.md"
+    },
+    "my": {
+      "file": "approvalEmailPoc.my.md"
+    },
+    "ne": {
+      "file": "approvalEmailPoc.ne.md"
+    },
+    "ps": {
+      "file": "approvalEmailPoc.ps.md"
+    },
+    "ru": {
+      "file": "approvalEmailPoc.ru.md"
+    },
+    "rw": {
+      "file": "approvalEmailPoc.rw.md"
+    },
+    "so": {
+      "file": "approvalEmailPoc.so.md"
+    },
+    "sw": {
+      "file": "approvalEmailPoc.sw.md"
+    }
+  },
+  "mimeType": "text/html",
+  "styles": {
+    "file": "approvalEmailPoc.css"
+  },
+  "subject": {
+    "ar": "",
+    "en": "",
+    "es": "",
+    "fr": "",
+    "ht": "",
+    "kar": "",
+    "my": "",
+    "ne": "",
+    "ps": "",
+    "ru": "",
+    "rw": "",
+    "so": "",
+    "sw": ""
+  },
+  "templateId": "approvalEmailPoc"
+}

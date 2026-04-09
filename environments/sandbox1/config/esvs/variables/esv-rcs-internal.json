@@ -1,0 +1,6 @@
+{
+  "_id": "esv-rcs-internal",
+  "description": "RCS client for Internal AD",
+  "expressionType": "string",
+  "valueBase64": "${ESV_RCS_INTERNAL}"
+}

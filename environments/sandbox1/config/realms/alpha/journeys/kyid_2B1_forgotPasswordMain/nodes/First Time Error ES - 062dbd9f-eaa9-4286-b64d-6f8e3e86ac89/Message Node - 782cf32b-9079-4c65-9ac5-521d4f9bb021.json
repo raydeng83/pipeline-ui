@@ -1,0 +1,27 @@
+{
+  "_id": "782cf32b-9079-4c65-9ac5-521d4f9bb021",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-518950494",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "es": "<div class='error-message'> </div>"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "es": "Volver a iniciar sesión"
+  }
+}

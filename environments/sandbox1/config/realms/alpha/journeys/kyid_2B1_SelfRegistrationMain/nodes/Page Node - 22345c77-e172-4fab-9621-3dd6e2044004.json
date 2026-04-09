@@ -1,0 +1,48 @@
+{
+  "_id": "22345c77-e172-4fab-9621-3dd6e2044004",
+  "_outcomes": [
+    {
+      "displayName": "Next",
+      "id": "Next"
+    },
+    {
+      "displayName": "Back",
+      "id": "Back"
+    },
+    {
+      "displayName": "Empty",
+      "id": "Empty"
+    },
+    {
+      "displayName": "Mismatch",
+      "id": "Mismatch"
+    },
+    {
+      "displayName": "InValid",
+      "id": "InValid"
+    }
+  ],
+  "_rev": "101237538",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "2d05377e-58f4-42a2-b849-62b897ade8ef",
+      "displayName": "Accept Terms and Conditions",
+      "nodeType": "AcceptTermsAndConditionsNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "f23be532-2973-4acd-9d98-ab7b89e91145",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

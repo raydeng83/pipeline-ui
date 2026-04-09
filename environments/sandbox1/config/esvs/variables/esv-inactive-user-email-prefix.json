@@ -1,0 +1,6 @@
+{
+  "_id": "esv-inactive-user-email-prefix",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_INACTIVE_USER_EMAIL_PREFIX}"
+}

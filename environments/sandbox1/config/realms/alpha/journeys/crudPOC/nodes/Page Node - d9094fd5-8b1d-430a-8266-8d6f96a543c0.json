@@ -1,0 +1,26 @@
+{
+  "_id": "d9094fd5-8b1d-430a-8266-8d6f96a543c0",
+  "_outcomes": [
+    {
+      "displayName": "EnrollmentContext",
+      "id": "EnrollmentContext"
+    }
+  ],
+  "_rev": "-25696745",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "6cbe425b-956c-4d75-9c18-bdea8912093b",
+      "displayName": "Choice Collector",
+      "nodeType": "ChoiceCollectorNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}

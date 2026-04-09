@@ -1,0 +1,18 @@
+{
+  "displayName": "Allow Violation",
+  "name": "scriptTask-313f487929a4",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": null
+      }
+    ],
+    "script": {
+      "file": "Allow Violation - scriptTask-313f487929a4.js"
+    }
+  },
+  "type": "scriptTask"
+}

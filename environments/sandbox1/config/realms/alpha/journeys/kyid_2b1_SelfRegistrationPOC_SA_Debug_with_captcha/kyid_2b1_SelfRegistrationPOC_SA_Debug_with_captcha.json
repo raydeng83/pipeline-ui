@@ -1,0 +1,272 @@
+{
+  "_id": "kyid_2b1_SelfRegistrationPOC_SA_Debug_with_captcha",
+  "_rev": "-2072833641",
+  "description": "for Captcha",
+  "enabled": true,
+  "entryNodeId": "bb2cb428-93bb-4555-a363-d67f57d9e2f7",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1301bb07-4ef0-46fd-959b-b789b84b7604": {
+      "connections": {
+        "outcome": "393803ca-4c46-4941-96fe-3ec350fa1233"
+      },
+      "displayName": "HOTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 403,
+      "y": 751.2222137451172
+    },
+    "220ae276-d5a0-4b6a-84af-a0f53059fd77": {
+      "connections": {
+        "true": "e5e90125-7a2b-471d-8144-778b8eabed2d"
+      },
+      "displayName": "Phone Auth",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1128,
+      "y": 454.5
+    },
+    "2c08ffb1-70f8-402e-9fec-6585dfb7f718": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1297.2638854980469,
+      "y": 48.66665840148926
+    },
+    "393803ca-4c46-4941-96fe-3ec350fa1233": {
+      "connections": {
+        "success": "bb861b22-a857-4dbd-9bbe-1362ad53d3a8"
+      },
+      "displayName": "send otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 664.8888816833496
+    },
+    "3fd8a64c-bca0-4ed9-91ed-303c5dc9f7f6": {
+      "connections": {
+        "false": "4304722d-9e45-4237-aacb-a8a90b3c515f",
+        "true": "f7ec4a9e-667a-4494-a06e-411d925cd794"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 561,
+      "y": 241.5
+    },
+    "4304722d-9e45-4237-aacb-a8a90b3c515f": {
+      "connections": {
+        "true": "5ba9aa7f-8671-4209-9081-9977bdb89454"
+      },
+      "displayName": "Email Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 859,
+      "y": 152
+    },
+    "4ea2a0a4-3a1a-48b0-b234-ea9b1d5f4c21": {
+      "connections": {
+        "FAILURE": "c51d0347-46b2-4832-82ea-57cd4c79d1a0",
+        "PATCHED": "bda2880a-1166-4798-9f57-906aabb8c5c1"
+      },
+      "displayName": "Patch Object",
+      "nodeType": "PatchObjectNode",
+      "version": "1.0",
+      "x": 690,
+      "y": 0
+    },
+    "5ba9aa7f-8671-4209-9081-9977bdb89454": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "c7259a72-7ddd-47f6-b274-939049612023"
+      },
+      "displayName": "Create User in AIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 471.6875,
+      "y": 492.3333282470703
+    },
+    "6155c5a4-eda5-45ea-bee6-c215061b4059": {
+      "connections": {
+        "true": "c7259a72-7ddd-47f6-b274-939049612023"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1487,
+      "y": 846
+    },
+    "99c6b922-beab-4376-8677-ab33642ccf88": {
+      "connections": {},
+      "displayName": "Login Journey",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 69,
+      "y": 341
+    },
+    "9ba89899-2595-4a17-b9bd-80078bc86316": {
+      "connections": {
+        "true": "c7259a72-7ddd-47f6-b274-939049612023"
+      },
+      "displayName": "mail exist in mfa",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 779,
+      "y": 1042.6666641235352
+    },
+    "9f3e3708-b20d-415f-8b76-2c35607b84f5": {
+      "connections": {
+        "false": "c7259a72-7ddd-47f6-b274-939049612023",
+        "true": "c51d0347-46b2-4832-82ea-57cd4c79d1a0"
+      },
+      "displayName": "create phone object",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1466,
+      "y": 668.5
+    },
+    "b0a3eb1a-f277-4abc-ade6-abcd782fd5e3": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c51d0347-46b2-4832-82ea-57cd4c79d1a0"
+      },
+      "displayName": "create mail object",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1076,
+      "y": 289.5
+    },
+    "bb2cb428-93bb-4555-a363-d67f57d9e2f7": {
+      "connections": {
+        "true": "3fd8a64c-bca0-4ed9-91ed-303c5dc9f7f6"
+      },
+      "displayName": "enter_name_email_1",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 289,
+      "y": 0
+    },
+    "bb861b22-a857-4dbd-9bbe-1362ad53d3a8": {
+      "connections": {
+        "Choose Another": "c7259a72-7ddd-47f6-b274-939049612023",
+        "Method": "c7259a72-7ddd-47f6-b274-939049612023",
+        "Resend Code": "1301bb07-4ef0-46fd-959b-b789b84b7604",
+        "Verify": "b0a3eb1a-f277-4abc-ade6-abcd782fd5e3",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Verify email",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1144,
+      "y": 818.8888816833496
+    },
+    "bda2880a-1166-4798-9f57-906aabb8c5c1": {
+      "connections": {
+        "true": "2c08ffb1-70f8-402e-9fec-6585dfb7f718"
+      },
+      "displayName": "Status Active",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 918,
+      "y": 25.222213745117188
+    },
+    "c12aa0c2-4d7b-4ba9-ae33-3ad043548666": {
+      "connections": {},
+      "displayName": "CAPTCHA",
+      "nodeType": "product-CaptchaNode",
+      "version": "1.0",
+      "x": 632.3749847412109,
+      "y": 107.22221374511719
+    },
+    "c3f515cc-a8ce-4202-9591-b2b8af931524": {
+      "connections": {
+        "false": "9ba89899-2595-4a17-b9bd-80078bc86316",
+        "pass": "1301bb07-4ef0-46fd-959b-b789b84b7604",
+        "true": "e822a3c2-1957-4652-970a-78d8b99161f1"
+      },
+      "displayName": "Check primary & alternate mail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 360.8888854980469,
+      "y": 943.7777557373047
+    },
+    "c51d0347-46b2-4832-82ea-57cd4c79d1a0": {
+      "connections": {
+        "outcome": "4ea2a0a4-3a1a-48b0-b234-ea9b1d5f4c21"
+      },
+      "displayName": "create password",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1336,
+      "y": 208.5
+    },
+    "c7259a72-7ddd-47f6-b274-939049612023": {
+      "connections": {
+        "email": "c3f515cc-a8ce-4202-9591-b2b8af931524",
+        "phone": "220ae276-d5a0-4b6a-84af-a0f53059fd77"
+      },
+      "displayName": "Select account recovery method",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 748.5625,
+      "y": 384.5
+    },
+    "e5e90125-7a2b-471d-8144-778b8eabed2d": {
+      "connections": {
+        "false": "9f3e3708-b20d-415f-8b76-2c35607b84f5",
+        "true": "6155c5a4-eda5-45ea-bee6-c215061b4059"
+      },
+      "displayName": "check phone no exist",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1012,
+      "y": 665
+    },
+    "e822a3c2-1957-4652-970a-78d8b99161f1": {
+      "connections": {
+        "try again": "c7259a72-7ddd-47f6-b274-939049612023"
+      },
+      "displayName": "Existing alternate mail same as primary",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 707.0416564941406,
+      "y": 941.5555572509766
+    },
+    "f7ec4a9e-667a-4494-a06e-411d925cd794": {
+      "connections": {
+        "pass": "c7259a72-7ddd-47f6-b274-939049612023",
+        "sign in": "bb2cb428-93bb-4555-a363-d67f57d9e2f7",
+        "try again": "bb2cb428-93bb-4555-a363-d67f57d9e2f7"
+      },
+      "displayName": "Existing Account",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 151,
+      "y": 504
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1543,
+      "y": 37
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1686,
+      "y": 109
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

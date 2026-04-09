@@ -1,0 +1,25 @@
+{
+  "_id": "75822fc3-966a-4c34-8605-e7e71a747e30",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "40750305",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "false-cookie"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

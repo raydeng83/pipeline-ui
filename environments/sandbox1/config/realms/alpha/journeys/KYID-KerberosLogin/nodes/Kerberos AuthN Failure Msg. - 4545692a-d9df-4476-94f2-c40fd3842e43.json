@@ -1,0 +1,26 @@
+{
+  "_id": "4545692a-d9df-4476-94f2-c40fd3842e43",
+  "_outcomes": [
+    {
+      "displayName": "Done",
+      "id": "DONE"
+    }
+  ],
+  "_rev": "-235113131",
+  "_type": {
+    "_id": "PollingWaitNode",
+    "collection": true,
+    "name": "Polling Wait Node",
+    "version": "1.0"
+  },
+  "exitMessage": {
+    "en": "Continue"
+  },
+  "exitable": false,
+  "secondsToWait": 3,
+  "spamDetectionEnabled": false,
+  "spamDetectionTolerance": 2,
+  "waitingMessage": {
+    "en": "Kerberos authentications failed. Falling back ro form-based authentication."
+  }
+}

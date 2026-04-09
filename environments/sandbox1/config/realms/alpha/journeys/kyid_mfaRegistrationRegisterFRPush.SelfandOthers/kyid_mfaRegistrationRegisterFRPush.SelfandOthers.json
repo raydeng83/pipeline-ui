@@ -1,0 +1,239 @@
+{
+  "_id": "kyid_mfaRegistrationRegisterFRPush.SelfandOthers",
+  "_rev": "-349579504",
+  "enabled": true,
+  "entryNodeId": "e4b566bf-7470-414e-9321-fd715a6f67ab",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "010d6dbf-d9a2-4fb7-aba5-ce627d3a069d": {
+      "connections": {
+        "DONE": "2ce576ab-3ed9-4c90-a5bc-d865fb05e1cb"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1385.6666564941406,
+      "y": 514.3333282470703
+    },
+    "0111979f-42cf-419f-86b8-bead17885ccc": {
+      "connections": {
+        "false": "189325a1-ae6a-4d88-9fd4-f07bc8c91bab",
+        "true": "9c44fa8b-b1b3-4bd3-b59a-a4558339071d"
+      },
+      "displayName": "Resend Push / Another factor",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 869,
+      "y": 364.015625
+    },
+    "1148b100-cc5c-49dd-a387-bfffd674d764": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fada1ede-b45c-4320-9074-92c069921d7d"
+      },
+      "displayName": "Update User Profile for MFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1886,
+      "y": 86.66666666666667
+    },
+    "11cd82e1-e55e-417e-a0d6-9e8db93bdee7": {
+      "connections": {
+        "false": "189325a1-ae6a-4d88-9fd4-f07bc8c91bab",
+        "true": "df8bb24d-2b73-4e8d-b52f-331fb6db926e"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1511,
+      "y": 668.015625
+    },
+    "189325a1-ae6a-4d88-9fd4-f07bc8c91bab": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1923,
+      "y": 261.8333333333333
+    },
+    "281d077e-4d37-4b5d-8ba2-bb0e96592899": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1148b100-cc5c-49dd-a387-bfffd674d764"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1649,
+      "y": 80
+    },
+    "2ce576ab-3ed9-4c90-a5bc-d865fb05e1cb": {
+      "connections": {
+        "EXPIRED": "dbb08229-2477-451e-a661-f631382b3fa7",
+        "FALSE": "dbb08229-2477-451e-a661-f631382b3fa7",
+        "TRUE": "281d077e-4d37-4b5d-8ba2-bb0e96592899",
+        "WAITING": "010d6dbf-d9a2-4fb7-aba5-ce627d3a069d"
+      },
+      "displayName": "Push Result Verifier Node",
+      "nodeType": "PushResultVerifierNode",
+      "version": "1.0",
+      "x": 1180,
+      "y": 81
+    },
+    "35157a6f-13a1-4c4c-893e-8a4aaa9afcb8": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetUp additional security methods",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2126,
+      "y": 819.015625
+    },
+    "4f351fd7-d391-47c0-a877-4e36599272b5": {
+      "connections": {
+        "DONE": "2ce576ab-3ed9-4c90-a5bc-d865fb05e1cb"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1231,
+      "y": 288
+    },
+    "5088b820-0b7a-4a1c-a032-f5b0ceded318": {
+      "connections": {
+        "NOT_REGISTERED": "9c44fa8b-b1b3-4bd3-b59a-a4558339071d",
+        "SENT": "2ce576ab-3ed9-4c90-a5bc-d865fb05e1cb"
+      },
+      "displayName": "Push Sender",
+      "nodeType": "PushAuthenticationSenderNode",
+      "version": "1.0",
+      "x": 848,
+      "y": 75.66666666666667
+    },
+    "91bc02db-34eb-4e32-86d3-d0453f201df8": {
+      "connections": {
+        "Another Factor?": "189325a1-ae6a-4d88-9fd4-f07bc8c91bab",
+        "Resend Push": "9c44fa8b-b1b3-4bd3-b59a-a4558339071d"
+      },
+      "displayName": "Resend Push / Another factor",
+      "nodeType": "ChoiceCollectorNode",
+      "version": "1.0",
+      "x": 868,
+      "y": 220.83333333333331
+    },
+    "92aa69b8-7782-4ae3-ad16-c02f6be50686": {
+      "connections": {
+        "failureOutcome": "0111979f-42cf-419f-86b8-bead17885ccc",
+        "successOutcome": "5088b820-0b7a-4a1c-a032-f5b0ceded318",
+        "timeoutOutcome": "0111979f-42cf-419f-86b8-bead17885ccc"
+      },
+      "displayName": "Push Registration",
+      "nodeType": "PushRegistrationNode",
+      "version": "1.0",
+      "x": 583,
+      "y": 95.5
+    },
+    "9c44fa8b-b1b3-4bd3-b59a-a4558339071d": {
+      "connections": {
+        "failureOutcome": "0111979f-42cf-419f-86b8-bead17885ccc",
+        "successOutcome": "5088b820-0b7a-4a1c-a032-f5b0ceded318",
+        "timeoutOutcome": "0111979f-42cf-419f-86b8-bead17885ccc"
+      },
+      "displayName": "Push Registration",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 594,
+      "y": 381
+    },
+    "b16df643-fced-41c8-98af-a53248ad8a0f": {
+      "connections": {
+        "false": "35157a6f-13a1-4c4c-893e-8a4aaa9afcb8",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1888,
+      "y": 710.015625
+    },
+    "dbb08229-2477-451e-a661-f631382b3fa7": {
+      "connections": {
+        "false": "189325a1-ae6a-4d88-9fd4-f07bc8c91bab",
+        "true": "5088b820-0b7a-4a1c-a032-f5b0ceded318"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1649,
+      "y": 265
+    },
+    "df8bb24d-2b73-4e8d-b52f-331fb6db926e": {
+      "connections": {
+        "DONE": "2ce576ab-3ed9-4c90-a5bc-d865fb05e1cb",
+        "EXITED": "11cd82e1-e55e-417e-a0d6-9e8db93bdee7"
+      },
+      "displayName": "Push Wait Node",
+      "nodeType": "PushWaitNode",
+      "version": "1.0",
+      "x": 1072,
+      "y": 418
+    },
+    "e21804e6-d532-4f33-b237-81fb75f5cd50": {
+      "connections": {
+        "anotherMethod": "189325a1-ae6a-4d88-9fd4-f07bc8c91bab",
+        "true": "9c44fa8b-b1b3-4bd3-b59a-a4558339071d"
+      },
+      "displayName": "Display instruction",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 318,
+      "y": 166.5
+    },
+    "e4b566bf-7470-414e-9321-fd715a6f67ab": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e21804e6-d532-4f33-b237-81fb75f5cd50"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 271.7875061035156,
+      "y": 473.6125030517578
+    },
+    "fada1ede-b45c-4320-9074-92c069921d7d": {
+      "connections": {
+        "true": "b16df643-fced-41c8-98af-a53248ad8a0f"
+      },
+      "displayName": "Script: Set IDPAuthType",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1893,
+      "y": 477.3125
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2187,
+      "y": 250.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2187,
+      "y": 121
+    },
+    "startNode": {
+      "x": 70,
+      "y": 350.25
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

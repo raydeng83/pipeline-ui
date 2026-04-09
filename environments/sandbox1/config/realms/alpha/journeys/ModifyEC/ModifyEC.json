@@ -1,0 +1,17 @@
+{
+  "_id": "ModifyEC",
+  "_rev": "-403200040",
+  "description": "Journey to modify EC object",
+  "enabled": true,
+  "entryNodeId": "e301438c-0bd0-429c-ab0c-66126501069a",
+  "identityResource": "managed/EnrollmentContext",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {},
+  "staticNodes": {},
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"Misc\"]"
+  }
+}

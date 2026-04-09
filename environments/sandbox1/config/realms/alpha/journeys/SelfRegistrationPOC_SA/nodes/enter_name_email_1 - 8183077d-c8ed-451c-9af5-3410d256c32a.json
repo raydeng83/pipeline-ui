@@ -1,0 +1,31 @@
+{
+  "_id": "8183077d-c8ed-451c-9af5-3410d256c32a",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-177247702",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "1b532f8f-6835-419b-a155-80cd474cef69",
+      "displayName": "Attribute Collector",
+      "nodeType": "AttributeCollectorNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "Your email will serve as a username for your KYID account"
+  },
+  "pageHeader": {
+    "en": "Enter your name and email"
+  },
+  "stage": "{\"submitButtonText\":{\"en\":\"Next\"},\"themeId\":\"ad0c7178-859b-4eb0-ace3-3110aba3d31b\"}"
+}

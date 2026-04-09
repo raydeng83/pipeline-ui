@@ -1,0 +1,6 @@
+{
+  "_id": "esv-kyid-kogapi-isauthzendpoint-dev",
+  "description": "isAuthorized endpoint for DEV",
+  "expressionType": "string",
+  "valueBase64": "${ESV_KYID_KOGAPI_ISAUTHZENDPOINT_DEV}"
+}

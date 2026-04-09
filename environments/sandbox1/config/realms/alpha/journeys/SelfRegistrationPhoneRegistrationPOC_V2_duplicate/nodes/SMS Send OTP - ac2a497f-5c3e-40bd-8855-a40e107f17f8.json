@@ -1,0 +1,52 @@
+{
+  "_id": "ac2a497f-5c3e-40bd-8855-a40e107f17f8",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "expired",
+      "id": "expired"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    }
+  ],
+  "_rev": "-1163390279",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "4c71b815-51fb-465a-9cfb-7dc9d8bde7d1",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify_phone</h5></div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Configurar la autenticación del teléfono\n</h5><br>\n<a href=\"&{esv.kog.help.mfa.reg.sms.url}\" target=\"_blank\">¿Necesita ayuda?\n</a>"
+  },
+  "pageHeader": {
+    "en": "3_Verify_phone_number"
+  },
+  "stage": "{\"themeId\":\"ad0c7178-859b-4eb0-ace3-3110aba3d31b\"}"
+}

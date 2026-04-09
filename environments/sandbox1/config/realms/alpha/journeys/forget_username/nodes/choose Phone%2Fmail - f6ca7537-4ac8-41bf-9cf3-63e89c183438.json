@@ -1,0 +1,32 @@
+{
+  "_id": "f6ca7537-4ac8-41bf-9cf3-63e89c183438",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "phone",
+      "id": "phone"
+    }
+  ],
+  "_rev": "2085737857",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "285ba3cd-518a-4296-bd67-f98781846b54",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "Choose your preferred recovery method and complete the field below."
+  },
+  "pageHeader": {}
+}

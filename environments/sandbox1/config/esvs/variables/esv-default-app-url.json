@@ -1,0 +1,6 @@
+{
+  "_id": "esv-default-app-url",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_DEFAULT_APP_URL}"
+}

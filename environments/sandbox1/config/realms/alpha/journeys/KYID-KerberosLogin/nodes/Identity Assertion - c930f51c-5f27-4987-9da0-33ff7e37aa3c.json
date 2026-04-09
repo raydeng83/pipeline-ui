@@ -1,0 +1,24 @@
+{
+  "_id": "c930f51c-5f27-4987-9da0-33ff7e37aa3c",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "SUCCESS"
+    },
+    {
+      "displayName": "Error",
+      "id": "ERROR"
+    }
+  ],
+  "_rev": "-875820846",
+  "_type": {
+    "_id": "IdentityAssertionDecisionNode",
+    "collection": true,
+    "name": "Identity Assertion",
+    "version": "1.0"
+  },
+  "serverToSharedStateMap": {
+    "principal": "username"
+  },
+  "sharedStateToServerMap": {}
+}

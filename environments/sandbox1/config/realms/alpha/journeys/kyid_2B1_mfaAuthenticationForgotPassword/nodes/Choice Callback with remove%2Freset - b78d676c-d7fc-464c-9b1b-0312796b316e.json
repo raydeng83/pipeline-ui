@@ -1,0 +1,62 @@
+{
+  "_id": "b78d676c-d7fc-464c-9b1b-0312796b316e",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-1608890019",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "5b48a39c-27e4-4bcc-960c-5e2641640856",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "fecf2f31-145c-4991-a3d4-ab4792dcb844",
+      "displayName": "Script",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "5d6c2ee5-502c-4a1a-9585-94be344e7bd4",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify_your_Account</h5></div>\n<div class=\"page-element\">\n\n</div>\n<div class=\"page-header-content\">\nHow_would_you_like_to_verify_your_account\n</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\">Verifica_tu_cuenta</h5>\n<br>\n<h5 style=\"color:#5e5e5e;\">\n¿Cómo_le_gustaría_verificar_su_cuenta?</h5>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

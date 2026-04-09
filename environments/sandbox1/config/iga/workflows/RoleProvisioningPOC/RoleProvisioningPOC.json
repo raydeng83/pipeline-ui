@@ -1,0 +1,141 @@
+{
+  "_rev": 0,
+  "childType": false,
+  "description": "RoleProvisioningPOC",
+  "displayName": "RoleProvisioningPOC",
+  "id": "roleProvisioningPoc",
+  "mutable": true,
+  "name": "RoleProvisioningPOC",
+  "staticNodes": {
+    "endNode": {
+      "_outcomes": [],
+      "connections": {},
+      "displayDetails": {
+        "icon": "checkmark",
+        "value": "Success",
+        "variant": "success"
+      },
+      "displayType": "SingleInput",
+      "hasError": false,
+      "id": "endNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "End",
+      "nodeType": "SingleInput",
+      "schema": null,
+      "template": null,
+      "x": 2159,
+      "y": 272
+    },
+    "startNode": {
+      "_outcomes": [
+        {
+          "displayName": "start",
+          "id": "start"
+        }
+      ],
+      "connections": {
+        "start": "scriptTask-dc4ee67c271a"
+      },
+      "displayDetails": {
+        "icon": "play_arrow",
+        "value": "Start",
+        "variant": "info"
+      },
+      "displayType": "IconOutcomeNode",
+      "hasError": false,
+      "id": "startNode",
+      "isDeleteable": false,
+      "isDroppable": false,
+      "isEditable": false,
+      "isHovered": false,
+      "name": "Start",
+      "nodeType": "IconOutcomeNode",
+      "schema": null,
+      "template": null,
+      "x": 50,
+      "y": 250
+    },
+    "uiConfig": {
+      "approvalTask-09e2ff6faadc": {
+        "actors": {
+          "isExpression": true,
+          "value": "/**\nDefine custom script which returns an array of actors in the following format\n(function() {\n    var content = execution.getVariables();\n    var requestId = content.get('id');\n    var requestIndex = openidm.action('iga/governance/requests/' + requestId, 'GET', {}, {});\n    return [{\n        \"id\": \"managed/user/\" + requestIndex.applicationOwner[0].id,\n        \"permissions\": {\n            \"approve\": true,\n            \"reject\": true,\n            \"reassign\": true,\n            \"modify\": true,\n            \"comment\": true\n        }\n    }];\n})()\n**/\n(function() {\n    logger.error(\"InSide Approver Node\")\n    var content = execution.getVariables();\n    var requestId = content.get('id');\n    var roleId = null;\n    var users = [];\n\n    try {\n      var requestObj = openidm.action('iga/governance/requests/' + requestId, 'GET', {}, {});\n        logger.error(\"Naren Wrokflow Logs requestObj  from Approval Node\"+ requestObj )\n      roleId = requestObj.request.custom.roleId;\n        logger.error(\"Naren Wrokflow Logs Role ID from Approval Node\"+ roleId )\n    }\n    catch (e) {\n      failureReason = \"Validation failed: Error reading request with id \" + requestId;\n    }\n    try{\n         logger.error(\"InSide Approver Node Line 16\")\n      var glossary = openidm.action('iga/governance/role/' + roleId +'/glossary', 'GET', {}, {})\n     logger.error(\"Glossary Is \"+glossary )\n      let approversRole = glossary.approvers\n      logger.error(\"Naren Workflow logs:Approval Node:  Approver Role is : \"+ approversRole)\n      var approversRoleId = approversRole.split(\"role/\")[1];\n        logger.error(\"Naren Workflow logs:Approval Node:  approversRoleId is : \"+ approversRoleId)\n    //   var params = {\n    // '_queryFilter' : 'effectiveRoles._refResourceId eq \"' + approversRoleId + '\"'\n    //   };\n    //  var roleQueryResponse = openidm.query(\"managed/user\", params, [\"userName\", \"_id\"]);\n\n    var roleQueryResponse = openidm.query(\"managed/alpha_role/\" + approversRoleId + \"/members\", {\n    \"_queryFilter\": \"true\"\n  }, [\"_refResourceId\"]);\n\n    logger.error(\"Naren Workflow logs:Approval Node:  roleQueryResponse is\"+ roleQueryResponse.result[0]._refResourceId)\n        logger.error(\"Naren Workflow logs:Approval Node:  roleQueryResponse is\"+ roleQueryResponse.result[1]._refResourceId)\n        logger.error(\"Naren Workflow logs:Approval Node:  roleQueryResponse is\"+ roleQueryResponse.result[2]._refResourceId)\n        \n     logger.error(\"Naren Workflow logs:Approval Node:  roleQueryResponse Length is\"+ roleQueryResponse.result)\n     logger.error(\"Naren Workflow logs:Approval Node:  roleQueryResponse is\"+ roleQueryResponse.length)\n     logger.error(\"Naren Workflow logs:Approval Node:  roleQueryResponse is\"+ roleQueryResponse.result.length)\n      for(var i = 0; i < roleQueryResponse.result.length; i++){\n        var userId= roleQueryResponse.result[i]._refResourceId\n         logger.error(\"Approver User ID is :: \"+userId )\n        // var userId = approvers[i];\n        users.push({\n          \"id\": \"managed/user/\"+userId, \"permissions\": {\"approve\": true, \"reject\": true, \"forward\": true, \"modify\": true, \"comment\": true}\n        })\n\n      }\n\n    }\n    catch (e){\n      failureReason = \"Validation failed: Error reading request with id \" + requestId;\n    }\n    logger.error(\"Approvers are  \"+users )\n\n    if(users.length > 0){\n      return users;\n    }\n    else {\n      // default approver logic\n    }\n})()"
+        },
+        "events": {
+          "escalationDate": 1,
+          "escalationType": "applicationOwner",
+          "expirationDate": 1,
+          "reminderDate": 1
+        },
+        "x": 718.2222290039062,
+        "y": 294
+      },
+      "approvalTask-7ce3550b317a": {
+        "actors": [
+          {
+            "id": {
+              "isExpression": false,
+              "value": "managed/user/555a8b24-fe49-4638-926f-8d7e91e65a6d"
+            },
+            "type": "user"
+          }
+        ],
+        "events": {
+          "escalationDate": 5,
+          "escalationTimeSpan": "day(s)",
+          "escalationType": "applicationOwner",
+          "expirationDate": 7,
+          "expirationTimeSpan": "day(s)",
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 680.3333129882812,
+        "y": 492.3333282470703
+      },
+      "exclusiveGateway-4cd8cc874738": {
+        "x": 1094,
+        "y": 103
+      },
+      "inclusiveGateway-2b685dcedd96": {
+        "x": 938.3333129882812,
+        "y": 473.3333282470703
+      },
+      "inclusiveGateway-2c886d23cf5d": {
+        "x": 413.33331298828125,
+        "y": 453.3333282470703
+      },
+      "scriptTask-030e547762fb": {
+        "x": 1575,
+        "y": 399
+      },
+      "scriptTask-09a01f1f27f4": {
+        "x": 873,
+        "y": 103
+      },
+      "scriptTask-25e6e0567c81": {
+        "x": 1551.2222290039062,
+        "y": 215.2222137451172
+      },
+      "scriptTask-3ffae9ad152c": {
+        "x": 399,
+        "y": 182
+      },
+      "scriptTask-577a38f4d657": {
+        "x": 1134.6666736602783,
+        "y": 319.2222137451172
+      },
+      "scriptTask-85f37b5a334f": {
+        "x": 179.22222900390625,
+        "y": 507.2222137451172
+      },
+      "scriptTask-dc4ee67c271a": {
+        "x": 77.22222900390625,
+        "y": 359.2222137451172
+      }
+    }
+  },
+  "status": "published"
+}

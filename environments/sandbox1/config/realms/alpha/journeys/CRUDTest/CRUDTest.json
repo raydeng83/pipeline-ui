@@ -1,0 +1,46 @@
+{
+  "_id": "CRUDTest",
+  "_rev": "1153760515",
+  "enabled": true,
+  "entryNodeId": "7efc28c3-baae-4bc2-bf70-5d71a454a87a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "7efc28c3-baae-4bc2-bf70-5d71a454a87a": {
+      "connections": {},
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 200,
+      "y": 50.9999885559082
+    },
+    "d0210f5e-2deb-433f-a2d2-2adb1cfca36b": {
+      "connections": {},
+      "displayName": "Identity Store Decision",
+      "nodeType": "IdentityStoreDecisionNode",
+      "version": "1.0",
+      "x": 452.33333587646484,
+      "y": 59.999990463256836
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 884,
+      "y": 47
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 500,
+      "y": 350
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "8dc07283-b379-43ea-8130-91ec9fa292e1",
+  "_outcomes": [
+    {
+      "displayName": "Send code to my phone or email",
+      "id": "Send code to my phone or email"
+    },
+    {
+      "displayName": "Verify my identity with my U.S.Driver's License",
+      "id": "Verify my identity with my U.S.Driver's License"
+    },
+    {
+      "displayName": "Verify with identity proofing",
+      "id": "Verify with identity proofing"
+    },
+    {
+      "displayName": "Verify my identity by calling the helpdesk",
+      "id": "Verify my identity by calling the helpdesk"
+    }
+  ],
+  "_rev": "-1178681484",
+  "_type": {
+    "_id": "ChoiceCollectorNode",
+    "collection": true,
+    "name": "Choice Collector",
+    "version": "1.0"
+  },
+  "choices": [
+    "Send code to my phone or email",
+    "Verify my identity with my U.S.Driver's License",
+    "Verify with identity proofing",
+    "Verify my identity by calling the helpdesk"
+  ],
+  "defaultChoice": "Send code to my phone or email",
+  "prompt": "How would you like to verify your Identity?"
+}

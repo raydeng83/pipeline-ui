@@ -1,0 +1,25 @@
+{
+  "_id": "316ef63a-ab06-4f26-b288-4e604b2f0131",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "2107104925",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "good device"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

@@ -1,0 +1,146 @@
+{
+  "_id": "kyid_mfaAuthenticationForRemoveReset",
+  "_rev": "625991708",
+  "description": "Self and Others Authentication ",
+  "enabled": true,
+  "entryNodeId": "4a96d155-04ef-44a8-89e3-192a93d8a1c4",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0238cfef-2815-414a-b339-4460779c35fb": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "50a628b5-943e-49ca-ae06-1571b27ad8d7",
+        "without": "50a628b5-943e-49ca-ae06-1571b27ad8d7"
+      },
+      "displayName": "Choose Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1021,
+      "y": 354.1666666666667
+    },
+    "34e48c19-98c7-464e-b82d-7399f1a55148": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0238cfef-2815-414a-b339-4460779c35fb"
+      },
+      "displayName": "KYID-MFAAuthentication-EmailOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 80
+    },
+    "46ef8630-9afd-40b3-8f67-f2a4a7c0f6bd": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0238cfef-2815-414a-b339-4460779c35fb"
+      },
+      "displayName": "KYID-MFAAuthenticationSymantec",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 816
+    },
+    "4a96d155-04ef-44a8-89e3-192a93d8a1c4": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "50a628b5-943e-49ca-ae06-1571b27ad8d7"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 540
+    },
+    "50a628b5-943e-49ca-ae06-1571b27ad8d7": {
+      "connections": {
+        "Default": "f0f564b3-0db8-4927-9c85-c948596b2d05",
+        "email": "34e48c19-98c7-464e-b82d-7399f1a55148",
+        "otp": "cf7c145d-39c7-43f9-be13-2f2640554927",
+        "sms": "a32be793-2953-4825-8d9c-1bbdcd2745f5",
+        "swk": "9036417c-5a9d-4c02-8fae-518a216c5118",
+        "symantec": "46ef8630-9afd-40b3-8f67-f2a4a7c0f6bd",
+        "voice": "a2d50337-1ece-47e2-afcd-6442e48ecf2c"
+      },
+      "displayName": "Without Remove/reset option Dynamic choice collector",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 433,
+      "y": 454
+    },
+    "9036417c-5a9d-4c02-8fae-518a216c5118": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0238cfef-2815-414a-b339-4460779c35fb"
+      },
+      "displayName": "KYID-MFAAuthentication-FRPushNotification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 632
+    },
+    "a2d50337-1ece-47e2-afcd-6442e48ecf2c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0238cfef-2815-414a-b339-4460779c35fb"
+      },
+      "displayName": "Twilio API",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 1000
+    },
+    "a32be793-2953-4825-8d9c-1bbdcd2745f5": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0238cfef-2815-414a-b339-4460779c35fb"
+      },
+      "displayName": "KYID-MFAAuthentication-SMSOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 448
+    },
+    "cf7c145d-39c7-43f9-be13-2f2640554927": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "0238cfef-2815-414a-b339-4460779c35fb"
+      },
+      "displayName": "kyid_mfaAuthenticationFRTOTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 701,
+      "y": 264
+    },
+    "f0f564b3-0db8-4927-9c85-c948596b2d05": {
+      "connections": {
+        "true": "4a96d155-04ef-44a8-89e3-192a93d8a1c4"
+      },
+      "displayName": "Blank Error Message",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 209,
+      "y": 346.55555725097656
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1415,
+      "y": 397
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1412,
+      "y": 278.33333333333337
+    },
+    "startNode": {
+      "x": 70,
+      "y": 557
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

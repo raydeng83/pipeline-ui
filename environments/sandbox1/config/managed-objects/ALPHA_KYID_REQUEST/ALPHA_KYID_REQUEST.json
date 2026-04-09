@@ -1,0 +1,107 @@
+{
+  "name": "ALPHA_KYID_REQUEST",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "Type",
+      "Requester",
+      "Steps",
+      "Status",
+      "start_Date",
+      "end_Date",
+      "create_Date",
+      "update_Date",
+      "created_By",
+      "updated_By"
+    ],
+    "properties": {
+      "Requester": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "Status": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "Steps": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "Type": {
+        "searchable": false,
+        "title": null,
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "create_Date": {
+        "description": null,
+        "format": "date",
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Create Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "created_By": {
+        "searchable": false,
+        "title": "Created By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "end_Date": {
+        "description": null,
+        "format": "date",
+        "isVirtual": false,
+        "searchable": false,
+        "title": "End Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "start_Date": {
+        "description": null,
+        "format": "date",
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Start Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "update_Date": {
+        "description": null,
+        "format": "date",
+        "isVirtual": false,
+        "searchable": false,
+        "title": "Update Date",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "updated_By": {
+        "searchable": false,
+        "title": "Updated By",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "Request",
+    "type": "object"
+  }
+}

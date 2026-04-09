@@ -1,0 +1,25 @@
+{
+  "_id": "b066513e-7558-45af-8be3-e28eb73a94da",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "787552658",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "invalid phone or email"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

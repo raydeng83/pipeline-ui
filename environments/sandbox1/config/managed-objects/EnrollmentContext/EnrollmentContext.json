@@ -1,0 +1,39 @@
+{
+  "name": "EnrollmentContext",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "Enrollment Context POC",
+    "icon": "fa-database",
+    "order": [
+      "name",
+      "description",
+      "id"
+    ],
+    "properties": {
+      "description": {
+        "searchable": false,
+        "title": "Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "id": {
+        "searchable": false,
+        "title": "Identifier",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "searchable": false,
+        "title": "Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "Enrollment Context",
+    "type": "object"
+  }
+}

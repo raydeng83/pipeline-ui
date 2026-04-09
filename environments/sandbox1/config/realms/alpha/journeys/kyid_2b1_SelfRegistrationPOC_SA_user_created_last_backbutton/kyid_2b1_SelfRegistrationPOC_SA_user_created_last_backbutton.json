@@ -1,0 +1,255 @@
+{
+  "_id": "kyid_2b1_SelfRegistrationPOC_SA_user_created_last_backbutton",
+  "_rev": "-750765891",
+  "description": "for Captcha",
+  "enabled": true,
+  "entryNodeId": "8c0b889f-b199-4454-98a9-a5765735b6c6",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0824a22a-a446-4cf7-89c1-8d5f0afdbf9f": {
+      "connections": {
+        "pass": "960cf931-8556-4fc6-aa1c-6aaf2f638a70",
+        "true": "d7376d37-b33c-4214-ac48-dc494150fc8b"
+      },
+      "displayName": "Check primary & alternate mail",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 360.8888854980469,
+      "y": 943.7777557373047
+    },
+    "39ea488f-2e40-4f71-8a00-d93fcdf5e6a7": {
+      "connections": {
+        "false": "908e4951-c6bb-4b8a-8f28-0aa1b1836300",
+        "true": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369"
+      },
+      "displayName": "Divert",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1296,
+      "y": 477.3333282470703
+    },
+    "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369": {
+      "connections": {
+        "back": "8c0b889f-b199-4454-98a9-a5765735b6c6",
+        "next": "7747ab0a-349d-42f1-838a-b6d6ea1fd3ca"
+      },
+      "displayName": "Select account recovery method",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 595.5625,
+      "y": 348.5
+    },
+    "5c79503f-f13a-45a4-9dd3-207afaa6367e": {
+      "connections": {
+        "false": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369",
+        "true": "f54c4b8a-ee8a-4dd3-ad98-c2e38f2cdfce"
+      },
+      "displayName": "create phone object",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1635,
+      "y": 724.5
+    },
+    "7747ab0a-349d-42f1-838a-b6d6ea1fd3ca": {
+      "connections": {
+        "back": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369",
+        "email": "0824a22a-a446-4cf7-89c1-8d5f0afdbf9f",
+        "phone": "a0e32a38-69eb-49fc-81c9-bf6221b113ab"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 936,
+      "y": 371
+    },
+    "7b1bdead-3385-4fca-bfb3-f220f2ecb694": {
+      "connections": {
+        "false": "8c0b889f-b199-4454-98a9-a5765735b6c6",
+        "true": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369"
+      },
+      "displayName": "Email Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 827,
+      "y": 175
+    },
+    "85670929-6f6c-437d-b7eb-5e123f2c01a9": {
+      "connections": {
+        "FAILURE": "f54c4b8a-ee8a-4dd3-ad98-c2e38f2cdfce",
+        "PATCHED": "e22e2aca-a10b-47dc-9868-cc5cdb7a8d39"
+      },
+      "displayName": "Patch Object",
+      "nodeType": "PatchObjectNode",
+      "version": "1.0",
+      "x": 1235,
+      "y": 214
+    },
+    "8c0b889f-b199-4454-98a9-a5765735b6c6": {
+      "connections": {
+        "true": "af69e172-76e2-4f12-9096-f170805ffa2c"
+      },
+      "displayName": "enter_name_email_1",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 289,
+      "y": 0
+    },
+    "908e4951-c6bb-4b8a-8f28-0aa1b1836300": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "a929b2cb-21e8-4084-92a3-1602f0e8ae1a"
+      },
+      "displayName": "Create User in AIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 879.6875,
+      "y": 0
+    },
+    "960cf931-8556-4fc6-aa1c-6aaf2f638a70": {
+      "connections": {
+        "outcome": "ae9d124a-eb6e-43af-9ab5-34e91d4e6862"
+      },
+      "displayName": "HOTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 403,
+      "y": 751.2222137451172
+    },
+    "a0e32a38-69eb-49fc-81c9-bf6221b113ab": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "39ea488f-2e40-4f71-8a00-d93fcdf5e6a7"
+      },
+      "displayName": "Phone Auth",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1114,
+      "y": 570.5
+    },
+    "a929b2cb-21e8-4084-92a3-1602f0e8ae1a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "f54c4b8a-ee8a-4dd3-ad98-c2e38f2cdfce"
+      },
+      "displayName": "create mail/Phone object",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1131,
+      "y": 0
+    },
+    "ae9d124a-eb6e-43af-9ab5-34e91d4e6862": {
+      "connections": {
+        "success": "b6426ddb-34ac-442a-83d4-3becf308f2c8"
+      },
+      "displayName": "send otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 703,
+      "y": 664.8888816833496
+    },
+    "af69e172-76e2-4f12-9096-f170805ffa2c": {
+      "connections": {
+        "false": "7b1bdead-3385-4fca-bfb3-f220f2ecb694",
+        "true": "e623b181-7d94-496e-a527-384d2adcfbff"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 538,
+      "y": 71.5
+    },
+    "b6426ddb-34ac-442a-83d4-3becf308f2c8": {
+      "connections": {
+        "Choose Another": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369",
+        "Method": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369",
+        "Resend Code": "960cf931-8556-4fc6-aa1c-6aaf2f638a70",
+        "Verify": "908e4951-c6bb-4b8a-8f28-0aa1b1836300",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Verify email",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1146,
+      "y": 818.8888816833496
+    },
+    "d7376d37-b33c-4214-ac48-dc494150fc8b": {
+      "connections": {
+        "try again": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369"
+      },
+      "displayName": "Existing alternate mail same as primary",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 707.0416564941406,
+      "y": 941.5555572509766
+    },
+    "e22e2aca-a10b-47dc-9868-cc5cdb7a8d39": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1465.2638854980469,
+      "y": 9.666658401489258
+    },
+    "e4efd60c-7a87-4ec2-b903-f8b901ae59d4": {
+      "connections": {},
+      "displayName": "CAPTCHA",
+      "nodeType": "product-CaptchaNode",
+      "version": "1.0",
+      "x": 348.37498474121094,
+      "y": 310.2222137451172
+    },
+    "e623b181-7d94-496e-a527-384d2adcfbff": {
+      "connections": {
+        "pass": "3a7cedf5-c5cb-4f7b-b94f-65b7a8811369",
+        "sign in": "8c0b889f-b199-4454-98a9-a5765735b6c6",
+        "try again": "8c0b889f-b199-4454-98a9-a5765735b6c6"
+      },
+      "displayName": "Existing Account",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 107,
+      "y": 494
+    },
+    "f54c4b8a-ee8a-4dd3-ad98-c2e38f2cdfce": {
+      "connections": {
+        "outcome": "85670929-6f6c-437d-b7eb-5e123f2c01a9"
+      },
+      "displayName": "create password",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1657,
+      "y": 254.5
+    },
+    "fd10f448-a932-4dcc-8360-aca4ec16e06a": {
+      "connections": {},
+      "displayName": "Login Journey",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 69,
+      "y": 341
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1791,
+      "y": 18
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2073,
+      "y": 313
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

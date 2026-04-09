@@ -1,0 +1,27 @@
+{
+  "_id": "4aeb2f9a-dc77-4342-b2a6-ca043b44575e",
+  "_outcomes": [
+    {
+      "displayName": "Sent",
+      "id": "SENT"
+    },
+    {
+      "displayName": "Not Registered",
+      "id": "NOT_REGISTERED"
+    }
+  ],
+  "_rev": "-402459459",
+  "_type": {
+    "_id": "PushAuthenticationSenderNode",
+    "collection": true,
+    "name": "Push Sender",
+    "version": "1.0"
+  },
+  "captureFailure": false,
+  "contextInfo": false,
+  "customPayload": [],
+  "mandatory": true,
+  "messageTimeout": 20000,
+  "pushType": "DEFAULT",
+  "userMessage": {}
+}

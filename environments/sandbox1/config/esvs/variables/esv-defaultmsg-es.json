@@ -1,0 +1,6 @@
+{
+  "_id": "esv-defaultmsg-es",
+  "description": "Variable to store value for default option in drpdown",
+  "expressionType": "string",
+  "valueBase64": "${ESV_DEFAULTMSG_ES}"
+}

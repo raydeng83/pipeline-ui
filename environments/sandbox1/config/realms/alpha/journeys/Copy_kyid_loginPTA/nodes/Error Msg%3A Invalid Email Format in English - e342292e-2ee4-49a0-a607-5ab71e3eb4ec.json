@@ -1,0 +1,31 @@
+{
+  "_id": "e342292e-2ee4-49a0-a607-5ab71e3eb4ec",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "838868524",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "a6841a77-2e13-49ff-9e3c-c0c895977abb",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element text-align-left'>\\n<a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a>\\n</div>\\n</div>\"},\"ConfirmationCallback\":[{\"id\":\"3fd98b19-5e72-43cb-8983-b0d4b205dd0d\",\"showOnlyPositiveAnswer\":true}],\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

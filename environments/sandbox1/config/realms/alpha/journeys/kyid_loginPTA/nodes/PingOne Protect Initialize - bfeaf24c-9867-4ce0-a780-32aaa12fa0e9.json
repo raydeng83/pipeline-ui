@@ -1,0 +1,31 @@
+{
+  "_id": "bfeaf24c-9867-4ce0-a780-32aaa12fa0e9",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1556950324",
+  "_type": {
+    "_id": "product-PingOneProtectInitializeNode",
+    "collection": true,
+    "name": "PingOne Protect Initialize",
+    "version": "1.0"
+  },
+  "additionalSignalsInitializationOptions": {},
+  "agentIdentification": false,
+  "behavioralDataCollection": true,
+  "consoleLogEnabled": true,
+  "deviceAttributesToIgnore": [],
+  "deviceKeyRsyncIntervals": 14,
+  "disableHub": false,
+  "disableTags": false,
+  "enableTrust": false,
+  "lazyMetadata": false,
+  "pingOneWorker": "PingOne Worker Service"
+}

@@ -1,0 +1,61 @@
+{
+  "name": "Test",
+  "type": "request",
+  "description": "Test",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "6e4716a0-9c87-46c6-b99d-aebf8eaf9b54",
+        "fields": [
+          {
+            "id": "e920cbb3-5a06-40b4-a34c-e087f3e06d1e",
+            "model": "custom.roleId",
+            "type": "string",
+            "label": "role ID of User",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "e082ae60-2c8b-4699-bb1e-294a814c5268",
+        "fields": [
+          {
+            "id": "7e4afa66-4541-4c18-8239-92b7cd434ffe",
+            "model": "custom.userId",
+            "type": "string",
+            "label": "User ID",
+            "description": "User ID of User",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "id": "81b9de2b-f742-4a0c-a681-7cf0bca44f9a",
+  "_rev": 18,
+  "metadata": {
+    "modifiedDate": "2025-02-28T12:02:34.374Z",
+    "createdDate": "2025-02-19T09:30:16.020889436Z"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "_id": "6dfcae75-e125-4691-8d31-df1e4be82c99",
+  "_outcomes": [
+    {
+      "displayName": "next",
+      "id": "next"
+    },
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "skip",
+      "id": "skip"
+    },
+    {
+      "displayName": "dontVerify",
+      "id": "dontVerify"
+    }
+  ],
+  "_rev": "527597025",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "4c165754-4af6-47b1-8bf8-cc96084e5375",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "set_recovery_method"
+  },
+  "pageHeader": {
+    "en": "2_phone_number"
+  },
+  "stage": "{\"pageFooter\":{\"en\":\"additional_recovery_methods\"}}"
+}

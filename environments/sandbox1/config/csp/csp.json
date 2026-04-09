@@ -1,0 +1,111 @@
+{
+  "enforced": {
+    "active": true,
+    "directives": {
+      "base-uri": [
+        "'none'"
+      ],
+      "connect-src": [
+        "'self'",
+        "https://www.google.com",
+        "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io"
+      ],
+      "default-src": [
+        "'unsafe-inline'",
+        "'self'",
+        "'unsafe-hashes'"
+      ],
+      "font-src": [
+        "'self'",
+        "https://www.google.com",
+        "https://cdn.forgerock.com"
+      ],
+      "frame-ancestors": [
+        "'self'"
+      ],
+      "frame-src": [
+        "'self'",
+        "https://www.google.com"
+      ],
+      "img-src": [
+        "'self'",
+        "https://ok10static.oktacdn.com",
+        "https://kog.chfs.ky.gov",
+        "https://ide.kog.ky.gov",
+        "https://dev.kog.ky.gov",
+        "https://sso.dev.kyid.ky.gov",
+        "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io",
+        "data:"
+      ],
+      "object-src": [
+        "'none'"
+      ],
+      "script-src": [
+        "'self'",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "https://www.google.com",
+        "https://www.gstatic.com"
+      ],
+      "style-src-elem": [
+        "'self'",
+        "'unsafe-inline'",
+        "https://www.google.com"
+      ]
+    }
+  },
+  "report-only": {
+    "active": false,
+    "directives": {
+      "base-uri": [
+        "'none'"
+      ],
+      "connect-src": [
+        "'self'",
+        "https://www.google.com",
+        "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io"
+      ],
+      "default-src": [
+        "'self'",
+        "'unsafe-inline'",
+        "'unsafe-hashes'"
+      ],
+      "font-src": [
+        "'self'",
+        "https://www.google.com"
+      ],
+      "frame-ancestors": [
+        "'self'"
+      ],
+      "frame-src": [
+        "'self'",
+        "https://www.google.com"
+      ],
+      "img-src": [
+        "'self'",
+        "https://ok10static.oktacdn.com",
+        "https://kog.chfs.ky.gov",
+        "https://ide.kog.ky.gov",
+        "https://dev.kog.ky.gov",
+        "https://sso.dev.kyid.ky.gov",
+        "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io",
+        "data:"
+      ],
+      "object-src": [
+        "'none'"
+      ],
+      "script-src": [
+        "'self'",
+        "'unsafe-eval'",
+        "'unsafe-inline'",
+        "https://www.google.com",
+        "https://www.gstatic.com"
+      ],
+      "style-src-elem": [
+        "'unsafe-inline'",
+        "'self'",
+        "https://www.google.com"
+      ]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "_id": "ddaafa92-e28b-4809-9df1-be418cdc9ed8",
+  "_outcomes": [
+    {
+      "displayName": "sign in",
+      "id": "sign in"
+    },
+    {
+      "displayName": "try again",
+      "id": "try again"
+    },
+    {
+      "displayName": "pass",
+      "id": "pass"
+    }
+  ],
+  "_rev": "-1206949746",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "bd032189-cbd1-4941-b99d-6cf7d50d552b",
+      "displayName": "Show Email",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "There's an existing account with this email"
+  }
+}

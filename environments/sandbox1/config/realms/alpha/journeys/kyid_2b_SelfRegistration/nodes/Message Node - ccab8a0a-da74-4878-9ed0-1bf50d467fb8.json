@@ -1,0 +1,25 @@
+{
+  "_id": "ccab8a0a-da74-4878-9ed0-1bf50d467fb8",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1701345787",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User Account Created"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

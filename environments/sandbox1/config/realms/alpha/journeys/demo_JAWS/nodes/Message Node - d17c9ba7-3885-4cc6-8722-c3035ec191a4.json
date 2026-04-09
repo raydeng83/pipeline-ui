@@ -1,0 +1,25 @@
+{
+  "_id": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1734273543",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Hello Here"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

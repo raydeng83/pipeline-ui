@@ -1,0 +1,217 @@
+{
+  "name": "Alpha_Kyid_Pages",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "name",
+      "header",
+      "description",
+      "prereqtype",
+      "attributes",
+      "footer",
+      "onSubmit"
+    ],
+    "properties": {
+      "attributes": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_Kyid_Pages:attributes",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_prereqattributes",
+            "notify": false,
+            "path": "managed/Alpha_Kyid_PreReqAttributes",
+            "query": {
+              "fields": [
+                "name",
+                "type",
+                "localeEN",
+                "localeES",
+                "localeAR",
+                "localeBU",
+                "localeFR",
+                "localeHA",
+                "localeKA",
+                "localeKI",
+                "localeNE",
+                "localePA",
+                "localeRU",
+                "localeSO",
+                "localeSW",
+                "validationRegex",
+                "encrypted",
+                "sysAttribute"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": false,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "PreRequisiteAttributes",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "description": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Description",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "footer": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Footer",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "header": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Header",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "onSubmit": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_Kyid_Pages:onSubmit",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_endpoint",
+            "notify": false,
+            "path": "managed/Alpha_Kyid_Endpoint",
+            "query": {
+              "fields": [
+                "endpointURL",
+                "endpointType",
+                "authnType",
+                "username",
+                "password",
+                "token",
+                "certificate"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": false,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Endpoint onSubmit",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      },
+      "prereqtype": {
+        "description": null,
+        "id": "urn:jsonschema:org:forgerock:openidm:managed:api:Alpha_Kyid_Pages:prereqtype",
+        "notifySelf": false,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "properties": {
+              "_id": {
+                "propName": "_id",
+                "required": false,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "resourceCollection": [
+          {
+            "label": "Alpha_kyid_prerequisitetype",
+            "notify": false,
+            "path": "managed/Alpha_Kyid_PrerequisiteType",
+            "query": {
+              "fields": [
+                "name",
+                "description",
+                "isSave",
+                "_prereqformattributes"
+              ],
+              "queryFilter": "true",
+              "sortKeys": []
+            }
+          }
+        ],
+        "returnByDefault": false,
+        "reversePropertyName": null,
+        "reverseRelationship": false,
+        "searchable": true,
+        "title": "Prereqtype",
+        "type": "relationship",
+        "userEditable": false,
+        "validate": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "Pages",
+    "type": "object"
+  }
+}

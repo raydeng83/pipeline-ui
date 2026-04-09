@@ -1,0 +1,89 @@
+{
+  "_id": "TestLogin_RA",
+  "_rev": "-1222839871",
+  "enabled": true,
+  "entryNodeId": "d0b7b2fe-271f-425c-aa8b-5d2570cee0d9",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1446df61-31f8-4d02-bf39-6a08be0b6d69": {
+      "connections": {
+        "outcome": "653ef750-661e-4b45-a51a-ac47b94fdffe"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "653ef750-661e-4b45-a51a-ac47b94fdffe": {
+      "connections": {
+        "false": "9e524bc0-1501-481c-8570-de06962c99f6",
+        "true": "660c9c5d-67e8-433f-968b-6a5ee179041c"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 447,
+      "y": 174.94444274902344
+    },
+    "660c9c5d-67e8-433f-968b-6a5ee179041c": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "9e524bc0-1501-481c-8570-de06962c99f6": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "d0b7b2fe-271f-425c-aa8b-5d2570cee0d9": {
+      "connections": {
+        "outcome": "1446df61-31f8-4d02-bf39-6a08be0b6d69"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 200,
+      "y": 25.944442749023438
+    },
+    "ea2d2ebc-24ae-4881-83af-244d3783edc0": {
+      "connections": {},
+      "displayName": "Your email is served as your username for KYID account",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 190,
+      "y": 345.3999938964844
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 500,
+      "y": 50
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 500,
+      "y": 350
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

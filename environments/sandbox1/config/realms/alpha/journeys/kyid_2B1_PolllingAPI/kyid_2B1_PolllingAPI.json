@@ -1,0 +1,93 @@
+{
+  "_id": "kyid_2B1_PolllingAPI",
+  "_rev": "-1956681854",
+  "description": "This Journey is used for Polling and API",
+  "enabled": true,
+  "entryNodeId": "c33447d9-b6c9-4fe3-9dee-3bfde316bc43",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "41add08d-3799-45cb-8090-bd556af22078": {
+      "connections": {
+        "true": "c33447d9-b6c9-4fe3-9dee-3bfde316bc43"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 829,
+      "y": 55
+    },
+    "64c9c15e-df0c-4850-a2a2-e000be85e80e": {
+      "connections": {
+        "false": "f7c6cad6-be93-4b5a-8d9c-12c11211e920",
+        "true": "cfcae2c2-491d-4dfd-b18b-61b957f2f5ec"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 289,
+      "y": 300
+    },
+    "ba446340-4a84-43e7-b2b3-b9ab18ea2781": {
+      "connections": {
+        "Reject": "41add08d-3799-45cb-8090-bd556af22078",
+        "Retry": "f7c6cad6-be93-4b5a-8d9c-12c11211e920"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 530,
+      "y": 439
+    },
+    "c33447d9-b6c9-4fe3-9dee-3bfde316bc43": {
+      "connections": {
+        "outcome": "64c9c15e-df0c-4850-a2a2-e000be85e80e"
+      },
+      "displayName": "Attribute Collector",
+      "nodeType": "AttributeCollectorNode",
+      "version": "1.0",
+      "x": 208,
+      "y": 173
+    },
+    "cfcae2c2-491d-4dfd-b18b-61b957f2f5ec": {
+      "connections": {
+        "true": "c33447d9-b6c9-4fe3-9dee-3bfde316bc43"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 860,
+      "y": 387
+    },
+    "f7c6cad6-be93-4b5a-8d9c-12c11211e920": {
+      "connections": {
+        "DONE": "ba446340-4a84-43e7-b2b3-b9ab18ea2781"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 508,
+      "y": 100
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1102,
+      "y": 86
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1107,
+      "y": 521
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

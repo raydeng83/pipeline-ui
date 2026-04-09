@@ -1,0 +1,25 @@
+{
+  "_id": "dfbc3371-2fe2-4d64-9dac-608f8539004b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "344102067",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Click Yes to Verify through Push Notification"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

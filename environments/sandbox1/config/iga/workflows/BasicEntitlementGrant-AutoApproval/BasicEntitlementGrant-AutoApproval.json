@@ -1,0 +1,81 @@
+{
+  "_rev": 4,
+  "childType": false,
+  "description": "BasicEntitlementGrant-AutoApproval",
+  "displayName": "BasicEntitlementGrant-AutoApproval",
+  "id": "basicEntitlementGrantAutoApproval",
+  "mutable": true,
+  "name": "BasicEntitlementGrant-AutoApproval",
+  "staticNodes": {
+    "endNode": {
+      "connections": null,
+      "id": "endNode",
+      "x": 1936,
+      "y": 271
+    },
+    "startNode": {
+      "connections": {
+        "start": "scriptTask-e04f42607ba5"
+      },
+      "id": "startNode",
+      "x": 70,
+      "y": 140
+    },
+    "uiConfig": {
+      "approvalTask-74cf85c35437": {
+        "actors": [
+          {
+            "id": {
+              "isExpression": true,
+              "value": "\"managed/user/\" + ((requestIndex.entitlementOwner && requestIndex.entitlementOwner.length > 0) ? requestIndex.entitlementOwner[0].id : requestIndex.applicationOwner[0].id)"
+            },
+            "type": "script"
+          }
+        ],
+        "events": {
+          "escalationDate": 5,
+          "escalationTimeSpan": "day(s)",
+          "escalationType": "script",
+          "reminderDate": 3,
+          "reminderTimeSpan": "day(s)"
+        },
+        "x": 722,
+        "y": 156
+      },
+      "exclusiveGateway-48e748c42994": {
+        "x": 1254,
+        "y": 73.015625
+      },
+      "exclusiveGateway-67a954f33919": {
+        "x": 467,
+        "y": 121.015625
+      },
+      "scriptTask-0359a9d77ee2": {
+        "x": 1495,
+        "y": 104.015625
+      },
+      "scriptTask-0b56191887de": {
+        "x": 1502,
+        "y": 197.015625
+      },
+      "scriptTask-3eab1948f1ec": {
+        "x": 957,
+        "y": 80.015625
+      },
+      "scriptTask-aec6c36b3a45": {
+        "x": 964,
+        "y": 253.015625
+      },
+      "scriptTask-e04f42607ba5": {
+        "x": 186,
+        "y": 143.015625
+      },
+      "scriptTask-e21178ab80f7": {
+        "x": 716,
+        "y": 74.015625
+      }
+    }
+  },
+  "status": "published",
+  "type": "provisioning"
+}

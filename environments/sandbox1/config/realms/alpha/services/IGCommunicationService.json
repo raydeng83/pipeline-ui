@@ -1,0 +1,10 @@
+{
+  "_id": "",
+  "_rev": "757611316",
+  "_type": {
+    "_id": "IGCommunicationService",
+    "collection": false,
+    "name": "Gateway Communication Service"
+  },
+  "enable": true
+}

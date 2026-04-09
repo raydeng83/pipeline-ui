@@ -1,0 +1,62 @@
+{
+  "_id": "BasicLogin",
+  "_rev": "-973791234",
+  "enabled": true,
+  "entryNodeId": "31153d2b-d4b3-49ad-8fe3-7e878e74a6a1",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "31153d2b-d4b3-49ad-8fe3-7e878e74a6a1": {
+      "connections": {
+        "outcome": "9775d8bb-c232-40e7-bb3d-76a3620e8f53"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 81
+    },
+    "60161e2b-f5c9-45eb-b0d5-62b6cf56602d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 799,
+      "y": 128
+    },
+    "9775d8bb-c232-40e7-bb3d-76a3620e8f53": {
+      "connections": {
+        "True": "60161e2b-f5c9-45eb-b0d5-62b6cf56602d"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 526,
+      "y": 269.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1079,
+      "y": 80
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1079,
+      "y": 230
+    },
+    "startNode": {
+      "x": 70,
+      "y": 155
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[]"
+  }
+}

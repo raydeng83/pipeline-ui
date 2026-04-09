@@ -1,0 +1,51 @@
+{
+  "_id": "1f5cfa60-5f59-478b-bbf4-82430f9f8572",
+  "_outcomes": [
+    {
+      "displayName": "Successful",
+      "id": "Successful"
+    },
+    {
+      "displayName": "connFail",
+      "id": "connFail"
+    },
+    {
+      "displayName": "pwdExpire",
+      "id": "pwdExpire"
+    },
+    {
+      "displayName": "failOrInactive",
+      "id": "failOrInactive"
+    },
+    {
+      "displayName": "ExtUserlockout",
+      "id": "ExtUserlockout"
+    },
+    {
+      "displayName": "IntUserlockout",
+      "id": "IntUserlockout"
+    }
+  ],
+  "_rev": "1730237394",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Successful",
+    "connFail",
+    "pwdExpire",
+    "failOrInactive",
+    "ExtUserlockout",
+    "IntUserlockout"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "c8755411-bdbb-43ab-966a-950e10c22467"
+}

@@ -1,0 +1,113 @@
+{
+  "_id": "Test_Journey",
+  "_rev": "-1046104633",
+  "enabled": true,
+  "entryNodeId": "ed6edea2-bde6-4b72-a227-7d1ed63e8d87",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "2a595bc3-30eb-4b99-b3b7-6573ca34626c": {
+      "connections": {
+        "outcome": "ba2052c0-5b0e-4a0e-bb31-d1b07777fe38"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "3d31103b-24e7-4615-8da5-5d62972aaa9f": {
+      "connections": {
+        "outcome": "c6223f58-a0b1-42e0-a92d-c3cf81856439"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "53244640-d81c-4c58-b369-6154f93a3fa5": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "92df569b-ffea-4815-ae87-4747c896a1b0": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "ba2052c0-5b0e-4a0e-bb31-d1b07777fe38": {
+      "connections": {
+        "false": "92df569b-ffea-4815-ae87-4747c896a1b0",
+        "true": "3d31103b-24e7-4615-8da5-5d62972aaa9f"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 859.5909118652344,
+      "y": 302.4815444946289
+    },
+    "be290976-35b9-4955-b72f-afca4abd4d6a": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "c6223f58-a0b1-42e0-a92d-c3cf81856439": {
+      "connections": {
+        "FALSE": "53244640-d81c-4c58-b369-6154f93a3fa5",
+        "TRUE": "be290976-35b9-4955-b72f-afca4abd4d6a"
+      },
+      "displayName": "Identity Store Decision",
+      "nodeType": "IdentityStoreDecisionNode",
+      "version": "1.0",
+      "x": 1122.3409118652344,
+      "y": 97.9815444946289
+    },
+    "ed6edea2-bde6-4b72-a227-7d1ed63e8d87": {
+      "connections": {
+        "outcome": "2a595bc3-30eb-4b99-b3b7-6573ca34626c"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 531,
+      "y": 186.015625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1473,
+      "y": 218
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1475,
+      "y": 318
+    },
+    "startNode": {
+      "x": 357,
+      "y": 219
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[\"test\"]"
+  }
+}

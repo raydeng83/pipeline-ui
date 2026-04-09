@@ -1,0 +1,36 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "kyid_prerequisites",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "",
+    "icon": "fa-database",
+    "mat-icon": "",
+    "order": [
+      "title",
+      "page"
+    ],
+    "properties": {
+      "page": {
+        "order": [],
+        "properties": {},
+        "searchable": false,
+        "title": null,
+        "type": "object",
+        "userEditable": true,
+        "viewable": true
+      },
+      "title": {
+        "searchable": false,
+        "title": "Page title",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [],
+    "title": "Pre Requisites",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

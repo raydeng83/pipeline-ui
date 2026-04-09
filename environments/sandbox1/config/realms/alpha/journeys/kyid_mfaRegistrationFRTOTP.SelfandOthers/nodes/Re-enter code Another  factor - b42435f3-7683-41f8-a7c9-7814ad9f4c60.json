@@ -1,0 +1,42 @@
+{
+  "_id": "b42435f3-7683-41f8-a7c9-7814ad9f4c60",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "goBack",
+      "id": "goBack"
+    },
+    {
+      "displayName": "submit",
+      "id": "submit"
+    }
+  ],
+  "_rev": "-407732337",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "4f889a28-da03-4b4e-929d-5ee594ce0d70",
+      "displayName": "Choose Another factor",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Set up ForgeRock Authenticator App using code</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.forgerock.code.url}\"target=\"_blank\">Need Assistance?</a>\n</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Configurar la aplicación ForgeRock Authenticator mediante código</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.forgerock.code.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"ChoiceCallback\":[{\"id\":\"a96ec7eb-f720-4834-9572-95e90b5c909c\",\"displayType\":\"radio\"}],\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"}}"
+}

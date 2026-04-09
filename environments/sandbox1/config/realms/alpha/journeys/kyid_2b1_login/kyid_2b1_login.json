@@ -1,0 +1,113 @@
+{
+  "_id": "kyid_2b1_login",
+  "_rev": "392673129",
+  "enabled": true,
+  "entryNodeId": "c4e2a76f-c248-4e4f-9408-1b27d9d6638e",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1a857453-9b57-4738-9a91-7ed299a40a0c": {
+      "connections": {
+        "false": "b15dd742-eefe-456c-8d7c-15a91bce933b",
+        "true": "24f33884-30ee-46ad-abbe-f30870e1e90f"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 526,
+      "y": 136
+    },
+    "24f33884-30ee-46ad-abbe-f30870e1e90f": {
+      "connections": {
+        "outcome": "812cea07-a534-4496-a21b-95799ab78fcc"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 728.3750228881836,
+      "y": 43.9375
+    },
+    "4c63c524-ca16-4877-9a51-f296f115e15f": {
+      "connections": {
+        "email": "6e5bf5dd-38f1-439f-81ba-75c47dd5f402",
+        "invalid": "c4e2a76f-c248-4e4f-9408-1b27d9d6638e",
+        "phone": "1a857453-9b57-4738-9a91-7ed299a40a0c"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 345,
+      "y": 72
+    },
+    "6e5bf5dd-38f1-439f-81ba-75c47dd5f402": {
+      "connections": {
+        "false": "b15dd742-eefe-456c-8d7c-15a91bce933b",
+        "true": "24f33884-30ee-46ad-abbe-f30870e1e90f"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 526,
+      "y": 25
+    },
+    "75ff84a1-f837-403e-9bdf-0325fd634a47": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Increment Login Count",
+      "nodeType": "IncrementLoginCountNode",
+      "version": "1.0",
+      "x": 1124.3750228881836,
+      "y": 103.10416793823242
+    },
+    "812cea07-a534-4496-a21b-95799ab78fcc": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "75ff84a1-f837-403e-9bdf-0325fd634a47"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 929,
+      "y": 47
+    },
+    "b15dd742-eefe-456c-8d7c-15a91bce933b": {
+      "connections": {
+        "true": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 728.3750228881836,
+      "y": 162.27083587646484
+    },
+    "c4e2a76f-c248-4e4f-9408-1b27d9d6638e": {
+      "connections": {
+        "outcome": "4c63c524-ca16-4877-9a51-f296f115e15f"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 151,
+      "y": 77
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1337.3541946411133,
+      "y": 103.10416793823242
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 928.5312728881836,
+      "y": 158.73958587646484
+    },
+    "startNode": {
+      "x": 50,
+      "y": 103.10416793823242
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {}
+}

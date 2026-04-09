@@ -1,0 +1,6 @@
+{
+  "_id": "esv-mfaself-successurl",
+  "description": "",
+  "expressionType": "string",
+  "valueBase64": "${ESV_MFASELF_SUCCESSURL}"
+}

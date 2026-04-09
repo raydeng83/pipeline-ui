@@ -1,0 +1,7 @@
+{
+  "_id": "endpoint/list_prerequisiteform_attributes",
+  "description": "This endpoint returns all the attributes for prerequisite form page.",
+  "file": "list_prerequisiteform_attributes.js",
+  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
+  "type": "text/javascript"
+}

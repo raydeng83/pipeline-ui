@@ -1,0 +1,48 @@
+{
+  "_id": "0ad65526-af33-406f-88b0-304beb096d0a",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "BlankOTP",
+      "id": "BlankOTP"
+    },
+    {
+      "displayName": "Resend code",
+      "id": "Resend code"
+    }
+  ],
+  "_rev": "369565091",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "df9334d6-b7d6-4c3f-b599-69f8e5751fed",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Set up phone authentication</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.reg.voice.url}\" target=\"_blank\">Need Assistance?</a>\n</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<h5 style=\"color:#5e5e5e;\nfont-weight\n: bold;\n\">Configurar la autenticación del teléfono</h5><br>\n<a href=\"&{esv.kog.help.mfa.reg.voice.url}\" target=\"_blank\">¿Necesita ayuda?</a>"
+  },
+  "pageHeader": {
+    "en": "3_Verify_phone_number"
+  },
+  "stage": "{\"pageFooter\":{\"es\":\"<div class='page-footer-horizontal'>\\n    <div class='page-footer-element' style=\\\"text-align:left\\\">\\n    <span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n    </div>\\n</div>\",\"en\":\"<div class='page-footer-horizontal'>\\n    <div class='page-footer-element' style=\\\"text-align:left\\\">\\n    <span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n    </div>\\n</div>\"},\"themeId\":\"ad0c7178-859b-4eb0-ace3-3110aba3d31b\"}"
+}

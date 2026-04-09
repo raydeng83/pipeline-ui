@@ -1,0 +1,31 @@
+{
+  "_id": "d067202b-5645-4d1d-b501-157da3d3e303",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    }
+  ],
+  "_rev": "349565777",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "4ac69893-da12-49c0-aac3-004c4d9f0e6d",
+      "displayName": "OATH Registration",
+      "nodeType": "OathRegistrationNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div style=\\\"text-align:left;\\\">\\n</div>\\n<div class='page-footer-horizontal'>\\n\",\"es\":\"<div style=\\\"text-align:left;\\\">\\n</div>\\n<div class='page-footer-horizontal'>\"}}"
+}

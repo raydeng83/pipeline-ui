@@ -1,0 +1,53 @@
+{
+  "_id": "683b390c-ce5e-45ad-82dc-c2872b782daa",
+  "_outcomes": [
+    {
+      "displayName": "High",
+      "id": "high"
+    },
+    {
+      "displayName": "Medium",
+      "id": "medium"
+    },
+    {
+      "displayName": "Low",
+      "id": "low"
+    },
+    {
+      "displayName": "Exceeds Score Threshold",
+      "id": "exceed"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failure"
+    },
+    {
+      "displayName": "ClientError",
+      "id": "clientError"
+    }
+  ],
+  "_rev": "-216626222",
+  "_type": {
+    "_id": "product-PingOneProtectEvaluationNode",
+    "collection": true,
+    "name": "PingOne Protect Evaluation",
+    "version": "1.0"
+  },
+  "authenticationFlowSubtype": "NONE",
+  "authorizationFlowSubtype": "NONE",
+  "deviceSharingType": "SHARED",
+  "dynamicRiskPolicySetID": false,
+  "dynamicTargetResourceID": false,
+  "dynamicTargetResourceName": false,
+  "flowType": "AUTHENTICATION",
+  "pauseBehavioralData": true,
+  "pingOneWorker": "PingOne Worker Service",
+  "recommendedActions": [],
+  "riskPolicySetID": "04431b84-bf36-461c-b602-4d6e115ba9e9",
+  "scoreThreshold": "300",
+  "storeEvaluateResult": false,
+  "targetedPoliciesEvaluation": false,
+  "userId": "KOGID",
+  "userType": "EXTERNAL",
+  "username": "username"
+}

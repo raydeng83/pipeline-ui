@@ -1,0 +1,19 @@
+{
+  "_id": "4b55d79f-9a56-4947-b05b-c955214460d7",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-1128185883",
+  "_type": {
+    "_id": "ValidatedUsernameNode",
+    "collection": true,
+    "name": "Platform Username",
+    "version": "1.0"
+  },
+  "autocompleteValues": [],
+  "usernameAttribute": "mail",
+  "validateInput": true
+}

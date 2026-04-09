@@ -1,0 +1,68 @@
+{
+  "_id": "149f9457-b003-4d7b-8e75-03f52aff4c51",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "Remove/Reset MFA Method",
+      "id": "Remove/Reset MFA Method"
+    },
+    {
+      "displayName": "RecoveryMFA",
+      "id": "RecoveryMFA"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "1666942254",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "7430a7b6-c734-4423-b5a2-941ea9fab902",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "3392241e-129c-457e-97f1-d7a01a66e97e",
+      "displayName": "Dynamic Choice",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verify identity with a security method</h5></div>\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">Need Assistance?</a>\n<div class=\"page-header-content\">Verify with one of the following security Methods.</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Verificar la identidad con un método de seguridad</h5></div>\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n<div class=\"page-header-content\">Verifique con uno de los siguientes métodos de seguridad.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"}}"
+}

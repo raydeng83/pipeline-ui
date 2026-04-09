@@ -1,0 +1,64 @@
+{
+  "_id": "80fd6887-9d2d-42da-94a6-ae452dcf673e",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "otp",
+      "id": "otp"
+    },
+    {
+      "displayName": "swk",
+      "id": "swk"
+    },
+    {
+      "displayName": "voice",
+      "id": "voice"
+    },
+    {
+      "displayName": "symantec",
+      "id": "symantec"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-336567418",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "c593b66a-4b16-44eb-9809-af082eeaadd6",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "5f3ace36-7332-4d12-a920-ff2555cc5f67",
+      "displayName": "Display MFA methods as per MFA context that are not registered",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'><br>\n<div class=\"page-header-title\"><h5>Set up security methods</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">Security methods help protect your Kentucky Online Gateway account by ensuring only you have access.</div>",
+    "es": "<div class='page-footer-horizontal'><br>\n<div class=\"page-header-title\"><h5>Configurar métodos de seguridad</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.auth.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">Los métodos de seguridad ayudan a proteger su cuenta de Kentucky Online Gateway al garantizar que solo usted tenga acceso.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div style=\\\"text-align:left;\\\">\\n<a href=\\\"&{esv.kyid.sso.url}&authIndexType=service&authIndexValue=kyid_BackToLoginRouterTreeEN\\\">Back to sign in</a>\\n</div>\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div style=\\\"text-align:left;\\\">\\n<a href=\\\"&{esv.kyid.sso.url}&authIndexType=service&authIndexValue=kyid_BackToLoginRouterTreeES\\\">Volver a iniciar sesión</a>\\n</div>\\n<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\" target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

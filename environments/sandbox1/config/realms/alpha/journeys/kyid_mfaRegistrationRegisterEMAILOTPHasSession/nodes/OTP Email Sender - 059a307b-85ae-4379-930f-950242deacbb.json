@@ -1,0 +1,27 @@
+{
+  "_id": "059a307b-85ae-4379-930f-950242deacbb",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "1240993518",
+  "_type": {
+    "_id": "OneTimePasswordSmtpSenderNode",
+    "collection": true,
+    "name": "OTP Email Sender",
+    "version": "1.0"
+  },
+  "emailAttribute": "mail",
+  "emailContent": {},
+  "emailSubject": {
+    "en": "Email OTP Request"
+  },
+  "fromEmailAddress": "&{esv.mailserver.fromemailaddress}",
+  "hostName": "&{esv.mailserver.hostname}",
+  "hostPort": 25,
+  "smsGatewayImplementationClass": "com.sun.identity.authentication.modules.hotp.DefaultSMSGatewayImpl",
+  "sslOption": "NON_SSL",
+  "username": "&{esv.mailserver.username}"
+}

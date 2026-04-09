@@ -1,0 +1,25 @@
+{
+  "_id": "32635f37-8992-4ec0-81b6-8b67051fb1eb",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1671340048",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "phone auth success"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

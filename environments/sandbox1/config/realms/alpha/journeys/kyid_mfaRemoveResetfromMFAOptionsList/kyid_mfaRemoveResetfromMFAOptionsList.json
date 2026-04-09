@@ -1,0 +1,198 @@
+{
+  "_id": "kyid_mfaRemoveResetfromMFAOptionsList",
+  "_rev": "590067122",
+  "description": "this journey will display the mfa that needs to be removed reset and covers the language pref",
+  "enabled": true,
+  "entryNodeId": "3be3bb9e-a472-4154-a2be-96cf4c724e6e",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1b580b1e-ee19-41da-8ded-2696013d20af": {
+      "connections": {
+        "false": "b07948a1-eeb2-45b4-abae-4c41313c4715",
+        "true": "e22c922e-4129-4926-b5cc-2b6562a73be8"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1695,
+      "y": 354.5
+    },
+    "2b812cd4-f93c-4096-8573-47635cdbd306": {
+      "connections": {
+        "false": "cc367197-adec-41ac-916b-1cadf0828955",
+        "true": "8f1c8edd-7760-48ee-a4db-8a446abdb7de"
+      },
+      "displayName": "isLoginPerformed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 475,
+      "y": 343.5
+    },
+    "34fada88-b4a9-418a-aa7b-9468001e9ddb": {
+      "connections": {
+        "true": "d0d39401-e033-4322-9c99-f399539e1e64"
+      },
+      "displayName": "Blank Error Message",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1127.111083984375,
+      "y": 89.55554723739624
+    },
+    "3be3bb9e-a472-4154-a2be-96cf4c724e6e": {
+      "connections": {
+        "hasSession": "8f1c8edd-7760-48ee-a4db-8a446abdb7de",
+        "noSession": "2b812cd4-f93c-4096-8573-47635cdbd306"
+      },
+      "displayName": "CheckforSessionValidity",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 343.5
+    },
+    "68672a61-2b1f-4f61-a38e-fb477bd7bc5d": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Failure Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2126,
+      "y": 315
+    },
+    "821e191b-8602-40ff-9d20-d3c6780d33ec": {
+      "connections": {
+        "false": "b07948a1-eeb2-45b4-abae-4c41313c4715",
+        "true": "bbb43cb0-7f55-4dff-ba4c-08605561f86d"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1694,
+      "y": 159
+    },
+    "8f1c8edd-7760-48ee-a4db-8a446abdb7de": {
+      "connections": {
+        "false": "d0d39401-e033-4322-9c99-f399539e1e64",
+        "true": "b07948a1-eeb2-45b4-abae-4c41313c4715"
+      },
+      "displayName": "isMFAPerformed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 935,
+      "y": 205.66666666666669
+    },
+    "b07948a1-eeb2-45b4-abae-4c41313c4715": {
+      "connections": {
+        "Default": "34fada88-b4a9-418a-aa7b-9468001e9ddb",
+        "Remove/Reset MFA Methods": "821e191b-8602-40ff-9d20-d3c6780d33ec",
+        "Restablecer/Eliminar Métodos MFA": "821e191b-8602-40ff-9d20-d3c6780d33ec",
+        "otp": "821e191b-8602-40ff-9d20-d3c6780d33ec",
+        "sms": "821e191b-8602-40ff-9d20-d3c6780d33ec",
+        "swk": "821e191b-8602-40ff-9d20-d3c6780d33ec",
+        "symantec": "821e191b-8602-40ff-9d20-d3c6780d33ec",
+        "voice": "821e191b-8602-40ff-9d20-d3c6780d33ec"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1450,
+      "y": 205
+    },
+    "b37a1381-5138-4cbb-8f53-b42c8ca8055e": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2171,
+      "y": 79
+    },
+    "bbb43cb0-7f55-4dff-ba4c-08605561f86d": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "fafa4ea6-d26b-4b09-bf41-2285a52a9c2c"
+      },
+      "displayName": "Script: Get Access Token",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1900,
+      "y": 49.015625
+    },
+    "cc367197-adec-41ac-916b-1cadf0828955": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "8f1c8edd-7760-48ee-a4db-8a446abdb7de"
+      },
+      "displayName": "IJ01: LoginJourney",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 705,
+      "y": 343.5
+    },
+    "d0d39401-e033-4322-9c99-f399539e1e64": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b07948a1-eeb2-45b4-abae-4c41313c4715"
+      },
+      "displayName": "IJ02: Re-Perform Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1121,
+      "y": 355.5
+    },
+    "dc1bfc80-b416-4245-975d-081eb215bcd2": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2170,
+      "y": 554
+    },
+    "e22c922e-4129-4926-b5cc-2b6562a73be8": {
+      "connections": {
+        "false": "68672a61-2b1f-4f61-a38e-fb477bd7bc5d",
+        "true": "dc1bfc80-b416-4245-975d-081eb215bcd2"
+      },
+      "displayName": "IJ03: Reset MFA",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1902,
+      "y": 574.1666666666667
+    },
+    "fafa4ea6-d26b-4b09-bf41-2285a52a9c2c": {
+      "connections": {
+        "false": "68672a61-2b1f-4f61-a38e-fb477bd7bc5d",
+        "true": "b37a1381-5138-4cbb-8f53-b42c8ca8055e"
+      },
+      "displayName": "RemoveMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1934,
+      "y": 341.3333333333333
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2415,
+      "y": 360.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1500,
+      "y": 651.8333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 360.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

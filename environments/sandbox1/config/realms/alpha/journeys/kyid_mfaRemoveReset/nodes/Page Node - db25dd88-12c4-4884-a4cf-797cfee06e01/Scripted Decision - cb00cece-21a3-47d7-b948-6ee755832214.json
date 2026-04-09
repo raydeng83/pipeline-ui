@@ -1,0 +1,31 @@
+{
+  "_id": "cb00cece-21a3-47d7-b948-6ee755832214",
+  "_outcomes": [
+    {
+      "displayName": "Confirm",
+      "id": "Confirm"
+    },
+    {
+      "displayName": "GoBack",
+      "id": "GoBack"
+    }
+  ],
+  "_rev": "-921428795",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Confirm",
+    "GoBack"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "cfd58417-66c2-4727-8423-3ea5d9e0522c"
+}

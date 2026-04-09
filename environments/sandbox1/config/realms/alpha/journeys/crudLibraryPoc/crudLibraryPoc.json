@@ -1,0 +1,164 @@
+{
+  "_id": "crudLibraryPoc",
+  "_rev": "-218466741",
+  "description": "Testing the crud library script",
+  "enabled": true,
+  "entryNodeId": "9551be46-0f49-484c-b72e-a850f3b3076d",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0059088b-a2c9-43d8-a262-14b5e1a138c0": {
+      "connections": {
+        "false": "2d28bc39-a0e6-4766-9f67-0b3f5fc696d8",
+        "true": "152546fc-578f-4fcf-8822-f2ea4a5f9d2c"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 634,
+      "y": 155
+    },
+    "152546fc-578f-4fcf-8822-f2ea4a5f9d2c": {
+      "connections": {
+        "outcome": "6c3eb713-f607-4b6f-a66a-31301b2caedc"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "183a8735-0ef6-40a1-a498-a5ee633c4e75": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "19a5eb17-0f3b-401d-be01-8948a059b9c8": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "2d28bc39-a0e6-4766-9f67-0b3f5fc696d8": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "34dff5df-8638-440f-b0cc-0b81098c75b5": {
+      "connections": {
+        "outcome": "63593488-897e-42e1-91a6-ff19674ccbed"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "3b50add9-99cc-4826-a773-c96cae06296a": {
+      "connections": {
+        "outcome": "0059088b-a2c9-43d8-a262-14b5e1a138c0"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "63593488-897e-42e1-91a6-ff19674ccbed": {
+      "connections": {
+        "true": "d0d3c3a8-4614-4e22-8d20-191518624686"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1206,
+      "y": 97.66666666666667
+    },
+    "6c3eb713-f607-4b6f-a66a-31301b2caedc": {
+      "connections": {
+        "false": "183a8735-0ef6-40a1-a498-a5ee633c4e75",
+        "true": "34dff5df-8638-440f-b0cc-0b81098c75b5"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 925,
+      "y": 155
+    },
+    "72f68b40-d686-48c7-a0a7-752f7deadf39": {
+      "connections": {
+        "false": "19a5eb17-0f3b-401d-be01-8948a059b9c8",
+        "true": "a6aa3b0c-40ce-40f7-b81a-340f5c189702"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 70,
+      "y": 80
+    },
+    "9551be46-0f49-484c-b72e-a850f3b3076d": {
+      "connections": {
+        "outcome": "3b50add9-99cc-4826-a773-c96cae06296a"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 335,
+      "y": 107.5
+    },
+    "a6aa3b0c-40ce-40f7-b81a-340f5c189702": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    },
+    "d0d3c3a8-4614-4e22-8d20-191518624686": {
+      "connections": {
+        "outcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Debug Node",
+      "nodeType": "DebugNode",
+      "version": "1.0",
+      "x": null,
+      "y": null
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1471,
+      "y": 182
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1206,
+      "y": 239.83333333333334
+    },
+    "startNode": {
+      "x": 70,
+      "y": 284
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

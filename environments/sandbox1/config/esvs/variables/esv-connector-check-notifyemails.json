@@ -1,0 +1,6 @@
+{
+  "_id": "esv-connector-check-notifyemails",
+  "description": "emails that the connector alert will be sent to",
+  "expressionType": "array",
+  "valueBase64": "${ESV_CONNECTOR_CHECK_NOTIFYEMAILS}"
+}

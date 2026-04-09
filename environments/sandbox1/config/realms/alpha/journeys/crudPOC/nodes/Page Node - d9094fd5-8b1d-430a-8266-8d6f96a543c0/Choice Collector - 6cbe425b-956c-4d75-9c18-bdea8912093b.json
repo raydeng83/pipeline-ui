@@ -1,0 +1,21 @@
+{
+  "_id": "6cbe425b-956c-4d75-9c18-bdea8912093b",
+  "_outcomes": [
+    {
+      "displayName": "EnrollmentContext",
+      "id": "EnrollmentContext"
+    }
+  ],
+  "_rev": "1647830916",
+  "_type": {
+    "_id": "ChoiceCollectorNode",
+    "collection": true,
+    "name": "Choice Collector",
+    "version": "1.0"
+  },
+  "choices": [
+    "EnrollmentContext"
+  ],
+  "defaultChoice": "EnrollmentContext",
+  "prompt": "Provide custom object name"
+}

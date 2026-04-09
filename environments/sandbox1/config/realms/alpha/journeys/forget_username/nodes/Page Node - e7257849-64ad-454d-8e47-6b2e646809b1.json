@@ -1,0 +1,39 @@
+{
+  "_id": "e7257849-64ad-454d-8e47-6b2e646809b1",
+  "_outcomes": [
+    {
+      "displayName": "Send code to my phone or email",
+      "id": "Send code to my phone or email"
+    },
+    {
+      "displayName": "Verify my identity with my U.S.Driver's License",
+      "id": "Verify my identity with my U.S.Driver's License"
+    },
+    {
+      "displayName": "Verify with identity proofing",
+      "id": "Verify with identity proofing"
+    },
+    {
+      "displayName": "Verify my identity by calling the helpdesk",
+      "id": "Verify my identity by calling the helpdesk"
+    }
+  ],
+  "_rev": "-1116622873",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "8dc07283-b379-43ea-8130-91ec9fa292e1",
+      "displayName": "Choice Collector",
+      "nodeType": "ChoiceCollectorNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"ChoiceCallback\":[{\"id\":\"8dc07283-b379-43ea-8130-91ec9fa292e1\",\"displayType\":\"radio\"}]}"
+}

@@ -1,0 +1,25 @@
+{
+  "_id": "881939ed-fde5-4fdf-8b50-b067012e863b",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "288725712",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "EMAIL"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

@@ -1,0 +1,140 @@
+{
+  "_id": "kyid_2B1_mfaAuthenticationEmailOTP_CreateUser",
+  "_rev": "-1785798715",
+  "description": "Email authentication for User registration ",
+  "enabled": true,
+  "entryNodeId": "e63832b5-a281-4d79-b170-5893282c26d5",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0872e250-d876-4463-81ec-aa3edb17a631": {
+      "connections": {
+        "outcome": "dd7aa6df-8f03-4d1f-a170-24771fa24143"
+      },
+      "displayName": "HOTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 114,
+      "y": 42.5
+    },
+    "09072006-bd56-45b6-a4bd-0a54ab5d0231": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Max Limit Reached",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 886,
+      "y": 334.9999942779541
+    },
+    "203b687f-08d4-4374-a2db-b26ab3551978": {
+      "connections": {
+        "true": "0872e250-d876-4463-81ec-aa3edb17a631"
+      },
+      "displayName": "ResendOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 898,
+      "y": 441
+    },
+    "8eb00950-fef2-486c-98b5-9d0aad372ab8": {
+      "connections": {
+        "true": "ce5420e1-81e5-4bc5-81a2-1653df81f21f"
+      },
+      "displayName": "Blank Otp",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 882,
+      "y": 181.3333282470703
+    },
+    "ce5420e1-81e5-4bc5-81a2-1653df81f21f": {
+      "connections": {
+        "BlankOTP": "8eb00950-fef2-486c-98b5-9d0aad372ab8",
+        "Choose Another": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "MaxLimit": "09072006-bd56-45b6-a4bd-0a54ab5d0231",
+        "Resend Code": "203b687f-08d4-4374-a2db-b26ab3551978",
+        "Verify": "d9f40ffc-1c68-4426-a307-1264a910cea2",
+        "false": "d3f4d74d-7df2-4ac6-82a1-78ab7f489dfd",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Verify email",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 588,
+      "y": 17
+    },
+    "d3f4d74d-7df2-4ac6-82a1-78ab7f489dfd": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "ce5420e1-81e5-4bc5-81a2-1653df81f21f"
+      },
+      "displayName": "Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 883,
+      "y": 21
+    },
+    "d9f40ffc-1c68-4426-a307-1264a910cea2": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1141,
+      "y": 66
+    },
+    "db21dfe3-8f6e-4981-a69a-7dd1af274e61": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Failure URL",
+      "nodeType": "SetFailureUrlNode",
+      "version": "1.0",
+      "x": 1589.46875,
+      "y": 770.5
+    },
+    "dd7aa6df-8f03-4d1f-a170-24771fa24143": {
+      "connections": {
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "ce5420e1-81e5-4bc5-81a2-1653df81f21f"
+      },
+      "displayName": "SendOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 339,
+      "y": 17.5
+    },
+    "e63832b5-a281-4d79-b170-5893282c26d5": {
+      "connections": {
+        "false": "0872e250-d876-4463-81ec-aa3edb17a631",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 178,
+      "y": 210
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1376,
+      "y": 28
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1389,
+      "y": 158
+    },
+    "startNode": {
+      "x": 70,
+      "y": 285.8333333333333
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "consentRequired": false,
+  "correlationQuery": [
+    {
+      "expressionTree": {
+        "any": [
+          "name"
+        ]
+      },
+      "file": "ui/correlateTreeToQueryFilter.js",
+      "linkQualifier": "default",
+      "mapping": "systemCsvfileroletest__GROUP___managedAlpha_group",
+      "type": "text/javascript"
+    }
+  ],
+  "displayName": "systemCsvfileroletest__GROUP___managedAlpha_group",
+  "icon": null,
+  "name": "systemCsvfileroletest__GROUP___managedAlpha_group",
+  "policies": [
+    {
+      "action": "EXCEPTION",
+      "situation": "AMBIGUOUS"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "SOURCE_MISSING"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "MISSING"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "FOUND_ALREADY_LINKED"
+    },
+    {
+      "action": "ASYNC",
+      "situation": "UNQUALIFIED"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "UNASSIGNED"
+    },
+    {
+      "action": "EXCEPTION",
+      "situation": "LINK_ONLY"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "TARGET_IGNORED"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "SOURCE_IGNORED"
+    },
+    {
+      "action": "IGNORE",
+      "situation": "ALL_GONE"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "CONFIRMED"
+    },
+    {
+      "action": "UPDATE",
+      "situation": "FOUND"
+    },
+    {
+      "action": "CREATE",
+      "situation": "ABSENT"
+    }
+  ],
+  "properties": [
+    {
+      "source": "name",
+      "target": "name"
+    }
+  ],
+  "source": "system/CSVFileRoleTest/__GROUP__",
+  "target": "managed/alpha_group"
+}

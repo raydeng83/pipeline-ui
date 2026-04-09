@@ -1,0 +1,25 @@
+{
+  "_id": "0afde390-8877-4adf-9c61-ae11374b5b6a",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "336761274",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "OIDC Login Journey Start"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

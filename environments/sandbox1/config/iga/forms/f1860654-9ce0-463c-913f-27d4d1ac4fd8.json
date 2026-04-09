@@ -1,0 +1,62 @@
+{
+  "name": "RoleAcessRequest",
+  "type": "request",
+  "description": "RoleAcessRequest",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "7253895d-f48d-4403-8265-2fb40908fba5",
+        "fields": [
+          {
+            "id": "af0f244e-5e8b-4174-9142-ebe510f4740e",
+            "model": "custom.userId",
+            "type": "string",
+            "label": "UserID",
+            "description": "userID",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "ee4c8652-178f-460f-bb4a-629fdb665508",
+        "fields": [
+          {
+            "id": "fcd33298-939e-4e56-aaa9-3361e9bf3f34",
+            "model": "custom.roleId",
+            "type": "string",
+            "label": "RoleID",
+            "description": "RoleID",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "id": "f1860654-9ce0-463c-913f-27d4d1ac4fd8",
+  "_rev": 27,
+  "metadata": {
+    "modifiedDate": "2025-03-03T14:39:00.841Z",
+    "createdDate": "2025-02-26T05:38:59.056683595Z"
+  }
+}

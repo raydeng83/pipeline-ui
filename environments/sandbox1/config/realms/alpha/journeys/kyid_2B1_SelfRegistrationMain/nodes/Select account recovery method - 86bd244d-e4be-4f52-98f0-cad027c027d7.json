@@ -1,0 +1,43 @@
+{
+  "_id": "86bd244d-e4be-4f52-98f0-cad027c027d7",
+  "_outcomes": [
+    {
+      "displayName": "back",
+      "id": "back"
+    },
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "phone",
+      "id": "phone"
+    },
+    {
+      "displayName": "error",
+      "id": "error"
+    }
+  ],
+  "_rev": "-1984193299",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "e2df96e7-28bf-446e-a84c-fb3f701f5ac7",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "set_account_recovery_method"
+  },
+  "pageHeader": {
+    "en": "3_account_recovery"
+  },
+  "stage": "{\"pageFooter\":{\"en\":\"additional_recovery_methods\"}}"
+}

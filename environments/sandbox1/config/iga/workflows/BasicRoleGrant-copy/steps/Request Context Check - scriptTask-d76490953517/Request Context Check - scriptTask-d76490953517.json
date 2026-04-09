@@ -1,0 +1,18 @@
+{
+  "displayName": "Request Context Check",
+  "name": "scriptTask-d76490953517",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "scriptTask-c5cdf63f3edf"
+      }
+    ],
+    "script": {
+      "file": "Request Context Check - scriptTask-d76490953517.js"
+    }
+  },
+  "type": "scriptTask"
+}

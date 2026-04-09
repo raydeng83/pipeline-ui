@@ -1,0 +1,422 @@
+{
+  "_id": "JAWS_Test_kyid_mfaAuthenticationAndRegistration",
+  "_rev": "-644016112",
+  "description": "for language pref",
+  "enabled": true,
+  "entryNodeId": "65cffa91-ef09-4dc7-b03c-8cd5700ff967",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "00b7eff5-91df-4f47-b228-28cef0412ece": {
+      "connections": {
+        "Default": "a5b2ef2f-6671-422b-a041-8c94fe172fb3",
+        "RecoveryMFA": "1f092a5b-b87c-4292-bd2c-f84a351bc876",
+        "Registration": "de30977d-1a16-4c20-966e-b40fc4601e4c",
+        "email": "8a89a6f7-e54e-4362-8859-f320d6c0282c",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "otp": "044a16e1-0cc8-4827-9db6-29dfadb5dda2",
+        "sms": "aa4c0606-c4dc-4fb5-8b73-94ab8add950c",
+        "swk": "f2408a89-26d4-448a-9b89-1d446afe0d69",
+        "symantec": "e71e93b7-7f5a-4198-9322-97515c699010",
+        "voice": "0b4ebef1-2d23-4858-9dfe-6c4fc2c351cf"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2353,
+      "y": 306.66666666666663
+    },
+    "044a16e1-0cc8-4827-9db6-29dfadb5dda2": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "FR Code Has Session",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2711,
+      "y": 629
+    },
+    "08b05fab-9056-4a48-8610-72d04d4ee7f8": {
+      "connections": {
+        "hasSession": "b9991d34-7500-4ba3-9901-5d18a964d85c",
+        "noSession": "d9b87534-b22a-4a12-a573-0e2f3ae72d1d"
+      },
+      "displayName": "Script: Check Valid Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3874,
+      "y": 764.3333333333333
+    },
+    "0b4ebef1-2d23-4858-9dfe-6c4fc2c351cf": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "Voice OTP Has Session",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2708,
+      "y": 306
+    },
+    "0cceea28-1a92-4f3f-bee9-3af1ec5fab3b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "FR Code",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2720,
+      "y": 1498
+    },
+    "12e3c16e-3b57-4160-83e3-cf2182b52522": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "false": "08b05fab-9056-4a48-8610-72d04d4ee7f8",
+        "true": "6bfe3163-cef7-45a7-890c-33264091af1a"
+      },
+      "displayName": "Script: First Time login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1449,
+      "y": 1475.5
+    },
+    "159383fb-72a3-4d9a-969c-4607411935fc": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b2c4c0ad-ac82-43fe-b60c-3432708afdef"
+      },
+      "displayName": "IJ: MFA Recovery",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2705,
+      "y": 1155
+    },
+    "1b50db30-2000-4bcc-9074-500fed3456d1": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "5193cf12-e25b-40b8-a4a1-10a4c02f28dd"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 517,
+      "y": 1488.5
+    },
+    "1f092a5b-b87c-4292-bd2c-f84a351bc876": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "b2c4c0ad-ac82-43fe-b60c-3432708afdef"
+      },
+      "displayName": "IJ: MFA Recovery Has Session",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2702,
+      "y": 794
+    },
+    "234f7423-d4bb-4a8b-b35c-defa61b78f7a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Registration",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 4028,
+      "y": 325.2
+    },
+    "2a705201-77ac-44ef-83ff-4e95f3c297b0": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "Symantec VIP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2724,
+      "y": 2029
+    },
+    "2e9daef9-285d-478c-91fe-6802ec635cf7": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "b2c4c0ad-ac82-43fe-b60c-3432708afdef"
+      },
+      "displayName": "Script: Get isJourneyMFARecovery",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 4486,
+      "y": 451.5
+    },
+    "3a01a240-4fc3-4540-9d61-87b4d53dd018": {
+      "connections": {
+        "Default": "a5b2ef2f-6671-422b-a041-8c94fe172fb3",
+        "RecoveryMFA": "159383fb-72a3-4d9a-969c-4607411935fc",
+        "Registration": "de30977d-1a16-4c20-966e-b40fc4601e4c",
+        "email": "c30c7fa8-4b4c-452c-8fc9-a2f3fa48412b",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "otp": "0cceea28-1a92-4f3f-bee9-3af1ec5fab3b",
+        "sms": "98bd2fd8-7282-4a81-b16e-aa7f4193cb85",
+        "swk": "510df12e-ed31-4bf2-a6cf-21689567ffde",
+        "symantec": "2a705201-77ac-44ef-83ff-4e95f3c297b0",
+        "voice": "cd4de3d4-902e-4cd1-9a68-b76eb8e5fd17"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2387,
+      "y": 978.3333333333333
+    },
+    "46b04ae0-7039-476f-b849-d4096a5893dd": {
+      "connections": {
+        "false": "de30977d-1a16-4c20-966e-b40fc4601e4c",
+        "true": "12e3c16e-3b57-4160-83e3-cf2182b52522"
+      },
+      "displayName": "Script: Is Registered for any MFA method as per code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1129,
+      "y": 1488.5
+    },
+    "510df12e-ed31-4bf2-a6cf-21689567ffde": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "FR Push Notification",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2726,
+      "y": 1855
+    },
+    "5193cf12-e25b-40b8-a4a1-10a4c02f28dd": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "46b04ae0-7039-476f-b849-d4096a5893dd"
+      },
+      "displayName": "Script: Is MFA Required as per the context",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 809,
+      "y": 1488.5
+    },
+    "65cffa91-ef09-4dc7-b03c-8cd5700ff967": {
+      "connections": {
+        "true": "1b50db30-2000-4bcc-9074-500fed3456d1"
+      },
+      "displayName": "Script:GetEmailAddress",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 1515
+    },
+    "66f691b5-7c03-44de-9570-0ea9753a885d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Registration-HasSession",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 4012,
+      "y": 86.39999999999998
+    },
+    "6bfe3163-cef7-45a7-890c-33264091af1a": {
+      "connections": {
+        "Registration": "de30977d-1a16-4c20-966e-b40fc4601e4c",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "8b376cb3-c639-4a05-b8f3-2ef5ee6450f8"
+      },
+      "displayName": "Script: Is user registered for anything as per mfa context code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1747,
+      "y": 1475.5
+    },
+    "8a89a6f7-e54e-4362-8859-f320d6c0282c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "Email OTP Has Session",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2709,
+      "y": 0
+    },
+    "8b376cb3-c639-4a05-b8f3-2ef5ee6450f8": {
+      "connections": {
+        "hasSession": "00b7eff5-91df-4f47-b228-28cef0412ece",
+        "noSession": "3a01a240-4fc3-4540-9d61-87b4d53dd018"
+      },
+      "displayName": "Script: Check Valid Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2082,
+      "y": 852.5
+    },
+    "98bd2fd8-7282-4a81-b16e-aa7f4193cb85": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "SMS OTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2728,
+      "y": 1653
+    },
+    "a5b2ef2f-6671-422b-a041-8c94fe172fb3": {
+      "connections": {
+        "true": "6bfe3163-cef7-45a7-890c-33264091af1a"
+      },
+      "displayName": "Blank Message Error",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1696,
+      "y": 772
+    },
+    "aa4c0606-c4dc-4fb5-8b73-94ab8add950c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "SMS OTP Has Session",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2709,
+      "y": 148
+    },
+    "b2c4c0ad-ac82-43fe-b60c-3432708afdef": {
+      "connections": {
+        "Authenticate": "db4d7c5f-a0cb-4e8b-a089-6a9cb3b86095",
+        "NoAuthNeeded": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: CheckifReAuthNeeded",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3249,
+      "y": 965.6666666666666
+    },
+    "b9991d34-7500-4ba3-9901-5d18a964d85c": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "2e9daef9-285d-478c-91fe-6802ec635cf7"
+      },
+      "displayName": "MFA Authentication-HasSession",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 4251,
+      "y": 697.8
+    },
+    "c30c7fa8-4b4c-452c-8fc9-a2f3fa48412b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "Email OTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2718,
+      "y": 1325
+    },
+    "cd4de3d4-902e-4cd1-9a68-b76eb8e5fd17": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "Voice OTP",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2770,
+      "y": 2221
+    },
+    "d9b87534-b22a-4a12-a573-0e2f3ae72d1d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "2e9daef9-285d-478c-91fe-6802ec635cf7"
+      },
+      "displayName": "MFA Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 4273,
+      "y": 952.0999999999999
+    },
+    "db4d7c5f-a0cb-4e8b-a089-6a9cb3b86095": {
+      "connections": {
+        "Registration": "de30977d-1a16-4c20-966e-b40fc4601e4c",
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "08b05fab-9056-4a48-8610-72d04d4ee7f8"
+      },
+      "displayName": "Script: Check if any MFA Present",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3541,
+      "y": 521.5
+    },
+    "de30977d-1a16-4c20-966e-b40fc4601e4c": {
+      "connections": {
+        "hasSession": "66f691b5-7c03-44de-9570-0ea9753a885d",
+        "noSession": "234f7423-d4bb-4a8b-b35c-defa61b78f7a"
+      },
+      "displayName": "Script: Check Valid Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3564,
+      "y": 255.66666666666652
+    },
+    "e71e93b7-7f5a-4198-9322-97515c699010": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "Symantec VIP Has Session",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2720,
+      "y": 963
+    },
+    "f2408a89-26d4-448a-9b89-1d446afe0d69": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "fa1a0b40-b259-4d3c-bd52-ada1908d6b15"
+      },
+      "displayName": "FR Push Notification Has Session",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 2712,
+      "y": 458
+    },
+    "fa1a0b40-b259-4d3c-bd52-ada1908d6b15": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "1b50db30-2000-4bcc-9074-500fed3456d1"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 3208,
+      "y": 598.3333333333333
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 4875,
+      "y": 826
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 4892,
+      "y": 1060
+    },
+    "startNode": {
+      "x": 70,
+      "y": 1516
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

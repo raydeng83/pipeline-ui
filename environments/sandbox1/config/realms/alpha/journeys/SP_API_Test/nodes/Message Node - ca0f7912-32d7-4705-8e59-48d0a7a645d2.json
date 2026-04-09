@@ -1,0 +1,25 @@
+{
+  "_id": "ca0f7912-32d7-4705-8e59-48d0a7a645d2",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-426257470",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Journey Start"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

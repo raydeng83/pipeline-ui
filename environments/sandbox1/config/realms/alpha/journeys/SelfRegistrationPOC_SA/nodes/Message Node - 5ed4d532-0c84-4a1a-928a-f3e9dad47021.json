@@ -1,0 +1,30 @@
+{
+  "_id": "5ed4d532-0c84-4a1a-928a-f3e9dad47021",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1199877451",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "There is an existing account with this Email"
+  },
+  "messageNo": {
+    "en": "Try again with different Email"
+  },
+  "messageYes": {
+    "en": "Sign In"
+  },
+  "stateField": "mail"
+}

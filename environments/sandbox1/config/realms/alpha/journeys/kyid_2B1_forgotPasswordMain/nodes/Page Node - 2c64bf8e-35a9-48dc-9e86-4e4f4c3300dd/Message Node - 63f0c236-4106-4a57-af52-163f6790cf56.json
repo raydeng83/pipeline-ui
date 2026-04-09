@@ -1,0 +1,27 @@
+{
+  "_id": "63f0c236-4106-4a57-af52-163f6790cf56",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "1936694817",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "es": "Inicie sesión para acceder a su panel de KYID"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "es": "Volver a iniciar sesión"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "_id": "c19f06a6-0670-4318-98b3-f1578bbc77db",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1485466621",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "FR OTP Verification  Successful"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

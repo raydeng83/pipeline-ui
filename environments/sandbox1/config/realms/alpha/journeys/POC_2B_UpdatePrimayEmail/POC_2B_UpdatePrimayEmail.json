@@ -1,0 +1,207 @@
+{
+  "_id": "POC_2B_UpdatePrimayEmail",
+  "_rev": "1487737141",
+  "enabled": true,
+  "entryNodeId": "63baa1a4-5c23-48ba-9ce4-31fb63ab098a",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1aaf6272-6789-4ae5-8991-7348cc997743": {
+      "connections": {
+        "false": "925de378-9ca5-4134-9f92-c62cf09f1245",
+        "true": "4ac582c5-2d53-42a6-929a-d0642229f835"
+      },
+      "displayName": "Inner Tree Evaluator",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 484,
+      "y": 64
+    },
+    "2f33fce7-2b5a-4f70-8b8c-aed487974d10": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1208,
+      "y": 384
+    },
+    "34c6390e-9920-4061-a112-fa4645610cef": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1162,
+      "y": 46
+    },
+    "4ac582c5-2d53-42a6-929a-d0642229f835": {
+      "connections": {
+        "false": "2f33fce7-2b5a-4f70-8b8c-aed487974d10",
+        "true": "5d8e97c7-b047-4a9a-91f8-17c34606db21"
+      },
+      "displayName": "Patch",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 732,
+      "y": 57
+    },
+    "54dca305-aeef-471b-bc9a-41d962ff8da9": {
+      "connections": {
+        "true": "92d59bed-3ba2-41e7-8467-73a091764727"
+      },
+      "displayName": "IJ02: JIT",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 652,
+      "y": 354
+    },
+    "5c4f5bd0-be83-4031-a0a5-97725d8caaea": {
+      "connections": {
+        "true": "1aaf6272-6789-4ae5-8991-7348cc997743"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 479,
+      "y": 219
+    },
+    "5d8e97c7-b047-4a9a-91f8-17c34606db21": {
+      "connections": {
+        "false": "925de378-9ca5-4134-9f92-c62cf09f1245",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "UpdateMFAObject",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 949,
+      "y": 54
+    },
+    "6223425f-140f-4a81-9224-5ac63249f4c2": {
+      "connections": {
+        "true": "6bf58f17-e8c0-4b57-91ad-586af27318a3"
+      },
+      "displayName": "GetUserIDfromkyLoginPTA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 354,
+      "y": 492
+    },
+    "63baa1a4-5c23-48ba-9ce4-31fb63ab098a": {
+      "connections": {
+        "hasSession": "eaaf447d-0246-42b5-a052-433576fa3f54",
+        "noSession": "fae02129-1aee-445e-8f0c-c5afa159e448"
+      },
+      "displayName": "Script: Checks existing session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 68,
+      "y": 351
+    },
+    "6bf58f17-e8c0-4b57-91ad-586af27318a3": {
+      "connections": {
+        "true": "c7d14dc1-a86c-4131-848a-daad4826db3f"
+      },
+      "displayName": "IJ02:JIT",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 648,
+      "y": 486
+    },
+    "925de378-9ca5-4134-9f92-c62cf09f1245": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 1208,
+      "y": 239
+    },
+    "92d59bed-3ba2-41e7-8467-73a091764727": {
+      "connections": {
+        "true": "c7d14dc1-a86c-4131-848a-daad4826db3f"
+      },
+      "displayName": "IJ03: read claims",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 850,
+      "y": 355
+    },
+    "c7d14dc1-a86c-4131-848a-daad4826db3f": {
+      "connections": {
+        "True": "fef51d41-5b2f-4f4b-9586-6f5b0454ac1e"
+      },
+      "displayName": "FetchRequestID",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 871,
+      "y": 486
+    },
+    "d712cb73-71c0-4ce9-9f88-084557b24b42": {
+      "connections": {
+        "true": "fef51d41-5b2f-4f4b-9586-6f5b0454ac1e"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 60,
+      "y": 64
+    },
+    "eaaf447d-0246-42b5-a052-433576fa3f54": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "54dca305-aeef-471b-bc9a-41d962ff8da9"
+      },
+      "displayName": "GetUserIDfromExistingSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 357,
+      "y": 352
+    },
+    "fae02129-1aee-445e-8f0c-c5afa159e448": {
+      "connections": {
+        "true": "6223425f-140f-4a81-9224-5ac63249f4c2"
+      },
+      "displayName": "IJ01: Login",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 124,
+      "y": 494
+    },
+    "fef51d41-5b2f-4f4b-9586-6f5b0454ac1e": {
+      "connections": {
+        "Verify": "1aaf6272-6789-4ae5-8991-7348cc997743"
+      },
+      "displayName": "ChangeEmailScreen",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 274,
+      "y": 71
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1439,
+      "y": 48
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1479,
+      "y": 336
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

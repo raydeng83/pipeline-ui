@@ -1,0 +1,27 @@
+{
+  "_id": "34d42d7e-e198-4ba6-889f-8779a31719c9",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "2046975754",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "User is Present in AD"
+  },
+  "messageNo": {},
+  "messageYes": {
+    "en": "Search another account"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "_id": "f462217d-aed6-4a72-85b8-305396b00b7e",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "1170292446",
+  "_type": {
+    "_id": "SetFailureUrlNode",
+    "collection": true,
+    "name": "Failure URL",
+    "version": "1.0"
+  },
+  "failureUrl": "registration-failure"
+}

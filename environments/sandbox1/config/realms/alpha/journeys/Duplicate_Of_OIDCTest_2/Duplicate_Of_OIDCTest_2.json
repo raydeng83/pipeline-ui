@@ -1,0 +1,203 @@
+{
+  "_id": "Duplicate_Of_OIDCTest_2",
+  "_rev": "310929387",
+  "enabled": true,
+  "entryNodeId": "c3ce81f3-707d-4461-b8d4-1b6891c4960c",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "0dead8bf-0d17-4701-8402-ef206304a087": {
+      "connections": {
+        "tryAgain": "c3ce81f3-707d-4461-b8d4-1b6891c4960c"
+      },
+      "displayName": "Incorrect Username",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1061,
+      "y": 470.8333333333333
+    },
+    "275f1cd7-b535-4ccf-ae2f-c27fa569a85a": {
+      "connections": {
+        "outcome": "5b9833a1-e544-4649-a4a6-9953b3109ebc"
+      },
+      "displayName": "Password Collector",
+      "nodeType": "PasswordCollectorNode",
+      "version": "1.0",
+      "x": 783,
+      "y": 174.66666666666669
+    },
+    "2f7a6878-f1ad-4cc2-925d-95f4f233b2e1": {
+      "connections": {
+        "authenticate": "ac7b2ad0-60d7-45cc-a22a-0fddf1965c17",
+        "noUser": "0dead8bf-0d17-4701-8402-ef206304a087"
+      },
+      "displayName": "Check User In AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 783,
+      "y": 278.3333333333333
+    },
+    "3952ff1e-d984-4c64-b7d3-f6427d175708": {
+      "connections": {
+        "false": "2f7a6878-f1ad-4cc2-925d-95f4f233b2e1",
+        "true": "275f1cd7-b535-4ccf-ae2f-c27fa569a85a"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 492,
+      "y": 157
+    },
+    "5b9833a1-e544-4649-a4a6-9953b3109ebc": {
+      "connections": {
+        "existing": "e2a5ef2d-2456-4568-a0a0-6788e0ca84d0",
+        "locked": "df713717-dd24-4343-8954-e0fdabd41a2b",
+        "updated": "f7ebaada-c65a-4ef9-8315-3481f2ddc469"
+      },
+      "displayName": "Check IF 2A/2B",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1061,
+      "y": 244.25
+    },
+    "71752a6d-4047-4c9f-8e24-f15039b77e27": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Successful Login",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2153,
+      "y": 192.66666666666669
+    },
+    "7481d8ab-088c-49f6-9e5d-cea481d2072b": {
+      "connections": {
+        "false": "2f7a6878-f1ad-4cc2-925d-95f4f233b2e1",
+        "true": "275f1cd7-b535-4ccf-ae2f-c27fa569a85a"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 492,
+      "y": 322.5
+    },
+    "7faf5b3d-c55a-4b05-afc6-1031c8431068": {
+      "connections": {
+        "fail": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "71752a6d-4047-4c9f-8e24-f15039b77e27"
+      },
+      "displayName": "Patch Password",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1895,
+      "y": 297.5
+    },
+    "8eff1add-629d-4dac-bc67-8d5469f24ed8": {
+      "connections": {
+        "next": "c3ce81f3-707d-4461-b8d4-1b6891c4960c"
+      },
+      "displayName": "Password Expired",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1625,
+      "y": 446.0833333333333
+    },
+    "ac7b2ad0-60d7-45cc-a22a-0fddf1965c17": {
+      "connections": {
+        "outcome": "e2a5ef2d-2456-4568-a0a0-6788e0ca84d0"
+      },
+      "displayName": "Password Collector",
+      "nodeType": "PasswordCollectorNode",
+      "version": "1.0",
+      "x": 1061,
+      "y": 106.5
+    },
+    "b9ac8983-9f63-45e4-804b-7b1ebcb37cfe": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "7faf5b3d-c55a-4b05-afc6-1031c8431068"
+      },
+      "displayName": " Create User in AIC",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1625,
+      "y": 113.25
+    },
+    "be2a0d4c-5329-42cc-8009-109743bd6bec": {
+      "connections": {
+        "next": "c3ce81f3-707d-4461-b8d4-1b6891c4960c"
+      },
+      "displayName": "Invalid Password",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1625,
+      "y": 300.625
+    },
+    "c3ce81f3-707d-4461-b8d4-1b6891c4960c": {
+      "connections": {
+        "mail": "7481d8ab-088c-49f6-9e5d-cea481d2072b",
+        "phone": "3952ff1e-d984-4c64-b7d3-f6427d175708"
+      },
+      "displayName": "Username Collector",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 297.5
+    },
+    "df713717-dd24-4343-8954-e0fdabd41a2b": {
+      "connections": {
+        "next": "c3ce81f3-707d-4461-b8d4-1b6891c4960c"
+      },
+      "displayName": "User Locked",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1344,
+      "y": 568
+    },
+    "e2a5ef2d-2456-4568-a0a0-6788e0ca84d0": {
+      "connections": {
+        "fail": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "invalidPassword": "be2a0d4c-5329-42cc-8009-109743bd6bec",
+        "newUser": "b9ac8983-9f63-45e4-804b-7b1ebcb37cfe",
+        "passwordExpired": "8eff1add-629d-4dac-bc67-8d5469f24ed8",
+        "success": "7faf5b3d-c55a-4b05-afc6-1031c8431068"
+      },
+      "displayName": "Authenticate at AD",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1344,
+      "y": 284
+    },
+    "f7ebaada-c65a-4ef9-8315-3481f2ddc469": {
+      "connections": {
+        "false": "be2a0d4c-5329-42cc-8009-109743bd6bec",
+        "true": "71752a6d-4047-4c9f-8e24-f15039b77e27"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 1344,
+      "y": 80
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2411,
+      "y": 324.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2153,
+      "y": 287.3333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 324.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

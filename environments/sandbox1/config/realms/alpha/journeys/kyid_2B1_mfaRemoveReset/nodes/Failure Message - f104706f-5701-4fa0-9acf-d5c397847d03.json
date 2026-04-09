@@ -1,0 +1,31 @@
+{
+  "_id": "f104706f-5701-4fa0-9acf-d5c397847d03",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-749494902",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "d7295e15-efa2-4c48-adfe-2115d0618240",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {},
+  "stage": "{\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\",\"ConfirmationCallback\":[{\"id\":\"63e28b17-c913-4232-bd89-d0a54ff6a505\",\"showOnlyPositiveAnswer\":true}]}"
+}

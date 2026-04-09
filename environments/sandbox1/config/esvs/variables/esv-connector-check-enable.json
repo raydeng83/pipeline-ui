@@ -1,0 +1,6 @@
+{
+  "_id": "esv-connector-check-enable",
+  "description": "",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_CONNECTOR_CHECK_ENABLE}"
+}

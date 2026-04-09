@@ -1,0 +1,96 @@
+{
+  "_id": "kyid_mfaAuthenticationFRTOTP.SelfandOthers",
+  "_rev": "-767636613",
+  "enabled": true,
+  "entryNodeId": "c6f914f2-1d5a-4503-9b04-3c76f14f0cab",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "122f9aff-6cb2-4530-984c-9ba9bb9b83f1": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1357,
+      "y": 554.6
+    },
+    "35383d4b-7028-4067-80af-7c6bbda4e2ed": {
+      "connections": {
+        "false": "122f9aff-6cb2-4530-984c-9ba9bb9b83f1",
+        "true": "e91f0e9f-3169-464e-a601-6bc42d753e88"
+      },
+      "displayName": "Invalid OTP message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 957,
+      "y": 487
+    },
+    "64959ae7-0f93-423d-83c0-292082e86781": {
+      "connections": {
+        "successOutcome": "e91f0e9f-3169-464e-a601-6bc42d753e88"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1229,
+      "y": 257.3333282470703
+    },
+    "b230dfd1-5b30-47b5-947f-8d0aab80c098": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Code",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 936,
+      "y": 292
+    },
+    "c6f914f2-1d5a-4503-9b04-3c76f14f0cab": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e91f0e9f-3169-464e-a601-6bc42d753e88"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 267.7875061035156,
+      "y": 326.6125030517578
+    },
+    "e91f0e9f-3169-464e-a601-6bc42d753e88": {
+      "connections": {
+        "failureOutcome": "35383d4b-7028-4067-80af-7c6bbda4e2ed",
+        "notRegisteredOutcome": "64959ae7-0f93-423d-83c0-292082e86781",
+        "successOutcome": "b230dfd1-5b30-47b5-947f-8d0aab80c098"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 575,
+      "y": 269.3333282470703
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1864,
+      "y": 459.6666666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1815,
+      "y": 233.33333333333331
+    },
+    "startNode": {
+      "x": 70,
+      "y": 334
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

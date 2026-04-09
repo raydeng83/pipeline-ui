@@ -1,0 +1,220 @@
+{
+  "_id": "kyid_mfaRemoveResetForOthers",
+  "_rev": "721969733",
+  "description": "this journey will display the mfa that needs to be removed reset and covers the language pref",
+  "enabled": true,
+  "entryNodeId": "7c0f54ff-e6b6-47f1-9c49-1409c1afb888",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "38ed6bdd-4ad8-4304-8935-2f72d0c22c9e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "71a894e2-9f8b-476a-a44f-55d5a9b3c6d6"
+      },
+      "displayName": "LoginJourney",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 705,
+      "y": 284
+    },
+    "461a12ee-d302-4ef5-98f6-bbf3c6cea836": {
+      "connections": {
+        "true": "af93eea7-dd30-4bb9-9398-f4ff37e860fe"
+      },
+      "displayName": "Blank Error Message",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1505.111083984375,
+      "y": 43.22221374511719
+    },
+    "4c3d3037-7a63-48ec-bc2b-5e559fe9d63d": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "af93eea7-dd30-4bb9-9398-f4ff37e860fe"
+      },
+      "displayName": "Re-Perform Authentication",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1165,
+      "y": 284
+    },
+    "51c99f5e-330b-4278-b073-ca4bbd843607": {
+      "connections": {
+        "false": "af93eea7-dd30-4bb9-9398-f4ff37e860fe",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2958.4443359375,
+      "y": 214.79165840148926
+    },
+    "5b9638f6-2727-4526-9492-09126f635bed": {
+      "connections": {
+        "Default": "461a12ee-d302-4ef5-98f6-bbf3c6cea836",
+        "Remove/Reset MFA Methods": "e72b69a6-9891-42de-bdf3-1162bc09ac47",
+        "Restablecer/Eliminar Métodos MFA": "e72b69a6-9891-42de-bdf3-1162bc09ac47",
+        "otp": "e72b69a6-9891-42de-bdf3-1162bc09ac47",
+        "sms": "e72b69a6-9891-42de-bdf3-1162bc09ac47",
+        "swk": "e72b69a6-9891-42de-bdf3-1162bc09ac47",
+        "symantec": "e72b69a6-9891-42de-bdf3-1162bc09ac47",
+        "voice": "e72b69a6-9891-42de-bdf3-1162bc09ac47"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1738,
+      "y": 61
+    },
+    "66fb95a2-90a3-4408-9e89-a41b182602e8": {
+      "connections": {
+        "false": "38ed6bdd-4ad8-4304-8935-2f72d0c22c9e",
+        "true": "71a894e2-9f8b-476a-a44f-55d5a9b3c6d6"
+      },
+      "displayName": "isLoginPerformed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 475,
+      "y": 284
+    },
+    "701c04c0-0e7a-4f2c-8989-d4079331d74a": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2958,
+      "y": 448.5
+    },
+    "71a894e2-9f8b-476a-a44f-55d5a9b3c6d6": {
+      "connections": {
+        "false": "4c3d3037-7a63-48ec-bc2b-5e559fe9d63d",
+        "true": "af93eea7-dd30-4bb9-9398-f4ff37e860fe"
+      },
+      "displayName": "isMFAPerformed",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 935,
+      "y": 284
+    },
+    "75ff2668-7263-4d0d-8664-5137cf270a64": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "ef2b354f-1695-4204-bb7a-526e6f3fec6d"
+      },
+      "displayName": "Script: Get Access Token",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2270,
+      "y": 284
+    },
+    "7c0f54ff-e6b6-47f1-9c49-1409c1afb888": {
+      "connections": {
+        "hasSession": "71a894e2-9f8b-476a-a44f-55d5a9b3c6d6",
+        "noSession": "66fb95a2-90a3-4408-9e89-a41b182602e8"
+      },
+      "displayName": "CheckforSessionValidity",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 284
+    },
+    "928a9d62-e442-4658-8656-92915fd1c4b2": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Failure Message",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2729,
+      "y": 18
+    },
+    "9d557842-f1cf-4a5b-a2f5-3a1721d5e82d": {
+      "connections": {
+        "false": "5b9638f6-2727-4526-9492-09126f635bed",
+        "true": "75ff2668-7263-4d0d-8664-5137cf270a64"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2025,
+      "y": 257.5
+    },
+    "af93eea7-dd30-4bb9-9398-f4ff37e860fe": {
+      "connections": {
+        "True": "5b9638f6-2727-4526-9492-09126f635bed",
+        "noMFA": "f69c7fcb-fc80-437b-9c61-2af1ac810d09"
+      },
+      "displayName": "Script: Check MFA to Remove",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1452,
+      "y": 156
+    },
+    "b2d223e3-bef4-4913-8fc2-d453c61d2b20": {
+      "connections": {
+        "True": "51c99f5e-330b-4278-b073-ca4bbd843607",
+        "noMFA": "701c04c0-0e7a-4f2c-8989-d4079331d74a"
+      },
+      "displayName": "Script: Check MFA to Remove",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2639.4443359375,
+      "y": 270.79165840148926
+    },
+    "e72b69a6-9891-42de-bdf3-1162bc09ac47": {
+      "connections": {
+        "Confirm": "75ff2668-7263-4d0d-8664-5137cf270a64",
+        "GoBack": "5b9638f6-2727-4526-9492-09126f635bed"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2067.3333740234375,
+      "y": 490.4444351196289
+    },
+    "ef2b354f-1695-4204-bb7a-526e6f3fec6d": {
+      "connections": {
+        "false": "928a9d62-e442-4658-8656-92915fd1c4b2",
+        "true": "b2d223e3-bef4-4913-8fc2-d453c61d2b20"
+      },
+      "displayName": "RemoveMFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2475,
+      "y": 83
+    },
+    "f69c7fcb-fc80-437b-9c61-2af1ac810d09": {
+      "connections": {
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Error: No MFA to Remove",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1751,
+      "y": 538
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3449,
+      "y": 296.5
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2537,
+      "y": 308
+    },
+    "startNode": {
+      "x": 70,
+      "y": 301.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

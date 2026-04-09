@@ -1,0 +1,51 @@
+{
+  "_id": "8e45a2ca-2d4f-4952-b898-9d797c0884a1",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "false",
+      "id": "false"
+    },
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    },
+    {
+      "displayName": "Resend Code",
+      "id": "Resend Code"
+    },
+    {
+      "displayName": "Choose Another Method",
+      "id": "Choose Another Method"
+    },
+    {
+      "displayName": "expired",
+      "id": "expired"
+    }
+  ],
+  "_rev": "1947564557",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "false",
+    "Verify",
+    "Resend Code",
+    "Choose Another Method",
+    "expired"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "06f34901-5963-4ecc-961b-9343775e58b9"
+}

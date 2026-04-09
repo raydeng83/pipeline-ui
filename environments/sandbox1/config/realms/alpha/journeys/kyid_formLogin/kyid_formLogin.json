@@ -1,0 +1,87 @@
+{
+  "_id": "kyid_formLogin",
+  "_rev": "1334281464",
+  "description": "This journey is used to skip Kerberos authentication",
+  "enabled": true,
+  "entryNodeId": "fc5a8f25-46cf-49b3-b93b-e3a6c5f59caf",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "196dfc16-0aa3-4488-bfd4-7a7927bb3c96": {
+      "connections": {
+        "CONFIGURATION_FAILED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Set Skip Kerberos Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 1068,
+      "y": 153
+    },
+    "315e210a-15a1-4358-a7b9-ea5164b00cc9": {
+      "connections": {
+        "CONFIGURATION_FAILED": "897942a2-131d-4c04-8a94-df05ba5f0451",
+        "outcome": "897942a2-131d-4c04-8a94-df05ba5f0451"
+      },
+      "displayName": "Config: Set cLocale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 720,
+      "y": 80
+    },
+    "897942a2-131d-4c04-8a94-df05ba5f0451": {
+      "connections": {
+        "CONFIGURATION_FAILED": "196dfc16-0aa3-4488-bfd4-7a7927bb3c96",
+        "outcome": "196dfc16-0aa3-4488-bfd4-7a7927bb3c96"
+      },
+      "displayName": "Config: Set Locale Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 836,
+      "y": 290
+    },
+    "bab43216-53fe-4303-97b1-05fb0fb06318": {
+      "connections": {
+        "CONFIGURATION_FAILED": "315e210a-15a1-4358-a7b9-ea5164b00cc9",
+        "outcome": "315e210a-15a1-4358-a7b9-ea5164b00cc9"
+      },
+      "displayName": "Set Language Prefernce Cookie",
+      "nodeType": "ConfigProviderNode",
+      "version": "1.0",
+      "x": 386.3333282470703,
+      "y": 171.33332061767578
+    },
+    "fc5a8f25-46cf-49b3-b93b-e3a6c5f59caf": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "SetLang": "bab43216-53fe-4303-97b1-05fb0fb06318",
+        "True": "196dfc16-0aa3-4488-bfd4-7a7927bb3c96"
+      },
+      "displayName": "Scripted: Set Goto App Url",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 167,
+      "y": 328
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1486,
+      "y": 259
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1292,
+      "y": 401
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

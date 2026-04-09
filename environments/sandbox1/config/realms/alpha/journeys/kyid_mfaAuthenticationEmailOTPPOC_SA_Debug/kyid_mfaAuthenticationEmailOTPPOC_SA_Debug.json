@@ -1,0 +1,63 @@
+{
+  "_id": "kyid_mfaAuthenticationEmailOTPPOC_SA_Debug",
+  "_rev": "-1520972122",
+  "enabled": true,
+  "entryNodeId": "7b9d9e8e-ed0c-4950-a7aa-86c7bb8232f7",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "7b9d9e8e-ed0c-4950-a7aa-86c7bb8232f7": {
+      "connections": {
+        "outcome": "efb670d8-23a2-4436-95c2-64657375c3ac"
+      },
+      "displayName": "HOTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 204,
+      "y": 126.5
+    },
+    "db434965-21d3-4904-ad13-fa7673b869fb": {
+      "connections": {
+        "Choose Another": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Resend Code": "7b9d9e8e-ed0c-4950-a7aa-86c7bb8232f7",
+        "Verify": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Verify email",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 795,
+      "y": 0
+    },
+    "efb670d8-23a2-4436-95c2-64657375c3ac": {
+      "connections": {
+        "failure": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "db434965-21d3-4904-ad13-fa7673b869fb"
+      },
+      "displayName": "SendOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 503,
+      "y": 64.5
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1356,
+      "y": 159
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1158,
+      "y": 558
+    },
+    "startNode": {
+      "x": 70,
+      "y": 285.8333333333333
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

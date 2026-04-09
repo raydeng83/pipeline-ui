@@ -1,0 +1,33 @@
+{
+  "_id": "41add08d-3799-45cb-8090-bd556af22078",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-837756740",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "7b68afd0-8375-4772-8892-2a8f97aabb23",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "An Error Occurred While searching user account."
+  },
+  "pageHeader": {},
+  "stage": "{\"ConfirmationCallback\":[{\"id\":\"7b68afd0-8375-4772-8892-2a8f97aabb23\",\"showOnlyPositiveAnswer\":true,\"showButtonsAsLinks\":true}]}"
+}

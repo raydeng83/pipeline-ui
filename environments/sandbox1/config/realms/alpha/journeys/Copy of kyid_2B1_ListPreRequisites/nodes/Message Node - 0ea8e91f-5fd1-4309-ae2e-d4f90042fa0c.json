@@ -1,0 +1,25 @@
+{
+  "_id": "0ea8e91f-5fd1-4309-ae2e-d4f90042fa0c",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "-1776435247",
+  "_type": {
+    "_id": "MessageNode",
+    "collection": true,
+    "name": "Message Node",
+    "version": "1.0"
+  },
+  "message": {
+    "en": "Successfully obtained the list of Prerequisites"
+  },
+  "messageNo": {},
+  "messageYes": {}
+}

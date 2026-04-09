@@ -1,0 +1,79 @@
+{
+  "name": "Alpha_Kyid_Endpoint",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": null,
+    "icon": "fa-database",
+    "order": [
+      "endpointURL",
+      "endpointType",
+      "authnType",
+      "username",
+      "password",
+      "token",
+      "certificate"
+    ],
+    "properties": {
+      "authnType": {
+        "searchable": false,
+        "title": "Endpoint Authentication Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "certificate": {
+        "searchable": false,
+        "title": "Endpoint Certificate",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "endpointType": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Endpoint Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "endpointURL": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Endpoint URL",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "password": {
+        "searchable": false,
+        "title": "Endpoint Connect Credentials",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "token": {
+        "searchable": false,
+        "title": "Endpoint Token",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "username": {
+        "searchable": false,
+        "title": "Endpoint Connect Username",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "endpointURL"
+    ],
+    "title": "Endpoint",
+    "type": "object"
+  }
+}

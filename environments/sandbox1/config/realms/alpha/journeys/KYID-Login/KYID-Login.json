@@ -1,0 +1,107 @@
+{
+  "_id": "KYID-Login",
+  "_rev": "-1319298906",
+  "description": "Platform Login Tree",
+  "enabled": true,
+  "entryNodeId": "b0089471-6010-4d35-ba54-930c98fb249e",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "2e3caa35-8182-40e4-8adf-476b7bee504d": {
+      "connections": {},
+      "displayName": "monAuthNSession",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 550,
+      "y": 315.0625
+    },
+    "382f0088-a05e-4315-8983-c36383b4ee5a": {
+      "connections": {
+        "CANCELLED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "EXPIRED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "FALSE": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "LOCKED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "TRUE": "a00255a3-c997-48e8-a34d-e21060f7606e"
+      },
+      "displayName": "Identity Store Decision",
+      "nodeType": "IdentityStoreDecisionNode",
+      "version": "1.0",
+      "x": 980,
+      "y": 246.015625
+    },
+    "4019322e-b85b-4136-9d50-9928ba908d1b": {
+      "connections": {
+        "outcome": "382f0088-a05e-4315-8983-c36383b4ee5a"
+      },
+      "displayName": "Sign In",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 779,
+      "y": 249.0625
+    },
+    "5dac1378-2093-4e32-bab7-620c8eb45eec": {
+      "connections": {
+        "hasSession": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "noSession": "c98b464f-39ae-4dbc-a3d8-a6ba8b58e95e"
+      },
+      "displayName": "Check Session",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 323,
+      "y": 53.3125
+    },
+    "a00255a3-c997-48e8-a34d-e21060f7606e": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 1235.90234375,
+      "y": 160.0625
+    },
+    "b0089471-6010-4d35-ba54-930c98fb249e": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "success": "5dac1378-2093-4e32-bab7-620c8eb45eec"
+      },
+      "displayName": "Initialize Journey",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 163,
+      "y": 325.0625
+    },
+    "c98b464f-39ae-4dbc-a3d8-a6ba8b58e95e": {
+      "connections": {
+        "false": "4019322e-b85b-4136-9d50-9928ba908d1b",
+        "true": "a00255a3-c997-48e8-a34d-e21060f7606e"
+      },
+      "displayName": "Kerberos AuthN Inner",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 540,
+      "y": 158.0625
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1506,
+      "y": 70
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1514,
+      "y": 450
+    },
+    "startNode": {
+      "x": 48,
+      "y": 342
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"KYID\"]"
+  }
+}

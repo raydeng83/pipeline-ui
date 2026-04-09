@@ -1,0 +1,77 @@
+{
+  "iconClass": "fa fa-database",
+  "name": "kyid_messages",
+  "schema": {
+    "$schema": "http://forgerock.org/json-schema#",
+    "description": "KYID Messages",
+    "icon": "fa-envelope-square",
+    "order": [
+      "_id",
+      "name",
+      "label",
+      "locale",
+      "type"
+    ],
+    "properties": {
+      "_id": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": false,
+        "title": "ID",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "label": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Message Label",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "locale": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Locale",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "name": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Message Name",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      },
+      "type": {
+        "description": null,
+        "format": null,
+        "isVirtual": false,
+        "searchable": true,
+        "title": "Message Type",
+        "type": "string",
+        "userEditable": true,
+        "viewable": true
+      }
+    },
+    "required": [
+      "name",
+      "label",
+      "locale",
+      "type"
+    ],
+    "title": "KYID Messages",
+    "type": "object"
+  },
+  "type": "Managed Object"
+}

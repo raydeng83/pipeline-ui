@@ -1,0 +1,40 @@
+{
+  "_id": "7e98d613-faa3-44f0-be90-aebe1b780a0d",
+  "_outcomes": [
+    {
+      "displayName": "MFA Registration",
+      "id": "MFA Registration"
+    },
+    {
+      "displayName": "Remove/Reset",
+      "id": "Remove/Reset"
+    }
+  ],
+  "_rev": "-157648604",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "72519878-d67b-41b3-aa85-aaeff9157f87",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "9e436a79-0bf7-4b01-b5a1-8bdc80dd6de8",
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Manage your security methods</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.for.self}\"target=\"_blank\">Need Assistance?</a>\n</div>\n<div class=\"page-header-content\">Select one of the below options to manage your security methods.</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Gestionar sus métodos de seguridad</h5></div>\n<div class=\"page-element\">\n<a href=\"&{esv.kog.help.mfa.for.self}\"target=\"_blank\">¿Necesita ayuda?</a>\n</div>\n<div class=\"page-header-content\">Seleccione una de las siguientes opciones para administrar sus métodos de seguridad.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nBack</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\"target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nAtrás</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\"target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"}}"
+}

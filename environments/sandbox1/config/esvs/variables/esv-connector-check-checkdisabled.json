@@ -1,0 +1,6 @@
+{
+  "_id": "esv-connector-check-checkdisabled",
+  "description": "If the schedule job connector check will send alert for disabled connector",
+  "expressionType": "bool",
+  "valueBase64": "${ESV_CONNECTOR_CHECK_CHECKDISABLED}"
+}

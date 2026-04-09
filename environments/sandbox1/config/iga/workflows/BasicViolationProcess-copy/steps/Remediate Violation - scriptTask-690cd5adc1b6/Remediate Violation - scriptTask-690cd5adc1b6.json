@@ -1,0 +1,18 @@
+{
+  "displayName": "Remediate Violation",
+  "name": "scriptTask-690cd5adc1b6",
+  "scriptTask": {
+    "language": "javascript",
+    "nextStep": [
+      {
+        "condition": "true",
+        "outcome": "done",
+        "step": "exclusiveGateway-b1e244b742b5"
+      }
+    ],
+    "script": {
+      "file": "Remediate Violation - scriptTask-690cd5adc1b6.js"
+    }
+  },
+  "type": "scriptTask"
+}

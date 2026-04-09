@@ -1,0 +1,26 @@
+{
+  "_id": "533dfffa-d178-4328-91ef-2a77a4291161",
+  "_outcomes": [
+    {
+      "displayName": "Verify",
+      "id": "Verify"
+    }
+  ],
+  "_rev": "-1124642213",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "Verify"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "210760ff-e17c-4496-9e5d-453b23198575"
+}

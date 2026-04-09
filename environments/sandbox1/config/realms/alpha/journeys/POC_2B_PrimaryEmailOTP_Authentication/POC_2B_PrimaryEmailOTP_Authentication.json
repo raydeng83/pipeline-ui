@@ -1,0 +1,187 @@
+{
+  "_id": "POC_2B_PrimaryEmailOTP_Authentication",
+  "_rev": "-906773262",
+  "description": "Phase 2B development work",
+  "enabled": true,
+  "entryNodeId": "62b8f8f8-c2e8-44c3-b11e-11deec0ff141",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "07ac1cff-fb27-450c-bde6-4927a74c4e4b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Set IDPAuthType Email",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1822,
+      "y": 265
+    },
+    "1af32c81-c457-4a68-92a6-9d4474335f82": {
+      "connections": {
+        "outcome": "acdf35d5-cde9-455e-8d8e-24195e51d923"
+      },
+      "displayName": "Email OTP Generator",
+      "nodeType": "OneTimePasswordGeneratorNode",
+      "version": "1.0",
+      "x": 1022,
+      "y": 475
+    },
+    "41109809-3f35-472b-8200-76ce5c5c090f": {
+      "connections": {
+        "True": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Script: Missing Mandatory Configuration Parameters",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2106,
+      "y": 293.33333333333337
+    },
+    "46b3614b-42e0-4acd-9226-3bb08b28570a": {
+      "connections": {
+        "False": "41109809-3f35-472b-8200-76ce5c5c090f",
+        "True": "4ebe38b0-cc61-4c21-90c8-366af42eb20c"
+      },
+      "displayName": "Email: BlankOTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1822,
+      "y": 819
+    },
+    "4ebe38b0-cc61-4c21-90c8-366af42eb20c": {
+      "connections": {
+        "BlankOTP": "46b3614b-42e0-4acd-9226-3bb08b28570a",
+        "Choose Another Method": "d60ed3b5-034f-4a85-bcc0-adc7e472342b",
+        "Resend Code": "ee9a4caf-ae30-425f-a6cd-4d7871d0f047",
+        "Verify": "07ac1cff-fb27-450c-bde6-4927a74c4e4b",
+        "expired": "b667dbc7-67c3-4ed8-b4d2-2edab9d36896",
+        "false": "59e8d49d-7a11-4852-92b6-4e70f5a814fe",
+        "true": "07ac1cff-fb27-450c-bde6-4927a74c4e4b"
+      },
+      "displayName": "Custom Callback Node(Password, choice, confirmation)",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1570,
+      "y": 241
+    },
+    "59e8d49d-7a11-4852-92b6-4e70f5a814fe": {
+      "connections": {
+        "False": "41109809-3f35-472b-8200-76ce5c5c090f",
+        "True": "4ebe38b0-cc61-4c21-90c8-366af42eb20c"
+      },
+      "displayName": "Email: Invalid OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1822,
+      "y": 635
+    },
+    "62b8f8f8-c2e8-44c3-b11e-11deec0ff141": {
+      "connections": {
+        "Error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "Success": "89c16e40-17fe-4f24-9c8d-1d1518ea1610"
+      },
+      "displayName": "Get Access Token",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 302,
+      "y": 437
+    },
+    "89c16e40-17fe-4f24-9c8d-1d1518ea1610": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1af32c81-c457-4a68-92a6-9d4474335f82"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 530,
+      "y": 449
+    },
+    "8cb53df5-44f7-47f2-9aba-071056a409c0": {
+      "connections": {
+        "Another Factor": "d60ed3b5-034f-4a85-bcc0-adc7e472342b",
+        "true": "1af32c81-c457-4a68-92a6-9d4474335f82"
+      },
+      "displayName": "DisplayMessageToUser",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 777,
+      "y": 396
+    },
+    "acdf35d5-cde9-455e-8d8e-24195e51d923": {
+      "connections": {
+        "error": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "noMail": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "sent": "4ebe38b0-cc61-4c21-90c8-366af42eb20c"
+      },
+      "displayName": "Send Email OTP with Template",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1267,
+      "y": 437.5
+    },
+    "b667dbc7-67c3-4ed8-b4d2-2edab9d36896": {
+      "connections": {
+        "False": "41109809-3f35-472b-8200-76ce5c5c090f",
+        "True": "4ebe38b0-cc61-4c21-90c8-366af42eb20c"
+      },
+      "displayName": "Email: Expired OTP",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1822,
+      "y": 449
+    },
+    "d60ed3b5-034f-4a85-bcc0-adc7e472342b": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Node State Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1822,
+      "y": 80
+    },
+    "ee9a4caf-ae30-425f-a6cd-4d7871d0f047": {
+      "connections": {
+        "true": "1af32c81-c457-4a68-92a6-9d4474335f82"
+      },
+      "displayName": "Script: Email OTP Resend",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1516,
+      "y": 678.4583282470703
+    },
+    "f273f908-9562-4967-a032-170fedb5997e": {
+      "connections": {
+        "outcome": "4ebe38b0-cc61-4c21-90c8-366af42eb20c"
+      },
+      "displayName": "OTP Email Sender",
+      "nodeType": "OneTimePasswordSmtpSenderNode",
+      "version": "1.0",
+      "x": 180,
+      "y": 182.33333333333337
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 2106,
+      "y": 321.6666666666667
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2426,
+      "y": 467.5
+    },
+    "startNode": {
+      "x": 70,
+      "y": 321.6666666666667
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

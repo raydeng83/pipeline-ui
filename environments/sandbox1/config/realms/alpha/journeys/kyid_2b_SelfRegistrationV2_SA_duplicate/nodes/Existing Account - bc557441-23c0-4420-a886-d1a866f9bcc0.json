@@ -1,0 +1,32 @@
+{
+  "_id": "bc557441-23c0-4420-a886-d1a866f9bcc0",
+  "_outcomes": [
+    {
+      "displayName": "try again",
+      "id": "try again"
+    },
+    {
+      "displayName": "pass",
+      "id": "pass"
+    }
+  ],
+  "_rev": "-1628582383",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "21dd69ac-c12f-4e52-8a2f-85c88f0a0007",
+      "displayName": "Show Email",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "existing_email"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "_id": "demo_JAWS",
+  "_rev": "738411675",
+  "enabled": true,
+  "entryNodeId": "6e3916e4-9bf3-4974-a18a-cb8203ecc4da",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "6e3916e4-9bf3-4974-a18a-cb8203ecc4da": {
+      "connections": {
+        "Default": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "FAILED": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "Failed": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "RecoveryMFA": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "Remove/Reset MFA Method": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "True": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "email": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "false": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "otp": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "sms": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "swk": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "symantec": "d17c9ba7-3885-4cc6-8722-c3035ec191a4",
+        "voice": "d17c9ba7-3885-4cc6-8722-c3035ec191a4"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 119,
+      "y": 150.66665649414062
+    },
+    "d17c9ba7-3885-4cc6-8722-c3035ec191a4": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 411,
+      "y": 185.01040649414062
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 500,
+      "y": 50
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 500,
+      "y": 350
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[\"test\"]"
+  }
+}

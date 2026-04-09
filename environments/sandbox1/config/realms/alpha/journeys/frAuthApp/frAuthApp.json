@@ -1,0 +1,96 @@
+{
+  "_id": "frAuthApp",
+  "_rev": "-1277162686",
+  "enabled": true,
+  "entryNodeId": "de97e489-a476-4b7f-a85f-776a43c3b9aa",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "1eaba74f-2a5b-4dc4-94c2-83dc026ff86d": {
+      "connections": {
+        "failureOutcome": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "notRegisteredOutcome": "8e1b630a-af0a-445b-a0cc-7be79bcb066a",
+        "successOutcome": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "OATH Token Verifier",
+      "nodeType": "OathTokenVerifierNode",
+      "version": "1.0",
+      "x": 405,
+      "y": 31.666664123535156
+    },
+    "8e1b630a-af0a-445b-a0cc-7be79bcb066a": {
+      "connections": {
+        "failureOutcome": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "successOutcome": "1eaba74f-2a5b-4dc4-94c2-83dc026ff86d"
+      },
+      "displayName": "OATH Registration",
+      "nodeType": "OathRegistrationNode",
+      "version": "1.0",
+      "x": 429,
+      "y": 315.66666412353516
+    },
+    "94d6189f-701d-47de-91ee-782675a2fe29": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 771.3333339691162,
+      "y": 188.33332443237305
+    },
+    "de97e489-a476-4b7f-a85f-776a43c3b9aa": {
+      "connections": {
+        "outcome": "f3e6ccc0-4ea0-41c9-b64d-0711942bb94a"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 128,
+      "y": 42.666656494140625
+    },
+    "e7632b24-3a2b-4f39-bafa-7bb58f856435": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "1eaba74f-2a5b-4dc4-94c2-83dc026ff86d"
+      },
+      "displayName": "Data Store Decision",
+      "nodeType": "DataStoreDecisionNode",
+      "version": "1.0",
+      "x": 169,
+      "y": 310.6666564941406
+    },
+    "f3e6ccc0-4ea0-41c9-b64d-0711942bb94a": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "e7632b24-3a2b-4f39-bafa-7bb58f856435"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 408,
+      "y": 191.66666412353516
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 840,
+      "y": 36
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 872,
+      "y": 320
+    },
+    "startNode": {
+      "x": 0,
+      "y": 245
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

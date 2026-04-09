@@ -1,0 +1,31 @@
+{
+  "_id": "0128a4de-325c-46dc-82e7-98b2ef723dce",
+  "_outcomes": [
+    {
+      "displayName": "true",
+      "id": "true"
+    },
+    {
+      "displayName": "InvalidNumber",
+      "id": "InvalidNumber"
+    }
+  ],
+  "_rev": "-1673598442",
+  "_type": {
+    "_id": "ScriptedDecisionNode",
+    "collection": true,
+    "name": "Scripted Decision",
+    "version": "1.0"
+  },
+  "inputs": [
+    "*"
+  ],
+  "outcomes": [
+    "true",
+    "InvalidNumber"
+  ],
+  "outputs": [
+    "*"
+  ],
+  "script": "bf48f246-f0a3-4dab-afc4-6fe70fd5e2c5"
+}

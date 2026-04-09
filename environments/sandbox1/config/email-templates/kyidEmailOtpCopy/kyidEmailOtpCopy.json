@@ -1,0 +1,34 @@
+{
+  "_id": "emailTemplate/kyidEmailOtpCopy",
+  "defaultLocale": "en",
+  "description": "",
+  "displayName": "KYID_EMAIL_OTP copy",
+  "enabled": true,
+  "from": "",
+  "html": {
+    "en": {
+      "file": "kyidEmailOtpCopy.en.html"
+    },
+    "es": {
+      "file": "kyidEmailOtpCopy.es.html"
+    }
+  },
+  "message": {
+    "en": {
+      "file": "kyidEmailOtpCopy.en.md"
+    },
+    "es": {
+      "file": "kyidEmailOtpCopy.es.md"
+    }
+  },
+  "mimeType": "text/html",
+  "name": "kyidEmailOtp",
+  "styles": {
+    "file": "kyidEmailOtpCopy.css"
+  },
+  "subject": {
+    "en": "Email OTP",
+    "es": "OTP de correo electrónico"
+  },
+  "templateId": "kyidEmailOtpCopy"
+}

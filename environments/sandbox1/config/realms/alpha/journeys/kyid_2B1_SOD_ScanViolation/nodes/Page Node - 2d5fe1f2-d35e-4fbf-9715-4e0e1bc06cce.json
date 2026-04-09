@@ -1,0 +1,33 @@
+{
+  "_id": "2d5fe1f2-d35e-4fbf-9715-4e0e1bc06cce",
+  "_outcomes": [
+    {
+      "displayName": "True",
+      "id": "true"
+    },
+    {
+      "displayName": "False",
+      "id": "false"
+    }
+  ],
+  "_rev": "203505597",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "a11f5431-ee9e-41e3-9341-c83aac6fe085",
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {
+    "en": "SOD Scan Violation"
+  },
+  "stage": "{\"ConfirmationCallback\":[{\"id\":\"a11f5431-ee9e-41e3-9341-c83aac6fe085\",\"showOnlyPositiveAnswer\":true,\"showButtonsAsLinks\":true}]}"
+}

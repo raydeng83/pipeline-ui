@@ -1,0 +1,17 @@
+{
+  "_id": "1795ee1b-ae1b-4ff0-b571-2f61d9f582da",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-427544126",
+  "_type": {
+    "_id": "UsernameCollectorNode",
+    "collection": true,
+    "name": "Username Collector",
+    "version": "1.0"
+  },
+  "autocompleteValues": []
+}

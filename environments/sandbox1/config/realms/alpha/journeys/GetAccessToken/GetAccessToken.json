@@ -1,0 +1,53 @@
+{
+  "_id": "GetAccessToken",
+  "_rev": "-1808232289",
+  "description": "get Access Token",
+  "enabled": true,
+  "entryNodeId": "ce34e0ba-fdb8-4ff9-9b65-7402bf33d3f2",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "596a3642-a619-4e18-b6c8-a1ffda8d8276": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Message Node",
+      "nodeType": "MessageNode",
+      "version": "1.0",
+      "x": 500,
+      "y": 143.66665649414062
+    },
+    "ce34e0ba-fdb8-4ff9-9b65-7402bf33d3f2": {
+      "connections": {
+        "FAILED": "596a3642-a619-4e18-b6c8-a1ffda8d8276",
+        "SUCCESS": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 155.66665649414062
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 500,
+      "y": 50
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 500,
+      "y": 350
+    },
+    "startNode": {
+      "x": 50,
+      "y": 250
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

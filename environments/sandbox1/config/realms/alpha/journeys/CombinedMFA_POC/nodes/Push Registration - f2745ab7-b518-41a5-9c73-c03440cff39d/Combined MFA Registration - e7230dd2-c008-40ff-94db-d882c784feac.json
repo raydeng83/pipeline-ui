@@ -1,0 +1,40 @@
+{
+  "_id": "e7230dd2-c008-40ff-94db-d882c784feac",
+  "_outcomes": [
+    {
+      "displayName": "Success",
+      "id": "successOutcome"
+    },
+    {
+      "displayName": "Failure",
+      "id": "failureOutcome"
+    },
+    {
+      "displayName": "Time Out",
+      "id": "timeoutOutcome"
+    }
+  ],
+  "_rev": "1956496167",
+  "_type": {
+    "_id": "CombinedMultiFactorRegistrationNode",
+    "collection": true,
+    "name": "Combined MFA Registration",
+    "version": "1.0"
+  },
+  "accountName": "EMAIL_ADDRESS",
+  "addChecksum": false,
+  "algorithm": "TOTP",
+  "bgColor": "032b75",
+  "generateRecoveryCodes": true,
+  "issuer": "&{esv.frapp.issuer}",
+  "minSharedSecretLength": 32,
+  "passwordLength": "SIX_DIGITS",
+  "policiesJson": "{   \"biometricAvailable\": { }   }",
+  "scanQRCodeMessage": {
+    "en": "Register For Push Notification"
+  },
+  "timeout": 60,
+  "totpHashAlgorithm": "HMAC_SHA1",
+  "totpTimeInterval": 30,
+  "truncationOffset": -1
+}

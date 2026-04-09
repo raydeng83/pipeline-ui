@@ -1,0 +1,17 @@
+{
+  "_id": "a937e2b2-618c-4cb7-8dd2-9e9e73e87dcd",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-77312860",
+  "_type": {
+    "_id": "SetSuccessUrlNode",
+    "collection": true,
+    "name": "Success URL",
+    "version": "1.0"
+  },
+  "successUrl": "&{esv.helpdesk.successurl}"
+}

@@ -1,0 +1,44 @@
+{
+  "_id": "bb2736db-8e34-49bb-b06c-dabef5e2f61e",
+  "_outcomes": [
+    {
+      "displayName": "email",
+      "id": "email"
+    },
+    {
+      "displayName": "sms",
+      "id": "sms"
+    },
+    {
+      "displayName": "Default",
+      "id": "Default"
+    }
+  ],
+  "_rev": "-602268877",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "29297a95-c3b1-4283-806d-40e8bc1bda45",
+      "displayName": "Display Username",
+      "nodeType": "DisplayUserNameNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "43663279-0c41-4500-8d4d-34b23e93eaea",
+      "displayName": "MFA Authentication",
+      "nodeType": "ScriptedDecisionNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {
+    "en": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Manage your security methods</h5></div>\n<a href=\"&{esv.kog.help.mfa.remove.url}\"target=\"_blank\">Need Assistance?</a>\n<div class=\"page-header-content\">In order to reset any of your existing security method please perform MFA with any of the below available options to reset \nregistered MFA methods.</div>",
+    "es": "<div class='page-footer-horizontal'>\n<div class=\"page-header-title\"><h5>Gestionar sus métodos de seguridad</h5></div>\n<a href=\"&{esv.kog.help.mfa.remove.url}\"target=\"_blank\">¿Necesita ayuda?</a>\n<div class=\"page-header-content\">Para restablecer cualquiera de sus métodos de seguridad existentes, realice MFA con cualquiera de las siguientes opciones disponibles para restablecer \nmétodos MFA registrados.</div>"
+  },
+  "pageHeader": {},
+  "stage": "{\"pageFooter\":{\"en\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nBack</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\"target=\\\"_blank\\\">Help</a></span>\\n</div>\",\"es\":\"<div class='page-footer-horizontal'>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.mfaself.successurl}\\\">\\nAtrás</a></span>\\n</div>\\n<div class='page-footer-element' style=\\\"text-align:left\\\">\\n<span><a href=\\\"&{esv.kog.help.url}\\\"target=\\\"_blank\\\">Ayuda</a></span>\\n</div>\"},\"themeId\":\"9e4187d2-b9a5-477f-a4fd-0b230161789e\"}"
+}

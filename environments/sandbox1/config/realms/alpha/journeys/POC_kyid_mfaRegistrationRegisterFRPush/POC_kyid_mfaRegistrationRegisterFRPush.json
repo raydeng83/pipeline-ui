@@ -1,0 +1,228 @@
+{
+  "_id": "POC_kyid_mfaRegistrationRegisterFRPush",
+  "_rev": "-2051956600",
+  "enabled": true,
+  "entryNodeId": "eaae5627-b003-49ea-a8ac-f4a06425f218",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "41781e83-cdfb-47e3-9137-d22aa42f3b91": {
+      "connections": {
+        "false": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Another Factor",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1860,
+      "y": 142.66666666666666
+    },
+    "42d8c351-99ba-44cf-860a-a3958e1a1e9c": {
+      "connections": {
+        "True": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Script: SetUp additional security methods",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2942,
+      "y": 291.5
+    },
+    "47af1bb5-1305-4bc6-9ec8-64ac946d3a35": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "489d84b7-6948-46a2-a227-adb2646b5521"
+      },
+      "displayName": "Scripted Decision",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1615,
+      "y": 80
+    },
+    "489d84b7-6948-46a2-a227-adb2646b5521": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "f7d604c3-9ebd-4bfd-ae41-880792cf3852"
+      },
+      "displayName": "Update User Profile for MFA",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 1860,
+      "y": 296.3333333333333
+    },
+    "4aeb2f9a-dc77-4342-b2a6-ca043b44575e": {
+      "connections": {
+        "NOT_REGISTERED": "58223a72-7c1c-4c2a-93f0-807e4b82adb1",
+        "SENT": "8ca3a4fd-5063-4430-963a-755ba9a859a0"
+      },
+      "displayName": "Push Sender",
+      "nodeType": "PushAuthenticationSenderNode",
+      "version": "1.0",
+      "x": 1094,
+      "y": 125
+    },
+    "58223a72-7c1c-4c2a-93f0-807e4b82adb1": {
+      "connections": {
+        "failureOutcome": "cbc9aa6f-40d6-4fd1-a66b-73c7923bc2a5",
+        "successOutcome": "4aeb2f9a-dc77-4342-b2a6-ca043b44575e",
+        "timeoutOutcome": "cbc9aa6f-40d6-4fd1-a66b-73c7923bc2a5"
+      },
+      "displayName": "Push Registration",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 851,
+      "y": 461
+    },
+    "79c0f0c9-c5a1-43f8-a4f5-69af38dca799": {
+      "connections": {
+        "false": "41781e83-cdfb-47e3-9137-d22aa42f3b91",
+        "true": "4aeb2f9a-dc77-4342-b2a6-ca043b44575e"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1615,
+      "y": 265
+    },
+    "7e44be33-08e9-4588-9615-737b1fcb88fc": {
+      "connections": {
+        "DONE": "8ca3a4fd-5063-4430-963a-755ba9a859a0"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PollingWaitNode",
+      "version": "1.0",
+      "x": 1383,
+      "y": 513
+    },
+    "8ca3a4fd-5063-4430-963a-755ba9a859a0": {
+      "connections": {
+        "EXPIRED": "79c0f0c9-c5a1-43f8-a4f5-69af38dca799",
+        "FALSE": "79c0f0c9-c5a1-43f8-a4f5-69af38dca799",
+        "TRUE": "47af1bb5-1305-4bc6-9ec8-64ac946d3a35",
+        "WAITING": "7e44be33-08e9-4588-9615-737b1fcb88fc"
+      },
+      "displayName": "Push Result Verifier Node",
+      "nodeType": "PushResultVerifierNode",
+      "version": "1.0",
+      "x": 1339,
+      "y": 241.5
+    },
+    "9a7c4e96-3ff2-4e27-b0e4-cb306e1f827f": {
+      "connections": {
+        "False": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "True": "ff327b9d-2f80-4552-ae24-a7fbf055b4d5"
+      },
+      "displayName": "Script: FirstTimeLoginUser",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2416,
+      "y": 266.5
+    },
+    "9d005f05-88e4-4f9f-958f-b75c452fc29c": {
+      "connections": {
+        "failureOutcome": "cbc9aa6f-40d6-4fd1-a66b-73c7923bc2a5",
+        "successOutcome": "4aeb2f9a-dc77-4342-b2a6-ca043b44575e",
+        "timeoutOutcome": "cbc9aa6f-40d6-4fd1-a66b-73c7923bc2a5"
+      },
+      "displayName": "Push Registration",
+      "nodeType": "PushRegistrationNode",
+      "version": "1.0",
+      "x": 854,
+      "y": 250
+    },
+    "c89d154f-639a-4aaf-aec7-7b441710dc24": {
+      "connections": {
+        "anotherMethod": "41781e83-cdfb-47e3-9137-d22aa42f3b91",
+        "true": "58223a72-7c1c-4c2a-93f0-807e4b82adb1"
+      },
+      "displayName": "Display instruction",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 619,
+      "y": 213.5
+    },
+    "cbc9aa6f-40d6-4fd1-a66b-73c7923bc2a5": {
+      "connections": {
+        "false": "41781e83-cdfb-47e3-9137-d22aa42f3b91",
+        "true": "58223a72-7c1c-4c2a-93f0-807e4b82adb1"
+      },
+      "displayName": "Resend Push / Another factor",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1094,
+      "y": 287.5
+    },
+    "d6bbafc6-4aa0-438e-b68d-7fbfee6cdb3e": {
+      "connections": {
+        "Another Factor?": "41781e83-cdfb-47e3-9137-d22aa42f3b91",
+        "Resend Push": "9d005f05-88e4-4f9f-958f-b75c452fc29c"
+      },
+      "displayName": "Resend Push / Another factor",
+      "nodeType": "ChoiceCollectorNode",
+      "version": "1.0",
+      "x": 70,
+      "y": 154.33333333333331
+    },
+    "eaae5627-b003-49ea-a8ac-f4a06425f218": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "c89d154f-639a-4aaf-aec7-7b441710dc24"
+      },
+      "displayName": "Identify Existing User",
+      "nodeType": "IdentifyExistingUserNode",
+      "version": "1.0",
+      "x": 372,
+      "y": 266.5
+    },
+    "f7d604c3-9ebd-4bfd-ae41-880792cf3852": {
+      "connections": {
+        "true": "9a7c4e96-3ff2-4e27-b0e4-cb306e1f827f"
+      },
+      "displayName": "Script: Set IDPAuthType",
+      "nodeType": "ScriptedDecisionNode",
+      "version": "1.0",
+      "x": 2153,
+      "y": 291.5
+    },
+    "f965c75b-22ee-4423-a793-b80d32a60a57": {
+      "connections": {
+        "DONE": "8ca3a4fd-5063-4430-963a-755ba9a859a0"
+      },
+      "displayName": "Polling Wait Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 1102,
+      "y": 500
+    },
+    "ff327b9d-2f80-4552-ae24-a7fbf055b4d5": {
+      "connections": {
+        "false": "42d8c351-99ba-44cf-860a-a3958e1a1e9c",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Success Messgae",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 2697,
+      "y": 136.66666666666666
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 3262,
+      "y": 284
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 2697,
+      "y": 346.3333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 302.1666666666667
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "categories": "[]"
+  }
+}

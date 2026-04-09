@@ -1,0 +1,32 @@
+{
+  "_id": "7efc28c3-baae-4bc2-bf70-5d71a454a87a",
+  "_outcomes": [
+    {
+      "displayName": "Outcome",
+      "id": "outcome"
+    }
+  ],
+  "_rev": "-901932404",
+  "_type": {
+    "_id": "PageNode",
+    "collection": true,
+    "name": "Page Node",
+    "version": "1.0"
+  },
+  "nodes": [
+    {
+      "_id": "d75ea1be-6c86-432f-a264-7d2c7a3b228c",
+      "displayName": "Username Collector",
+      "nodeType": "UsernameCollectorNode",
+      "nodeVersion": "1.0"
+    },
+    {
+      "_id": "09ff396f-5076-4b6d-a7a2-4a1017c5f341",
+      "displayName": "Password Collector",
+      "nodeType": "PasswordCollectorNode",
+      "nodeVersion": "1.0"
+    }
+  ],
+  "pageDescription": {},
+  "pageHeader": {}
+}
