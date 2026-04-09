@@ -10,12 +10,18 @@ import type { LogEntry } from "@/lib/history";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { source, target, scopes, diffOptions } = body as {
+  const { source, target, scopes, scopeSelections, diffOptions } = body as {
     source: CompareEndpoint;
     target: CompareEndpoint;
     scopes?: ConfigScope[];
+    scopeSelections?: import("@/lib/fr-config-types").ScopeSelection[];
     diffOptions?: { includeMetadata?: boolean; ignoreWhitespace?: boolean };
   };
+
+  // Derive scope names from scopeSelections if provided
+  const effectiveScopes: ConfigScope[] = scopeSelections
+    ? scopeSelections.map((s) => s.scope as ConfigScope)
+    : scopes ?? [];
 
   if (!source?.environment || !target?.environment) {
     return new Response("Missing source or target", { status: 400 });
@@ -76,7 +82,7 @@ export async function POST(req: NextRequest) {
         const { stream: pullStream, abort } = spawnFrConfig({
           command: "fr-config-pull",
           environment: endpoint.environment,
-          scopes: scopes ?? [],
+          ...(scopeSelections ? { scopeSelections } : { scopes: effectiveScopes }),
           envOverrides: { CONFIG_DIR: tempDir! },
         });
 
@@ -111,7 +117,29 @@ export async function POST(req: NextRequest) {
           pullSide("target", target, targetTempDir),
         ]);
 
-        const report = buildReport(source, sourceConfigDir, target, targetConfigDir, scopes, diffOptions);
+        const report = buildReport(source, sourceConfigDir, target, targetConfigDir, effectiveScopes, diffOptions);
+
+        // When scopeSelections has item-level filters, narrow the diff to only matching files
+        if (scopeSelections?.some((s) => s.items && s.items.length > 0)) {
+          const itemPatterns: RegExp[] = [];
+          for (const sel of scopeSelections) {
+            if (!sel.items || sel.items.length === 0) continue; // all items — no filter
+            for (const item of sel.items) {
+              // Match file paths containing the item name (directory name or filename stem)
+              const escaped = item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+              itemPatterns.push(new RegExp(`(^|/)${escaped}(/|\\.|$)`, "i"));
+            }
+          }
+          if (itemPatterns.length > 0) {
+            report.files = report.files.filter(
+              (f) => f.status === "unchanged" || itemPatterns.some((p) => p.test(f.relativePath))
+            );
+            // Recalculate summary
+            report.summary = { added: 0, removed: 0, modified: 0, unchanged: 0 };
+            for (const f of report.files) report.summary[f.status]++;
+          }
+        }
+
         enqueue({ type: "report", data: JSON.stringify(report), ts: Date.now() });
         enqueue({ type: "exit", code: 0, ts: Date.now() });
 
@@ -119,7 +147,7 @@ export async function POST(req: NextRequest) {
         try {
           const { summary } = report;
           const summaryText = `${summary.added} added, ${summary.removed} removed, ${summary.modified} modified across ${report.files.length} files`;
-          const scopeList = scopes ?? [];
+          const scopeList = effectiveScopes;
 
           const record = createHistoryRecord({
             type: "compare",

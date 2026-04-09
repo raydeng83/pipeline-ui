@@ -10,6 +10,8 @@ import {
 } from "@/lib/fr-config-types";
 import type { PromotionTask, TaskStatus } from "@/lib/promotion-tasks";
 import { LogViewer } from "@/components/LogViewer";
+import { ScopedLogViewer } from "@/components/ScopedLogViewer";
+import { DiffReport } from "@/app/compare/DiffReport";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
@@ -68,11 +70,19 @@ function Stepper({
           <div key={phase.id} className="flex items-center">
             <button
               type="button"
-              onClick={() => !isSkipped && onClick(phase.id)}
-              disabled={isSkipped}
+              onClick={() => {
+                if (isSkipped) return;
+                // Block jumping to promote if dry-run hasn't completed
+                if (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped") return;
+                onClick(phase.id);
+              }}
+              disabled={isSkipped || (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped")}
               className={cn(
                 "flex flex-col items-center gap-1 px-2 py-1 rounded transition-colors min-w-[64px]",
-                isSkipped ? "opacity-40 cursor-default" : "hover:bg-slate-50 cursor-pointer"
+                isSkipped ? "opacity-40 cursor-default"
+                  : (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped")
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:bg-slate-50 cursor-pointer"
               )}
             >
               <div className={dot}>
@@ -181,16 +191,14 @@ function PreparePhase({
 
 function DryRunPhase({
   task,
-  frConfigScopes,
   visible,
   onComplete,
 }: {
   task: PromotionTask;
-  frConfigScopes: ConfigScope[];
   visible: boolean;
   onComplete: (s: PhaseStatus) => void;
 }) {
-  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
+  const { logs, running, exitCode, report, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
   const onCompleteRef = useRef(onComplete);
   useEffect(() => { onCompleteRef.current = onComplete; });
@@ -201,14 +209,32 @@ function DryRunPhase({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exitCode, running]);
 
+  // Use the task's item selections for item-level comparison
+  const scopeSelections = task.items.filter((i) =>
+    getCommandType(i.scope) === "fr-config"
+  );
+
   const compare = () =>
-    run("/api/compare", { source: task.source, target: task.target, scopes: frConfigScopes });
+    run("/api/compare", {
+      source: task.source,
+      target: task.target,
+      scopeSelections,
+      diffOptions: { includeMetadata: false, ignoreWhitespace: true },
+    });
+
+  const sourceLogs = logs.filter((l) => l.side === "source");
+  const targetLogs = logs.filter((l) => l.side === "target");
+  const sourceExitCode = logs.find((l) => l.type === "exit" && l.side === "source")?.code ?? null;
+  const targetExitCode = logs.find((l) => l.type === "exit" && l.side === "target")?.code ?? null;
+  const sourceRunning = running && sourceExitCode === null;
+  const targetRunning = running && targetExitCode === null;
+  const showConsole = logs.length > 0 || running;
 
   return (
     <div className={cn(!visible && "hidden")}>
       <div className="space-y-3">
         <p className="text-xs text-slate-500">
-          Compare source against target to preview what will change before promoting. Review the diff carefully before proceeding.
+          Compare source against target for the selected scopes to preview what will change. Review the diff carefully before proceeding.
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -226,17 +252,32 @@ function DryRunPhase({
           )}
         </div>
 
-        {(running || logs.length > 0) && (
-          <div className="rounded-lg border border-slate-200 overflow-hidden">
-            <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+        {/* Console panels */}
+        {showConsole && (
+          <div className="rounded-lg border border-slate-700 overflow-hidden grid grid-cols-2 divide-x divide-slate-700">
+            <div className="min-w-0 flex flex-col">
+              <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
+                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Source — {task.source.environment}</span>
+              </div>
+              <ScopedLogViewer logs={sourceLogs} running={sourceRunning} exitCode={sourceExitCode} />
+            </div>
+            <div className="min-w-0 flex flex-col">
+              <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
+                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Target — {task.target.environment}</span>
+              </div>
+              <ScopedLogViewer logs={targetLogs} running={targetRunning} exitCode={targetExitCode} />
+            </div>
           </div>
         )}
+
+        {/* Diff report */}
+        {report && !running && <DiffReport report={report} />}
       </div>
     </div>
   );
 }
 
-// ── Phase 3: Promote (merged fr-config + frodo + IGA) ─────────────────────────
+// ── Phase 3: Promote (item-level push with ID remapping) ─────────────────────
 
 function FrConfigSection({
   task,
@@ -249,8 +290,7 @@ function FrConfigSection({
 }) {
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
-  const [activeSubcommand, setActiveSubcommand] = useState<PromoteSubcommand | null>(null);
-  const [confirmDanger, setConfirmDanger] = useState<PromoteSubcommand | null>(null);
+  const [confirmPromote, setConfirmPromote] = useState(false);
   const onCompleteRef = useRef(onComplete);
   const onTaskStatusRef = useRef(onTaskStatusChange);
   useEffect(() => { onCompleteRef.current = onComplete; });
@@ -258,71 +298,79 @@ function FrConfigSection({
   useEffect(() => { setBusy(running); }, [running, setBusy]);
 
   useEffect(() => {
-    if (activeSubcommand === "run-promotion" && exitCode !== null && !running) {
+    if (exitCode !== null && !running) {
       onCompleteRef.current(exitCode === 0 ? "done" : "failed");
       onTaskStatusRef.current(exitCode === 0 ? "completed" : "failed");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exitCode, running]);
 
-  const handleRun = (subcommand: PromoteSubcommand) => {
-    const def = PROMOTE_SUBCOMMANDS.find((s) => s.value === subcommand)!;
-    if (def.variant === "danger" && confirmDanger !== subcommand) { setConfirmDanger(subcommand); return; }
-    setConfirmDanger(null);
-    setActiveSubcommand(subcommand);
+  const frConfigItems = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
+
+  const handlePromote = () => {
+    if (!confirmPromote) { setConfirmPromote(true); return; }
+    setConfirmPromote(false);
     if (task.status === "new") onTaskStatusChange("in-progress");
-    run("/api/promote", { environment: task.target.environment, subcommand });
+    run("/api/promote-items", {
+      sourceEnvironment: task.source.environment,
+      targetEnvironment: task.target.environment,
+      scopeSelections: frConfigItems,
+    });
   };
 
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-500">
-        Run the fr-config-promote workflow against target <span className="font-medium text-slate-700">{task.target.environment}</span>. Execute steps in order.
+        Push selected items from <span className="font-medium text-slate-700">{task.source.environment}</span> to <span className="font-medium text-slate-700">{task.target.environment}</span> with automatic ID remapping.
+        Items matching by name on the target will be overwritten; new items will be created.
       </p>
 
-      {running && (
-        <div className="flex justify-end">
-          <button onClick={abort} className="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded hover:bg-red-200 transition-colors">Abort</button>
-        </div>
-      )}
+      <div className="flex flex-wrap gap-1.5 text-[11px]">
+        {frConfigItems.map(({ scope, items }) => (
+          <span key={scope} className="px-2 py-0.5 rounded border border-slate-200 bg-white text-slate-600">
+            {scopeLabel(scope)}
+            {items && <span className="text-slate-400 ml-1">×{items.length}</span>}
+          </span>
+        ))}
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {PROMOTE_SUBCOMMANDS.map((cmd) => {
-          const isActive = activeSubcommand === cmd.value && (running || exitCode !== null);
-          const isPendingConfirm = confirmDanger === cmd.value;
-          return (
-            <div key={cmd.value} className={cn("rounded-lg border-2 p-3 transition-colors", VARIANT_STYLES[cmd.variant], isActive && "ring-2 ring-offset-1 ring-slate-400")}>
-              <div className="space-y-2">
-                <div>
-                  <p className="font-medium text-xs">{cmd.label}</p>
-                  <p className="text-[11px] opacity-70 mt-0.5 leading-snug">{cmd.description}</p>
-                </div>
-                {isPendingConfirm ? (
-                  <div className="space-y-1">
-                    <p className="text-xs text-red-700 font-medium">Are you sure?</p>
-                    <div className="flex gap-1">
-                      <button onClick={() => handleRun(cmd.value)} disabled={running} className="flex-1 px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50">Yes</button>
-                      <button onClick={() => setConfirmDanger(null)} className="flex-1 px-2 py-1 text-xs rounded border border-slate-300 hover:bg-white">No</button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleRun(cmd.value)}
-                    disabled={running}
-                    className={cn("w-full px-2 py-1 text-xs font-medium rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed", VARIANT_BUTTON_STYLES[cmd.variant])}
-                  >
-                    {running && activeSubcommand === cmd.value ? "Running…" : "Run"}
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+      <div className="flex items-center gap-2">
+        {confirmPromote ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-red-700 font-medium">This will push to {task.target.environment}. Continue?</span>
+            <button
+              onClick={handlePromote}
+              disabled={running}
+              className="px-3 py-1.5 text-xs font-medium rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+            >
+              Yes, Promote
+            </button>
+            <button
+              onClick={() => setConfirmPromote(false)}
+              className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 hover:bg-slate-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handlePromote}
+            disabled={running || frConfigItems.length === 0}
+            className="px-4 py-1.5 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+          >
+            {running ? "Promoting…" : "Promote Selected Items"}
+          </button>
+        )}
+        {running && (
+          <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
+            Abort
+          </button>
+        )}
       </div>
 
       {(running || logs.length > 0) && (
         <div className="rounded-lg border border-slate-200 overflow-hidden">
-          <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+          <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
         </div>
       )}
     </div>
@@ -507,41 +555,54 @@ function PromotePhase({
 
 function VerifyPhase({
   task,
-  frConfigScopes,
   visible,
   onComplete,
 }: {
   task: PromotionTask;
-  frConfigScopes: ConfigScope[];
   visible: boolean;
   onComplete: (s: PhaseStatus) => void;
 }) {
-  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
+  const pullHook = useStreamingLogs();
+  const compareHook = useStreamingLogs();
   const { setBusy } = useBusyState();
-  const [lastAction, setLastAction] = useState<"pull" | "compare" | null>(null);
   const onCompleteRef = useRef(onComplete);
   useEffect(() => { onCompleteRef.current = onComplete; });
-  useEffect(() => { setBusy(running); }, [running, setBusy]);
+  useEffect(() => { setBusy(pullHook.running || compareHook.running); }, [pullHook.running, compareHook.running, setBusy]);
   useEffect(() => {
-    if (exitCode !== null && !running && lastAction) onCompleteRef.current(exitCode === 0 ? "done" : "failed");
+    if (compareHook.exitCode !== null && !compareHook.running)
+      onCompleteRef.current(compareHook.exitCode === 0 ? "done" : "failed");
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exitCode, running]);
+  }, [compareHook.exitCode, compareHook.running]);
+
+  const frConfigItems = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
+  const anyRunning = pullHook.running || compareHook.running;
 
   const pullTarget = () => {
-    setLastAction("pull");
-    run("/api/pull", { environment: task.target.environment, scopes: task.items.map((i) => i.scope) });
+    pullHook.run("/api/pull", { environment: task.target.environment, scopes: task.items.map((i) => i.scope) });
   };
 
   const compare = () => {
-    setLastAction("compare");
-    run("/api/compare", { source: task.source, target: task.target, scopes: frConfigScopes });
+    compareHook.run("/api/compare", {
+      source: task.source,
+      target: task.target,
+      scopeSelections: frConfigItems,
+      diffOptions: { includeMetadata: false, ignoreWhitespace: true },
+    });
   };
+
+  const compareLogs = compareHook.logs;
+  const sourceLogs = compareLogs.filter((l) => l.side === "source");
+  const targetLogs = compareLogs.filter((l) => l.side === "target");
+  const sourceExitCode = compareLogs.find((l) => l.type === "exit" && l.side === "source")?.code ?? null;
+  const targetExitCode = compareLogs.find((l) => l.type === "exit" && l.side === "target")?.code ?? null;
+  const sourceRunning = compareHook.running && sourceExitCode === null;
+  const targetRunning = compareHook.running && targetExitCode === null;
 
   return (
     <div className={cn(!visible && "hidden")}>
       <div className="space-y-3">
         <p className="text-xs text-slate-500">
-          Pull the target environment to confirm changes landed, then re-compare against source — the diff should now be empty or show only expected differences.
+          Pull the target environment to confirm changes landed, then re-compare against source for the selected items — the diff should now be empty or show only expected differences.
         </p>
         <div className="flex flex-wrap gap-2">
           {task.target.mode === "local" ? (
@@ -551,32 +612,57 @@ function VerifyPhase({
           ) : (
             <button
               onClick={pullTarget}
-              disabled={running}
+              disabled={anyRunning}
               className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
             >
-              {running && lastAction === "pull" ? "Pulling…" : "Pull Target"}
+              {pullHook.running ? "Pulling…" : "Pull Target"}
             </button>
           )}
           <button
             onClick={compare}
-            disabled={running || frConfigScopes.length === 0}
-            title={frConfigScopes.length === 0 ? "No fr-config scopes in this task" : undefined}
+            disabled={anyRunning || frConfigItems.length === 0}
+            title={frConfigItems.length === 0 ? "No fr-config scopes in this task" : undefined}
             className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
           >
-            {running && lastAction === "compare" ? "Comparing…" : "Re-compare Source vs Target"}
+            {compareHook.running ? "Comparing…" : "Re-compare Source vs Target"}
           </button>
-          {running && (
-            <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">Abort</button>
+          {anyRunning && (
+            <button
+              onClick={() => { pullHook.abort(); compareHook.abort(); }}
+              className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors"
+            >
+              Abort
+            </button>
           )}
         </div>
-        {frConfigScopes.length === 0 && (
-          <p className="text-[11px] text-amber-600">No fr-config scopes selected — compare is not available for this task.</p>
-        )}
-        {(running || logs.length > 0) && (
+
+        {/* Pull logs */}
+        {(pullHook.running || pullHook.logs.length > 0) && (
           <div className="rounded-lg border border-slate-200 overflow-hidden">
-            <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+            <ScopedLogViewer logs={pullHook.logs} running={pullHook.running} exitCode={pullHook.exitCode} onClear={pullHook.clear} />
           </div>
         )}
+
+        {/* Compare console */}
+        {(compareHook.running || compareLogs.length > 0) && (
+          <div className="rounded-lg border border-slate-700 overflow-hidden grid grid-cols-2 divide-x divide-slate-700">
+            <div className="min-w-0 flex flex-col">
+              <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
+                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Source — {task.source.environment}</span>
+              </div>
+              <ScopedLogViewer logs={sourceLogs} running={sourceRunning} exitCode={sourceExitCode} />
+            </div>
+            <div className="min-w-0 flex flex-col">
+              <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
+                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Target — {task.target.environment}</span>
+              </div>
+              <ScopedLogViewer logs={targetLogs} running={targetRunning} exitCode={targetExitCode} />
+            </div>
+          </div>
+        )}
+
+        {/* Diff report */}
+        {compareHook.report && !compareHook.running && <DiffReport report={compareHook.report} />}
       </div>
     </div>
   );
@@ -660,28 +746,43 @@ export function PromoteExecution({
               {PHASE_DEFS.find((p) => p.id === activePhase)?.description}
             </p>
           </div>
-          {nextPhase && (
-            <button
-              type="button"
-              onClick={() => {
-                if (
-                  nextPhase.id === "dry-run" &&
-                  task.target.mode === "local"
-                ) {
-                  if (!window.confirm(
-                    `The task target "${task.target.environment}" is set to Local mode.\n\nDry run compares the source against the target environment. A local target means no live remote data will be fetched.\n\nContinue anyway?`
-                  )) return;
-                }
-                setActivePhase(nextPhase.id);
-              }}
-              className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-800 transition-colors shrink-0"
-            >
-              Next: {nextPhase.label}
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          )}
+          {nextPhase && (() => {
+            // Block advancing to promote unless dry-run is done or skipped
+            const blocked = nextPhase.id === "promote" &&
+              phaseStatuses["dry-run"] !== "done" &&
+              phaseStatuses["dry-run"] !== "skipped";
+
+            return (
+              <button
+                type="button"
+                disabled={blocked}
+                title={blocked ? "Run the dry-run comparison first" : undefined}
+                onClick={() => {
+                  if (blocked) return;
+                  if (
+                    nextPhase.id === "dry-run" &&
+                    task.target.mode === "local"
+                  ) {
+                    if (!window.confirm(
+                      `The task target "${task.target.environment}" is set to Local mode.\n\nDry run compares the source against the target environment. A local target means no live remote data will be fetched.\n\nContinue anyway?`
+                    )) return;
+                  }
+                  setActivePhase(nextPhase.id);
+                }}
+                className={cn(
+                  "flex items-center gap-1 text-xs transition-colors shrink-0",
+                  blocked
+                    ? "text-slate-300 cursor-not-allowed"
+                    : "text-sky-600 hover:text-sky-800"
+                )}
+              >
+                Next: {nextPhase.label}
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            );
+          })()}
         </div>
 
         {/* All phase panels — always mounted, only active one visible */}
@@ -692,7 +793,6 @@ export function PromoteExecution({
         />
         <DryRunPhase
           task={task}
-          frConfigScopes={frConfigScopes}
           visible={activePhase === "dry-run"}
           onComplete={(s) => updatePhase("dry-run", s)}
         />
@@ -707,7 +807,6 @@ export function PromoteExecution({
         />
         <VerifyPhase
           task={task}
-          frConfigScopes={frConfigScopes}
           visible={activePhase === "verify"}
           onComplete={(s) => updatePhase("verify", s)}
         />
