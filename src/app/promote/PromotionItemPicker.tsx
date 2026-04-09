@@ -82,27 +82,29 @@ function ScopeRow({
   const visible = sorted.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
   const needsPagination = filtered.length > PAGE_SIZE;
 
-  // Non-selectable scopes: entire header row is the toggle
   const headerIsToggle = !entry.selectable;
 
   return (
     <div className="border-b border-slate-100 last:border-b-0">
-      {/* Header */}
+      {/* Header — clicking anywhere expands/collapses; check indicator toggles inclusion for non-selectable */}
       <div
         className={cn(
           "flex items-center gap-2.5 px-3 py-2.5 transition-colors",
-          headerIsToggle && entry.items.length > 0 && "cursor-pointer select-none",
-          headerIsToggle && included ? "bg-sky-50 hover:bg-sky-100" : "bg-white",
-          headerIsToggle && !included && entry.items.length > 0 && "hover:bg-slate-50 opacity-50",
+          entry.items.length > 0 && "cursor-pointer select-none",
+          included ? "bg-sky-50 hover:bg-sky-100" : "bg-white",
+          !included && entry.items.length > 0 && "hover:bg-slate-50 opacity-50",
         )}
-        onClick={headerIsToggle && entry.items.length > 0 ? () => onToggleScope(!included) : undefined}
+        onClick={entry.items.length > 0 ? () => setOpen((o) => !o) : undefined}
       >
-        {/* Non-selectable: small check indicator */}
+        {/* Non-selectable: check indicator — click toggles scope inclusion */}
         {headerIsToggle && (
-          <span className={cn(
-            "w-3.5 h-3.5 rounded border-2 shrink-0 flex items-center justify-center transition-colors",
-            included ? "bg-sky-600 border-sky-600" : "border-slate-300 bg-white",
-          )}>
+          <span
+            className={cn(
+              "w-3.5 h-3.5 rounded border-2 shrink-0 flex items-center justify-center transition-colors",
+              included ? "bg-sky-600 border-sky-600" : "border-slate-300 bg-white",
+            )}
+            onClick={(e) => { e.stopPropagation(); onToggleScope(!included); }}
+          >
             {included && (
               <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -113,7 +115,7 @@ function ScopeRow({
 
         <span className="flex-1 text-xs font-medium text-slate-700">{scopeLabel(entry.scope)}</span>
 
-        {/* Selectable: count + select-all always visible */}
+        {/* Selectable: count + select-all */}
         {entry.selectable && entry.items.length > 0 && (
           <>
             <span className="text-[10px] text-slate-400 tabular-nums font-mono">
@@ -138,17 +140,11 @@ function ScopeRow({
           <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">all files</span>
         )}
 
-        {/* Expand / empty */}
+        {/* Chevron indicator (visual only — whole header is the click target) */}
         {entry.items.length > 0 ? (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-            className="text-slate-400 hover:text-slate-600"
-          >
-            <svg className={cn("w-3 h-3 transition-transform", open ? "" : "-rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+          <svg className={cn("w-3 h-3 text-slate-400 transition-transform shrink-0", open ? "" : "-rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         ) : (
           <span className="text-[10px] text-slate-400">empty</span>
         )}
@@ -375,6 +371,15 @@ export function PromotionItemPicker({
     onChange(fromSelections({ ...selections, [scope]: allNowSelected ? null : [...currentSet] }));
   };
 
+  // Selected scopes float to the top; order within each group preserved
+  const sortedAuditData = auditData
+    ? [...auditData].sort((a, b) => {
+        const aHas = Object.prototype.hasOwnProperty.call(selections, a.scope) ? 0 : 1;
+        const bHas = Object.prototype.hasOwnProperty.call(selections, b.scope) ? 0 : 1;
+        return aHas - bHas;
+      })
+    : null;
+
   const includedCount = Object.keys(selections).length;
   const totalItems = auditData
     ? auditData.reduce((sum, e) => {
@@ -443,7 +448,7 @@ export function PromotionItemPicker({
               ? Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="h-7 mx-2 my-1 rounded bg-slate-200 animate-pulse" />
                 ))
-              : (auditData ?? []).map((entry) => {
+              : (sortedAuditData ?? []).map((entry) => {
                   const included = Object.prototype.hasOwnProperty.call(selections, entry.scope);
                   return (
                     <button
@@ -474,7 +479,7 @@ export function PromotionItemPicker({
                     <div className="h-3 flex-1 bg-slate-100 rounded" />
                   </div>
                 ))
-              : (auditData ?? []).map((entry) => (
+              : (sortedAuditData ?? []).map((entry) => (
                   <div
                     key={entry.scope}
                     data-scope={entry.scope}
