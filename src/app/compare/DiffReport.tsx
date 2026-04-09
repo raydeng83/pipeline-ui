@@ -2051,7 +2051,7 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => setTaskDropdownOpen((o) => !o)}
+                  onClick={(e) => { e.stopPropagation(); setTaskDropdownOpen((o) => !o); }}
                   disabled={addingToTask || tasks.length === 0}
                   className="flex items-center gap-1 px-3 py-1 bg-sky-600 text-white rounded-full text-xs font-medium hover:bg-sky-700 disabled:opacity-50 transition-colors"
                 >
@@ -2061,7 +2061,10 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
                   </svg>
                 </button>
                 {taskDropdownOpen && (
-                  <div className="absolute bottom-full mb-1.5 left-0 bg-white border border-slate-200 rounded-lg shadow-xl min-w-[200px] py-1 z-50">
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute bottom-full mb-1.5 left-0 bg-white border border-slate-200 rounded-lg shadow-xl min-w-[200px] py-1 z-50"
+                  >
                     {tasks.length === 0 ? (
                       <p className="px-3 py-2 text-xs text-slate-400 italic">No tasks available</p>
                     ) : tasks.map((t) => (
