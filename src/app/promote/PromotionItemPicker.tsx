@@ -82,10 +82,6 @@ function ScopeRow({
   const visible = sorted.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
   const needsPagination = sorted.length > PAGE_SIZE;
 
-  // Pills: selected items resolved to { id, label } for display outside the accordion
-  const selectedPills = !allSelected && selectedSet.size > 0
-    ? [...selectedSet].map((id) => entry.items.find((i) => i.id === id) ?? { id, label: id.replace(/\.json$/, "") })
-    : [];
 
   const headerIsToggle = !entry.selectable;
 
@@ -161,21 +157,6 @@ function ScopeRow({
           <span className="text-[10px] text-slate-400">empty</span>
         )}
       </div>
-
-      {/* Selected item pills — always visible when specific items are checked */}
-      {selectedPills.length > 0 && (
-        <div className="px-3 py-2 flex flex-wrap gap-1 bg-white border-b border-slate-100">
-          {selectedPills.map((item) => (
-            <span
-              key={item.id}
-              title={item.id !== item.label ? item.id : undefined}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-medium bg-sky-50 border-sky-200 text-sky-700"
-            >
-              {item.label}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Filter */}
       {open && entry.items.length > 0 && (

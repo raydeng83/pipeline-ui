@@ -219,6 +219,11 @@ function TaskForm({
           </div>
         </div>
 
+        {/* Selected items summary — mirrors the task view */}
+        {form.items.length > 0 && (
+          <ScopesSummary items={form.items} sourceEnvironment={form.source.environment} />
+        )}
+
         {/* Items to promote */}
         <PromotionItemPicker
           environment={form.source.environment}
