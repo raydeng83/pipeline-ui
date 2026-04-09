@@ -33,6 +33,14 @@ export async function PUT(
 
   if (body.label) envs[idx].label = body.label;
   if (body.color) envs[idx].color = body.color;
+  if (body.type !== undefined) {
+    envs[idx].type = body.type;
+    if (body.type === "controlled") {
+      envs[idx].devEnvironment = body.devEnvironment ?? false;
+    } else {
+      delete envs[idx].devEnvironment;
+    }
+  }
   saveEnvironments(envs);
 
   if (body.envContent !== undefined) {

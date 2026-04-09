@@ -41,10 +41,15 @@ export type ConfigScope =
   | "ui-config"
   | "variables";
 
+export type EnvironmentType = "sandbox" | "controlled";
+
 export interface Environment {
   name: string;
   label: string;
-  color: "blue" | "yellow" | "red" | "green";
+  color: "blue" | "yellow" | "red" | "green" | "purple" | "orange" | "teal" | "pink" | "indigo" | "gray";
+  type?: EnvironmentType;
+  /** Only meaningful when type === "controlled". Indicates this is the first env in the pipeline. */
+  devEnvironment?: boolean;
 }
 
 /** Scopes supporting file-level filtering via filenameFilter env var (comma-separated filenames) */

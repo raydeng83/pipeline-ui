@@ -498,6 +498,99 @@ function RecordRow({
   );
 }
 
+// ── Pagination bar ───────────────────────────────────────────────────────────
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+
+function PaginationBar({
+  total,
+  page,
+  pageSize,
+  onPage,
+  onPageSize,
+}: {
+  total: number;
+  page: number;
+  pageSize: number;
+  onPage: (p: number) => void;
+  onPageSize: (s: number) => void;
+}) {
+  const totalPages = Math.ceil(total / pageSize);
+  const from = total === 0 ? 0 : page * pageSize + 1;
+  const to = Math.min((page + 1) * pageSize, total);
+
+  return (
+    <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-200 bg-slate-50 text-xs text-slate-500 flex-wrap gap-2">
+      <span>
+        {total === 0 ? "0 results" : `${from}–${to} of ${total}`}
+      </span>
+
+      <div className="flex items-center gap-3">
+        <label className="flex items-center gap-1.5">
+          Rows per page
+          <select
+            value={pageSize}
+            onChange={(e) => onPageSize(Number(e.target.value))}
+            className="rounded border border-slate-300 px-1.5 py-0.5 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500"
+          >
+            {PAGE_SIZE_OPTIONS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </label>
+
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onPage(0)}
+            disabled={page === 0}
+            className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+            title="First page"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => onPage(page - 1)}
+            disabled={page === 0}
+            className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+            title="Previous page"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <span className="px-2 tabular-nums">
+            {totalPages === 0 ? "0 / 0" : `${page + 1} / ${totalPages}`}
+          </span>
+
+          <button
+            onClick={() => onPage(page + 1)}
+            disabled={page >= totalPages - 1}
+            className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+            title="Next page"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => onPage(totalPages - 1)}
+            disabled={page >= totalPages - 1}
+            className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+            title="Last page"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function HistoryView({
@@ -510,6 +603,8 @@ export function HistoryView({
   const [envFilter, setEnvFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
 
   const filtered = useMemo(() => {
     let records = history;
@@ -517,6 +612,17 @@ export function HistoryView({
     if (typeFilter !== "all") records = records.filter((r) => r.type === typeFilter);
     return records;
   }, [history, envFilter, typeFilter]);
+
+  // Reset to page 0 when filters or page size change
+  const handleEnvChange = (v: string) => { setEnvFilter(v); setPage(0); setExpandedId(null); };
+  const handleTypeChange = (v: TypeFilter) => { setTypeFilter(v); setPage(0); setExpandedId(null); };
+  const handlePageSize = (s: number) => { setPageSize(s); setPage(0); setExpandedId(null); };
+  const handlePage = (p: number) => { setPage(p); setExpandedId(null); };
+
+  const paginated = useMemo(
+    () => filtered.slice(page * pageSize, (page + 1) * pageSize),
+    [filtered, page, pageSize]
+  );
 
   const envMap = useMemo(() => {
     const map = new Map<string, Environment>();
@@ -530,23 +636,32 @@ export function HistoryView({
         environments={environments}
         envFilter={envFilter}
         typeFilter={typeFilter}
-        onEnvChange={setEnvFilter}
-        onTypeChange={setTypeFilter}
+        onEnvChange={handleEnvChange}
+        onTypeChange={handleTypeChange}
       />
 
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-        {filtered.length > 0 ? (
-          filtered.map((record) => (
-            <RecordRow
-              key={record.id}
-              record={record}
-              environment={envMap.get(record.environment)}
-              expanded={expandedId === record.id}
-              onToggle={() =>
-                setExpandedId((prev) => (prev === record.id ? null : record.id))
-              }
+        {paginated.length > 0 ? (
+          <>
+            {paginated.map((record) => (
+              <RecordRow
+                key={record.id}
+                record={record}
+                environment={envMap.get(record.environment)}
+                expanded={expandedId === record.id}
+                onToggle={() =>
+                  setExpandedId((prev) => (prev === record.id ? null : record.id))
+                }
+              />
+            ))}
+            <PaginationBar
+              total={filtered.length}
+              page={page}
+              pageSize={pageSize}
+              onPage={handlePage}
+              onPageSize={handlePageSize}
             />
-          ))
+          </>
         ) : (
           <div className="flex items-center justify-center h-40 text-sm text-slate-400">
             {history.length === 0

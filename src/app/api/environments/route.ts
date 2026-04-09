@@ -19,6 +19,10 @@ export async function POST(req: NextRequest) {
     name: body.name,
     label: body.label,
     color: body.color || "blue",
+    type: body.type || "sandbox",
+    ...(body.type === "controlled" && body.devEnvironment !== undefined
+      ? { devEnvironment: body.devEnvironment }
+      : {}),
   };
 
   if (envs.find((e) => e.name === newEnv.name)) {

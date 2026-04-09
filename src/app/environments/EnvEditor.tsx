@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Environment } from "@/lib/fr-config-types";
+import { Environment, EnvironmentType } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { parseEnvFile, serializeEnvFile } from "@/lib/env-parser";
 import { cn } from "@/lib/utils";
@@ -558,6 +558,8 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
   const [values, setValues] = useState<Record<string, string>>({});
   const [label, setLabel] = useState(env.label);
   const [color, setColor] = useState<Environment["color"]>(env.color);
+  const [envType, setEnvType] = useState<EnvironmentType>(env.type ?? "sandbox");
+  const [devEnvironment, setDevEnvironment] = useState(env.devEnvironment ?? false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -576,6 +578,8 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
     setError("");
     setLabel(env.label);
     setColor(env.color);
+    setEnvType(env.type ?? "sandbox");
+    setDevEnvironment(env.devEnvironment ?? false);
     fetch(`/api/environments/${env.name}`)
       .then((r) => r.json())
       .then((data) => {
@@ -611,7 +615,13 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
   const handleSave = async () => {
     setSaving(true);
     setError("");
-    const body: Record<string, unknown> = { label, color, envContent: currentRaw };
+    const body: Record<string, unknown> = {
+      label,
+      color,
+      type: envType,
+      devEnvironment: envType === "controlled" ? devEnvironment : undefined,
+      envContent: currentRaw,
+    };
     if (logApiKey || logApiSecret) {
       body.logApi = { apiKey: logApiKey, apiSecret: logApiSecret };
     }
@@ -676,10 +686,41 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
               >
                 <option value="green">Green</option>
                 <option value="blue">Blue</option>
+                <option value="teal">Teal</option>
+                <option value="indigo">Indigo</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
                 <option value="yellow">Yellow</option>
+                <option value="orange">Orange</option>
                 <option value="red">Red (Production)</option>
+                <option value="gray">Gray</option>
               </select>
             </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600">Type</label>
+              <select
+                value={envType}
+                onChange={(e) => setEnvType(e.target.value as EnvironmentType)}
+                className="block rounded border border-slate-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              >
+                <option value="sandbox">Sandbox Environment</option>
+                <option value="controlled">Controlled Environment</option>
+              </select>
+            </div>
+            {envType === "controlled" && (
+              <div className="space-y-1 self-end pb-0.5">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={devEnvironment}
+                    onChange={(e) => setDevEnvironment(e.target.checked)}
+                    className="accent-sky-600 w-4 h-4"
+                  />
+                  <span>Dev Environment</span>
+                </label>
+                <p className="text-xs text-slate-400">First environment in the pipeline</p>
+              </div>
+            )}
           </div>
 
           {/* ── Section tabs (fr-config / Log API) ──────────────────────── */}

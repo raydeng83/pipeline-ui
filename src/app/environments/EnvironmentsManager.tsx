@@ -1,30 +1,44 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Environment } from "@/lib/fr-config-types";
+import { Environment, EnvironmentType } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { EnvEditor } from "./EnvEditor";
 import { cn } from "@/lib/utils";
 import { ServiceAccountScopeSelector } from "@/components/ServiceAccountScopeSelector";
 
 const COLOR_OPTIONS: { value: Environment["color"]; label: string }[] = [
-  { value: "green", label: "Green" },
-  { value: "blue", label: "Blue" },
+  { value: "green",  label: "Green" },
+  { value: "blue",   label: "Blue" },
+  { value: "teal",   label: "Teal" },
+  { value: "indigo", label: "Indigo" },
+  { value: "purple", label: "Purple" },
+  { value: "pink",   label: "Pink" },
   { value: "yellow", label: "Yellow" },
-  { value: "red", label: "Red (Production)" },
+  { value: "orange", label: "Orange" },
+  { value: "red",    label: "Red (Production)" },
+  { value: "gray",   label: "Gray" },
 ];
 
 const COLOR_SWATCHES: Record<Environment["color"], string> = {
-  green: "bg-green-400",
-  blue: "bg-blue-400",
+  green:  "bg-green-400",
+  blue:   "bg-blue-400",
+  teal:   "bg-teal-400",
+  indigo: "bg-indigo-400",
+  purple: "bg-purple-400",
+  pink:   "bg-pink-400",
   yellow: "bg-yellow-400",
-  red: "bg-red-400",
+  orange: "bg-orange-400",
+  red:    "bg-red-400",
+  gray:   "bg-gray-400",
 };
 
 interface NewEnvForm {
   name: string;
   label: string;
   color: Environment["color"];
+  type: EnvironmentType;
+  devEnvironment: boolean;
   TENANT_BASE_URL: string;
   SERVICE_ACCOUNT_CLIENT_ID: string;
   SERVICE_ACCOUNT_ID: string;
@@ -39,6 +53,8 @@ const EMPTY_FORM: NewEnvForm = {
   name: "",
   label: "",
   color: "green",
+  type: "sandbox",
+  devEnvironment: false,
   TENANT_BASE_URL: "",
   SERVICE_ACCOUNT_CLIENT_ID: "service-account",
   SERVICE_ACCOUNT_ID: "",
@@ -92,7 +108,7 @@ export function EnvironmentsManager({
   const dragIdx = useRef<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
-  const setF = (key: keyof NewEnvForm, value: string) =>
+  const setF = (key: keyof NewEnvForm, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleDragStart = (idx: number) => {
@@ -152,6 +168,8 @@ export function EnvironmentsManager({
         name: form.name,
         label: form.label,
         color: form.color,
+        type: form.type,
+        devEnvironment: form.type === "controlled" ? form.devEnvironment : undefined,
         envContent: buildEnvContent(form),
       }),
     });
@@ -324,6 +342,32 @@ export function EnvironmentsManager({
                         ))}
                       </div>
                     </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-slate-700">Environment Type</label>
+                      <p className="text-xs text-slate-400">
+                        Sandbox is for internal development. Controlled Environment is used for system integration before Prod.
+                      </p>
+                      <select
+                        value={form.type}
+                        onChange={(e) => setF("type", e.target.value as EnvironmentType)}
+                        className="block rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      >
+                        <option value="sandbox">Sandbox Environment</option>
+                        <option value="controlled">Controlled Environment</option>
+                      </select>
+                    </div>
+                    {form.type === "controlled" && (
+                      <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={form.devEnvironment}
+                          onChange={(e) => setF("devEnvironment", e.target.checked)}
+                          className="accent-sky-600 w-4 h-4"
+                        />
+                        <span>Dev Environment</span>
+                        <span className="text-xs text-slate-400">(first environment in the pipeline)</span>
+                      </label>
+                    )}
                   </div>
                 </>
               )}
