@@ -68,31 +68,30 @@ function ScopeRow({
   const query = filter.trim().toLowerCase();
   const filtered = query ? entry.items.filter((i) => i.label.toLowerCase().includes(query)) : entry.items;
 
-  // Selected items float to the top (only when not "all selected", to avoid a no-op sort)
-  const sorted = allSelected
-    ? filtered
-    : [...filtered].sort((a, b) => {
-        const aChecked = selectedSet.has(a.id) ? 0 : 1;
-        const bChecked = selectedSet.has(b.id) ? 0 : 1;
-        return aChecked - bChecked;
-      });
+  // When specific items are checked, pin ALL of them above the fold (no pagination).
+  // Only the remaining unselected items are paginated.
+  const hasSpecificSelection = !allSelected && selectedSet.size > 0;
+  const pinnedItems = hasSpecificSelection ? filtered.filter((i) => selectedSet.has(i.id)) : [];
+  const unpinnedItems = hasSpecificSelection ? filtered.filter((i) => !selectedSet.has(i.id)) : filtered;
 
-  const pageCount = Math.ceil(sorted.length / PAGE_SIZE);
+  const pageCount = Math.ceil(unpinnedItems.length / PAGE_SIZE);
   const safePage = Math.min(page, Math.max(0, pageCount - 1));
-  const visible = sorted.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
-  const needsPagination = filtered.length > PAGE_SIZE;
+  const visibleUnpinned = unpinnedItems.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+  const needsPagination = unpinnedItems.length > PAGE_SIZE;
 
   const headerIsToggle = !entry.selectable;
 
   return (
-    <div className="border-b border-slate-100 last:border-b-0">
-      {/* Header — clicking anywhere expands/collapses; check indicator toggles inclusion for non-selectable */}
+    <div className="border-b border-slate-200 last:border-b-0">
+      {/* Header — the full bar is clickable for expand/collapse */}
       <div
         className={cn(
-          "flex items-center gap-2.5 px-3 py-2.5 transition-colors",
-          entry.items.length > 0 && "cursor-pointer select-none",
-          included ? "bg-sky-50 hover:bg-sky-100" : "bg-white",
-          !included && entry.items.length > 0 && "hover:bg-slate-50 opacity-50",
+          "flex items-center gap-2.5 px-3 py-3 border-l-4 transition-colors",
+          entry.items.length > 0 ? "cursor-pointer select-none" : "cursor-default",
+          included
+            ? "bg-sky-50 border-l-sky-500 hover:bg-sky-100"
+            : "bg-slate-100 border-l-transparent hover:bg-slate-200",
+          !included && "opacity-60",
         )}
         onClick={entry.items.length > 0 ? () => setOpen((o) => !o) : undefined}
       >
@@ -100,25 +99,30 @@ function ScopeRow({
         {headerIsToggle && (
           <span
             className={cn(
-              "w-3.5 h-3.5 rounded border-2 shrink-0 flex items-center justify-center transition-colors",
-              included ? "bg-sky-600 border-sky-600" : "border-slate-300 bg-white",
+              "w-4 h-4 rounded border-2 shrink-0 flex items-center justify-center transition-colors",
+              included ? "bg-sky-600 border-sky-600" : "border-slate-400 bg-white",
             )}
             onClick={(e) => { e.stopPropagation(); onToggleScope(!included); }}
           >
             {included && (
-              <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             )}
           </span>
         )}
 
-        <span className="flex-1 text-xs font-medium text-slate-700">{scopeLabel(entry.scope)}</span>
+        <span className={cn(
+          "flex-1 text-xs font-semibold tracking-wide",
+          included ? "text-sky-900" : "text-slate-500",
+        )}>
+          {scopeLabel(entry.scope)}
+        </span>
 
         {/* Selectable: count + select-all */}
         {entry.selectable && entry.items.length > 0 && (
           <>
-            <span className="text-[10px] text-slate-400 tabular-nums font-mono">
+            <span className={cn("text-[10px] tabular-nums font-mono", checkedCount > 0 ? "text-sky-700 font-semibold" : "text-slate-400")}>
               {checkedCount > 0 ? `${checkedCount}/${entry.items.length}` : `0/${entry.items.length}`}
             </span>
             <button
@@ -137,12 +141,12 @@ function ScopeRow({
 
         {/* Non-selectable: "all files" badge */}
         {headerIsToggle && entry.items.length > 0 && (
-          <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">all files</span>
+          <span className="text-[10px] text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded">all files</span>
         )}
 
-        {/* Chevron indicator (visual only — whole header is the click target) */}
+        {/* Chevron — visual only, whole header is the click target */}
         {entry.items.length > 0 ? (
-          <svg className={cn("w-3 h-3 text-slate-400 transition-transform shrink-0", open ? "" : "-rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className={cn("w-3.5 h-3.5 transition-transform shrink-0", included ? "text-sky-500" : "text-slate-400", open ? "" : "-rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         ) : (
@@ -180,41 +184,70 @@ function ScopeRow({
       {/* Items */}
       {open && entry.items.length > 0 && (
         <div className="px-3 pb-2 pt-0.5 space-y-0.5 bg-slate-50/60">
-          {visible.length === 0 ? (
+          {pinnedItems.length === 0 && visibleUnpinned.length === 0 ? (
             <p className="text-[11px] text-slate-400 py-2 text-center">No matches</p>
-          ) : visible.map((item) => {
-            const checked = allSelected || selectedSet.has(item.id);
-            return (
-              <div key={item.id} className="flex items-center gap-2 py-0.5">
-                {entry.selectable ? (
+          ) : (
+            <>
+              {/* Pinned selected items — always visible, no pagination */}
+              {pinnedItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-2 py-0.5">
                   <input
                     type="checkbox"
-                    checked={checked}
+                    checked
                     onChange={(e) => onToggleItem(item.id, e.target.checked)}
                     className="w-3 h-3 accent-sky-600 shrink-0 cursor-pointer"
                   />
-                ) : (
-                  <span className="w-3 h-3 shrink-0" />
-                )}
-                <button
-                  type="button"
-                  onClick={() => onViewItem(item)}
-                  className={cn(
-                    "text-[11px] truncate text-left hover:underline hover:text-sky-600 transition-colors",
-                    checked ? "text-slate-600" : "text-slate-400",
-                  )}
-                >
-                  {item.label}
-                </button>
-              </div>
-            );
-          })}
+                  <button
+                    type="button"
+                    onClick={() => onViewItem(item)}
+                    className="text-[11px] truncate text-left hover:underline hover:text-sky-600 transition-colors text-slate-700 font-medium"
+                  >
+                    {item.label}
+                  </button>
+                </div>
+              ))}
 
-          {/* Pagination */}
+              {/* Divider between pinned and unpinned */}
+              {pinnedItems.length > 0 && visibleUnpinned.length > 0 && (
+                <div className="border-t border-slate-200 my-1" />
+              )}
+
+              {/* Remaining (unselected) items — paginated */}
+              {visibleUnpinned.map((item) => {
+                const checked = allSelected || selectedSet.has(item.id);
+                return (
+                  <div key={item.id} className="flex items-center gap-2 py-0.5">
+                    {entry.selectable ? (
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => onToggleItem(item.id, e.target.checked)}
+                        className="w-3 h-3 accent-sky-600 shrink-0 cursor-pointer"
+                      />
+                    ) : (
+                      <span className="w-3 h-3 shrink-0" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onViewItem(item)}
+                      className={cn(
+                        "text-[11px] truncate text-left hover:underline hover:text-sky-600 transition-colors",
+                        checked ? "text-slate-600" : "text-slate-400",
+                      )}
+                    >
+                      {item.label}
+                    </button>
+                  </div>
+                );
+              })}
+            </>
+          )}
+
+          {/* Pagination (for unselected items only) */}
           {needsPagination && (
             <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-slate-200">
               <span className="text-[10px] text-slate-400 tabular-nums">
-                {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+                {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, unpinnedItems.length)} of {unpinnedItems.length}
               </span>
               <div className="flex items-center gap-0.5">
                 <button
