@@ -107,16 +107,38 @@ function PanelHeader({ label }: { label: string }) {
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
+const SESSION_KEY = "compare-form-state";
+
+function loadSession() {
+  if (typeof window === "undefined") return null;
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "null"); } catch { return null; }
+}
+
 export function CompareForm({ environments, tasks = [] }: { environments: Environment[]; tasks?: PromotionTask[] }) {
   const defaultEnv = environments[0]?.name ?? "";
-  const [source, setSource] = useState<Endpoint>({ environment: defaultEnv, mode: "local" });
-  const [target, setTarget] = useState<Endpoint>({ environment: defaultEnv, mode: "remote" });
-  const [scopes, setScopes] = useState<ConfigScope[]>([]);
-  const [includeMetadata, setIncludeMetadata] = useState(false);
+
+  // Restore form inputs + last report from sessionStorage on mount
+  const saved = loadSession();
+  const [source, setSource] = useState<Endpoint>(saved?.source ?? { environment: defaultEnv, mode: "local" });
+  const [target, setTarget] = useState<Endpoint>(saved?.target ?? { environment: defaultEnv, mode: "remote" });
+  const [scopes, setScopes] = useState<ConfigScope[]>(saved?.scopes ?? []);
+  const [includeMetadata, setIncludeMetadata] = useState<boolean>(saved?.includeMetadata ?? false);
+  const [savedReport, setSavedReport] = useState<import("@/lib/diff-types").CompareReport | null>(saved?.report ?? null);
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
   const { setBusy } = useBusyState();
+
+  // Persist state to sessionStorage whenever inputs or the report change
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ source, target, scopes, includeMetadata, report: report ?? savedReport }));
+    } catch { /* ignore quota errors */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source, target, scopes, includeMetadata, report]);
+
+  // Track the latest finished report (live report from hook takes priority)
+  const displayReport = report ?? savedReport;
 
   useEffect(() => { setBusy(running); }, [running, setBusy]);
 
@@ -244,7 +266,7 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
       )}
 
       {/* ── Diff report ──────────────────────────────────────────────────── */}
-      {report && !running && <DiffReport report={report} tasks={tasks} />}
+      {displayReport && !running && <DiffReport report={displayReport} tasks={tasks} />}
     </div>
   );
 }
