@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { EnvEditor } from "./EnvEditor";
@@ -89,9 +89,46 @@ export function EnvironmentsManager({
   const [saving, setSaving] = useState(false);
   const [addError, setAddError] = useState("");
   const [showKeyInput, setShowKeyInput] = useState(false);
+  const dragIdx = useRef<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
   const setF = (key: keyof NewEnvForm, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleDragStart = (idx: number) => {
+    dragIdx.current = idx;
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    setDragOverIdx(idx);
+  };
+
+  const handleDrop = async (idx: number) => {
+    const from = dragIdx.current;
+    dragIdx.current = null;
+    setDragOverIdx(null);
+    if (from === null || from === idx) return;
+
+    const reordered = [...environments];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(idx, 0, moved);
+    setEnvironments(reordered);
+
+    // Persist the new order
+    try {
+      await fetch("/api/environments/reorder", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: reordered.map((e) => e.name) }),
+      });
+    } catch { /* ignore */ }
+  };
+
+  const handleDragEnd = () => {
+    dragIdx.current = null;
+    setDragOverIdx(null);
+  };
 
   const openAdd = () => {
     setForm(EMPTY_FORM);
@@ -155,20 +192,31 @@ export function EnvironmentsManager({
           {environments.length === 0 && (
             <p className="px-4 py-6 text-sm text-slate-400 text-center">No environments yet.</p>
           )}
-          {environments.map((env) => (
+          {environments.map((env, idx) => (
             <div
               key={env.name}
+              draggable
+              onDragStart={() => handleDragStart(idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDrop={() => handleDrop(idx)}
+              onDragEnd={handleDragEnd}
               onClick={() => { setSelectedEnv(env.name); setShowAdd(false); }}
               className={cn(
                 "flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors",
                 selectedEnv === env.name && !showAdd
                   ? "bg-sky-50 border-l-4 border-l-sky-500"
-                  : ""
+                  : "",
+                dragOverIdx === idx && "border-t-2 border-t-sky-400"
               )}
             >
-              <div className="space-y-0.5 min-w-0">
-                <EnvironmentBadge env={env} />
-                <p className="text-xs text-slate-400 font-mono truncate">{env.name}/.env</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <svg className="w-4 h-4 text-slate-300 shrink-0 cursor-grab active:cursor-grabbing" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                </svg>
+                <div className="space-y-0.5 min-w-0">
+                  <EnvironmentBadge env={env} />
+                  <p className="text-xs text-slate-400 font-mono truncate">{env.name}/.env</p>
+                </div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); handleDelete(env.name); }}

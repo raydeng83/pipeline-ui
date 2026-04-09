@@ -160,12 +160,17 @@ function auditScope(configDir: string, scope: string) {
     const fileCount = realmDirs.reduce((sum, d) => sum + countFiles(d), 0);
     const exists = realmDirs.length > 0;
 
+    // Realm-based scopes that store items as directories
+    const REALM_DIR_BASED_SCOPES = new Set(["themes"]);
+
     let items: AuditItem[];
     if (scope === "scripts") {
       items = scriptItems(realmDirs);
     } else if (isNameFlag) {
       // Journey dirs (and other NAME_FLAG realm scopes): list individual item dirs
       items = journeyItems(realmDirs);
+    } else if (REALM_DIR_BASED_SCOPES.has(scope)) {
+      items = realmDirs.flatMap((d) => genericItems(d, "dirs"));
     } else {
       items = realmDirs.flatMap((d) => genericItems(d, "files"));
     }
@@ -179,10 +184,11 @@ function auditScope(configDir: string, scope: string) {
   const exists = fs.existsSync(scopeDir);
   const fileCount = countFiles(scopeDir);
 
+  // Scopes that store items as directories (not files) at the top level
+  const DIR_BASED_SCOPES = new Set(["email-templates"]);
+
   let items: AuditItem[];
-  if (isNameFlag || isFilenameFilter) {
-    // Both NAME_FLAG and FILENAME_FILTER direct scopes (endpoints, schedules, custom-nodes)
-    // store one directory per item — scripts is realm-based and handled above.
+  if (isNameFlag || isFilenameFilter || DIR_BASED_SCOPES.has(scope)) {
     items = genericItems(scopeDir, "dirs");
   } else {
     items = genericItems(scopeDir, "files");
