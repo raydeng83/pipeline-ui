@@ -2694,7 +2694,7 @@ function getViewAccountInformation(queryFilter) {
                             highRiskMFATemplate.transactionId = queryFilter.transactionId ? queryFilter.transactionId : "",
                             highRiskMFATemplate.methodName = mfaMethods[i].MFAMethod
                         highRiskMFA.push(highRiskMFATemplate)
-                    } else if (mfaMethods[i].MFAMethod.toUpperCase() == "EMAIL" && mfaMethods[i].risk && mfaMethods[i].risk.toLowerCase() == "override") {
+                    } else if (mfaMethods[i].MFAMethod.toUpperCase() == "EMAIL" && mfaMethods[i].risk && mfaMethods[i].risk.toLowerCase() == "override" && mfaMethods[i].MFAStatus.toLowerCase() == "active") {
 
                         highRiskMFATemplate._id = mfaMethods[i]._id,
                             highRiskMFATemplate.methodType = {
@@ -4181,8 +4181,17 @@ function overrideMFA(input) {
 
             const updateMFAMethod = openidm.patch("managed/alpha_kyid_mfa_methods/" + payload._id, null, jsonArray);
             logger.error("Update MFA Method Response is --> " + updateMFAMethod);
-            if(updateMFAMethod && updateMFAMethod.methodName == "EMAIL"){
-              var query = `MFAMethod eq 'EMAIL' AND MFAStatus eq 'ACTIVE' AND KOGId eq '${updateMFAMethod.KOGId}' AND  !(MFAValue eq '${updateMFAMethod.MFAValue})'`
+            if(updateMFAMethod && updateMFAMethod.MFAMethod == "EMAIL" && updateMFAMethod.MFAValue){
+
+              // Update Email in KOG
+
+              var kogEmailResponse = invokeKOGEmailUpdateAPI(payload, updateMFAMethod.MFAValue);
+
+              //Activate the Alpha User
+              var updateUserProfile = openidm.patch("managed/alpha_user/" + payload.userAccountId, null, [{ "operation": "replace", "field": "mail","value": updateMFAMethod.MFAValue}]);
+
+              
+              var query = `MFAMethod eq 'EMAIL' AND MFAStatus eq 'ACTIVE' AND KOGId eq '${updateMFAMethod.KOGId}' AND  !(MFAValue eq '${updateMFAMethod.MFAValue}')`
               var allEmailMethods =  openidm.query("managed/alpha_kyid_mfa_methods", {
             "_queryFilter": query
         });
@@ -4206,7 +4215,7 @@ function overrideMFA(input) {
                 jsonArray2.push({
                     "operation": "replace",
                     "field": "updatedBy",
-                    "value": payload.requesterId ? payload.requesterId : ""
+                    "value": (payload && payload.requesterId) ? payload.requesterId : ""
                 });
                 allEmailMethods.result.forEach(val=>{
            
@@ -4214,9 +4223,9 @@ function overrideMFA(input) {
                 })
               }
 
-              // Upadte User Email
 
-              // Update KOG
+              
+
             }
 
             returnPayload = {

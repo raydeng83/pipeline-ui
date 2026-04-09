@@ -284,6 +284,7 @@ if(missingInputs.length>0){
     action.goTo(nodeOutcome.ERROR);
 
 } else {
+    if(nodeState.get("accountStatus") && nodeState.get("accountStatus").toLowerCase() == "active"){
     nodeState.putShared("ConnectorName",ConnectorName);
     nodeState.putShared("isinternaluser",isinternaluser);
     //ConnectorName="kyid";
@@ -415,7 +416,12 @@ if(missingInputs.length>0){
         }
         
     }  
- 
+}else{
+    auditLog("LOG002", "Login Failure");
+    nodeLogger.error("account is inactive in ping");
+    nodeLogger.error(nodeConfig.timestamp+"::"+nodeConfig.node+"::"+nodeConfig.nodeName+"::"+nodeConfig.script+"::"+nodeConfig.scriptName +"::"+nodeConfig.ldapConnSuccess+"::"+nodeConfig.userNotFound+"::Email::"+nodeState.get("mail"));
+    action.goTo(nodeOutcome.FAIL_INACTIVE);
+}
 }
 
 

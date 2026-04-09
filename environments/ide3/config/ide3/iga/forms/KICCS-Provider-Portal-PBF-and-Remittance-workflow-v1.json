@@ -1,0 +1,268 @@
+{
+  "id": "KICCS-Provider-Portal-PBF-and-Remittance-workflow-v1",
+  "name": "KICCS-Provider-Portal-PBF-and-Remittance-workflow-v1",
+  "type": "request",
+  "description": "Request form for KICCS Provider Portal PBF and Remittance workflow v1",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "9364b3ee-8946-4bb7-b961-4b0c6e8456b5",
+        "fields": [
+          {
+            "id": "0562d485-aba5-44a0-9380-df7388f53eb6",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "9b9892b5-3d6b-428e-a5f4-50a453dd35b1",
+        "fields": [
+          {
+            "id": "c32eb6e0-f1a1-4483-b491-3564fcf74e97",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "ea9e602f-7c34-419a-8ab3-f0d40d6a6133",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "558e9a0f-2bf6-401f-bd76-e4128b9a6faf",
+        "fields": [
+          {
+            "id": "a529d37a-1944-42bf-b893-02f128318551",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "496ec9e3-0b8c-46b2-a776-1e8376e9dcc5",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "dbc5ec2e-cd5d-49bd-9fac-c9fece6d640d",
+        "fields": [
+          {
+            "id": "c74853b9-5791-4e8c-a18a-51def7cbd76b",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "2bc9718a-26f7-4013-8594-551cd39e9b11",
+        "fields": [
+          {
+            "id": "37981a5d-6690-4633-a03c-f86fce4ab61e",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "67f201a5-178b-4fff-b139-ff28504ce2d3",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "0cd67749-823f-4bca-ba8e-3a8ae09408c3",
+        "fields": [
+          {
+            "id": "9322ce96-0fbd-4df8-9fc9-f8f70bcc3979",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "15a07465-8f06-4234-ad43-765af86cd505",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "c29581da-e7ff-46d6-9a99-2cae4f4b7860",
+        "fields": [
+          {
+            "id": "6d1fa420-8ac9-467b-8ef5-bc9cca973842",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Additional Request Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "ba184d29-8cb4-4fb9-8c53-9e6a4775535f",
+        "fields": [
+          {
+            "id": "0b6f4e01-324d-4bb5-9415-1e2632d8c32b",
+            "model": "custom.page.fields.Drivers-License-or-State-ID",
+            "type": "string",
+            "label": "Drivers License or State ID",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "a6e8087f-12b3-41b5-8a6d-e36a5c3f8cc9",
+        "fields": [
+          {
+            "id": "7d77e039-1a2b-424b-8581-7d0d979e341b",
+            "model": "custom.page.fields.Expiration-Date-of-License-or-State-ID",
+            "type": "string",
+            "label": "Expiration Date of License or State ID",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "36fe8e85-2c26-4f6c-8249-bf2c56c5d1e4",
+        "fields": [
+          {
+            "id": "0f643edf-f24d-4175-82b7-98576b962235",
+            "model": "custom.page.fields.Legal-First-and-Last-Name",
+            "type": "string",
+            "label": "Legal First and Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-09-16T05:40:21.005926682Z",
+    "createdDate": "2025-09-16T05:40:21.005925872Z"
+  }
+}

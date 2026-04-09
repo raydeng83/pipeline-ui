@@ -1,0 +1,80 @@
+{
+  "name": "PrerequisiteFormSample",
+  "type": "request",
+  "description": "",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "0429d290-6cc5-454a-ad6a-cc1e595a719d",
+        "fields": [
+          {
+            "id": "3aae6fb7-e753-40cc-95da-9a8068082e7e",
+            "model": "custom.userPrerequisiteId",
+            "type": "string",
+            "label": "Prerequisite Request ID",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "06f09aba-dbf9-4424-b147-3fcfc7d0f211",
+        "fields": [
+          {
+            "id": "01bc94ac-6b1d-414d-92a6-108c00785c3e",
+            "model": "custom.page.fields.Date of Birth",
+            "type": "string",
+            "label": "Date of Birth",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "c3ef33c7-3864-4657-875a-dbb3aec78a29",
+        "fields": [
+          {
+            "id": "161259e2-1c0a-4b16-83d2-843da4f82f83",
+            "model": "custom.page.fields.Email Address",
+            "type": "string",
+            "label": "Email Address",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "id": "52fb5075-be73-422c-941f-0a4d3cb86d2e",
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-07-24T05:58:20.807059483Z",
+    "createdDate": "2025-07-24T05:58:20.807056633Z"
+  }
+}

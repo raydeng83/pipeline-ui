@@ -1,0 +1,76 @@
+{
+  "name": "Create New User",
+  "type": "request",
+  "description": "Form for creation of a new user",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "dd155b12-fb27-44e5-b4d6-476587b31a71",
+        "model": "custom.userName",
+        "type": "string",
+        "label": "User Name",
+        "description": "User name of the new user",
+        "validation": {
+          "required": true
+        },
+        "layout": {
+          "columns": 6,
+          "offset": 0
+        }
+      },
+      {
+        "id": "88c73e69-86b1-453f-878b-527ceddeccf4",
+        "model": "custom.mail",
+        "type": "string",
+        "label": "E-mail address",
+        "description": "E-mail address of the new user",
+        "validation": {
+          "required": true
+        },
+        "layout": {
+          "columns": 6,
+          "offset": 0
+        }
+      },
+      {
+        "id": "683892f9-2c13-41c7-a1cc-fcf38d7d0183",
+        "model": "custom.givenName",
+        "type": "string",
+        "label": "First Name",
+        "description": "First name of the new user",
+        "validation": {
+          "required": true
+        },
+        "layout": {
+          "columns": 6,
+          "offset": 0
+        }
+      },
+      {
+        "id": "76fd5526-2ade-42a9-9b03-b6899e65aa31",
+        "model": "custom.sn",
+        "type": "string",
+        "label": "Last Name",
+        "description": "Last name of the new user",
+        "validation": {
+          "required": true
+        },
+        "layout": {
+          "columns": 6,
+          "offset": 0
+        }
+      }
+    ]
+  },
+  "id": "381711f5-77e9-493c-a84e-cf3d25fa15a2",
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-08-19T20:41:51.745268549Z",
+    "createdDate": "2025-08-19T20:41:51.745266299Z"
+  }
+}

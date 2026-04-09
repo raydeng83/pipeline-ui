@@ -1,0 +1,61 @@
+{
+  "application": {
+    "_rev": "bd3e26a0-6dd0-4e0e-acc9-7ab5e91f03ad-423656",
+    "description": "OIDC client for KYID self service web application",
+    "fr": {
+      "realm": "alpha"
+    },
+    "id": "e2f1b656-6940-4f21-b983-bf310b5e897f",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-05-19T06:32:19.341Z"
+    },
+    "name": "kyid-selfservice-web",
+    "ssoEntities": {
+      "idpLoginUrl": "https://selfservice.dev.kyid.ky.gov:5173/signin",
+      "oidcId": "kyid-selfservice-web"
+    },
+    "templateName": "web",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "006ffa30-405c-47b6-a2ae-bb1970bc2678",
+      "userName": "test-priya@mailinator.com",
+      "givenName": "Test",
+      "sn": "test1",
+      "mail": "test-priya@mailinator.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2025-05-19T11:39:47.096Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "e2f1b656-6940-4f21-b983-bf310b5e897f",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-05-19T06:32:19.341Z",
+    "applicationOwner": {
+      "006ffa30-405c-47b6-a2ae-bb1970bc2678": "2025-12-08T16:16:39.602Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2025-05-19T11:39:47.096Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2025-12-08T16:21:26.296Z",
+    "createdDate": "2025-05-19T06:35:16.760773676Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

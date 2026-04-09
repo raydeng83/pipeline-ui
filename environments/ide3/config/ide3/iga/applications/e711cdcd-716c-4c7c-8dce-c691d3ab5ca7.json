@@ -1,0 +1,44 @@
+{
+  "application": {
+    "_rev": "e240af18-29ac-4b6e-bf31-7322078bc693-669718",
+    "authoritative": false,
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "",
+    "id": "e711cdcd-716c-4c7c-8dce-c691d3ab5ca7",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-01-15T18:04:42.958Z"
+    },
+    "name": "testScriptedrestPOC-3",
+    "templateName": "scripted.rest",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "000220e7-6f87-4a56-bfb3-ad856407e190",
+      "userName": "60fc7f40-0622-41b2-b92c-153dce39852b",
+      "givenName": "Citi",
+      "sn": "potter",
+      "mail": "potter.citi1222@yopmail.com"
+    }
+  ],
+  "id": "e711cdcd-716c-4c7c-8dce-c691d3ab5ca7",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-01-15T18:04:42.958Z",
+    "applicationOwner": {
+      "000220e7-6f87-4a56-bfb3-ad856407e190": "2025-12-08T16:16:39.397Z"
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-01-15T18:12:30.673273272Z",
+    "createdDate": "2026-01-15T18:12:30.673273272Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

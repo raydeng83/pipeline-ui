@@ -1,6 +1,6 @@
 {
   "_id": "Login",
-  "_rev": "-1653709526",
+  "_rev": "-1396167036",
   "description": "Platform Login Tree",
   "enabled": true,
   "entryNodeId": "b89a5c5f-49ea-4367-b603-6c590c60bbaf",
@@ -111,8 +111,8 @@
       "displayName": "Page Node",
       "nodeType": "PageNode",
       "version": "1.0",
-      "x": 88,
-      "y": 48.399993896484375
+      "x": 61,
+      "y": 0
     },
     "b89a5c5f-49ea-4367-b603-6c590c60bbaf": {
       "connections": {
@@ -121,8 +121,8 @@
       "displayName": "Message Node",
       "nodeType": "MessageNode",
       "version": "1.0",
-      "x": 78,
-      "y": 403
+      "x": 3,
+      "y": 443
     },
     "be112377-4dca-4845-8658-d42c596f3933": {
       "connections": {
@@ -172,6 +172,7 @@
   },
   "transactionalOnly": false,
   "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
     "categories": "[\"1. Main\",\"mustRunTests\"]"
   }
 }

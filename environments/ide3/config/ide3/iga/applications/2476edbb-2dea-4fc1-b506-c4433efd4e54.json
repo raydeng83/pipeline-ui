@@ -1,0 +1,60 @@
+{
+  "application": {
+    "_rev": "04aba0da-5264-487a-9dab-91b835f7852b-67797",
+    "description": "Client created for enrollment context API",
+    "fr": {
+      "realm": "alpha"
+    },
+    "id": "2476edbb-2dea-4fc1-b506-c4433efd4e54",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-07-17T06:33:53.251Z"
+    },
+    "name": "1b0770a7-f1a1-4388-9a46-1d280b1a5708",
+    "ssoEntities": {
+      "oidcId": "1b0770a7-f1a1-4388-9a46-1d280b1a5708"
+    },
+    "templateName": "service",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "ccf7821c-4d84-45ec-af1f-7db724024320",
+      "userName": "kasshah@deloitte.com",
+      "givenName": "Kashif",
+      "sn": "Shah",
+      "mail": "kasshah@deloitte.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2026-02-20T09:03:30.702Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "2476edbb-2dea-4fc1-b506-c4433efd4e54",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-07-17T06:33:53.251Z",
+    "applicationOwner": {
+      "ccf7821c-4d84-45ec-af1f-7db724024320": "2025-12-08T16:18:32.883Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2026-02-20T09:03:30.702Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-02-20T09:20:36.17Z",
+    "createdDate": "2025-07-17T06:35:49.014737081Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

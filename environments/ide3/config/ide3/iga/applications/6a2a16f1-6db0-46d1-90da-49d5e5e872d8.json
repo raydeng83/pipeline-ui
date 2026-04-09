@@ -1,0 +1,67 @@
+{
+  "application": {
+    "_rev": "3a8871ec-6aed-46e9-a895-3de92bc18882-55718",
+    "authoritative": true,
+    "connectorId": "aaroncsvinboundpoc",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "",
+    "id": "6a2a16f1-6db0-46d1-90da-49d5e5e872d8",
+    "mappingNames": [
+      "systemAaroncsvinboundpoc__account___managedAlpha_user"
+    ],
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-02-19T17:32:50.21Z"
+    },
+    "name": "aaron-csv-inbound-poc",
+    "objectTypes": [
+      {
+        "name": "__ACCOUNT__"
+      }
+    ],
+    "templateName": "csv.file",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "2ae33a24-16b0-409b-9fd1-6afddc9d64f0",
+      "userName": "aaron_test1",
+      "givenName": "Aaron33",
+      "sn": "Wang",
+      "mail": "aaron1234@example.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2026-02-19T17:32:42.449551337Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "6a2a16f1-6db0-46d1-90da-49d5e5e872d8",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-02-19T17:32:50.21Z",
+    "applicationOwner": {
+      "2ae33a24-16b0-409b-9fd1-6afddc9d64f0": "2026-03-19T20:00:16.095Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2026-02-19T17:32:42.449551337Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-03-19T20:15:11.836Z",
+    "createdDate": "2026-02-19T17:46:38.207213526Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

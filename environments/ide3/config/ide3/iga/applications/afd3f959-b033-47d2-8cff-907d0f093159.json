@@ -1,0 +1,34 @@
+{
+  "application": {
+    "_rev": "cf787f71-b935-4746-9cbd-9a025c62de93-727819",
+    "description": "TestApplication",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "test",
+    "id": "afd3f959-b033-47d2-8cff-907d0f093159",
+    "mappingNames": [
+      "managedAlpha_role_managedAlpha_assignment_POC"
+    ],
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-03-13T04:10:02.002Z"
+    },
+    "name": "TestApplication",
+    "url": "test"
+  },
+  "id": "afd3f959-b033-47d2-8cff-907d0f093159",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-03-13T04:10:02.002Z"
+  },
+  "metadata": {
+    "modifiedDate": "2026-03-13T04:15:03.826Z",
+    "createdDate": "2026-03-13T04:00:17.735341654Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

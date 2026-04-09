@@ -1,0 +1,31 @@
+{
+  "application": {
+    "_rev": "bd3e26a0-6dd0-4e0e-acc9-7ab5e91f03ad-424210",
+    "description": "A test application",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "App.png",
+    "id": "771cb8bf-4c55-4948-b9c9-1621a818e479",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-05-19T06:39:32.248Z"
+    },
+    "name": "Application1",
+    "url": "https://sb2.application1.ky.gov/"
+  },
+  "id": "771cb8bf-4c55-4948-b9c9-1621a818e479",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-05-19T06:39:32.248Z"
+  },
+  "metadata": {
+    "modifiedDate": "2025-05-19T06:45:10.63817105Z",
+    "createdDate": "2025-05-19T06:45:10.63817105Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

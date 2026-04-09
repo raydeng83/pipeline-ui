@@ -1,0 +1,30 @@
+{
+  "application": {
+    "_rev": "bd3e26a0-6dd0-4e0e-acc9-7ab5e91f03ad-424404",
+    "description": "Agent Portal",
+    "fr": {
+      "realm": "alpha"
+    },
+    "id": "9e8e633e-cc26-44c3-9997-6fdff4fa2278",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-05-19T06:41:49.748Z"
+    },
+    "name": "Agent Portal",
+    "url": "www.agentportal.com"
+  },
+  "id": "9e8e633e-cc26-44c3-9997-6fdff4fa2278",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-05-19T06:41:49.748Z"
+  },
+  "metadata": {
+    "modifiedDate": "2025-05-19T06:45:10.63803801Z",
+    "createdDate": "2025-05-19T06:45:10.63803801Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

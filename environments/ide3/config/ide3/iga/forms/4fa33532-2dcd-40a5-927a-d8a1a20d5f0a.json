@@ -1,0 +1,56 @@
+{
+  "name": "km_form",
+  "type": "request",
+  "description": "km_form",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "46434dd8-9ecd-49ea-b41b-e90c08edfd3a",
+        "fields": [
+          {
+            "id": "7af4459c-8258-40c7-972f-f129c78cbe2b",
+            "model": "custom.userName",
+            "type": "string",
+            "label": "User Name",
+            "validation": {
+              "required": true,
+              "regex": {}
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "fd7359e5-0f8c-4bec-976a-e09271fedca7",
+            "model": "custom.mail",
+            "type": "string",
+            "label": "Email Address",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": false,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "id": "4fa33532-2dcd-40a5-927a-d8a1a20d5f0a",
+  "_rev": 5,
+  "metadata": {
+    "modifiedDate": "2025-07-01T04:35:43.532Z",
+    "createdDate": "2025-07-01T04:30:08.635027946Z"
+  }
+}

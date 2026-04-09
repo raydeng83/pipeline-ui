@@ -1,0 +1,30 @@
+{
+  "application": {
+    "_rev": "bd3e26a0-6dd0-4e0e-acc9-7ab5e91f03ad-424377",
+    "description": "Plan Management",
+    "fr": {
+      "realm": "alpha"
+    },
+    "id": "0867ad48-15f0-40ea-8288-a70f5ee15978",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-05-19T06:41:28.499Z"
+    },
+    "name": "Plan Management",
+    "url": "www.planmanagement.com"
+  },
+  "id": "0867ad48-15f0-40ea-8288-a70f5ee15978",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-05-19T06:41:28.499Z"
+  },
+  "metadata": {
+    "modifiedDate": "2025-05-19T06:45:10.63699407Z",
+    "createdDate": "2025-05-19T06:45:10.63699407Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

@@ -1,6 +1,6 @@
 {
   "_id": "",
-  "_rev": "-647505928",
+  "_rev": "-49152415",
   "_type": {
     "_id": "EMPTY",
     "collection": false,
@@ -17,7 +17,7 @@
   },
   "core": {
     "adminAuthModule": "[Empty]",
-    "orgConfig": "kyid_2B1_MasterLogin"
+    "orgConfig": "aaron_test_login"
   },
   "general": {
     "defaultAuthLevel": 0,

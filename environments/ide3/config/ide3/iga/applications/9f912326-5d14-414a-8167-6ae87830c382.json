@@ -1,0 +1,72 @@
+{
+  "application": {
+    "_rev": "9b1e1acc-6d8d-42ae-8723-0fe7ed220999-3886994",
+    "authoritative": false,
+    "connectorId": "testscriptedrestPOC2",
+    "description": "scripted rest connector poc 2",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "",
+    "id": "9f912326-5d14-414a-8167-6ae87830c382",
+    "mappingNames": [
+      "systemTestscriptedrestpoc2__account___managedAlpha_user",
+      "managedAlpha_user_systemTestscriptedrestpoc2__account__"
+    ],
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-01-09T20:57:30.348Z"
+    },
+    "name": "testscriptedrestPOC-2",
+    "objectTypes": [
+      {
+        "name": "__ACCESS__"
+      },
+      {
+        "name": "__ACCOUNT__"
+      }
+    ],
+    "templateName": "scripted.rest",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "3dd5843e-5646-4599-a58f-e1ca822fc970",
+      "userName": "01e6aee3-6e16-41d9-b21c-9346ffdb21c3",
+      "givenName": "Test",
+      "sn": "User",
+      "mail": "IDETestUser669@mailinator.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2025-11-20T21:13:45.061588149Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "9f912326-5d14-414a-8167-6ae87830c382",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-01-09T20:57:30.348Z",
+    "applicationOwner": {
+      "3dd5843e-5646-4599-a58f-e1ca822fc970": "2025-12-08T16:17:15.556Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2025-11-20T21:13:45.061588149Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-01-09T21:00:14.66Z",
+    "createdDate": "2025-11-20T21:15:27.110103343Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

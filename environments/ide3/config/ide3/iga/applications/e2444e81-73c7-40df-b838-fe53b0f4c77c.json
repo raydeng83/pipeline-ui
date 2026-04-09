@@ -1,0 +1,69 @@
+{
+  "application": {
+    "_rev": "3a8871ec-6aed-46e9-a895-3de92bc18882-48357",
+    "authoritative": false,
+    "connectorId": "aaroncsvpoc",
+    "description": "CSV connector POC for bidirectional sync",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "",
+    "id": "e2444e81-73c7-40df-b838-fe53b0f4c77c",
+    "mappingNames": [
+      "managedAlpha_user_systemAaroncsvpoc__account__",
+      "systemAaroncsvpoc__account___managedAlpha_user"
+    ],
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-02-19T17:04:45.909Z"
+    },
+    "name": "aaron-csv-poc",
+    "objectTypes": [
+      {
+        "name": "__ACCOUNT__"
+      }
+    ],
+    "templateName": "csv.file",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "2ae33a24-16b0-409b-9fd1-6afddc9d64f0",
+      "userName": "aaron_test1",
+      "givenName": "Aaron33",
+      "sn": "Wang",
+      "mail": "aaron1234@example.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2026-02-19T16:27:03.860761449Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "e2444e81-73c7-40df-b838-fe53b0f4c77c",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-02-19T17:04:45.909Z",
+    "applicationOwner": {
+      "2ae33a24-16b0-409b-9fd1-6afddc9d64f0": "2026-03-19T20:00:16.095Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2026-02-19T16:27:03.860761449Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-03-19T20:15:11.835Z",
+    "createdDate": "2026-02-19T16:27:46.60589557Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

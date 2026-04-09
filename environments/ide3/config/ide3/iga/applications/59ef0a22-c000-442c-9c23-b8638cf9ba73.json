@@ -1,0 +1,59 @@
+{
+  "application": {
+    "_rev": "e1fc3bf8-2d80-40f1-b117-c73e74f70da1-926092",
+    "authoritative": false,
+    "description": "km_scriptedRESTconnector",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "",
+    "id": "59ef0a22-c000-442c-9c23-b8638cf9ba73",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-03-23T16:16:00.434Z"
+    },
+    "name": "km_scriptedRESTconnector",
+    "templateName": "scripted.rest",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "ba8e66f5-1172-4804-9c78-375009fe7f08",
+      "userName": "0a6cf8e8-da76-43fb-95f4-24113026fb72",
+      "givenName": "Kavita",
+      "sn": "Malik",
+      "mail": "kavmalik@deloitte.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2026-03-23T16:16:12.456606984Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "59ef0a22-c000-442c-9c23-b8638cf9ba73",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-03-23T16:16:00.434Z",
+    "applicationOwner": {
+      "ba8e66f5-1172-4804-9c78-375009fe7f08": "2025-12-08T16:18:22.41Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2026-03-23T16:16:12.456606984Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-03-23T16:30:23.651040808Z",
+    "createdDate": "2026-03-23T16:30:23.651040808Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

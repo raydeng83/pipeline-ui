@@ -1,0 +1,30 @@
+{
+  "application": {
+    "_rev": "bd3e26a0-6dd0-4e0e-acc9-7ab5e91f03ad-424321",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "MWMA.png",
+    "id": "e0e09b28-a0b6-4f50-8b75-66bf01f99016",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-05-19T06:40:52.638Z"
+    },
+    "name": "MWMA",
+    "url": "https://MWMA.kog.ky.gov/home"
+  },
+  "id": "e0e09b28-a0b6-4f50-8b75-66bf01f99016",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-05-19T06:40:52.638Z"
+  },
+  "metadata": {
+    "modifiedDate": "2025-05-19T06:45:10.63782868Z",
+    "createdDate": "2025-05-19T06:45:10.63782868Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

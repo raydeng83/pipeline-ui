@@ -1,0 +1,66 @@
+{
+  "application": {
+    "_rev": "cf787f71-b935-4746-9cbd-9a025c62de93-735602",
+    "description": "kyidPortal",
+    "fr": {
+      "realm": "alpha"
+    },
+    "id": "11ed294e-88d6-42ab-82f9-a242c2d4f83c",
+    "mappingNames": [
+      "managedAlpha_role_managedAlpha_assignment_POC"
+    ],
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-03-13T04:37:30.218Z"
+    },
+    "name": "bookmarkApplication",
+    "templateName": "bookmark",
+    "templateVersion": "1.0",
+    "url": "https://kyid.ky.gov.com"
+  },
+  "applicationOwner": [
+    {
+      "id": "000aec0e-eadf-4079-96bb-3a4efd01428e",
+      "userName": "000aec0e-eadf-4079-96bb-3a4efd01428e",
+      "givenName": "gijja123",
+      "sn": "abcdef",
+      "mail": "sampleide3_0902@maildrop.cc"
+    }
+  ],
+  "glossary": {
+    "idx": {
+      "/application": {
+        "requestable": true
+      }
+    },
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2026-03-13T04:39:18.274927438Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "11ed294e-88d6-42ab-82f9-a242c2d4f83c",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-03-13T04:37:30.218Z",
+    "applicationOwner": {
+      "000aec0e-eadf-4079-96bb-3a4efd01428e": "2026-01-09T21:21:51.974Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2026-03-13T04:39:18.274927438Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-03-13T04:48:17.661106612Z",
+    "createdDate": "2026-03-13T04:48:17.661106612Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

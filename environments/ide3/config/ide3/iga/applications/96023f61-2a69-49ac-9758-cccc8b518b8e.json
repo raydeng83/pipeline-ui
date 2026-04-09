@@ -1,0 +1,62 @@
+{
+  "application": {
+    "_rev": "479c75da-c09e-42bb-ae5f-9ae30896e41a-24581",
+    "description": "To handle OIDC app requests",
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQid3pT9ZLtLzniTB5g3oiTokUM8xlAI39MQ&s",
+    "id": "96023f61-2a69-49ac-9758-cccc8b518b8e",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-03-16T17:09:37.153Z"
+    },
+    "name": "kyid-oidc",
+    "ssoEntities": {
+      "idpLoginUrl": "https://dev4.kyserve.chfsinet.ky.gov/callback",
+      "oidcId": "kyid-oidc"
+    },
+    "templateName": "web",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "ccf7821c-4d84-45ec-af1f-7db724024320",
+      "userName": "kasshah@deloitte.com",
+      "givenName": "Kashif",
+      "sn": "Shah",
+      "mail": "kasshah@deloitte.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2026-04-08T10:56:31.61Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "96023f61-2a69-49ac-9758-cccc8b518b8e",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-03-16T17:09:37.153Z",
+    "applicationOwner": {
+      "ccf7821c-4d84-45ec-af1f-7db724024320": "2025-12-08T16:18:32.883Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2026-04-08T10:56:31.61Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-04-08T11:08:21.091Z",
+    "createdDate": "2026-03-05T07:02:47.060258345Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

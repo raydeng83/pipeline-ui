@@ -7,8 +7,8 @@
   "description": "null",
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
-  "lastModifiedBy": "id=5708fb1a-9d2d-4b8f-a6e0-3c38f1b823f5,ou=user,ou=am-config",
-  "lastModifiedDate": 1774613195678,
+  "lastModifiedBy": "id=2b47fdf0-e214-45fe-b98b-6c4470197fc5,ou=user,ou=am-config",
+  "lastModifiedDate": 1775668866584,
   "name": "KYID.2B1.Journey.PTAAuthentication",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/KYID.2B1.Journey.PTAAuthentication.js"

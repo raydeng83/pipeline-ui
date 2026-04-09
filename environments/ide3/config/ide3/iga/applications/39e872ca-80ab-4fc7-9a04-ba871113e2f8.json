@@ -1,0 +1,58 @@
+{
+  "application": {
+    "_rev": "130440d0-22c9-4678-9a6d-d3c6cf4092c4-91876",
+    "authoritative": false,
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "",
+    "id": "39e872ca-80ab-4fc7-9a04-ba871113e2f8",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-06-25T08:50:16.593Z"
+    },
+    "name": "Monday",
+    "templateName": "scim",
+    "templateVersion": "2.3"
+  },
+  "applicationOwner": [
+    {
+      "id": "006ffa30-405c-47b6-a2ae-bb1970bc2678",
+      "userName": "test-priya@mailinator.com",
+      "givenName": "Test",
+      "sn": "test1",
+      "mail": "test-priya@mailinator.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2025-06-25T08:50:28.742377264Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "39e872ca-80ab-4fc7-9a04-ba871113e2f8",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-06-25T08:50:16.593Z",
+    "applicationOwner": {
+      "006ffa30-405c-47b6-a2ae-bb1970bc2678": "2025-12-08T16:16:39.602Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2025-06-25T08:50:28.742377264Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2025-12-08T16:21:24.941Z",
+    "createdDate": "2025-06-25T08:55:17.845281732Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

@@ -1,0 +1,363 @@
+{
+  "id": "Q-test-expiration-generic",
+  "name": "Q-test-expiration-generic",
+  "type": "request",
+  "description": "Request form for Q-test-expiration-generic",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "0000c527-f25d-4d51-a28d-bf988d93da37",
+        "fields": [
+          {
+            "id": "fc01f954-c56a-45cc-8c9a-e06246d6053a",
+            "model": "custom.requesterUser.applicationName",
+            "type": "string",
+            "label": "Application Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "3d23050b-04c5-48a7-b095-639a6cae44ba",
+            "model": "custom.requesterUser.roleName",
+            "type": "string",
+            "label": "Role Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "764b2a0a-97cb-4af4-a01a-e5395dff43a7",
+        "fields": [
+          {
+            "id": "dd0258c4-380a-446b-8c67-27a3c7549d38",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "3c8f6dbe-c0e2-4ceb-94bb-ca16ef1c98a7",
+        "fields": [
+          {
+            "id": "c680fae6-56c5-4cd1-a386-f49e967a40dc",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "23587124-3949-4999-a5c6-e7f3a949064c",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "258570e9-f9bd-4a64-aa96-9c648e0fcc7a",
+        "fields": [
+          {
+            "id": "27136314-6a99-4972-9437-f1a2aed5ebb0",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "101b8e23-7919-4141-b3c2-bcef2f362042",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "6c82ddd7-8dde-4491-bd3b-c5dcc3fbea73",
+        "fields": [
+          {
+            "id": "bfb00518-ab14-4365-a6ab-a1da843e935c",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "a792d126-12e6-4da4-9cdf-ccab095b8e55",
+        "fields": [
+          {
+            "id": "4754c653-9dba-48cb-990c-b67d9b897a60",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "d6bb210a-92ce-47ea-9783-73bf911683de",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "b3f44fd8-a868-4b43-9be0-65f595a9ef63",
+        "fields": [
+          {
+            "id": "3852d5b4-26a4-4e49-93d8-f6c87b1cb752",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "6334adc5-3ce0-40ee-b844-ccde40616788",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "5e33e20b-1e3c-422b-ab36-e3604735152f",
+        "fields": [
+          {
+            "id": "78550d0a-df8b-43ce-b911-59bf22b1bfaf",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Additional Request Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "f988d7e2-5581-4890-a809-5fdf63c1db8a",
+        "fields": [
+          {
+            "id": "3a1813b7-1629-4bf0-9bec-322d4fce360a",
+            "model": "custom.page.fields.AgentID",
+            "type": "string",
+            "label": "AgentID",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "7d25d1f0-622d-4248-875c-6eda9d7296aa",
+        "fields": [
+          {
+            "id": "06a33759-7069-4940-8bfb-162b3f7ada09",
+            "model": "custom.page.fields.DOB",
+            "type": "string",
+            "label": "DOB",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "7a206a18-1972-4a6f-9470-3cfae3c10890",
+        "fields": [
+          {
+            "id": "f504e06e-47fc-4bdb-a4df-24821716d099",
+            "model": "custom.page.fields.Last_4_SSN",
+            "type": "string",
+            "label": "SSN",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "af8cdeab-5aca-4cbb-88d2-d1bc9f590b52",
+        "fields": [
+          {
+            "id": "7cac9127-8c1b-449c-b286-66b41e2edc64",
+            "model": "custom.page.fields.Surname",
+            "type": "string",
+            "label": "DONOTSENDTOKOG_Surname",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "39976feb-913e-485f-a1b9-9455cc7203d5",
+        "fields": [
+          {
+            "id": "2b73ec29-0951-43be-a9c2-b88c1cd2e6ea",
+            "model": "custom.page.fields.Username",
+            "type": "string",
+            "label": "DONOTSENDTOKOG_Username",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "9d738e76-cccd-46ed-8499-7f92062c2ceb",
+        "fields": [
+          {
+            "id": "c19ae786-0c4f-42d1-8d6e-6f6886c5990b",
+            "model": "custom.page.fields.Password",
+            "type": "string",
+            "label": "DONOTSENDTOKOG_Password",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-11-12T19:47:13.848121091Z",
+    "createdDate": "2025-11-12T19:47:13.848120051Z"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "application": {
+    "_rev": "14bcc110-d1b1-48d2-93fd-642071b80a34-1244171",
+    "authoritative": false,
+    "connectorId": "PocCertify",
+    "createDate": "2025-10-24T18:27:59.582Z",
+    "createDateEpoch": 1761330479582,
+    "createdBy": "idm-provisioning",
+    "custom_certifier_test": {
+      "_refResourceId": "000aec0e-eadf-4079-96bb-3a4efd01428e",
+      "_ref": "managed/alpha_user/000aec0e-eadf-4079-96bb-3a4efd01428e",
+      "_refProperties": {
+        "_rev": "638382df-419c-4185-9885-b03fd8e4c1b8-835944",
+        "_id": "638382df-419c-4185-9885-b03fd8e4c1b8-835943"
+      },
+      "_refResourceCollection": "managed/alpha_user"
+    },
+    "description": "Certification Poc",
+    "fr": {
+      "realm": "alpha"
+    },
+    "id": "43b51f8b-188c-414e-8bcf-a5700fbce686",
+    "mappingNames": [
+      "managedAlpha_user_systemPoccertify__account__",
+      "systemPoccertify__account___managedAlpha_user"
+    ],
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-11-21T19:11:07.82Z"
+    },
+    "name": "Poc_Certify",
+    "objectTypes": [
+      {
+        "name": "__ACCOUNT__"
+      }
+    ],
+    "templateName": "csv.file",
+    "templateVersion": "1.0",
+    "updateDate": "2025-11-11T14:54:08.113Z",
+    "updateDateEpoch": 1762872848113,
+    "updatedBy": "idm-provisioning"
+  },
+  "applicationOwner": [
+    {
+      "id": "113da38f-c012-4d4a-ba05-d5dee2359359",
+      "userName": "31d2f4c6-43a4-4112-b9c8-c30962cef4c3",
+      "givenName": "nik",
+      "sn": "user2",
+      "mail": "niku2@yopmail.com"
+    }
+  ],
+  "glossary": {
+    "types": [
+      {
+        "attrKey": "/application",
+        "modified": "2025-10-24T18:36:10.714592128Z",
+        "type": "entityType/id/realm"
+      }
+    ]
+  },
+  "id": "43b51f8b-188c-414e-8bcf-a5700fbce686",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-11-21T19:11:07.82Z",
+    "applicationOwner": {
+      "113da38f-c012-4d4a-ba05-d5dee2359359": "2025-12-08T16:16:50.277Z"
+    },
+    "glossaries": {
+      "/application": {
+        "entityType/id/realm": "2025-10-24T18:36:10.714592128Z"
+      }
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2025-12-08T16:21:27.271Z",
+    "createdDate": "2025-10-24T18:43:15.088371578Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

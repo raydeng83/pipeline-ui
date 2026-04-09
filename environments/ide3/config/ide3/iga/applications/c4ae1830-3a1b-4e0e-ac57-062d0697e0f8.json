@@ -1,0 +1,29 @@
+{
+  "application": {
+    "_rev": "bd3e26a0-6dd0-4e0e-acc9-7ab5e91f03ad-424439",
+    "description": "Issuer Portal Description",
+    "fr": {
+      "realm": "alpha"
+    },
+    "id": "c4ae1830-3a1b-4e0e-ac57-062d0697e0f8",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2025-05-19T06:42:05.906Z"
+    },
+    "name": "Issuer Portal"
+  },
+  "id": "c4ae1830-3a1b-4e0e-ac57-062d0697e0f8",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2025-05-19T06:42:05.906Z"
+  },
+  "metadata": {
+    "modifiedDate": "2025-05-19T06:45:10.63830929Z",
+    "createdDate": "2025-05-19T06:45:10.63830929Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

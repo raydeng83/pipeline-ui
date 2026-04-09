@@ -8,7 +8,7 @@
   "evaluatorVersion": "2.0",
   "language": "JAVASCRIPT",
   "lastModifiedBy": "id=3b72fc4d-9aae-4eb9-a34d-3e2328f2584d,ou=user,ou=am-config",
-  "lastModifiedDate": 1770976107038,
+  "lastModifiedDate": 1775672826989,
   "name": "kyid.send.email.ridp.recovery",
   "script": {
     "file": "scripts-content/AUTHENTICATION_TREE_DECISION_NODE/kyid.send.email.ridp.recovery.js"

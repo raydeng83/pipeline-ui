@@ -1,0 +1,44 @@
+{
+  "application": {
+    "_rev": "b9b1bc87-7b01-45a5-a8b9-75a28c28876d-52115",
+    "authoritative": false,
+    "fr": {
+      "realm": "alpha"
+    },
+    "icon": "",
+    "id": "d6f4f0ea-1334-44b0-a93d-a6e6436bc703",
+    "metadata": {
+      "entityType": "/openidm/managed/application",
+      "created": "2026-02-12T17:12:33.269Z"
+    },
+    "name": "aaron_test_db_app",
+    "templateName": "database.table",
+    "templateVersion": "1.0"
+  },
+  "applicationOwner": [
+    {
+      "id": "2ae33a24-16b0-409b-9fd1-6afddc9d64f0",
+      "userName": "aaron_test1",
+      "givenName": "Aaron33",
+      "sn": "Wang",
+      "mail": "aaron1234@example.com"
+    }
+  ],
+  "id": "d6f4f0ea-1334-44b0-a93d-a6e6436bc703",
+  "item": {
+    "type": "accountGrant"
+  },
+  "latestModified": {
+    "application": "2026-02-12T17:12:33.269Z",
+    "applicationOwner": {
+      "2ae33a24-16b0-409b-9fd1-6afddc9d64f0": "2026-03-19T20:00:16.095Z"
+    }
+  },
+  "metadata": {
+    "modifiedDate": "2026-03-19T20:15:11.835Z",
+    "createdDate": "2026-02-12T17:23:48.177970889Z"
+  },
+  "permissions": {
+    "createEntitlement": true
+  }
+}

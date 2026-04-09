@@ -3,6 +3,10 @@
   - The script should set outcome to either "true" or "false".
  */
 //var mail = nodeState.get("objectAttributes").get("mail");
+logger.error("value for sv.kyid.2b.kogapi.token.clientid::::"+systemEnv.getProperty("esv.kyid.2b.kogapi.token.clientid"));
+logger.error("value for esv.kyid.2b.kogapi.token.clientcredentials::::"+systemEnv.getProperty("esv.kyid.2b.kogapi.token.clientcredentials"));
+logger.error("value for esv.kyid.kogapi.token.scope::::"+systemEnv.getProperty("esv.kyid.kogapi.token.scope"));
+logger.error("value for esv.kyid.kogapi.token.granttype::::"+systemEnv.getProperty("esv.kyid.kogapi.token.granttype"));
 var frIndexedString5 = "Testone.account@eide.extdev.ky.gov";
 var mail = "IDE_KYAUG_T10@mailinator.com";
 //nodeState.putShared("frIndexedString5",frIndexedString5)
