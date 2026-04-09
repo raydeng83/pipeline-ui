@@ -1,0 +1,69 @@
+{
+  "application": {
+    "authoritative": false,
+    "connectorId": "kyinternalgov",
+    "icon": "",
+    "id": "d6a8ec6c-0f0d-4cbb-8a3f-79bcc19d48da",
+    "name": "ky-internal-gov",
+    "objectTypes": [
+      {
+        "name": "Group",
+        "accountAttribute": "ldapGroups"
+      },
+      {
+        "name": "User"
+      }
+    ],
+    "templateName": "active.directory",
+    "templateVersion": "2.5"
+  },
+  "applicationOwner": [
+    {
+      "id": "ccf7821c-4d84-45ec-af1f-7db724024320",
+      "userName": "kasshah@deloitte.com",
+      "givenName": "Kashif",
+      "sn": "Shah",
+      "mail": "kasshah@deloitte.com"
+    }
+  ],
+  "descriptor": {
+    "idx": {
+      "/entitlement": {
+        "displayName": "DL-KYIDE-Admin-KYID-IDE"
+      }
+    }
+  },
+  "entitlement": {
+    "whenChanged": "2024-07-24T18:26:15Z",
+    "whenCreated": "2024-07-24T17:35:14Z",
+    "uSNChanged": "15147427",
+    "displayName": "DL-KYIDE-Admin-KYID-IDE",
+    "objectGUID": "793019d9-7234-4b4c-87a6-395f72193192",
+    "description": "KYID IDE Administrators",
+    "__NAME__": "CN=DL-KYIDE-Admin-KYID-IDE,OU=Users,OU=Servers,OU=Groups,DC=kyide,DC=dev,DC=ky,DC=gov",
+    "cn": "DL-KYIDE-Admin-KYID-IDE",
+    "uSNCreated": "15146164",
+    "_id": "793019d9-7234-4b4c-87a6-395f72193192"
+  },
+  "glossary": {
+    "idx": {
+      "/application": {
+        "requestable": true
+      }
+    }
+  },
+  "id": "system_kyinternalgov_Group_793019d9-7234-4b4c-87a6-395f72193192",
+  "item": {
+    "type": "entitlementGrant",
+    "objectType": "Group",
+    "accountAttribute": "ldapGroups"
+  },
+  "metadata": {
+    "modifiedDate": "2025-12-08T16:21:27.275Z",
+    "createdDate": "2025-05-19T21:55:24.702634976Z"
+  },
+  "permissions": {
+    "modifyEntitlement": true,
+    "viewGrants": true
+  }
+}

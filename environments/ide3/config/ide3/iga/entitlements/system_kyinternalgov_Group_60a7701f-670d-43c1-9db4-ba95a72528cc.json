@@ -1,0 +1,68 @@
+{
+  "application": {
+    "authoritative": false,
+    "connectorId": "kyinternalgov",
+    "icon": "",
+    "id": "d6a8ec6c-0f0d-4cbb-8a3f-79bcc19d48da",
+    "name": "ky-internal-gov",
+    "objectTypes": [
+      {
+        "name": "Group",
+        "accountAttribute": "ldapGroups"
+      },
+      {
+        "name": "User"
+      }
+    ],
+    "templateName": "active.directory",
+    "templateVersion": "2.5"
+  },
+  "applicationOwner": [
+    {
+      "id": "ccf7821c-4d84-45ec-af1f-7db724024320",
+      "userName": "kasshah@deloitte.com",
+      "givenName": "Kashif",
+      "sn": "Shah",
+      "mail": "kasshah@deloitte.com"
+    }
+  ],
+  "descriptor": {
+    "idx": {
+      "/entitlement": {
+        "displayName": "CHFS_EDR_534_AA_Dev"
+      }
+    }
+  },
+  "entitlement": {
+    "whenChanged": "2023-04-27T14:25:55Z",
+    "whenCreated": "2020-03-12T15:13:48Z",
+    "uSNChanged": "17030",
+    "objectGUID": "60a7701f-670d-43c1-9db4-ba95a72528cc",
+    "description": "Created by KEUPS",
+    "__NAME__": "CN=CHFS_EDR_534_AA_Dev,OU=KOG,OU=Groups,DC=kyide,DC=dev,DC=ky,DC=gov",
+    "cn": "CHFS_EDR_534_AA_Dev",
+    "uSNCreated": "17030",
+    "_id": "60a7701f-670d-43c1-9db4-ba95a72528cc"
+  },
+  "glossary": {
+    "idx": {
+      "/application": {
+        "requestable": true
+      }
+    }
+  },
+  "id": "system_kyinternalgov_Group_60a7701f-670d-43c1-9db4-ba95a72528cc",
+  "item": {
+    "type": "entitlementGrant",
+    "objectType": "Group",
+    "accountAttribute": "ldapGroups"
+  },
+  "metadata": {
+    "modifiedDate": "2025-12-08T16:21:26.293Z",
+    "createdDate": "2025-05-19T21:45:44.162192985Z"
+  },
+  "permissions": {
+    "modifyEntitlement": true,
+    "viewGrants": true
+  }
+}
