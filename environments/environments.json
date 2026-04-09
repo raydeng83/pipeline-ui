@@ -1,27 +1,42 @@
 [
   {
+    "name": "sandbox1",
+    "label": "Sandbox1",
+    "color": "gray",
+    "type": "sandbox"
+  },
+  {
     "name": "ide3",
     "label": "ide3",
-    "color": "green"
+    "color": "green",
+    "type": "sandbox"
   },
   {
     "name": "temp-dcc",
     "label": "temp-dcc",
-    "color": "blue"
+    "color": "blue",
+    "type": "controlled",
+    "devEnvironment": false
   },
   {
     "name": "ide",
     "label": "IDE",
-    "color": "yellow"
+    "color": "teal",
+    "type": "controlled",
+    "devEnvironment": true
   },
   {
     "name": "sit",
     "label": "SIT",
-    "color": "green"
+    "color": "pink",
+    "type": "controlled",
+    "devEnvironment": false
   },
   {
     "name": "uat",
     "label": "UAT",
-    "color": "blue"
+    "color": "purple",
+    "type": "controlled",
+    "devEnvironment": false
   }
 ]

@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  Environment,
-  ConfigScope,
-  ScopeSelection,
-  PROMOTE_SUBCOMMANDS,
-  PromoteSubcommand,
-} from "@/lib/fr-config-types";
+import { useState, useEffect } from "react";
+import { Environment, ScopeSelection, CONFIG_SCOPES } from "@/lib/fr-config-types";
 import type { PromotionTask, TaskStatus, TaskEndpoint } from "@/lib/promotion-tasks";
 import { PromotionItemPicker } from "./PromotionItemPicker";
-import { LogViewer } from "@/components/LogViewer";
+import { PromoteExecution } from "./PromoteExecution";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
-import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
 
@@ -92,22 +85,6 @@ function EndpointSelector({
   );
 }
 
-// ── Subcommand card styles ────────────────────────────────────────────────────
-
-const VARIANT_STYLES = {
-  default: "border-slate-200 bg-slate-50 hover:border-slate-400 text-slate-700",
-  info:    "border-blue-200 bg-blue-50 hover:border-blue-400 text-blue-800",
-  warning: "border-yellow-200 bg-yellow-50 hover:border-yellow-400 text-yellow-800",
-  danger:  "border-red-200 bg-red-50 hover:border-red-400 text-red-800",
-};
-
-const VARIANT_BUTTON_STYLES = {
-  default: "bg-slate-700 hover:bg-slate-800 text-white",
-  info:    "bg-blue-600 hover:bg-blue-700 text-white",
-  warning: "bg-yellow-500 hover:bg-yellow-600 text-white",
-  danger:  "bg-red-600 hover:bg-red-700 text-white",
-};
-
 // ── Task form state ───────────────────────────────────────────────────────────
 
 interface TaskFormState {
@@ -141,11 +118,38 @@ function taskToForm(task: PromotionTask): TaskFormState {
 
 // ── Task form ─────────────────────────────────────────────────────────────────
 
+// ── Fullscreen toggle icon ─────────────────────────────────────────────────────
+
+function FullscreenToggle({ fullscreen, onToggle }: { fullscreen: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      title={fullscreen ? "Exit full screen (Esc)" : "Full screen"}
+      className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+    >
+      {fullscreen ? (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M15 9h4.5M15 9V4.5M15 9l5.25-5.25M9 15H4.5M9 15v4.5M9 15l-5.25 5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9M20.25 20.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+// ── Task form ─────────────────────────────────────────────────────────────────
+
 function TaskForm({
   form,
   environments,
   saving,
   isEdit,
+  fullscreen,
+  onToggleFullscreen,
   onChange,
   onSave,
   onCancel,
@@ -154,17 +158,20 @@ function TaskForm({
   environments: Environment[];
   saving: boolean;
   isEdit: boolean;
+  fullscreen: boolean;
+  onToggleFullscreen: () => void;
   onChange: (patch: Partial<TaskFormState>) => void;
   onSave: () => void;
   onCancel: () => void;
 }) {
-  return (
-    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col">
-      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
+  const inner = (
+    <>
+      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
         <h2 className="text-sm font-semibold text-slate-800">{isEdit ? "Edit Task" : "New Task"}</h2>
+        <FullscreenToggle fullscreen={fullscreen} onToggle={onToggleFullscreen} />
       </div>
 
-      <div className="p-4 space-y-4 overflow-y-auto max-h-[calc(100vh-260px)]">
+      <div className={cn("p-4 space-y-4 overflow-y-auto", fullscreen ? "flex-1" : "max-h-[calc(100vh-260px)]")}>
         {/* Name */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-700">
@@ -215,12 +222,13 @@ function TaskForm({
         {/* Items to promote */}
         <PromotionItemPicker
           environment={form.source.environment}
+          environments={environments}
           value={form.items}
           onChange={(items) => onChange({ items })}
         />
       </div>
 
-      <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 flex justify-end gap-2">
+      <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 flex justify-end gap-2 shrink-0">
         <button
           type="button"
           onClick={onCancel}
@@ -237,6 +245,150 @@ function TaskForm({
           {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Task"}
         </button>
       </div>
+    </>
+  );
+
+  if (fullscreen) {
+    return <div className="fixed inset-0 z-50 flex flex-col bg-white">{inner}</div>;
+  }
+  return <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col">{inner}</div>;
+}
+
+// ── Scope summary ─────────────────────────────────────────────────────────────
+
+interface AuditItem { id: string; label: string; }
+interface ScopeAuditEntry { scope: string; items: AuditItem[]; }
+
+function scopeLabel(scope: string) {
+  return CONFIG_SCOPES.find((s) => s.value === scope)?.label ?? scope;
+}
+
+const SCOPE_CMD_COLOR: Record<string, string> = {
+  "fr-config": "bg-slate-100 text-slate-600 border-slate-200 hover:border-slate-400",
+  "frodo":     "bg-purple-50 text-purple-700 border-purple-200 hover:border-purple-400",
+  "iga-api":   "bg-teal-50 text-teal-700 border-teal-200 hover:border-teal-400",
+};
+const ITEM_CHIP: Record<string, string> = {
+  "fr-config": "bg-white border-slate-200 text-slate-600",
+  "frodo":     "bg-white border-purple-200 text-purple-700",
+  "iga-api":   "bg-white border-teal-200 text-teal-700",
+};
+
+function ScopesSummary({
+  items,
+  sourceEnvironment,
+}: {
+  items: ScopeSelection[];
+  sourceEnvironment: string;
+}) {
+  const [open, setOpen] = useState(true);
+  const [auditMap, setAuditMap] = useState<Record<string, ScopeAuditEntry>>({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!items.length) return;
+    const scopes = items.map((i) => i.scope).join(",");
+    setLoading(true);
+    const params = new URLSearchParams({ environment: sourceEnvironment, scopes });
+    fetch(`/api/push/audit?${params}`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: ScopeAuditEntry[]) => {
+        setAuditMap(Object.fromEntries(data.map((e) => [e.scope, e])));
+      })
+      .finally(() => setLoading(false));
+  }, [items, sourceEnvironment]);
+
+  if (!items.length) return null;
+
+  return (
+    <div className="space-y-2">
+      {/* Pills row + toggle */}
+      <div className="flex items-start gap-2">
+        <div className="flex flex-wrap gap-1.5 flex-1">
+          {items.map(({ scope, items: selected }) => {
+            const cmdType = CONFIG_SCOPES.find((s) => s.value === scope)?.commandType ?? "fr-config";
+            const isAll = selected === undefined || selected === null;
+            const count = isAll ? null : selected.length;
+            return (
+              <span
+                key={scope}
+                className={cn(
+                  "inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-medium",
+                  SCOPE_CMD_COLOR[cmdType]
+                )}
+              >
+                {scopeLabel(scope)}
+                <span className="text-[9px] px-1 rounded bg-white/80">
+                  {isAll ? "all" : `×${count}`}
+                </span>
+              </span>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          title={open ? "Collapse items" : "Expand items"}
+          className="shrink-0 p-0.5 text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          <svg
+            className={cn("w-3.5 h-3.5 transition-transform", open && "rotate-180")}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Unified expanded panel */}
+      {open && (
+        <div className="rounded-md border border-slate-200 bg-white divide-y divide-slate-100">
+          {loading ? (
+            <div className="px-3 py-2.5 flex flex-wrap gap-1">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-5 w-20 rounded bg-slate-100 animate-pulse" />
+              ))}
+            </div>
+          ) : items.map(({ scope, items: selected }) => {
+            const cmdType = CONFIG_SCOPES.find((s) => s.value === scope)?.commandType ?? "fr-config";
+            const audit = auditMap[scope];
+            const isAll = selected === undefined || selected === null;
+            const specificIds = selected ?? [];
+            const resolvedItems: AuditItem[] = isAll
+              ? (audit?.items ?? [])
+              : specificIds.map((id) => audit?.items.find((i) => i.id === id) ?? { id, label: id.replace(/\.json$/, "") });
+
+            return (
+              <div key={scope} className="px-3 py-2.5 space-y-1.5">
+                <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  {scopeLabel(scope)}
+                  <span className="normal-case font-normal tracking-normal text-slate-400">
+                    {isAll
+                      ? `— all${resolvedItems.length > 0 ? ` (${resolvedItems.length})` : ""}`
+                      : `— ${specificIds.length}${audit ? ` of ${audit.items.length}` : ""} selected`
+                    }
+                  </span>
+                </div>
+                {resolvedItems.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic">No items found in source config.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1">
+                    {resolvedItems.map((item) => (
+                      <span
+                        key={item.id}
+                        title={item.id !== item.label ? item.id : undefined}
+                        className={cn("px-1.5 py-0.5 rounded text-[10px] border", ITEM_CHIP[cmdType])}
+                      >
+                        {item.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -246,12 +398,16 @@ function TaskForm({
 function TaskDetail({
   task,
   environments,
+  fullscreen,
+  onToggleFullscreen,
   onEdit,
   onDelete,
   onStatusChange,
 }: {
   task: PromotionTask;
   environments: Environment[];
+  fullscreen: boolean;
+  onToggleFullscreen: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onStatusChange: (status: TaskStatus) => void;
@@ -259,196 +415,94 @@ function TaskDetail({
   const envMap = new Map(environments.map((e) => [e.name, e]));
   const sourceEnv = envMap.get(task.source.environment);
   const targetEnv = envMap.get(task.target.environment);
+  const { busy } = useBusyState();
 
-  const [activeSubcommand, setActiveSubcommand] = useState<PromoteSubcommand | null>(null);
-  const [confirmDanger, setConfirmDanger] = useState<PromoteSubcommand | null>(null);
-  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
-  const { setBusy } = useBusyState();
+  const header = (
+    <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 space-y-2.5 shrink-0">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-sm font-semibold text-slate-800">{task.name}</h2>
+            <StatusBadge status={task.status} />
+          </div>
+          {task.description && (
+            <p className="text-xs text-slate-500">{task.description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+          <select
+            value={task.status}
+            onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
+            disabled={busy}
+            className="rounded border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
+          >
+            {(Object.keys(STATUS_CONFIG) as TaskStatus[]).map((s) => (
+              <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
+            ))}
+          </select>
+          <button
+            onClick={onEdit}
+            disabled={busy}
+            className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-50 transition-colors"
+          >
+            Edit
+          </button>
+          <button
+            onClick={onDelete}
+            disabled={busy}
+            className="px-2.5 py-1 text-xs border border-red-200 text-red-600 rounded hover:bg-red-50 disabled:opacity-50 transition-colors"
+          >
+            Delete
+          </button>
+          <FullscreenToggle fullscreen={fullscreen} onToggle={onToggleFullscreen} />
+        </div>
+      </div>
 
-  // Keep onStatusChange stable inside effects via a ref
-  const onStatusChangeRef = useRef(onStatusChange);
-  useEffect(() => { onStatusChangeRef.current = onStatusChange; });
+      {/* Source → Target */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          {sourceEnv
+            ? <EnvironmentBadge env={sourceEnv} />
+            : <span className="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200">{task.source.environment}</span>
+          }
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{task.source.mode}</span>
+        </div>
+        <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+        <div className="flex items-center gap-1.5">
+          {targetEnv
+            ? <EnvironmentBadge env={targetEnv} />
+            : <span className="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200">{task.target.environment}</span>
+          }
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">{task.target.mode}</span>
+        </div>
+      </div>
 
-  useEffect(() => { setBusy(running); }, [running, setBusy]);
+      {/* Scopes */}
+      <ScopesSummary items={task.items} sourceEnvironment={task.source.environment} />
+    </div>
+  );
 
-  // Auto-update status on run-promotion completion
-  useEffect(() => {
-    if (activeSubcommand === "run-promotion" && exitCode !== null && !running) {
-      onStatusChangeRef.current(exitCode === 0 ? "completed" : "failed");
-    }
-  }, [exitCode, running, activeSubcommand]);
+  const body = (
+    <div className={cn(fullscreen && "flex-1 overflow-y-auto")}>
+      <PromoteExecution task={task} environments={environments} onTaskStatusChange={onStatusChange} />
+    </div>
+  );
 
-  const handleRun = (subcommand: PromoteSubcommand) => {
-    const def = PROMOTE_SUBCOMMANDS.find((s) => s.value === subcommand)!;
-    if (def.variant === "danger" && confirmDanger !== subcommand) {
-      setConfirmDanger(subcommand);
-      return;
-    }
-    setConfirmDanger(null);
-    setActiveSubcommand(subcommand);
-    if (task.status === "new") onStatusChange("in-progress");
-    run("/api/promote", { environment: task.target.environment, subcommand });
-  };
+  if (fullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-white">
+        {header}
+        {body}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 space-y-2.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-sm font-semibold text-slate-800">{task.name}</h2>
-              <StatusBadge status={task.status} />
-            </div>
-            {task.description && (
-              <p className="text-xs text-slate-500">{task.description}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
-            <select
-              value={task.status}
-              onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-              disabled={running}
-              className="rounded border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
-            >
-              {(Object.keys(STATUS_CONFIG) as TaskStatus[]).map((s) => (
-                <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
-              ))}
-            </select>
-            <button
-              onClick={onEdit}
-              disabled={running}
-              className="px-2.5 py-1 text-xs border border-slate-300 rounded hover:bg-slate-100 disabled:opacity-50 transition-colors"
-            >
-              Edit
-            </button>
-            <button
-              onClick={onDelete}
-              disabled={running}
-              className="px-2.5 py-1 text-xs border border-red-200 text-red-600 rounded hover:bg-red-50 disabled:opacity-50 transition-colors"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-
-        {/* Source → Target */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5">
-            {sourceEnv
-              ? <EnvironmentBadge env={sourceEnv} />
-              : <span className="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200">{task.source.environment}</span>
-            }
-            <span className="text-[10px] text-slate-400 font-semibold uppercase">{task.source.mode}</span>
-          </div>
-          <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-          <div className="flex items-center gap-1.5">
-            {targetEnv
-              ? <EnvironmentBadge env={targetEnv} />
-              : <span className="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200">{task.target.environment}</span>
-            }
-            <span className="text-[10px] text-slate-400 font-semibold uppercase">{task.target.mode}</span>
-          </div>
-        </div>
-
-        {/* Scopes */}
-        {task.items.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {task.items.map(({ scope }) => (
-              <span key={scope} className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-600 font-mono border border-slate-200">
-                {scope}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Execution */}
-      <div className="p-4 space-y-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-xs text-slate-500">
-            Running against:{" "}
-            <span className="font-medium text-slate-700">{targetEnv?.label ?? task.target.environment}</span>
-            <span className="text-slate-400 ml-1">({task.target.mode})</span>
-          </p>
-          {running && (
-            <button
-              onClick={abort}
-              className="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded hover:bg-red-200 transition-colors"
-            >
-              Abort
-            </button>
-          )}
-        </div>
-        {task.items.length === 0 && (
-          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-            No scope items selected — edit the task to choose what to promote before running.
-          </p>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {PROMOTE_SUBCOMMANDS.map((cmd) => {
-            const isActive = activeSubcommand === cmd.value && (running || exitCode !== null);
-            const isPendingConfirm = confirmDanger === cmd.value;
-            return (
-              <div
-                key={cmd.value}
-                className={cn(
-                  "rounded-lg border-2 p-3 transition-colors",
-                  VARIANT_STYLES[cmd.variant],
-                  isActive && "ring-2 ring-offset-1 ring-slate-400"
-                )}
-              >
-                <div className="space-y-2">
-                  <div>
-                    <p className="font-medium text-xs">{cmd.label}</p>
-                    <p className="text-[11px] opacity-70 mt-0.5 leading-snug">{cmd.description}</p>
-                  </div>
-                  {isPendingConfirm ? (
-                    <div className="space-y-1">
-                      <p className="text-xs text-red-700 font-medium">Are you sure?</p>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleRun(cmd.value)}
-                          disabled={running}
-                          className="flex-1 px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-                        >
-                          Yes
-                        </button>
-                        <button
-                          onClick={() => setConfirmDanger(null)}
-                          className="flex-1 px-2 py-1 text-xs rounded border border-slate-300 hover:bg-white"
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleRun(cmd.value)}
-                      disabled={running || task.items.length === 0}
-                      className={cn(
-                        "w-full px-2 py-1 text-xs font-medium rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed",
-                        VARIANT_BUTTON_STYLES[cmd.variant]
-                      )}
-                    >
-                      {running && activeSubcommand === cmd.value ? "Running…" : "Run"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {(running || logs.length > 0) && (
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
-          </div>
-        )}
-      </div>
+      {header}
+      {body}
     </div>
   );
 }
@@ -469,7 +523,15 @@ export function PromoteWorkflow({
   const [panelMode, setPanelMode] = useState<PanelMode>(initialTasks.length > 0 ? "view" : "select");
   const [form, setForm] = useState<TaskFormState>(emptyForm(environments));
   const [saving, setSaving] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const { busy } = useBusyState();
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [fullscreen]);
 
   const selectedTask = tasks.find((t) => t.id === selectedId) ?? null;
 
@@ -477,6 +539,7 @@ export function PromoteWorkflow({
     setForm(emptyForm(environments));
     setPanelMode("new");
     setSelectedId(null);
+    setFullscreen(false);
   };
 
   const openEdit = () => {
@@ -626,6 +689,8 @@ export function PromoteWorkflow({
             environments={environments}
             saving={saving}
             isEdit={panelMode === "edit"}
+            fullscreen={fullscreen}
+            onToggleFullscreen={() => setFullscreen((f) => !f)}
             onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
             onSave={handleSave}
             onCancel={cancelForm}
@@ -637,6 +702,8 @@ export function PromoteWorkflow({
             key={selectedTask.id}
             task={selectedTask}
             environments={environments}
+            fullscreen={fullscreen}
+            onToggleFullscreen={() => setFullscreen((f) => !f)}
             onEdit={openEdit}
             onDelete={handleDelete}
             onStatusChange={(status) => handleStatusChange(selectedTask.id, status)}
