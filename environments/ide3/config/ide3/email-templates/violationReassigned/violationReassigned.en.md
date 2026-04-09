@@ -1,1 +1,0 @@
-<html><head></head><body>The violation for {{object.user.givenName}} {{object.user.sn}} was reassigned to you to make a decision on the user's violating access, please review at your earliest convenience.</body></html>

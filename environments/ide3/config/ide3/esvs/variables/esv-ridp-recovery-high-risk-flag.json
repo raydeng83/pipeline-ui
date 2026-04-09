@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ridp-recovery-high-risk-flag",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_RIDP_RECOVERY_HIGH_RISK_FLAG}"
-}

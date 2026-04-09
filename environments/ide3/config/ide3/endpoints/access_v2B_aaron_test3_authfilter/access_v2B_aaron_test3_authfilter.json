@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/access_v2B_aaron_test3_authfilter",
-  "description": "access_v2B with role-based data authorization filter (uses dataAuthorizationCheck_aaron_test1)",
-  "file": "access_v2B_aaron_test3_authfilter.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

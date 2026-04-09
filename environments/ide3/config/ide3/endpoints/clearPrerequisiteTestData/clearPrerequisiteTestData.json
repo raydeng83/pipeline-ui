@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/clearPrerequisiteTestData",
-  "description": "This endpoint is used for clearing the test data and this should not go to higher environment",
-  "file": "clearPrerequisiteTestData.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

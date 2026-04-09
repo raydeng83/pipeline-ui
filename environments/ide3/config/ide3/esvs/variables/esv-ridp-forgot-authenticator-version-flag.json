@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ridp-forgot-authenticator-version-flag",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_RIDP_FORGOT_AUTHENTICATOR_VERSION_FLAG}"
-}

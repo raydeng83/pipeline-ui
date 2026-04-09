@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-int-connector-attr",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_INT_CONNECTOR_ATTR}"
-}

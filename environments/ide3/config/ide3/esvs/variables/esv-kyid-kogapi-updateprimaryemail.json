@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-kogapi-updateprimaryemail",
-  "description": "Primary email update url SIH",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_KOGAPI_UPDATEPRIMARYEMAIL}"
-}

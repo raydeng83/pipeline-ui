@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/aaron_recon_trigger",
-  "description": "Trigger recon for CSV inbound mapping",
-  "file": "aaron_recon_trigger.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-validate-endpoint-access-enabled",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_VALIDATE_ENDPOINT_ACCESS_ENABLED}"
-}

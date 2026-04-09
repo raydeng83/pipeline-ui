@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/prerequisit_test",
-  "description": "",
-  "file": "prerequisit_test.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

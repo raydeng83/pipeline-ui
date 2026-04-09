@@ -1,6 +1,0 @@
-{
-  "_id": "endpoint/aaron_poc_test1",
-  "description": "POC test endpoint for role-based authorization filters",
-  "file": "aaron_poc_test1.js",
-  "type": "text/javascript"
-}

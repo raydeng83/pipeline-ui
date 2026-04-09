@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/LIB-PrerequisiteAPI",
-  "description": "This library endpoint returns result of CRUD operations performed on enrollment prerequisite IDM managed object",
-  "file": "LIB-PrerequisiteAPI.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

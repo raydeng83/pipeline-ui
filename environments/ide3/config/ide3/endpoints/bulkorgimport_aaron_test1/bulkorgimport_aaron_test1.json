@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/bulkorgimport_aaron_test1",
-  "description": "",
-  "file": "bulkorgimport_aaron_test1.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

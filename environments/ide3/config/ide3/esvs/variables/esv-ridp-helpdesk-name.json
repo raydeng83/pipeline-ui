@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ridp-helpdesk-name",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_RIDP_HELPDESK_NAME}"
-}

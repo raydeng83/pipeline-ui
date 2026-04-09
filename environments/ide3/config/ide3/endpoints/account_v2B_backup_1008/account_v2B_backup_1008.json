@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/account_v2B_backup_1008",
-  "description": "",
-  "file": "account_v2B_backup_1008.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

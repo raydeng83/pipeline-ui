@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-firsttimelogin-url",
-  "description": "First Time Login URL for Password Reset",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_FIRSTTIMELOGIN_URL}"
-}

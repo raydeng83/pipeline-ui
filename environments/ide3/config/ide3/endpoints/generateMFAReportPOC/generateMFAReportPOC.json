@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/generateMFAReportPOC",
-  "description": "",
-  "file": "generateMFAReportPOC.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

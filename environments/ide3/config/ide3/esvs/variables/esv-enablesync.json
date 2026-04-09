@@ -1,6 +1,0 @@
-{
-  "_id": "esv-enablesync",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_ENABLESYNC}"
-}

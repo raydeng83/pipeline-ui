@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/account_v2B_le_test",
-  "description": "",
-  "file": "account_v2B_le_test.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

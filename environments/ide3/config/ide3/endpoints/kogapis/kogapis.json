@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/kogapis",
-  "description": "To invoke KOG API endpoints",
-  "file": "kogapis.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

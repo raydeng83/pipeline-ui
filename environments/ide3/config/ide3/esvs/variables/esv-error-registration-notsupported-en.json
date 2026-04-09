@@ -1,6 +1,0 @@
-{
-  "_id": "esv-error-registration-notsupported-en",
-  "description": "Error Message Registration Not Supported in English",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ERROR_REGISTRATION_NOTSUPPORTED_EN}"
-}

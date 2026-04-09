@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-kerberos-enabled",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_KYID_KERBEROS_ENABLED}"
-}

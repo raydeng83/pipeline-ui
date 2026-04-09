@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-tenant-hostname",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_TENANT_HOSTNAME}"
-}

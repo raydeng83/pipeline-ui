@@ -1,6 +1,0 @@
-{
-  "_id": "esv-data-authorization-filter-enabled",
-  "description": "Enable/disable role-based data authorization filter on endpoints",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_DATA_AUTHORIZATION_FILTER_ENABLED}"
-}

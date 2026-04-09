@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/aaron_optb_test",
-  "description": "Option B test - reads auth filter from router filter, queries managed/alpha_user",
-  "file": "aaron_optb_test.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

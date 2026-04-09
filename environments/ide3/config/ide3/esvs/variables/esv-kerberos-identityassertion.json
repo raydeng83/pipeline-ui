@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kerberos-identityassertion",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KERBEROS_IDENTITYASSERTION}"
-}

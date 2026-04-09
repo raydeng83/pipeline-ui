@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/access_backup_11_25_25",
-  "description": "",
-  "file": "access_backup_11_25_25.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

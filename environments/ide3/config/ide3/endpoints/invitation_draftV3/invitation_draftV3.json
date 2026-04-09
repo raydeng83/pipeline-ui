@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/invitation_draftV3",
-  "description": "",
-  "file": "invitation_draftV3.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

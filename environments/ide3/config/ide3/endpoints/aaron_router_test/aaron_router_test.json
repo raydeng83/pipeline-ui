@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/aaron_router_test",
-  "description": "Simple test endpoint for router filter verification",
-  "file": "aaron_router_test.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

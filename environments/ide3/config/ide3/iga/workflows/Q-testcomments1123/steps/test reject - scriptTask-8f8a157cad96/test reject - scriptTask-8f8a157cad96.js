@@ -1,1 +1,0 @@
-logger.error("Testing node 2 after node check expiration condition");

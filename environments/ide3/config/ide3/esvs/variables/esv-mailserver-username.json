@@ -1,6 +1,0 @@
-{
-  "_id": "esv-mailserver-username",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_MAILSERVER_USERNAME}"
-}
