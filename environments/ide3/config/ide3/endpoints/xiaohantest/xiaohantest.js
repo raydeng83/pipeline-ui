@@ -17,5 +17,5 @@
   }());
 
 /*
-^(?!(.*internal rol with org.*\r?\n|.*\r?\n(?=.*internal rol with org))).*\r?\n?
+
 */
