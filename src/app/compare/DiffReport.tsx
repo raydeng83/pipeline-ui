@@ -1852,6 +1852,15 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
   const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
+  // Only show tasks whose source env matches the comparison target and vice versa.
+  // (Compare source = what changed; compare target = where it will be promoted FROM;
+  //  so task.source = compare.target, task.target = compare.source)
+  const eligibleTasks = tasks.filter(
+    (t) =>
+      t.source.environment === report.target.environment &&
+      t.target.environment === report.source.environment,
+  );
+
   const sameEnv = report.source.environment === report.target.environment;
   const sourceLabel = sameEnv
     ? `${report.source.environment} (${report.source.mode})`
@@ -2067,7 +2076,7 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setTaskDropdownOpen((o) => !o); }}
-                  disabled={addingToTask || tasks.length === 0}
+                  disabled={addingToTask || eligibleTasks.length === 0}
                   className="flex items-center gap-1 px-3 py-1 bg-sky-600 text-white rounded-full text-xs font-medium hover:bg-sky-700 disabled:opacity-50 transition-colors"
                 >
                   {addingToTask ? "Adding…" : "Add to Task"}
@@ -2080,9 +2089,9 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
                     onClick={(e) => e.stopPropagation()}
                     className="absolute bottom-full mb-1.5 left-0 bg-white border border-slate-200 rounded-lg shadow-xl min-w-[200px] py-1 z-50"
                   >
-                    {tasks.length === 0 ? (
-                      <p className="px-3 py-2 text-xs text-slate-400 italic">No tasks available</p>
-                    ) : tasks.map((t) => (
+                    {eligibleTasks.length === 0 ? (
+                      <p className="px-3 py-2 text-xs text-slate-400 italic">No matching tasks</p>
+                    ) : eligibleTasks.map((t) => (
                       <button
                         key={t.id}
                         type="button"
