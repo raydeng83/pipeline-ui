@@ -117,25 +117,39 @@ function loadSession() {
 export function CompareForm({ environments, tasks = [] }: { environments: Environment[]; tasks?: PromotionTask[] }) {
   const defaultEnv = environments[0]?.name ?? "";
 
-  // Restore form inputs + last report from sessionStorage on mount
-  const saved = loadSession();
-  const [source, setSource] = useState<Endpoint>(saved?.source ?? { environment: defaultEnv, mode: "local" });
-  const [target, setTarget] = useState<Endpoint>(saved?.target ?? { environment: defaultEnv, mode: "remote" });
-  const [scopes, setScopes] = useState<ConfigScope[]>(saved?.scopes ?? []);
-  const [includeMetadata, setIncludeMetadata] = useState<boolean>(saved?.includeMetadata ?? false);
-  const [savedReport, setSavedReport] = useState<import("@/lib/diff-types").CompareReport | null>(saved?.report ?? null);
+  const [source, setSource] = useState<Endpoint>({ environment: defaultEnv, mode: "local" });
+  const [target, setTarget] = useState<Endpoint>({ environment: defaultEnv, mode: "remote" });
+  const [scopes, setScopes] = useState<ConfigScope[]>([]);
+  const [includeMetadata, setIncludeMetadata] = useState<boolean>(false);
+  const [savedReport, setSavedReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
+  const [sessionLoaded, setSessionLoaded] = useState(false);
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
   const { setBusy } = useBusyState();
 
-  // Persist state to sessionStorage whenever inputs or the report change
+  // Restore from sessionStorage on mount (client-only — avoids SSR/hydration mismatch)
   useEffect(() => {
+    const saved = loadSession();
+    if (saved) {
+      if (saved.source) setSource(saved.source);
+      if (saved.target) setTarget(saved.target);
+      if (saved.scopes) setScopes(saved.scopes);
+      if (saved.includeMetadata !== undefined) setIncludeMetadata(saved.includeMetadata);
+      if (saved.report) setSavedReport(saved.report);
+    }
+    setSessionLoaded(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist state to sessionStorage after session has been restored
+  useEffect(() => {
+    if (!sessionLoaded) return;
     try {
       sessionStorage.setItem(SESSION_KEY, JSON.stringify({ source, target, scopes, includeMetadata, report: report ?? savedReport }));
     } catch { /* ignore quota errors */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, target, scopes, includeMetadata, report]);
+  }, [source, target, scopes, includeMetadata, report, sessionLoaded]);
 
   // Track the latest finished report (live report from hook takes priority)
   const displayReport = report ?? savedReport;
