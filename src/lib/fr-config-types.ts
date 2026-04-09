@@ -26,7 +26,6 @@ export type ConfigScope =
   | "oauth2-agents"
   | "org-privileges"
   | "password-policy"
-  | "raw"
   | "remote-servers"
   | "saml"
   | "schedules"
@@ -202,8 +201,6 @@ export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   { value: "iga-workflows",     label: "IGA Workflows",             group: "IGA", description: "Identity Governance and Administration workflow definitions" },
   { value: "iga-forms",         label: "IGA Forms",                 group: "IGA", description: "IGA request and approval form definitions used in access request workflows", commandType: "iga-api" },
   { value: "iga-notifications", label: "IGA Notifications",         group: "IGA", description: "IGA notification type definitions (certification, access request, etc.)", commandType: "iga-api" },
-  { value: "iga-applications",  label: "IGA Applications",          group: "IGA", description: "IGA application catalog entries — application definitions and connector bindings", commandType: "iga-api" },
-  { value: "iga-entitlements",  label: "IGA Entitlements",          group: "IGA", description: "Entitlement definitions for access certification and requests", commandType: "iga-api" },
   { value: "iga-assignments",   label: "IGA Assignments",           group: "IGA", description: "Form-to-object assignment configurations linking request forms to workflows, managed objects, and roles", commandType: "iga-api" },
   // Infrastructure
   { value: "schedules",        label: "Schedules",        group: "Infrastructure", description: "Scheduled tasks and cron-style recurring jobs" },
@@ -213,5 +210,4 @@ export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   { value: "audit",            label: "Audit",            group: "Infrastructure", description: "Audit logging configuration and event handler settings" },
   { value: "telemetry",        label: "Telemetry",        group: "Infrastructure", description: "Usage telemetry and monitoring configuration" },
   { value: "config-metadata",  label: "Config Metadata",  group: "Infrastructure", description: "Pipeline metadata stored alongside pushed configuration (custom-config.metadata)" },
-  { value: "raw",              label: "Raw Config",       group: "Infrastructure", description: "Direct AM config tree endpoints — requires RAW_CONFIG_FILE to be set" },
 ];
