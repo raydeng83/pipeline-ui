@@ -663,7 +663,17 @@ export function PromoteExecution({
           {nextPhase && (
             <button
               type="button"
-              onClick={() => setActivePhase(nextPhase.id)}
+              onClick={() => {
+                if (
+                  nextPhase.id === "dry-run" &&
+                  task.target.mode === "local"
+                ) {
+                  if (!window.confirm(
+                    `The task target "${task.target.environment}" is set to Local mode.\n\nDry run compares the source against the target environment. A local target means no live remote data will be fetched.\n\nContinue anyway?`
+                  )) return;
+                }
+                setActivePhase(nextPhase.id);
+              }}
               className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-800 transition-colors shrink-0"
             >
               Next: {nextPhase.label}
