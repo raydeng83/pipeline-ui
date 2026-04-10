@@ -32,6 +32,10 @@ function getException(e) {
     else if(exceptionMessage.includes("Password expired")){
       code = -4
     }
+    else if(exceptionMessage.includes("Account disabled")){
+      code = -5
+      //logger.error("Exception = "+e+" code = "+code)
+    }
     logger.error('endpointScriptForAuthentication: exception: ' + e);
     return { code: code };
   }
