@@ -121,7 +121,7 @@ function handleUserResponses() {
         if(!(nodeState.get("ishelpdesk") == "true")){
             if (selectedConfirmationOutcome === 0) {
                  if(!(nodeState.get("verificationAttempt") >= 2)){
-                    if(selectedOutcome === 0){
+                    if(selectedOutcome == 1){
                         logger.debug("true")
                         //auditLog("RIDP005", "KYID-RD-001: Unable to Verify - User chose to Review and Retry");
                         nodeState.putShared("userSelection","retry")

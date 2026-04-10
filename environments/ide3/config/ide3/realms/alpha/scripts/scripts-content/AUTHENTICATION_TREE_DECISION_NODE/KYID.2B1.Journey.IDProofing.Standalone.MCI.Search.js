@@ -210,7 +210,7 @@ function handleUserResponses() {
                             nodeState.putShared("terminatedArray", JSON.stringify(terminatedArray))
                             action.goTo("inputLink2TerminatedAccount")
                         }
-                    else if(matchedWithLoggedUser.length == 1){
+                    else if(matchedWithLoggedUser.length >= 1){
                             reason = "The user personal information provided to LexisNexis is verified";
                             title = "User identity verification is successful."
                             //auditLog("KYID-LN-007", `${flowName} - Identity Proofing is successful`, true, transactionid, flowName, mail, userInfo, lexisnexisResponse, reason, title);
@@ -237,7 +237,8 @@ function handleUserResponses() {
                             nodeState.putShared("pingMailId",JSON.stringify(pingMailId))
                             nodeState.putShared("jitMailID",JSON.stringify(jitMailID));     
                             nodeState.putShared("ListOfPrimaryEmails",associatedAccounts);
-                            nodeState.putShared("associatedAccountKOGID",JSON.stringify(associatedAccountKOGID));
+                            nodeState.putShared("associatedAccountKOGID",JSON.stringify(associatedAccountKOGID))
+                            nodeState.putShared("errorMessage","KYID-LN-001");
                             action.goTo("jitProvisioning");
                         }else if(jitArray.length == 0 && matchedWithLoggedUser.length == 0 && inputNoMatch.length == 0 && terminatedArray.length == 0){
                             //auditLog("RIDP004", "KYID-LN-007 - No account found in KOG search");

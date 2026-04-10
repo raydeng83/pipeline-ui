@@ -150,7 +150,7 @@ function auditLog(code, message){
                 var sessionDetails = {}
                 var sessionDetail = null
                 if(nodeState.get("sessionRefId")){
-                    if(code=="LOG002"){
+                    if(code=="LOG002" || code=="LOG005"){
                        sessionDetail = JSON.parse(nodeState.get("sessionRefId"))
                        sessionDetail.city = xClientCity
                        sessionDetail.country = xClientRegion

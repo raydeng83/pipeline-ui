@@ -102,7 +102,7 @@ function preSingleSignOn() {
  */
 function preAuthentication() {
    
-   logger.error(adapterLoggerPrefix+"::"+"ENTERING PREAuthentication FUNCTION"+"::"+reqId);
+   logger.debug(adapterLoggerPrefix+"::"+"ENTERING PREAuthentication FUNCTION"+"::"+reqId);
     /* This method assumes that the authentication is only SP Initiated and not IDP initiated*/
     var displayUrl = null;
     var wtrealmUrl = null;
@@ -115,39 +115,39 @@ function preAuthentication() {
     
     
     if(authnRequest) {
-        logger.error(adapterLoggerPrefix+"::"+"AUTHN REQUEST PRESENT IN PREAuthentication");
+        logger.debug(adapterLoggerPrefix+"::"+"AUTHN REQUEST PRESENT IN PREAuthentication");
         // issuer = authnRequest.getIssuer().getValue().toString();
         issuer = authnRequest.getIssuer().getValue();
-        logger.error("Issuer Value without String" + authnRequest.getIssuer().getValue())
-        logger.error("Type Of" + typeof(authnRequest.getIssuer().getValue()))
-        logger.error(adapterLoggerPrefix+"::"+"ISSUER PRESENT IN PREAuthentication"+"::"+issuer);
+        logger.debug("Issuer Value without String" + authnRequest.getIssuer().getValue())
+        logger.debug("Type Of" + typeof(authnRequest.getIssuer().getValue()))
+        logger.debug(adapterLoggerPrefix+"::"+"ISSUER PRESENT IN PREAuthentication"+"::"+issuer);
 
         var getIssuerTime = new Date().toISOString();       
         var tenantCookieDomain=systemEnv.getProperty("esv.kyid.cookie.domain");
         //var tenantCookieDomain=".sso.dev2.kyid.ky.gov
         //var tenantCookieDomain=".dev2.kyid.ky.gov"
         response.addHeader("Set-Cookie", "getIssuerTime=" + getIssuerTime + "; Path=/; HttpOnly; sameSite=Lax; domain="+tenantCookieDomain);
-        logger.error("get issuer time Mani :::"+getIssuerTime);
+        logger.debug("get issuer time Mani :::"+getIssuerTime);
     }
     
     if(issuer.localeCompare(systemEnv.getProperty("esv.logout.app.url")) == 0 && !session) {
         finalUrl = systemEnv.getProperty("esv.logout.app.url")+"loggedout/";
-        logger.error(adapterLoggerPrefix+"::"+"finalUrl PRESENT IN PREAuthentication"+"::"+finalUrl);
+        logger.debug(adapterLoggerPrefix+"::"+"finalUrl PRESENT IN PREAuthentication"+"::"+finalUrl);
         response.sendRedirect(finalUrl);
         return true;
     
     } else if(issuer.localeCompare(systemEnv.getProperty("esv.logout.app.url")) == 0) {
         displayUrl = issuer;
-       logger.error(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
+       logger.debug(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
     
     } else if(issuer.startsWith("kyidsp") && authnRequest.getExtensions()) {	
         //wsfed application coming from on-prem app
         var authnRequestExtensionList=authnRequest.getExtensions().getAny();
         var rawDisplayUrl=authnRequestExtensionList.get(0).split("saml2:AttributeValue")[1];
         displayUrl=rawDisplayUrl.substring(1,rawDisplayUrl.length()-2);
-        logger.error(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication one"+"::"+displayUrl);
+        logger.debug(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication one"+"::"+displayUrl);
         response.addHeader("Set-Cookie", "ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
-        logger.error("URL Constructed ::"+decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
+        logger.debug("URL Constructed ::"+decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
         
         if(authnRequestExtensionList.size()>1) {
             var rawWtRealmUrl=authnRequestExtensionList.get(1).split("saml2:AttributeValue")[1];
@@ -155,7 +155,7 @@ function preAuthentication() {
         } else {
             wtrealmUrl=displayUrl;
         }
-        logger.error(adapterLoggerPrefix+"::"+"wtrealmUrl PRESENT IN PREAuthentication"+"::"+wtrealmUrl);
+        logger.debug(adapterLoggerPrefix+"::"+"wtrealmUrl PRESENT IN PREAuthentication"+"::"+wtrealmUrl);
        // response.addHeader("Set-Cookie", "rp-realm=" + decodeURIComponent(wtrealmUrl) + "; Path=/; HttpOnly");
         response.addHeader("Set-Cookie", "rp-realm=" + decodeURIComponent(wtrealmUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly" );
         response.addHeader("Set-Cookie", reqId+"-"+"ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
@@ -164,7 +164,7 @@ function preAuthentication() {
       
     } else if(issuer.startsWith("kyidsp")) {
         displayUrl=systemEnv.getProperty("esv.default.app.url");
-		logger.error(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
+		logger.debug(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
         response.addHeader("Set-Cookie", "ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
         response.addHeader("Set-Cookie", "rp-realm=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
         response.addHeader("Set-Cookie", reqId+"-"+"ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
@@ -173,7 +173,7 @@ function preAuthentication() {
     } else if(relayState !== null && relayState.startsWith("https")) {
         //SAML Application with a full proper relayState URL
         displayUrl = relayState;
-        logger.error(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
+        logger.debug(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
         response.addHeader("Set-Cookie", "ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
        // response.addHeader("Set-Cookie", "rp-realm=" + "; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
         response.addHeader("Set-Cookie", "rp-realm=" + "; Domain="+returnUrlCookieDomain+ "; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
@@ -188,7 +188,7 @@ function preAuthentication() {
         	//displayUrl = authnRequest.getIssuer().getValue() + relayState;                  /**** Tableau Issue Fix 24/01 :: 183821, 183826, 183801 ****/
             displayUrl = authnRequest.getIssuer().getValue();								/**** Tableau Issue Fix 24/01 :: 183821, 183826, 183801 ****/
         }                                                                                  
-        logger.error(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
+        logger.debug(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
         response.addHeader("Set-Cookie", "ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
         response.addHeader("Set-Cookie", "rp-realm=" + "; Domain="+returnUrlCookieDomain+"; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
         response.addHeader("Set-Cookie", reqId+"-"+"ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
@@ -196,7 +196,7 @@ function preAuthentication() {
 
         } else {
         displayUrl = authnRequest.getIssuer().getValue();
-        logger.error(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
+        logger.debug(adapterLoggerPrefix+"::"+"displayUrl PRESENT IN PREAuthentication"+"::"+displayUrl);
         response.addHeader("Set-Cookie", "ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
         response.addHeader("Set-Cookie", "rp-realm=" + "; Domain="+returnUrlCookieDomain+"; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
         response.addHeader("Set-Cookie", reqId+"-"+"ReturnURL=" + decodeURIComponent(displayUrl) + "; Domain="+returnUrlCookieDomain+"; Path=/; HttpOnly");
@@ -211,7 +211,7 @@ function preAuthentication() {
     // response.addHeader("Set-Cookie", "clocale=" + lang + "; Path=/; HttpOnly; sameSite=Lax; domain="+tenantCookieDomain);
     //logger.error(adapterLoggerPrefix+"::"+"Language value in a locale cookie IN PREAuthentication"+"::"+lang);
 	
-  	logger.error(adapterLoggerPrefix+"::"+"EXITING PREAuthentication");	
+  	logger.debug(adapterLoggerPrefix+"::"+"EXITING PREAuthentication");	
     return false;
 }
 
@@ -232,26 +232,26 @@ function preAuthentication() {
  */
 function preSendResponse() {
 /* This method assumes that the authentication is only SP Initiated and not IDP initiated*/
-    logger.error(adapterLoggerPrefix+"::"+"ENTERING PRESEND RESPONSE FUNCTION"+"::"+reqId);
+    logger.debug(adapterLoggerPrefix+"::"+"ENTERING PRESEND RESPONSE FUNCTION"+"::"+reqId);
     var issuer = null;
     var finalUrl = null;
     var returnUrlCookieDomain=systemEnv.getProperty("esv.kyid.cookie.domain");
   
     if(authnRequest) {
-        logger.error(adapterLoggerPrefix+"::"+"AUTHN REQUEST PRESENT IN PRESEND RESPONSE");
+        logger.debug(adapterLoggerPrefix+"::"+"AUTHN REQUEST PRESENT IN PRESEND RESPONSE");
         // issuer = authnRequest.getIssuer().getValue().toString();
         issuer = authnRequest.getIssuer().getValue();
-        logger.error("Issure Value without String" + authnRequest.getIssuer().getValue())
-        logger.error("Type Of" + typeof(authnRequest.getIssuer().getValue()))
-        logger.error(adapterLoggerPrefix+"::"+"ISSUER IN PRESEND RESPONSE FUNCTION"+"::"+issuer);
+        logger.debug("Issure Value without String" + authnRequest.getIssuer().getValue())
+        logger.debug("Type Of" + typeof(authnRequest.getIssuer().getValue()))
+        logger.debug(adapterLoggerPrefix+"::"+"ISSUER IN PRESEND RESPONSE FUNCTION"+"::"+issuer);
       
       	if(issuer.localeCompare(systemEnv.getProperty("esv.logout.app.url")) == 0) {
-          logger.error(adapterLoggerPrefix+"::"+"issuerURL PRESENT IN preSendResponse"+"::"+issuer);
+          logger.debug(adapterLoggerPrefix+"::"+"issuerURL PRESENT IN preSendResponse"+"::"+issuer);
           response.addHeader("Set-Cookie", "ReturnURL=" + "; Domain="+returnUrlCookieDomain+"; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
           response.addHeader("Set-Cookie", "rp-realm=" + "; Domain="+returnUrlCookieDomain+"; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
     	}
     } else {
-        logger.error(adapterLoggerPrefix+"::"+"NO AUTHN REQUEST IN PRESEND RESPONSE");
+        logger.debug(adapterLoggerPrefix+"::"+"NO AUTHN REQUEST IN PRESEND RESPONSE");
         //response.sendRedirect(systemEnv.getProperty("esv.default.app.url"));
         return false;
     }
@@ -259,7 +259,7 @@ function preSendResponse() {
     try {
         if (session && session.getProperty("needKogSuccess") && session.getProperty("needKogSuccess").startsWith(systemEnv.getProperty("esv.kyid.kog.redirect.url"))) {
             finalUrl = session.getProperty("needKogSuccess");
-            logger.error(adapterLoggerPrefix+"::"+"finalUrl for needKOGVisit PRESENT IN PRESEND RESPONSE"+"::"+finalUrl);
+            logger.debug(adapterLoggerPrefix+"::"+"finalUrl for needKOGVisit PRESENT IN PRESEND RESPONSE"+"::"+finalUrl);
             session.setProperty("needKogSuccess", "FALSE");
             response.sendRedirect(finalUrl);
             return true;
@@ -271,7 +271,7 @@ function preSendResponse() {
     session.setProperty("visitedUrl", "FALSE");
     response.addHeader("Set-Cookie", reqId+"-"+"ReturnURL=" + "; Domain="+returnUrlCookieDomain+"; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
     response.addHeader("Set-Cookie", reqId+"-"+"rp-realm=" + "; Domain="+returnUrlCookieDomain+"; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; HttpOnly");
-  	logger.error(adapterLoggerPrefix+"::"+"EXITING PRESEND RESPONSE");  
+  	logger.debug(adapterLoggerPrefix+"::"+"EXITING PRESEND RESPONSE");  
     return false;
 
 }
@@ -279,7 +279,7 @@ function preSendResponse() {
 //TFS 182954 - For accept language header change on 4-feb-2025
 function readLangFromRequestHeader(request){
     var lang = "en";
-    logger.error(adapterLoggerPrefix+"::"+"accept-language in header is"+"::"+request.getHeader("accept-language"));
+    logger.debug(adapterLoggerPrefix+"::"+"accept-language in header is"+"::"+request.getHeader("accept-language"));
     if(request.getHeader("accept-language")){
         var acceptLanguageValue = request.getHeader("accept-language");
         if (acceptLanguageValue.includes("es") ){
@@ -334,7 +334,7 @@ function readLangFromRequestHeader(request){
  *     logger
  */
 function preSignResponse() {
-   logger.error(adapterLoggerPrefix+"::ENTERING preSignResponse FUNCTION");
+   logger.debug(adapterLoggerPrefix+"::ENTERING preSignResponse FUNCTION");
   
    var MFA_URI = "urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract";
    var UNSPECIFIED_URI = "urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified";  
@@ -377,8 +377,8 @@ function preSignResponse() {
      if (assertions != null && assertions.size() > 0) {
       var assertion = assertions.get(0);
       var xmlStr = assertion.toXMLString(true, true);
-      logger.error(adapterLoggerPrefix+"::Original assertion contains PWD_URI::" + (xmlStr.indexOf(PWD_URI) >= 0));
-      logger.error(adapterLoggerPrefix+"::Original assertion contains UNSPECIFIED_URI::" + (xmlStr.indexOf(UNSPECIFIED_URI) >= 0));
+      logger.debug(adapterLoggerPrefix+"::Original assertion contains PWD_URI::" + (xmlStr.indexOf(PWD_URI) >= 0));
+      logger.debug(adapterLoggerPrefix+"::Original assertion contains UNSPECIFIED_URI::" + (xmlStr.indexOf(UNSPECIFIED_URI) >= 0));
 
       // RepnewXml = xmlStr.replace(PWD_URI, MFA_URI);Replace AuthnContextClassRef in the XML string
       if(xmlStr.indexOf(PWD_URI) >= 0){
@@ -387,7 +387,7 @@ function preSignResponse() {
       newXml = xmlStr.replace(UNSPECIFIED_URI, MFA_URI);
      }
       //var newXml = xmlStr.replace(PWD_URI, MFA_URI);
-      logger.error(adapterLoggerPrefix+"::Modified XML contains MFA_URI::" + (newXml.indexOf(MFA_URI) >= 0));
+      logger.debug(adapterLoggerPrefix+"::Modified XML contains MFA_URI::" + (newXml.indexOf(MFA_URI) >= 0));
 
       // Create new assertion from modified XML using AssertionFactory
       var factory = com.sun.identity.saml2.assertion.AssertionFactory.getInstance();

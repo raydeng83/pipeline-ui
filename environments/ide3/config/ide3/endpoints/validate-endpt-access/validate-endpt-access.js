@@ -8,60 +8,59 @@ var validateEndptAccessLoggerPrefix = "VALIDATE-ENDPOINT-ACCESS";
       // POST
       const apiRequestPayload = request.content.payload
       const apiRequestAction = request.content.action
-      logger.error(validateEndptAccessLoggerPrefix + "::apiRequestPayload in endpoint/validate-endpt-access::" + apiRequestPayload)
-      logger.error(validateEndptAccessLoggerPrefix + "::apiRequestAction in endpoint/validate-endpt-access::" + apiRequestAction)
+      logger.debug(validateEndptAccessLoggerPrefix + "::apiRequestPayload in endpoint/validate-endpt-access::" + apiRequestPayload)
+      logger.debug(validateEndptAccessLoggerPrefix + "::apiRequestAction in endpoint/validate-endpt-access::" + apiRequestAction)
 
       if (apiRequestAction === 0) {
         //Controls whether endpoint authorization needs to be evaluated 
         if (!identityServer.getProperty("esv.validate.endpoint.access.enabled")) {
-          logger.error(validateEndptAccessLoggerPrefix + "::Server not configured")
+          logger.debug(validateEndptAccessLoggerPrefix + "::Server not configured")
           return { status: 500, message: "Unauthorized" };
         }
 
         let validateEndptAccess = identityServer.getProperty("esv.validate.endpoint.access.enabled");
-        logger.error(validateEndptAccessLoggerPrefix + "::validateEndptAccess value::" + validateEndptAccess)
-        logger.error("esv.validate.endpoint.access.enabled value is: " + validateEndptAccess)
+        logger.debug(validateEndptAccessLoggerPrefix + "::validateEndptAccess value::" + validateEndptAccess)
+        logger.debug("esv.validate.endpoint.access.enabled value is: " + validateEndptAccess)
         if (validateEndptAccess == "true" || validateEndptAccess == true) {
 
           if (apiRequestPayload && apiRequestPayload.attributes &&
             apiRequestPayload.oauth2 && apiRequestPayload.oauth2.rawInfo) {
-            logger.error("inside apiRequestPayload oauth2")
             let originalURI = apiRequestPayload.attributes.parent.parent.originalUri;
             let endpointName = apiRequestPayload.parent.matchedUri;
             let clientID = apiRequestPayload.oauth2.rawInfo.client_id;
-            logger.error(validateEndptAccessLoggerPrefix + "::Endpoint::" + endpointName);
+            logger.debug(validateEndptAccessLoggerPrefix + "::Endpoint::" + endpointName);
 
             if (clientID === "idm-provisioning") {
-              logger.error(validateEndptAccessLoggerPrefix + "::Skip Authorize Check. ClientID in OAuth context::" + clientID);
+              logger.debug(validateEndptAccessLoggerPrefix + "::Skip Authorize Check. ClientID in OAuth context::" + clientID);
               return { status: 200, message: "Authorized" };
 
             } else if (!originalURI.includes(endpointName)) {
-              logger.error(validateEndptAccessLoggerPrefix + "::Skip Authorize Check. originalURI in Attributes context::"
+              logger.debug(validateEndptAccessLoggerPrefix + "::Skip Authorize Check. originalURI in Attributes context::"
                 + apiRequestPayload.attributes.parent.parent.originalUri);
               return { status: 200, message: "Authorized" };
 
             } else {
-              logger.error(validateEndptAccessLoggerPrefix + "::Proceed with Authorization Check");
+              logger.debug(validateEndptAccessLoggerPrefix + "::Proceed with Authorization Check");
               return validateAccessToken(apiRequestPayload)
             }
             //Scheduler Calling Endpoints Internally
           } else if (apiRequestPayload && apiRequestPayload.security && apiRequestPayload.security.authenticationId) {
-            logger.error("inside apiRequestPayload security")
+            logger.debug("inside apiRequestPayload security")
             let authenticationIdClient = apiRequestPayload.security.authenticationId
             if (authenticationIdClient === "system") {
-              logger.error(validateEndptAccessLoggerPrefix + "::Skip Authorize Check. authenticationId in security context::"
+              logger.debug(validateEndptAccessLoggerPrefix + "::Skip Authorize Check. authenticationId in security context::"
                 + authenticationIdClient);
               return { status: 200, message: "Authorized" };
             } else {
-              logger.error("authenticationIdClient is not system, or no authenticationIdClient")
+              logger.debug("authenticationIdClient is not system, or no authenticationIdClient")
               return { status: 200, message: "Authorized" };
             }
           } else {
-            logger.error("returning authorized ")
+            logger.debug("returning authorized ")
             return { status: 200, message: "Authorized" };
           }
         } else {
-          logger.error("returning authorized without validating endpoint access")
+          logger.debug("returning authorized without validating endpoint access")
           return { status: 200, message: "Authorized" };
         }
       }
@@ -80,7 +79,7 @@ var validateEndptAccessLoggerPrefix = "VALIDATE-ENDPOINT-ACCESS";
   } else if (request.method === 'delete') {
     return {};
   } else {
-    logger.error(validateEndptAccessLoggerPrefix + ":: Unknown error ")
+    logger.debug(validateEndptAccessLoggerPrefix + ":: Unknown error ")
     throw { code: 500, message: 'Unknown error' };
   }
 }());
@@ -95,26 +94,26 @@ var validateEndptAccessLoggerPrefix = "VALIDATE-ENDPOINT-ACCESS";
 function validateAccessToken(context) {
   let accessTokenToValidate = "";
   const httpHeadersInfo = context.http.headers;
-  logger.error("endpoint/validate-endpt-access httpHeadersInfo => " + JSON.stringify(httpHeadersInfo))
+  logger.debug("endpoint/validate-endpt-access httpHeadersInfo => " + JSON.stringify(httpHeadersInfo))
 
   if (!identityServer.getProperty("esv.kyid.endpt.access.client")
     || !identityServer.getProperty("esv.kyid.endpt.access.secret")
     || !identityServer.getProperty("esv.kyid.introspect.url")) {
-    logger.error(validateEndptAccessLoggerPrefix + "::Server not configured");
+    logger.debug(validateEndptAccessLoggerPrefix + "::Server not configured");
     return { status: 500, message: "Unauthorized" };
   }
 
   if (!httpHeadersInfo["x-authorize-endpt-access"]) {
-    logger.error(validateEndptAccessLoggerPrefix + "::Missing token parameter");
+    logger.debug(validateEndptAccessLoggerPrefix + "::Missing token parameter");
     return { status: 401, message: "Unauthorized" };
   }
-  logger.error("endpoint/validate-endpt-access httpHeadersInfo x-authorize-endpt-access => " + httpHeadersInfo["x-authorize-endpt-access"])
+  logger.debug("endpoint/validate-endpt-access httpHeadersInfo x-authorize-endpt-access => " + httpHeadersInfo["x-authorize-endpt-access"])
 
   const client = identityServer.getProperty("esv.kyid.endpt.access.client");
   const clientCreds = identityServer.getProperty("esv.kyid.endpt.access.secret")
   //const introspectUrl = "https://sso"+identityServer.getProperty("esv.kyid.cookie.domain")+"/am/oauth2/alpha/introspect";
   const introspectUrl = identityServer.getProperty("esv.kyid.introspect.url")
-  logger.error(validateEndptAccessLoggerPrefix + "::introspectUrl in endpoint/validate-endpt-access::" + introspectUrl)
+  logger.debug(validateEndptAccessLoggerPrefix + "::introspectUrl in endpoint/validate-endpt-access::" + introspectUrl)
 
   accessTokenToValidate = httpHeadersInfo["x-authorize-endpt-access"];
 
@@ -137,17 +136,17 @@ function validateAccessToken(context) {
 
   try {
     const introspectionResponse = openidm.action("external/rest", "call", params);
-    logger.error(validateEndptAccessLoggerPrefix + "::introspectionResponse in endpoint/validate-endpt-access::" + JSON.stringify(introspectionResponse));
+    logger.debug(validateEndptAccessLoggerPrefix + "::introspectionResponse in endpoint/validate-endpt-access::" + JSON.stringify(introspectionResponse));
 
     if (introspectionResponse && introspectionResponse.active === true) {
-      logger.error(validateEndptAccessLoggerPrefix + "::Token is active. Scopes::" + introspectionResponse.scope);
+      logger.debug(validateEndptAccessLoggerPrefix + "::Token is active. Scopes::" + introspectionResponse.scope);
       return {
         status: 200,
         message: introspectionResponse
       };
     }
 
-    logger.error(validateEndptAccessLoggerPrefix + "::Token is inactive or invalid");
+    logger.debug(validateEndptAccessLoggerPrefix + "::Token is inactive or invalid");
     return {
       status: 401,
       message: "Unauthorized"
@@ -185,7 +184,7 @@ function validateClientCredentials(context) {
     if (!clientId || !clientSecret) {
       res.status = 403
       res.message = "Not Authorized"
-      logger.error("Missing client credentials")
+      logger.debug("Missing client credentials")
       return res
     }
 
@@ -202,12 +201,7 @@ function validateClientCredentials(context) {
     }
 
     expectedIdsESVs = identityServer.getProperty("esv.kyid.endpt.access.client").split(" ")
-    //logger.error("expectedIdsESVs are => "+expectedIdsESVs)
     expectedSecretsESVs = identityServer.getProperty("esv.kyid.endpt.access.secret").split(" ")
-    //logger.error("expectedSecretsESVs are => "+expectedSecretsESVs)
-
-    //logger.error("Total clientIDs => "+expectedIdsESVs.length)
-    //logger.error("Total secrets => "+expectedSecretsESVs.length)
 
     if (expectedIdsESVs.length > 0 && expectedSecretsESVs.length > 0) {
 
@@ -221,30 +215,28 @@ function validateClientCredentials(context) {
 
       if (expectedIds.indexOf(clientId) != -1) {
         expectedId = expectedIds[expectedIds.indexOf(clientId)]
-        //logger.error("expectedId is => "+expectedId)
       }
 
       if (expectedSecrets.indexOf(clientSecret) != -1) {
         expectedSecret = expectedSecrets[expectedSecrets.indexOf(clientSecret)]
-        //logger.error("expectedSecret is => "+expectedSecret)
       }
 
       if ((clientId.length !== expectedId.length) || (clientSecret.length !== expectedSecret.length)) {
-        logger.error("****endpoint/validate-endpt-access :: You're not Authorized****")
+        logger.debug("****endpoint/validate-endpt-access :: You're not Authorized****")
         res.status = 403
         res.message = "Not Authorized"
         return res
       }
 
       if ((clientId === expectedId) && (clientSecret === expectedSecret)) {
-        logger.error("****endpoint/validate-endpt-access :: You're Authorized****")
+        logger.debug("****endpoint/validate-endpt-access :: You're Authorized****")
         res.status = 200
         res.message = "Authorized"
         return res
       }
 
     } else {
-      logger.error("****endpoint/validate-endpt-access :: You're not Authorized****")
+      logger.debug("****endpoint/validate-endpt-access :: You're not Authorized****")
       res.status = 403
       res.message = "Not Authorized"
       return res

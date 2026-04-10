@@ -24,13 +24,14 @@
                 <br />
                 <p>You can review the request here:</p>
                 <p style="font-size:10pt;margin:10px 0;text-align:left;margin-bottom:25px;color:#5e5e5e;font-family:Arial,Verdana,Helvetica">
-                  <a href="&{esv.portal.url}/dashboard">REVIEW REQUEST</a>
+                  <a href="&{esv.portal.url}/governance/{{object.request.id}}/active">REVIEW REQUEST</a>
                 </p>
                 <p>
                   Request ID: 
                     
                     
                     
+                  
                   
                   
                   
@@ -68,9 +69,11 @@
                   
                   
                   
+                  
                   <b>approve or deny</b> this request.
                         
                   
+                
                 
                 
                 
@@ -133,6 +136,7 @@
                 
                 
                 
+                
                 </p>
                 <br />
                 <p style="text-align:left;line-height:1.6">
@@ -166,11 +170,13 @@
                 
                 
                 
+                
                 </p>
                 <p style="text-align:left;line-height:1.6">
                   <strong>Privacy Notice:</strong> This e-mail message, including any attachments, is for the sole use of the intended recipient(s) and may contain confidential data. Any unauthorized review, use, disclosure, or distribution is strictly prohibited. If you are not the intended recipient, please contact the sender by e-mail and destroy all copies of the original message.
                         
                     
+                
                 
                 
                 
