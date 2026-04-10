@@ -1,0 +1,227 @@
+{
+  "id": "TB-NEDSS",
+  "name": "TB-NEDSS",
+  "type": "request",
+  "description": "Request form for TB NEDSS",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "d7f469f0-c738-417b-8b65-2e18da02da36",
+        "fields": [
+          {
+            "id": "e697564b-1346-4e27-9066-2b265a23b00e",
+            "model": "custom.requesterUser.applicationName",
+            "type": "string",
+            "label": "Application Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "11583932-81d4-4fd7-94b4-204ec7dedcb9",
+            "model": "custom.requesterUser.roleName",
+            "type": "string",
+            "label": "Role Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "2bd7f57a-b68a-4cf7-8e9c-cb207d67fe5f",
+        "fields": [
+          {
+            "id": "712bd305-d185-4ab7-9d74-85b7049a1642",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "811881ac-bdf1-4c6e-b9fb-9409b463aca2",
+        "fields": [
+          {
+            "id": "af346e7b-5617-434b-a60c-a0cac45b54a9",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "f0bc5dd5-2f5f-4791-82c5-be448e534bfe",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "51222ef0-1871-4550-9a5c-23837c3e4da7",
+        "fields": [
+          {
+            "id": "761266f6-a816-4608-99e9-ad97a5d3bdd5",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "89af260a-6b81-401d-b3f9-d4fd3ba1ef19",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "4c977b84-3691-48a6-826e-455e50d01af0",
+        "fields": [
+          {
+            "id": "e214b729-710b-4a09-a027-27e27120efaf",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "c1f32106-5913-4323-b2a2-11fb996ea686",
+        "fields": [
+          {
+            "id": "2291fa6a-5f8a-4472-bef8-d2adfebda8b6",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "1e8d6032-9477-49f5-b828-8c3cde49eaa7",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "70f546da-6f05-4947-818c-9480ff4b6f09",
+        "fields": [
+          {
+            "id": "e37e265c-7383-4fdf-ab7d-f6f53b26901f",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "db23c8c4-6808-43d4-9e07-1b50f8441f55",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-10-13T18:23:33.843Z",
+    "createdDate": "2025-09-06T18:22:04.938892391Z"
+  }
+}

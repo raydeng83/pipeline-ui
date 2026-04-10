@@ -1,0 +1,283 @@
+{
+  "id": "KICCS-Technical-Notes-Assistance",
+  "name": "KICCS-Technical-Notes-Assistance",
+  "type": "request",
+  "description": "Request form for KICCS Technical Notes Assistance",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "c4574eea-8bbb-41c1-bfc4-d378a27ea9d0",
+        "fields": [
+          {
+            "id": "c9217acf-f45e-4788-a548-957e0983f9df",
+            "model": "custom.requesterUser.applicationName",
+            "type": "string",
+            "label": "Application Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "1a37f567-9586-4632-91e2-4e3f052cb9f6",
+            "model": "custom.requesterUser.roleName",
+            "type": "string",
+            "label": "Role Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "243e0753-cb43-43f8-b3a5-0ab8ac1b99ae",
+        "fields": [
+          {
+            "id": "ec37f2ab-ea12-4285-abd8-340b7019dbc8",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "a9574ab1-7125-48e6-88d8-5b5d544800f6",
+        "fields": [
+          {
+            "id": "0038a685-6a3d-4d27-b759-8cd7cbe33b7d",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "3ad9a4e7-ba4d-41bf-add4-ac3bdc574678",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "6940f7fc-6ae8-4523-b143-3a9c69e24c87",
+        "fields": [
+          {
+            "id": "dccab365-70f1-4f7b-926c-b3849489ca73",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "add25373-97eb-491c-9302-add9d88002af",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "405c915f-a5a0-4ce9-b140-23f8d56f2537",
+        "fields": [
+          {
+            "id": "7d40af1a-b511-4c76-9f19-f73624f224fe",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "e87de3fc-bdd8-4b74-b98b-583f4bedd405",
+        "fields": [
+          {
+            "id": "9b57aa02-6897-4a5d-845c-b9f1a188b712",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "1ee7a689-eaf8-4b94-a8b8-1e8857a942a1",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "717df2b2-11c2-4bb7-87ae-dd23819f453e",
+        "fields": [
+          {
+            "id": "0bd4e355-cbf9-4bc3-975d-48ea06c8a129",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "3f93642f-7820-4b6c-afd3-ad404c926919",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "fafa59d7-154b-4110-9cfb-89ac390d6d4b",
+        "fields": [
+          {
+            "id": "5826b46b-cdbb-49d4-87c0-d0c063bb6b2f",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Additional Request Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "29ec68c2-9efa-434a-85f8-4a2fc015955d",
+        "fields": [
+          {
+            "id": "070bc266-62c7-4279-87a4-6c1342c267c8",
+            "model": "custom.page.fields.Legal-First-and-Last-Name",
+            "type": "string",
+            "label": "Legal First and Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "9f89a0c7-70cc-4b33-8653-acacb0a0c6ed",
+        "fields": [
+          {
+            "id": "17e8d4a4-c6b0-424c-ae2b-232603060f35",
+            "model": "custom.page.fields.Employee-ID-number",
+            "type": "string",
+            "label": "Employee ID number",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-12-15T15:22:05.391Z",
+    "createdDate": "2025-08-29T17:02:25.39970914Z"
+  }
+}

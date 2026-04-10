@@ -1,0 +1,227 @@
+{
+  "id": "KICCS-PROV-Portal-STARS",
+  "name": "KICCS-PROV-Portal-STARS",
+  "type": "request",
+  "description": "Request form for KICCS PROV Portal STARS",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "f2f0c616-a69a-48b9-9a68-072f1f8cf0c8",
+        "fields": [
+          {
+            "id": "4575a7c8-f513-4bb2-9ea4-22b56ffd2dea",
+            "model": "custom.requesterUser.applicationName",
+            "type": "string",
+            "label": "Application Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "b1bf29d8-63cb-4e2f-9cec-d9e9bb2b64db",
+            "model": "custom.requesterUser.roleName",
+            "type": "string",
+            "label": "Role Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "ed66509f-f41f-4133-a712-22f8d867c8de",
+        "fields": [
+          {
+            "id": "1faa3c53-da6d-478b-bf63-1ee76ef6dbe0",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "db301049-5597-41f8-8c90-417e143e9a22",
+        "fields": [
+          {
+            "id": "66a660ee-3605-4d0f-8d0e-37281c6869ad",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "d71675f4-890c-4f8b-989c-c3dd07f5f34e",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "40405978-76df-4d03-a1cf-7beeb82437f5",
+        "fields": [
+          {
+            "id": "97e07f0b-3edf-46d6-a989-9e8475e22464",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "c900a9fa-f7b3-4fd7-a339-f253c6bea509",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "19a63ed3-cf2c-4c68-97fe-d01e82a02549",
+        "fields": [
+          {
+            "id": "8fed1012-15c5-42ec-940a-1b03fc485556",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "6adc4e94-4f06-4d87-843d-54b33f51b1fc",
+        "fields": [
+          {
+            "id": "be3c0f25-d083-4fde-9c39-f975fcf236d4",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "6554d304-dc91-4b58-927a-bbe63f084c65",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "bccf7e7e-1d54-43f9-b804-1024f8787329",
+        "fields": [
+          {
+            "id": "43eca5e5-7d49-41f5-86ab-131a7004c2b3",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "32922540-f3b6-41ba-8363-a4c7129d137a",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-12-15T15:21:20.357Z",
+    "createdDate": "2025-09-06T18:19:36.646749615Z"
+  }
+}

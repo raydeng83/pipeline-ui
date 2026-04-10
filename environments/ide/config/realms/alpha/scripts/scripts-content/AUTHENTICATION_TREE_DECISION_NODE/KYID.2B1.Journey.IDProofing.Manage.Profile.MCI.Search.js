@@ -469,7 +469,7 @@ function auditLog(code, message, helpdeskVisibility, transactionid, useCase, use
             sessionDetail = nodeState.get("sessionRefId")
             sessionDetails["sessionRefId"] = sessionDetail
         } else if (typeof existingSession != 'undefined') {
-            LOGGER.DEBUG("INSIDE SESSION EXISTS")
+            logger.debug("INSIDE SESSION EXISTS")
             sessionDetail = existingSession.get("sessionRefId")
             sessionDetails["sessionRefId"] = sessionDetail
         } else {

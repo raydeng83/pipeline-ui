@@ -1,0 +1,283 @@
+{
+  "id": "OTIS-Contractor-Organization",
+  "name": "OTIS-Contractor-Organization",
+  "type": "request",
+  "description": "Request form for OTIS Contractor Organization",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "a49f04f2-a2fc-4e35-b7c7-68babffb46cd",
+        "fields": [
+          {
+            "id": "756d5fc8-dccb-42fb-b133-384d8cb010e8",
+            "model": "custom.requesterUser.applicationName",
+            "type": "string",
+            "label": "Application Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "3e862d4c-68a9-4c29-8c52-a81a4bd155ab",
+            "model": "custom.requesterUser.roleName",
+            "type": "string",
+            "label": "Role Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "b71e51d9-a8ec-4896-bda6-00145c6db4a6",
+        "fields": [
+          {
+            "id": "6079283b-4440-4303-8e1b-552c78830348",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "8abfbd0a-10f7-4095-99d9-1dd30e5be2a8",
+        "fields": [
+          {
+            "id": "3df56005-2fb4-4351-8fa8-7d8799a39da5",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "d79c1998-dc55-4905-b832-5d4fe80132dd",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "8971e3fa-2658-4023-88a9-93a5ebce59b6",
+        "fields": [
+          {
+            "id": "f1ac06a2-659f-4a32-9c76-833e1d3fee4e",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "c9166948-dc02-4068-8ab7-754f62fa2f39",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "a44476bb-eb75-4abc-a1f8-81eff8fc6c5f",
+        "fields": [
+          {
+            "id": "28446c94-7fe8-4806-8cdb-d43d1fba91ca",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "cc079b32-b1ad-43be-b3cb-9c673426678e",
+        "fields": [
+          {
+            "id": "a9e8cc17-1a74-4a1f-9c25-7a0bbc224c0c",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "09da29ab-775c-4c6c-bcdb-019b57dc218b",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "92ce17cd-a775-4147-8ebe-dd154faed74f",
+        "fields": [
+          {
+            "id": "715ad933-902e-4f77-8676-4518e12b1717",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "6f7bbddb-1e64-4dd3-8166-0b77592130c4",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "a69bd539-c099-4f14-9b5c-c69d369fe36c",
+        "fields": [
+          {
+            "id": "7b0b9ec2-d5c1-4fad-8e75-a3f126a420ea",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Additional Request Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "661746b2-2d77-4042-882b-5cf116d8fb43",
+        "fields": [
+          {
+            "id": "76973f5e-58e9-4319-a7cc-c7b2e265b683",
+            "model": "custom.page.fields.Organization",
+            "type": "string",
+            "label": "Organization",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "b7fa9765-3624-4289-b8b5-5a4845a07c56",
+        "fields": [
+          {
+            "id": "6d78f51e-bb2a-4b40-a96a-af66b8bdd7a9",
+            "model": "custom.page.fields.Contractor-ID",
+            "type": "string",
+            "label": "Contractor ID",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2026-01-25T15:32:52.016Z",
+    "createdDate": "2025-08-21T04:03:43.792356845Z"
+  }
+}

@@ -167,9 +167,9 @@ function main() {
         }else if(nodeState.get("flowName") && nodeState.get("flowName").toLowerCase() == "mfarecovery"){
             outcome = sendMail(nodeState.get("mail"), nodeState.get("givenName"), nodeState.get("sn"), nodeState.get("phoneContact"), nodeState.get("emailContact"),"kyid2B1RidpMfaRecovery"); 
         }
-        // else if(nodeState.get("flowName") && nodeState.get("flowName").toLowerCase() == "userverification"){
-        //     outcome = sendMail(nodeState.get("mail"), nodeState.get("givenName"), nodeState.get("sn"), nodeState.get("phoneContact"), nodeState.get("emailContact"),"userverification");
-        // }
+        else if(nodeState.get("flowName") && nodeState.get("flowName").toLowerCase() == "userverification"){
+            outcome = sendMail(nodeState.get("mail"), nodeState.get("givenName"), nodeState.get("sn"), nodeState.get("phoneContact"), nodeState.get("emailContact"),"kyid2B1UserVerification");
+        }
         else{
             outcome = NodeOutcome.PASS
         }

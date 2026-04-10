@@ -1,0 +1,263 @@
+{
+  "id": "Khush-Radio-button",
+  "name": "Khush-Radio-button",
+  "type": "request",
+  "description": "Request form for Khush Radio button",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "59d4c745-3708-4a90-870a-13da008ce404",
+        "fields": [
+          {
+            "id": "2a174fb9-b46b-4bf1-8f68-96eb8166969a",
+            "model": "custom.requesterUser.applicationName",
+            "type": "string",
+            "label": "Application Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "136210ee-7604-413a-80a4-f3e71389ccd1",
+            "model": "custom.requesterUser.roleName",
+            "type": "string",
+            "label": "Role Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "f8a6a373-4be9-47b0-903c-783047833779",
+        "fields": [
+          {
+            "id": "4acdfb75-f222-44c0-8333-d9245411b974",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "7b099256-57b9-424c-9fad-796506095470",
+        "fields": [
+          {
+            "id": "1435d8d0-dde1-4b0c-8ac8-008ed9224d58",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "a27d8164-bbe1-4a70-be93-9086345c88b3",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "a6f4c01c-b777-4d28-a5e6-f0d186acdcb4",
+        "fields": [
+          {
+            "id": "a28b3c55-f854-4299-ab12-92c9cefdd8eb",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "cc2e5ea6-dde9-461e-a2e8-28df72251af9",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "d16da9ef-0c36-4701-b6c4-34e42e4e7312",
+        "fields": [
+          {
+            "id": "1c4d9e01-eb39-4125-97f7-85e586fac808",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "6d4159a4-799b-4cfc-83e1-152c5d6a76d5",
+        "fields": [
+          {
+            "id": "177bf2f3-70a7-47c8-af24-a1339728af3c",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "5b7e6038-6ee5-49b4-9732-5a54f241cb1e",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "71d16d95-d4ec-418a-8bfb-5ac61eb57fea",
+        "fields": [
+          {
+            "id": "51a8c66e-22c3-41f8-bf64-162b3a3412ae",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "b15aec51-6328-4c38-8e90-fa4a6cfed4d9",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "1f0346d7-4f7f-4f82-8a6b-3834ce9274f7",
+        "fields": [
+          {
+            "id": "ff855cce-471f-4f13-838c-d58eea40ee1e",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Additional Request Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "bbab7e18-c3b0-4b57-b7cf-7d673fbe2ece",
+        "fields": [
+          {
+            "id": "932df110-3123-4f54-a0c2-ce2fb56532f9",
+            "model": "custom.page.fields.Capital-of-Kentucky",
+            "type": "string",
+            "label": "Capital of Kentucky",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-10-13T18:28:53.366Z",
+    "createdDate": "2025-09-03T06:55:48.50912448Z"
+  }
+}

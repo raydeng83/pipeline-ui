@@ -1,0 +1,192 @@
+{
+  "id": "Generic-KICCS-Prov-Portal-ProcessProvRenChngCMPPOC",
+  "name": "Generic-KICCS-Prov-Portal-ProcessProvRenChngCMPPOC",
+  "type": "request",
+  "description": "Generic form for KICCS Prov Portal ProcessProvRenChngCMPPOC",
+  "categories": {
+    "applicationType": null,
+    "objectType": null,
+    "operation": "create"
+  },
+  "form": {
+    "fields": [
+      {
+        "id": "f0bd4c3d-0fc2-4639-b6a3-4330860c217e",
+        "fields": [
+          {
+            "id": "d1eac370-3ad9-4081-b002-884eaedf210b",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requester User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "997e0889-ba51-4df6-bc3d-ae189f99409b",
+        "fields": [
+          {
+            "id": "bffda9a6-b221-4b43-a32d-131323ce7a5c",
+            "model": "custom.requesterUser.requesterUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "ddc8a036-3416-412c-80b3-14664c8a74ef",
+            "model": "custom.requesterUser.requesterUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "d1ecec9d-80c5-4573-bafe-c0b4e9a06398",
+        "fields": [
+          {
+            "id": "cf305e5c-01de-4f94-a4fa-0e0aa39f8636",
+            "model": "custom.requesterUser.requesterUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "3c8a4cdf-4798-46f4-8330-eaf45beb165e",
+            "model": "custom.requesterUser.requesterUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "bb6b98be-844e-41ef-8ba3-d6fd218587c2",
+        "fields": [
+          {
+            "id": "f400aee1-e899-4e16-898e-5b31070059e3",
+            "type": "formText",
+            "validation": {},
+            "layout": {
+              "columns": 12,
+              "offset": 0
+            },
+            "formText": "Requested User Info",
+            "customSlot": "formText"
+          }
+        ]
+      },
+      {
+        "id": "5a07bd57-5db6-4fa7-a624-8ed595ed0fac",
+        "fields": [
+          {
+            "id": "6fb44b89-5839-44fc-9219-da133f60a785",
+            "model": "custom.requestedUser.requestedUserGivenName",
+            "type": "string",
+            "label": "First Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "b92310db-b2da-405f-91e5-b4ed9546071f",
+            "model": "custom.requestedUser.requestedUserSn",
+            "type": "string",
+            "label": "Last Name",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      },
+      {
+        "id": "213cf9ce-0d3f-4cee-9ed0-db45d4bff2e6",
+        "fields": [
+          {
+            "id": "9cb6d6ef-d7f0-4065-b841-9e226bbc7a18",
+            "model": "custom.requestedUser.requestedUserUsername",
+            "type": "string",
+            "label": "Username",
+            "validation": {
+              "required": true
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          },
+          {
+            "id": "636aebd8-8757-43b3-a364-4dd5cb99995c",
+            "model": "custom.requestedUser.requestedUserMail",
+            "type": "string",
+            "label": "Email",
+            "validation": {
+              "required": false
+            },
+            "layout": {
+              "columns": 6,
+              "offset": 0
+            },
+            "readOnly": true,
+            "customSlot": false
+          }
+        ]
+      }
+    ]
+  },
+  "_rev": 1,
+  "metadata": {
+    "modifiedDate": "2025-08-29T16:58:22.954821195Z",
+    "createdDate": "2025-08-29T16:58:22.954817495Z"
+  }
+}

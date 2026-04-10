@@ -57,6 +57,7 @@ function queryUserByMail(mail) {
             if(userQueryResult.result[0].custom_userIdentity && userQueryResult.result[0].custom_userIdentity.riskIndicator){
                 nodeState.putShared("exisitingRiskIndicator", userQueryResult.result[0].custom_userIdentity.riskIndicator)
             }
+            
             return userQueryResult.result[0];
         } else {
             nodeLogger.debug(transactionid + "::" + nodeConfig.timestamp + "::" + nodeConfig.node + "::" + nodeConfig.nodeName + "::" + nodeConfig.script + "::" + nodeConfig.scriptName + "::" + nodeConfig.begin + " No user found for mail: " + mail);
