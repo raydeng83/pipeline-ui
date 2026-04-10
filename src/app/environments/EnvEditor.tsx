@@ -856,7 +856,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
               {/* Test connection & restart */}
               <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 space-y-3">
                 <TestConnectionButton liveValues={values} />
-                <RestartButton environmentName={environment.name} />
+                <RestartButton environmentName={env.name} />
               </div>
 
               {/* Sub-tabs: Form / Raw */}
