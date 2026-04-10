@@ -29,6 +29,11 @@ const FRODO_SCOPE_CONFIG: Record<string, FrodoScopeConfig> = {
     pushArgs: ["idp", "import", "-A"],
     subdir: "idp",
   },
+  "variables": {
+    pullArgs: ["esv", "variable", "export", "-A"],
+    pushArgs: ["esv", "variable", "import", "-A"],
+    subdir: "esvs/variables",
+  },
 };
 
 export const FRODO_SCOPES = Object.keys(FRODO_SCOPE_CONFIG);
@@ -49,7 +54,7 @@ export function spawnFrodo(options: {
 
   const frodoEnv: NodeJS.ProcessEnv = {
     ...process.env,
-    FRODO_HOST: envVars.TENANT_BASE_URL ?? "",
+    FRODO_HOST: envVars.TENANT_BASE_URL ? `${envVars.TENANT_BASE_URL}/am` : "",
     FRODO_SA_ID: envVars.SERVICE_ACCOUNT_ID ?? "",
     FRODO_SA_JWK: envVars.SERVICE_ACCOUNT_KEY ?? "",
     FRODO_REALM: JSON.parse(envVars.REALMS ?? '["alpha"]')[0] ?? "alpha",

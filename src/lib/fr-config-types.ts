@@ -189,7 +189,7 @@ export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   // Secrets & Variables
   { value: "secrets",         label: "Secrets",           group: "Secrets & Variables", description: "Secret labels and their active/inactive versions" },
   { value: "secret-mappings", label: "Secret Mappings",   group: "Secrets & Variables", description: "Mappings that bind secret labels to AM/IDM services" },
-  { value: "variables",       label: "Variables (ESVs)",  group: "Secrets & Variables", description: "Environment-specific variables for tenant configuration" },
+  { value: "variables",       label: "Variables (ESVs)",  group: "Secrets & Variables", description: "Environment-specific variables for tenant configuration", commandType: "frodo" },
   // UI & Comms
   { value: "themes",           label: "Themes",           group: "UI & Comms", description: "UI themes, logos, and branding for the login experience" },
   { value: "ui-config",        label: "UI Config",        group: "UI & Comms", description: "Platform UI global configuration and feature flags" },
