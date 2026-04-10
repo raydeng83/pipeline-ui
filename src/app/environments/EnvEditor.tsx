@@ -549,10 +549,15 @@ function TestConnectionButton({
 // ── Restart Tenant ────────────────────────────────────────────────────────
 
 function RestartButton({ environmentName }: { environmentName: string }) {
-  const [status, setStatus] = useState<string | null>(null);
+  const [logs, setLogs] = useState<string[]>([]);
   const [polling, setPolling] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [finalStatus, setFinalStatus] = useState<"ready" | "error" | null>(null);
   const pollingRef = useRef(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
 
   const callRestart = async (action: "restart" | "status") => {
     const res = await fetch("/api/environments/restart", {
@@ -563,63 +568,54 @@ function RestartButton({ environmentName }: { environmentName: string }) {
     return res.json() as Promise<{ stdout: string; stderr: string; exitCode: number | null }>;
   };
 
-  const pollStatus = useCallback(async () => {
-    pollingRef.current = true;
-    setPolling(true);
-    setError(null);
-    while (pollingRef.current) {
-      await new Promise((r) => setTimeout(r, 10_000));
-      if (!pollingRef.current) break;
-      try {
-        const res = await callRestart("status");
-        const s = res.stdout.trim();
-        setStatus(s);
-        if (s === "ready") {
-          pollingRef.current = false;
-          break;
-        }
-      } catch {
-        setError("Failed to check status");
-        pollingRef.current = false;
-        break;
-      }
-    }
-    setPolling(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environmentName]);
+  const log = (msg: string) => setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   useEffect(() => { return () => { pollingRef.current = false; }; }, []);
 
   const handleRestart = async () => {
-    setError(null);
-    setStatus(null);
+    setLogs([]);
+    setFinalStatus(null);
+    log("Initiating restart...");
     try {
       const res = await callRestart("restart");
       if (res.exitCode !== 0) {
-        setError(res.stderr || res.stdout || "Restart failed");
+        log(`Error: ${res.stderr || res.stdout || "Restart failed"}`);
+        setFinalStatus("error");
         return;
       }
-      setStatus("restarting");
-      pollStatus();
+      log("Restart initiated. Polling status...");
+      pollingRef.current = true;
+      setPolling(true);
+      while (pollingRef.current) {
+        await new Promise((r) => setTimeout(r, 10_000));
+        if (!pollingRef.current) break;
+        try {
+          const statusRes = await callRestart("status");
+          const s = statusRes.stdout.trim();
+          log(`Status: ${s}`);
+          if (s === "ready") {
+            log("Restart complete.");
+            setFinalStatus("ready");
+            pollingRef.current = false;
+            break;
+          }
+        } catch {
+          log("Error: Failed to check status");
+          setFinalStatus("error");
+          pollingRef.current = false;
+          break;
+        }
+      }
+      setPolling(false);
     } catch {
-      setError("Failed to initiate restart");
+      log("Error: Failed to initiate restart");
+      setFinalStatus("error");
     }
   };
 
-  const handleCheckStatus = async () => {
-    setError(null);
-    try {
-      const res = await callRestart("status");
-      setStatus(res.stdout.trim());
-    } catch {
-      setError("Failed to check status");
-    }
-  };
-
-  const [flash, setFlash] = useState(false);
-
-  const statusColor = status === "ready" ? "text-green-600" : status === "restarting" ? "text-amber-600" : "text-slate-500";
-  const dotColor = status === "ready" ? "bg-green-400" : status === "restarting" ? "bg-amber-400 animate-pulse" : "bg-slate-300";
+  const statusDot = finalStatus === "ready" ? "bg-green-400" : finalStatus === "error" ? "bg-red-400" : polling ? "bg-amber-400 animate-pulse" : "bg-slate-300";
+  const statusLabel = finalStatus === "ready" ? "Ready" : finalStatus === "error" ? "Failed" : polling ? "Restarting" : "";
+  const statusTextColor = finalStatus === "ready" ? "text-green-400" : finalStatus === "error" ? "text-red-400" : "text-yellow-400";
 
   return (
     <div className="space-y-2 w-full">
@@ -632,28 +628,48 @@ function RestartButton({ environmentName }: { environmentName: string }) {
         >
           {polling ? "Restarting..." : "Restart Tenant"}
         </button>
-        <button
-          type="button"
-          onClick={async () => {
-            await handleCheckStatus();
-            setFlash(true);
-            setTimeout(() => setFlash(false), 600);
-          }}
-          disabled={polling}
-          className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
-        >
-          Check Status
-        </button>
-        {status && (
-          <div className={cn("flex items-center gap-1.5 transition-opacity duration-300", flash && "opacity-0")}>
-            <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", dotColor)} />
-            <span className={cn("text-xs font-medium", statusColor)}>{status}</span>
-          </div>
-        )}
-        {error && (
-          <span className="text-xs text-red-500">{error}</span>
+        {polling && (
+          <button
+            type="button"
+            onClick={() => { pollingRef.current = false; }}
+            className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            Stop Polling
+          </button>
         )}
       </div>
+
+      {logs.length > 0 && (
+        <div className="rounded-md overflow-hidden border border-slate-700">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border-b border-slate-700">
+            <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", statusDot)} />
+            <span className={cn("text-xs font-mono", statusTextColor)}>{statusLabel}</span>
+            {!polling && logs.length > 0 && (
+              <button
+                type="button"
+                onClick={() => { setLogs([]); setFinalStatus(null); }}
+                className="ml-auto text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="bg-slate-900 p-3 font-mono text-xs max-h-48 overflow-y-auto">
+            {logs.map((line, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "whitespace-pre-wrap leading-5",
+                  line.includes("Error") ? "text-red-400" : line.includes("complete") || line.includes("ready") ? "text-green-400" : "text-slate-300"
+                )}
+              >
+                {line}
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
