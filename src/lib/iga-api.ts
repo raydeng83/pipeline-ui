@@ -225,6 +225,10 @@ export function runIgaApi(options: {
       const envVars = parseEnvFile(getEnvFileContent(environment));
       const tenantUrl = envVars.TENANT_BASE_URL ?? "";
 
+      const MAX_RETRIES = 2;
+      const RETRY_DELAY_MS = 3000;
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
       let anyFailed = false;
 
       for (const scope of scopes) {
@@ -234,7 +238,16 @@ export function runIgaApi(options: {
 
         emit("scope-start", { scope });
 
-        try {
+        let scopeOk = false;
+
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+          if (aborted) break;
+          if (attempt > 0) {
+            log(`[${scope}] Retry ${attempt}/${MAX_RETRIES}...`);
+            await sleep(RETRY_DELAY_MS);
+          }
+
+          try {
           log(`[${scope}] Acquiring access token…`);
           const token = await getAccessToken(envVars);
           log(`[${scope}] Token acquired.`);
@@ -351,12 +364,20 @@ export function runIgaApi(options: {
             log(`[${scope}] Done. Pushed ${pushed}/${files.length} item(s).`);
           }
 
-          emit("scope-end", { scope, code: 0 });
+          scopeOk = true;
+          break; // success — no more retries
 
         } catch (err) {
           log(`[${scope}] Error: ${err instanceof Error ? err.message : String(err)}`, true);
-          emit("scope-end", { scope, code: 1 });
-          anyFailed = true;
+          if (attempt === MAX_RETRIES) {
+            emit("scope-end", { scope, code: 1 });
+            anyFailed = true;
+          }
+        }
+        } // end retry loop
+
+        if (scopeOk) {
+          emit("scope-end", { scope, code: 0 });
         }
       }
 

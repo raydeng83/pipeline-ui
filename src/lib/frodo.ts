@@ -61,6 +61,10 @@ export function spawnFrodo(options: {
     FRODO_NO_CACHE: "1",
   };
 
+  const MAX_RETRIES = 2;
+  const RETRY_DELAY_MS = 3000;
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
   let currentProc: ReturnType<typeof spawn> | null = null;
   let aborted = false;
 
@@ -95,23 +99,35 @@ export function spawnFrodo(options: {
           JSON.stringify({ type: "scope-start", scope, ts: Date.now() }) + "\n"
         );
 
-        const exitCode = await new Promise<number | null>((resolve) => {
-          const proc = spawn(
-            "frodo",
-            [...args, "-D", targetDir],
-            { env: frodoEnv, shell: true, cwd: targetDir }
-          );
-          currentProc = proc;
+        let exitCode: number | null = null;
 
-          proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
-          proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
-          proc.on("close", (code) => { currentProc = null; resolve(code); });
-          proc.on("error", (err) => {
-            encode(`frodo not found: ${err.message}`, "stderr");
-            currentProc = null;
-            resolve(1);
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+          if (aborted) break;
+          if (attempt > 0) {
+            encode(`Retry ${attempt}/${MAX_RETRIES} for ${scope}...`, "stderr");
+            await sleep(RETRY_DELAY_MS);
+          }
+
+          exitCode = await new Promise<number | null>((resolve) => {
+            const proc = spawn(
+              "frodo",
+              [...args, "-D", targetDir],
+              { env: frodoEnv, shell: true, cwd: targetDir }
+            );
+            currentProc = proc;
+
+            proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
+            proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
+            proc.on("close", (code) => { currentProc = null; resolve(code); });
+            proc.on("error", (err) => {
+              encode(`frodo not found: ${err.message}`, "stderr");
+              currentProc = null;
+              resolve(1);
+            });
           });
-        });
+
+          if (exitCode === 0) break;
+        }
 
         if (exitCode !== 0) anyFailed = true;
 

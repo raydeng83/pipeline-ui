@@ -132,6 +132,12 @@ function buildSubEntries(scopeSelections: ScopeSelection[]): SubEntry[] {
   return entries;
 }
 
+// ── Retry config ─────────────────────────────────────────────────────────────
+
+const MAX_RETRIES = 2;         // up to 3 total attempts
+const RETRY_DELAY_MS = 3000;   // 3 seconds between retries
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 // ── spawnFrConfig ─────────────────────────────────────────────────────────────
 
 export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<string, string> }): {
@@ -175,24 +181,36 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
         }
 
         const procEnv = { ...baseEnv, ...entry.extraEnv };
-        const exitCode = await new Promise<number | null>((resolve) => {
-          const envDir = path.join(ENVIRONMENTS_DIR, environment);
-          const proc = spawn(
-            command,
-            [entry.scope, "--debug", ...entry.extraArgs],
-            { env: procEnv, shell: true, cwd: envDir }
-          );
-          currentProc = proc;
+        let exitCode: number | null = null;
 
-          proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
-          proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
-          proc.on("close", (code) => { currentProc = null; resolve(code); });
-          proc.on("error", (err) => {
-            encode(err.message, "stderr");
-            currentProc = null;
-            resolve(1);
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+          if (aborted) break;
+          if (attempt > 0) {
+            encode(`Retry ${attempt}/${MAX_RETRIES} for ${entry.scope}...`, "stderr");
+            await sleep(RETRY_DELAY_MS);
+          }
+
+          exitCode = await new Promise<number | null>((resolve) => {
+            const envDir = path.join(ENVIRONMENTS_DIR, environment);
+            const proc = spawn(
+              command,
+              [entry.scope, "--debug", ...entry.extraArgs],
+              { env: procEnv, shell: true, cwd: envDir }
+            );
+            currentProc = proc;
+
+            proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
+            proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
+            proc.on("close", (code) => { currentProc = null; resolve(code); });
+            proc.on("error", (err) => {
+              encode(err.message, "stderr");
+              currentProc = null;
+              resolve(1);
+            });
           });
-        });
+
+          if (exitCode === 0) break;
+        }
 
         if (exitCode !== 0) anyFailed = true;
 
