@@ -616,6 +616,8 @@ function RestartButton({ environmentName }: { environmentName: string }) {
     }
   };
 
+  const [flash, setFlash] = useState(false);
+
   const statusColor = status === "ready" ? "text-green-600" : status === "restarting" ? "text-amber-600" : "text-slate-500";
   const dotColor = status === "ready" ? "bg-green-400" : status === "restarting" ? "bg-amber-400 animate-pulse" : "bg-slate-300";
 
@@ -632,14 +634,18 @@ function RestartButton({ environmentName }: { environmentName: string }) {
         </button>
         <button
           type="button"
-          onClick={handleCheckStatus}
+          onClick={async () => {
+            await handleCheckStatus();
+            setFlash(true);
+            setTimeout(() => setFlash(false), 600);
+          }}
           disabled={polling}
           className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
         >
           Check Status
         </button>
         {status && (
-          <div className="flex items-center gap-1.5">
+          <div className={cn("flex items-center gap-1.5 transition-opacity duration-300", flash && "opacity-0")}>
             <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", dotColor)} />
             <span className={cn("text-xs font-medium", statusColor)}>{status}</span>
           </div>
