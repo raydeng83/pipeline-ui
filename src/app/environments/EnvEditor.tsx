@@ -546,6 +546,112 @@ function TestConnectionButton({
   );
 }
 
+// ── Restart Tenant ────────────────────────────────────────────────────────
+
+function RestartButton({ environmentName }: { environmentName: string }) {
+  const [status, setStatus] = useState<string | null>(null);
+  const [polling, setPolling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pollingRef = useRef(false);
+
+  const callRestart = async (action: "restart" | "status") => {
+    const res = await fetch("/api/environments/restart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ environment: environmentName, action }),
+    });
+    return res.json() as Promise<{ stdout: string; stderr: string; exitCode: number | null }>;
+  };
+
+  const pollStatus = useCallback(async () => {
+    pollingRef.current = true;
+    setPolling(true);
+    setError(null);
+    while (pollingRef.current) {
+      await new Promise((r) => setTimeout(r, 10_000));
+      if (!pollingRef.current) break;
+      try {
+        const res = await callRestart("status");
+        const s = res.stdout.trim();
+        setStatus(s);
+        if (s === "ready") {
+          pollingRef.current = false;
+          break;
+        }
+      } catch {
+        setError("Failed to check status");
+        pollingRef.current = false;
+        break;
+      }
+    }
+    setPolling(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [environmentName]);
+
+  useEffect(() => { return () => { pollingRef.current = false; }; }, []);
+
+  const handleRestart = async () => {
+    setError(null);
+    setStatus(null);
+    try {
+      const res = await callRestart("restart");
+      if (res.exitCode !== 0) {
+        setError(res.stderr || res.stdout || "Restart failed");
+        return;
+      }
+      setStatus("restarting");
+      pollStatus();
+    } catch {
+      setError("Failed to initiate restart");
+    }
+  };
+
+  const handleCheckStatus = async () => {
+    setError(null);
+    try {
+      const res = await callRestart("status");
+      setStatus(res.stdout.trim());
+    } catch {
+      setError("Failed to check status");
+    }
+  };
+
+  const statusColor = status === "ready" ? "text-green-600" : status === "restarting" ? "text-amber-600" : "text-slate-500";
+  const dotColor = status === "ready" ? "bg-green-400" : status === "restarting" ? "bg-amber-400 animate-pulse" : "bg-slate-300";
+
+  return (
+    <div className="space-y-2 w-full">
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={handleRestart}
+          disabled={polling}
+          className="px-3 py-1.5 text-xs font-medium rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors"
+        >
+          {polling ? "Restarting..." : "Restart Tenant"}
+        </button>
+        <button
+          type="button"
+          onClick={handleCheckStatus}
+          disabled={polling}
+          className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
+        >
+          Check Status
+        </button>
+        {status && (
+          <div className="flex items-center gap-1.5">
+            <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", dotColor)} />
+            <span className={cn("text-xs font-medium", statusColor)}>{status}</span>
+          </div>
+        )}
+        {error && (
+          <span className="text-xs text-red-500">{error}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Editor ───────────────────────────────────────────────────────────────
 
 type Section = "fr-config" | "log-api";
@@ -747,9 +853,10 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
           {/* ═══════════ fr-config section ═══════════ */}
           {section === "fr-config" && (
             <>
-              {/* Test connection */}
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+              {/* Test connection & restart */}
+              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 space-y-3">
                 <TestConnectionButton liveValues={values} />
+                <RestartButton environmentName={environment.name} />
               </div>
 
               {/* Sub-tabs: Form / Raw */}

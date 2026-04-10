@@ -140,11 +140,11 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // ── spawnFrConfig ─────────────────────────────────────────────────────────────
 
-export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<string, string> }): {
+export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<string, string>; globalArgs?: string[] }): {
   stream: ReadableStream<string>;
   abort: () => void;
 } {
-  const { command, environment, scopes, scopeSelections, envOverrides } = options;
+  const { command, environment, scopes, scopeSelections, envOverrides, globalArgs = [] } = options;
   const baseEnv = buildEnv(environment, envOverrides);
 
   // Build the list of CLI invocations
@@ -194,7 +194,7 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             const envDir = path.join(ENVIRONMENTS_DIR, environment);
             const proc = spawn(
               command,
-              [entry.scope, "--debug", ...entry.extraArgs],
+              [entry.scope, "--debug", ...globalArgs, ...entry.extraArgs],
               { env: procEnv, shell: true, cwd: envDir }
             );
             currentProc = proc;

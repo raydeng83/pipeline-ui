@@ -281,10 +281,12 @@ function DryRunPhase({
 
 function FrConfigSection({
   task,
+  targetIsControlled,
   onComplete,
   onTaskStatusChange,
 }: {
   task: PromotionTask;
+  targetIsControlled?: boolean;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
@@ -309,17 +311,81 @@ function FrConfigSection({
   const frConfigItems = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
   const hasJourneys = task.items.some((i) => i.scope === "journeys");
 
-  const handlePromote = () => {
+  // DCC helper — calls /api/dcc endpoint for controlled environments
+  const callDcc = async (subcommand: string, dccArgs: string[] = []): Promise<{ stdout: string; stderr: string; exitCode: number | null }> => {
+    const res = await fetch("/api/dcc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ environment: task.target.environment, subcommand, args: dccArgs }),
+    });
+    return res.json();
+  };
+
+  const handlePromote = async () => {
     if (!confirmPromote) { setConfirmPromote(true); return; }
     setConfirmPromote(false);
     if (task.status === "new") onTaskStatusChange("in-progress");
+
+    if (targetIsControlled) {
+      // DCC Step 1: Check state
+      const stateRes = await callDcc("direct-control-state");
+      let stateJson: { status?: string } = {};
+      try { stateJson = JSON.parse(stateRes.stdout.trim()); } catch { /* ignore */ }
+
+      if (stateJson.status && stateJson.status !== "NO_SESSION") {
+        // Session already active — skip init, go straight to push
+      } else {
+        // DCC Step 2: Init session
+        const initRes = await callDcc("direct-control-init");
+        if (initRes.exitCode !== 0) {
+          onTaskStatusChange("failed");
+          return;
+        }
+
+        // Poll until SESSION_INITIALISED
+        const pollStart = Date.now();
+        while (Date.now() - pollStart < 120_000) {
+          await new Promise((r) => setTimeout(r, 5000));
+          const pollRes = await callDcc("direct-control-state");
+          let pollState: { status?: string } = {};
+          try { pollState = JSON.parse(pollRes.stdout.trim()); } catch { /* ignore */ }
+          if (pollState.status === "SESSION_INITIALISED") break;
+          if (pollState.status === "ERROR") {
+            await callDcc("direct-control-abort");
+            onTaskStatusChange("failed");
+            return;
+          }
+        }
+      }
+    }
+
+    // DCC Step 3 (or normal): Push with directControl flag
     run("/api/promote-items", {
       sourceEnvironment: task.source.environment,
       targetEnvironment: task.target.environment,
       includeDeps: hasJourneys ? includeDeps : false,
       scopeSelections: frConfigItems,
+      directControl: targetIsControlled,
     });
   };
+
+  // DCC Step 4: Apply after push completes (handled via effect on exitCode)
+  useEffect(() => {
+    if (!targetIsControlled || exitCode === null || running) return;
+
+    if (exitCode === 0) {
+      // Push succeeded — apply DCC changes
+      callDcc("direct-control-apply", ["--wait"]).then((res) => {
+        if (res.exitCode !== 0) {
+          callDcc("direct-control-abort");
+        }
+      });
+    } else {
+      // Push failed — abort DCC session
+      callDcc("direct-control-abort");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exitCode, running]);
 
   return (
     <div className="space-y-3">
@@ -327,6 +393,15 @@ function FrConfigSection({
         Push selected items from <span className="font-medium text-slate-700">{task.source.environment}</span> to <span className="font-medium text-slate-700">{task.target.environment}</span> with automatic ID remapping.
         After push, target is automatically pulled to sync local files for verification.
       </p>
+
+      {targetIsControlled && (
+        <div className="flex items-start gap-2 px-3 py-2 rounded-md bg-amber-50 border border-amber-200 text-xs text-amber-800">
+          <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <span>Controlled environment — changes will go through Direct Config Control (init &rarr; push via /mutable &rarr; apply).</span>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-1.5 text-[11px]">
         {frConfigItems.map(({ scope, items }) => (
@@ -504,6 +579,7 @@ function PromotePhase({
   frConfigScopes,
   frodoScopes,
   igaScopes,
+  targetIsControlled,
   visible,
   onComplete,
   onTaskStatusChange,
@@ -512,6 +588,7 @@ function PromotePhase({
   frConfigScopes: ConfigScope[];
   frodoScopes: string[];
   igaScopes: string[];
+  targetIsControlled?: boolean;
   visible: boolean;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
@@ -539,6 +616,7 @@ function PromotePhase({
             {sectionHeader("fr-config Promote", "text-slate-500")}
             <FrConfigSection
               task={task}
+              targetIsControlled={targetIsControlled}
               onComplete={onComplete}
               onTaskStatusChange={onTaskStatusChange}
             />
@@ -690,6 +768,7 @@ function VerifyPhase({
 
 export function PromoteExecution({
   task,
+  environments,
   onTaskStatusChange,
 }: {
   task: PromotionTask;
@@ -819,6 +898,7 @@ export function PromoteExecution({
           frConfigScopes={frConfigScopes}
           frodoScopes={frodoScopes}
           igaScopes={igaScopes}
+          targetIsControlled={(() => { const t = environments.find((e) => e.name === task.target.environment); return t?.type === "controlled" && !t?.devEnvironment; })()}
           visible={activePhase === "promote"}
           onComplete={(s) => updatePhase("promote", s)}
           onTaskStatusChange={onTaskStatusChange}

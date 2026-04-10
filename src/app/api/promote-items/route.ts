@@ -179,11 +179,13 @@ function remapIds(tempDirs: string[], scope: string, sourceNameToId: Map<string,
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { sourceEnvironment, targetEnvironment, scopeSelections, includeDeps } = body as {
+  const { sourceEnvironment, targetEnvironment, scopeSelections, includeDeps, directControl } = body as {
     sourceEnvironment: string;
     targetEnvironment: string;
     scopeSelections: ScopeSelection[];
     includeDeps?: boolean;
+    /** When true, pass --direct-control to fr-config-push for /mutable endpoints */
+    directControl?: boolean;
   };
 
   if (!sourceEnvironment || !targetEnvironment || !scopeSelections?.length) {
@@ -202,6 +204,7 @@ export async function POST(req: NextRequest) {
   // Get target environment's .env for CONFIG_DIR
   const targetEnvVars = parseEnvFile(getEnvFileContent(targetEnvironment));
   const targetConfigDirRel = targetEnvVars.CONFIG_DIR ?? "./config";
+
 
   const stream = new ReadableStream<string>({
     async start(controller) {
@@ -492,8 +495,6 @@ export async function POST(req: NextRequest) {
         }
 
         // Step 3: Push from temp dir to target environment
-        emit({ type: "scope-start", scope: "push", ts: Date.now() });
-        emit({ type: "stdout", data: `Pushing remapped config to ${targetEnvironment}...\n`, ts: Date.now() });
 
         // Only push scopes that actually have files in the temp dir
         const hasFiles = (dir: string): boolean => {
@@ -513,19 +514,21 @@ export async function POST(req: NextRequest) {
 
         if (pushScopes.length === 0) {
           emit({ type: "stdout", data: "No items to push — temp directory is empty.\n", ts: Date.now() });
-          emit({ type: "scope-end", scope: "push", code: 0, ts: Date.now() });
           emit({ type: "exit", code: 0, ts: Date.now() });
           controller.close();
           return;
         }
 
-        emit({ type: "stdout", data: `Pushing ${pushScopes.length} scope(s): ${pushScopes.join(", ")}\n`, ts: Date.now() });
+        // ── Push ──────────────────────────────────────────────────────────
+        emit({ type: "scope-start", scope: "push", ts: Date.now() });
+        emit({ type: "stdout", data: `Pushing ${pushScopes.length} scope(s): ${pushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
 
         const { stream: pushStream } = spawnFrConfig({
           command: "fr-config-push",
           environment: targetEnvironment,
           scopes: pushScopes as import("@/lib/fr-config-types").ConfigScope[],
           envOverrides: { CONFIG_DIR: tempConfigDir },
+          ...(directControl ? { globalArgs: ["--direct-control"] } : {}),
         });
 
         const reader = pushStream.getReader();
@@ -537,14 +540,11 @@ export async function POST(req: NextRequest) {
             if (!line.trim()) continue;
             try {
               const parsed = JSON.parse(line);
-              // Capture exit code but don't forward it
               if (parsed.type === "exit") {
                 if (parsed.code !== 0) pushFailed = true;
                 continue;
               }
-              // Skip inner scope-start/scope-end to avoid confusing the viewer
               if (parsed.type === "scope-start" || parsed.type === "scope-end") {
-                // Convert to stdout so user sees progress
                 emit({ type: "stdout", data: `[${parsed.scope}] ${parsed.type === "scope-start" ? "started" : `finished (exit ${parsed.code})`}\n`, ts: Date.now() });
                 continue;
               }
