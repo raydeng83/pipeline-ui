@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T17:40:09.270Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkent-temp-dcc-test.forgeblocks.com/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-dbconnector-jdbcdriver": {
+      "_id": "esv-dbconnector-jdbcdriver",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2026-04-09T16:43:46.966535Z",
+      "lastChangedBy": "manikugupta@deloitte.com",
+      "loaded": true,
+      "value": "ghjk"
+    }
+  }
+}

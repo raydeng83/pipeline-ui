@@ -1,6 +1,6 @@
 {
   "_id": "",
-  "_rev": "-1238420736",
+  "_rev": "-1287205702",
   "_type": {
     "_id": "oauth-oidc",
     "collection": false,
@@ -250,7 +250,8 @@
     "useForceAuthnForPromptLogin": false
   },
   "aiAgentsConfig": {
-    "aiAgentsEnabled": false
+    "aiAgentsEnabled": false,
+    "aiAgentsIdentityObjectMapping": []
   },
   "cibaConfig": {
     "cibaAuthReqIdLifetime": 600,
