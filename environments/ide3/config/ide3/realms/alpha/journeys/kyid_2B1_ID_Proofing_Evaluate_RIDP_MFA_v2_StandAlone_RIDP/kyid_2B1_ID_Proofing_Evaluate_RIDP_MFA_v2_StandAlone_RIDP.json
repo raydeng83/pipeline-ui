@@ -1,6 +1,6 @@
 {
   "_id": "kyid_2B1_ID_Proofing_Evaluate_RIDP_MFA_v2_StandAlone_RIDP",
-  "_rev": "1729617622",
+  "_rev": "1323291832",
   "description": "Inner Journey for standalone RIDP Flow",
   "enabled": true,
   "entryNodeId": "e7998f98-28a8-4d3b-bc1c-b0fdce50631d",
@@ -13,6 +13,7 @@
       "connections": {
         "emailsWithVerifiedLexID": "843fc3a1-cee6-40fa-9c13-1ca7e2180f82",
         "exactMatch": "843fc3a1-cee6-40fa-9c13-1ca7e2180f82",
+        "exactMatchPatchUser": "843fc3a1-cee6-40fa-9c13-1ca7e2180f82",
         "highRiskTransaction": "7a4a672e-f7e3-4640-b177-14a342b5e902",
         "inputLink2TerminatedAccount": "843fc3a1-cee6-40fa-9c13-1ca7e2180f82",
         "inputNotMatchingVerifiedIdentity": "843fc3a1-cee6-40fa-9c13-1ca7e2180f82",

@@ -40,9 +40,13 @@
     {
       "displayName": "noKOGAccount",
       "id": "noKOGAccount"
+    },
+    {
+      "displayName": "exactMatchPatchUser",
+      "id": "exactMatchPatchUser"
     }
   ],
-  "_rev": "230800583",
+  "_rev": "-571478428",
   "_type": {
     "_id": "ScriptedDecisionNode",
     "collection": true,
@@ -62,7 +66,8 @@
     "noKOGAccountFound",
     "noMatchPartialMatch",
     "emailsWithVerifiedLexID",
-    "noKOGAccount"
+    "noKOGAccount",
+    "exactMatchPatchUser"
   ],
   "outputs": [
     "*"
