@@ -68,7 +68,12 @@ function pathToTaskScopeAndItem(relativePath: string): { scope: string; itemId: 
     return { scope, itemId };
   }
   if (FILE_SELECTABLE_PATH_SCOPES.has(scope)) {
-    if (relativePath.includes("scripts-content/")) return { scope, itemId: null };
+    if (relativePath.includes("scripts-content/")) {
+      // Script content file: scripts-content/{type}/{ScriptName}.ext
+      // Use the filename (without extension) prefixed with "name:" so promote-items can resolve it
+      const fileName = parts[parts.length - 1].replace(/\.[^.]+$/, "");
+      return { scope, itemId: `name:${fileName}` };
+    }
 
     // Scripts are realm-based (realms/<realm>/scripts/scripts-config/<uuid>.json).
     // The item ID is the filename (UUID), matching what scriptItems() returns in the audit API.

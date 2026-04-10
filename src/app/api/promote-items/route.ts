@@ -209,6 +209,34 @@ export async function POST(req: NextRequest) {
       };
 
       try {
+        // Step 0: Resolve name: prefixed items to UUIDs
+        for (const sel of scopeSelections) {
+          if (sel.scope !== "scripts" || !sel.items) continue;
+          const nameItems = sel.items.filter((id) => id.startsWith("name:"));
+          if (nameItems.length === 0) continue;
+
+          const sourceDirs = resolveScopeDirs(sourceConfigDir, "scripts");
+          const nameToUuid = new Map<string, string>();
+          for (const dir of sourceDirs) {
+            const configDir = path.join(dir, "scripts-config");
+            if (!fs.existsSync(configDir)) continue;
+            for (const f of fs.readdirSync(configDir)) {
+              if (!f.endsWith(".json")) continue;
+              try {
+                const json = JSON.parse(fs.readFileSync(path.join(configDir, f), "utf-8"));
+                if (json.name) nameToUuid.set(json.name, f);
+              } catch { /* skip */ }
+            }
+          }
+
+          sel.items = sel.items.map((id) => {
+            if (!id.startsWith("name:")) return id;
+            const name = id.slice(5);
+            const uuid = nameToUuid.get(name);
+            return uuid ?? id;
+          });
+        }
+
         // Step 1: Copy only selected items from source to temp
         emit({ type: "scope-start", scope: "prepare", ts: Date.now() });
         emit({ type: "stdout", data: "Creating temporary copy of selected items...\n", ts: Date.now() });
@@ -342,13 +370,19 @@ export async function POST(req: NextRequest) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          // Forward push output, skip its exit event
           for (const line of value.split("\n")) {
             if (!line.trim()) continue;
             try {
               const parsed = JSON.parse(line);
+              // Capture exit code but don't forward it
               if (parsed.type === "exit") {
                 if (parsed.code !== 0) pushFailed = true;
+                continue;
+              }
+              // Skip inner scope-start/scope-end to avoid confusing the viewer
+              if (parsed.type === "scope-start" || parsed.type === "scope-end") {
+                // Convert to stdout so user sees progress
+                emit({ type: "stdout", data: `[${parsed.scope}] ${parsed.type === "scope-start" ? "started" : `finished (exit ${parsed.code})`}\n`, ts: Date.now() });
                 continue;
               }
               controller.enqueue(line + "\n");
@@ -359,6 +393,81 @@ export async function POST(req: NextRequest) {
         }
 
         emit({ type: "scope-end", scope: "push", code: pushFailed ? 1 : 0, ts: Date.now() });
+
+        // Step 4: Pull target to sync local files (only if push succeeded)
+        if (!pushFailed) {
+          emit({ type: "scope-start", scope: "pull-target", ts: Date.now() });
+          emit({ type: "stdout", data: `Pulling pushed items from ${targetEnvironment} to sync local files...\n`, ts: Date.now() });
+
+          // Resolve script items to names for --name flag (fr-config-pull uses --name, not filenameFilter)
+          const uuidToName = new Map<string, string>();
+          for (const dir of resolveScopeDirs(tempConfigDir, "scripts")) {
+            const cfgDir = path.join(dir, "scripts-config");
+            if (!fs.existsSync(cfgDir)) continue;
+            for (const f of fs.readdirSync(cfgDir)) {
+              if (!f.endsWith(".json")) continue;
+              try {
+                const json = JSON.parse(fs.readFileSync(path.join(cfgDir, f), "utf-8"));
+                if (json.name) {
+                  uuidToName.set(path.basename(f, ".json"), json.name);
+                  uuidToName.set(`name:${json.name}`, json.name);
+                }
+              } catch { /* skip */ }
+            }
+          }
+
+          // Pull each scope/item using spawn directly (scripts need --name flag)
+          const { spawn: spawnProc } = await import("child_process");
+          const pullEnvVars = parseEnvFile(getEnvFileContent(targetEnvironment));
+          const pullEnv = { ...process.env, ...pullEnvVars };
+          const pullCwd = path.join(process.cwd(), "environments", targetEnvironment);
+
+          for (const sel of scopeSelections) {
+            if (sel.scope === "scripts" && sel.items && sel.items.length > 0) {
+              // Pull each script by name
+              for (const itemId of sel.items) {
+                const scriptName = uuidToName.get(itemId) ?? uuidToName.get(itemId.replace(/\.json$/, "")) ?? itemId;
+                emit({ type: "stdout", data: `  Pulling script "${scriptName}"...\n`, ts: Date.now() });
+                const code = await new Promise<number | null>((resolve) => {
+                  const proc = spawnProc("fr-config-pull", ["scripts", "--name", scriptName], { env: pullEnv, shell: true, cwd: pullCwd });
+                  proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
+                  proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
+                  proc.on("close", (c) => resolve(c));
+                  proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
+                });
+                if (code !== 0) emit({ type: "stderr", data: `  Pull failed for "${scriptName}" (exit ${code})\n`, ts: Date.now() });
+              }
+            } else if (sel.items && sel.items.length > 0) {
+              // Non-script scopes with item selection: pull by --name if supported
+              for (const itemId of sel.items) {
+                emit({ type: "stdout", data: `  Pulling ${sel.scope} "${itemId}"...\n`, ts: Date.now() });
+                const code = await new Promise<number | null>((resolve) => {
+                  const proc = spawnProc("fr-config-pull", [sel.scope, "--name", itemId], { env: pullEnv, shell: true, cwd: pullCwd });
+                  proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
+                  proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
+                  proc.on("close", (c) => resolve(c));
+                  proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
+                });
+                if (code !== 0) emit({ type: "stderr", data: `  Pull failed for "${itemId}" (exit ${code})\n`, ts: Date.now() });
+              }
+            } else {
+              // Entire scope: pull all
+              emit({ type: "stdout", data: `  Pulling ${sel.scope} (all)...\n`, ts: Date.now() });
+              const code = await new Promise<number | null>((resolve) => {
+                const proc = spawnProc("fr-config-pull", [sel.scope], { env: pullEnv, shell: true, cwd: pullCwd });
+                proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
+                proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
+                proc.on("close", (c) => resolve(c));
+                proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
+              });
+              if (code !== 0) emit({ type: "stderr", data: `  Pull failed for ${sel.scope} (exit ${code})\n`, ts: Date.now() });
+            }
+          }
+
+          emit({ type: "scope-end", scope: "pull-target", code: 0, ts: Date.now() });
+          emit({ type: "stdout", data: "Local files synced with target.\n", ts: Date.now() });
+        }
+
         emit({ type: "exit", code: pushFailed ? 1 : 0, ts: Date.now() });
       } catch (err) {
         emit({ type: "stderr", data: `Error: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });

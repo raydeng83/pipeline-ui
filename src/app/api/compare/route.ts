@@ -124,7 +124,9 @@ export async function POST(req: NextRequest) {
           const itemPatterns: RegExp[] = [];
           for (const sel of scopeSelections) {
             if (!sel.items || sel.items.length === 0) continue; // all items — no filter
-            for (const item of sel.items) {
+            for (let item of sel.items) {
+              // Strip name: prefix used for script content files
+              if (item.startsWith("name:")) item = item.slice(5);
               // Match file paths containing the item name (directory name or filename stem)
               const escaped = item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
               itemPatterns.push(new RegExp(`(^|/)${escaped}(/|\\.|$)`, "i"));
@@ -138,6 +140,11 @@ export async function POST(req: NextRequest) {
             report.summary = { added: 0, removed: 0, modified: 0, unchanged: 0 };
             for (const f of report.files) report.summary[f.status]++;
           }
+        }
+
+        // Strip journey tree if journeys aren't in the selected scopes
+        if (scopeSelections && !effectiveScopes.includes("journeys" as ConfigScope)) {
+          report.journeyTree = undefined;
         }
 
         enqueue({ type: "report", data: JSON.stringify(report), ts: Date.now() });

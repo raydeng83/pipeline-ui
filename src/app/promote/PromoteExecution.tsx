@@ -322,7 +322,7 @@ function FrConfigSection({
     <div className="space-y-3">
       <p className="text-xs text-slate-500">
         Push selected items from <span className="font-medium text-slate-700">{task.source.environment}</span> to <span className="font-medium text-slate-700">{task.target.environment}</span> with automatic ID remapping.
-        Items matching by name on the target will be overwritten; new items will be created.
+        After push, target is automatically pulled to sync local files for verification.
       </p>
 
       <div className="flex flex-wrap gap-1.5 text-[11px]">
