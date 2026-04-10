@@ -364,9 +364,13 @@ function SectionsView({ environment }: { environment: string }) {
   };
 
   const scopeEntry = auditData.find((e) => e.scope === selectedScope);
+  const filterLower = itemFilter.trim().toLowerCase();
   const filteredItems = scopeEntry
-    ? itemFilter.trim()
-      ? scopeEntry.items.filter((i) => i.label.toLowerCase().includes(itemFilter.toLowerCase()))
+    ? filterLower
+      ? scopeEntry.items.filter((i) =>
+          i.label.toLowerCase().includes(filterLower) ||
+          (i.value !== undefined && i.value.toLowerCase().includes(filterLower))
+        )
       : scopeEntry.items
     : [];
 

@@ -63,6 +63,8 @@ export interface AuditItem {
   id: string;
   /** Human-readable display name */
   label: string;
+  /** Decoded value, populated for ESV variables */
+  value?: string;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -142,6 +144,32 @@ function genericItems(dir: string, filter: "files" | "dirs"): AuditItem[] {
   return listEntries(dir, filter).map((name) => ({ id: name, label: name }));
 }
 
+/** Read the decoded ESV variable value from a file (Frodo or fr-config-manager format). */
+function readVariableValue(filePath: string): string | undefined {
+  try {
+    const json = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    // Frodo format: { variable: { "<id>": { value: "..." } } }
+    if (json.variable && typeof json.variable === "object") {
+      const entry = Object.values(json.variable)[0] as Record<string, unknown>;
+      if (typeof entry?.value === "string") return entry.value;
+    }
+    // fr-config-manager format: { valueBase64: "..." } — skip ${...} placeholders
+    if (typeof json.valueBase64 === "string" && !json.valueBase64.startsWith("${")) {
+      return json.valueBase64;
+    }
+  } catch { /* ignore */ }
+  return undefined;
+}
+
+/** Variables: id = label = filename, value = decoded ESV value if available */
+function variableItems(dir: string): AuditItem[] {
+  return listEntries(dir, "files").map((name) => ({
+    id: name,
+    label: name,
+    value: readVariableValue(path.join(dir, name)),
+  }));
+}
+
 // ── Scope audit ────────────────────────────────────────────────────────────────
 
 function auditScope(configDir: string, scope: string) {
@@ -193,6 +221,8 @@ function auditScope(configDir: string, scope: string) {
     const nodesSubDir = path.join(scopeDir, "nodes");
     const itemsDir = (scope === "custom-nodes" && fs.existsSync(nodesSubDir)) ? nodesSubDir : scopeDir;
     items = genericItems(itemsDir, "dirs");
+  } else if (scope === "variables") {
+    items = variableItems(scopeDir);
   } else {
     items = genericItems(scopeDir, "files");
   }
