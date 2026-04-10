@@ -21,6 +21,7 @@ export interface PromotionTask {
   source: TaskEndpoint;
   target: TaskEndpoint;
   items: ScopeSelection[];
+  includeDeps?: boolean;
   createdAt: string;
   updatedAt: string;
 }

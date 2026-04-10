@@ -291,6 +291,7 @@ function FrConfigSection({
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
   const [confirmPromote, setConfirmPromote] = useState(false);
+  const [includeDeps, setIncludeDeps] = useState(task.includeDeps ?? false);
   const onCompleteRef = useRef(onComplete);
   const onTaskStatusRef = useRef(onTaskStatusChange);
   useEffect(() => { onCompleteRef.current = onComplete; });
@@ -306,6 +307,7 @@ function FrConfigSection({
   }, [exitCode, running]);
 
   const frConfigItems = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
+  const hasJourneys = task.items.some((i) => i.scope === "journeys");
 
   const handlePromote = () => {
     if (!confirmPromote) { setConfirmPromote(true); return; }
@@ -314,6 +316,7 @@ function FrConfigSection({
     run("/api/promote-items", {
       sourceEnvironment: task.source.environment,
       targetEnvironment: task.target.environment,
+      includeDeps: hasJourneys ? includeDeps : false,
       scopeSelections: frConfigItems,
     });
   };
@@ -333,6 +336,21 @@ function FrConfigSection({
           </span>
         ))}
       </div>
+
+      {hasJourneys && (
+        <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={includeDeps}
+            onChange={(e) => setIncludeDeps(e.target.checked)}
+            disabled={running}
+            className="accent-sky-600"
+          />
+          <span>
+            Include Dependencies (InnerTree, Scripts...)
+          </span>
+        </label>
+      )}
 
       <div className="flex items-center gap-2">
         {confirmPromote ? (

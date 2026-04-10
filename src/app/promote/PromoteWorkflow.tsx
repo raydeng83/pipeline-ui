@@ -93,6 +93,7 @@ interface TaskFormState {
   source: TaskEndpoint;
   target: TaskEndpoint;
   items: ScopeSelection[];
+  includeDeps: boolean;
 }
 
 function emptyForm(environments: Environment[]): TaskFormState {
@@ -103,6 +104,7 @@ function emptyForm(environments: Environment[]): TaskFormState {
     source: { environment: first, mode: "remote" },
     target: { environment: first, mode: "remote" },
     items: [],
+    includeDeps: false,
   };
 }
 
@@ -113,6 +115,7 @@ function taskToForm(task: PromotionTask): TaskFormState {
     source: task.source,
     target: task.target,
     items: task.items,
+    includeDeps: task.includeDeps ?? false,
   };
 }
 
@@ -238,6 +241,8 @@ function TaskForm({
               }).filter((i): i is ScopeSelection => i !== null);
               onChange({ items: updated });
             }}
+            includeDeps={form.includeDeps}
+            onIncludeDepsChange={(v) => onChange({ includeDeps: v })}
           />
         )}
 
@@ -301,11 +306,15 @@ function ScopesSummary({
   sourceEnvironment,
   onRemoveScope,
   onRemoveItem,
+  includeDeps,
+  onIncludeDepsChange,
 }: {
   items: ScopeSelection[];
   sourceEnvironment: string;
   onRemoveScope?: (scope: string) => void;
   onRemoveItem?: (scope: string, itemId: string) => void;
+  includeDeps?: boolean;
+  onIncludeDepsChange?: (v: boolean) => void;
 }) {
   const [open, setOpen] = useState(true);
   const [auditMap, setAuditMap] = useState<Record<string, ScopeAuditEntry>>({});
@@ -330,7 +339,7 @@ function ScopesSummary({
     <div className="space-y-2">
       {/* Pills row + toggle */}
       <div className="flex items-start gap-2">
-        <div className="flex flex-wrap gap-1.5 flex-1">
+        <div className="flex flex-wrap gap-1.5 items-center flex-1">
           {items.map(({ scope, items: selected }) => {
             const cmdType = CONFIG_SCOPES.find((s) => s.value === scope)?.commandType ?? "fr-config";
             const isAll = selected === undefined || selected === null;
@@ -362,6 +371,23 @@ function ScopesSummary({
               </span>
             );
           })}
+          {items.some((i) => i.scope === "journeys") && (
+            onIncludeDepsChange ? (
+              <label className="inline-flex items-center gap-1 text-[10px] text-sky-700 cursor-pointer select-none ml-1">
+                <input
+                  type="checkbox"
+                  checked={includeDeps ?? false}
+                  onChange={(e) => onIncludeDepsChange(e.target.checked)}
+                  className="accent-sky-600 w-3 h-3"
+                />
+                Include Dependencies (InnerTree, Scripts...)
+              </label>
+            ) : (
+              <span className={cn("text-[10px] ml-1 px-1.5 py-0.5 rounded", includeDeps ? "text-sky-700 bg-sky-50" : "text-slate-400 bg-slate-50")}>
+                {includeDeps ? "dependencies included" : "dependencies NOT included"}
+              </span>
+            )
+          )}
         </div>
         <button
           type="button"
@@ -530,7 +556,7 @@ function TaskDetail({
       </div>
 
       {/* Scopes */}
-      <ScopesSummary items={task.items} sourceEnvironment={task.source.environment} />
+      <ScopesSummary items={task.items} sourceEnvironment={task.source.environment} includeDeps={task.includeDeps} />
     </div>
   );
 
@@ -621,6 +647,7 @@ export function PromoteWorkflow({
           source: form.source,
           target: form.target,
           items,
+          includeDeps: form.includeDeps,
         }),
       });
       if (res.ok) {
@@ -639,6 +666,7 @@ export function PromoteWorkflow({
           source: form.source,
           target: form.target,
           items,
+          includeDeps: form.includeDeps,
         }),
       });
       if (res.ok) {
