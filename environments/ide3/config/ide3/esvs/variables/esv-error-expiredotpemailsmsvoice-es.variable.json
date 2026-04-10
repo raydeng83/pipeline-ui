@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:18.217Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-error-expiredotpemailsmsvoice-es": {
+      "_id": "esv-error-expiredotpemailsmsvoice-es",
+      "description": "Error Message for Expired OTP of Email Voice and SMS in Spanish",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:29:31.256584Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "El código ha caducado. Haga clic en el botón \"Reenviar código\" para recibir un nuevo código."
+    }
+  }
+}

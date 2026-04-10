@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:32.127Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-generic-workflow-api": {
+      "_id": "esv-generic-workflow-api",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-08-19T14:51:01.267462Z",
+      "lastChangedBy": "rapokharna@deloitte.com",
+      "loaded": true,
+      "value": "iga/governance/requests/d20dd98c-2f71-4407-99ba-4a48c3dc759d"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:50:06.010Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-kyid-kog-home": {
+      "_id": "esv-kyid-kog-home",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-07-15T08:51:58.43424Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "https://ide3.kog.ky.gov/home/"
+    }
+  }
+}

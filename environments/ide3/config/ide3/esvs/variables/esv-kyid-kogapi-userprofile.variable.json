@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:50:13.948Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-kyid-kogapi-userprofile": {
+      "_id": "esv-kyid-kogapi-userprofile",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-07-09T06:20:53.445128Z",
+      "lastChangedBy": "shubhamsingh14@deloitte.com",
+      "loaded": true,
+      "value": "https://dev.sih.ngateway.ky.gov/ide3/kyidapi/V1/getuserdetails"
+    }
+  }
+}

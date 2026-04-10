@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:55.531Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-kyid-cert-logs-header": {
+      "_id": "esv-kyid-cert-logs-header",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2026-02-24T09:44:52.799835Z",
+      "lastChangedBy": "priyaagrawal3@deloitte.com",
+      "loaded": true,
+      "value": "255b0e1d46ec488c95dab3bef2c55b94"
+    }
+  }
+}

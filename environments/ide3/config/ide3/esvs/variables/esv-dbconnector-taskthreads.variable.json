@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:10.072Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-dbconnector-taskthreads": {
+      "_id": "esv-dbconnector-taskthreads",
+      "description": "",
+      "expressionType": "int",
+      "lastChangeDate": "2025-11-20T05:10:20.779385Z",
+      "lastChangedBy": "navmm@deloitte.com",
+      "loaded": true,
+      "value": "5"
+    }
+  }
+}

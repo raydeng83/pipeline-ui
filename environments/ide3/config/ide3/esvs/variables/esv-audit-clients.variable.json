@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:05.295Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-audit-clients": {
+      "_id": "esv-audit-clients",
+      "description": "Add client coma separated only.",
+      "expressionType": "string",
+      "lastChangeDate": "2025-09-15T17:15:32.616776Z",
+      "lastChangedBy": "shubhampathak@deloitte.com",
+      "loaded": true,
+      "value": "idmAdminClient"
+    }
+  }
+}

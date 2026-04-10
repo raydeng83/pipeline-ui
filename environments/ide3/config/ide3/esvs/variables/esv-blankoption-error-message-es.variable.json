@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:06.466Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-blankoption-error-message-es": {
+      "_id": "esv-blankoption-error-message-es",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:28:57.039425Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "Seleccione un método MFA válido de la lista."
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:24.654Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-error-userclaimapi-unexpected-es": {
+      "_id": "esv-error-userclaimapi-unexpected-es",
+      "description": "Error Message - User Claim API - unexpected Error - In Spanish",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:30:13.156227Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "Se ha producido un error inesperado al procesar la solicitud. Intente iniciar sesión nuevamente."
+    }
+  }
+}

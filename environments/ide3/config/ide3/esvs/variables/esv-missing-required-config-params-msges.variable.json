@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:50:23.740Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-missing-required-config-params-msges": {
+      "_id": "esv-missing-required-config-params-msges",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:34:03.878443Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "Se ha producido un error de configuraciÃÂ³n desconocido. Por favor contacte al administrador."
+    }
+  }
+}

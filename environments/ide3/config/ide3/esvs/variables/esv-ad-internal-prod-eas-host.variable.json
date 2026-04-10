@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:48:53.321Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-ad-internal-prod-eas-host": {
+      "_id": "esv-ad-internal-prod-eas-host",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:27:57.186236Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "kytest.dev.ky.gov"
+    }
+  }
+}

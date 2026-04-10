@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:19.538Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-error-invalidphonenumber-en": {
+      "_id": "esv-error-invalidphonenumber-en",
+      "description": "Error Message Invalid Phone Number in English",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:29:40.710015Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "Invalid Phone Number Entered"
+    }
+  }
+}

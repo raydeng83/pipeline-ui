@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:49:07.658Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-captchathreshold": {
+      "_id": "esv-captchathreshold",
+      "description": "Captcha Threshold value",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:29:02.657616Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "0.0"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:50:37.611Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-saml-session-timeout-value": {
+      "_id": "esv-saml-session-timeout-value",
+      "description": "Please mention the time in minutes",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:34:30.760882Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "30"
+    }
+  }
+}

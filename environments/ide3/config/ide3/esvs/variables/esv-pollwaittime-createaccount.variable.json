@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:50:28.346Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-pollwaittime-createaccount": {
+      "_id": "esv-pollwaittime-createaccount",
+      "description": "",
+      "expressionType": "int",
+      "lastChangeDate": "2026-01-12T06:23:48.102234Z",
+      "lastChangedBy": "priyaagrawal3@deloitte.com",
+      "loaded": true,
+      "value": "2"
+    }
+  }
+}

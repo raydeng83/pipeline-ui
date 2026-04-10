@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:50:20.463Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-mailserver-username": {
+      "_id": "esv-mailserver-username",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-23T10:21:10.440677Z",
+      "lastChangedBy": "dchaturya@deloitte.com",
+      "loaded": true,
+      "value": "test"
+    }
+  }
+}

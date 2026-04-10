@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-10T14:50:24.590Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb3-use1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-name-claims-url": {
+      "_id": "esv-name-claims-url",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T09:34:05.603455Z",
+      "lastChangedBy": "frconfigserviceaccount",
+      "loaded": true,
+      "value": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+    }
+  }
+}
