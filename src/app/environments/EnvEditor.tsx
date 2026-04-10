@@ -572,6 +572,33 @@ function RestartButton({ environmentName }: { environmentName: string }) {
 
   useEffect(() => { return () => { pollingRef.current = false; }; }, []);
 
+  const startPolling = useCallback(async () => {
+    pollingRef.current = true;
+    setPolling(true);
+    setFinalStatus(null);
+    while (pollingRef.current) {
+      try {
+        const statusRes = await callRestart("status");
+        const s = statusRes.stdout.trim();
+        log(`Status: ${s}`);
+        if (s === "ready") {
+          log("Environment is ready.");
+          setFinalStatus("ready");
+          pollingRef.current = false;
+          break;
+        }
+      } catch {
+        log("Error: Failed to check status");
+        setFinalStatus("error");
+        pollingRef.current = false;
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 10_000));
+    }
+    setPolling(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [environmentName]);
+
   const handleRestart = async () => {
     setLogs([]);
     setFinalStatus(null);
@@ -584,33 +611,18 @@ function RestartButton({ environmentName }: { environmentName: string }) {
         return;
       }
       log("Restart initiated. Polling status...");
-      pollingRef.current = true;
-      setPolling(true);
-      while (pollingRef.current) {
-        await new Promise((r) => setTimeout(r, 10_000));
-        if (!pollingRef.current) break;
-        try {
-          const statusRes = await callRestart("status");
-          const s = statusRes.stdout.trim();
-          log(`Status: ${s}`);
-          if (s === "ready") {
-            log("Restart complete.");
-            setFinalStatus("ready");
-            pollingRef.current = false;
-            break;
-          }
-        } catch {
-          log("Error: Failed to check status");
-          setFinalStatus("error");
-          pollingRef.current = false;
-          break;
-        }
-      }
-      setPolling(false);
+      startPolling();
     } catch {
       log("Error: Failed to initiate restart");
       setFinalStatus("error");
     }
+  };
+
+  const handlePollStatus = () => {
+    setLogs([]);
+    setFinalStatus(null);
+    log("Polling status...");
+    startPolling();
   };
 
   const statusDot = finalStatus === "ready" ? "bg-green-400" : finalStatus === "error" ? "bg-red-400" : polling ? "bg-amber-400 animate-pulse" : "bg-slate-300";
@@ -626,15 +638,23 @@ function RestartButton({ environmentName }: { environmentName: string }) {
           disabled={polling}
           className="px-3 py-1.5 text-xs font-medium rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors"
         >
-          {polling ? "Restarting..." : "Restart Tenant"}
+          Restart Tenant
+        </button>
+        <button
+          type="button"
+          onClick={handlePollStatus}
+          disabled={polling}
+          className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
+        >
+          Poll Status
         </button>
         {polling && (
           <button
             type="button"
             onClick={() => { pollingRef.current = false; }}
-            className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-500 hover:bg-slate-50 transition-colors"
           >
-            Stop Polling
+            Stop
           </button>
         )}
       </div>
