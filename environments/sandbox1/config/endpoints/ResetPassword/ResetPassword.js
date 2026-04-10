@@ -43,60 +43,63 @@ function generatePassword(length) {
 function delay(ms){
           logger.error("Inside Delay Function")
          var StartTime = Date.now();
-         var timeDiff =  Date.now() - StartTime
          while ( Date.now() - StartTime < ms ){
-          
+           //  busy wait for delay
          }
        }
 
 (function () {
+    var code = -1;
    try {
     var delayValue = identityServer.getProperty("esv.reset.password.delay")
     var randomKnownPass=generatePassword(8);
-  var code = -1;
+     logger.error("try - request content ="+request.content)
   if(request.content.TempPassword){
     randomKnownPass = request.content.TempPassword
+    logger.error("if - randomKnownPass = "+randomKnownPass)
      if(!request.content.resource|| request.content.resource === null || request.content.resource === '' ||
       !request.content.password || request.content.password === null || request.content.password === '') {
+       logger.error("if - code ="+code)
       return { code: code };
     }
-    logger.error('PasswordResetIFPart');
+    
     
     var ret2 = openidm.update(request.content.resource, null, {"__PASSWORD__": request.content.password, "__CURRENT_PASSWORD__": randomKnownPass});
     
   }
      else {
-    logger.error('PasswordResetElsePart');
+       
     if(!request.content.resource|| request.content.resource === null || request.content.resource === '' ||
       !request.content.password || request.content.password === null || request.content.password === '') {
       return { code: code };
     }
-        //var ret1 = openidm.patch(request.content.resource, null, [{"operation":"replace", "field":"/__PASSWORD__", "value": request.content.password}]);
+        // var ret1 = openidm.update(request.content.resource, null, {"__PASSWORD__": request.content.password});
+        //task 210908 apply new password reset logic with new Jar updated.
         var ret1 = openidm.update(request.content.resource, null, {"__PASSWORD__": request.content.password});
-        logger.error('PasswordResetResponse:'+ret1);
-
-    //      delay(delayValue); 
-    // logger.error("Update user password in AD 1")
-    // logger.error("Update user password: " + request.content.password)
-    //     var ret2 = openidm.update(request.content.resource, null, {"__PASSWORD__": request.content.password, "__CURRENT_PASSWORD__": randomKnownPass});
-    // logger.error("Updated user password in AD 2")     
+      
+        // delay(delayValue); 
+        // var ret2 = openidm.update(request.content.resource, null, {"__PASSWORD__": request.content.password, "__CURRENT_PASSWORD__": randomKnownPass});
      }
    
      return {code: 0}
   } catch (e) {
     var exceptionMessage = getException(e);
     logger.error('endpointScriptForResetPassword Error Messgae: {}', exceptionMessage);
-    if(exceptionMessage.includes("New password does not comply with password policy")) {
-      code = -2
+    if(exceptionMessage.includes("New password does not comply with password policy")) {      code = -2
     }
+    //task 210908 hanlde new password policy error message when resetting password
     if(exceptionMessage.includes("The value provided for the new password does not meet the length, complexity, or history requirements of the domain")) {
-      code = -2
+        code = -2
     }
-    if(exceptionMessage.includes("Operation not supported")) {
-      code = -2
+      if(exceptionMessage.includes("Operation not supported")) {
+        code = -2
     }
       logger.error('endpointScriptForResetPassword Exception: ' + e);
       logger.error('endpointScriptForResetPassword Exception With Stack: ' + e.stack);
     return { code: code };
   }
 })();
+
+
+
+
