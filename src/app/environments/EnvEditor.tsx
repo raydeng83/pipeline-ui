@@ -292,7 +292,7 @@ function TestLogApiButton({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [logs]);
 
   const run = async (isDebug: boolean) => {
@@ -423,7 +423,7 @@ function TestConnectionButton({
   const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [logs]);
 
   const run = async (isDebug: boolean) => {
@@ -556,7 +556,7 @@ function RestartButton({ environmentName }: { environmentName: string }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [logs]);
 
   const callRestart = async (action: "restart" | "status") => {
