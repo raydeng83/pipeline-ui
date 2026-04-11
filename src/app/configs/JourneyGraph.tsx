@@ -781,8 +781,8 @@ function NodeInfoDrawer({
 
 // ── Inner graph ───────────────────────────────────────────────────────────────
 
-function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNodeId }: {
-  json: string; fitViewKey?: number; environment?: string; journeyId?: string; focusNodeId?: string;
+function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNodeId, compact }: {
+  json: string; fitViewKey?: number; environment?: string; journeyId?: string; focusNodeId?: string; compact?: boolean;
 }) {
   const { fitView, getViewport, setViewport } = useReactFlow();
 
@@ -1423,21 +1423,25 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
             minZoom={0.1}
             maxZoom={2}
           >
-            <Panel position="bottom-right">
-              <Legend />
-            </Panel>
+            {!compact && (
+              <Panel position="bottom-right">
+                <Legend />
+              </Panel>
+            )}
             <Background color="#e2e8f0" gap={20} size={1} />
-            <Controls showInteractive={false} />
-            <MiniMap
-              nodeColor={(n) =>
-                n.type === "successNode" ? "#34d399" :
-                n.type === "failureNode" ? "#f87171" :
-                n.type === "startNode"   ? "#10b981" :
-                n.type === "pageGroup"   ? "#ddd6fe" :
-                n.type === "pageChild"   ? "#ede9fe" : "#cbd5e1"
-              }
-              zoomable pannable
-            />
+            <Controls showInteractive={false} showFitView={false} />
+            {!compact && (
+              <MiniMap
+                nodeColor={(n) =>
+                  n.type === "successNode" ? "#34d399" :
+                  n.type === "failureNode" ? "#f87171" :
+                  n.type === "startNode"   ? "#10b981" :
+                  n.type === "pageGroup"   ? "#ddd6fe" :
+                  n.type === "pageChild"   ? "#ede9fe" : "#cbd5e1"
+                }
+                zoomable pannable
+              />
+            )}
           </ReactFlow>
         )}
 
@@ -1574,10 +1578,10 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export function JourneyGraph({ json, fitViewKey, environment, journeyId, focusNodeId }: { json: string; fitViewKey?: number; environment?: string; journeyId?: string; focusNodeId?: string }) {
+export function JourneyGraph({ json, fitViewKey, environment, journeyId, focusNodeId, compact }: { json: string; fitViewKey?: number; environment?: string; journeyId?: string; focusNodeId?: string; compact?: boolean }) {
   return (
     <ReactFlowProvider>
-      <JourneyGraphInner json={json} fitViewKey={fitViewKey} environment={environment} journeyId={journeyId} focusNodeId={focusNodeId} />
+      <JourneyGraphInner json={json} fitViewKey={fitViewKey} environment={environment} journeyId={journeyId} focusNodeId={focusNodeId} compact={compact} />
     </ReactFlowProvider>
   );
 }

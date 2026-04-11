@@ -1,13 +1,79 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Environment, ScopeSelection, CONFIG_SCOPES } from "@/lib/fr-config-types";
 import type { PromotionTask, TaskStatus, TaskEndpoint } from "@/lib/promotion-tasks";
 import { PromotionItemPicker } from "./PromotionItemPicker";
 import { PromoteExecution } from "./PromoteExecution";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
+import { ItemViewer } from "@/app/push/ItemViewer";
+import { JourneyGraph } from "@/app/configs/JourneyGraph";
 import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60_000);
+  if (m < 1)  return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+}
+
+const STALE_PULL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+function useLastPullTime(environment: string) {
+  const [lastPull, setLastPull] = useState<{ completedAt: string; status: string } | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/history?environment=${encodeURIComponent(environment)}&type=pull`)
+      .then((r) => r.json())
+      .then((records: { completedAt: string; status: string }[]) => {
+        setLastPull(records[0] ?? null);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, [environment]);
+
+  const isStale = loaded && (!lastPull || Date.now() - new Date(lastPull.completedAt).getTime() > STALE_PULL_MS);
+
+  return { lastPull, loaded, isStale };
+}
+
+function LastPullNote({ environment }: { environment: string }) {
+  const { lastPull, loaded, isStale } = useLastPullTime(environment);
+
+  if (!loaded) return null;
+
+  return (
+    <span className={cn("text-[10px]", isStale ? "font-semibold text-amber-600" : "text-slate-400")}>
+      {lastPull ? `pulled ${timeAgo(lastPull.completedAt)}` : "never pulled"}
+    </span>
+  );
+}
+
+function StalePullWarning({ environment }: { environment: string }) {
+  const { loaded, isStale } = useLastPullTime(environment);
+
+  if (!loaded || !isStale) return null;
+
+  return (
+    <div className="flex items-start gap-2 px-3 py-2 rounded border border-amber-300 bg-amber-50 text-amber-800 text-xs font-medium">
+      <svg className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>
+        Last pull for <span className="font-bold">{environment}</span> is older than 6 hours. Consider pulling the latest config before promoting.
+      </span>
+    </div>
+  );
+}
 
 // ── Status ────────────────────────────────────────────────────────────────────
 
@@ -301,6 +367,8 @@ const ITEM_CHIP: Record<string, string> = {
   "iga-api":   "bg-white border-teal-200 text-teal-700",
 };
 
+const PREVIEWABLE_SCOPES = new Set(["journeys", "scripts"]);
+
 function ScopesSummary({
   items,
   sourceEnvironment,
@@ -319,6 +387,14 @@ function ScopesSummary({
   const [open, setOpen] = useState(true);
   const [auditMap, setAuditMap] = useState<Record<string, ScopeAuditEntry>>({});
   const [loading, setLoading] = useState(false);
+  const [viewerItem, setViewerItem] = useState<{ scope: string; item: AuditItem } | null>(null);
+  const [journeyPreview, setJourneyPreview] = useState<{
+    item: AuditItem;
+    loading: boolean;
+    json?: string;
+    fullscreen?: boolean;
+  } | null>(null);
+  const journeyModalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!items.length) return;
@@ -332,6 +408,35 @@ function ScopesSummary({
       })
       .finally(() => setLoading(false));
   }, [items, sourceEnvironment]);
+
+  // Fetch journey JSON when a journey preview is requested
+  useEffect(() => {
+    if (!journeyPreview?.loading) return;
+    let cancelled = false;
+    const params = new URLSearchParams({ environment: sourceEnvironment, scope: "journeys", item: journeyPreview.item.id });
+    fetch(`/api/push/item?${params}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { files?: Array<{ content?: string }> } | null) => {
+        if (cancelled) return;
+        const json = data?.files?.[0]?.content;
+        setJourneyPreview((p) => p ? { ...p, loading: false, json } : null);
+      })
+      .catch(() => { if (!cancelled) setJourneyPreview((p) => p ? { ...p, loading: false } : null); });
+    return () => { cancelled = true; };
+  }, [journeyPreview?.loading, journeyPreview?.item.id, sourceEnvironment]);
+
+  // Close journey modal on Escape
+  useEffect(() => {
+    if (!journeyPreview) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (journeyPreview.fullscreen) setJourneyPreview((p) => p ? { ...p, fullscreen: false } : null);
+        else setJourneyPreview(null);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [journeyPreview]);
 
   if (!items.length) return null;
 
@@ -437,32 +542,125 @@ function ScopesSummary({
                   <p className="text-[11px] text-slate-400 italic">No items found in source config.</p>
                 ) : (
                   <div className="flex flex-wrap gap-1">
-                    {resolvedItems.map((item) => (
-                      <span
-                        key={item.id}
-                        title={item.id !== item.label ? item.id : undefined}
-                        className={cn("inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] border", ITEM_CHIP[cmdType])}
-                      >
-                        {item.label}
-                        {onRemoveItem && (
-                          <button
-                            type="button"
-                            onClick={() => onRemoveItem(scope, item.id)}
-                            title={`Remove ${item.label}`}
-                            className="text-slate-300 hover:text-red-500 transition-colors"
-                          >
-                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        )}
-                      </span>
-                    ))}
+                    {resolvedItems.map((item) => {
+                      const canPreview = PREVIEWABLE_SCOPES.has(scope);
+                      return (
+                        <span
+                          key={item.id}
+                          title={item.id !== item.label ? item.id : undefined}
+                          className={cn(
+                            "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] border",
+                            ITEM_CHIP[cmdType],
+                            canPreview && "cursor-pointer hover:ring-1 hover:ring-sky-400 transition-shadow"
+                          )}
+                          onClick={canPreview ? () => {
+                            if (scope === "journeys") {
+                              setJourneyPreview({ item, loading: true });
+                            } else {
+                              setViewerItem({ scope, item });
+                            }
+                          } : undefined}
+                        >
+                          {item.label}
+                          {onRemoveItem && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onRemoveItem(scope, item.id); }}
+                              title={`Remove ${item.label}`}
+                              className="text-slate-300 hover:text-red-500 transition-colors"
+                            >
+                              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          )}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             );
           })}
+        </div>
+      )}
+
+      {viewerItem && (
+        <ItemViewer
+          environment={sourceEnvironment}
+          scope={viewerItem.scope}
+          item={viewerItem.item}
+          onClose={() => setViewerItem(null)}
+        />
+      )}
+
+      {journeyPreview && (
+        <div
+          className={cn(
+            "fixed inset-0 z-50 flex",
+            journeyPreview.fullscreen ? "" : "items-center justify-center bg-black/40"
+          )}
+          onClick={(e) => { if (e.target === e.currentTarget && !journeyPreview.fullscreen) setJourneyPreview(null); }}
+        >
+          <div
+            ref={journeyModalRef}
+            className={cn(
+              "bg-white flex flex-col overflow-hidden",
+              journeyPreview.fullscreen
+                ? "w-full h-full"
+                : "rounded-xl shadow-2xl"
+            )}
+            style={journeyPreview.fullscreen ? undefined : { width: "80vw", maxWidth: 960, height: "75vh", maxHeight: "90vh" }}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-800 truncate">{journeyPreview.item.label}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Journey preview</p>
+              </div>
+
+              {/* Fullscreen toggle */}
+              <button
+                type="button"
+                onClick={() => setJourneyPreview((p) => p ? { ...p, fullscreen: !p.fullscreen } : null)}
+                title={journeyPreview.fullscreen ? "Exit fullscreen" : "Fullscreen"}
+                className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+              >
+                {journeyPreview.fullscreen ? (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Close button */}
+              <button
+                type="button"
+                onClick={() => journeyPreview.fullscreen ? setJourneyPreview((p) => p ? { ...p, fullscreen: false } : null) : setJourneyPreview(null)}
+                title="Close (Esc)"
+                className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 min-h-0 overflow-hidden">
+              {journeyPreview.loading ? (
+                <div className="flex items-center justify-center h-full text-sm text-slate-400">Loading…</div>
+              ) : journeyPreview.json ? (
+                <JourneyGraph compact json={journeyPreview.json} environment={sourceEnvironment} journeyId={journeyPreview.item.id} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-sm text-slate-400">Could not load journey.</div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -542,6 +740,7 @@ function TaskDetail({
             : <span className="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200">{task.source.environment}</span>
           }
           <span className="text-[10px] text-slate-400 font-semibold uppercase">{task.source.mode}</span>
+          {task.source.mode === "local" && <LastPullNote environment={task.source.environment} />}
         </div>
         <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -552,8 +751,13 @@ function TaskDetail({
             : <span className="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600 border border-slate-200">{task.target.environment}</span>
           }
           <span className="text-[10px] text-slate-400 font-semibold uppercase">{task.target.mode}</span>
+          {task.target.mode === "local" && <LastPullNote environment={task.target.environment} />}
         </div>
       </div>
+
+      {/* Stale pull warnings */}
+      {task.source.mode === "local" && <StalePullWarning environment={task.source.environment} />}
+      {task.target.mode === "local" && <StalePullWarning environment={task.target.environment} />}
 
       {/* Scopes */}
       <ScopesSummary items={task.items} sourceEnvironment={task.source.environment} includeDeps={task.includeDeps} />

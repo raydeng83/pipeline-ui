@@ -156,11 +156,7 @@ function PreparePhase({
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {task.source.mode === "local" ? (
-            <div className="text-xs text-slate-400 bg-slate-50 border border-slate-200 rounded px-3 py-2">
-              Source is local — pull not needed
-            </div>
-          ) : (
+          {task.source.mode !== "local" && (
             <button
               onClick={pullSource}
               disabled={running}

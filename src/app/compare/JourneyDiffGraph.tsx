@@ -1561,7 +1561,7 @@ function DiffGraphCanvasInner({
       maxZoom={2}
     >
       <Background color="#e2e8f0" gap={20} size={1} />
-      <Controls showInteractive={false} />
+      <Controls showInteractive={false} showFitView={false} />
       <MiniMap nodeColor={miniMapNodeColor} zoomable pannable />
       <Panel position="bottom-right">
         <DiffLegend />

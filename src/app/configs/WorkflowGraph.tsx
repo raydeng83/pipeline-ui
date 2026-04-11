@@ -773,7 +773,7 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
           >
             <Panel position="bottom-right"><Legend /></Panel>
             <Background color="#e2e8f0" gap={20} size={1} />
-            <Controls showInteractive={false} />
+            <Controls showInteractive={false} showFitView={false} />
             <MiniMap
               nodeColor={(n) => {
                 if (n.type === "wfStart") return "#10b981";
