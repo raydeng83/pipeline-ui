@@ -379,8 +379,10 @@ export async function POST(req: NextRequest) {
         }
         emit({ type: "scope-end", scope: "remap-ids", code: 0, ts: Date.now() });
 
-        // Step 2b: Remap script UUID references inside journey node configs
-        if (includeDeps) {
+        // Step 2b: Remap script UUID references inside journey node configs.
+        // Always remap regardless of includeDeps — the journey nodes reference
+        // scripts by UUID, and those UUIDs may differ between source and target.
+        {
           const sourceScriptNameToUuid = new Map<string, string>();
           const targetScriptNameToUuid = new Map<string, string>();
           for (const dir of resolveScopeDirs(sourceConfigDir, "scripts")) {

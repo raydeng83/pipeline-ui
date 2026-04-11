@@ -119,14 +119,20 @@ export async function POST(req: NextRequest) {
           pullSide("target", target, targetTempDir),
         ]);
 
-        // Resolve journey dependencies when includeDeps is enabled
-        if (includeDeps && scopeSelections) {
+        // Always resolve journey dependencies so the dry-run comparison
+        // shows sub-journeys and scripts referenced by the selected journey.
+        // This lets the user see whether dependencies exist on the target
+        // and their actual status (unchanged/modified), regardless of
+        // whether includeDeps is enabled for the push step.
+        let resolvedSubJourneys: string[] = [];
+        if (scopeSelections) {
           const journeyScopes = scopeSelections.filter(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
           );
           if (journeyScopes.length > 0) {
             const journeyNames = journeyScopes.flatMap((s) => s.items!);
             const deps = resolveJourneyDeps(sourceConfigDir, journeyNames);
+            resolvedSubJourneys = deps.subJourneys;
 
             // Add sub-journeys to the journeys scope selection
             if (deps.subJourneys.length > 0) {
@@ -175,9 +181,8 @@ export async function POST(req: NextRequest) {
               // Strip name: prefix used for script content files
               if (item.startsWith("name:")) item = item.slice(5);
               const escaped = item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-              if (isJourney && !includeDeps) {
-                // Without dependencies: match the journey directory (tree JSON + nodes)
-                // but not scripts or inner journeys (which are separate directories)
+              if (isJourney) {
+                // Match the journey directory (tree JSON + nodes)
                 itemPatterns.push(new RegExp(`(^|/)journeys/${escaped}/`, "i"));
               } else {
                 // Match file paths containing the item name (directory name or filename stem)
@@ -194,21 +199,23 @@ export async function POST(req: NextRequest) {
             for (const f of report.files) report.summary[f.status]++;
           }
 
-          // Filter journey tree to only include selected journey items
+          // Filter journey tree: always include selected journeys AND their
+          // resolved sub-journeys so the tree shows the full dependency chain.
           const journeySelection = scopeSelections.find(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
           );
           if (journeySelection && report.journeyTree) {
             const selectedNames = new Set(journeySelection.items!.map((n) => n.toLowerCase()));
+            // Always include resolved sub-journeys in the tree
+            for (const sub of resolvedSubJourneys) {
+              selectedNames.add(sub.toLowerCase());
+            }
             const filterTree = (
               nodes: import("@/lib/diff-types").JourneyTreeNode[]
             ): import("@/lib/diff-types").JourneyTreeNode[] =>
               nodes
-                .map((node) => ({ ...node, subJourneys: filterTree(node.subJourneys) }))
-                .filter(
-                  (node) =>
-                    selectedNames.has(node.name.toLowerCase()) || node.subJourneys.length > 0
-                );
+                .filter((node) => selectedNames.has(node.name.toLowerCase()))
+                .map((node) => ({ ...node, subJourneys: filterTree(node.subJourneys) }));
             report.journeyTree = filterTree(report.journeyTree);
           }
         }
