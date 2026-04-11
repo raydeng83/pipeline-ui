@@ -219,6 +219,7 @@ function DryRunPhase({
       source: task.source,
       target: task.target,
       scopeSelections,
+      includeDeps: task.includeDeps ?? false,
       diffOptions: { includeMetadata: false, ignoreWhitespace: true },
     });
 
