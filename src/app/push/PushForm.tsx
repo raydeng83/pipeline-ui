@@ -1,22 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Environment, ConfigScope } from "@/lib/fr-config-types";
-import { ScopeSelector } from "@/components/ScopeSelector";
+import { Environment, ConfigScope, CONFIG_SCOPES } from "@/lib/fr-config-types";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
-import { PushAudit } from "./PushAudit";
 import { PushPlanPanel, PlanSelections } from "./PushPlanPanel";
 import { DiffReport } from "../compare/DiffReport";
-import { cn } from "@/lib/utils";
+
+/** All scopes that CLI tools can actually push */
+const ALL_SCOPES = CONFIG_SCOPES
+  .filter((s) => s.cliSupported !== false)
+  .map((s) => s.value as ConfigScope);
 
 export function PushForm({ environments }: { environments: Environment[] }) {
   const [environment, setEnvironment] = useState(environments[0]?.name ?? "");
-  const [scopes, setScopes] = useState<ConfigScope[]>([]);
+  const [scopes, setScopes] = useState<ConfigScope[]>(ALL_SCOPES);
   const [confirmed, setConfirmed] = useState(false);
-  const [planMode, setPlanMode] = useState(false);
-  const [planSelections, setPlanSelections] = useState<PlanSelections>({});
+  const [planSelections, setPlanSelections] = useState<PlanSelections>(() => {
+    const initial: PlanSelections = {};
+    for (const s of ALL_SCOPES) initial[s] = [];
+    return initial;
+  });
   const push = useStreamingLogs();
   const dryRun = useStreamingLogs();
   const { setBusy } = useBusyState();
@@ -30,7 +35,6 @@ export function PushForm({ environments }: { environments: Environment[] }) {
 
   // Keep planSelections in sync with scope changes
   useEffect(() => {
-    if (!planMode) return;
     setPlanSelections((prev) => {
       const next: PlanSelections = {};
       for (const scope of scopes) {
@@ -38,25 +42,13 @@ export function PushForm({ environments }: { environments: Environment[] }) {
       }
       return next;
     });
-  }, [scopes, planMode]);
+  }, [scopes]);
 
   // Clear dry run report when selections change
   useEffect(() => {
     if (dryRun.report) dryRun.clear();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planSelections, environment]);
-
-  const handleTogglePlanMode = () => {
-    if (!planMode) {
-      const initial: PlanSelections = {};
-      for (const s of scopes) initial[s] = [];
-      setPlanSelections(initial);
-    } else {
-      setPlanSelections({});
-      dryRun.clear();
-    }
-    setPlanMode((m) => !m);
-  };
 
   const handleScopeToggle = (scope: ConfigScope, included: boolean) => {
     if (included) {
@@ -111,33 +103,18 @@ export function PushForm({ environments }: { environments: Environment[] }) {
             </select>
           </div>
 
-          <ScopeSelector
-            selected={scopes}
-            onChange={setScopes}
-            disabled={running || dryRunning || planMode}
-            action="push"
-          />
-
-          {/* Local files to push */}
+          {/* Local files to push — always shown with all scopes */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Local Files to Push</label>
-            {planMode ? (
-              <PushPlanPanel
-                environment={environment}
-                scopes={scopes}
-                selections={planSelections}
-                onScopeToggle={handleScopeToggle}
-                onItemsChange={(scope, items) =>
-                  setPlanSelections((prev) => ({ ...prev, [scope]: items }))
-                }
-              />
-            ) : scopes.length === 0 ? (
-              <div className="flex items-center justify-center h-32 rounded-md border border-dashed border-slate-200 bg-slate-50">
-                <p className="text-sm text-slate-400">Select scopes above to see local files</p>
-              </div>
-            ) : (
-              <PushAudit environment={environment} scopes={scopes} />
-            )}
+            <PushPlanPanel
+              environment={environment}
+              scopes={scopes}
+              selections={planSelections}
+              onScopeToggle={handleScopeToggle}
+              onItemsChange={(scope, items) =>
+                setPlanSelections((prev) => ({ ...prev, [scope]: items }))
+              }
+            />
           </div>
 
           {isProd && (
@@ -155,22 +132,8 @@ export function PushForm({ environments }: { environments: Environment[] }) {
           <div className="flex gap-3 items-center">
             <button
               type="button"
-              onClick={handleTogglePlanMode}
-              disabled={running || dryRunning || scopes.length === 0}
-              className={cn(
-                "px-4 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-                planMode
-                  ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  : "bg-white border border-slate-300 text-slate-600 hover:border-sky-400 hover:text-sky-700"
-              )}
-            >
-              {planMode ? "Cancel Plan" : "Plan"}
-            </button>
-
-            <button
-              type="button"
               onClick={handleDryRun}
-              disabled={!planMode || !canSubmit || running || dryRunning}
+              disabled={!canSubmit || running || dryRunning}
               className="px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-md hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {dryRunning ? "Running Dry Run…" : "Dry Run"}
@@ -178,10 +141,10 @@ export function PushForm({ environments }: { environments: Environment[] }) {
 
             <button
               type="submit"
-              disabled={running || dryRunning || !environment || !planMode || !canSubmit || (isProd && !confirmed)}
+              disabled={running || dryRunning || !environment || !canSubmit || (isProd && !confirmed)}
               className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {running ? "Pushing..." : "Push Plan"}
+              {running ? "Pushing..." : "Push"}
             </button>
 
             {(running || dryRunning) && (
