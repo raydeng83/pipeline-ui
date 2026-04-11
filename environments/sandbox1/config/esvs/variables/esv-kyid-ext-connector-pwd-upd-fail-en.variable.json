@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:31:25.577Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-kyid-ext-connector-pwd-upd-fail-en": {
+      "_id": "esv-kyid-ext-connector-pwd-upd-fail-en",
+      "description": "Password Update Failed Message.",
+      "expressionType": "string",
+      "lastChangeDate": "2024-11-13T22:48:20.489034Z",
+      "lastChangedBy": "kyid-migration-2",
+      "loaded": true,
+      "value": "An error occurred while updating the password. Please try again."
+    }
+  }
+}

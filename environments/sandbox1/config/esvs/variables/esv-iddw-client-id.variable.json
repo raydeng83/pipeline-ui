@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:31:03.361Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-iddw-client-id": {
+      "_id": "esv-iddw-client-id",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-02-14T19:42:02.289831Z",
+      "lastChangedBy": "ledeng@deloitte.com",
+      "loaded": true,
+      "value": "test"
+    }
+  }
+}

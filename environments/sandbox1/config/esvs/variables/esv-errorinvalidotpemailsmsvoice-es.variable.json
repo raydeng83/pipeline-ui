@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:30:58.140Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-errorinvalidotpemailsmsvoice-es": {
+      "_id": "esv-errorinvalidotpemailsmsvoice-es",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-01-21T11:47:49.788423Z",
+      "lastChangedBy": "frconfig_util",
+      "loaded": true,
+      "value": "Código no válido. Por favor inténtalo de nuevo."
+    }
+  }
+}

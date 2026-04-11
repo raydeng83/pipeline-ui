@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:31:16.974Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-kog-help-mfa-reg-voice-url": {
+      "_id": "esv-kog-help-mfa-reg-voice-url",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-01-21T11:49:02.263257Z",
+      "lastChangedBy": "frconfig_util",
+      "loaded": true,
+      "value": "https://dev.kog.ky.gov/public/KOG_Login_User_Guide2.pdf#page=34"
+    }
+  }
+}

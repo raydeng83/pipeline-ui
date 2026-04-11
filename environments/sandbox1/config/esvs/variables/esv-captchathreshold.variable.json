@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:30:44.731Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-captchathreshold": {
+      "_id": "esv-captchathreshold",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-01-30T17:21:33.3989Z",
+      "lastChangedBy": "kasshah@deloitte.com",
+      "loaded": true,
+      "value": "0"
+    }
+  }
+}

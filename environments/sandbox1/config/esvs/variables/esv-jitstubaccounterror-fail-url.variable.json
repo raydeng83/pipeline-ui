@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:31:06.672Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-jitstubaccounterror-fail-url": {
+      "_id": "esv-jitstubaccounterror-fail-url",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2024-11-14T00:09:25.521332Z",
+      "lastChangedBy": "kyid-migration-2",
+      "loaded": true,
+      "value": "https://sso.dev.kyid.ky.gov/am/XUI/?realm=/alpha&authIndexType=service&authIndexValue=kyid_loginPTA&jitStubAccountError=jitStubAccountError"
+    }
+  }
+}

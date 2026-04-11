@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:30:41.292Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-adaccountlockederrormsgfornonprod-en": {
+      "_id": "esv-adaccountlockederrormsgfornonprod-en",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-04-24T08:31:00.80801Z",
+      "lastChangedBy": "fareeykhan@deloitte.com",
+      "loaded": true,
+      "value": "As per the Commonwealth policy, you need to reset your password using the following link. Please <a href=\"&{esv.kyid.sso.url}&authIndexType=service&authIndexValue=kyid_ForgotPasswordRouterTree\">click here</a>"
+    }
+  }
+}

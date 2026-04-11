@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:31:40.468Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-pingone-authorization-server-url": {
+      "_id": "esv-pingone-authorization-server-url",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2025-06-10T15:49:42.30127Z",
+      "lastChangedBy": "ledeng@deloitte.com",
+      "loaded": true,
+      "value": "https://auth.pingone.com"
+    }
+  }
+}

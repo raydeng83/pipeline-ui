@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:30:47.619Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-environment-name": {
+      "_id": "esv-environment-name",
+      "description": "The name of current environment.",
+      "expressionType": "string",
+      "lastChangeDate": "2025-10-06T18:14:23.543559Z",
+      "lastChangedBy": "xli5@deloitte.com",
+      "loaded": true,
+      "value": "Dev"
+    }
+  }
+}

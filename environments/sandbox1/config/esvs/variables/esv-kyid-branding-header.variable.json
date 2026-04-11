@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:31:20.867Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-kyid-branding-header": {
+      "_id": "esv-kyid-branding-header",
+      "description": "",
+      "expressionType": "string",
+      "lastChangeDate": "2024-11-13T22:47:56.464368Z",
+      "lastChangedBy": "kyid-migration-2",
+      "loaded": true,
+      "value": "https://dev.kog.ky.gov/public/content/images/LoginPageHeaderLogo.png"
+    }
+  }
+}

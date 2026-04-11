@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:30:56.497Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-error-registration-notsupported-es": {
+      "_id": "esv-error-registration-notsupported-es",
+      "description": "Error Message Registration not supported in Spanish",
+      "expressionType": "string",
+      "lastChangeDate": "2025-01-21T11:47:40.010451Z",
+      "lastChangedBy": "frconfig_util",
+      "loaded": true,
+      "value": "ERROR: Operación de registro no admitida."
+    }
+  }
+}

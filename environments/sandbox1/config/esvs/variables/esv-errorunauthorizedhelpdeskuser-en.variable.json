@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "exportDate": "2026-04-11T02:30:58.954Z",
+    "exportTool": "frodo",
+    "exportToolVersion": "v3.0.3 [v22.17.0]",
+    "origin": "https://openam-commkentsb1-useast1-sandbox.id.forgerock.io/am",
+    "originAmVersion": "9.0.0"
+  },
+  "variable": {
+    "esv-errorunauthorizedhelpdeskuser-en": {
+      "_id": "esv-errorunauthorizedhelpdeskuser-en",
+      "description": "Error Message for Unauthorized Help Desk User in English",
+      "expressionType": "string",
+      "lastChangeDate": "2024-11-13T22:46:31.96622Z",
+      "lastChangedBy": "kyid-migration-2",
+      "loaded": true,
+      "value": "ERROR: You are not authorized to perform this operation."
+    }
+  }
+}
