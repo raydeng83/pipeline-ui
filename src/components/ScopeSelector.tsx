@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { CONFIG_SCOPES, ConfigScope, ScopeDisplayEntry } from "@/lib/fr-config-types";
+import { CONFIG_SCOPES, ESSENTIALS_SCOPES, ConfigScope, ScopeDisplayEntry } from "@/lib/fr-config-types";
 import { cn } from "@/lib/utils";
 
 interface ScopeSelectorProps {
@@ -14,10 +14,22 @@ interface ScopeSelectorProps {
 /** Only scopes fr-config-manager can actually run */
 const CLI_SCOPES = CONFIG_SCOPES.filter((s) => s.cliSupported !== false);
 
-const GROUPS = CONFIG_SCOPES.reduce<Record<string, ScopeDisplayEntry[]>>((acc, scope) => {
-  (acc[scope.group] ??= []).push(scope);
-  return acc;
-}, {});
+/** Essentials is a virtual group whose items mirror real scopes in other groups. */
+const ESSENTIALS_GROUP = "Essentials";
+const ESSENTIALS_VALUES = new Set(ESSENTIALS_SCOPES.map((s) => s.value));
+
+const GROUPS: Record<string, ScopeDisplayEntry[]> = {
+  // Essentials first — entries map to real scopes elsewhere
+  [ESSENTIALS_GROUP]: ESSENTIALS_SCOPES.map((s) => {
+    const real = CONFIG_SCOPES.find((c) => c.value === s.value)!;
+    return { ...real, label: s.label, group: ESSENTIALS_GROUP };
+  }),
+  // Then the normal groups
+  ...CONFIG_SCOPES.reduce<Record<string, ScopeDisplayEntry[]>>((acc, scope) => {
+    (acc[scope.group] ??= []).push(scope);
+    return acc;
+  }, {}),
+};
 
 type Mode = "basic" | "advanced";
 
@@ -212,6 +224,9 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                     </span>
                   )}
                 </div>
+                {groupName === ESSENTIALS_GROUP && isExpanded && (
+                  <p className="px-9 pb-1 -mt-0.5 text-[10px] text-slate-400 italic">Quick access — mirrors scopes below</p>
+                )}
 
                 {/* Scope rows (collapsible) */}
                 {isExpanded && (

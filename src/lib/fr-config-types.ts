@@ -158,20 +158,36 @@ export interface ScopeDisplayEntry {
   cliSupported?: boolean;
 }
 
+/**
+ * Essentials scope mappings: each entry maps an Essentials label to the real scope value.
+ * Toggling an Essentials checkbox mirrors to the real scope and vice versa.
+ */
+export const ESSENTIALS_SCOPES: { value: ConfigScope; label: string }[] = [
+  { value: "access-config",      label: "Access Config" },
+  { value: "endpoints",          label: "Custom Endpoints" },
+  { value: "email-templates",    label: "Email Templates" },
+  { value: "variables",          label: "ESVs" },
+  { value: "idm-authentication", label: "IDM Authentication" },
+  { value: "iga-workflows",     label: "IGA Workflows" },
+  { value: "journeys",          label: "Journeys" },
+  { value: "managed-objects",   label: "Managed Objects" },
+  { value: "scripts",           label: "Scripts" },
+];
+
 export const CONFIG_SCOPES: ScopeDisplayEntry[] = [
   // Journeys & Auth
   { value: "journeys",         label: "Journeys",             group: "Journeys & Auth",   description: "Authentication journey trees and their node configurations" },
   { value: "scripts",          label: "Scripts",              group: "Journeys & Auth",   description: "Groovy/JavaScript scripts used within journey nodes and policies" },
-  { value: "endpoints",        label: "Custom Endpoints",     group: "Journeys & Auth",   description: "Custom REST endpoints exposed via the IDM API" },
+  { value: "endpoints",        label: "Custom Endpoints",     group: "Connectors & IDM",  description: "Custom REST endpoints exposed via the IDM API" },
   // Identity & Access
   { value: "authentication",       label: "Authentication",          group: "Identity & Access", description: "Core AM authentication settings, modules, and chains" },
   { value: "custom-nodes",         label: "Custom Nodes",            group: "Identity & Access", description: "Custom journey node implementations (jar/script-backed)" },
   { value: "services",             label: "Services",                group: "Identity & Access", description: "AM service configurations (e.g. OAuth2, SAML, social providers)" },
   { value: "kba",                  label: "KBA",                     group: "Identity & Access", description: "Knowledge-based authentication security questions" },
   { value: "password-policy",      label: "Password Policy",         group: "Identity & Access", description: "Password strength, expiry, and history policies" },
-  { value: "managed-objects",      label: "Managed Objects",         group: "Identity & Access", description: "IDM managed object schema definitions (e.g. user, role, device)" },
+  { value: "managed-objects",      label: "Managed Objects",         group: "Connectors & IDM",  description: "IDM managed object schema definitions (e.g. user, role, device)" },
   { value: "authz-policies",       label: "Authorization Policies",  group: "Identity & Access", description: "Policy sets and rules controlling access to resources" },
-  { value: "access-config",        label: "Access Config",           group: "Identity & Access", description: "AM access management global and realm-level settings" },
+  { value: "access-config",        label: "Access Config",           group: "Connectors & IDM",  description: "AM access management global and realm-level settings" },
   { value: "internal-roles",       label: "Internal Roles",          group: "Identity & Access", description: "IDM internal roles and their assignments" },
   { value: "org-privileges",       label: "Org Privileges",          group: "Identity & Access", description: "Organization-level admin privileges and delegations" },
   { value: "terms-and-conditions", label: "Terms & Conditions",      group: "Identity & Access", description: "Versioned T&C agreements presented to users at login" },

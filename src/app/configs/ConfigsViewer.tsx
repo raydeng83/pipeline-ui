@@ -245,6 +245,7 @@ interface AuditEntry {
 }
 
 const ALL_SCOPES = CONFIG_SCOPES.map((s) => s.value);
+
 const GROUPS = Array.from(new Set(CONFIG_SCOPES.map((s) => s.group)));
 
 function SectionsView({ environment }: { environment: string }) {
