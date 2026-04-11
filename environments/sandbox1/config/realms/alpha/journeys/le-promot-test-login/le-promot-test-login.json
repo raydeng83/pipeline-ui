@@ -1,0 +1,98 @@
+{
+  "_id": "le-promot-test-login",
+  "_rev": "-1907893014",
+  "description": "Platform Login Tree",
+  "enabled": true,
+  "entryNodeId": "a7377f20-6d41-4f0b-b2af-d0914b002b91",
+  "identityResource": "managed/alpha_user",
+  "innerTreeOnly": false,
+  "mustRun": false,
+  "noSession": false,
+  "nodes": {
+    "4ec5f580-ac8d-45a0-b86d-81b2795b9297": {
+      "connections": {
+        "outcome": "c7d1d4fe-ca53-4364-bf91-4e673f5a5f50"
+      },
+      "displayName": "Increment Login Count",
+      "nodeType": "IncrementLoginCountNode",
+      "version": "1.0",
+      "x": 810,
+      "y": 80
+    },
+    "54efe34a-65b3-405c-b388-2b89b0ada1ab": {
+      "connections": {
+        "outcome": "e301438c-0bd0-429c-ab0c-66126501069a"
+      },
+      "displayName": "Account Lockout",
+      "nodeType": "AccountLockoutNode",
+      "version": "1.0",
+      "x": 1113,
+      "y": 80
+    },
+    "93b97f88-bdc3-4ff1-961c-77eb5d8e2745": {
+      "connections": {
+        "CANCELLED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "EXPIRED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "FALSE": "cf13ade6-0b82-49fd-a05c-3eee665697b2",
+        "LOCKED": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "TRUE": "4ec5f580-ac8d-45a0-b86d-81b2795b9297"
+      },
+      "displayName": "Identity Store Decision",
+      "nodeType": "IdentityStoreDecisionNode",
+      "version": "1.0",
+      "x": 509,
+      "y": 115.5
+    },
+    "a7377f20-6d41-4f0b-b2af-d0914b002b91": {
+      "connections": {
+        "outcome": "93b97f88-bdc3-4ff1-961c-77eb5d8e2745"
+      },
+      "displayName": "Page Node",
+      "nodeType": "PageNode",
+      "version": "1.0",
+      "x": 210,
+      "y": 108
+    },
+    "c7d1d4fe-ca53-4364-bf91-4e673f5a5f50": {
+      "connections": {
+        "false": "e301438c-0bd0-429c-ab0c-66126501069a",
+        "true": "70e691a5-1e33-4ac3-a356-e7b6d60d92e0"
+      },
+      "displayName": "Inner Tree Evaluator",
+      "nodeType": "InnerTreeEvaluatorNode",
+      "version": "1.0",
+      "x": 1113,
+      "y": 231
+    },
+    "cf13ade6-0b82-49fd-a05c-3eee665697b2": {
+      "connections": {
+        "Reject": "54efe34a-65b3-405c-b388-2b89b0ada1ab",
+        "Retry": "a7377f20-6d41-4f0b-b2af-d0914b002b91"
+      },
+      "displayName": "Retry Limit Decision",
+      "nodeType": "RetryLimitDecisionNode",
+      "version": "1.0",
+      "x": 810,
+      "y": 231
+    }
+  },
+  "staticNodes": {
+    "70e691a5-1e33-4ac3-a356-e7b6d60d92e0": {
+      "x": 1399,
+      "y": 239.16666666666666
+    },
+    "e301438c-0bd0-429c-ab0c-66126501069a": {
+      "x": 1399,
+      "y": 98.33333333333333
+    },
+    "startNode": {
+      "x": 70,
+      "y": 182.5
+    }
+  },
+  "transactionalOnly": false,
+  "uiConfig": {
+    "annotations": "{\"forNodes\":{},\"structural\":[]}",
+    "categories": "[\"Authentication\"]"
+  }
+}
