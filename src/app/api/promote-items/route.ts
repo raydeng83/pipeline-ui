@@ -355,6 +355,70 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        // Step 1b: Copy referenced sub-journeys and scripts so fr-config-push
+        // can resolve InnerTreeEvaluatorNode / ScriptedDecisionNode references.
+        // Without this, the push fails with ENOENT when reading the inner journey file.
+        // These are copied from source even if includeDeps is false — they'll be
+        // pushed to target, but that's required for referential integrity.
+        {
+          const journeyScope = scopeSelections.find(
+            (s) => s.scope === "journeys" && s.items && s.items.length > 0
+          );
+          if (journeyScope?.items) {
+            const deps = resolveJourneyDeps(sourceConfigDir, journeyScope.items);
+
+            // Copy referenced sub-journey directories from source to temp
+            for (const subName of deps.subJourneys) {
+              if (journeyScope.items.includes(subName)) continue; // already copied
+              for (const srcDir of resolveScopeDirs(sourceConfigDir, "journeys")) {
+                const relPath = path.relative(sourceConfigDir, srcDir);
+                const srcSub = path.join(srcDir, subName);
+                const destSub = path.join(tempConfigDir, relPath, subName);
+                if (fs.existsSync(srcSub)) {
+                  copyDirSync(srcSub, destSub);
+                  emit({ type: "stdout", data: `  Copied referenced sub-journey: ${subName}\n`, ts: Date.now() });
+                  break;
+                }
+              }
+            }
+
+            // Copy referenced scripts (config + content) from source to temp
+            if (deps.scriptUuids.length > 0) {
+              const scriptScope = scopeSelections.find((s) => s.scope === "scripts");
+              const existingScriptItems = new Set(scriptScope?.items ?? []);
+              for (const srcDir of resolveScopeDirs(sourceConfigDir, "scripts")) {
+                const relPath = path.relative(sourceConfigDir, srcDir);
+                const configSrc = path.join(srcDir, "scripts-config");
+                if (!fs.existsSync(configSrc)) continue;
+                const configDest = path.join(tempConfigDir, relPath, "scripts-config");
+                fs.mkdirSync(configDest, { recursive: true });
+
+                for (const uuid of deps.scriptUuids) {
+                  const configFile = `${uuid}.json`;
+                  if (existingScriptItems.has(configFile)) continue; // already copied
+                  const srcFile = path.join(configSrc, configFile);
+                  if (!fs.existsSync(srcFile)) continue;
+                  fs.copyFileSync(srcFile, path.join(configDest, configFile));
+                  // Copy the script content file too
+                  try {
+                    const config = JSON.parse(fs.readFileSync(srcFile, "utf-8"));
+                    if (config.script?.file) {
+                      const contentSrc = path.join(srcDir, config.script.file);
+                      const contentDest = path.join(tempConfigDir, relPath, config.script.file);
+                      if (fs.existsSync(contentSrc)) {
+                        fs.mkdirSync(path.dirname(contentDest), { recursive: true });
+                        fs.copyFileSync(contentSrc, contentDest);
+                      }
+                    }
+                  } catch { /* skip */ }
+                  const scriptName = deps.scriptNames.get(uuid) ?? uuid;
+                  emit({ type: "stdout", data: `  Copied referenced script: ${scriptName}\n`, ts: Date.now() });
+                }
+              }
+            }
+          }
+        }
+
         // Step 2: For each scope, build name→id maps from source and target, then remap
         emit({ type: "scope-end", scope: "prepare", code: 0, ts: Date.now() });
         emit({ type: "scope-start", scope: "remap-ids", ts: Date.now() });

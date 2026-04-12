@@ -655,89 +655,62 @@ function VerifyPhase({
   visible: boolean;
   onComplete: (s: PhaseStatus) => void;
 }) {
-  const pullHook = useStreamingLogs();
-  const compareHook = useStreamingLogs();
+  const { logs, running, exitCode, report, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
   const onCompleteRef = useRef(onComplete);
   useEffect(() => { onCompleteRef.current = onComplete; });
-  useEffect(() => { setBusy(pullHook.running || compareHook.running); }, [pullHook.running, compareHook.running, setBusy]);
+  useEffect(() => { setBusy(running); }, [running, setBusy]);
   useEffect(() => {
-    if (compareHook.exitCode !== null && !compareHook.running)
-      onCompleteRef.current(compareHook.exitCode === 0 ? "done" : "failed");
+    if (exitCode !== null && !running)
+      onCompleteRef.current(exitCode === 0 ? "done" : "failed");
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [compareHook.exitCode, compareHook.running]);
+  }, [exitCode, running]);
 
-  const frConfigItems = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
-  const anyRunning = pullHook.running || compareHook.running;
-
-  const pullTarget = () => {
-    pullHook.run("/api/pull", { environment: task.target.environment, scopes: task.items.map((i) => i.scope) });
-  };
+  const scopeSelections = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
 
   const compare = () => {
-    compareHook.run("/api/compare", {
+    run("/api/compare", {
       source: task.source,
       target: task.target,
-      scopeSelections: frConfigItems,
+      scopeSelections,
+      includeDeps: task.includeDeps ?? false,
       diffOptions: { includeMetadata: false, ignoreWhitespace: true },
     });
   };
 
-  const compareLogs = compareHook.logs;
-  const sourceLogs = compareLogs.filter((l) => l.side === "source");
-  const targetLogs = compareLogs.filter((l) => l.side === "target");
-  const sourceExitCode = compareLogs.find((l) => l.type === "exit" && l.side === "source")?.code ?? null;
-  const targetExitCode = compareLogs.find((l) => l.type === "exit" && l.side === "target")?.code ?? null;
-  const sourceRunning = compareHook.running && sourceExitCode === null;
-  const targetRunning = compareHook.running && targetExitCode === null;
+  const sourceLogs = logs.filter((l) => l.side === "source");
+  const targetLogs = logs.filter((l) => l.side === "target");
+  const sourceExitCode = logs.find((l) => l.type === "exit" && l.side === "source")?.code ?? null;
+  const targetExitCode = logs.find((l) => l.type === "exit" && l.side === "target")?.code ?? null;
+  const sourceRunning = running && sourceExitCode === null;
+  const targetRunning = running && targetExitCode === null;
+  const showConsole = logs.length > 0 || running;
 
   return (
     <div className={cn(!visible && "hidden")}>
       <div className="space-y-3">
         <p className="text-xs text-slate-500">
-          Pull the target environment to confirm changes landed, then re-compare against source for the selected items — the diff should now be empty or show only expected differences.
+          Re-compare source against target for the selected items — the diff should now be empty or show only expected differences.
         </p>
+
         <div className="flex flex-wrap gap-2">
-          {task.target.mode === "local" ? (
-            <div className="text-xs text-slate-400 bg-slate-50 border border-slate-200 rounded px-3 py-2">
-              Target is local — pull not needed
-            </div>
-          ) : (
-            <button
-              onClick={pullTarget}
-              disabled={anyRunning}
-              className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
-            >
-              {pullHook.running ? "Pulling…" : "Pull Target"}
-            </button>
-          )}
           <button
             onClick={compare}
-            disabled={anyRunning || frConfigItems.length === 0}
-            title={frConfigItems.length === 0 ? "No fr-config scopes in this task" : undefined}
+            disabled={running || scopeSelections.length === 0}
+            title={scopeSelections.length === 0 ? "No fr-config scopes in this task" : undefined}
             className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
           >
-            {compareHook.running ? "Comparing…" : "Re-compare Source vs Target"}
+            {running ? "Comparing…" : "Re-compare Source vs Target"}
           </button>
-          {anyRunning && (
-            <button
-              onClick={() => { pullHook.abort(); compareHook.abort(); }}
-              className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors"
-            >
+          {running && (
+            <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
               Abort
             </button>
           )}
         </div>
 
-        {/* Pull logs */}
-        {(pullHook.running || pullHook.logs.length > 0) && (
-          <div className="rounded-lg border border-slate-200 overflow-hidden">
-            <ScopedLogViewer logs={pullHook.logs} running={pullHook.running} exitCode={pullHook.exitCode} onClear={pullHook.clear} />
-          </div>
-        )}
-
-        {/* Compare console */}
-        {(compareHook.running || compareLogs.length > 0) && (
+        {/* Console panels */}
+        {showConsole && (
           <div className="rounded-lg border border-slate-700 overflow-hidden grid grid-cols-2 divide-x divide-slate-700">
             <div className="min-w-0 flex flex-col">
               <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
@@ -755,7 +728,7 @@ function VerifyPhase({
         )}
 
         {/* Diff report */}
-        {compareHook.report && !compareHook.running && <DiffReport report={compareHook.report} dryRunMode />}
+        {report && !running && <DiffReport report={report} dryRunMode />}
       </div>
     </div>
   );

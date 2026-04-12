@@ -771,7 +771,7 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
             minZoom={0.1}
             maxZoom={2}
           >
-            <Panel position="bottom-right"><Legend /></Panel>
+            <Panel position="top-left"><Legend /></Panel>
             <Background color="#e2e8f0" gap={20} size={1} />
             <Controls showInteractive={false} showFitView={false} />
             <MiniMap

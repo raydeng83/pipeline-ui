@@ -194,7 +194,18 @@ export async function POST(req: NextRequest) {
           ]);
         }
 
-        const report = buildReport(source, sourceConfigDir, target, targetConfigDir, effectiveScopes, diffOptions);
+        // Always include the explicitly selected journeys + resolved sub-journeys
+        // in the journey tree, even when nothing changed (e.g. after a successful verify).
+        const forceIncludeJourneys = new Set<string>();
+        if (scopeSelections) {
+          for (const sel of scopeSelections) {
+            if (sel.scope === "journeys" && sel.items) {
+              for (const name of sel.items) forceIncludeJourneys.add(name);
+            }
+          }
+        }
+
+        const report = buildReport(source, sourceConfigDir, target, targetConfigDir, effectiveScopes, diffOptions, forceIncludeJourneys);
 
         // When scopeSelections has item-level filters, narrow the diff to only matching files
         if (scopeSelections?.some((s) => s.items && s.items.length > 0)) {

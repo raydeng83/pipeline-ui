@@ -1424,7 +1424,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
             maxZoom={2}
           >
             {!compact && (
-              <Panel position="bottom-right">
+              <Panel position="top-left">
                 <Legend />
               </Panel>
             )}

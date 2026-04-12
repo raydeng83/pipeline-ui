@@ -410,6 +410,7 @@ function buildJourneyTree(
   changedJourneys: Map<string, FileDiff["status"]>,
   changedScripts: Map<string, FileDiff["status"]>,
   changedNodeFiles: Map<string, FileDiff["status"]>,  // "journeyName/nodeUUID" → status
+  forceIncludeJourneys?: Set<string>,  // Always include these in the tree, even if unchanged
 ): JourneyTreeNode[] {
   const sourceJourneys = scanJourneys(sourceDir);
   const targetJourneys = scanJourneys(targetDir);
@@ -502,11 +503,14 @@ function buildJourneyTree(
     const parents = calledBy.get(name) ?? [];
     const isEntry = parents.length === 0 && !meta.innerTreeOnly;
     if (!isEntry) continue;
-    if (!hasChangedDescendant(name, new Set())) continue;
-
+    // Always build the full tree (including unchanged journeys). Client-side
+    // filtering controls visibility via the "Hide unchanged files" checkbox.
     const node = buildNode(name, new Set());
     if (node) roots.push(node);
   }
+  // forceIncludeJourneys is kept for backward compat but no longer needed
+  // since we always include all entry journeys.
+  void forceIncludeJourneys;
 
   return roots.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -518,6 +522,7 @@ export function buildReport(
   targetDir: string,
   scopes?: string[],
   opts: DiffOptions = {},
+  forceIncludeJourneys?: Set<string>,
 ): CompareReport {
   // Default: ignore whitespace, exclude metadata
   const effectiveOpts: DiffOptions = {
@@ -587,11 +592,9 @@ export function buildReport(
   }
 
   let journeyTree: JourneyTreeNode[] | undefined;
-  if (changedJourneys.size > 0 || changedScripts.size > 0) {
-    try {
-      journeyTree = buildJourneyTree(sourceDir, targetDir, changedJourneys, changedScripts, changedNodeFiles);
-    } catch { /* ignore */ }
-  }
+  try {
+    journeyTree = buildJourneyTree(sourceDir, targetDir, changedJourneys, changedScripts, changedNodeFiles, forceIncludeJourneys);
+  } catch { /* ignore */ }
 
   return {
     source,

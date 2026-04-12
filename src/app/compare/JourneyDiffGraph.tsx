@@ -1563,7 +1563,7 @@ function DiffGraphCanvasInner({
       <Background color="#e2e8f0" gap={20} size={1} />
       <Controls showInteractive={false} showFitView={false} />
       <MiniMap nodeColor={miniMapNodeColor} zoomable pannable />
-      <Panel position="bottom-right">
+      <Panel position="top-left">
         <DiffLegend />
       </Panel>
     </ReactFlow>

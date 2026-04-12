@@ -1184,14 +1184,14 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           </button>
         )}
       </div>
-      {open && (hasChildren || (showScripts && node.scripts.some((s) => s.status !== "unchanged")) || (showNodes && node.nodes.some((n) => n.status !== "unchanged"))) && (
+      {open && (hasChildren || (showScripts && node.scripts.length > 0) || (showNodes && node.nodes.length > 0)) && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
             <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
           ))}
-          {showScripts && node.scripts.filter((sc) => sc.status !== "unchanged").length > 0 && (
+          {showScripts && node.scripts.length > 0 && (
             <div className="mt-1 space-y-0.5">
-              {node.scripts.filter((sc) => sc.status !== "unchanged").map((sc) => (
+              {node.scripts.map((sc) => (
                 <JourneyScriptRow
                   key={sc.uuid}
                   sc={sc}
@@ -1207,9 +1207,9 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
               ))}
             </div>
           )}
-          {showNodes && node.nodes.filter((nd) => nd.status !== "unchanged").length > 0 && (
+          {showNodes && node.nodes.length > 0 && (
             <div className="mt-1 space-y-0.5">
-              {node.nodes.filter((nd) => nd.status !== "unchanged").map((nd) => {
+              {node.nodes.map((nd) => {
                 const ns = JOURNEY_STATUS_STYLES[nd.status] ?? JOURNEY_STATUS_STYLES.unchanged;
                 return (
                   <div key={nd.uuid} className="flex items-center gap-1.5 py-0.5 text-xs">
@@ -1265,6 +1265,7 @@ function filterJourneyTree(
   tree: JourneyTreeNode[],
   statusFilter: JourneyStatusFilter,
   searchQ: string,
+  hideUnchanged = false,
 ): JourneyTreeNode[] {
   function nameMatchesInTree(n: JourneyTreeNode): boolean {
     if (n.name.toLowerCase().includes(searchQ)) return true;
@@ -1272,14 +1273,15 @@ function filterJourneyTree(
   }
 
   return tree.filter((entry) => {
+    if (hideUnchanged && entry.status === "unchanged") return false;
     const statusOk = statusFilter === "all" || entry.status === statusFilter;
     const nameOk = !searchQ || nameMatchesInTree(entry);
     return statusOk && nameOk;
   });
 }
 
-function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv, selectedPaths, onTogglePath }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void }) {
-  const [open, setOpen] = useState(false);
+function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv, selectedPaths, onTogglePath, hideUnchanged = false }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void; hideUnchanged?: boolean }) {
+  const [open, setOpen] = useState(true);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
   const [page, setPage] = useState(0);
@@ -1303,8 +1305,8 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
   const totalChanged = counts.modified + counts.added + counts.removed;
 
   const filtered = useMemo(
-    () => filterJourneyTree(tree, statusFilter, searchQ.toLowerCase()),
-    [tree, statusFilter, searchQ],
+    () => filterJourneyTree(tree, statusFilter, searchQ.toLowerCase(), hideUnchanged),
+    [tree, statusFilter, searchQ, hideUnchanged],
   );
 
   return (
@@ -1844,7 +1846,7 @@ function AllFilesModal({
 }
 
 function ScopeSection({
-  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath,
+  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath, hideUnchanged = true,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
@@ -1856,6 +1858,7 @@ function ScopeSection({
   allFiles?: FileDiff[];
   selectedPaths?: Set<string>;
   onTogglePath?: (path: string) => void;
+  hideUnchanged?: boolean;
 }) {
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
@@ -1875,7 +1878,10 @@ function ScopeSection({
   const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
 
   const visibleFiles = filterFiles(
-    group.files.filter((f) => f.status !== "unchanged" && (statusFilter === "all" || f.status === statusFilter)),
+    group.files.filter((f) => {
+      if (hideUnchanged && f.status === "unchanged") return false;
+      return statusFilter === "all" || f.status === statusFilter;
+    }),
     itemSearch,
   );
   const totalVisible = visibleFiles.length;
@@ -1916,12 +1922,12 @@ function ScopeSection({
       {open && (
         <div className="bg-white">
           {/* Filter + search bar */}
-          {hasChanges && (
+          {(hasChanges || !hideUnchanged) && (
             <div className="px-3 pt-3 pb-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               {/* Status filter pills */}
               <div className="flex rounded border border-slate-300 overflow-hidden text-[10px] shrink-0">
                 {([
-                  { value: "all"      as const, label: `All (${totalChanged})` },
+                  { value: "all"      as const, label: `All (${hideUnchanged ? totalChanged : group.files.length})` },
                   { value: "modified" as const, label: `Modified (${group.modified})` },
                   { value: "added"    as const, label: `Added (${group.added})` },
                   { value: "removed"  as const, label: `Removed (${group.removed})` },
@@ -1968,7 +1974,7 @@ function ScopeSection({
           )}
 
           <div className="p-3 pt-1 space-y-1.5">
-            {hasChanges ? (
+            {(hasChanges || !hideUnchanged) ? (
               totalVisible === 0 ? (
                 <p className="text-xs text-slate-400 text-center py-2">
                   {itemSearch ? `No items match "${itemSearch}".` : "No items match the selected filter."}
@@ -2008,7 +2014,7 @@ function ScopeSection({
               </p>
             )}
           </div>
-          {hasChanges && (
+          {(hasChanges || !hideUnchanged) && totalVisible > pageSize && (
             <Pagination
               page={page} total={totalVisible} pageSize={pageSize}
               onChange={setPage}
@@ -2027,7 +2033,6 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
   const { summary, files } = report;
   const total = summary.added + summary.removed + summary.modified + summary.unchanged;
   const [hideUnchanged, setHideUnchanged] = useState(true);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
   const [allOpenSeq, setAllOpenSeq] = useState(0);
   const [allFilesModalOpen, setAllFilesModalOpen] = useState(false);
@@ -2134,34 +2139,18 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
           </div>
         </div>
 
-        {/* Toolbar: filters toggle */}
-        <div className="flex items-center gap-3 pt-1">
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((o) => !o)}
-            className={cn("text-xs transition-colors", filtersOpen ? "text-sky-600" : "text-slate-500 hover:text-slate-700")}
-          >
-            Filters {filtersOpen ? "▲" : "▼"}
-          </button>
+        {/* Filters (always visible) */}
+        <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-slate-100 mt-2">
+          <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={hideUnchanged}
+              onChange={(e) => setHideUnchanged(e.target.checked)}
+              className="accent-sky-600"
+            />
+            Hide unchanged files
+          </label>
         </div>
-
-        {/* Collapsible filters */}
-        {filtersOpen && (
-          <div className="flex flex-wrap items-center gap-4 pt-1 pb-1 border-t border-slate-100 mt-2 pt-3">
-            <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={hideUnchanged}
-                onChange={(e) => setHideUnchanged(e.target.checked)}
-                className="accent-sky-600"
-              />
-              Hide unchanged files
-            </label>
-            <span className="text-xs text-slate-400">
-              Options from the compare form (metadata, whitespace) apply to the diff computation.
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Scope sections */}
@@ -2174,7 +2163,7 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
           <>
             {/* Journey tree (shown first if available) */}
             {report.journeyTree && report.journeyTree.length > 0 && (
-              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} />
+              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} hideUnchanged={hideUnchanged} />
             )}
 
             {/* Non-journey scope sections (journeys are shown above in the tree) */}
@@ -2191,6 +2180,7 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
                 allFiles={report.files}
                 selectedPaths={selectedPaths}
                 onTogglePath={togglePath}
+                hideUnchanged={hideUnchanged}
               />
             ))}
           </>
