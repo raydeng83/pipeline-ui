@@ -9,6 +9,7 @@ import {
   PromoteSubcommand,
 } from "@/lib/fr-config-types";
 import type { PromotionTask, TaskStatus } from "@/lib/promotion-tasks";
+import type { HistoryRecord } from "@/lib/history";
 import { LogViewer } from "@/components/LogViewer";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { DiffReport } from "@/app/compare/DiffReport";
@@ -232,7 +233,7 @@ function DryRunPhase({
     <div className={cn(!visible && "hidden")}>
       <div className="space-y-3">
         <p className="text-xs text-slate-500">
-          Compare source against target for the selected scopes to preview what will change. Review the diff carefully before proceeding.
+          Simulate what will change on the target (<span className="font-mono">{task.target.environment}</span>) if the source (<span className="font-mono">{task.source.environment}</span>) is promoted to it. Review the diff carefully before proceeding.
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -241,7 +242,7 @@ function DryRunPhase({
             disabled={running}
             className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
           >
-            {running ? "Comparing…" : "Compare Source vs Target"}
+            {running ? "Running…" : "Start Dry-run"}
           </button>
           {running && (
             <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
@@ -669,10 +670,13 @@ function VerifyPhase({
 
   const scopeSelections = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
 
+  // Verify swaps the compare direction: the just-promoted target is treated as
+  // the baseline and checked against the original source. Post-promotion the
+  // two should match exactly for the selected items.
   const compare = () => {
     run("/api/compare", {
-      source: task.source,
-      target: task.target,
+      source: task.target,
+      target: task.source,
       scopeSelections,
       includeDeps: task.includeDeps ?? false,
       mode: "compare",
@@ -692,7 +696,7 @@ function VerifyPhase({
     <div className={cn(!visible && "hidden")}>
       <div className="space-y-3">
         <p className="text-xs text-slate-500">
-          Re-compare source against target for the selected items — the diff should now be empty or show only expected differences.
+          Check the promoted target (<span className="font-mono">{task.target.environment}</span>, used as the verify source) against the original source (<span className="font-mono">{task.source.environment}</span>, used as the verify target). The diff should be empty — any remaining differences flag an incomplete or drifted promotion.
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -702,7 +706,7 @@ function VerifyPhase({
             title={scopeSelections.length === 0 ? "No fr-config scopes in this task" : undefined}
             className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
           >
-            {running ? "Comparing…" : "Re-compare Source vs Target"}
+            {running ? "Verifying…" : "Start Verify"}
           </button>
           {running && (
             <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
@@ -716,13 +720,13 @@ function VerifyPhase({
           <div className="rounded-lg border border-slate-700 overflow-hidden grid grid-cols-2 divide-x divide-slate-700">
             <div className="min-w-0 flex flex-col">
               <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
-                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Source — {task.source.environment}</span>
+                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Source — {task.target.environment}</span>
               </div>
               <ScopedLogViewer logs={sourceLogs} running={sourceRunning} exitCode={sourceExitCode} />
             </div>
             <div className="min-w-0 flex flex-col">
               <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
-                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Target — {task.target.environment}</span>
+                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Target — {task.source.environment}</span>
               </div>
               <ScopedLogViewer logs={targetLogs} running={targetRunning} exitCode={targetExitCode} />
             </div>
@@ -730,7 +734,7 @@ function VerifyPhase({
         )}
 
         {/* Diff report */}
-        {report && !running && <DiffReport report={report} mode="compare" />}
+        {report && !running && <DiffReport report={report} mode="compare" showUnchangedByDefault />}
       </div>
     </div>
   );
@@ -783,8 +787,71 @@ export function PromoteExecution({
     });
   }, [frConfigScopes.length]);
 
-  const updatePhase = (id: PhaseId, status: PhaseStatus) =>
-    setPhaseStatuses((prev) => ({ ...prev, [id]: status }));
+  // Track run start time and whether history has been emitted for this run,
+  // so a re-run starts a fresh record.
+  const runStartedAtRef = useRef<{ iso: string; ms: number } | null>(null);
+  const historyEmittedRef = useRef(false);
+
+  const updatePhase = (id: PhaseId, status: PhaseStatus) => {
+    setPhaseStatuses((prev) => {
+      // On first transition into "running" for any phase, stamp the run start.
+      if (status === "running" && !runStartedAtRef.current) {
+        const now = new Date();
+        runStartedAtRef.current = { iso: now.toISOString(), ms: now.getTime() };
+      }
+      // If the user re-runs after a previous emission (promote phase cycles
+      // back to running), reset the emitted flag so the new run is recorded.
+      if (id === "promote" && status === "running" && historyEmittedRef.current) {
+        historyEmittedRef.current = false;
+        const now = new Date();
+        runStartedAtRef.current = { iso: now.toISOString(), ms: now.getTime() };
+      }
+      return { ...prev, [id]: status };
+    });
+  };
+
+  // Emit a history record when the promote phase reaches a terminal state.
+  useEffect(() => {
+    const promoteStatus = phaseStatuses.promote;
+    if (promoteStatus !== "done" && promoteStatus !== "failed") return;
+    if (historyEmittedRef.current) return;
+    historyEmittedRef.current = true;
+
+    const started = runStartedAtRef.current ?? { iso: new Date().toISOString(), ms: Date.now() };
+    const completedMs = Date.now();
+    const completedAt = new Date(completedMs).toISOString();
+
+    const phaseOutcomes: Record<string, PhaseStatus> = {
+      prepare:   phaseStatuses.prepare,
+      "dry-run": phaseStatuses["dry-run"],
+      promote:   phaseStatuses.promote,
+      verify:    phaseStatuses.verify,
+    };
+    const scopeNames = task.items.map((i) => i.scope);
+    const record: Partial<HistoryRecord> = {
+      type: "promote",
+      environment: `${task.source.environment} → ${task.target.environment}`,
+      source: task.source,
+      target: task.target,
+      scopes: scopeNames.length ? scopeNames : ["all"],
+      status: promoteStatus === "done" ? "success" : "failed",
+      commitHash: null,
+      startedAt: started.iso,
+      completedAt,
+      duration: completedMs - started.ms,
+      summary: `${promoteStatus === "done" ? "Promoted" : "Promote failed"}: ${task.name} (${scopeNames.length} scope${scopeNames.length === 1 ? "" : "s"})`,
+      taskId: task.id,
+      taskName: task.name,
+      phaseOutcomes,
+    };
+
+    fetch("/api/history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ record, detail: {} }),
+    }).catch(() => { /* non-fatal */ });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phaseStatuses.promote, phaseStatuses.prepare, phaseStatuses["dry-run"], phaseStatuses.verify]);
 
   const nextPhase = PHASE_DEFS
     .slice(PHASE_DEFS.findIndex((p) => p.id === activePhase) + 1)

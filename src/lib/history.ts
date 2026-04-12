@@ -32,11 +32,11 @@ export interface LogEntry {
 /** Lightweight index record — stored in history.json */
 export interface HistoryRecord {
   id: string;
-  type: "pull" | "push" | "compare" | "log-search";
+  type: "pull" | "push" | "compare" | "log-search" | "promote";
   environment: string;
-  /** Compare: source endpoint */
+  /** Compare / promote: source endpoint */
   source?: CompareEndpoint;
-  /** Compare: target endpoint */
+  /** Compare / promote: target endpoint */
   target?: CompareEndpoint;
   scopes: string[];
   status: "success" | "failed";
@@ -53,6 +53,12 @@ export interface HistoryRecord {
   logPreset?: string;
   /** Log search: total log entries */
   logEntryCount?: number;
+  /** Promote: originating PromotionTask id */
+  taskId?: string;
+  /** Promote: originating PromotionTask name */
+  taskName?: string;
+  /** Promote: per-phase status snapshot at emission time (prepare / dry-run / promote / verify) */
+  phaseOutcomes?: Record<string, "done" | "failed" | "skipped" | "pending" | "running">;
 }
 
 /** Full detail — stored in history/{id}.json */

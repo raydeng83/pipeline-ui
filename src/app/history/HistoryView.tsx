@@ -40,7 +40,7 @@ function formatTimestamp(iso: string): string {
 
 // ── Filter bar ───────────────────────────────────────────────────────────────
 
-type TypeFilter = "all" | "pull" | "push" | "compare" | "log-search";
+type TypeFilter = "all" | "pull" | "push" | "compare" | "promote" | "log-search";
 
 function FilterBar({
   environments,
@@ -71,7 +71,7 @@ function FilterBar({
       </select>
 
       <div className="flex rounded-md border border-slate-300 overflow-hidden">
-        {(["all", "pull", "push", "compare", "log-search"] as TypeFilter[]).map((t) => (
+        {(["all", "pull", "push", "compare", "promote", "log-search"] as TypeFilter[]).map((t) => (
           <button
             key={t}
             onClick={() => onTypeChange(t)}
@@ -329,6 +329,58 @@ function LogPanel({ detail }: { detail: HistoryDetail }) {
   );
 }
 
+// ── Promote phase outcomes panel ─────────────────────────────────────────────
+
+const PHASE_ORDER = ["prepare", "dry-run", "promote", "verify"] as const;
+const PHASE_LABEL: Record<string, string> = {
+  prepare: "Prepare",
+  "dry-run": "Dry Run",
+  promote: "Promote",
+  verify: "Verify",
+};
+const PHASE_STYLE: Record<string, string> = {
+  done:    "bg-emerald-100 text-emerald-700 border-emerald-200",
+  failed:  "bg-red-100 text-red-700 border-red-200",
+  running: "bg-sky-100 text-sky-700 border-sky-200",
+  skipped: "bg-slate-100 text-slate-500 border-slate-200",
+  pending: "bg-slate-50 text-slate-400 border-slate-200",
+};
+
+function PromoteDetailPanel({ record }: { record: HistoryRecord }) {
+  const outcomes = record.phaseOutcomes ?? {};
+  return (
+    <div className="space-y-3">
+      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Promote Task</div>
+      {record.taskName && (
+        <div className="text-sm text-slate-700">
+          <span className="text-slate-400">Task:</span> <span className="font-medium">{record.taskName}</span>
+        </div>
+      )}
+      {(record.source || record.target) && (
+        <div className="text-xs text-slate-500 font-mono">
+          {record.source?.environment ?? "?"} → {record.target?.environment ?? "?"}
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {PHASE_ORDER.map((id) => {
+          const outcome = outcomes[id] ?? "pending";
+          return (
+            <span
+              key={id}
+              className={cn(
+                "px-2 py-0.5 rounded border text-xs font-medium",
+                PHASE_STYLE[outcome] ?? PHASE_STYLE.pending,
+              )}
+            >
+              {PHASE_LABEL[id]}: {outcome}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Expanded detail (fetches on demand) ──────────────────────────────────────
 
 function ExpandedDetail({ record }: { record: HistoryRecord }) {
@@ -382,6 +434,9 @@ function ExpandedDetail({ record }: { record: HistoryRecord }) {
       {/* Compare report */}
       {record.type === "compare" && <CompareDetailPanel detail={detail} />}
 
+      {/* Promote task */}
+      {record.type === "promote" && <PromoteDetailPanel record={record} />}
+
       {/* Log search results */}
       {record.type === "log-search" && <LogSearchDetailPanel record={record} detail={detail} />}
 
@@ -397,6 +452,7 @@ const TYPE_BADGE: Record<string, { bg: string; label: string }> = {
   pull: { bg: "bg-sky-100 text-sky-700", label: "Pull" },
   push: { bg: "bg-emerald-100 text-emerald-700", label: "Push" },
   compare: { bg: "bg-violet-100 text-violet-700", label: "Compare" },
+  promote: { bg: "bg-orange-100 text-orange-700", label: "Promote" },
   "log-search": { bg: "bg-amber-100 text-amber-700", label: "Log Search" },
 };
 

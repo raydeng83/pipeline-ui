@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
     logEntryCount: record.logEntryCount,
     source: record.source,
     target: record.target,
+    taskId: record.taskId,
+    taskName: record.taskName,
+    phaseOutcomes: record.phaseOutcomes,
   };
 
   appendHistory(full, detail);

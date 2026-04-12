@@ -2088,12 +2088,12 @@ function ScopeSection({
 
 // ── Main report ─────────────────────────────────────────────────────────────
 
-export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode }: { report: CompareReport; tasks?: PromotionTask[]; mode?: DiffMode; dryRunMode?: boolean }) {
+export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, showUnchangedByDefault = false }: { report: CompareReport; tasks?: PromotionTask[]; mode?: DiffMode; dryRunMode?: boolean; showUnchangedByDefault?: boolean }) {
   // Back-compat: the older `dryRunMode` boolean still works — it maps to mode="dry-run".
   const effectiveMode: DiffMode = dryRunMode ? "dry-run" : mode;
   const { summary, files } = report;
   const total = summary.added + summary.removed + summary.modified + summary.unchanged;
-  const [hideUnchanged, setHideUnchanged] = useState(true);
+  const [hideUnchanged, setHideUnchanged] = useState(!showUnchangedByDefault);
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
   const [allOpenSeq, setAllOpenSeq] = useState(0);
   const [allFilesModalOpen, setAllFilesModalOpen] = useState(false);
@@ -2104,14 +2104,12 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode }:
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
   const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
-  // Compare tab uses traditional `diff source target` semantics: report.source is
-  // the baseline, report.target is what it's being compared against. A promotion
-  // task going the *other* direction (task.source = compare.target → task.target
-  // = compare.source) is the one that can consume diffs from this comparison.
+  // Match tasks whose source and target envs align with the comparison's
+  // source and target directly (same order, not reversed).
   const eligibleTasks = tasks.filter(
     (t) =>
-      t.source.environment === report.target.environment &&
-      t.target.environment === report.source.environment,
+      t.source.environment === report.source.environment &&
+      t.target.environment === report.target.environment,
   );
 
   const sameEnv = report.source.environment === report.target.environment;
