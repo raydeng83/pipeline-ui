@@ -154,7 +154,9 @@ export function readCommitHistory(opts?: CommitFilter): HistoryRecord[] {
     if (!line) continue;
     const parts = line.split(FIELD_SEP);
     const [hash, shortHash, author, atStr, subject, body] = parts;
-    const commitDate = new Date(Number(atStr) * 1000).toISOString();
+    const atNum = Number(atStr);
+    if (!atStr || isNaN(atNum)) continue;
+    const commitDate = new Date(atNum * 1000).toISOString();
     const trailers = parseTrailers(body ?? "");
 
     if (trailers.Operation) {
@@ -289,7 +291,18 @@ export function readOpLog(opts?: CommitFilter): HistoryRecord[] {
 export function readHistoryMerged(opts?: CommitFilter): HistoryRecord[] {
   const commits = readCommitHistory(opts);
   const ops = readOpLog(opts);
-  const merged = [...commits, ...ops].sort((a, b) =>
+
+  // Deduplicate: if an op-log entry has a matching commit (same type, environment,
+  // and startedAt within 2 seconds), prefer the commit (richer metadata).
+  const commitKeys = new Set(
+    commits.map((c) => `${c.type}|${c.environment}|${c.startedAt.slice(0, 19)}`),
+  );
+  const dedupedOps = ops.filter((o) => {
+    const key = `${o.type}|${o.environment}|${o.startedAt.slice(0, 19)}`;
+    return !commitKeys.has(key);
+  });
+
+  const merged = [...commits, ...dedupedOps].sort((a, b) =>
     b.startedAt.localeCompare(a.startedAt),
   );
   return opts?.limit ? merged.slice(0, opts.limit) : merged;

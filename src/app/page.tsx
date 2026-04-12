@@ -3,7 +3,6 @@ import { getEnvironments } from "@/lib/fr-config";
 import { readHistoryMerged } from "@/lib/op-history";
 import type { HistoryRecord } from "@/lib/op-history";
 import type { Environment } from "@/lib/fr-config";
-import { ScopeCoverage } from "./_dashboard/ScopeCoverage";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -97,42 +96,11 @@ export default function DashboardPage() {
     lastPush: history.find((r) => r.type === "push" && r.environment === env.name) ?? null,
   }));
 
-  // Stats
-  const totalOps   = history.length;
-  const successPct = totalOps > 0 ? Math.round(history.filter((r) => r.status === "success").length / totalOps * 100) : null;
-  const lastRecord = history[0] ?? null;
-
-  // Recent activity (latest 12)
+  // Recent activity (latest 7)
   const recentActivity = history.slice(0, 7);
 
   // Compare reports (latest 6)
   const compareReports = history.filter((r) => r.type === "compare").slice(0, 6);
-
-  const actions = [
-    { href: "/pull",    title: "Pull",    desc: "Export config from a tenant.",           icon: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3", color: "sky" },
-    { href: "/push",    title: "Push",    desc: "Deploy local config to a tenant.",        icon: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5", color: "emerald" },
-    { href: "/compare", title: "Compare", desc: "Diff two environments side by side.",     icon: "M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5", color: "violet" },
-    { href: "/promote", title: "Promote", desc: "Migrate config between tenants.",         icon: "M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3", color: "amber" },
-    { href: "/configs", title: "Browse",  desc: "Inspect config files and journeys.",      icon: "M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z", color: "slate" },
-    { href: "/analyze", title: "Analyze", desc: "Analyze journeys and dependencies.",      icon: "M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6.75v6.75", color: "indigo" },
-  ];
-
-  const actionColors: Record<string, { bg: string; border: string; icon: string; title: string }> = {
-    sky:     { bg: "bg-sky-50 hover:bg-sky-100",        border: "border-sky-200",     icon: "text-sky-500",     title: "text-sky-800" },
-    emerald: { bg: "bg-emerald-50 hover:bg-emerald-100", border: "border-emerald-200", icon: "text-emerald-500", title: "text-emerald-800" },
-    violet:  { bg: "bg-violet-50 hover:bg-violet-100",  border: "border-violet-200",  icon: "text-violet-500",  title: "text-violet-800" },
-    amber:   { bg: "bg-amber-50 hover:bg-amber-100",    border: "border-amber-200",   icon: "text-amber-500",   title: "text-amber-800" },
-    slate:   { bg: "bg-slate-50 hover:bg-slate-100",    border: "border-slate-200",   icon: "text-slate-500",   title: "text-slate-800" },
-    indigo:  { bg: "bg-indigo-50 hover:bg-indigo-100",  border: "border-indigo-200",  icon: "text-indigo-500",  title: "text-indigo-800" },
-  };
-
-  const shortcuts = [
-    { keys: ["Double-click node"], desc: "Open script / inner journey preview" },
-    { keys: ["Single-click node"],  desc: "Open side panel with node details" },
-    { keys: ["Esc"],                desc: "Close modal or side panel" },
-    { keys: ["Diff", "Files"],      desc: "Switch between unified diff and split view" },
-    { keys: ["Ctrl+click"],         desc: "Copy node label (where applicable)" },
-  ];
 
   return (
     <div className="space-y-8">
@@ -144,24 +112,6 @@ export default function DashboardPage() {
           <p className="text-slate-500 mt-1">Manage your Ping Advanced Identity Cloud configuration pipeline.</p>
         </div>
       </div>
-
-      {/* ── Quick Stats ── */}
-      {totalOps > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: "Environments", value: environments.length.toString(), sub: environments.map((e) => e.label).join(", ") || "none" },
-            { label: "Total Operations", value: totalOps.toString(), sub: "pull · push · compare · promote" },
-            { label: "Success Rate", value: successPct != null ? `${successPct}%` : "—", sub: `${history.filter((r) => r.status === "success").length} succeeded` },
-            { label: "Last Activity", value: lastRecord ? timeAgo(lastRecord.completedAt) : "—", sub: lastRecord ? `${lastRecord.type} · ${lastRecord.environment}` : "no history yet" },
-          ].map(({ label, value, sub }) => (
-            <div key={label} className="bg-white rounded-lg border border-slate-200 px-4 py-3">
-              <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">{label}</p>
-              <p className="text-2xl font-bold text-slate-900 mt-0.5">{value}</p>
-              <p className="text-[11px] text-slate-400 mt-0.5 truncate">{sub}</p>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* ── Environments + Recent Activity ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -251,9 +201,6 @@ export default function DashboardPage() {
         </section>
       </div>
 
-      {/* ── Scope Coverage ── */}
-      <ScopeCoverage environments={environments} />
-
       {/* ── Recent Compare Reports ── */}
       {compareReports.length > 0 && (
         <section>
@@ -299,52 +246,6 @@ export default function DashboardPage() {
           </div>
         </section>
       )}
-
-      {/* ── Quick Actions + Keyboard Shortcuts ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Quick Actions */}
-        <section className="lg:col-span-2">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {actions.map((action) => {
-              const c = actionColors[action.color];
-              return (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className={`flex items-start gap-3 p-4 rounded-lg border transition-colors ${c.bg} ${c.border}`}
-                >
-                  <svg className={`w-5 h-5 shrink-0 mt-0.5 ${c.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d={action.icon} />
-                  </svg>
-                  <div>
-                    <p className={`text-sm font-semibold ${c.title}`}>{action.title}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">{action.desc}</p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Keyboard Shortcuts */}
-        <section>
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">Keyboard Shortcuts</h2>
-          <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-50">
-            {shortcuts.map(({ keys, desc }) => (
-              <div key={desc} className="flex items-center gap-3 px-4 py-2.5">
-                <div className="flex items-center gap-1 shrink-0 flex-wrap">
-                  {keys.map((k) => (
-                    <kbd key={k} className="px-1.5 py-0.5 text-[10px] font-mono bg-slate-100 text-slate-600 rounded border border-slate-200">{k}</kbd>
-                  ))}
-                </div>
-                <p className="text-[11px] text-slate-500 leading-tight">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
 
     </div>
   );

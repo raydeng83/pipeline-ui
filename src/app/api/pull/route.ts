@@ -262,21 +262,20 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // If the pull failed OR there was no commit (nothing to commit), log to op-log as fallback
-      if (lastExitCode !== 0 || !postHash) {
-        try {
-          appendOpLog({
-            type: "pull",
-            environment,
-            scopes: scopesList.length ? scopesList : ["all"],
-            status: lastExitCode === 0 ? "success" : "failed",
-            startedAt,
-            durationMs: Date.now() - startTime,
-            summary,
-          });
-        } catch {
-          // non-fatal
-        }
+      // Always record to op-log so every pull is visible in history
+      // (git-commit history is a secondary source parsed from trailers)
+      try {
+        appendOpLog({
+          type: "pull",
+          environment,
+          scopes: scopesList.length ? scopesList : ["all"],
+          status: lastExitCode === 0 ? "success" : "failed",
+          startedAt,
+          durationMs: Date.now() - startTime,
+          summary,
+        });
+      } catch {
+        // non-fatal
       }
 
       controller.close();
