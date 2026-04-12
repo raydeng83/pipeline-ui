@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
+import path from "path";
 import { spawnFrConfig, ConfigScope, getEnvFileContent } from "@/lib/fr-config";
 import { parseEnvFile } from "@/lib/env-parser";
-import { autoCommit, analyzeChanges, scopeLabel as getScopeLabel } from "@/lib/git";
+import { autoCommit, analyzeChanges, pruneScopeDirs, scopeLabel as getScopeLabel } from "@/lib/git";
 import { appendHistory, createHistoryRecord } from "@/lib/history";
 import type { ScopeDetail, LogEntry } from "@/lib/history";
 import { CONFIG_SCOPES } from "@/lib/fr-config-types";
@@ -98,6 +99,18 @@ export async function POST(req: NextRequest) {
 
   // Partition scopes by command type
   const allScopes = scopesList.length ? scopesList : (CONFIG_SCOPES.filter(s => s.cliSupported !== false).map(s => s.value) as ConfigScope[]);
+
+  // Prune: delete on-disk scope directories so the pull mirrors remote deletions.
+  // Safe because the pre-pull auto-commit above just snapshotted any local changes.
+  const configDirAbs = path.resolve(process.cwd(), "environments", environment, configDirRel);
+  let prunedDirs: string[] = [];
+  let pruneError: string | null = null;
+  try {
+    prunedDirs = pruneScopeDirs(configDirAbs, allScopes);
+  } catch (err) {
+    pruneError = err instanceof Error ? err.message : String(err);
+  }
+
   const frodoScopes = allScopes.filter((s) => FRODO_SCOPES.includes(s));
   const igaScopes   = allScopes.filter((s) => IGA_API_SCOPES.includes(s));
   const frScopes    = allScopes.filter((s) => !FRODO_SCOPES.includes(s) && !IGA_API_SCOPES.includes(s)) as ConfigScope[];
@@ -140,6 +153,32 @@ export async function POST(req: NextRequest) {
           message: "No uncommitted changes — working tree clean",
           ts: Date.now(),
         });
+      }
+
+      // Emit prune events so the UI shows what was wiped to mirror remote deletions
+      if (pruneError) {
+        emit({
+          type: "git",
+          action: "pre-pull-prune-error",
+          message: `Failed to prune scope directories: ${pruneError}`,
+          ts: Date.now(),
+        });
+      } else if (prunedDirs.length === 0) {
+        emit({
+          type: "git",
+          action: "pre-pull-prune-skip",
+          message: "No existing scope directories to prune",
+          ts: Date.now(),
+        });
+      } else {
+        for (const dir of prunedDirs) {
+          emit({
+            type: "git",
+            action: "pre-pull-prune",
+            message: `Pruned ${path.relative(process.cwd(), dir)}`,
+            ts: Date.now(),
+          });
+        }
       }
 
       // Pipe through the pull stream

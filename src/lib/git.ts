@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import fs from "fs";
 import path from "path";
 
 const REPO_ROOT = process.cwd();
@@ -52,6 +53,47 @@ const REALM_SCOPE_SUBDIR: Record<string, string> = {
   "services":        "services",
   "themes":          "themes",
 };
+
+/**
+ * Return the absolute directories that back a given scope inside a config dir.
+ * Global scopes resolve to one directory; realm scopes expand to one per realm on disk.
+ * Scopes with no mapping return an empty array.
+ */
+export function getScopePruneTargets(configDirAbs: string, scope: string): string[] {
+  const targets: string[] = [];
+  if (scope in SCOPE_DIR) {
+    targets.push(path.join(configDirAbs, SCOPE_DIR[scope]));
+  }
+  if (scope in REALM_SCOPE_SUBDIR) {
+    const realmsDir = path.join(configDirAbs, "realms");
+    if (fs.existsSync(realmsDir)) {
+      for (const entry of fs.readdirSync(realmsDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        targets.push(path.join(realmsDir, entry.name, REALM_SCOPE_SUBDIR[scope]));
+      }
+    }
+  }
+  return targets;
+}
+
+/**
+ * Delete the on-disk directories backing each given scope so a subsequent pull
+ * acts as a mirror of remote state. Returns the absolute paths that were deleted
+ * (existing directories only). Caller is expected to have committed any local
+ * changes first so nothing is unrecoverable.
+ */
+export function pruneScopeDirs(configDirAbs: string, scopes: string[]): string[] {
+  const deleted: string[] = [];
+  for (const scope of scopes) {
+    for (const target of getScopePruneTargets(configDirAbs, scope)) {
+      if (fs.existsSync(target)) {
+        fs.rmSync(target, { recursive: true, force: true });
+        deleted.push(target);
+      }
+    }
+  }
+  return deleted;
+}
 
 /** Reverse lookup: given a relative path segment inside a config dir, return the scope name. */
 function dirToScope(relPath: string): string | null {
