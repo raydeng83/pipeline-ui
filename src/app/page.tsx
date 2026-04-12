@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getEnvironments } from "@/lib/fr-config";
-import { readHistory } from "@/lib/history";
-import type { HistoryRecord } from "@/lib/history";
+import { readHistoryMerged } from "@/lib/op-history";
+import type { HistoryRecord } from "@/lib/op-history";
 import type { Environment } from "@/lib/fr-config";
 import { ScopeCoverage } from "./_dashboard/ScopeCoverage";
 
@@ -88,7 +88,7 @@ function activityLabel(r: HistoryRecord): string {
 
 export default function DashboardPage() {
   const environments = getEnvironments();
-  const history      = readHistory().filter((r) => r.type !== "log-search");
+  const history      = readHistoryMerged({ limit: 500 }).filter((r) => r.type !== "log-search");
 
   // Environment health: last pull / push per env
   const envHealth = environments.map((env) => ({

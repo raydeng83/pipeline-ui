@@ -9,7 +9,6 @@ import {
   PromoteSubcommand,
 } from "@/lib/fr-config-types";
 import type { PromotionTask, TaskStatus } from "@/lib/promotion-tasks";
-import type { HistoryRecord } from "@/lib/history";
 import { LogViewer } from "@/components/LogViewer";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { DiffReport } from "@/app/compare/DiffReport";
@@ -828,27 +827,27 @@ export function PromoteExecution({
       verify:    phaseStatuses.verify,
     };
     const scopeNames = task.items.map((i) => i.scope);
-    const record: Partial<HistoryRecord> = {
-      type: "promote",
+    const payload = {
+      type: "promote" as const,
       environment: `${task.source.environment} → ${task.target.environment}`,
       source: task.source,
       target: task.target,
       scopes: scopeNames.length ? scopeNames : ["all"],
-      status: promoteStatus === "done" ? "success" : "failed",
-      commitHash: null,
+      status: (promoteStatus === "done" ? "success" : "failed") as "success" | "failed",
       startedAt: started.iso,
-      completedAt,
-      duration: completedMs - started.ms,
+      durationMs: completedMs - started.ms,
       summary: `${promoteStatus === "done" ? "Promoted" : "Promote failed"}: ${task.name} (${scopeNames.length} scope${scopeNames.length === 1 ? "" : "s"})`,
       taskId: task.id,
       taskName: task.name,
       phaseOutcomes,
     };
+    // Suppress unused warning for completedAt (kept for potential future use)
+    void completedAt;
 
     fetch("/api/history", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ record, detail: {} }),
+      body: JSON.stringify(payload),
     }).catch(() => { /* non-fatal */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phaseStatuses.promote, phaseStatuses.prepare, phaseStatuses["dry-run"], phaseStatuses.verify]);

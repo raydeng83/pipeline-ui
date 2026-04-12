@@ -1,51 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
-import { readHistory, appendHistory } from "@/lib/history";
-import type { HistoryRecord, HistoryDetail } from "@/lib/history";
+import { readHistoryMerged, appendOpLog, type OpType, type OpStatus } from "@/lib/op-history";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const envFilter = searchParams.get("environment");
-  const typeFilter = searchParams.get("type");
+  const environment = searchParams.get("environment") ?? undefined;
+  const type = (searchParams.get("type") as OpType | null) ?? undefined;
+  const limitStr = searchParams.get("limit");
+  const limit = limitStr ? Math.min(Math.max(Number(limitStr), 1), 2000) : undefined;
 
-  let records = readHistory();
-  if (envFilter) records = records.filter((r) => r.environment === envFilter);
-  if (typeFilter) records = records.filter((r) => r.type === typeFilter);
-
+  const records = readHistoryMerged({ environment, type, limit });
   return NextResponse.json(records);
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { record, detail } = body as { record: Partial<HistoryRecord>; detail?: HistoryDetail };
-
-  if (!record?.type) {
-    return NextResponse.json({ error: "Missing record type" }, { status: 400 });
+  const body = await req.json().catch(() => ({}));
+  if (!body.type || !body.environment) {
+    return NextResponse.json({ error: "Missing type or environment" }, { status: 400 });
   }
-
-  const id = crypto.randomUUID();
-  const full: HistoryRecord = {
-    id,
-    type: record.type as HistoryRecord["type"],
-    environment: record.environment ?? "",
-    scopes: record.scopes ?? [],
-    status: record.status ?? "success",
-    commitHash: record.commitHash ?? null,
-    startedAt: record.startedAt ?? new Date().toISOString(),
-    completedAt: record.completedAt ?? new Date().toISOString(),
-    duration: record.duration ?? 0,
-    summary: record.summary ?? "",
-    logSource: record.logSource,
-    logMode: record.logMode,
-    logPreset: record.logPreset,
-    logEntryCount: record.logEntryCount,
-    source: record.source,
-    target: record.target,
-    taskId: record.taskId,
-    taskName: record.taskName,
-    phaseOutcomes: record.phaseOutcomes,
-  };
-
-  appendHistory(full, detail);
-  return NextResponse.json({ id: full.id });
+  const record = appendOpLog({
+    type: body.type as OpType,
+    environment: String(body.environment),
+    scopes: Array.isArray(body.scopes) ? body.scopes : [],
+    status: (body.status as OpStatus) ?? "success",
+    startedAt: body.startedAt ?? new Date().toISOString(),
+    durationMs: Number(body.durationMs ?? 0),
+    summary: String(body.summary ?? ""),
+    source: body.source,
+    target: body.target,
+    taskId: body.taskId,
+    taskName: body.taskName,
+    phaseOutcomes: body.phaseOutcomes,
+    logSource: body.logSource,
+    logMode: body.logMode,
+    logPreset: body.logPreset,
+    logEntryCount: body.logEntryCount,
+  });
+  return NextResponse.json({ id: record.id });
 }

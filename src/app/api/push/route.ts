@@ -2,8 +2,7 @@ import { NextRequest } from "next/server";
 import { spawnFrConfig, ConfigScope } from "@/lib/fr-config";
 import { ScopeSelection } from "@/lib/fr-config-types";
 import { scopeLabel as getScopeLabel } from "@/lib/git";
-import { appendHistory, createHistoryRecord } from "@/lib/history";
-import type { ScopeDetail, LogEntry } from "@/lib/history";
+import { appendOpLog } from "@/lib/op-history";
 import { spawnFrodo, FRODO_SCOPES } from "@/lib/frodo";
 import { runIgaApi, IGA_API_SCOPES } from "@/lib/iga-api";
 
@@ -77,10 +76,9 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
   const startedAt = new Date(startTime).toISOString();
 
-  // Wrap the push stream to capture logs and record history
+  // Wrap the push stream to record op-log entry
   const stream = new ReadableStream<string>({
     async start(controller) {
-      const collectedLogs: LogEntry[] = [];
       const reader = pushStream.getReader();
       let lastExitCode = 0;
 
@@ -92,7 +90,6 @@ export async function POST(req: NextRequest) {
           if (!line.trim()) continue;
           try {
             const parsed = JSON.parse(line);
-            collectedLogs.push(parsed);
             if (parsed.type === "exit") lastExitCode = parsed.code;
           } catch {
             // ignore
@@ -100,23 +97,16 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Record history
+      // Record op-log entry
       try {
         const scopeList = scopeSelections
           ? scopeSelections.map((s) => s.scope)
           : scopes ?? [];
 
-        const scopeDetails: Record<string, ScopeDetail> = {};
         let totalItems = 0;
-
         if (scopeSelections) {
-          for (const { scope, items } of scopeSelections) {
-            if (items && items.length > 0) {
-              scopeDetails[scope] = { added: [], modified: items, deleted: [] };
-              totalItems += items.length;
-            } else {
-              scopeDetails[scope] = { added: [], modified: [], deleted: [] };
-            }
+          for (const { items } of scopeSelections) {
+            if (items && items.length > 0) totalItems += items.length;
           }
         }
 
@@ -125,19 +115,17 @@ export async function POST(req: NextRequest) {
           ? `${totalItems} items across ${scopeList.length} scope${scopeList.length !== 1 ? "s" : ""} (${scopeNames})`
           : `${scopeList.length} scope${scopeList.length !== 1 ? "s" : ""} (${scopeNames})`;
 
-        const record = createHistoryRecord({
+        appendOpLog({
           type: "push",
           environment,
           scopes: scopeList,
           status: lastExitCode === 0 ? "success" : "failed",
-          commitHash: null,
           startedAt,
-          startTime,
+          durationMs: Date.now() - startTime,
           summary,
         });
-        appendHistory(record, { scopeDetails, logs: collectedLogs });
       } catch {
-        // history append failed — don't break the stream
+        // op-log append failed — don't break the stream
       }
 
       controller.close();

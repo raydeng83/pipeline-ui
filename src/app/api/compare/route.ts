@@ -5,8 +5,7 @@ import fs from "fs";
 import { spawnFrConfig, getConfigDir, ConfigScope } from "@/lib/fr-config";
 import { buildReport } from "@/lib/diff";
 import type { CompareEndpoint } from "@/lib/diff-types";
-import { appendHistory, createHistoryRecord } from "@/lib/history";
-import type { LogEntry } from "@/lib/history";
+import { appendOpLog } from "@/lib/op-history";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 
@@ -107,10 +106,8 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
-      const collectedLogs: LogEntry[] = [];
 
       const enqueue = (obj: object) => {
-        collectedLogs.push(obj as LogEntry);
         controller.enqueue(enc.encode(JSON.stringify(obj) + "\n"));
       };
 
@@ -322,45 +319,39 @@ export async function POST(req: NextRequest) {
         enqueue({ type: "report", data: JSON.stringify(report), ts: Date.now() });
         enqueue({ type: "exit", code: 0, ts: Date.now() });
 
-        // Record history with full compare report
+        // Record compare op-log entry (summary only — detail is too heavy to persist)
         try {
           const { summary } = report;
           const summaryText = `${summary.added} added, ${summary.removed} removed, ${summary.modified} modified across ${report.files.length} files`;
           const scopeList = effectiveScopes;
-
-          const record = createHistoryRecord({
+          appendOpLog({
             type: "compare",
             environment: `${source.environment} → ${target.environment}`,
             source,
             target,
             scopes: scopeList.length ? scopeList : ["all"],
             status: "success",
-            commitHash: null,
             startedAt,
-            startTime,
+            durationMs: Date.now() - startTime,
             summary: summaryText,
           });
-          appendHistory(record, { compareReport: report, logs: collectedLogs });
         } catch {
           // ignore
         }
       } catch {
         failed = true;
-        // Record failed compare
         try {
-          const record = createHistoryRecord({
+          appendOpLog({
             type: "compare",
             environment: `${source.environment} → ${target.environment}`,
             source,
             target,
             scopes: scopes ?? ["all"],
             status: "failed",
-            commitHash: null,
             startedAt,
-            startTime,
+            durationMs: Date.now() - startTime,
             summary: "Compare failed",
           });
-          appendHistory(record, { logs: collectedLogs });
         } catch {
           // ignore
         }

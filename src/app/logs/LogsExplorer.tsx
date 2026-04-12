@@ -1003,31 +1003,26 @@ export function LogsExplorer({
   const [wholeWord, setWholeWord] = useState(false);
   const highlightInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Auto-save helper ──
+  // ── Auto-save helper (summary-only; entry payloads no longer persisted) ──
   const autoSaveToHistory = useCallback((logMode: "search" | "tail" | "transaction", logEntries: unknown[], extra?: { transactionId?: string }) => {
     if (logEntries.length === 0) return;
     fetch("/api/history", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        record: {
-          type: "log-search",
-          environment: env,
-          scopes: [],
-          status: "success",
-          commitHash: null,
-          startedAt: new Date().toISOString(),
-          completedAt: new Date().toISOString(),
-          duration: 0,
-          summary: logMode === "transaction"
-            ? `${logEntries.length} entries for tx:${extra?.transactionId?.slice(0, 16) ?? ""}…`
-            : `${logEntries.length} entries from ${selectedSources.join("+")}`,
-          logSource: selectedSources.join("+"),
-          logMode,
-          logPreset: logMode === "search" ? preset : undefined,
-          logEntryCount: logEntries.length,
-        },
-        detail: { logSearchEntries: logEntries },
+        type: "log-search",
+        environment: env,
+        scopes: [],
+        status: "success",
+        startedAt: new Date().toISOString(),
+        durationMs: 0,
+        summary: logMode === "transaction"
+          ? `${logEntries.length} entries for tx:${extra?.transactionId?.slice(0, 16) ?? ""}…`
+          : `${logEntries.length} entries from ${selectedSources.join("+")}`,
+        logSource: selectedSources.join("+"),
+        logMode,
+        logPreset: logMode === "search" ? preset : undefined,
+        logEntryCount: logEntries.length,
       }),
     }).then(() => {
       setSaveFlash(true);
@@ -1568,37 +1563,6 @@ export function LogsExplorer({
                       {rec.summary}
                     </span>
                     <span className="text-slate-400 shrink-0">{ageStr}</span>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const res = await fetch(`/api/history/${rec.id}`);
-                          if (!res.ok) return;
-                          const detail = await res.json();
-                          setEntries(detail.logSearchEntries ?? []);
-                          setFetched(true);
-                          setLastUpdated(new Date());
-                          setPage(Infinity);
-                          setExpandedIdx(null);
-                          setHistoryOpen(false);
-                        } catch { /* ignore */ }
-                      }}
-                      className="text-sky-600 hover:text-sky-800 shrink-0"
-                    >
-                      Load
-                    </button>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        await fetch(`/api/history/${rec.id}`, { method: "DELETE" });
-                        setHistoryRecords((prev) => prev.filter((r) => r.id !== rec.id));
-                      }}
-                      className="text-slate-300 hover:text-red-500 shrink-0"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
                   </div>
                 );
               })}

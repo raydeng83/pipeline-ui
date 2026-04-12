@@ -1,13 +1,20 @@
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import { getHistoryGitRoot, buildTrailers, type OpMetadata } from "./op-history";
 
 const REPO_ROOT = process.cwd();
 const ENVIRONMENTS_DIR = path.join(REPO_ROOT, "environments");
 
-/** Get the relative path from repo root for an environment's directory. */
+/** Directory to run git commands in — the nested environments repo if initialized, else null. */
+function getGitCwd(): string | null {
+  return getHistoryGitRoot();
+}
+
+/** Path to an environment's directory relative to the configured git root. */
 function envRelPath(environment: string): string {
-  return path.relative(REPO_ROOT, path.join(ENVIRONMENTS_DIR, environment));
+  const cwd = getGitCwd() ?? REPO_ROOT;
+  return path.relative(cwd, path.join(ENVIRONMENTS_DIR, environment));
 }
 
 // ── Scope mapping (mirrors the audit route) ──────────────────────────────────
@@ -200,9 +207,11 @@ export interface ScopeChange {
  * Returns per-scope breakdown with individual item names.
  */
 export function analyzeChanges(environment: string, configDirRel: string): ScopeChange[] {
+  const cwd = getGitCwd();
+  if (!cwd) return [];
   const relPath = envRelPath(environment);
   const output = execSync(`git status --porcelain -- "${relPath}"`, {
-    cwd: REPO_ROOT,
+    cwd,
     encoding: "utf-8",
     maxBuffer: 10 * 1024 * 1024,
   }).trim();
@@ -281,14 +290,18 @@ function buildSummaryLine(title: string, changes: ScopeChange[]): string {
 export function buildCommitMessage(
   title: string,
   environment: string,
-  configDirRel: string
+  configDirRel: string,
+  metadata?: OpMetadata,
 ): string {
   const changes = analyzeChanges(environment, configDirRel);
-  if (changes.length === 0) return title;
+
+  const trailerBlock = metadata ? buildTrailers(metadata) : null;
+  const appendTrailers = (body: string) => (trailerBlock ? `${body}\n\n${trailerBlock}` : body);
+
+  if (changes.length === 0) return appendTrailers(title);
 
   const summary = buildSummaryLine(title, changes);
 
-  // Per-scope one-line summary (not full item list — full details are in history)
   const scopeLines = changes.map((s) => {
     const parts: string[] = [];
     if (s.added.length) parts.push(`+${s.added.length}`);
@@ -297,37 +310,45 @@ export function buildCommitMessage(
     return `  ${scopeLabel(s.scope)}: ${parts.join(" ")}`;
   });
 
-  return `${summary}\n\n${scopeLines.join("\n")}\n\nFull details saved to history.`;
+  return appendTrailers(`${summary}\n\n${scopeLines.join("\n")}`);
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
 
 /** Check whether an environment directory has uncommitted changes (staged or unstaged, plus untracked). */
 export function hasChanges(environment: string): boolean {
+  const cwd = getGitCwd();
+  if (!cwd) return false;
   const relPath = envRelPath(environment);
   const status = execSync(`git status --porcelain -- "${relPath}"`, {
-    cwd: REPO_ROOT,
+    cwd,
     encoding: "utf-8",
     maxBuffer: 10 * 1024 * 1024,
   }).trim();
   return status.length > 0;
 }
 
-/** Stage and commit all changes in an environment directory. Returns the short commit hash, or null if nothing to commit. */
+/**
+ * Stage and commit all changes in an environment directory inside the nested environments repo.
+ * Returns the short commit hash, or null if the repo isn't initialized or nothing to commit.
+ */
 export function autoCommit(
   environment: string,
   title: string,
-  configDirRel: string
+  configDirRel: string,
+  metadata?: OpMetadata,
 ): string | null {
+  const cwd = getGitCwd();
+  if (!cwd) return null;
   if (!hasChanges(environment)) return null;
 
-  const message = buildCommitMessage(title, environment, configDirRel);
+  const message = buildCommitMessage(title, environment, configDirRel, metadata);
   const relPath = envRelPath(environment);
-  execSync(`git add -- "${relPath}"`, { cwd: REPO_ROOT, maxBuffer: 10 * 1024 * 1024 });
-  execSync(`git commit -m ${JSON.stringify(message)}`, { cwd: REPO_ROOT, maxBuffer: 10 * 1024 * 1024 });
+  execSync(`git add -- "${relPath}"`, { cwd, maxBuffer: 10 * 1024 * 1024 });
+  execSync(`git commit -m ${JSON.stringify(message)}`, { cwd, maxBuffer: 10 * 1024 * 1024 });
 
   const hash = execSync("git rev-parse --short HEAD", {
-    cwd: REPO_ROOT,
+    cwd,
     encoding: "utf-8",
   }).trim();
   return hash;

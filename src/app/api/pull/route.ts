@@ -3,8 +3,7 @@ import path from "path";
 import { spawnFrConfig, ConfigScope, getEnvFileContent } from "@/lib/fr-config";
 import { parseEnvFile } from "@/lib/env-parser";
 import { autoCommit, analyzeChanges, pruneScopeDirs, scopeLabel as getScopeLabel } from "@/lib/git";
-import { appendHistory, createHistoryRecord } from "@/lib/history";
-import type { ScopeDetail, LogEntry } from "@/lib/history";
+import { appendOpLog, type OpMetadata } from "@/lib/op-history";
 import { CONFIG_SCOPES } from "@/lib/fr-config-types";
 import { spawnFrodo, FRODO_SCOPES } from "@/lib/frodo";
 import { runIgaApi, IGA_API_SCOPES } from "@/lib/iga-api";
@@ -129,11 +128,7 @@ export async function POST(req: NextRequest) {
 
   const stream = new ReadableStream<string>({
     async start(controller) {
-      const collectedLogs: LogEntry[] = [];
-
       const emit = (data: object) => {
-        const entry = data as LogEntry;
-        collectedLogs.push(entry);
         controller.enqueue(JSON.stringify(data) + "\n");
       };
 
@@ -188,12 +183,11 @@ export async function POST(req: NextRequest) {
         const { done, value } = await reader.read();
         if (done) break;
         controller.enqueue(value);
-        // Parse and collect log entries
+        // Parse for exit code
         for (const line of value.split("\n")) {
           if (!line.trim()) continue;
           try {
             const parsed = JSON.parse(line);
-            collectedLogs.push(parsed);
             if (parsed.type === "exit") lastExitCode = parsed.code;
           } catch {
             // ignore
@@ -202,28 +196,44 @@ export async function POST(req: NextRequest) {
       }
 
       // Post-pull: commit and record history
-      let scopeDetails: Record<string, ScopeDetail> = {};
       let summary = "Pull failed";
       let postHash: string | null = null;
+      let totalAdded = 0;
+      let totalModified = 0;
+      let totalDeleted = 0;
 
       if (lastExitCode === 0) {
         // Capture changes BEFORE commit (commit cleans the working tree)
         const changes = analyzeChanges(environment, configDirRel);
 
         for (const c of changes) {
-          scopeDetails[c.scope] = { added: c.added, modified: c.modified, deleted: c.deleted };
+          totalAdded += c.added.length;
+          totalModified += c.modified.length;
+          totalDeleted += c.deleted.length;
         }
-        const totalItems = changes.reduce((s, c) => s + c.added.length + c.modified.length + c.deleted.length, 0);
+        const totalItems = totalAdded + totalModified + totalDeleted;
         const scopeNames = changes.map((c) => getScopeLabel(c.scope)).join(", ");
         summary = totalItems > 0
           ? `${totalItems} items across ${changes.length} scope${changes.length !== 1 ? "s" : ""} (${scopeNames})`
           : "No changes";
 
         try {
+          const metadata: OpMetadata = {
+            operation: "pull",
+            environment,
+            scopes: scopesList.length ? scopesList : ["all"],
+            status: "success",
+            startedAt,
+            durationMs: Date.now() - startTime,
+            added: totalAdded,
+            modified: totalModified,
+            deleted: totalDeleted,
+          };
           postHash = autoCommit(
             environment,
             `pull(${environment}): ${scopeLabel} @ ${ts}`,
-            configDirRel
+            configDirRel,
+            metadata,
           );
           if (postHash) {
             emit({
@@ -252,21 +262,21 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Append history with detail
-      try {
-        const record = createHistoryRecord({
-          type: "pull",
-          environment,
-          scopes: scopesList.length ? scopesList : ["all"],
-          status: lastExitCode === 0 ? "success" : "failed",
-          commitHash: postHash,
-          startedAt,
-          startTime,
-          summary,
-        });
-        appendHistory(record, { scopeDetails, logs: collectedLogs });
-      } catch {
-        // history append failed — don't break the stream
+      // If the pull failed OR there was no commit (nothing to commit), log to op-log as fallback
+      if (lastExitCode !== 0 || !postHash) {
+        try {
+          appendOpLog({
+            type: "pull",
+            environment,
+            scopes: scopesList.length ? scopesList : ["all"],
+            status: lastExitCode === 0 ? "success" : "failed",
+            startedAt,
+            durationMs: Date.now() - startTime,
+            summary,
+          });
+        } catch {
+          // non-fatal
+        }
       }
 
       controller.close();
