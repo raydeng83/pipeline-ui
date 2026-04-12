@@ -47,14 +47,17 @@ function addDepsToSelections(
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { source, target, scopes, scopeSelections, includeDeps, diffOptions } = body as {
+  const { source, target, scopes, scopeSelections, includeDeps, diffOptions, mode } = body as {
     source: CompareEndpoint;
     target: CompareEndpoint;
     scopes?: ConfigScope[];
     scopeSelections?: import("@/lib/fr-config-types").ScopeSelection[];
     includeDeps?: boolean;
     diffOptions?: { includeMetadata?: boolean; ignoreWhitespace?: boolean };
+    /** "compare" (default) = traditional diff; "dry-run" = source-overwrites-target simulation with added/removed flipped for target-focused reading. */
+    mode?: "compare" | "dry-run";
   };
+  const diffMode: "compare" | "dry-run" = mode === "dry-run" ? "dry-run" : "compare";
 
   // Derive scope names from scopeSelections if provided
   const effectiveScopes: ConfigScope[] = scopeSelections
@@ -261,10 +264,12 @@ export async function POST(req: NextRequest) {
           report.journeyTree = undefined;
         }
 
-        // Flip added ↔ removed semantics for promote intuition:
+        // Dry-run only: flip added ↔ removed semantics for promote intuition:
         // "added" now means "will be added to target" (file exists on source only)
         // "removed" now means "will be removed from target" (file exists on target only)
         // Also flip diffLines, swap line counts, and swap localContent/remoteContent.
+        // Compare mode leaves the report in traditional `diff source target` polarity.
+        if (diffMode === "dry-run") {
         for (const f of report.files) {
           if (f.status === "added") {
             f.status = "removed";
@@ -312,6 +317,7 @@ export async function POST(req: NextRequest) {
             }));
           report.journeyTree = flipTree(report.journeyTree);
         }
+        } // end of dry-run flip block
 
         enqueue({ type: "report", data: JSON.stringify(report), ts: Date.now() });
         enqueue({ type: "exit", code: 0, ts: Date.now() });

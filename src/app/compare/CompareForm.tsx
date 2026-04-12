@@ -154,6 +154,7 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
       source,
       target,
       scopes,
+      mode: "compare",
       diffOptions: { includeMetadata, ignoreWhitespace: true },
     });
   };

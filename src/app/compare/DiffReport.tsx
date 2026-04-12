@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect, createContext, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { DiffMinimap } from "./DiffMinimap";
 import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "@/lib/diff-types";
@@ -256,16 +256,35 @@ function DiffViewer({ lines, fullscreen, wrap }: { lines: DiffLine[]; fullscreen
 
 // ── Side-by-side alignment ───────────────────────────────────────────────────
 
+export type DiffMode = "compare" | "dry-run";
+
+/** Context for the current diff interpretation. Provided at the DiffReport root. */
+const DiffModeContext = createContext<DiffMode>("compare");
+
 type AlignedRow = {
   leftContent?: string;
   rightContent?: string;
   leftNo?: number;
   rightNo?: number;
-  /** "context" | "added" (right only) | "removed" (left only) | "changed" (both sides differ) */
-  type: "context" | "added" | "removed" | "changed";
+  /** "context" = same on both sides. "leftOnly" / "rightOnly" = line only on that side. "changed" = different on both sides. */
+  type: "context" | "leftOnly" | "rightOnly" | "changed";
 };
 
-function buildAlignedRows(diffLines: DiffLine[]): AlignedRow[] {
+/**
+ * Build aligned rows for side-by-side rendering.
+ *
+ * - `compare` (traditional `diff source target`): `removed` diff lines are
+ *   source-only and render on the left; `added` diff lines are target-only
+ *   and render on the right.
+ * - `dry-run`: polarity already flipped by the API so `added` = source-only
+ *   (will be added to target) → left side, `removed` = target-only → right
+ *   side.
+ *
+ * Row `type` is expressed in pane-relative terms (leftOnly / rightOnly) so
+ * rendering color and prefix logic depend only on the `mode`, not on which
+ * underlying diff-line type happened to feed the row.
+ */
+function buildAlignedRows(diffLines: DiffLine[], mode: DiffMode): AlignedRow[] {
   const rows: AlignedRow[] = [];
   let leftNo = 0;
   let rightNo = 0;
@@ -277,23 +296,26 @@ function buildAlignedRows(diffLines: DiffLine[]): AlignedRow[] {
       rows.push({ leftContent: diffLines[i].content, rightContent: diffLines[i].content, leftNo, rightNo, type: "context" });
       i++;
     } else {
-      // Collect a block of consecutive removed then added lines
       const removed: string[] = [];
       const added: string[] = [];
       while (i < diffLines.length && diffLines[i].type === "removed") { removed.push(diffLines[i].content); i++; }
       while (i < diffLines.length && diffLines[i].type === "added")   { added.push(diffLines[i].content);   i++; }
-      const len = Math.max(removed.length, added.length);
+
+      const leftCol  = mode === "dry-run" ? added   : removed;
+      const rightCol = mode === "dry-run" ? removed : added;
+
+      const len = Math.max(leftCol.length, rightCol.length);
       for (let j = 0; j < len; j++) {
-        const hasL = j < removed.length;
-        const hasR = j < added.length;
+        const hasL = j < leftCol.length;
+        const hasR = j < rightCol.length;
         if (hasL) leftNo++;
         if (hasR) rightNo++;
         rows.push({
-          leftContent:  hasL ? removed[j] : undefined,
-          rightContent: hasR ? added[j]   : undefined,
+          leftContent:  hasL ? leftCol[j]  : undefined,
+          rightContent: hasR ? rightCol[j] : undefined,
           leftNo:  hasL ? leftNo  : undefined,
           rightNo: hasR ? rightNo : undefined,
-          type: hasL && hasR ? "changed" : hasL ? "removed" : "added",
+          type: hasL && hasR ? "changed" : hasL ? "leftOnly" : "rightOnly",
         });
       }
     }
@@ -320,7 +342,12 @@ function SideBySideViewer({
   fullscreen?: boolean;
   wrap?: boolean;
 }) {
-  const alignedRows = diffLines && diffLines.length > 0 ? buildAlignedRows(diffLines) : null;
+  const mode = useContext(DiffModeContext);
+  // In compare mode the API leaves FileDiff.localContent = source, .remoteContent = target.
+  // In dry-run mode the API swaps them, so un-swap here to keep pane ↔ content consistent.
+  const sourceContent = mode === "dry-run" ? remoteContent : localContent;
+  const targetContent = mode === "dry-run" ? localContent : remoteContent;
+  const alignedRows = diffLines && diffLines.length > 0 ? buildAlignedRows(diffLines, mode) : null;
   const leftScrollRef  = useRef<HTMLDivElement>(null);
   const rightScrollRef = useRef<HTMLDivElement>(null);
 
@@ -344,21 +371,23 @@ function SideBySideViewer({
     )}>
       <FilePane
         label={sourceLabel}
-        content={localContent}
+        content={sourceContent}
         absence={`Not in ${sourceLabel}`}
         rows={alignedRows}
         side="left"
         wrap={wrap}
         scrollRef={leftScrollRef}
+        mode={mode}
       />
       <FilePane
         label={targetLabel}
-        content={remoteContent}
+        content={targetContent}
         absence={`Not in ${targetLabel}`}
         rows={alignedRows}
         side="right"
         wrap={wrap}
         scrollRef={rightScrollRef}
+        mode={mode}
       />
       {diffLines && diffLines.length > 0 && (
         <DiffMinimap lines={diffLines} scrollRef={rightScrollRef} />
@@ -367,22 +396,50 @@ function SideBySideViewer({
   );
 }
 
-const ROW_BG: Record<AlignedRow["type"], { left: string; right: string }> = {
-  context: { left: "",              right: ""              },
-  removed: { left: "bg-red-950",    right: "bg-slate-900"  },
-  added:   { left: "bg-slate-900",  right: "bg-emerald-950"},
-  changed: { left: "bg-red-950",    right: "bg-emerald-950"},
+// Per-mode pane styling. Keys describe pane semantics, not diff-line types.
+// compare:  left pane = source ("-" red), right pane = target ("+" green) — classic diff polarity.
+// dry-run:  left pane = source ("+" green), right pane = target ("-" red) — target-overwrite focus.
+type PaneStyle = {
+  bg: Record<AlignedRow["type"], { left: string; right: string }>;
+  text: Record<AlignedRow["type"], { left: string; right: string }>;
+  prefix: { left: "+" | "-"; right: "+" | "-" };
 };
 
-const ROW_TEXT: Record<AlignedRow["type"], { left: string; right: string }> = {
-  context: { left: "text-slate-400",  right: "text-slate-400"  },
-  removed: { left: "text-red-300",    right: "text-slate-600"  },
-  added:   { left: "text-slate-600",  right: "text-emerald-300"},
-  changed: { left: "text-red-300",    right: "text-emerald-300"},
+const PANE_STYLES: Record<DiffMode, PaneStyle> = {
+  compare: {
+    bg: {
+      context:   { left: "",              right: ""              },
+      leftOnly:  { left: "bg-red-950",    right: "bg-slate-900"  },
+      rightOnly: { left: "bg-slate-900",  right: "bg-emerald-950"},
+      changed:   { left: "bg-red-950",    right: "bg-emerald-950"},
+    },
+    text: {
+      context:   { left: "text-slate-400",  right: "text-slate-400"  },
+      leftOnly:  { left: "text-red-300",    right: "text-slate-600"  },
+      rightOnly: { left: "text-slate-600",  right: "text-emerald-300"},
+      changed:   { left: "text-red-300",    right: "text-emerald-300"},
+    },
+    prefix: { left: "-", right: "+" },
+  },
+  "dry-run": {
+    bg: {
+      context:   { left: "",                right: ""                },
+      leftOnly:  { left: "bg-emerald-950",  right: "bg-slate-900"    },
+      rightOnly: { left: "bg-slate-900",    right: "bg-red-950"      },
+      changed:   { left: "bg-emerald-950",  right: "bg-red-950"      },
+    },
+    text: {
+      context:   { left: "text-slate-400",    right: "text-slate-400"  },
+      leftOnly:  { left: "text-emerald-300",  right: "text-slate-600"  },
+      rightOnly: { left: "text-slate-600",    right: "text-red-300"    },
+      changed:   { left: "text-emerald-300",  right: "text-red-300"    },
+    },
+    prefix: { left: "+", right: "-" },
+  },
 };
 
 function FilePane({
-  label, content, absence, rows, side, wrap, scrollRef,
+  label, content, absence, rows, side, wrap, scrollRef, mode,
 }: {
   label: string;
   content?: string;
@@ -391,7 +448,9 @@ function FilePane({
   side: "left" | "right";
   wrap?: boolean;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
+  mode: DiffMode;
 }) {
+  const style = PANE_STYLES[mode];
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700 shrink-0">
@@ -405,11 +464,11 @@ function FilePane({
               {rows.map((row, i) => {
                 const lineNo   = side === "left" ? row.leftNo  : row.rightNo;
                 const lineText = side === "left" ? row.leftContent : row.rightContent;
-                const bg   = ROW_BG[row.type][side];
-                const text = ROW_TEXT[row.type][side];
+                const bg   = style.bg[row.type][side];
+                const text = style.text[row.type][side];
+                const hasContent = side === "left" ? row.leftContent !== undefined : row.rightContent !== undefined;
                 const prefix = row.type === "context" ? " "
-                  : side === "left"  ? (row.leftContent  !== undefined ? "-" : " ")
-                  : side === "right" ? (row.rightContent !== undefined ? "+" : " ")
+                  : hasContent ? style.prefix[side]
                   : " ";
                 const pfxColor = prefix === "-" ? "text-red-500" : prefix === "+" ? "text-emerald-400" : "text-slate-600";
                 return (
@@ -2029,7 +2088,9 @@ function ScopeSection({
 
 // ── Main report ─────────────────────────────────────────────────────────────
 
-export function DiffReport({ report, tasks = [], dryRunMode = false }: { report: CompareReport; tasks?: PromotionTask[]; dryRunMode?: boolean }) {
+export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode }: { report: CompareReport; tasks?: PromotionTask[]; mode?: DiffMode; dryRunMode?: boolean }) {
+  // Back-compat: the older `dryRunMode` boolean still works — it maps to mode="dry-run".
+  const effectiveMode: DiffMode = dryRunMode ? "dry-run" : mode;
   const { summary, files } = report;
   const total = summary.added + summary.removed + summary.modified + summary.unchanged;
   const [hideUnchanged, setHideUnchanged] = useState(true);
@@ -2043,9 +2104,10 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
   const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
-  // Only show tasks whose source env matches the comparison target and vice versa.
-  // (Compare source = what changed; compare target = where it will be promoted FROM;
-  //  so task.source = compare.target, task.target = compare.source)
+  // Compare tab uses traditional `diff source target` semantics: report.source is
+  // the baseline, report.target is what it's being compared against. A promotion
+  // task going the *other* direction (task.source = compare.target → task.target
+  // = compare.source) is the one that can consume diffs from this comparison.
   const eligibleTasks = tasks.filter(
     (t) =>
       t.source.environment === report.target.environment &&
@@ -2107,6 +2169,7 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
   }, [taskDropdownOpen]);
 
   return (
+    <DiffModeContext.Provider value={effectiveMode}>
     <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 space-y-3">
@@ -2270,6 +2333,7 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
         </div>
       )}
     </div>
+    </DiffModeContext.Provider>
   );
 }
 

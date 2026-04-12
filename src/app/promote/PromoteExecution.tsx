@@ -216,6 +216,7 @@ function DryRunPhase({
       target: task.target,
       scopeSelections,
       includeDeps: task.includeDeps ?? false,
+      mode: "dry-run",
       diffOptions: { includeMetadata: false, ignoreWhitespace: true },
     });
 
@@ -268,7 +269,7 @@ function DryRunPhase({
         )}
 
         {/* Diff report */}
-        {report && !running && <DiffReport report={report} dryRunMode />}
+        {report && !running && <DiffReport report={report} mode="dry-run" />}
       </div>
     </div>
   );
@@ -674,6 +675,7 @@ function VerifyPhase({
       target: task.target,
       scopeSelections,
       includeDeps: task.includeDeps ?? false,
+      mode: "compare",
       diffOptions: { includeMetadata: false, ignoreWhitespace: true },
     });
   };
@@ -728,7 +730,7 @@ function VerifyPhase({
         )}
 
         {/* Diff report */}
-        {report && !running && <DiffReport report={report} dryRunMode />}
+        {report && !running && <DiffReport report={report} mode="compare" />}
       </div>
     </div>
   );
