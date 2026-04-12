@@ -2055,15 +2055,12 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
     ? `${report.target.environment} (${report.target.mode})`
     : report.target.environment;
 
-  const [scopeSearch, setScopeSearch] = useState("");
-  const scopeGroups = useMemo(() => {
-    return groupByScope(files);
-  }, [files]);
-  const visibleScopeGroups = useMemo(() => {
-    if (!scopeSearch.trim()) return scopeGroups;
-    const q = scopeSearch.trim().toLowerCase();
-    return scopeGroups.filter((g) => g.label.toLowerCase().includes(q) || g.scope.toLowerCase().includes(q));
-  }, [scopeGroups, scopeSearch]);
+  const scopeGroups = useMemo(() => groupByScope(files), [files]);
+  // Non-journey scope groups — journeys are shown via the JourneyTreeSection
+  const nonJourneyScopeGroups = useMemo(
+    () => scopeGroups.filter((g) => g.scope !== "journeys"),
+    [scopeGroups],
+  );
   const changedCount = summary.added + summary.removed + summary.modified;
 
   const togglePath = (path: string) =>
@@ -2125,7 +2122,7 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
           <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
           <div className="ml-auto flex items-center gap-3 self-center">
             <span className="text-xs text-slate-400">
-              {total} files · {scopeSearch ? `${visibleScopeGroups.length}/` : ""}{scopeGroups.length} scopes
+              {total} files · {scopeGroups.length} scopes
             </span>
             <button
               type="button"
@@ -2137,46 +2134,8 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
           </div>
         </div>
 
-        {/* Scope search */}
-        <div className="relative">
-          <input
-            type="text"
-            value={scopeSearch}
-            onChange={(e) => setScopeSearch(e.target.value)}
-            placeholder="Search scopes…"
-            className="w-full pl-7 pr-7 py-1 text-xs border border-slate-200 rounded bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
-          />
-          <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-          </svg>
-          {scopeSearch && (
-            <button
-              type="button"
-              onClick={() => setScopeSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-
-        {/* Toolbar: expand/collapse all + filters toggle */}
+        {/* Toolbar: filters toggle */}
         <div className="flex items-center gap-3 pt-1">
-          <button
-            type="button"
-            onClick={() => { setAllOpen(true); setAllOpenSeq((s) => s + 1); }}
-            className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
-          >
-            Expand All
-          </button>
-          <button
-            type="button"
-            onClick={() => { setAllOpen(false); setAllOpenSeq((s) => s + 1); }}
-            className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
-          >
-            Collapse All
-          </button>
-          <span className="text-slate-300">|</span>
           <button
             type="button"
             onClick={() => setFiltersOpen((o) => !o)}
@@ -2218,30 +2177,22 @@ export function DiffReport({ report, tasks = [], dryRunMode = false }: { report:
               <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} />
             )}
 
-            {/* Other scope sections (hidden in dry-run mode — use "View all" modal instead) */}
-            {!dryRunMode && (
-              visibleScopeGroups.length === 0 && !report.journeyTree?.length ? (
-                <p className="text-sm text-slate-400 text-center py-4">
-                  {scopeSearch ? `No scopes match "${scopeSearch}".` : "No differences found."}
-                </p>
-              ) : (
-                visibleScopeGroups.map((group) => (
-                  <ScopeSection
-                    key={group.scope}
-                    group={group}
-                    sourceLabel={sourceLabel}
-                    targetLabel={targetLabel}
-                    forceOpen={allOpen}
-                    forceSeq={allOpenSeq}
-                    sourceEnv={report.source.environment}
-                    targetEnv={report.target.environment}
-                    allFiles={report.files}
-                    selectedPaths={selectedPaths}
-                    onTogglePath={togglePath}
-                  />
-                ))
-              )
-            )}
+            {/* Non-journey scope sections (journeys are shown above in the tree) */}
+            {nonJourneyScopeGroups.map((group) => (
+              <ScopeSection
+                key={group.scope}
+                group={group}
+                sourceLabel={sourceLabel}
+                targetLabel={targetLabel}
+                forceOpen={allOpen}
+                forceSeq={allOpenSeq}
+                sourceEnv={report.source.environment}
+                targetEnv={report.target.environment}
+                allFiles={report.files}
+                selectedPaths={selectedPaths}
+                onTogglePath={togglePath}
+              />
+            ))}
           </>
         )}
         {!hideUnchanged && summary.unchanged > 0 && (
