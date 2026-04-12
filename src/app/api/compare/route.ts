@@ -8,6 +8,42 @@ import type { CompareEndpoint } from "@/lib/diff-types";
 import { appendHistory, createHistoryRecord } from "@/lib/history";
 import type { LogEntry } from "@/lib/history";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
+import type { ScopeSelection } from "@/lib/fr-config-types";
+
+/** Add resolved journey deps (sub-journeys + scripts) to scope selections. */
+function addDepsToSelections(
+  deps: ReturnType<typeof resolveJourneyDeps>,
+  scopeSelections: ScopeSelection[],
+  effectiveScopes: ConfigScope[],
+) {
+  if (deps.subJourneys.length > 0) {
+    const journeySel = scopeSelections.find((s) => s.scope === "journeys");
+    if (journeySel?.items) {
+      for (const sub of deps.subJourneys) {
+        if (!journeySel.items.includes(sub)) journeySel.items.push(sub);
+      }
+    }
+  }
+  if (deps.scriptUuids.length > 0) {
+    let scriptSel = scopeSelections.find((s) => s.scope === "scripts");
+    if (!scriptSel) {
+      scriptSel = { scope: "scripts" as ScopeSelection["scope"], items: [] };
+      scopeSelections.push(scriptSel);
+    }
+    if (!scriptSel.items) scriptSel.items = [];
+    for (const uuid of deps.scriptUuids) {
+      const configFile = uuid + ".json";
+      if (!scriptSel.items.includes(configFile)) {
+        scriptSel.items.push(configFile);
+        const name = deps.scriptNames.get(uuid);
+        if (name) scriptSel.items.push("name:" + name);
+      }
+    }
+    if (!effectiveScopes.includes("scripts" as ConfigScope)) {
+      effectiveScopes.push("scripts" as ConfigScope);
+    }
+  }
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -114,59 +150,48 @@ export async function POST(req: NextRequest) {
 
       let failed = false;
       try {
-        await Promise.all([
-          pullSide("source", source, sourceTempDir),
-          pullSide("target", target, targetTempDir),
-        ]);
-
-        // Always resolve journey dependencies so the dry-run comparison
-        // shows sub-journeys and scripts referenced by the selected journey.
-        // This lets the user see whether dependencies exist on the target
-        // and their actual status (unchanged/modified), regardless of
-        // whether includeDeps is enabled for the push step.
+        // Resolve journey dependencies BEFORE pulling so that remote
+        // pulls include sub-journeys and scripts in scopeSelections.
+        // This ensures the target pull fetches ProgressiveProfile etc.
+        // so the comparison can show their actual status.
         let resolvedSubJourneys: string[] = [];
         if (scopeSelections) {
           const journeyScopes = scopeSelections.filter(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
           );
           if (journeyScopes.length > 0) {
-            const journeyNames = journeyScopes.flatMap((s) => s.items!);
-            const deps = resolveJourneyDeps(sourceConfigDir, journeyNames);
-            resolvedSubJourneys = deps.subJourneys;
+            // Resolve from local config dir if source is local; otherwise
+            // pull source first, then resolve from the temp dir.
+            const resolveDir = source.mode === "local"
+              ? getConfigDir(source.environment)
+              : null;
 
-            // Add sub-journeys to the journeys scope selection
-            if (deps.subJourneys.length > 0) {
-              const journeySel = scopeSelections.find((s) => s.scope === "journeys");
-              if (journeySel?.items) {
-                for (const sub of deps.subJourneys) {
-                  if (!journeySel.items.includes(sub)) journeySel.items.push(sub);
-                }
-              }
-            }
-
-            // Add scripts to scope selections
-            if (deps.scriptUuids.length > 0) {
-              let scriptSel = scopeSelections.find((s) => s.scope === "scripts");
-              if (!scriptSel) {
-                scriptSel = { scope: "scripts" as any, items: [] };
-                scopeSelections.push(scriptSel);
-              }
-              if (!scriptSel.items) scriptSel.items = [];
-              for (const uuid of deps.scriptUuids) {
-                const configFile = uuid + ".json";
-                if (!scriptSel.items.includes(configFile)) {
-                  scriptSel.items.push(configFile);
-                  // Also add by name for scripts-content matching
-                  const name = deps.scriptNames.get(uuid);
-                  if (name) scriptSel.items.push("name:" + name);
-                }
-              }
-              // Add scripts to effectiveScopes so buildReport includes the scripts directory
-              if (!effectiveScopes.includes("scripts" as ConfigScope)) {
-                effectiveScopes.push("scripts" as ConfigScope);
-              }
+            if (resolveDir) {
+              const deps = resolveJourneyDeps(resolveDir, journeyScopes.flatMap((s) => s.items!));
+              resolvedSubJourneys = deps.subJourneys;
+              addDepsToSelections(deps, scopeSelections, effectiveScopes);
             }
           }
+        }
+
+        // If source is remote and we couldn't resolve deps yet, pull source
+        // first, resolve deps, then pull target with the expanded selections.
+        if (source.mode === "remote" && resolvedSubJourneys.length === 0 && scopeSelections) {
+          await pullSide("source", source, sourceTempDir);
+          const journeyScopes = scopeSelections.filter(
+            (s) => s.scope === "journeys" && s.items && s.items.length > 0
+          );
+          if (journeyScopes.length > 0) {
+            const deps = resolveJourneyDeps(sourceConfigDir, journeyScopes.flatMap((s) => s.items!));
+            resolvedSubJourneys = deps.subJourneys;
+            addDepsToSelections(deps, scopeSelections, effectiveScopes);
+          }
+          await pullSide("target", target, targetTempDir);
+        } else {
+          await Promise.all([
+            pullSide("source", source, sourceTempDir),
+            pullSide("target", target, targetTempDir),
+          ]);
         }
 
         const report = buildReport(source, sourceConfigDir, target, targetConfigDir, effectiveScopes, diffOptions);
@@ -223,6 +248,58 @@ export async function POST(req: NextRequest) {
         // Strip journey tree if journeys aren't in the selected scopes
         if (scopeSelections && !effectiveScopes.includes("journeys" as ConfigScope)) {
           report.journeyTree = undefined;
+        }
+
+        // Flip added ↔ removed semantics for promote intuition:
+        // "added" now means "will be added to target" (file exists on source only)
+        // "removed" now means "will be removed from target" (file exists on target only)
+        // Also flip diffLines, swap line counts, and swap localContent/remoteContent.
+        for (const f of report.files) {
+          if (f.status === "added") {
+            f.status = "removed";
+          } else if (f.status === "removed") {
+            f.status = "added";
+          }
+          if (f.status === "modified" || f.status === "added" || f.status === "removed") {
+            // Swap line counts
+            const la = f.linesAdded ?? 0;
+            const lr = f.linesRemoved ?? 0;
+            f.linesAdded = lr;
+            f.linesRemoved = la;
+            // Swap content fields
+            const lc = f.localContent;
+            f.localContent = f.remoteContent;
+            f.remoteContent = lc;
+            // Flip diff line types
+            if (f.diffLines) {
+              f.diffLines = f.diffLines.map((dl) =>
+                dl.type === "added"   ? { ...dl, type: "removed" as const } :
+                dl.type === "removed" ? { ...dl, type: "added" as const } :
+                dl
+              );
+            }
+          }
+        }
+        // Swap summary counts
+        const sumAdded = report.summary.added;
+        report.summary.added = report.summary.removed;
+        report.summary.removed = sumAdded;
+
+        // Also flip journey tree node statuses
+        if (report.journeyTree) {
+          const flipStatus = (s: "added" | "removed" | "modified" | "unchanged") =>
+            s === "added" ? "removed" as const :
+            s === "removed" ? "added" as const :
+            s;
+          const flipTree = (nodes: import("@/lib/diff-types").JourneyTreeNode[]): import("@/lib/diff-types").JourneyTreeNode[] =>
+            nodes.map((n) => ({
+              ...n,
+              status: flipStatus(n.status),
+              scripts: n.scripts.map((sc) => ({ ...sc, status: flipStatus(sc.status) })),
+              nodes: n.nodes.map((nd) => ({ ...nd, status: flipStatus(nd.status) })),
+              subJourneys: flipTree(n.subJourneys),
+            }));
+          report.journeyTree = flipTree(report.journeyTree);
         }
 
         enqueue({ type: "report", data: JSON.stringify(report), ts: Date.now() });

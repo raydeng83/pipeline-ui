@@ -268,7 +268,7 @@ function DryRunPhase({
         )}
 
         {/* Diff report */}
-        {report && !running && <DiffReport report={report} />}
+        {report && !running && <DiffReport report={report} dryRunMode />}
       </div>
     </div>
   );
@@ -755,7 +755,7 @@ function VerifyPhase({
         )}
 
         {/* Diff report */}
-        {compareHook.report && !compareHook.running && <DiffReport report={compareHook.report} />}
+        {compareHook.report && !compareHook.running && <DiffReport report={compareHook.report} dryRunMode />}
       </div>
     </div>
   );

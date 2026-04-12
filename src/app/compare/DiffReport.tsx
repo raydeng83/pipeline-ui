@@ -1663,6 +1663,186 @@ function WorkflowGroupRow({
   );
 }
 
+// ── Per-scope section inside the global All Files modal ─────────────────────
+
+function AllFilesModalScopeSection({
+  group, sourceLabel, targetLabel, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath,
+}: {
+  group: ScopeGroup;
+  sourceLabel: string;
+  targetLabel: string;
+  sourceEnv?: string;
+  targetEnv?: string;
+  allFiles?: FileDiff[];
+  selectedPaths?: Set<string>;
+  onTogglePath?: (path: string) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<"all" | "modified" | "added" | "removed" | "unchanged">("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const filtered = filterFiles(
+    group.files.filter((f) => statusFilter === "all" || f.status === statusFilter),
+    search,
+  );
+  const totalVisible = filtered.length;
+
+  return (
+    <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div
+        className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="text-sm font-semibold text-slate-700 flex-1">{group.label}</span>
+        <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
+          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{group.files.length} total</span>
+          {group.modified > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{group.modified} modified</span>}
+          {group.added > 0    && <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{group.added} added</span>}
+          {group.removed > 0  && <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{group.removed} removed</span>}
+          {group.unchanged > 0 && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{group.unchanged} unchanged</span>}
+        </div>
+        <span className="text-slate-400 text-xs shrink-0">{open ? "▲" : "▼"}</span>
+      </div>
+
+      {open && (
+        <div className="bg-white">
+          <div className="px-3 pt-3 pb-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex rounded border border-slate-300 overflow-hidden text-[10px] shrink-0">
+              {([
+                { value: "all"       as const, label: `All (${group.files.length})` },
+                { value: "modified"  as const, label: `Modified (${group.modified})` },
+                { value: "added"     as const, label: `Added (${group.added})` },
+                { value: "removed"   as const, label: `Removed (${group.removed})` },
+                { value: "unchanged" as const, label: `Unchanged (${group.unchanged})` },
+              ]).map((f) => (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => { setStatusFilter(f.value); setPage(0); }}
+                  className={cn(
+                    "px-2 py-0.5 transition-colors",
+                    statusFilter === f.value ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+                placeholder={`Search ${group.label} files…`}
+                className="w-full pl-7 pr-7 py-1 text-xs border border-slate-200 rounded bg-slate-50 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-400 focus:bg-white"
+              />
+              <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="p-3 pt-1 space-y-1.5">
+            {totalVisible === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-2">
+                {search ? `No files match "${search}".` : "No files match the selected filter."}
+              </p>
+            ) : (
+              filtered.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
+                group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
+                  ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
+                  : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
+              ))
+            )}
+          </div>
+
+          {totalVisible > pageSize && (
+            <Pagination
+              page={page} total={totalVisible} pageSize={pageSize}
+              onChange={setPage}
+              onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Global modal showing all files across all scopes ────────────────────────
+
+function AllFilesModal({
+  scopeGroups, sourceLabel, targetLabel, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath, onClose,
+}: {
+  scopeGroups: ScopeGroup[];
+  sourceLabel: string;
+  targetLabel: string;
+  sourceEnv?: string;
+  targetEnv?: string;
+  allFiles?: FileDiff[];
+  selectedPaths?: Set<string>;
+  onTogglePath?: (path: string) => void;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  const totalFiles = scopeGroups.reduce((s, g) => s + g.files.length, 0);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden" style={{ width: "90vw", maxWidth: 1200, height: "90vh" }}>
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-800 truncate">All Files</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">{totalFiles} file{totalFiles !== 1 ? "s" : ""} · {scopeGroups.length} scope{scopeGroups.length !== 1 ? "s" : ""}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            title="Close (Esc)"
+            className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Scope groups */}
+        <div className="flex-1 overflow-auto p-5 space-y-3">
+          {scopeGroups.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">No files to display.</p>
+          ) : (
+            scopeGroups.map((group) => (
+              <AllFilesModalScopeSection
+                key={group.scope}
+                group={group}
+                sourceLabel={sourceLabel}
+                targetLabel={targetLabel}
+                sourceEnv={sourceEnv}
+                targetEnv={targetEnv}
+                allFiles={allFiles}
+                selectedPaths={selectedPaths}
+                onTogglePath={onTogglePath}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ScopeSection({
   group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath,
 }: {
@@ -1843,13 +2023,14 @@ function ScopeSection({
 
 // ── Main report ─────────────────────────────────────────────────────────────
 
-export function DiffReport({ report, tasks = [] }: { report: CompareReport; tasks?: PromotionTask[] }) {
+export function DiffReport({ report, tasks = [], dryRunMode = false }: { report: CompareReport; tasks?: PromotionTask[]; dryRunMode?: boolean }) {
   const { summary, files } = report;
   const total = summary.added + summary.removed + summary.modified + summary.unchanged;
   const [hideUnchanged, setHideUnchanged] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
   const [allOpenSeq, setAllOpenSeq] = useState(0);
+  const [allFilesModalOpen, setAllFilesModalOpen] = useState(false);
 
   const router = useRouter();
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
@@ -1876,12 +2057,8 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
 
   const [scopeSearch, setScopeSearch] = useState("");
   const scopeGroups = useMemo(() => {
-    // Exclude journey files from scope groups when journeyTree is available
-    const filtered = report.journeyTree?.length
-      ? files.filter((f) => !f.relativePath.includes("/journeys/"))
-      : files;
-    return groupByScope(filtered);
-  }, [files, report.journeyTree]);
+    return groupByScope(files);
+  }, [files]);
   const visibleScopeGroups = useMemo(() => {
     if (!scopeSearch.trim()) return scopeGroups;
     const q = scopeSearch.trim().toLowerCase();
@@ -1946,9 +2123,18 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
           <Stat count={summary.added}     label="Added"     color="text-emerald-600" bg="bg-emerald-50" />
           <Stat count={summary.removed}   label="Removed"   color="text-red-600"     bg="bg-red-50" />
           <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
-          <span className="ml-auto text-xs text-slate-400 self-center">
-            {total} files · {scopeSearch ? `${visibleScopeGroups.length}/` : ""}{scopeGroups.length} scopes
-          </span>
+          <div className="ml-auto flex items-center gap-3 self-center">
+            <span className="text-xs text-slate-400">
+              {total} files · {scopeSearch ? `${visibleScopeGroups.length}/` : ""}{scopeGroups.length} scopes
+            </span>
+            <button
+              type="button"
+              onClick={() => setAllFilesModalOpen(true)}
+              className="px-2.5 py-1 text-xs font-medium rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 hover:border-slate-400 transition-colors"
+            >
+              View all
+            </button>
+          </div>
         </div>
 
         {/* Scope search */}
@@ -2021,9 +2207,9 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
 
       {/* Scope sections */}
       <div className="p-5 space-y-3">
-        {changedCount === 0 ? (
+        {changedCount === 0 && summary.unchanged === 0 ? (
           <p className="text-sm text-slate-500 text-center py-4">
-            No differences found — source and target configs are identical.
+            No files to display.
           </p>
         ) : (
           <>
@@ -2032,27 +2218,29 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
               <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} />
             )}
 
-            {/* Other scope sections */}
-            {visibleScopeGroups.length === 0 && !report.journeyTree?.length ? (
-              <p className="text-sm text-slate-400 text-center py-4">
-                {scopeSearch ? `No scopes match "${scopeSearch}".` : "No differences found."}
-              </p>
-            ) : (
-              visibleScopeGroups.map((group) => (
-                <ScopeSection
-                  key={group.scope}
-                  group={group}
-                  sourceLabel={sourceLabel}
-                  targetLabel={targetLabel}
-                  forceOpen={allOpen}
-                  forceSeq={allOpenSeq}
-                  sourceEnv={report.source.environment}
-                  targetEnv={report.target.environment}
-                  allFiles={report.files}
-                  selectedPaths={selectedPaths}
-                  onTogglePath={togglePath}
-                />
-              ))
+            {/* Other scope sections (hidden in dry-run mode — use "View all" modal instead) */}
+            {!dryRunMode && (
+              visibleScopeGroups.length === 0 && !report.journeyTree?.length ? (
+                <p className="text-sm text-slate-400 text-center py-4">
+                  {scopeSearch ? `No scopes match "${scopeSearch}".` : "No differences found."}
+                </p>
+              ) : (
+                visibleScopeGroups.map((group) => (
+                  <ScopeSection
+                    key={group.scope}
+                    group={group}
+                    sourceLabel={sourceLabel}
+                    targetLabel={targetLabel}
+                    forceOpen={allOpen}
+                    forceSeq={allOpenSeq}
+                    sourceEnv={report.source.environment}
+                    targetEnv={report.target.environment}
+                    allFiles={report.files}
+                    selectedPaths={selectedPaths}
+                    onTogglePath={togglePath}
+                  />
+                ))
+              )
             )}
           </>
         )}
@@ -2062,6 +2250,20 @@ export function DiffReport({ report, tasks = [] }: { report: CompareReport; task
           </p>
         )}
       </div>
+
+      {allFilesModalOpen && (
+        <AllFilesModal
+          scopeGroups={scopeGroups}
+          sourceLabel={sourceLabel}
+          targetLabel={targetLabel}
+          sourceEnv={report.source.environment}
+          targetEnv={report.target.environment}
+          allFiles={report.files}
+          selectedPaths={selectedPaths}
+          onTogglePath={togglePath}
+          onClose={() => setAllFilesModalOpen(false)}
+        />
+      )}
 
       {/* Floating action bar */}
       {(selectedCount > 0 || addSuccess) && (
