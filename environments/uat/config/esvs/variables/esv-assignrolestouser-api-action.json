@@ -1,6 +1,0 @@
-{
-  "_id": "esv-assignrolestouser-api-action",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ASSIGNROLESTOUSER_API_ACTION}"
-}

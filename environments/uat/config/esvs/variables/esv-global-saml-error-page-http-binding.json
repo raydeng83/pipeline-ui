@@ -1,6 +1,0 @@
-{
-  "_id": "esv-global-saml-error-page-http-binding",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_GLOBAL_SAML_ERROR_PAGE_HTTP_BINDING}"
-}

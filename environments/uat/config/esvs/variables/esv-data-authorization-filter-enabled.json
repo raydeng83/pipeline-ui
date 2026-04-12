@@ -1,6 +1,0 @@
-{
-  "_id": "esv-data-authorization-filter-enabled",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_DATA_AUTHORIZATION_FILTER_ENABLED}"
-}

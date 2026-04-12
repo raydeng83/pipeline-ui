@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/pingticket01118105_v3",
-  "description": "",
-  "file": "pingticket01118105_v3.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

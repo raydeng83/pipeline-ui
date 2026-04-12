@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kog-cookie-domain",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KOG_COOKIE_DOMAIN}"
-}

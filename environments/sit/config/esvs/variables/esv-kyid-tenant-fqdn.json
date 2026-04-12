@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-tenant-fqdn",
-  "description": "FQDN Tenant",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_TENANT_FQDN}"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-errorinvalidotpemailsmsvoice-en",
-  "description": "Error messages",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ERRORINVALIDOTPEMAILSMSVOICE_EN}"
-}

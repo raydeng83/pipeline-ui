@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-introspect-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_INTROSPECT_URL}"
-}

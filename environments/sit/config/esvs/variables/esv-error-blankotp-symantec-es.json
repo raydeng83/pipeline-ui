@@ -1,6 +1,0 @@
-{
-  "_id": "esv-error-blankotp-symantec-es",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ERROR_BLANKOTP_SYMANTEC_ES}"
-}

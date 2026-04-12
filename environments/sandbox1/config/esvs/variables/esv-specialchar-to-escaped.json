@@ -1,6 +1,0 @@
-{
-  "_id": "esv-specialchar-to-escaped",
-  "description": "",
-  "expressionType": "list",
-  "valueBase64": "${ESV_SPECIALCHAR_TO_ESCAPED}"
-}

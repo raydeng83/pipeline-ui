@@ -1,2 +1,0 @@
-
-action.goTo("true")

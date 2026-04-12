@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/businessapplication_v2B_aaron_test3",
-  "description": "Business application management API with role-based data authorization POC.",
-  "file": "businessapplication_v2B_aaron_test3.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-global-session-quotas-enable-constraints",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_GLOBAL_SESSION_QUOTAS_ENABLE_CONSTRAINTS}"
-}

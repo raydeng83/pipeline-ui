@@ -1,1 +1,0 @@
-<html><head></head><body>Hello, {{object.user.givenName}} {{object.user.sn}}! <br> A certification task for the campaign {{object.campaign.name}} was assigned to you.</body></html>

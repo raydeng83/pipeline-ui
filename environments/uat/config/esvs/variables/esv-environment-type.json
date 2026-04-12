@@ -1,6 +1,0 @@
-{
-  "_id": "esv-environment-type",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ENVIRONMENT_TYPE}"
-}

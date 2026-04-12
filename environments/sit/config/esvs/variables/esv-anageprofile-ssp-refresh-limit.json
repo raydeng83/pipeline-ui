@@ -1,6 +1,0 @@
-{
-  "_id": "esv-anageprofile-ssp-refresh-limit",
-  "description": "",
-  "expressionType": "number",
-  "valueBase64": "${ESV_ANAGEPROFILE_SSP_REFRESH_LIMIT}"
-}

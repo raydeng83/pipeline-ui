@@ -1,6 +1,0 @@
-{
-  "_id": "esv-dbconnector-jdbcdriver",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_DBCONNECTOR_JDBCDRIVER}"
-}

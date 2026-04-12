@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/loginprerequisite",
-  "description": "",
-  "file": "loginprerequisite.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

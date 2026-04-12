@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/mapping_Data_Generate",
-  "description": "Used to create payload for the Scripted Rest Connector Mapping",
-  "file": "mapping_Data_Generate.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

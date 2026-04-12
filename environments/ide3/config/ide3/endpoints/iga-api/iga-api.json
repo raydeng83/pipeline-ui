@@ -1,6 +1,0 @@
-{
-  "_id": "endpoint/iga-api",
-  "context": "iga/*",
-  "file": "iga-api.js",
-  "type": "text/javascript"
-}

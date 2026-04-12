@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kogjwtfailedmsg-es",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KOGJWTFAILEDMSG_ES}"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ad-internal-prod-eas-basedn",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_AD_INTERNAL_PROD_EAS_BASEDN}"
-}

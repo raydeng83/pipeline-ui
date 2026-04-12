@@ -1,6 +1,0 @@
-{
-  "_id": "esv-prereq-expiry-notify",
-  "description": "",
-  "expressionType": "number",
-  "valueBase64": "${ESV_PREREQ_EXPIRY_NOTIFY}"
-}

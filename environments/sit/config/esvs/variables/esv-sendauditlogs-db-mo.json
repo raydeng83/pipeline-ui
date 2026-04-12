@@ -1,6 +1,0 @@
-{
-  "_id": "esv-sendauditlogs-db-mo",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_SENDAUDITLOGS_DB_MO}"
-}

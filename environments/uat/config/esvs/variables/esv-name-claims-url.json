@@ -1,6 +1,0 @@
-{
-  "_id": "esv-name-claims-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_NAME_CLAIMS_URL}"
-}

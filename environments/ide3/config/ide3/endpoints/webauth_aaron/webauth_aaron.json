@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/webauth_aaron",
-  "description": "WebAuthn Device Management - List, Update, Delete",
-  "file": "webauth_aaron.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

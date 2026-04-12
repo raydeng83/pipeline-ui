@@ -1,6 +1,0 @@
-{
-  "_id": "esv-esv-global-saml-error-page-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ESV_GLOBAL_SAML_ERROR_PAGE_URL}"
-}

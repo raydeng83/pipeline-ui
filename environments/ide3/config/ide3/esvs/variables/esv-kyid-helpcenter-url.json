@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-helpcenter-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_HELPCENTER_URL}"
-}

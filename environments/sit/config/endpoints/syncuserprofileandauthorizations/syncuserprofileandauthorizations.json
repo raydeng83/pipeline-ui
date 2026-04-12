@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/syncuserprofileandauthorizations",
-  "description": "This the endpoint used to synchronize the profile and authorization information from Kentucky Online Gateway.",
-  "file": "syncuserprofileandauthorizations.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

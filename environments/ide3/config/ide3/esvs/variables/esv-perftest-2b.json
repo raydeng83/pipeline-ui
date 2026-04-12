@@ -1,6 +1,0 @@
-{
-  "_id": "esv-perftest-2b",
-  "description": "performance testing enable disable esv",
-  "expressionType": "string",
-  "valueBase64": "${ESV_PERFTEST_2B}"
-}

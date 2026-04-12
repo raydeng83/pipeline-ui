@@ -1,6 +1,0 @@
-{
-  "_id": "esv-2b-queryfilter-auditlogs-sqldb",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_2B_QUERYFILTER_AUDITLOGS_SQLDB}"
-}

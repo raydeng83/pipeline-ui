@@ -1,6 +1,0 @@
-{
-  "_id": "esv-mfa-auth-frotp-invalidcode-en",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_MFA_AUTH_FROTP_INVALIDCODE_EN}"
-}

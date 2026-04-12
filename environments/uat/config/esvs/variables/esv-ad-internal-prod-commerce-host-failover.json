@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ad-internal-prod-commerce-host-failover",
-  "description": "failover host for the prod AD ",
-  "expressionType": "array",
-  "valueBase64": "${ESV_AD_INTERNAL_PROD_COMMERCE_HOST_FAILOVER}"
-}

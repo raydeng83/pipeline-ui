@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/getActiveEnrollment",
-  "description": "",
-  "file": "getActiveEnrollment.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

@@ -1,2 +1,0 @@
-<html><head></head><body style="background-color: #324054; color: #455469; padding: 60px; text-align: center;"><div class="content" style="background-color: #fff; border-radius: 4px; margin: 0 auto; padding: 48px; width: 235px;"><p>Hello, {{object.user.givenName}} {{object.user.sn}}! <br>
-A role certification has revoked for you.</p></div></body></html>

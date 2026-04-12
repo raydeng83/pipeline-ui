@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-ky-cookie-domain",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_KY_COOKIE_DOMAIN}"
-}

@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/dataAuthorizationCheck",
-  "description": "",
-  "file": "dataAuthorizationCheck.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-global-saml-error-page-url",
-  "description": "Redirect URL for Generic SAML Error \"Server Error\"",
-  "expressionType": "string",
-  "valueBase64": "${ESV_GLOBAL_SAML_ERROR_PAGE_URL}"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-internal-rcs-alert-email-subject",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_INTERNAL_RCS_ALERT_EMAIL_SUBJECT}"
-}

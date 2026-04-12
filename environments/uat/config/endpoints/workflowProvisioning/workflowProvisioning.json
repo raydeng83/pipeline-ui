@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/workflowProvisioning",
-  "description": "This endpoint consists of workflow provisioning code",
-  "file": "workflowProvisioning.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

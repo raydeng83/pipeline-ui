@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/contactus",
-  "description": "Helpdesk contacts endpoint for retrieving support contact information",
-  "file": "contactus.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

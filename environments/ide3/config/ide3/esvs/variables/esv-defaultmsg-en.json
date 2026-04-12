@@ -1,6 +1,0 @@
-{
-  "_id": "esv-defaultmsg-en",
-  "description": "Variable being used in dropdown menu for en message",
-  "expressionType": "string",
-  "valueBase64": "${ESV_DEFAULTMSG_EN}"
-}

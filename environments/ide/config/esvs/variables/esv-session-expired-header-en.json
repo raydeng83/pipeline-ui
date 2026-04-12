@@ -1,6 +1,0 @@
-{
-  "_id": "esv-session-expired-header-en",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_SESSION_EXPIRED_HEADER_EN}"
-}

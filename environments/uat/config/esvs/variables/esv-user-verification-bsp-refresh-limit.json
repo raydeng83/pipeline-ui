@@ -1,6 +1,0 @@
-{
-  "_id": "esv-user-verification-bsp-refresh-limit",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_USER_VERIFICATION_BSP_REFRESH_LIMIT}"
-}

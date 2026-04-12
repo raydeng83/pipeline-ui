@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/enrollment_delegator_fix",
-  "description": "",
-  "file": "enrollment_delegator_fix.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

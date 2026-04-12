@@ -1,6 +1,0 @@
-{
-  "_id": "esv-sa-accesstoken-accountid",
-  "description": "used in email scripts. Account ID of Service Account to Get Access Token",
-  "expressionType": "string",
-  "valueBase64": "${ESV_SA_ACCESSTOKEN_ACCOUNTID}"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-transactiontimeout",
-  "description": "This timeout value is same as transaction authentication service setting",
-  "expressionType": "string",
-  "valueBase64": "${ESV_TRANSACTIONTIMEOUT}"
-}

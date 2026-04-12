@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/LIB-WorkflowAPI",
-  "description": "",
-  "file": "LIB-WorkflowAPI.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-automation-testing",
-  "description": "This variable is being used for testing the registration flow to bypass the mfa methods verification",
-  "expressionType": "string",
-  "valueBase64": "${ESV_AUTOMATION_TESTING}"
-}

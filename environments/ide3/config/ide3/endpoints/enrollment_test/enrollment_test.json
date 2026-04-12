@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/enrollment_test",
-  "description": "",
-  "file": "enrollment_test.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

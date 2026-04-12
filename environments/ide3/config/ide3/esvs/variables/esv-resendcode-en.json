@@ -1,6 +1,0 @@
-{
-  "_id": "esv-resendcode-en",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_RESENDCODE_EN}"
-}

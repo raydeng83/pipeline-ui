@@ -1,6 +1,0 @@
-{
-  "_id": "esv-dbconnector-access-tablename",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_DBCONNECTOR_ACCESS_TABLENAME}"
-}

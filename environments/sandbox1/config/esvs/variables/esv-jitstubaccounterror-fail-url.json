@@ -1,6 +1,0 @@
-{
-  "_id": "esv-jitstubaccounterror-fail-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_JITSTUBACCOUNTERROR_FAIL_URL}"
-}

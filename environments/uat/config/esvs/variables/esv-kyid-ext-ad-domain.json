@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-ext-ad-domain",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_EXT_AD_DOMAIN}"
-}

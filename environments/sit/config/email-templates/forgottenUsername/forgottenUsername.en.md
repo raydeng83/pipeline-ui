@@ -1,1 +1,0 @@
-<html><head></head><body style="background-color: #324054; color: #5e6d82; padding: 60px; text-align: center;">{{#if object.userName}}<p>Your username is '{{object.userName}}'.</p>{{else}}If you received this email in error, please disregard.{{/if}}<p><a href="{{object.resumeURI}}" style="text-decoration: none; color: #109cf1;">Click here to login</a></p></body></html>

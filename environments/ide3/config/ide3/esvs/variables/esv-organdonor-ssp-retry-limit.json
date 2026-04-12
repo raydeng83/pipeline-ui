@@ -1,6 +1,0 @@
-{
-  "_id": "esv-organdonor-ssp-retry-limit",
-  "description": "",
-  "expressionType": "number",
-  "valueBase64": "${ESV_ORGANDONOR_SSP_RETRY_LIMIT}"
-}

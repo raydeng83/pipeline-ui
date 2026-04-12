@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ridp-organdonor-version-flag",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_RIDP_ORGANDONOR_VERSION_FLAG}"
-}

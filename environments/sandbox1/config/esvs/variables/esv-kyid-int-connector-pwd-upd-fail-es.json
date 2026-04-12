@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-int-connector-pwd-upd-fail-es",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_INT_CONNECTOR_PWD_UPD_FAIL_ES}"
-}

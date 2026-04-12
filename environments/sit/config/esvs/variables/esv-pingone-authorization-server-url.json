@@ -1,6 +1,0 @@
-{
-  "_id": "esv-pingone-authorization-server-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_PINGONE_AUTHORIZATION_SERVER_URL}"
-}

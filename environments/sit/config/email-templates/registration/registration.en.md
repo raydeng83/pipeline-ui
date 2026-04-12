@@ -1,1 +1,0 @@
-<html><head></head><body style="background-color: #324054; color: #5e6d82; padding: 60px; text-align: center;"><h3>This is your registration email.</h3><p><a href="{{object.resumeURI}}" style="text-decoration: none; color: #109cf1;">Email verification link</a></p></body></html>

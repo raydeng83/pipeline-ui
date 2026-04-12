@@ -1,6 +1,0 @@
-{
-  "_id": "esv-defaultmsg-es",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_DEFAULTMSG_ES}"
-}

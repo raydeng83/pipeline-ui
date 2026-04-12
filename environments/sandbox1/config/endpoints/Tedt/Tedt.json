@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/Tedt",
-  "description": "",
-  "file": "Tedt.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

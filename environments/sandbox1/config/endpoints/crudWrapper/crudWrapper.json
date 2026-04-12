@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/crudWrapper",
-  "description": "CRUD Wrapper for IDM custom objects",
-  "file": "crudWrapper.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n  }\\n  }\"",
-  "type": "text/javascript"
-}

@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/LIB-businessApplicationAPI",
-  "description": "",
-  "file": "LIB-businessApplicationAPI.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

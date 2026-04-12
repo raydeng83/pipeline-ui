@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/UserPrerequisiteAPI",
-  "description": "",
-  "file": "UserPrerequisiteAPI.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

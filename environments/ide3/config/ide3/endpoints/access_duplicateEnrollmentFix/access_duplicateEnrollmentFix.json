@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/access_duplicateEnrollmentFix",
-  "description": "",
-  "file": "access_duplicateEnrollmentFix.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

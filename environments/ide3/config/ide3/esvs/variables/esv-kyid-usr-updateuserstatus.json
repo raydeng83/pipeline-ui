@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-usr-updateuserstatus",
-  "description": "KOG User Status Update URL",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_USR_UPDATEUSERSTATUS}"
-}

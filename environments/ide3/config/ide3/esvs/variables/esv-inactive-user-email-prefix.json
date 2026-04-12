@@ -1,6 +1,0 @@
-{
-  "_id": "esv-inactive-user-email-prefix",
-  "description": "When user is inactive it is used as a prefix in AIC",
-  "expressionType": "string",
-  "valueBase64": "${ESV_INACTIVE_USER_EMAIL_PREFIX}"
-}

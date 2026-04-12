@@ -1,6 +1,0 @@
-{
-  "_id": "esv-enrollment-prereq-defaultexpiry",
-  "description": "",
-  "expressionType": "number",
-  "valueBase64": "${ESV_ENROLLMENT_PREREQ_DEFAULTEXPIRY}"
-}

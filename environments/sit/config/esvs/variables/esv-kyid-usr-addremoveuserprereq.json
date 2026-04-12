@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-usr-addremoveuserprereq",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_USR_ADDREMOVEUSERPREREQ}"
-}

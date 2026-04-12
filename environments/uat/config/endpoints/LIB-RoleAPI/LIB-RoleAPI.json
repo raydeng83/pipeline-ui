@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/LIB-RoleAPI",
-  "description": "",
-  "file": "LIB-RoleAPI.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

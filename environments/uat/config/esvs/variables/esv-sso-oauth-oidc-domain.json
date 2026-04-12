@@ -1,6 +1,0 @@
-{
-  "_id": "esv-sso-oauth-oidc-domain",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_SSO_OAUTH_OIDC_DOMAIN}"
-}

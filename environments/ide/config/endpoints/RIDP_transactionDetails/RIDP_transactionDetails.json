@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/RIDP_transactionDetails",
-  "description": "",
-  "file": "RIDP_transactionDetails.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

@@ -1,1 +1,0 @@
-<html><head></head><body>The violation for {{object.user.givenName}} {{object.user.sn}} has been escalated to your attention.</body></html>

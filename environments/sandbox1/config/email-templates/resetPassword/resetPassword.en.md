@@ -1,1 +1,0 @@
-<h3>Click to reset your password</h3><h4><a href="{{object.resumeURI}}">Password reset link</a></h4>

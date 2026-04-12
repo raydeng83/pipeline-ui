@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-ig-identity-assertion-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_IG_IDENTITY_ASSERTION_URL}"
-}

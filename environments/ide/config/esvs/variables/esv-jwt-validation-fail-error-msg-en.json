@@ -1,6 +1,0 @@
-{
-  "_id": "esv-jwt-validation-fail-error-msg-en",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_JWT_VALIDATION_FAIL_ERROR_MSG_EN}"
-}

@@ -1,6 +1,0 @@
-{
-  "_id": "esv-certjourney-api",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_CERTJOURNEY_API}"
-}

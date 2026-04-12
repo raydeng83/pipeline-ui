@@ -1,6 +1,0 @@
-{
-  "_id": "esv-pingone-protect-client-id",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_PINGONE_PROTECT_CLIENT_ID}"
-}

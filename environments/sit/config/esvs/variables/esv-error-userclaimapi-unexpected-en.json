@@ -1,6 +1,0 @@
-{
-  "_id": "esv-error-userclaimapi-unexpected-en",
-  "description": "Error Message User Claim API Unexpected Error in English ",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ERROR_USERCLAIMAPI_UNEXPECTED_EN}"
-}

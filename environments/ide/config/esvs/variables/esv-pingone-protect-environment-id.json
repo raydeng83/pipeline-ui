@@ -1,6 +1,0 @@
-{
-  "_id": "esv-pingone-protect-environment-id",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_PINGONE_PROTECT_ENVIRONMENT_ID}"
-}

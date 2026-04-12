@@ -1,6 +1,0 @@
-{
-  "_id": "esv-addremoveuseronboarding-api-action",
-  "description": "",
-  "expressionType": "number",
-  "valueBase64": "${ESV_ADDREMOVEUSERONBOARDING_API_ACTION}"
-}

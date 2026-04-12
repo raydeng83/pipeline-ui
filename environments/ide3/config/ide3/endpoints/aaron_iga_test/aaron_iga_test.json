@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/aaron_iga_test",
-  "description": "Aaron's test endpoint for IGA governance API testing",
-  "file": "aaron_iga_test.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

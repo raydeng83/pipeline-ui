@@ -1,6 +1,0 @@
-{
-  "_id": "esv-useragreementssignedcheck-api",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_USERAGREEMENTSSIGNEDCHECK_API}"
-}

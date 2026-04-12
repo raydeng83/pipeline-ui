@@ -1,6 +1,0 @@
-{
-  "_id": "esv-enable-auditlogs-defaultusername",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ENABLE_AUDITLOGS_DEFAULTUSERNAME}"
-}

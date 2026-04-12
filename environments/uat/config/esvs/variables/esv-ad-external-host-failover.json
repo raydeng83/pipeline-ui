@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ad-external-host-failover",
-  "description": "failover host for the prod AD ",
-  "expressionType": "array",
-  "valueBase64": "${ESV_AD_EXTERNAL_HOST_FAILOVER}"
-}

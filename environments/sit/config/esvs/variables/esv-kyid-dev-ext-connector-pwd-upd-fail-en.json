@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-dev-ext-connector-pwd-upd-fail-en",
-  "description": "Password Update Failed Message.",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_DEV_EXT_CONNECTOR_PWD_UPD_FAIL_EN}"
-}

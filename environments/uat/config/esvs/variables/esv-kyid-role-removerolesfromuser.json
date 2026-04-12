@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-role-removerolesfromuser",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_ROLE_REMOVEROLESFROMUSER}"
-}

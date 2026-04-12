@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/aaron_query_test",
-  "description": "Test endpoint that queries managed/alpha_user to verify router filter on managed objects",
-  "file": "aaron_query_test.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

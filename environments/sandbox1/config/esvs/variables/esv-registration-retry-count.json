@@ -1,6 +1,0 @@
-{
-  "_id": "esv-registration-retry-count",
-  "description": "Retry Count",
-  "expressionType": "int",
-  "valueBase64": "${ESV_REGISTRATION_RETRY_COUNT}"
-}

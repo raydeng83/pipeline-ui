@@ -1,6 +1,0 @@
-{
-  "_id": "esv-captcha-enabled",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_CAPTCHA_ENABLED}"
-}

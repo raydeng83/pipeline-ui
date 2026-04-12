@@ -1,6 +1,0 @@
-{
-  "_id": "esv-risklevelmfa-enabled",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_RISKLEVELMFA_ENABLED}"
-}

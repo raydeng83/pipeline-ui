@@ -1,6 +1,0 @@
-{
-  "_id": "esv-pollingwaittime-createaccount",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_POLLINGWAITTIME_CREATEACCOUNT}"
-}

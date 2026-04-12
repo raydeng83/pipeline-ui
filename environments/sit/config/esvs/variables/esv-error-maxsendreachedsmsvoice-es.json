@@ -1,6 +1,0 @@
-{
-  "_id": "esv-error-maxsendreachedsmsvoice-es",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ERROR_MAXSENDREACHEDSMSVOICE_ES}"
-}

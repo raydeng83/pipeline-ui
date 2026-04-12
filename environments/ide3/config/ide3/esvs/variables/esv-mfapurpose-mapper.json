@@ -1,6 +1,0 @@
-{
-  "_id": "esv-mfapurpose-mapper",
-  "description": "",
-  "expressionType": "object",
-  "valueBase64": "${ESV_MFAPURPOSE_MAPPER}"
-}

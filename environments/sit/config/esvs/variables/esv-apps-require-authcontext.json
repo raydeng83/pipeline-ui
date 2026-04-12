@@ -1,6 +1,0 @@
-{
-  "_id": "esv-apps-require-authcontext",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_APPS_REQUIRE_AUTHCONTEXT}"
-}

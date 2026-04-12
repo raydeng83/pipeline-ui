@@ -1,6 +1,0 @@
-{
-  "_id": "esv-dbconnector-taskthreads",
-  "description": "",
-  "expressionType": "number",
-  "valueBase64": "${ESV_DBCONNECTOR_TASKTHREADS}"
-}

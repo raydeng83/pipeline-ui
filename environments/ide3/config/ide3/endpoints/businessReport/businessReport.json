@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/businessReport",
-  "description": "",
-  "file": "businessReport.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

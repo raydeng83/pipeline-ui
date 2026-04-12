@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/invokeCertAPI",
-  "description": "",
-  "file": "invokeCertAPI.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

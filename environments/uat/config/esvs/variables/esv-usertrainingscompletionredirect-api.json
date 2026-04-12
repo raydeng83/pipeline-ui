@@ -1,6 +1,0 @@
-{
-  "_id": "esv-usertrainingscompletionredirect-api",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_USERTRAININGSCOMPLETIONREDIRECT_API}"
-}

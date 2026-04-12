@@ -1,6 +1,0 @@
-{
-  "_id": "esv-error-invalidotpsymantecvip-es",
-  "description": "Error Message for Invalid OTP of Symantec VIP in Spanish",
-  "expressionType": "string",
-  "valueBase64": "${ESV_ERROR_INVALIDOTPSYMANTECVIP_ES}"
-}

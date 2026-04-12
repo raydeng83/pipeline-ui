@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/Testetst",
-  "description": "",
-  "file": "Testetst.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"read\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

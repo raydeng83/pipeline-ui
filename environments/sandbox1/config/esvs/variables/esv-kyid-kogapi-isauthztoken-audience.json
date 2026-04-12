@@ -1,6 +1,0 @@
-{
-  "_id": "esv-kyid-kogapi-isauthztoken-audience",
-  "description": "Audience URL for DEV, for passing in Token Endpoint call for isAuthz",
-  "expressionType": "string",
-  "valueBase64": "${ESV_KYID_KOGAPI_ISAUTHZTOKEN_AUDIENCE}"
-}

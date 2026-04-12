@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/authenticate",
-  "description": "",
-  "file": "authenticate.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

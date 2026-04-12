@@ -1,6 +1,0 @@
-{
-  "_id": "esv-redirect-message-unauthorized-helpdesk-user-es",
-  "description": "Redirect Message for Unauthorized Helpdesk User to Kog in Spanish ",
-  "expressionType": "string",
-  "valueBase64": "${ESV_REDIRECT_MESSAGE_UNAUTHORIZED_HELPDESK_USER_ES}"
-}

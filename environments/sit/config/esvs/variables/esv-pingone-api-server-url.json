@@ -1,6 +1,0 @@
-{
-  "_id": "esv-pingone-api-server-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_PINGONE_API_SERVER_URL}"
-}

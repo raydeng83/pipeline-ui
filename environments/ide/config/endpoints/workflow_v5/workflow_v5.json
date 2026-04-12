@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/workflow_v5",
-  "description": "",
-  "file": "workflow_v5.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

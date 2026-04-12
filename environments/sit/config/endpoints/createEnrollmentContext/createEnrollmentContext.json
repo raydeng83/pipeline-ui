@@ -1,7 +1,0 @@
-{
-  "_id": "endpoint/createEnrollmentContext",
-  "description": "This API is used for creating the Enrollment COntext",
-  "file": "createEnrollmentContext.js",
-  "globalsObject": "\"  {\\n    \\\"request\\\": {\\n      \\\"method\\\": \\\"create\\\"\\n    }\\n  }\"",
-  "type": "text/javascript"
-}

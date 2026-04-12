@@ -1,6 +1,0 @@
-{
-  "_id": "esv-focussed-signin-url",
-  "description": "",
-  "expressionType": "string",
-  "valueBase64": "${ESV_FOCUSSED_SIGNIN_URL}"
-}

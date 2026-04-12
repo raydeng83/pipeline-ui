@@ -1,6 +1,0 @@
-{
-  "_id": "esv-helpdesk-successurl",
-  "description": "helpdesk success url",
-  "expressionType": "string",
-  "valueBase64": "${ESV_HELPDESK_SUCCESSURL}"
-}

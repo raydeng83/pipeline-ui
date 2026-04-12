@@ -1,6 +1,0 @@
-{
-  "_id": "esv-ridp-manageprofile-version-flag",
-  "description": "",
-  "expressionType": "bool",
-  "valueBase64": "${ESV_RIDP_MANAGEPROFILE_VERSION_FLAG}"
-}
