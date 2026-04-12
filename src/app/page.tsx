@@ -38,7 +38,7 @@ function ActivityTypeIcon({ type }: { type: HistoryRecord["type"] }) {
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
     </svg>
   );
-  if (type === "compare") return (
+  if (type === "compare" || type === "dry-run") return (
     <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
     </svg>
@@ -59,6 +59,7 @@ function ActivityTypeBg(type: HistoryRecord["type"]): string {
   if (type === "pull")       return "bg-sky-100 text-sky-600";
   if (type === "push")       return "bg-emerald-100 text-emerald-600";
   if (type === "compare")    return "bg-violet-100 text-violet-600";
+  if (type === "dry-run")    return "bg-fuchsia-100 text-fuchsia-600";
   if (type === "promote")    return "bg-amber-100 text-amber-600";
   return "bg-slate-100 text-slate-500";
 }
@@ -75,7 +76,7 @@ function envColorClasses(color: string): { dot: string; badge: string } {
 }
 
 function activityLabel(r: HistoryRecord): string {
-  if (r.type === "compare") {
+  if (r.type === "compare" || r.type === "dry-run") {
     const src = r.source ? `${r.source.environment} (${r.source.mode})` : r.environment;
     const tgt = r.target ? `${r.target.environment} (${r.target.mode})` : "—";
     return `${src} → ${tgt}`;

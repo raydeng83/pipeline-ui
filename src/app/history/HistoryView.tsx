@@ -40,12 +40,13 @@ function formatTimestamp(iso: string): string {
 
 // ── Types / badges ───────────────────────────────────────────────────────────
 
-type TypeFilter = "all" | "pull" | "push" | "compare" | "promote" | "log-search";
+type TypeFilter = "all" | "pull" | "push" | "compare" | "dry-run" | "promote" | "log-search";
 
 const TYPE_BADGE: Record<string, { bg: string; label: string }> = {
   pull: { bg: "bg-sky-100 text-sky-700", label: "Pull" },
   push: { bg: "bg-emerald-100 text-emerald-700", label: "Push" },
   compare: { bg: "bg-violet-100 text-violet-700", label: "Compare" },
+  "dry-run": { bg: "bg-fuchsia-100 text-fuchsia-700", label: "Dry Run" },
   promote: { bg: "bg-orange-100 text-orange-700", label: "Promote" },
   "log-search": { bg: "bg-amber-100 text-amber-700", label: "Log Search" },
 };
@@ -81,7 +82,7 @@ function FilterBar({
       </select>
 
       <div className="flex rounded-md border border-slate-300 overflow-hidden">
-        {(["all", "pull", "push", "compare", "promote", "log-search"] as TypeFilter[]).map((t) => (
+        {(["all", "pull", "push", "compare", "dry-run", "promote", "log-search"] as TypeFilter[]).map((t) => (
           <button
             key={t}
             type="button"

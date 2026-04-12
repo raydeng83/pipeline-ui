@@ -10,7 +10,7 @@ const ENVIRONMENTS_DIR = path.join(REPO_ROOT, "environments");
 const OP_LOG_PATH = path.join(ENVIRONMENTS_DIR, ".op-log.jsonl");
 const OP_LOG_MAX = 500;
 
-export type OpType = "pull" | "push" | "compare" | "promote" | "log-search";
+export type OpType = "pull" | "push" | "compare" | "dry-run" | "promote" | "log-search";
 export type OpStatus = "success" | "failed";
 
 // ── Types ────────────────────────────────────────────────────────────────────

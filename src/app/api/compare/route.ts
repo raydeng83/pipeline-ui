@@ -325,7 +325,7 @@ export async function POST(req: NextRequest) {
           const summaryText = `${summary.added} added, ${summary.removed} removed, ${summary.modified} modified across ${report.files.length} files`;
           const scopeList = effectiveScopes;
           appendOpLog({
-            type: "compare",
+            type: diffMode === "dry-run" ? "dry-run" : "compare",
             environment: `${source.environment} → ${target.environment}`,
             source,
             target,
@@ -342,7 +342,7 @@ export async function POST(req: NextRequest) {
         failed = true;
         try {
           appendOpLog({
-            type: "compare",
+            type: diffMode === "dry-run" ? "dry-run" : "compare",
             environment: `${source.environment} → ${target.environment}`,
             source,
             target,
@@ -350,7 +350,7 @@ export async function POST(req: NextRequest) {
             status: "failed",
             startedAt,
             durationMs: Date.now() - startTime,
-            summary: "Compare failed",
+            summary: diffMode === "dry-run" ? "Dry run failed" : "Compare failed",
           });
         } catch {
           // ignore
