@@ -29,6 +29,22 @@ export async function GET() {
     ahead = Number(parts[1] ?? 0);
   }
 
+  // Fetch unpushed commit list (ahead commits)
+  const unpushedCommits: { hash: string; subject: string; date: string; author: string }[] = [];
+  if (ahead > 0) {
+    const logRes = runGit(
+      ["log", `origin/${settings.branch}..HEAD`, "--pretty=format:%h\x1f%s\x1f%ai\x1f%an"],
+      cwd,
+    );
+    if (logRes.ok) {
+      for (const line of logRes.stdout.split("\n")) {
+        if (!line.trim()) continue;
+        const [hash, subject, date, author] = line.split("\x1f");
+        if (hash) unpushedCommits.push({ hash, subject: subject ?? "", date: date ?? "", author: author ?? "" });
+      }
+    }
+  }
+
   const dirtyFiles: { path: string; status: string; label: string }[] = [];
   if (statusRes.ok) {
     for (const line of statusRes.stdout.split("\n")) {
@@ -48,6 +64,7 @@ export async function GET() {
     dirtyFiles,
     ahead,
     behind,
+    unpushedCommits,
   });
 }
 

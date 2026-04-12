@@ -25,6 +25,13 @@ interface DirtyFile {
   label: string;
 }
 
+interface UnpushedCommit {
+  hash: string;
+  subject: string;
+  date: string;
+  author: string;
+}
+
 interface StatusInfo {
   initialized: boolean;
   targetDir?: string;
@@ -34,6 +41,7 @@ interface StatusInfo {
   dirtyFiles?: DirtyFile[];
   ahead?: number;
   behind?: number;
+  unpushedCommits?: UnpushedCommit[];
   message?: string;
 }
 
@@ -378,6 +386,25 @@ export function SettingsForm({ initialSettings, targetDirAbsolute, initialHasGit
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {status.unpushedCommits && status.unpushedCommits.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-slate-600">
+                  Unpushed commits ({status.unpushedCommits.length})
+                </p>
+                <div className="border border-slate-100 rounded max-h-64 overflow-auto">
+                  <ul className="divide-y divide-slate-100">
+                    {status.unpushedCommits.map((c) => (
+                      <li key={c.hash} className="flex items-center gap-2 px-3 py-1.5 text-xs">
+                        <span className="font-mono text-sky-600 shrink-0">{c.hash}</span>
+                        <span className="text-slate-700 truncate flex-1" title={c.subject}>{c.subject}</span>
+                        <span className="text-slate-400 shrink-0 text-[10px]">{c.date.slice(0, 10)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
           </div>
