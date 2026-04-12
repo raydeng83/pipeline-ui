@@ -41,6 +41,9 @@ environments/history/
 # log API credentials (sensitive)
 environments/*/log-api.json
 
+# local git settings for the environments repo (per-machine)
+/git-settings.json
+
 # vercel
 .vercel
 

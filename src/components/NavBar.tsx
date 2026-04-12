@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: "/logs", label: "Logs" },
   { href: "/history", label: "History" },
   { href: "/environments", label: "Environments" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export function NavBar() {
