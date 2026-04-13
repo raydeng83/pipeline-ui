@@ -4,9 +4,10 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
     globals: false,
     clearMocks: true,
     restoreMocks: true,
+    setupFiles: ["./tests/setup.ts"],
   },
 });
