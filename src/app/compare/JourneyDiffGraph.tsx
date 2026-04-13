@@ -2262,20 +2262,22 @@ export function JourneyDiffGraphModal({
       }
 
       if (!treeName) {
-        // Fetch node config via API to get the `tree` field
-        const env = sourceEnv || targetEnv;
-        if (env) {
+        // Fetch node config via API. Try each env in order — an added inner
+        // tree evaluator may live on only one side, and the parent journey
+        // may exist on only one side too, so probing just one env silently
+        // fails when we probe the wrong one.
+        const envCandidates = [sourceEnv, targetEnv].filter((e): e is string => !!e);
+        for (const env of envCandidates) {
+          if (treeName) break;
           try {
             const params = new URLSearchParams({ environment: env, journey: active.name, nodeId });
             const res = await fetch(`/api/push/journey-node?${params}`);
-            if (res.ok) {
-              const data = await res.json() as { file?: { content?: string } };
-              if (data.file?.content) {
-                const json = JSON.parse(data.file.content) as Record<string, unknown>;
-                if (typeof json.tree === "string" && json.tree) treeName = json.tree;
-              }
-            }
-          } catch { /* ignore */ }
+            if (!res.ok) continue;
+            const data = await res.json() as { file?: { content?: string } };
+            if (!data.file?.content) continue;
+            const json = JSON.parse(data.file.content) as Record<string, unknown>;
+            if (typeof json.tree === "string" && json.tree) treeName = json.tree;
+          } catch { /* try next */ }
         }
       }
 
