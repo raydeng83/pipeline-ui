@@ -711,10 +711,12 @@ function PromotePhase({
 function VerifyPhase({
   task,
   visible,
+  includeDeps,
   onComplete,
 }: {
   task: PromotionTask;
   visible: boolean;
+  includeDeps: boolean;
   onComplete: (s: PhaseStatus) => void;
 }) {
   const { logs, running, exitCode, report, run, abort, clear } = useStreamingLogs();
@@ -732,13 +734,16 @@ function VerifyPhase({
 
   // Verify swaps the compare direction: the just-promoted target is treated as
   // the baseline and checked against the original source. Post-promotion the
-  // two should match exactly for the selected items.
+  // two should match exactly for the selected items. Both sides are forced to
+  // local mode — Step 1 Prepare pulled source and Step 3 Promote pulled target
+  // after the push, so the local config dirs are already in sync and another
+  // remote pull would be wasted work.
   const compare = () => {
     run("/api/compare", {
-      source: task.target,
-      target: task.source,
+      source: { ...task.target, mode: "local" },
+      target: { ...task.source, mode: "local" },
       scopeSelections,
-      includeDeps: task.includeDeps ?? false,
+      includeDeps,
       mode: "compare",
       diffOptions: { includeMetadata: false, ignoreWhitespace: true },
     });
@@ -1017,6 +1022,7 @@ export function PromoteExecution({
         <VerifyPhase
           task={task}
           visible={activePhase === "verify"}
+          includeDeps={hasJourneys ? includeDeps : false}
           onComplete={(s) => updatePhase("verify", s)}
         />
       </div>
