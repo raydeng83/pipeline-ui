@@ -34,12 +34,12 @@ function EndpointSelector({
 }) {
   return (
     <div className="flex-1 space-y-2.5 p-4 bg-slate-50 rounded-lg border border-slate-200">
-      <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{label}</div>
+      <div className="label-xs">{label}</div>
       <select
         value={value.environment}
         onChange={(e) => onChange({ ...value, environment: e.target.value })}
         disabled={disabled}
-        className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
+        className="block w-full px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 bg-white"
       >
         {environments.map((env) => (
           <option key={env.name} value={env.name}>{env.label}</option>
@@ -162,7 +162,7 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
   return (
     <div className="space-y-6">
       {/* ── Selector card ────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-lg border border-slate-200 p-5 space-y-4">
+      <div className="card-padded space-y-4">
         <div className="flex items-stretch gap-3">
           <EndpointSelector
             label="Source"
@@ -205,7 +205,7 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
             type="button"
             onClick={handleCompare}
             disabled={running || !source.environment || !target.environment || scopes.length === 0}
-            className="px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-md hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {running ? "Comparing…" : "Compare"}
           </button>
@@ -223,7 +223,7 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
             <button
               type="button"
               onClick={abort}
-              className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-md hover:bg-red-200 transition-colors"
+              className="btn-secondary"
             >
               Abort
             </button>

@@ -2168,7 +2168,7 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
 
   return (
     <DiffModeContext.Provider value={effectiveMode}>
-    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <div className="card overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 space-y-3">
         <div className="flex items-center justify-between">
@@ -2182,9 +2182,9 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
 
         {/* Stats cards */}
         <div className="flex flex-wrap gap-3">
-          <Stat count={summary.modified}  label="Modified"  color="text-amber-600"   bg="bg-amber-50" />
-          <Stat count={summary.added}     label="Added"     color="text-emerald-600" bg="bg-emerald-50" />
-          <Stat count={summary.removed}   label="Removed"   color="text-red-600"     bg="bg-red-50" />
+          <Stat count={summary.modified}  label="Modified"  color="text-amber-700"   bg="bg-amber-50" />
+          <Stat count={summary.added}     label="Added"     color="text-emerald-700" bg="bg-emerald-50" />
+          <Stat count={summary.removed}   label="Removed"   color="text-rose-700"    bg="bg-rose-50" />
           <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
           <div className="ml-auto flex items-center gap-3 self-center">
             <span className="text-xs text-slate-400">
