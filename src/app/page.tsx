@@ -100,9 +100,6 @@ export default function DashboardPage() {
   // Recent activity (latest 7)
   const recentActivity = history.slice(0, 7);
 
-  // Compare reports (latest 6)
-  const compareReports = history.filter((r) => r.type === "compare").slice(0, 6);
-
   return (
     <div className="space-y-8">
 
@@ -201,52 +198,6 @@ export default function DashboardPage() {
           </div>
         </section>
       </div>
-
-      {/* ── Recent Compare Reports ── */}
-      {compareReports.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Recent Compare Reports</h2>
-            <Link href="/history" className="text-xs text-sky-600 hover:underline">View all</Link>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-100">
-            {compareReports.map((r) => {
-              const src = r.source ? `${r.source.environment} (${r.source.mode})` : r.environment;
-              const tgt = r.target ? `${r.target.environment} (${r.target.mode})` : "—";
-              // Parse summary from r.summary string, e.g. "+12 -3 ~8 =100"
-              const addMatch = r.summary.match(/\+(\d+)/);
-              const remMatch = r.summary.match(/-(\d+)/);
-              const modMatch = r.summary.match(/~(\d+)/);
-              const added   = addMatch ? parseInt(addMatch[1]) : null;
-              const removed = remMatch ? parseInt(remMatch[1]) : null;
-              const modified = modMatch ? parseInt(modMatch[1]) : null;
-              return (
-                <div key={r.id} className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-medium text-slate-800 font-mono">{src}</span>
-                      <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                      <span className="text-xs font-medium text-slate-800 font-mono">{tgt}</span>
-                    </div>
-                    {r.scopes.length > 0 && (
-                      <p className="text-[10px] text-slate-400 mt-0.5">{r.scopes.slice(0, 5).join(", ")}{r.scopes.length > 5 ? ` +${r.scopes.length - 5}` : ""}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    {added   != null && <span className="text-xs font-mono text-emerald-600">+{added}</span>}
-                    {removed != null && <span className="text-xs font-mono text-red-500">-{removed}</span>}
-                    {modified != null && <span className="text-xs font-mono text-amber-600">~{modified}</span>}
-                    <span className={`w-1.5 h-1.5 rounded-full ${r.status === "success" ? "bg-emerald-400" : "bg-red-400"}`} />
-                    <span className="text-[10px] text-slate-400 min-w-[48px] text-right">{timeAgo(r.completedAt)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
     </div>
   );

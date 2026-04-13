@@ -26,12 +26,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-slate-50">
+      <body className="min-h-full bg-slate-50 flex flex-col">
         <BusyProvider>
           <NavBar />
-          <main className="px-6 sm:px-10 lg:px-16 py-8 w-full">
+          <main className="flex-1 px-6 sm:px-10 lg:px-16 py-8 w-full">
             {children}
           </main>
+          <footer className="mt-auto border-t border-slate-200 bg-white">
+            <div className="px-6 sm:px-10 lg:px-16 py-4 text-xs text-slate-500 flex items-center justify-between">
+              <span>
+                &copy; {new Date().getFullYear()} <span className="font-semibold text-slate-700">Boston Identity</span>
+              </span>
+              <span className="text-slate-400">AIC Config Pipeline</span>
+            </div>
+          </footer>
         </BusyProvider>
       </body>
     </html>

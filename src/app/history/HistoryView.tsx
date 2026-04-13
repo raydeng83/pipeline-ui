@@ -303,7 +303,7 @@ function ExpandedDetail({ record }: { record: HistoryRecord }) {
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 export function HistoryView({
   environments,
@@ -315,6 +315,7 @@ export function HistoryView({
   const [envFilter, setEnvFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -337,9 +338,10 @@ export function HistoryView({
     return map;
   }, [environments]);
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const pageStart = page * PAGE_SIZE;
-  const pageRows = filtered.slice(pageStart, pageStart + PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(page, totalPages - 1);
+  const pageStart = safePage * pageSize;
+  const pageRows = filtered.slice(pageStart, pageStart + pageSize);
 
   return (
     <div className="space-y-4">
@@ -374,31 +376,81 @@ export function HistoryView({
           ))
         )}
 
-        {filtered.length > PAGE_SIZE && (
-          <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-200 bg-slate-50 text-xs text-slate-500">
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-200 bg-slate-50 text-xs text-slate-500 flex-wrap gap-2">
             <span>
-              {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, filtered.length)} of {filtered.length}
+              {filtered.length === 0
+                ? "0 results"
+                : `${pageStart + 1}–${Math.min(pageStart + pageSize, filtered.length)} of ${filtered.length}`}
             </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="px-2 py-1 rounded hover:bg-slate-200 disabled:opacity-30"
-              >
-                Prev
-              </button>
-              <span className="tabular-nums">
-                {page + 1} / {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={page >= totalPages - 1}
-                className="px-2 py-1 rounded hover:bg-slate-200 disabled:opacity-30"
-              >
-                Next
-              </button>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1.5">
+                Rows per page
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPage(0);
+                  }}
+                  className="rounded border border-slate-300 px-1.5 py-0.5 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500"
+                >
+                  {PAGE_SIZE_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setPage(0)}
+                  disabled={safePage === 0}
+                  className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+                  title="First page"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={safePage === 0}
+                  className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+                  title="Previous page"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <span className="px-2 tabular-nums">
+                  {safePage + 1} / {totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={safePage >= totalPages - 1}
+                  className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+                  title="Next page"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(totalPages - 1)}
+                  disabled={safePage >= totalPages - 1}
+                  className="p-1 rounded hover:bg-slate-200 disabled:opacity-30 transition-colors"
+                  title="Last page"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         )}
