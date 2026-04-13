@@ -344,12 +344,14 @@ function FrConfigSection({
   task,
   targetIsControlled,
   includeDeps,
+  isProdTarget,
   onComplete,
   onTaskStatusChange,
 }: {
   task: PromotionTask;
   targetIsControlled?: boolean;
   includeDeps: boolean;
+  isProdTarget: boolean;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
@@ -384,13 +386,19 @@ function FrConfigSection({
   };
 
   const diffLoader = useCallback(async () => {
-    const scopes = frConfigItems.map((i) => i.scope).join(",");
-    const sp = new URLSearchParams({ source: task.source.environment, target: task.target.environment, scopes });
-    const res = await fetch(`/api/diff?${sp.toString()}`);
-    if (!res.ok) throw new Error((await res.json() as { error?: string }).error ?? "diff failed");
-    return res.json() as Promise<import("@/lib/fr-config").DiffSummary[]>;
+    const scopes = frConfigItems.map((i) => i.scope);
+    const res = await fetch("/api/diff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ target: task.target.environment, scopes, mode: "dry-run" }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error((body as { error?: string }).error ?? "diff failed");
+    }
+    return res.json();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task.source.environment, task.target.environment, frConfigItems.map((i) => i.scope).join(",")]);
+  }, [task.target.environment, frConfigItems.map((i) => i.scope).join(",")]);
 
   const runActualPromote = async () => {
     if (task.status === "new") onTaskStatusChange("in-progress");
@@ -515,8 +523,14 @@ function FrConfigSection({
       <DangerousConfirmDialog
         open={promoteConfirmOpen}
         title={`Promote → ${task.target.environment}`}
-        subtitle="This writes config to the target tenant. Review the diff preview below before confirming."
+        subtitle={
+          isProdTarget
+            ? "This writes config to a live production tenant. Review the diff preview below before confirming."
+            : "This writes config to the target tenant. Review the diff preview below before confirming."
+        }
         tenantName={task.target.environment}
+        requireTypeToConfirm={isProdTarget}
+        blockUntilDiffLoaded={isProdTarget}
         diffLoader={diffLoader}
         onConfirm={() => { setPromoteConfirmOpen(false); void runActualPromote(); }}
         onCancel={() => setPromoteConfirmOpen(false)}
@@ -635,6 +649,7 @@ function PromotePhase({
   frodoScopes,
   igaScopes,
   targetIsControlled,
+  isProdTarget,
   visible,
   includeDeps,
   onComplete,
@@ -645,6 +660,7 @@ function PromotePhase({
   frodoScopes: string[];
   igaScopes: string[];
   targetIsControlled?: boolean;
+  isProdTarget: boolean;
   visible: boolean;
   includeDeps: boolean;
   onComplete: (s: PhaseStatus) => void;
@@ -675,6 +691,7 @@ function PromotePhase({
               task={task}
               targetIsControlled={targetIsControlled}
               includeDeps={includeDeps}
+              isProdTarget={isProdTarget}
               onComplete={onComplete}
               onTaskStatusChange={onTaskStatusChange}
             />
@@ -1013,6 +1030,7 @@ export function PromoteExecution({
           frodoScopes={frodoScopes}
           igaScopes={igaScopes}
           targetIsControlled={(() => { const t = environments.find((e) => e.name === task.target.environment); return t?.type === "controlled" && !t?.devEnvironment; })()}
+          isProdTarget={environments.find((e) => e.name === task.target.environment)?.color === "red"}
           visible={activePhase === "promote"}
           includeDeps={hasJourneys ? includeDeps : false}
           onComplete={(s) => updatePhase("promote", s)}
