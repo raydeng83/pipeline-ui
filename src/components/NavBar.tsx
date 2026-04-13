@@ -43,7 +43,7 @@ export function NavBar() {
 
   return (
     <header className="bg-white/80 backdrop-blur border-b border-slate-200/60 sticky top-0 z-50">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-6 min-w-0">
             <Link

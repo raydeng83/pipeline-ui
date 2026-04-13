@@ -29,11 +29,11 @@ export default function RootLayout({
       <body className="min-h-full bg-slate-50 text-slate-900 antialiased flex flex-col">
         <BusyProvider>
           <NavBar />
-          <main className="flex-1 px-6 sm:px-10 lg:px-16 py-10 w-full max-w-[1400px] mx-auto">
+          <main className="flex-1 px-6 sm:px-10 lg:px-16 py-10 w-full max-w-[1600px] mx-auto">
             {children}
           </main>
           <footer className="mt-auto border-t border-slate-200/60 bg-white">
-            <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-4 text-xs text-slate-500 flex items-center justify-between">
+            <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 py-4 text-xs text-slate-500 flex items-center justify-between">
               <span>
                 &copy; {new Date().getFullYear()} <span className="font-semibold text-slate-700">Boston Identity</span>
               </span>
