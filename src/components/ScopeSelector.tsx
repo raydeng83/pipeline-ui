@@ -78,7 +78,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {/* Header */}
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-slate-700">Config Scopes</span>
@@ -131,17 +131,17 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                 onClick={() => hasCliScopes ? toggleGroup(scopes) : undefined}
                 disabled={disabled || !hasCliScopes}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors select-none disabled:opacity-40",
+                  "inline-flex items-center gap-1.5 transition-colors select-none disabled:opacity-40",
                   allGroupSelected
-                    ? "bg-sky-600 border-sky-600 text-white"
+                    ? "px-2.5 py-1 text-[11px] rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100 cursor-pointer"
                     : someGroupSelected
-                    ? "bg-sky-100 border-sky-400 text-sky-800"
-                    : "bg-white border-slate-300 text-slate-600 hover:border-sky-400 hover:text-sky-700"
+                    ? "px-2.5 py-1 text-[11px] rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100 cursor-pointer"
+                    : "px-2.5 py-1 text-[11px] rounded-full bg-slate-50 text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 cursor-pointer"
                 )}
               >
                 {groupName}
                 {someGroupSelected && (
-                  <span className={cn("text-[10px] font-normal", allGroupSelected ? "text-sky-200" : "text-sky-600")}>
+                  <span className="text-[10px] text-slate-400">
                     {cliGroupValues.filter((v) => selectedSet.has(v)).length}/{cliGroupValues.length}
                   </span>
                 )}
@@ -162,7 +162,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
             Collapse All
           </button>
         </div>
-        <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100">
+        <div className="space-y-2.5">
           {Object.entries(GROUPS).map(([groupName, scopes]) => {
             const cliGroupValues = scopes
               .filter((s) => s.cliSupported !== false)
@@ -174,9 +174,9 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
             const hasCliScopes = cliGroupValues.length > 0;
 
             return (
-              <div key={groupName}>
+              <div key={groupName} className="border border-slate-200 rounded-xl p-3">
                 {/* Group header */}
-                <div className="flex items-center justify-between px-3 py-2 bg-slate-50">
+                <div className="flex items-center justify-between text-[12px] font-semibold text-slate-800 mb-2">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -219,7 +219,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                     </button>
                   </div>
                   {someGroupSelected && (
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-[10px] text-slate-400">
                       {selectedCount}/{cliGroupValues.length}
                     </span>
                   )}
