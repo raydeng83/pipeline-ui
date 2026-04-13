@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Environment,
   ConfigScope,
@@ -12,6 +12,7 @@ import type { PromotionTask, TaskStatus } from "@/lib/promotion-tasks";
 import { LogViewer } from "@/components/LogViewer";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { DiffReport } from "@/app/compare/DiffReport";
+import { DangerousConfirmDialog } from "@/components/DangerousConfirmDialog";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
@@ -354,7 +355,7 @@ function FrConfigSection({
 }) {
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
-  const [confirmPromote, setConfirmPromote] = useState(false);
+  const [promoteConfirmOpen, setPromoteConfirmOpen] = useState(false);
   const onCompleteRef = useRef(onComplete);
   const onTaskStatusRef = useRef(onTaskStatusChange);
   useEffect(() => { onCompleteRef.current = onComplete; });
@@ -382,9 +383,16 @@ function FrConfigSection({
     return res.json();
   };
 
-  const handlePromote = async () => {
-    if (!confirmPromote) { setConfirmPromote(true); return; }
-    setConfirmPromote(false);
+  const diffLoader = useCallback(async () => {
+    const scopes = frConfigItems.map((i) => i.scope).join(",");
+    const sp = new URLSearchParams({ source: task.source.environment, target: task.target.environment, scopes });
+    const res = await fetch(`/api/diff?${sp.toString()}`);
+    if (!res.ok) throw new Error((await res.json() as { error?: string }).error ?? "diff failed");
+    return res.json() as Promise<import("@/lib/fr-config").DiffSummary[]>;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task.source.environment, task.target.environment, frConfigItems.map((i) => i.scope).join(",")]);
+
+  const runActualPromote = async () => {
     if (task.status === "new") onTaskStatusChange("in-progress");
 
     if (targetIsControlled) {
@@ -484,32 +492,13 @@ function FrConfigSection({
       )}
 
       <div className="flex items-center gap-2">
-        {confirmPromote ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-red-700 font-medium">This will push to {task.target.environment}. Continue?</span>
-            <button
-              onClick={handlePromote}
-              disabled={running}
-              className="px-3 py-1.5 text-xs font-medium rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
-            >
-              Yes, Promote
-            </button>
-            <button
-              onClick={() => setConfirmPromote(false)}
-              className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 hover:bg-slate-50 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={handlePromote}
-            disabled={running || frConfigItems.length === 0}
-            className="px-4 py-1.5 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-          >
-            {running ? "Promoting…" : "Promote Selected Items"}
-          </button>
-        )}
+        <button
+          onClick={() => setPromoteConfirmOpen(true)}
+          disabled={running || frConfigItems.length === 0}
+          className="px-4 py-1.5 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+        >
+          {running ? "Promoting…" : "Promote Selected Items"}
+        </button>
         {running && (
           <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
             Abort
@@ -522,6 +511,16 @@ function FrConfigSection({
           <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
         </div>
       )}
+
+      <DangerousConfirmDialog
+        open={promoteConfirmOpen}
+        title={`Promote → ${task.target.environment}`}
+        subtitle="This writes config to the target tenant. Review the diff preview below before confirming."
+        tenantName={task.target.environment}
+        diffLoader={diffLoader}
+        onConfirm={() => { setPromoteConfirmOpen(false); void runActualPromote(); }}
+        onCancel={() => setPromoteConfirmOpen(false)}
+      />
     </div>
   );
 }

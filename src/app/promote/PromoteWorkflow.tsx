@@ -906,97 +906,148 @@ export function PromoteWorkflow({
     }
   };
 
+  const selectedSrcEnv = selectedTask ? environments.find((e) => e.name === selectedTask.source.environment) : null;
+  const selectedTgtEnv = selectedTask ? environments.find((e) => e.name === selectedTask.target.environment) : null;
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Sidebar */}
-      <div className="lg:col-span-1 space-y-2">
-        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden divide-y divide-slate-100">
-          {tasks.length === 0 && (
-            <p className="px-4 py-6 text-sm text-slate-400 text-center">No promotion tasks yet.</p>
-          )}
-          {tasks.map((task) => {
-            const srcEnv = environments.find((e) => e.name === task.source.environment);
-            const tgtEnv = environments.find((e) => e.name === task.target.environment);
-            const isSelected = selectedId === task.id && panelMode === "view";
-            return (
-              <div
-                key={task.id}
-                onClick={() => { if (!busy) { setSelectedId(task.id); setPanelMode("view"); } }}
-                className={cn(
-                  "px-4 py-3 transition-colors",
-                  busy ? "cursor-default opacity-60" : "cursor-pointer hover:bg-slate-50",
-                  isSelected && "bg-sky-50 border-l-4 border-l-sky-500"
-                )}
-              >
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-sm font-medium text-slate-800 truncate">{task.name}</span>
-                  <StatusBadge status={task.status} />
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <span className="truncate max-w-[90px]">{srcEnv?.label ?? task.source.environment}</span>
-                  <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                  <span className="truncate max-w-[90px]">{tgtEnv?.label ?? task.target.environment}</span>
-                </div>
-                {task.items.length > 0 && (
-                  <p className="text-[10px] text-slate-400 mt-0.5 font-mono">
-                    {task.items.length} scope{task.items.length !== 1 ? "s" : ""}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+    <div className="space-y-6">
+      {/* Page header */}
+      <header className="flex items-start justify-between gap-6">
+        <div>
+          <h1 className="page-title">Promote</h1>
+          <p className="section-subtitle mt-1">
+            Move verified config from a source tenant to a target tenant, safely.
+          </p>
         </div>
-
-        <button
-          onClick={panelMode === "new" ? cancelForm : openNew}
-          disabled={busy}
-          className={cn(
-            "w-full px-4 py-2 border-2 rounded-lg text-sm transition-colors disabled:opacity-50",
-            panelMode === "new"
-              ? "border-slate-300 text-slate-500 hover:bg-slate-50"
-              : "border-dashed border-slate-300 text-slate-500 hover:border-sky-400 hover:text-sky-600"
-          )}
-        >
-          {panelMode === "new" ? "Cancel" : "+ New Task"}
-        </button>
-      </div>
-
-      {/* Right panel */}
-      <div className="lg:col-span-2">
-        {(panelMode === "new" || panelMode === "edit") && (
-          <TaskForm
-            form={form}
-            environments={environments}
-            saving={saving}
-            isEdit={panelMode === "edit"}
-            fullscreen={fullscreen}
-            onToggleFullscreen={() => setFullscreen((f) => !f)}
-            onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
-            onSave={handleSave}
-            onCancel={cancelForm}
-          />
-        )}
-
-        {panelMode === "view" && selectedTask && (
-          <TaskDetail
-            key={selectedTask.id}
-            task={selectedTask}
-            environments={environments}
-            fullscreen={fullscreen}
-            onToggleFullscreen={() => setFullscreen((f) => !f)}
-            onEdit={openEdit}
-            onDelete={handleDelete}
-            onStatusChange={(status) => handleStatusChange(selectedTask.id, status)}
-          />
-        )}
-
-        {(panelMode === "select" || (panelMode === "view" && !selectedTask)) && (
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center text-slate-400 text-sm">
-            Select a task or create a new one to get started.
+        {selectedSrcEnv && selectedTgtEnv && (
+          <div className="flex items-center gap-3 shrink-0">
+            <EnvironmentBadge env={selectedSrcEnv} />
+            <span className="text-slate-400">→</span>
+            <EnvironmentBadge env={selectedTgtEnv} />
           </div>
         )}
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
+        {/* Left: task list as vertical stepper aside */}
+        <aside className="lg:sticky lg:top-20 h-fit space-y-2">
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-3 py-2.5 border-b border-slate-100">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Tasks</span>
+            </div>
+            {tasks.length === 0 && (
+              <p className="px-4 py-6 text-sm text-slate-400 text-center">No promotion tasks yet.</p>
+            )}
+            <ol className="divide-y divide-slate-100">
+              {tasks.map((task, idx) => {
+                const srcEnv = environments.find((e) => e.name === task.source.environment);
+                const tgtEnv = environments.find((e) => e.name === task.target.environment);
+                const isSelected = selectedId === task.id && panelMode === "view";
+                const isDone = task.status === "completed";
+                const isFailed = task.status === "failed";
+                const isRunning = task.status === "in-progress";
+                return (
+                  <li key={task.id}>
+                    <button
+                      type="button"
+                      onClick={() => { if (!busy) { setSelectedId(task.id); setPanelMode("view"); } }}
+                      disabled={busy}
+                      className={cn(
+                        "w-full flex items-start gap-3 px-3 py-2.5 text-left transition-colors",
+                        busy ? "opacity-60 cursor-default" : "cursor-pointer hover:bg-slate-50",
+                        isSelected && "bg-indigo-50"
+                      )}
+                    >
+                      {/* Step circle */}
+                      <span className={cn(
+                        "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5",
+                        isDone   ? "bg-emerald-50 text-emerald-700"
+                          : isFailed  ? "bg-rose-50 text-rose-700"
+                          : isRunning ? "bg-sky-50 text-sky-700 animate-pulse"
+                          : isSelected ? "bg-indigo-600 text-white shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+                          : "bg-slate-100 text-slate-500"
+                      )}>
+                        {isDone ? "✓" : isFailed ? "!" : idx + 1}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className={cn(
+                          "block text-[13px] truncate",
+                          isSelected ? "font-semibold text-indigo-700" : isDone ? "text-slate-800" : "text-slate-600"
+                        )}>
+                          {task.name}
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
+                          <span className="truncate max-w-[70px]">{srcEnv?.label ?? task.source.environment}</span>
+                          <svg className="w-2.5 h-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                          <span className="truncate max-w-[70px]">{tgtEnv?.label ?? task.target.environment}</span>
+                        </span>
+                        {task.status !== "new" && (
+                          <span className={cn(
+                            "block text-[10px] mt-0.5",
+                            isFailed ? "text-rose-600" : isDone ? "text-emerald-600" : "text-sky-600"
+                          )}>
+                            {isDone ? "completed" : isFailed ? "failed" : "in progress"}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
+          <button
+            onClick={panelMode === "new" ? cancelForm : openNew}
+            disabled={busy}
+            className={cn(
+              "w-full px-4 py-2 border-2 rounded-lg text-sm transition-colors disabled:opacity-50",
+              panelMode === "new"
+                ? "border-slate-300 text-slate-500 hover:bg-slate-50"
+                : "border-dashed border-slate-300 text-slate-500 hover:border-indigo-400 hover:text-indigo-600"
+            )}
+          >
+            {panelMode === "new" ? "Cancel" : "+ New Task"}
+          </button>
+        </aside>
+
+        {/* Right: active step content */}
+        <div>
+          {(panelMode === "new" || panelMode === "edit") && (
+            <TaskForm
+              form={form}
+              environments={environments}
+              saving={saving}
+              isEdit={panelMode === "edit"}
+              fullscreen={fullscreen}
+              onToggleFullscreen={() => setFullscreen((f) => !f)}
+              onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+              onSave={handleSave}
+              onCancel={cancelForm}
+            />
+          )}
+
+          {panelMode === "view" && selectedTask && (
+            <TaskDetail
+              key={selectedTask.id}
+              task={selectedTask}
+              environments={environments}
+              fullscreen={fullscreen}
+              onToggleFullscreen={() => setFullscreen((f) => !f)}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+              onStatusChange={(status) => handleStatusChange(selectedTask.id, status)}
+            />
+          )}
+
+          {(panelMode === "select" || (panelMode === "view" && !selectedTask)) && (
+            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-sm">
+              Select a task from the left or create a new one to get started.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
