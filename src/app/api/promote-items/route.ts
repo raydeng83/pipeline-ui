@@ -295,7 +295,7 @@ export async function POST(req: NextRequest) {
         for (const sel of scopeSelections) {
           const sourceDirs = resolveScopeDirs(sourceConfigDir, sel.scope);
           for (const srcDir of sourceDirs) {
-            const relPath = path.relative(sourceConfigDir, srcDir);
+            const relPath = path.relative(sourceConfigDir, srcDir).split(path.sep).join("/");
             const destDir = path.join(tempConfigDir, relPath);
 
             if (!sel.items || sel.items.length === 0) {
@@ -371,7 +371,7 @@ export async function POST(req: NextRequest) {
             for (const subName of deps.subJourneys) {
               if (journeyScope.items.includes(subName)) continue; // already copied
               for (const srcDir of resolveScopeDirs(sourceConfigDir, "journeys")) {
-                const relPath = path.relative(sourceConfigDir, srcDir);
+                const relPath = path.relative(sourceConfigDir, srcDir).split(path.sep).join("/");
                 const srcSub = path.join(srcDir, subName);
                 const destSub = path.join(tempConfigDir, relPath, subName);
                 if (fs.existsSync(srcSub)) {
@@ -387,7 +387,7 @@ export async function POST(req: NextRequest) {
               const scriptScope = scopeSelections.find((s) => s.scope === "scripts");
               const existingScriptItems = new Set(scriptScope?.items ?? []);
               for (const srcDir of resolveScopeDirs(sourceConfigDir, "scripts")) {
-                const relPath = path.relative(sourceConfigDir, srcDir);
+                const relPath = path.relative(sourceConfigDir, srcDir).split(path.sep).join("/");
                 const configSrc = path.join(srcDir, "scripts-config");
                 if (!fs.existsSync(configSrc)) continue;
                 const configDest = path.join(tempConfigDir, relPath, "scripts-config");

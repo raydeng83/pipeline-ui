@@ -19,7 +19,7 @@ function buildTree(dir: string, base: string): FileNode[] {
     })
     .map((entry) => {
       const full = path.join(dir, entry.name);
-      const relativePath = path.relative(base, full);
+      const relativePath = path.relative(base, full).split(path.sep).join("/");
       if (entry.isDirectory()) {
         return { name: entry.name, relativePath, type: "dir" as const, children: buildTree(full, base) };
       }

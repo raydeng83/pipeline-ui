@@ -210,7 +210,10 @@ function walkDir(dir: string, base: string, out: Map<string, string>): void {
     if (entry.isDirectory()) {
       walkDir(full, base, out);
     } else {
-      out.set(path.relative(base, full), fs.readFileSync(full, "utf-8"));
+      // Normalize to POSIX separators so downstream consumers (regexes, UI
+      // path splits, scope derivation) work identically on Windows and Unix.
+      const rel = path.relative(base, full).split(path.sep).join("/");
+      out.set(rel, fs.readFileSync(full, "utf-8"));
     }
   }
 }
