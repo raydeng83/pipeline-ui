@@ -7,6 +7,7 @@ import { parseEnvFile, serializeEnvFile } from "@/lib/env-parser";
 import { cn } from "@/lib/utils";
 import { LogEntry } from "@/hooks/useStreamingLogs";
 import { ServiceAccountScopeSelector } from "@/components/ServiceAccountScopeSelector";
+import { StatusPill } from "@/components/ui/StatusPill";
 
 // ── Field definitions ────────────────────────────────────────────────────────
 
@@ -480,6 +481,14 @@ function TestConnectionButton({
     : exitCode === null ? "bg-slate-400"
     : exitCode === 0 ? "bg-green-400" : "bg-red-400";
 
+  const inlinePill = running ? (
+    <StatusPill tone="info">testing…</StatusPill>
+  ) : exitCode === 0 ? (
+    <StatusPill tone="success">ok</StatusPill>
+  ) : exitCode !== null ? (
+    <StatusPill tone="danger">failed</StatusPill>
+  ) : null;
+
   return (
     <div className="space-y-2 w-full">
       <div className="flex items-center gap-2 flex-wrap">
@@ -491,6 +500,7 @@ function TestConnectionButton({
         >
           {running ? "Testing..." : "Test Connection"}
         </button>
+        {inlinePill}
         <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
           <input
             type="checkbox"
@@ -792,31 +802,32 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
   const missing = getMissingRequired(values);
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <div className="card-padded space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50 gap-3 flex-wrap">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <EnvironmentBadge env={{ ...env, label, color }} />
           <span className="text-xs font-mono text-slate-400">{env.name}</span>
         </div>
         <div className="flex items-center gap-2">
           {error && <span className="text-xs text-red-600">{error}</span>}
+          {saved && <StatusPill tone="success">Saved</StatusPill>}
           <button
             onClick={handleSave}
             disabled={saving || loading}
-            className="px-3 py-1 text-xs font-medium bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 transition-colors"
+            className="btn-primary"
           >
-            {saving ? "Saving..." : saved ? "Saved!" : "Save"}
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="p-8 text-slate-400 text-sm text-center">Loading...</div>
+        <div className="py-8 text-slate-400 text-sm text-center">Loading...</div>
       ) : (
         <>
           {/* Metadata row */}
-          <div className="flex flex-wrap items-end gap-4 px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex flex-wrap items-end gap-4 py-3 border-b border-slate-100 bg-slate-50/50">
             <div className="space-y-1">
               <label className="text-xs font-medium text-slate-600">Display Name</label>
               <input
@@ -872,7 +883,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
           </div>
 
           {/* ── Section tabs (fr-config / Log API) ──────────────────────── */}
-          <div className="flex border-b border-slate-200 bg-slate-50/50">
+          <div className="flex border-b border-slate-200">
             {([
               { key: "fr-config" as Section, label: "fr-config" },
               { key: "log-api" as Section, label: "Log API" },
@@ -896,7 +907,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
           {section === "fr-config" && (
             <>
               {/* Test connection & restart */}
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 space-y-3">
+              <div className="py-3 border-b border-slate-100 bg-slate-50/50 space-y-3">
                 <TestConnectionButton liveValues={values} />
                 <RestartButton environmentName={env.name} />
               </div>
@@ -921,14 +932,14 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
 
               {/* Validation banner */}
               {subTab === "form" && missing.length > 0 && (
-                <div className="mx-4 mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
+                <div className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
                   Required fields missing: {missing.join(", ")}
                 </div>
               )}
 
               {/* Form sub-tab */}
               {subTab === "form" && (
-                <div className="p-4 space-y-6 overflow-y-auto max-h-[600px]">
+                <div className="space-y-6 overflow-y-auto max-h-[600px]">
                   {FIELD_GROUPS.map((group) => (
                     <div key={group.title} className="space-y-3">
                       <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 border-b border-slate-100 pb-1">
@@ -979,7 +990,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
               {/* Raw sub-tab */}
               {subTab === "raw" && (
                 <div>
-                  <p className="text-xs text-slate-400 px-4 pt-3 pb-1">
+                  <p className="text-xs text-slate-400 pt-3 pb-1">
                     Direct edit of the .env file. Changes here are reflected in the form view on next switch.
                   </p>
                   <textarea
@@ -998,7 +1009,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
           {section === "log-api" && (
             <>
               {/* Test Log API */}
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+              <div className="py-3 border-b border-slate-100 bg-slate-50/50">
                 <TestLogApiButton
                   tenantBaseUrl={values["TENANT_BASE_URL"] ?? ""}
                   apiKey={logApiKey}
@@ -1006,7 +1017,7 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
                 />
               </div>
 
-              <div className="p-4 space-y-6 max-w-lg">
+              <div className="space-y-6 max-w-lg py-4">
                 <div>
                   <p className="text-xs text-slate-500">
                     API key and secret for accessing PingOne Advanced Identity Cloud monitoring logs.
