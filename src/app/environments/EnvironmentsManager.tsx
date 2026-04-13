@@ -5,7 +5,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { Environment, EnvironmentType } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
-import { EnvCard } from "@/components/EnvCard";
 import { EnvEditor } from "./EnvEditor";
 import { cn } from "@/lib/utils";
 import { ServiceAccountScopeSelector } from "@/components/ServiceAccountScopeSelector";
@@ -213,15 +212,45 @@ export function EnvironmentsManager({
             onDragOver={(e) => handleDragOver(e, idx)}
             onDrop={() => handleDrop(idx)}
             onDragEnd={handleDragEnd}
-            className={cn(dragOverIdx === idx && "ring-2 ring-indigo-400 ring-offset-1 rounded-xl")}
+            className={cn(
+              "group card-padded text-left cursor-pointer transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.06)]",
+              dragOverIdx === idx && "ring-2 ring-indigo-400 ring-offset-1"
+            )}
+            onClick={() => { setEditing(env); setShowAdd(false); }}
           >
-            <EnvCard
-              env={env}
-              health="healthy"
-              lastPull={null}
-              lastPush={null}
-              onClick={() => { setEditing(env); setShowAdd(false); }}
-            />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", COLOR_SWATCHES[env.color])} />
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-[14px] text-slate-900 truncate">{env.label}</div>
+                  <div className="text-[11px] text-slate-500 font-mono truncate">{env.name}</div>
+                </div>
+              </div>
+              <span
+                className="text-slate-300 group-hover:text-slate-400 text-base cursor-grab select-none shrink-0"
+                title="Drag to reorder"
+                onClick={(e) => e.stopPropagation()}
+              >
+                ⋮⋮
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 mt-3">
+              <span
+                className={cn(
+                  "inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full ring-1",
+                  env.type === "controlled"
+                    ? "bg-amber-50 text-amber-700 ring-amber-200"
+                    : "bg-slate-50 text-slate-600 ring-slate-200"
+                )}
+              >
+                {env.type === "controlled" ? "controlled" : "sandbox"}
+              </span>
+              {env.type === "controlled" && env.devEnvironment && (
+                <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full ring-1 bg-indigo-50 text-indigo-700 ring-indigo-200">
+                  dev
+                </span>
+              )}
+            </div>
           </div>
         ))}
 
@@ -230,7 +259,7 @@ export function EnvironmentsManager({
           type="button"
           onClick={showAdd ? cancelAdd : openAdd}
           className={cn(
-            "card-padded border-2 border-dashed flex flex-col items-center justify-center gap-2 min-h-[120px] transition-colors text-sm",
+            "card-padded border-2 border-dashed flex flex-col items-center justify-center gap-2 min-h-[100px] transition-colors text-sm",
             showAdd
               ? "border-slate-300 text-slate-400 hover:bg-slate-50"
               : "border-slate-300 text-slate-400 hover:border-indigo-400 hover:text-indigo-600"
