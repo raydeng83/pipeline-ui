@@ -11,22 +11,38 @@ interface Props {
   title: string;
   subtitle: string;
   tenantName: string;
+  requireTypeToConfirm: boolean;
+  blockUntilDiffLoaded: boolean;
   diffLoader: () => Promise<DiffSummary[]>;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 export function DangerousConfirmDialog(props: Props) {
-  const { open, title, subtitle, tenantName, diffLoader, onConfirm, onCancel } = props;
+  const {
+    open,
+    title,
+    subtitle,
+    tenantName,
+    requireTypeToConfirm,
+    blockUntilDiffLoaded,
+    diffLoader,
+    onConfirm,
+    onCancel,
+  } = props;
   const [typed, setTyped] = useState("");
   const [diff, setDiff] = useState<DiffSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [skipDiff, setSkipDiff] = useState(false);
+  const [showSkipLink, setShowSkipLink] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setTyped("");
       setDiff(null);
       setError(null);
+      setSkipDiff(false);
+      setShowSkipLink(false);
       return;
     }
     let cancelled = false;
@@ -36,7 +52,17 @@ export function DangerousConfirmDialog(props: Props) {
     return () => { cancelled = true; };
   }, [open, diffLoader]);
 
-  const matches = typed === tenantName;
+  useEffect(() => {
+    if (!open || blockUntilDiffLoaded || diff || error) return;
+    const timer = window.setTimeout(() => setShowSkipLink(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [open, blockUntilDiffLoaded, diff, error]);
+
+  const typeMatches = typed === tenantName;
+  const diffReady = diff !== null || error !== null;
+  const typeGateOk = requireTypeToConfirm ? typeMatches : true;
+  const diffGateOk = blockUntilDiffLoaded ? diffReady : true;
+  const canConfirm = typeGateOk && diffGateOk;
 
   const totalChanges = diff
     ? diff.reduce((n, r) => n + r.added + r.modified + r.removed, 0)
@@ -76,9 +102,18 @@ export function DangerousConfirmDialog(props: Props) {
               </div>
             )}
 
-            {!error && !diff && (
-              <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-[12px] px-3 py-3">
-                Loading diff…
+            {!error && !diff && !skipDiff && (
+              <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-[12px] px-3 py-3 flex items-center justify-between">
+                <span>Loading diff…</span>
+                {showSkipLink && !blockUntilDiffLoaded && (
+                  <button
+                    type="button"
+                    onClick={() => setSkipDiff(true)}
+                    className="text-indigo-600 hover:text-indigo-700 text-[12px]"
+                  >
+                    Skip diff
+                  </button>
+                )}
               </div>
             )}
 
@@ -98,29 +133,33 @@ export function DangerousConfirmDialog(props: Props) {
               </div>
             )}
 
-            <label className="block text-[12px] text-slate-600 mb-2">
-              Type{" "}
-              <span className="font-mono bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded font-semibold">
-                {tenantName}
-              </span>{" "}
-              to confirm
-            </label>
-            <input
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              placeholder={`type ${tenantName}`}
-              autoComplete="off"
-              spellCheck={false}
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-200 font-mono text-[13px] text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            />
+            {requireTypeToConfirm && (
+              <>
+                <label className="block text-[12px] text-slate-600 mb-2">
+                  Type{" "}
+                  <span className="font-mono bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded font-semibold">
+                    {tenantName}
+                  </span>{" "}
+                  to confirm
+                </label>
+                <input
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  placeholder={`type ${tenantName}`}
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 font-mono text-[13px] text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+              </>
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-3 px-5 py-4 bg-slate-50 border-t border-slate-100">
             <button onClick={onCancel} className="btn-secondary">Cancel</button>
             <button
               onClick={onConfirm}
-              disabled={!matches}
-              className={cn("btn-danger-solid", !matches && "opacity-50 cursor-not-allowed")}
+              disabled={!canConfirm}
+              className={cn("btn-danger-solid", !canConfirm && "opacity-50 cursor-not-allowed")}
             >
               Confirm
             </button>
