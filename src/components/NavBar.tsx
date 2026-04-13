@@ -7,12 +7,11 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard" },
+  { href: "/configs", label: "Browse" },
   { href: "/pull", label: "Pull" },
   { href: "/push", label: "Push" },
-  { href: "/promote", label: "Promote" },
-  { href: "/configs", label: "Browse" },
-  { href: "/analyze", label: "Analyze" },
   { href: "/compare", label: "Compare" },
+  { href: "/promote", label: "Promote" },
   { href: "/logs", label: "Logs" },
   { href: "/history", label: "History" },
   { href: "/environments", label: "Environments" },

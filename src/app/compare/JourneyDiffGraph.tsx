@@ -937,19 +937,27 @@ function ScriptPanelContent({
       );
       let nodeContent = nodeConfigFile?.localContent ?? nodeConfigFile?.remoteContent ?? null;
 
-      // Pick the env that actually has this node
-      const env = diffStatus === "added" ? targetEnv : diffStatus === "removed" ? sourceEnv : (sourceEnv || targetEnv);
+      // Env probing order: prefer the env that should have the node based on diff
+      // status, but always fall back to the other side so source-only items (target
+      // has deleted them) still resolve.
+      const primaryFirst =
+        diffStatus === "added" ? targetEnv :
+        diffStatus === "removed" ? sourceEnv :
+        (sourceEnv || targetEnv);
+      const envCandidates = Array.from(
+        new Set([primaryFirst, sourceEnv, targetEnv].filter((e): e is string => !!e)),
+      );
 
-      if (!nodeContent) {
-        if (env && journeyName) {
+      if (!nodeContent && journeyName) {
+        for (const env of envCandidates) {
+          if (cancelled || nodeContent) break;
           try {
             const params = new URLSearchParams({ environment: env, journey: journeyName, nodeId });
             const res = await fetch(`/api/push/journey-node?${params}`);
-            if (res.ok) {
-              const data = await res.json() as { file?: { content?: string } };
-              nodeContent = data.file?.content ?? null;
-            }
-          } catch { /* ignore */ }
+            if (!res.ok) continue;
+            const data = await res.json() as { file?: { content?: string } };
+            if (data.file?.content) nodeContent = data.file.content;
+          } catch { /* try next */ }
         }
       }
 
@@ -977,27 +985,32 @@ function ScriptPanelContent({
 
         const configFile = files.find((f) => f.relativePath.includes(`/scripts-config/${uuid}.json`));
 
-        // Always fetch from API: get authoritative name + filename for content-file lookup,
-        // and get script content as a fallback for unchanged scripts.
+        // Try each env in order until we get a non-empty response (source-only items
+        // will 404 on target; we transparently fall back to source).
         let name = uuid;
         let scriptFilename: string | undefined;
         let fetchedFilename: string | undefined;
         let fetchedContent: string | null | undefined;
-        if (env) {
+        let gotAny = false;
+        for (const env of envCandidates) {
+          if (cancelled) break;
           try {
             const params = new URLSearchParams({ environment: env, scriptId: uuid });
             const res = await fetch(`/api/push/script?${params}`);
-            if (res.ok) {
-              const data = await res.json() as { name?: string; content?: string | null; filename?: string };
-              if (data.name) name = data.name;
-              if (data.filename) {
-                fetchedFilename = data.filename;
-                scriptFilename = data.filename.replace(/\.[^.]+$/, "");
-              }
-              fetchedContent = data.content ?? null;
+            if (!res.ok) continue;
+            const data = await res.json() as { name?: string; content?: string | null; filename?: string };
+            if (!data.name && data.content == null && !data.filename) continue;
+            if (data.name) name = data.name;
+            if (data.filename) {
+              fetchedFilename = data.filename;
+              scriptFilename = data.filename.replace(/\.[^.]+$/, "");
             }
-          } catch { /* ignore */ }
-        } else if (configFile) {
+            fetchedContent = data.content ?? null;
+            gotAny = true;
+            if (data.content != null) break;
+          } catch { /* try next */ }
+        }
+        if (!gotAny && configFile) {
           const cfgContent = configFile.localContent ?? configFile.remoteContent;
           if (cfgContent) {
             try {
@@ -1418,6 +1431,18 @@ function DiffGraphCanvasInner({
     ),
     [baseEdges, visibleNodeIds],
   );
+
+  // Clear stale selection when the node set changes (e.g. descending into a
+  // sub-journey). Without this, selectedNodeId would still point at a node
+  // from the parent graph, causing every node in the new graph to fail the
+  // path-highlight check and render at 15% opacity.
+  useEffect(() => {
+    if (!selectedNodeId) return;
+    if (!filteredNodes.some((n) => n.id === selectedNodeId)) {
+      setSelectedNodeId(null);
+      onNodeActivate?.(null, {});
+    }
+  }, [filteredNodes, selectedNodeId, onNodeActivate]);
 
   // Path tracing
   const highlighted = useMemo(() => {
@@ -1872,14 +1897,36 @@ export function JourneyDiffGraphModal({
   // Fetch preview content when modal opens
   useEffect(() => {
     if (!previewModal?.loading) return;
-    const env = targetEnv || sourceEnv;
-    if (!env) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
+    // Try target first, fall back to source — ensures source-only items (target deleted)
+    // still preview correctly.
+    const envCandidates = [targetEnv, sourceEnv].filter((e): e is string => !!e);
+    if (envCandidates.length === 0) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
     const { nodeId, nodeType } = previewModal;
     let cancelled = false;
 
+    const fetchNodeConfigFromEnv = async (env: string): Promise<Record<string, unknown> | null> => {
+      try {
+        const params = new URLSearchParams({ environment: env, journey: active.name, nodeId });
+        const res = await fetch(`/api/push/journey-node?${params}`);
+        if (!res.ok) return null;
+        const d = await res.json() as { file?: { content?: string } };
+        if (!d.file?.content) return null;
+        try { return JSON.parse(d.file.content) as Record<string, unknown>; } catch { return null; }
+      } catch { return null; }
+    };
+
+    const fetchScriptFromEnv = async (env: string, scriptId: string) => {
+      try {
+        const sParams = new URLSearchParams({ environment: env, scriptId });
+        const sRes = await fetch(`/api/push/script?${sParams}`);
+        if (!sRes.ok) return null;
+        return await sRes.json() as { name?: string; content?: string | null; filename?: string };
+      } catch { return null; }
+    };
+
     const doFetch = async () => {
       try {
-        // Resolve node config — files array first, then API fallback
+        // Resolve node config — files array first, then API fallback (target→source)
         const nodeConfigFile = files.find(
           (f) => f.relativePath.includes(`/${nodeId}.json`) && f.relativePath.includes("/nodes/"),
         );
@@ -1888,42 +1935,41 @@ export function JourneyDiffGraphModal({
           const content = nodeConfigFile.remoteContent ?? nodeConfigFile.localContent;
           if (content) { try { config = JSON.parse(content) as Record<string, unknown>; } catch { /* ignore */ } }
         }
-        if (!config) {
-          const params = new URLSearchParams({ environment: env, journey: active.name, nodeId });
-          const res = await fetch(`/api/push/journey-node?${params}`);
-          if (!res.ok || cancelled) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
-          const d = await res.json() as { file?: { content?: string } };
-          if (d.file?.content) { try { config = JSON.parse(d.file.content) as Record<string, unknown>; } catch { /* ignore */ } }
+        for (const env of envCandidates) {
+          if (config || cancelled) break;
+          config = await fetchNodeConfigFromEnv(env);
         }
+        if (cancelled) return;
+        if (!config) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
 
         if (nodeType === "ScriptedDecisionNode") {
           // `config.script` is the script UUID for ScriptedDecisionNode
           const scriptId = typeof config?.script === "string" ? config.script : null;
           if (!scriptId || cancelled) { setPreviewModal((p) => p ? { ...p, loading: false } : null); return; }
 
-          // Step 1: resolve script name.
-          // The script config file is only in `files` when metadata changed; for content-only
-          // changes it's absent. Always fetch from API to get the authoritative name & content
-          // (the content serves as fallback if no diff file is found in step 2).
+          // Step 1: resolve script name / content by trying each env in order.
+          // For source-only items (target has deleted them), target returns 404 and we
+          // transparently fall back to source.
           let scriptName: string = scriptId;
-          let scriptFilename: string | undefined;  // basename without extension, for file lookup
-          let scriptFullFilename: string | undefined;  // full filename including extension
+          let scriptFilename: string | undefined;
+          let scriptFullFilename: string | undefined;
           let apiFallbackContent: string | undefined;
-          try {
-            const sParams = new URLSearchParams({ environment: env, scriptId });
-            const sRes = await fetch(`/api/push/script?${sParams}`);
-            if (sRes.ok && !cancelled) {
-              const sd = await sRes.json() as { name?: string; content?: string; filename?: string };
-              if (sd.name) scriptName = sd.name;
-              if (sd.filename) {
-                scriptFullFilename = sd.filename;
-                scriptFilename = sd.filename.replace(/\.[^.]+$/, "");
-              }
-              apiFallbackContent = sd.content != null
-                ? (scriptFullFilename ? formatForDisplay(sd.content, scriptFullFilename) : sd.content)
-                : undefined;
+          for (const env of envCandidates) {
+            if (cancelled) return;
+            const sd = await fetchScriptFromEnv(env, scriptId);
+            if (!sd) continue;
+            if (sd.name) scriptName = sd.name;
+            if (sd.filename) {
+              scriptFullFilename = sd.filename;
+              scriptFilename = sd.filename.replace(/\.[^.]+$/, "");
             }
-          } catch { /* ignore */ }
+            if (sd.content != null) {
+              apiFallbackContent = scriptFullFilename
+                ? formatForDisplay(sd.content, scriptFullFilename)
+                : sd.content;
+              break;
+            }
+          }
           if (cancelled) return;
 
           // Step 2: look for a diff content file in `files` using the script filename

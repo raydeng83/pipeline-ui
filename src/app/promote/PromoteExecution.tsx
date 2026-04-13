@@ -188,13 +188,19 @@ function PreparePhase({
 function DryRunPhase({
   task,
   visible,
+  includeDeps,
+  onIncludeDepsChange,
+  hasJourneys,
   onComplete,
 }: {
   task: PromotionTask;
   visible: boolean;
+  includeDeps: boolean;
+  onIncludeDepsChange: (v: boolean) => void;
+  hasJourneys: boolean;
   onComplete: (s: PhaseStatus) => void;
 }) {
-  const { logs, running, exitCode, report, run, abort, clear } = useStreamingLogs();
+  const { logs, running, exitCode, report, run, abort } = useStreamingLogs();
   const { setBusy } = useBusyState();
   const onCompleteRef = useRef(onComplete);
   useEffect(() => { onCompleteRef.current = onComplete; });
@@ -215,7 +221,7 @@ function DryRunPhase({
       source: task.source,
       target: task.target,
       scopeSelections,
-      includeDeps: task.includeDeps ?? false,
+      includeDeps: hasJourneys ? includeDeps : false,
       mode: "dry-run",
       diffOptions: { includeMetadata: false, ignoreWhitespace: true },
     });
@@ -235,7 +241,7 @@ function DryRunPhase({
           Simulate what will change on the target (<span className="font-mono">{task.target.environment}</span>) if the source (<span className="font-mono">{task.source.environment}</span>) is promoted to it. Review the diff carefully before proceeding.
         </p>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={compare}
             disabled={running}
@@ -247,6 +253,21 @@ function DryRunPhase({
             <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
               Abort
             </button>
+          )}
+          {hasJourneys && (
+            <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={includeDeps}
+                onChange={(e) => onIncludeDepsChange(e.target.checked)}
+                disabled={running}
+                className="accent-sky-600"
+              />
+              <span>Include Dependencies (InnerTree, Scripts…)</span>
+              <span className={cn("text-[10px] px-1.5 py-0.5 rounded", includeDeps ? "text-sky-700 bg-sky-50" : "text-slate-400 bg-slate-100")}>
+                {includeDeps ? "on" : "off"}
+              </span>
+            </label>
           )}
         </div>
 
@@ -321,18 +342,19 @@ function DryRunPhase({
 function FrConfigSection({
   task,
   targetIsControlled,
+  includeDeps,
   onComplete,
   onTaskStatusChange,
 }: {
   task: PromotionTask;
   targetIsControlled?: boolean;
+  includeDeps: boolean;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
   const [confirmPromote, setConfirmPromote] = useState(false);
-  const [includeDeps, setIncludeDeps] = useState(task.includeDeps ?? false);
   const onCompleteRef = useRef(onComplete);
   const onTaskStatusRef = useRef(onTaskStatusChange);
   useEffect(() => { onCompleteRef.current = onComplete; });
@@ -452,18 +474,13 @@ function FrConfigSection({
       </div>
 
       {hasJourneys && (
-        <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={includeDeps}
-            onChange={(e) => setIncludeDeps(e.target.checked)}
-            disabled={running}
-            className="accent-sky-600"
-          />
-          <span>
-            Include Dependencies (InnerTree, Scripts...)
+        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+          <span>Include Dependencies:</span>
+          <span className={cn("px-1.5 py-0.5 rounded font-medium", includeDeps ? "text-sky-700 bg-sky-50" : "text-slate-500 bg-slate-100")}>
+            {includeDeps ? "on" : "off"}
           </span>
-        </label>
+          <span className="text-slate-400">— set in Step 2 Dry Run.</span>
+        </div>
       )}
 
       <div className="flex items-center gap-2">
@@ -620,6 +637,7 @@ function PromotePhase({
   igaScopes,
   targetIsControlled,
   visible,
+  includeDeps,
   onComplete,
   onTaskStatusChange,
 }: {
@@ -629,6 +647,7 @@ function PromotePhase({
   igaScopes: string[];
   targetIsControlled?: boolean;
   visible: boolean;
+  includeDeps: boolean;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
@@ -656,6 +675,7 @@ function PromotePhase({
             <FrConfigSection
               task={task}
               targetIsControlled={targetIsControlled}
+              includeDeps={includeDeps}
               onComplete={onComplete}
               onTaskStatusChange={onTaskStatusChange}
             />
@@ -816,6 +836,14 @@ export function PromoteExecution({
 
   const [activePhase, setActivePhase] = useState<PhaseId>("prepare");
 
+  // Shared "include dependencies" toggle for dry-run + promote. Initialized
+  // from the task's saved preference; toggling it in the Dry Run phase affects
+  // both the compare call and the subsequent promote call, so the user can
+  // preview the effect and carry it through without going back to edit the task.
+  const [includeDeps, setIncludeDeps] = useState<boolean>(task.includeDeps ?? false);
+  useEffect(() => { setIncludeDeps(task.includeDeps ?? false); }, [task.id, task.includeDeps]);
+  const hasJourneys = task.items.some((i) => i.scope === "journeys");
+
   // Sync dry-run skipped ↔ pending when scope counts change
   useEffect(() => {
     setPhaseStatuses((prev) => {
@@ -970,6 +998,9 @@ export function PromoteExecution({
         <DryRunPhase
           task={task}
           visible={activePhase === "dry-run"}
+          includeDeps={includeDeps}
+          onIncludeDepsChange={setIncludeDeps}
+          hasJourneys={hasJourneys}
           onComplete={(s) => updatePhase("dry-run", s)}
         />
         <PromotePhase
@@ -979,6 +1010,7 @@ export function PromoteExecution({
           igaScopes={igaScopes}
           targetIsControlled={(() => { const t = environments.find((e) => e.name === task.target.environment); return t?.type === "controlled" && !t?.devEnvironment; })()}
           visible={activePhase === "promote"}
+          includeDeps={hasJourneys ? includeDeps : false}
           onComplete={(s) => updatePhase("promote", s)}
           onTaskStatusChange={onTaskStatusChange}
         />
