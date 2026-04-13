@@ -212,7 +212,7 @@ export function SettingsForm({ initialSettings, targetDirAbsolute, initialHasGit
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-      <section className="rounded-lg border border-slate-200 bg-white p-5 space-y-4">
+      <section className="card-padded space-y-4">
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Environments Git Repository</h2>
           <p className="text-xs text-slate-500 mt-1">
@@ -324,7 +324,7 @@ export function SettingsForm({ initialSettings, targetDirAbsolute, initialHasGit
         )}
       </section>
 
-      <section className="rounded-lg border border-slate-200 bg-white p-5 space-y-4">
+      <section className="card-padded space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-slate-900">Repository status</h2>
@@ -443,7 +443,7 @@ export function SettingsForm({ initialSettings, targetDirAbsolute, initialHasGit
       </section>
 
       {hasGit && (
-        <section className="rounded-lg border border-slate-200 bg-white p-5 space-y-4">
+        <section className="card-padded space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-semibold text-slate-900">Commit history</h2>
@@ -512,7 +512,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-700 mb-1">{label}</label>
+      <label className="label-xs mb-1 block">{label}</label>
       {children}
       {description && <p className="text-[11px] text-slate-500 mt-1">{description}</p>}
     </div>
@@ -539,10 +539,10 @@ function dirtyColor(label: string): string {
 }
 
 const inputCls =
-  "w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400";
+  "w-full px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900";
 
 const btnPrimary =
-  "rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
+  "btn-primary disabled:cursor-not-allowed disabled:opacity-50";
 
 const btnSecondary =
-  "rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50";
+  "btn-secondary disabled:cursor-not-allowed disabled:opacity-50";

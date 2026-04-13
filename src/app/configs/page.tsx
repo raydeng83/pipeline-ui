@@ -5,12 +5,10 @@ export default function ConfigsPage() {
   const environments = getEnvironments();
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Config Browser</h1>
-        <p className="text-slate-500 mt-1">
-          Browse and inspect configuration files for each environment.
-        </p>
-      </div>
+      <header>
+        <h1 className="page-title">Browse</h1>
+        <p className="section-subtitle mt-1">Explore the pulled configuration tree.</p>
+      </header>
       <ConfigsViewer environments={environments} />
     </div>
   );

@@ -2297,16 +2297,16 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
     <div className="space-y-0">
       {/* ── Controls (above tabs) ── */}
       {cfg && (
-        <div className="bg-white rounded-t-lg border border-b-0 border-slate-200 p-4 space-y-4">
+        <div className="card-padded space-y-4 rounded-b-none border-b-0">
           {/* Row 1: env + source + level */}
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Environment</label>
+              <label className="label-xs">Environment</label>
               <select
                 value={cfg.env}
                 onChange={(e) => updateActiveConfig({ env: e.target.value, tailing: false })}
                 disabled={cfg.loading || cfg.tailing}
-                className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
+                className="block px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 bg-white"
               >
                 {environments.map((e) => (
                   <option key={e.name} value={e.name} disabled={!e.hasLogApi}>
@@ -2317,7 +2317,7 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Log Source</label>
+              <label className="label-xs">Log Source</label>
               <div className="flex gap-3 py-1">
                 {LOG_SOURCES.map((s) => (
                   <label key={s} className={cn("flex items-center gap-1.5 text-sm cursor-pointer select-none", (cfg.loading || cfg.tailing) ? "opacity-50 cursor-not-allowed" : "")}>
@@ -2340,11 +2340,11 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Min Level</label>
+              <label className="label-xs">Min Level</label>
               <select
                 value={cfg.levelFilter}
                 onChange={(e) => updateActiveConfig({ levelFilter: e.target.value })}
-                className="block rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="block px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
               >
                 {LEVEL_FILTERS.map((l) => (
                   <option key={l.value} value={l.value}>{l.label}</option>
@@ -2361,20 +2361,20 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
 
           {/* Row 2: transaction ID search */}
           <div className="flex items-center gap-2">
-            <label className="text-xs font-medium text-slate-600 shrink-0">Transaction ID</label>
+            <label className="label-xs shrink-0">Transaction ID</label>
             <input
               type="text"
               value={txInput}
               onChange={(e) => setTxInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") submitTxSearch(); }}
               placeholder="Paste a transaction ID to trace…"
-              className="text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 w-96"
+              className="px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono w-96"
             />
             <button
               type="button"
               onClick={submitTxSearch}
               disabled={!txInput.trim() || !cfg?.env || cfg?.loading}
-              className="px-3 py-1.5 text-xs font-medium bg-slate-700 text-white rounded hover:bg-slate-800 disabled:opacity-40 transition-colors flex items-center gap-1.5"
+              className="btn-primary disabled:opacity-40 flex items-center gap-1.5"
             >
               {cfg?.loading && txSearch ? (
                 <>
