@@ -30,6 +30,11 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
   );
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [activeRun, setActiveRun] = useState<{
+    direction: Direction;
+    tenant: string;
+    scopes: ConfigScope[];
+  } | null>(null);
 
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
 
@@ -77,6 +82,7 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
   function startRun() {
     if (!tenant || scopes.length === 0) return;
     const url = direction === "pull" ? "/api/pull" : "/api/push";
+    setActiveRun({ direction, tenant, scopes: [...scopes] });
     // Both /api/pull and /api/push accept { environment, scopes }
     run(url, { environment: tenant, scopes });
   }
@@ -195,8 +201,43 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
         </div>
       </div>
 
-      {/* RIGHT: log viewer */}
-      <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+      {/* RIGHT: run summary + log viewer */}
+      <div className="flex flex-col gap-3 min-w-0">
+        {activeRun && (
+          <div className="card-padded">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                {activeRun.direction === "pull" ? (
+                  <ArrowDown className="w-4 h-4 text-indigo-600" />
+                ) : (
+                  <ArrowUp className="w-4 h-4 text-rose-600" />
+                )}
+                <span className="text-[13px] font-semibold capitalize">
+                  {activeRun.direction}
+                </span>
+                <span className="text-[13px] text-slate-500">·</span>
+                <span className="text-[13px] font-mono text-slate-700">
+                  {activeRun.tenant}
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400">
+                {activeRun.scopes.length} scope{activeRun.scopes.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {activeRun.scopes.map((s) => (
+                <span
+                  key={s}
+                  className="px-2 py-0.5 text-[11px] rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100 font-mono"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+      </div>
 
       {/* Push-to-prod confirmation dialog */}
       {tenantEnv && (
