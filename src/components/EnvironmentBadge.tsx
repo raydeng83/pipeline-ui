@@ -1,28 +1,35 @@
-import { Environment } from "@/lib/fr-config-types";
 import { cn } from "@/lib/utils";
+import type { Environment } from "@/lib/fr-config";
 
-const colorMap: Record<NonNullable<Environment["color"]>, string> = {
-  blue:   "bg-blue-100 text-blue-800 border-blue-300",
-  green:  "bg-green-100 text-green-800 border-green-300",
-  yellow: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  red:    "bg-red-100 text-red-800 border-red-300",
-  purple: "bg-purple-100 text-purple-800 border-purple-300",
-  orange: "bg-orange-100 text-orange-800 border-orange-300",
-  teal:   "bg-teal-100 text-teal-800 border-teal-300",
-  pink:   "bg-pink-100 text-pink-800 border-pink-300",
-  indigo: "bg-indigo-100 text-indigo-800 border-indigo-300",
-  gray:   "bg-gray-100 text-gray-800 border-gray-300",
+const DOT: Record<string, string> = {
+  blue:   "bg-blue-400",
+  green:  "bg-emerald-400",
+  yellow: "bg-amber-400",
+  red:    "bg-rose-400",
+  slate:  "bg-slate-400",
 };
 
-export function EnvironmentBadge({ env }: { env: Environment }) {
+const BADGE: Record<string, string> = {
+  blue:   "bg-blue-50 text-blue-700 ring-blue-200",
+  green:  "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  yellow: "bg-amber-50 text-amber-700 ring-amber-200",
+  red:    "bg-rose-50 text-rose-700 ring-rose-200",
+  slate:  "bg-slate-50 text-slate-700 ring-slate-200",
+};
+
+export function EnvironmentBadge({
+  env,
+  showDot = true,
+  className,
+}: { env: Environment; showDot?: boolean; className?: string }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
-        colorMap[env.color]
+    <span className={cn("inline-flex items-center gap-2", className)}>
+      {showDot && (
+        <span className={cn("w-2 h-2 rounded-full shrink-0", DOT[env.color] ?? DOT.slate)} />
       )}
-    >
-      {env.label}
+      <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full ring-1", BADGE[env.color] ?? BADGE.slate)}>
+        {env.label}
+      </span>
     </span>
   );
 }
