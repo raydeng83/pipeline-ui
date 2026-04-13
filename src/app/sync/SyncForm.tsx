@@ -80,17 +80,15 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
 
   const tenantEnv = environments.find((e) => e.name === tenant);
   const isProd = tenantEnv?.color === "red";
-  const isDangerous = direction === "push" && isProd;
 
   const diffLoader = useMemo(
     (): (() => Promise<DiffSummary[]>) =>
       async () => {
-        const sp = new URLSearchParams({
-          source: "repo",
-          target: tenant,
-          scopes: scopes.join(","),
+        const res = await fetch("/api/diff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ target: tenant, scopes, mode: "dry-run" }),
         });
-        const res = await fetch(`/api/diff?${sp.toString()}`);
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
           throw new Error((body as { error?: string }).error ?? "diff failed");
@@ -109,7 +107,7 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
   }
 
   function handleSubmit() {
-    if (isDangerous) {
+    if (direction === "push") {
       setConfirmOpen(true);
       return;
     }
@@ -275,13 +273,19 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
         <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
       </div>
 
-      {/* Push-to-prod confirmation dialog */}
+      {/* Push confirmation dialog */}
       {tenantEnv && (
         <DangerousConfirmDialog
           open={confirmOpen}
           title={`Push to ${tenantEnv.label}`}
-          subtitle="This writes repo config to a live tenant. Review the preview below."
+          subtitle={
+            isProd
+              ? "This writes repo config to a live production tenant. Review the preview below."
+              : "Review the changes below before pushing."
+          }
           tenantName={tenantEnv.name}
+          requireTypeToConfirm={isProd}
+          blockUntilDiffLoaded={isProd}
           diffLoader={diffLoader}
           onConfirm={() => {
             setConfirmOpen(false);
