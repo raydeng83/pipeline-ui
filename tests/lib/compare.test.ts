@@ -51,4 +51,17 @@ describe("summarizeReport", () => {
       { scope: "scripts", added: 0, modified: 1, removed: 0 },
     ]);
   });
+
+  it("derives scope from relativePath when scope field is absent", () => {
+    const report = mkReport([
+      { relativePath: "journeys/Login.json", status: "modified" } as any as FileDiff,
+      { relativePath: "scripts/foo.js",     status: "added" }    as any as FileDiff,
+      { relativePath: "scripts/bar.js",     status: "removed" }  as any as FileDiff,
+    ]);
+    const result = summarizeReport(report);
+    expect(result).toEqual([
+      { scope: "journeys", added: 0, modified: 1, removed: 0 },
+      { scope: "scripts",  added: 1, modified: 0, removed: 1 },
+    ]);
+  });
 });
