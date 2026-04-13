@@ -5,6 +5,8 @@ export interface DiffLine {
 
 export interface FileDiff {
   relativePath: string;
+  /** Top-level config scope this file belongs to (e.g. "journeys", "scripts"). */
+  scope?: string;
   status: "added" | "removed" | "modified" | "unchanged";
   diffLines?: DiffLine[];
   /** Source file content (modified / removed files). Absent if file too large. */
