@@ -49,6 +49,11 @@ export interface JourneyTreeNode {
   nodes: JourneyNodeInfo[];
 }
 
+export interface MissingDepsWarning {
+  missingJourneys: string[];
+  missingScripts: string[];
+}
+
 export interface CompareReport {
   source: CompareEndpoint;
   target: CompareEndpoint;
@@ -62,4 +67,5 @@ export interface CompareReport {
   };
   files: FileDiff[];
   journeyTree?: JourneyTreeNode[];
+  missingDeps?: MissingDepsWarning;
 }

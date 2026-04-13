@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
         // This ensures the target pull fetches ProgressiveProfile etc.
         // so the comparison can show their actual status.
         let resolvedSubJourneys: string[] = [];
-        if (scopeSelections) {
+        if (includeDeps && scopeSelections) {
           const journeyScopes = scopeSelections.filter(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
           );
@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
 
         // If source is remote and we couldn't resolve deps yet, pull source
         // first, resolve deps, then pull target with the expanded selections.
-        if (source.mode === "remote" && resolvedSubJourneys.length === 0 && scopeSelections) {
+        if (includeDeps && source.mode === "remote" && resolvedSubJourneys.length === 0 && scopeSelections) {
           await pullSide("source", source, sourceTempDir);
           const journeyScopes = scopeSelections.filter(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
@@ -253,6 +253,62 @@ export async function POST(req: NextRequest) {
                 .filter((node) => selectedNames.has(node.name.toLowerCase()))
                 .map((node) => ({ ...node, subJourneys: filterTree(node.subJourneys) }));
             report.journeyTree = filterTree(report.journeyTree);
+          }
+        }
+
+        // When includeDeps is false, check if the target is missing any
+        // dependency journeys / scripts that the selected journeys reference.
+        if (!includeDeps && scopeSelections) {
+          const journeyScopes = scopeSelections.filter(
+            (s) => s.scope === "journeys" && s.items && s.items.length > 0,
+          );
+          if (journeyScopes.length > 0) {
+            const resolveDir = sourceConfigDir;
+            const deps = resolveJourneyDeps(
+              resolveDir,
+              journeyScopes.flatMap((s) => s.items!),
+            );
+            if (deps.subJourneys.length > 0 || deps.scriptUuids.length > 0) {
+              // Build name sets for target journeys and scripts
+              const targetRealmsDir = path.join(targetConfigDir, "realms");
+              const targetJourneyNames = new Set<string>();
+              const targetScriptNames = new Set<string>();
+
+              if (fs.existsSync(targetRealmsDir)) {
+                for (const realm of fs.readdirSync(targetRealmsDir, { withFileTypes: true })) {
+                  if (!realm.isDirectory()) continue;
+                  // Journeys
+                  const jDir = path.join(targetRealmsDir, realm.name, "journeys");
+                  if (fs.existsSync(jDir)) {
+                    for (const d of fs.readdirSync(jDir, { withFileTypes: true })) {
+                      if (d.isDirectory()) targetJourneyNames.add(d.name);
+                    }
+                  }
+                  // Scripts (name from config JSON)
+                  const sDir = path.join(targetRealmsDir, realm.name, "scripts", "scripts-config");
+                  if (fs.existsSync(sDir)) {
+                    for (const f of fs.readdirSync(sDir)) {
+                      if (!f.endsWith(".json")) continue;
+                      try {
+                        const json = JSON.parse(fs.readFileSync(path.join(sDir, f), "utf-8"));
+                        if (json.name) targetScriptNames.add(json.name);
+                      } catch { /* skip */ }
+                    }
+                  }
+                }
+              }
+
+              const missingJourneys = deps.subJourneys.filter(
+                (name) => !targetJourneyNames.has(name),
+              );
+              const missingScripts = deps.scriptUuids
+                .map((uuid) => deps.scriptNames.get(uuid) ?? uuid)
+                .filter((name) => !targetScriptNames.has(name));
+
+              if (missingJourneys.length > 0 || missingScripts.length > 0) {
+                report.missingDeps = { missingJourneys, missingScripts };
+              }
+            }
           }
         }
 

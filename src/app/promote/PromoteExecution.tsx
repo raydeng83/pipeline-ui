@@ -268,6 +268,47 @@ function DryRunPhase({
           </div>
         )}
 
+        {/* Missing dependencies warning */}
+        {report && !running && report.missingDeps &&
+          (report.missingDeps.missingJourneys.length > 0 || report.missingDeps.missingScripts.length > 0) && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm space-y-2">
+            <div className="flex items-start gap-2">
+              <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <div className="space-y-1.5">
+                <p className="font-semibold text-amber-800">
+                  Missing dependencies in target ({task.target.environment})
+                </p>
+                <p className="text-xs text-amber-700">
+                  The selected journeys reference the following dependencies that do not exist on the target.
+                  Pushing without them may cause failures. Consider enabling &quot;Include Dependencies&quot; in the task.
+                </p>
+                {report.missingDeps.missingJourneys.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-amber-800 mt-1">Sub-journeys</p>
+                    <ul className="mt-0.5 space-y-0.5">
+                      {report.missingDeps.missingJourneys.map((name) => (
+                        <li key={name} className="text-xs text-amber-700 font-mono pl-3">• {name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {report.missingDeps.missingScripts.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-amber-800 mt-1">Scripts</p>
+                    <ul className="mt-0.5 space-y-0.5">
+                      {report.missingDeps.missingScripts.map((name) => (
+                        <li key={name} className="text-xs text-amber-700 font-mono pl-3">• {name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Diff report */}
         {report && !running && <DiffReport report={report} mode="dry-run" />}
       </div>
