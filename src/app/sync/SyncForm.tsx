@@ -8,6 +8,7 @@ import { LogViewer } from "@/components/LogViewer";
 import { ScopeSelector } from "@/components/ScopeSelector";
 import { DangerousConfirmDialog } from "@/components/DangerousConfirmDialog";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
+import { useBusyState } from "@/hooks/useBusyState";
 import type { Environment, DiffSummary } from "@/lib/fr-config";
 import type { ConfigScope } from "@/lib/fr-config-types";
 
@@ -37,6 +38,26 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
   } | null>(null);
 
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
+  const { setBusy } = useBusyState();
+
+  useEffect(() => {
+    setBusy(running);
+  }, [running, setBusy]);
+
+  // Track completed scopes and current in-progress scope from scope-start events.
+  // A scope-start event means that scope just began; any previous scope is now done.
+  const { currentScope, completedScopes } = useMemo(() => {
+    const starts: string[] = [];
+    for (const entry of logs) {
+      if (entry.type === "scope-start" && entry.scope) starts.push(entry.scope);
+    }
+    if (starts.length === 0) {
+      return { currentScope: null as string | null, completedScopes: new Set<string>() };
+    }
+    const current = running ? starts[starts.length - 1] : null;
+    const completed = new Set<string>(running ? starts.slice(0, -1) : starts);
+    return { currentScope: current, completedScopes: completed };
+  }, [logs, running]);
 
   // Load last state from localStorage
   useEffect(() => {
@@ -225,14 +246,29 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
               </span>
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {activeRun.scopes.map((s) => (
-                <span
-                  key={s}
-                  className="px-2 py-0.5 text-[11px] rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100 font-mono"
-                >
-                  {s}
-                </span>
-              ))}
+              {activeRun.scopes.map((s) => {
+                const isCurrent = s === currentScope;
+                const isDone = completedScopes.has(s);
+                return (
+                  <span
+                    key={s}
+                    className={cn(
+                      "inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded-full ring-1 font-mono transition-colors",
+                      isCurrent
+                        ? "bg-indigo-600 text-white ring-indigo-600 shadow-[0_0_0_3px_rgba(99,102,241,0.18)]"
+                        : isDone
+                          ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                          : "bg-slate-50 text-slate-500 ring-slate-200"
+                    )}
+                  >
+                    {isCurrent && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    )}
+                    {isDone && <span>✓</span>}
+                    {s}
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}
