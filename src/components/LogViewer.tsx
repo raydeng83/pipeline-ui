@@ -38,13 +38,6 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
     if (debugOpen) debugBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [debugLogs.length, debugOpen]);
 
-  const statusColor =
-    exitCode === null
-      ? "text-yellow-400"
-      : exitCode === 0
-      ? "text-green-400"
-      : "text-red-400";
-
   const statusText =
     exitCode === null
       ? running
@@ -55,33 +48,38 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
       : `Failed (exit code ${exitCode})`;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="card flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border-y border-slate-700">
+      <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-200/60 rounded-t-xl">
         <span className={cn(
           "inline-block w-2 h-2 rounded-full shrink-0",
-          running ? "bg-yellow-400 animate-pulse"
-            : exitCode === 0 ? "bg-green-400"
-            : exitCode !== null ? "bg-red-400"
-            : "bg-slate-500"
+          running ? "bg-amber-400 animate-pulse"
+            : exitCode === 0 ? "bg-emerald-400"
+            : exitCode !== null ? "bg-rose-400"
+            : "bg-slate-300"
         )} />
-        <span className={cn("text-xs font-mono", statusColor)}>{statusText}</span>
+        <span className={cn(
+          "text-[12px] font-medium",
+          exitCode === null
+            ? (running ? "text-amber-700" : "text-slate-500")
+            : exitCode === 0 ? "text-emerald-700" : "text-rose-700"
+        )}>
+          {statusText}
+        </span>
         {logs.length > 0 && (
-          <div className="ml-auto flex items-center gap-3">
-            <button onClick={handleCopy} className="text-xs text-slate-400 hover:text-slate-200 transition-colors">
-              {copied ? "Copied!" : "Copy"}
+          <div className="ml-auto flex items-center gap-3 text-[11px] text-slate-500">
+            <button onClick={handleCopy} className="hover:text-slate-800 transition-colors">
+              {copied ? "Copied" : "Copy"}
             </button>
-            {!running && (
-              <button onClick={onClear} className="text-xs text-slate-400 hover:text-slate-200 transition-colors">
-                Clear
-              </button>
+            {!running && onClear && (
+              <button onClick={onClear} className="hover:text-slate-800 transition-colors">Clear</button>
             )}
           </div>
         )}
       </div>
 
       {/* Main output — stdout only */}
-      <div className="overflow-y-auto bg-slate-900 p-3 font-mono text-xs min-h-[300px] max-h-[500px]">
+      <div className="overflow-y-auto bg-slate-900 p-4 font-mono text-[12px] leading-5 min-h-[320px] max-h-[520px] rounded-b-xl">
         {mainLogs.length === 0 && !running && (
           <span className="text-slate-500">No output yet. Run a command to see logs.</span>
         )}
