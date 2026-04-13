@@ -242,3 +242,47 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
     },
   };
 }
+
+// ── runDiffSummary ────────────────────────────────────────────────────────────
+
+export interface DiffSummary {
+  scope: string;
+  added: number;
+  modified: number;
+  removed: number;
+}
+
+/**
+ * Run a dry-run compare between two environments and parse per-scope counts.
+ * Uses existing compare/promote CLI under the hood (fr-config-promote --dry-run).
+ * If the CLI fails, throws — callers should catch and surface a banner.
+ */
+export async function runDiffSummary(
+  source: string,
+  target: string,
+  scopes: string[],
+): Promise<DiffSummary[]> {
+  const env = getEnvironments().find((e) => e.name === target);
+  if (!env) throw new Error(`unknown target env: ${target}`);
+
+  return new Promise((resolve, reject) => {
+    const args = ["--source", source, "--target", target, "--dry-run", "--json"];
+    if (scopes.length) args.push("--scopes", scopes.join(","));
+    const proc = spawn("fr-config-promote", args, { env: process.env });
+    let out = "";
+    let err = "";
+    proc.stdout.on("data", (b: Buffer) => { out += b.toString(); });
+    proc.stderr.on("data", (b: Buffer) => { err += b.toString(); });
+    proc.on("close", (code) => {
+      if (code !== 0) return reject(new Error(err || `diff failed: exit ${code}`));
+      try {
+        const parsed = JSON.parse(out);
+        // Expected shape: { changes: [{ scope, added, modified, removed }] }
+        const changes = (parsed.changes ?? []) as DiffSummary[];
+        resolve(changes);
+      } catch (e) {
+        reject(new Error(`diff parse error: ${(e as Error).message}`));
+      }
+    });
+  });
+}

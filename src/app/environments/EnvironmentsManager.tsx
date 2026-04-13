@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 import { Environment, EnvironmentType } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
+import { EnvCard } from "@/components/EnvCard";
 import { EnvEditor } from "./EnvEditor";
 import { cn } from "@/lib/utils";
 import { ServiceAccountScopeSelector } from "@/components/ServiceAccountScopeSelector";
@@ -96,9 +99,7 @@ export function EnvironmentsManager({
   initialEnvironments: Environment[];
 }) {
   const [environments, setEnvironments] = useState(initialEnvironments);
-  const [selectedEnv, setSelectedEnv] = useState<string | null>(
-    initialEnvironments[0]?.name ?? null
-  );
+  const [editing, setEditing] = useState<Environment | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [addStep, setAddStep] = useState<AddStep>("meta");
   const [form, setForm] = useState<NewEnvForm>(EMPTY_FORM);
@@ -176,7 +177,6 @@ export function EnvironmentsManager({
     if (res.ok) {
       const created: Environment = await res.json();
       setEnvironments((prev) => [...prev, created]);
-      setSelectedEnv(created.name);
       setShowAdd(false);
     } else {
       const data = await res.json();
@@ -189,372 +189,389 @@ export function EnvironmentsManager({
     if (!confirm(`Delete environment "${name}"? This cannot be undone.`)) return;
     const res = await fetch(`/api/environments/${name}`, { method: "DELETE" });
     if (res.ok) {
-      const next = environments.find((e) => e.name !== name);
       setEnvironments((prev) => prev.filter((e) => e.name !== name));
-      setSelectedEnv(next?.name ?? null);
+      if (editing?.name === name) setEditing(null);
     }
   };
 
   const handleEnvUpdated = (updated: Environment) => {
     setEnvironments((prev) => prev.map((e) => (e.name === updated.name ? updated : e)));
+    setEditing(updated);
   };
 
-  const currentEnv = environments.find((e) => e.name === selectedEnv) ?? null;
   const stepIdx = STEPS.indexOf(addStep);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Sidebar */}
-      <div className="lg:col-span-1 space-y-2">
-        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden divide-y divide-slate-100">
-          {environments.length === 0 && (
-            <p className="px-4 py-6 text-sm text-slate-400 text-center">No environments yet.</p>
-          )}
-          {environments.map((env, idx) => (
-            <div
-              key={env.name}
-              draggable
-              onDragStart={() => handleDragStart(idx)}
-              onDragOver={(e) => handleDragOver(e, idx)}
-              onDrop={() => handleDrop(idx)}
-              onDragEnd={handleDragEnd}
-              onClick={() => { setSelectedEnv(env.name); setShowAdd(false); }}
-              className={cn(
-                "flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors",
-                selectedEnv === env.name && !showAdd
-                  ? "bg-sky-50 border-l-4 border-l-sky-500"
-                  : "",
-                dragOverIdx === idx && "border-t-2 border-t-sky-400"
-              )}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <svg className="w-4 h-4 text-slate-300 shrink-0 cursor-grab active:cursor-grabbing" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
-                </svg>
-                <div className="space-y-0.5 min-w-0">
-                  <EnvironmentBadge env={env} />
-                  <p className="text-xs text-slate-400 font-mono truncate">{env.name}/.env</p>
-                </div>
-              </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); handleDelete(env.name); }}
-                className="text-slate-300 hover:text-red-500 transition-colors text-sm ml-2 shrink-0"
-                title="Delete environment"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
+    <div className="space-y-6">
+      {/* Card grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {environments.map((env, idx) => (
+          <div
+            key={env.name}
+            draggable
+            onDragStart={() => handleDragStart(idx)}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={() => handleDrop(idx)}
+            onDragEnd={handleDragEnd}
+            className={cn(dragOverIdx === idx && "ring-2 ring-indigo-400 ring-offset-1 rounded-xl")}
+          >
+            <EnvCard
+              env={env}
+              health="healthy"
+              lastPull={null}
+              lastPush={null}
+              onClick={() => { setEditing(env); setShowAdd(false); }}
+            />
+          </div>
+        ))}
 
+        {/* Add environment card */}
         <button
+          type="button"
           onClick={showAdd ? cancelAdd : openAdd}
           className={cn(
-            "w-full px-4 py-2 border-2 rounded-lg text-sm transition-colors",
+            "card-padded border-2 border-dashed flex flex-col items-center justify-center gap-2 min-h-[120px] transition-colors text-sm",
             showAdd
-              ? "border-slate-300 text-slate-500 hover:bg-slate-50"
-              : "border-dashed border-slate-300 text-slate-500 hover:border-sky-400 hover:text-sky-600"
+              ? "border-slate-300 text-slate-400 hover:bg-slate-50"
+              : "border-slate-300 text-slate-400 hover:border-indigo-400 hover:text-indigo-600"
           )}
         >
-          {showAdd ? "Cancel" : "+ Add Environment"}
+          <span className="text-2xl leading-none">{showAdd ? "✕" : "+"}</span>
+          <span>{showAdd ? "Cancel" : "Add environment"}</span>
         </button>
       </div>
 
-      {/* Right panel */}
-      <div className="lg:col-span-2">
-        {showAdd ? (
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            {/* Stepper header */}
-            <div className="flex border-b border-slate-200">
-              {STEPS.map((step, i) => (
-                <button
-                  key={step}
-                  onClick={() => i < stepIdx && setAddStep(step)}
-                  className={cn(
-                    "flex-1 px-3 py-3 text-xs font-medium transition-colors text-center",
-                    addStep === step
-                      ? "bg-sky-50 text-sky-700 border-b-2 border-sky-500"
-                      : i < stepIdx
-                      ? "text-slate-600 hover:bg-slate-50 cursor-pointer"
-                      : "text-slate-400 cursor-default"
-                  )}
-                >
-                  {STEP_LABELS[step]}
-                </button>
-              ))}
-            </div>
+      {/* Add wizard — shown below grid when active */}
+      {showAdd && (
+        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+          {/* Stepper header */}
+          <div className="flex border-b border-slate-200">
+            {STEPS.map((step, i) => (
+              <button
+                key={step}
+                onClick={() => i < stepIdx && setAddStep(step)}
+                className={cn(
+                  "flex-1 px-3 py-3 text-xs font-medium transition-colors text-center",
+                  addStep === step
+                    ? "bg-sky-50 text-sky-700 border-b-2 border-sky-500"
+                    : i < stepIdx
+                    ? "text-slate-600 hover:bg-slate-50 cursor-pointer"
+                    : "text-slate-400 cursor-default"
+                )}
+              >
+                {STEP_LABELS[step]}
+              </button>
+            ))}
+          </div>
 
-            <div className="p-6 space-y-5">
-              {/* Step 1: meta */}
-              {addStep === "meta" && (
-                <>
-                  <h2 className="text-base font-semibold text-slate-800">Environment Details</h2>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Name <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">
-                        Slug used internally and as the .env filename. Lowercase, no spaces.
-                      </p>
-                      <input
-                        value={form.name}
-                        onChange={(e) => setF("name", e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
-                        placeholder="e.g. staging"
-                        className="block w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Display Label <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        value={form.label}
-                        onChange={(e) => setF("label", e.target.value)}
-                        placeholder="e.g. Staging"
-                        className="block w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">Color</label>
-                      <div className="flex gap-3 flex-wrap">
-                        {COLOR_OPTIONS.map((opt) => (
-                          <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-sm">
-                            <input
-                              type="radio"
-                              name="color"
-                              value={opt.value}
-                              checked={form.color === opt.value}
-                              onChange={() => setF("color", opt.value)}
-                              className="sr-only"
-                            />
-                            <span
-                              className={cn(
-                                "w-4 h-4 rounded-full inline-block ring-2 ring-offset-1",
-                                COLOR_SWATCHES[opt.value],
-                                form.color === opt.value ? "ring-slate-600" : "ring-transparent"
-                              )}
-                            />
-                            <span className={form.color === opt.value ? "font-medium text-slate-800" : "text-slate-500"}>
-                              {opt.label}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">Environment Type</label>
-                      <p className="text-xs text-slate-400">
-                        Sandbox is for internal development. Controlled Environment is used for system integration before Prod.
-                      </p>
-                      <select
-                        value={form.type}
-                        onChange={(e) => setF("type", e.target.value as EnvironmentType)}
-                        className="block rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      >
-                        <option value="sandbox">Sandbox Environment</option>
-                        <option value="controlled">Controlled Environment</option>
-                      </select>
-                    </div>
-                    {form.type === "controlled" && (
-                      <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-700">
-                        <input
-                          type="checkbox"
-                          checked={form.devEnvironment}
-                          onChange={(e) => setF("devEnvironment", e.target.checked)}
-                          className="accent-sky-600 w-4 h-4"
-                        />
-                        <span>Dev Environment</span>
-                        <span className="text-xs text-slate-400">(first environment in the pipeline)</span>
-                      </label>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Step 2: connection */}
-              {addStep === "connection" && (
-                <>
-                  <h2 className="text-base font-semibold text-slate-800">Tenant Connection</h2>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Tenant Base URL <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">
-                        Root URL of the tenant — do <strong>not</strong> include <code className="bg-slate-100 px-1 rounded">/am</code> (the CLI appends it automatically).
-                      </p>
-                      <input
-                        value={form.TENANT_BASE_URL}
-                        onChange={(e) => setF("TENANT_BASE_URL", e.target.value)}
-                        placeholder="https://your-tenant.forgeblocks.com"
-                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Service Account Client ID <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">OAuth2 client ID for the service account.</p>
-                      <input
-                        value={form.SERVICE_ACCOUNT_CLIENT_ID}
-                        onChange={(e) => setF("SERVICE_ACCOUNT_CLIENT_ID", e.target.value)}
-                        placeholder="service-account"
-                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Service Account ID <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">UUID of the service account (JWT issuer).</p>
-                      <input
-                        value={form.SERVICE_ACCOUNT_ID}
-                        onChange={(e) => setF("SERVICE_ACCOUNT_ID", e.target.value)}
-                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Service Account Scope <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">Select the OAuth2 scopes to request for this service account.</p>
-                      <ServiceAccountScopeSelector
-                        value={form.SERVICE_ACCOUNT_SCOPE}
-                        onChange={(v) => setF("SERVICE_ACCOUNT_SCOPE", v)}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-slate-700">
-                          Service Account Private Key <span className="text-red-500">*</span>
-                        </label>
-                        <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">sensitive</span>
-                        <button
-                          type="button"
-                          onClick={() => setShowKeyInput((v) => !v)}
-                          className="text-xs text-slate-400 hover:text-slate-700 ml-auto"
-                        >
-                          {showKeyInput ? "Hide" : "Show"}
-                        </button>
-                      </div>
-                      <p className="text-xs text-slate-400">
-                        PEM-encoded private key (include header and footer lines).
-                      </p>
-                      <textarea
-                        rows={4}
-                        value={form.SERVICE_ACCOUNT_KEY}
-                        onChange={(e) => setF("SERVICE_ACCOUNT_KEY", e.target.value)}
-                        placeholder={"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"}
-                        className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
-                        style={{ filter: showKeyInput ? "none" : "blur(3px)", userSelect: showKeyInput ? "auto" : "none" }}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Step 3: repo */}
-              {addStep === "repo" && (
-                <>
-                  <h2 className="text-base font-semibold text-slate-800">Repository Settings</h2>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Config Directory <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">
-                        Path to the local directory where fr-config-manager reads/writes config files.
-                      </p>
-                      <input
-                        value={form.CONFIG_DIR}
-                        onChange={(e) => setF("CONFIG_DIR", e.target.value)}
-                        placeholder="./config"
-                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Realms <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">
-                        JSON array of realm names to manage, e.g. <code className="bg-slate-100 px-1 rounded">{`["alpha"]`}</code>
-                      </p>
-                      <input
-                        value={form.REALMS}
-                        onChange={(e) => setF("REALMS", e.target.value)}
-                        placeholder='["alpha"]'
-                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-slate-700">
-                        Script Prefixes <span className="text-red-500">*</span>
-                      </label>
-                      <p className="text-xs text-slate-400">
-                        JSON array of script name prefixes to include, e.g. <code className="bg-slate-100 px-1 rounded">{`["MyOrg-"]`}</code>. Use <code className="bg-slate-100 px-1 rounded">{`[""]`}</code> to include all.
-                      </p>
-                      <input
-                        value={form.SCRIPT_PREFIXES}
-                        onChange={(e) => setF("SCRIPT_PREFIXES", e.target.value)}
-                        placeholder='["MyOrg-"]'
-                        className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      />
-                    </div>
-                  </div>
-                  {addError && (
-                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
-                      {addError}
+          <div className="p-6 space-y-5">
+            {/* Step 1: meta */}
+            {addStep === "meta" && (
+              <>
+                <h2 className="text-base font-semibold text-slate-800">Environment Details</h2>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Name <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">
+                      Slug used internally and as the .env filename. Lowercase, no spaces.
                     </p>
+                    <input
+                      value={form.name}
+                      onChange={(e) => setF("name", e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
+                      placeholder="e.g. staging"
+                      className="block w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Display Label <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={form.label}
+                      onChange={(e) => setF("label", e.target.value)}
+                      placeholder="e.g. Staging"
+                      className="block w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">Color</label>
+                    <div className="flex gap-3 flex-wrap">
+                      {COLOR_OPTIONS.map((opt) => (
+                        <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-sm">
+                          <input
+                            type="radio"
+                            name="color"
+                            value={opt.value}
+                            checked={form.color === opt.value}
+                            onChange={() => setF("color", opt.value)}
+                            className="sr-only"
+                          />
+                          <span
+                            className={cn(
+                              "w-4 h-4 rounded-full inline-block ring-2 ring-offset-1",
+                              COLOR_SWATCHES[opt.value],
+                              form.color === opt.value ? "ring-slate-600" : "ring-transparent"
+                            )}
+                          />
+                          <span className={form.color === opt.value ? "font-medium text-slate-800" : "text-slate-500"}>
+                            {opt.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">Environment Type</label>
+                    <p className="text-xs text-slate-400">
+                      Sandbox is for internal development. Controlled Environment is used for system integration before Prod.
+                    </p>
+                    <select
+                      value={form.type}
+                      onChange={(e) => setF("type", e.target.value as EnvironmentType)}
+                      className="block rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    >
+                      <option value="sandbox">Sandbox Environment</option>
+                      <option value="controlled">Controlled Environment</option>
+                    </select>
+                  </div>
+                  {form.type === "controlled" && (
+                    <label className="flex items-center gap-2.5 cursor-pointer text-sm text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={form.devEnvironment}
+                        onChange={(e) => setF("devEnvironment", e.target.checked)}
+                        className="accent-sky-600 w-4 h-4"
+                      />
+                      <span>Dev Environment</span>
+                      <span className="text-xs text-slate-400">(first environment in the pipeline)</span>
+                    </label>
                   )}
-                </>
-              )}
+                </div>
+              </>
+            )}
 
-              {/* Nav buttons */}
-              <div className="flex justify-between pt-2">
+            {/* Step 2: connection */}
+            {addStep === "connection" && (
+              <>
+                <h2 className="text-base font-semibold text-slate-800">Tenant Connection</h2>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Tenant Base URL <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">
+                      Root URL of the tenant — do <strong>not</strong> include <code className="bg-slate-100 px-1 rounded">/am</code> (the CLI appends it automatically).
+                    </p>
+                    <input
+                      value={form.TENANT_BASE_URL}
+                      onChange={(e) => setF("TENANT_BASE_URL", e.target.value)}
+                      placeholder="https://your-tenant.forgeblocks.com"
+                      className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Service Account Client ID <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">OAuth2 client ID for the service account.</p>
+                    <input
+                      value={form.SERVICE_ACCOUNT_CLIENT_ID}
+                      onChange={(e) => setF("SERVICE_ACCOUNT_CLIENT_ID", e.target.value)}
+                      placeholder="service-account"
+                      className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Service Account ID <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">UUID of the service account (JWT issuer).</p>
+                    <input
+                      value={form.SERVICE_ACCOUNT_ID}
+                      onChange={(e) => setF("SERVICE_ACCOUNT_ID", e.target.value)}
+                      placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                      className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Service Account Scope <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">Select the OAuth2 scopes to request for this service account.</p>
+                    <ServiceAccountScopeSelector
+                      value={form.SERVICE_ACCOUNT_SCOPE}
+                      onChange={(v) => setF("SERVICE_ACCOUNT_SCOPE", v)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium text-slate-700">
+                        Service Account Private Key <span className="text-red-500">*</span>
+                      </label>
+                      <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">sensitive</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowKeyInput((v) => !v)}
+                        className="text-xs text-slate-400 hover:text-slate-700 ml-auto"
+                      >
+                        {showKeyInput ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      PEM-encoded private key (include header and footer lines).
+                    </p>
+                    <textarea
+                      rows={4}
+                      value={form.SERVICE_ACCOUNT_KEY}
+                      onChange={(e) => setF("SERVICE_ACCOUNT_KEY", e.target.value)}
+                      placeholder={"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"}
+                      className="w-full font-mono text-xs rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+                      style={{ filter: showKeyInput ? "none" : "blur(3px)", userSelect: showKeyInput ? "auto" : "none" }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Step 3: repo */}
+            {addStep === "repo" && (
+              <>
+                <h2 className="text-base font-semibold text-slate-800">Repository Settings</h2>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Config Directory <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">
+                      Path to the local directory where fr-config-manager reads/writes config files.
+                    </p>
+                    <input
+                      value={form.CONFIG_DIR}
+                      onChange={(e) => setF("CONFIG_DIR", e.target.value)}
+                      placeholder="./config"
+                      className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Realms <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">
+                      JSON array of realm names to manage, e.g. <code className="bg-slate-100 px-1 rounded">{`["alpha"]`}</code>
+                    </p>
+                    <input
+                      value={form.REALMS}
+                      onChange={(e) => setF("REALMS", e.target.value)}
+                      placeholder='["alpha"]'
+                      className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-slate-700">
+                      Script Prefixes <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400">
+                      JSON array of script name prefixes to include, e.g. <code className="bg-slate-100 px-1 rounded">{`["MyOrg-"]`}</code>. Use <code className="bg-slate-100 px-1 rounded">{`[""]`}</code> to include all.
+                    </p>
+                    <input
+                      value={form.SCRIPT_PREFIXES}
+                      onChange={(e) => setF("SCRIPT_PREFIXES", e.target.value)}
+                      placeholder='["MyOrg-"]'
+                      className="block w-full font-mono text-sm rounded border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                </div>
+                {addError && (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+                    {addError}
+                  </p>
+                )}
+              </>
+            )}
+
+            {/* Nav buttons */}
+            <div className="flex justify-between pt-2">
+              <button
+                type="button"
+                onClick={() => stepIdx > 0 && setAddStep(STEPS[stepIdx - 1])}
+                disabled={stepIdx === 0}
+                className="btn-secondary disabled:opacity-30"
+              >
+                Back
+              </button>
+
+              {addStep !== "repo" ? (
                 <button
                   type="button"
-                  onClick={() => stepIdx > 0 && setAddStep(STEPS[stepIdx - 1])}
-                  disabled={stepIdx === 0}
-                  className="px-4 py-2 text-sm border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-30"
+                  onClick={() => setAddStep(STEPS[stepIdx + 1])}
+                  disabled={
+                    (addStep === "meta" && (!form.name || !form.label)) ||
+                    (addStep === "connection" && !form.TENANT_BASE_URL)
+                  }
+                  className="btn-primary"
                 >
-                  Back
+                  Next
                 </button>
-
-                {addStep !== "repo" ? (
-                  <button
-                    type="button"
-                    onClick={() => setAddStep(STEPS[stepIdx + 1])}
-                    disabled={
-                      (addStep === "meta" && (!form.name || !form.label)) ||
-                      (addStep === "connection" && !form.TENANT_BASE_URL)
-                    }
-                    className="px-4 py-2 text-sm bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleAddEnv}
-                    disabled={saving || !form.CONFIG_DIR || !form.REALMS}
-                    className="px-4 py-2 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
-                  >
-                    {saving ? "Creating..." : "Create Environment"}
-                  </button>
-                )}
-              </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAddEnv}
+                  disabled={saving || !form.CONFIG_DIR || !form.REALMS}
+                  className="btn-primary"
+                >
+                  {saving ? "Creating..." : "Create Environment"}
+                </button>
+              )}
             </div>
           </div>
-        ) : currentEnv ? (
-          <EnvEditor env={currentEnv} onUpdate={handleEnvUpdated} />
-        ) : (
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center text-slate-400 text-sm">
-            Select an environment to edit its configuration.
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Edit dialog */}
+      <Dialog.Root open={editing !== null} onOpenChange={(open) => { if (!open) setEditing(null); }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 data-[state=open]:animate-in data-[state=open]:fade-in" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[min(900px,calc(100vw-32px))] max-h-[calc(100vh-48px)] overflow-y-auto bg-white rounded-2xl shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                {editing && <EnvironmentBadge env={editing} />}
+                <Dialog.Title className="text-sm font-semibold text-slate-700">
+                  Edit Environment
+                </Dialog.Title>
+              </div>
+              <div className="flex items-center gap-2">
+                {editing && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(editing.name)}
+                    className="btn-danger-outline text-xs px-3 py-1.5"
+                  >
+                    Delete
+                  </button>
+                )}
+                <Dialog.Close asChild>
+                  <button aria-label="Close" className="text-slate-400 hover:text-slate-600 p-1 rounded">
+                    <X className="w-4 h-4" />
+                  </button>
+                </Dialog.Close>
+              </div>
+            </div>
+            <Dialog.Description className="sr-only">
+              Edit the selected environment configuration.
+            </Dialog.Description>
+            <div className="p-5">
+              {editing && (
+                <EnvEditor
+                  env={editing}
+                  onUpdate={handleEnvUpdated}
+                />
+              )}
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
