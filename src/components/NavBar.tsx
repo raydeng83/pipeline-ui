@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: "/configs",      label: "Browse" },
   { href: "/compare",      label: "Compare" },
   { href: "/promote",      label: "Promote" },
+  { href: "/analyze",      label: "Analyze" },
   { href: "/logs",         label: "Logs" },
   { href: "/search",       label: "Search" },
   { href: "/history",      label: "History" },
