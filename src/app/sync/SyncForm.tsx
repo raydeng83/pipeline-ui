@@ -44,19 +44,30 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
     setBusy(running);
   }, [running, setBusy]);
 
-  // Track completed scopes and current in-progress scope from scope-start events.
-  // A scope-start event means that scope just began; any previous scope is now done.
-  const { currentScope, completedScopes } = useMemo(() => {
+  // Walk logs to derive per-scope status from scope-start / scope-end events.
+  // scope-end carries the exit code, so failed scopes get marked separately.
+  const { currentScope, completedScopes, erroredScopes } = useMemo(() => {
     const starts: string[] = [];
+    const completed = new Set<string>();
+    const errored = new Set<string>();
     for (const entry of logs) {
-      if (entry.type === "scope-start" && entry.scope) starts.push(entry.scope);
+      if (entry.type === "scope-start" && entry.scope) {
+        starts.push(entry.scope);
+      } else if (entry.type === "scope-end" && entry.scope) {
+        if (entry.code === 0) completed.add(entry.scope);
+        else errored.add(entry.scope);
+      }
     }
-    if (starts.length === 0) {
-      return { currentScope: null as string | null, completedScopes: new Set<string>() };
+    // Fallback: if no scope-end was emitted (e.g. older runner), treat earlier
+    // scope-starts as completed once a later one begins.
+    if (starts.length > 0 && completed.size === 0 && errored.size === 0) {
+      starts.slice(0, running ? -1 : starts.length).forEach((s) => completed.add(s));
     }
-    const current = running ? starts[starts.length - 1] : null;
-    const completed = new Set<string>(running ? starts.slice(0, -1) : starts);
-    return { currentScope: current, completedScopes: completed };
+    const lastStarted = starts[starts.length - 1] ?? null;
+    const current = running && lastStarted && !completed.has(lastStarted) && !errored.has(lastStarted)
+      ? lastStarted
+      : null;
+    return { currentScope: current, completedScopes: completed, erroredScopes: errored };
   }, [logs, running]);
 
   // Load last state from localStorage
@@ -246,6 +257,7 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
             <div className="flex flex-wrap gap-1.5">
               {activeRun.scopes.map((s) => {
                 const isCurrent = s === currentScope;
+                const isErrored = erroredScopes.has(s);
                 const isDone = completedScopes.has(s);
                 return (
                   <span
@@ -254,15 +266,18 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
                       "inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded-full ring-1 font-mono transition-colors",
                       isCurrent
                         ? "bg-indigo-600 text-white ring-indigo-600 shadow-[0_0_0_3px_rgba(99,102,241,0.18)]"
-                        : isDone
-                          ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                          : "bg-slate-50 text-slate-500 ring-slate-200"
+                        : isErrored
+                          ? "bg-rose-50 text-rose-700 ring-rose-200"
+                          : isDone
+                            ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                            : "bg-slate-50 text-slate-500 ring-slate-200"
                     )}
                   >
                     {isCurrent && (
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                     )}
-                    {isDone && <span>✓</span>}
+                    {isErrored && <span>✗</span>}
+                    {!isErrored && isDone && <span>✓</span>}
                     {s}
                   </span>
                 );

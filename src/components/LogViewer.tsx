@@ -54,7 +54,7 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
         : "Ready"
       : exitCode === 0
       ? "Completed successfully"
-      : `Failed (exit code ${exitCode})`;
+      : `Completed with errors (exit code ${exitCode})`;
 
   return (
     <div className="card flex flex-col overflow-hidden">
