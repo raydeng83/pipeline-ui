@@ -561,6 +561,7 @@ function TestConnectionButton({
 function RestartButton({ environmentName }: { environmentName: string }) {
   const [logs, setLogs] = useState<string[]>([]);
   const [polling, setPolling] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [finalStatus, setFinalStatus] = useState<"ready" | "error" | null>(null);
   const pollingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -585,10 +586,12 @@ function RestartButton({ environmentName }: { environmentName: string }) {
   const startPolling = useCallback(async () => {
     pollingRef.current = true;
     setPolling(true);
+    setStopping(false);
     setFinalStatus(null);
     while (pollingRef.current) {
       try {
         const statusRes = await callRestart("status");
+        if (!pollingRef.current) break;
         const s = statusRes.stdout.trim();
         log(`Status: ${s}`);
         if (s === "ready") {
@@ -603,11 +606,24 @@ function RestartButton({ environmentName }: { environmentName: string }) {
         pollingRef.current = false;
         break;
       }
-      await new Promise((r) => setTimeout(r, 10_000));
+      // Sleep in short chunks so Stop can break out within ~200ms
+      // instead of waiting for a full 10-second tick.
+      for (let elapsed = 0; elapsed < 10_000 && pollingRef.current; elapsed += 200) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
     }
+    if (!finalStatus) log("Polling stopped.");
     setPolling(false);
+    setStopping(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environmentName]);
+
+  const handleStop = () => {
+    if (!polling || stopping) return;
+    setStopping(true);
+    log("Stop requested — waiting for current status check to finish...");
+    pollingRef.current = false;
+  };
 
   const handleRestart = async () => {
     setLogs([]);
@@ -661,11 +677,18 @@ function RestartButton({ environmentName }: { environmentName: string }) {
         {polling && (
           <button
             type="button"
-            onClick={() => { pollingRef.current = false; }}
-            className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-500 hover:bg-slate-50 transition-colors"
+            onClick={handleStop}
+            disabled={stopping}
+            className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Stop
+            {stopping ? "Stopping…" : "Stop"}
           </button>
+        )}
+        {stopping && (
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-amber-700">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Waiting for current status check to finish…
+          </span>
         )}
       </div>
 
