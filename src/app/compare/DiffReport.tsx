@@ -815,6 +815,51 @@ function extractScope(relativePath: string): string {
   return parts[0];
 }
 
+/**
+ * True when the file is metadata (config/sidecar JSON) rather than an actual
+ * script body. Currently covers two cases:
+ *   - scripts scope: anything NOT under scripts-content/ is config metadata
+ *   - endpoints scope: the <name>.json sidecar next to the <name>.js script
+ */
+function isMetadataFile(file: FileDiff, scope: string): boolean {
+  if (scope === "scripts") {
+    return !file.relativePath.includes("/scripts-content/");
+  }
+  if (scope === "endpoints") {
+    return file.relativePath.endsWith(".json");
+  }
+  return false;
+}
+
+/**
+ * Derive a sub-group key for scopes that benefit from one more level of
+ * grouping. Scripts group by TYPE (the scripts-content/<TYPE>/ directory);
+ * endpoints group by endpoint name. Returns null for scopes without a
+ * natural sub-group.
+ */
+function subgroupKeyForFile(file: FileDiff, scope: string): string | null {
+  if (scope === "scripts") {
+    const m = file.relativePath.match(/\/scripts-content\/([^/]+)\//);
+    return m ? m[1] : null;
+  }
+  if (scope === "endpoints") {
+    const m = file.relativePath.match(/\/endpoints\/([^/]+)\//) ?? file.relativePath.match(/^endpoints\/([^/]+)\//);
+    return m ? m[1] : null;
+  }
+  return null;
+}
+
+function humanizeSubgroup(scope: string, key: string): string {
+  if (scope === "scripts") {
+    // AUTHENTICATION_TREE_DECISION_NODE -> Authentication Tree Decision Node
+    return key
+      .split("_")
+      .map((w) => (w.length ? w[0] + w.slice(1).toLowerCase() : w))
+      .join(" ");
+  }
+  return key;
+}
+
 function groupByScope(files: FileDiff[]): ScopeGroup[] {
   const map = new Map<string, FileDiff[]>();
   for (const f of files) {
@@ -1904,8 +1949,65 @@ function AllFilesModal({
   );
 }
 
+function SubGroupSection({
+  scope, subgroupKey, files, sourceLabel, targetLabel, sourceEnv, targetEnv, allFiles, groupFiles, selectedPaths, onTogglePath, forceOpen, forceSeq,
+}: {
+  scope: string;
+  subgroupKey: string;
+  files: FileDiff[];
+  sourceLabel: string;
+  targetLabel: string;
+  sourceEnv?: string;
+  targetEnv?: string;
+  allFiles: FileDiff[];
+  groupFiles: FileDiff[];
+  selectedPaths?: Set<string>;
+  onTogglePath?: (path: string) => void;
+  forceOpen?: boolean;
+  forceSeq?: number;
+}) {
+  const [open, setOpen] = useState(forceOpen ?? false);
+  const prevSeq = useRef(forceSeq);
+  if (forceSeq !== undefined && forceSeq !== prevSeq.current) {
+    prevSeq.current = forceSeq;
+    if (forceOpen !== undefined) setOpen(forceOpen);
+  }
+
+  const added    = files.filter((f) => f.status === "added").length;
+  const modified = files.filter((f) => f.status === "modified").length;
+  const removed  = files.filter((f) => f.status === "removed").length;
+  const label = humanizeSubgroup(scope, subgroupKey);
+
+  return (
+    <div className="border border-slate-200 rounded-md overflow-hidden">
+      <div
+        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50/70 cursor-pointer hover:bg-slate-100 transition-colors"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="text-xs font-semibold text-slate-700 flex-1 truncate">{label}</span>
+        <div className="flex items-center gap-1.5 text-[10px] font-mono shrink-0">
+          {modified > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{modified}m</span>}
+          {added    > 0 && <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{added}+</span>}
+          {removed  > 0 && <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{removed}−</span>}
+          <span className="text-slate-400">{files.length} file{files.length === 1 ? "" : "s"}</span>
+        </div>
+        <span className="text-slate-400 text-[10px] shrink-0">{open ? "▲" : "▼"}</span>
+      </div>
+      {open && (
+        <div className="p-2 space-y-1.5 bg-white">
+          {files.map((f) =>
+            scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
+              ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={groupFiles} allFiles={allFiles} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
+              : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScopeSection({
-  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath, hideUnchanged = true,
+  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath, hideUnchanged = true, hideMetadata = true,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
@@ -1918,7 +2020,9 @@ function ScopeSection({
   selectedPaths?: Set<string>;
   onTogglePath?: (path: string) => void;
   hideUnchanged?: boolean;
+  hideMetadata?: boolean;
 }) {
+  const supportsSubgrouping = group.scope === "scripts" || group.scope === "endpoints";
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
   const [itemSearch, setItemSearch] = useState("");
@@ -1939,6 +2043,7 @@ function ScopeSection({
   const visibleFiles = filterFiles(
     group.files.filter((f) => {
       if (hideUnchanged && f.status === "unchanged") return false;
+      if (hideMetadata && isMetadataFile(f, group.scope)) return false;
       return statusFilter === "all" || f.status === statusFilter;
     }),
     itemSearch,
@@ -2060,6 +2165,39 @@ function ScopeSection({
                     />
                   ));
                 })()
+              ) : supportsSubgrouping ? (
+                (() => {
+                  // Group visible files into subgroups derived from the path
+                  // (TYPE for scripts, endpoint name for endpoints). Files
+                  // without a detectable subgroup fall into "(ungrouped)".
+                  const subgroups = new Map<string, FileDiff[]>();
+                  for (const f of visibleFiles) {
+                    const key = subgroupKeyForFile(f, group.scope) ?? "(ungrouped)";
+                    if (!subgroups.has(key)) subgroups.set(key, []);
+                    subgroups.get(key)!.push(f);
+                  }
+                  const entries = Array.from(subgroups.entries()).sort((a, b) =>
+                    humanizeSubgroup(group.scope, a[0]).localeCompare(humanizeSubgroup(group.scope, b[0]))
+                  );
+                  return entries.map(([key, files]) => (
+                    <SubGroupSection
+                      key={key}
+                      scope={group.scope}
+                      subgroupKey={key}
+                      files={files}
+                      sourceLabel={sourceLabel}
+                      targetLabel={targetLabel}
+                      sourceEnv={sourceEnv}
+                      targetEnv={targetEnv}
+                      allFiles={allFiles ?? []}
+                      groupFiles={group.files}
+                      selectedPaths={selectedPaths}
+                      onTogglePath={onTogglePath}
+                      forceOpen={forceOpen}
+                      forceSeq={forceSeq}
+                    />
+                  ));
+                })()
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
                   group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
@@ -2073,7 +2211,7 @@ function ScopeSection({
               </p>
             )}
           </div>
-          {(hasChanges || !hideUnchanged) && totalVisible > pageSize && (
+          {(hasChanges || !hideUnchanged) && !supportsSubgrouping && totalVisible > pageSize && (
             <Pagination
               page={page} total={totalVisible} pageSize={pageSize}
               onChange={setPage}
@@ -2094,6 +2232,7 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   const { summary, files } = report;
   const total = summary.added + summary.removed + summary.modified + summary.unchanged;
   const [hideUnchanged, setHideUnchanged] = useState(!showUnchangedByDefault);
+  const [hideMetadata, setHideMetadata] = useState(true);
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
   const [allOpenSeq, setAllOpenSeq] = useState(0);
   const [allFilesModalOpen, setAllFilesModalOpen] = useState(false);
@@ -2211,6 +2350,15 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
             />
             Hide unchanged files
           </label>
+          <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={hideMetadata}
+              onChange={(e) => setHideMetadata(e.target.checked)}
+              className="accent-sky-600"
+            />
+            Hide metadata files
+          </label>
         </div>
       </div>
 
@@ -2245,6 +2393,7 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
                 selectedPaths={selectedPaths}
                 onTogglePath={togglePath}
                 hideUnchanged={hideUnchanged}
+                hideMetadata={hideMetadata}
               />
             ))}
           </>
