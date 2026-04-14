@@ -105,6 +105,46 @@ function collectDefinedEsvs(configDir: string): {
   return { defined };
 }
 
+/**
+ * Blank out `//` and `/* *\/` comments in JS/Groovy source, preserving
+ * character positions and newlines so line numbers remain accurate.
+ * String literals are honored so that `//` inside e.g. "https://..." is
+ * not mistaken for a comment.
+ */
+function stripJsComments(src: string): string {
+  const out = src.split("");
+  const n = src.length;
+  let i = 0;
+  let str: '"' | "'" | "`" | null = null;
+  while (i < n) {
+    const c = src[i];
+    if (str) {
+      if (c === "\\" && i + 1 < n) { i += 2; continue; }
+      if (c === str) str = null;
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") { str = c as '"' | "'" | "`"; i++; continue; }
+    if (c === "/" && src[i + 1] === "/") {
+      // Line comment until newline
+      while (i < n && src[i] !== "\n") { out[i] = " "; i++; }
+      continue;
+    }
+    if (c === "/" && src[i + 1] === "*") {
+      // Block comment until */
+      const end = src.indexOf("*/", i + 2);
+      const stop = end === -1 ? n : end + 2;
+      while (i < stop) {
+        out[i] = src[i] === "\n" ? "\n" : " ";
+        i++;
+      }
+      continue;
+    }
+    i++;
+  }
+  return out.join("");
+}
+
 const REF_RE_PLACEHOLDER      = /&\{esv\.([A-Za-z0-9._-]+)\}/g;
 const REF_RE_REALM            = /fr\.realm\.esv\.([A-Za-z0-9._-]+)/g;
 const REF_RE_SYSTEMENV_PROP   = /systemEnv(?:\.([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*)|\[\s*['"]([^'"]+)['"]\s*\]|\.getProperty\(\s*['"]([^'"]+)['"])/g;
@@ -138,15 +178,17 @@ function collectRefsFromContent(content: string, relPath: string): EsvReference[
  * above) so the grouping stage gets one ref per matched name, not per match.
  */
 interface NamedRef extends EsvReference { name: string }
-function extractNamedRefs(content: string, relPath: string): NamedRef[] {
+function extractNamedRefs(scanText: string, relPath: string, displayText?: string): NamedRef[] {
   const refs: NamedRef[] = [];
-  const lines = content.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
+  const scanLines = scanText.split("\n");
+  const displayLines = (displayText ?? scanText).split("\n");
+  for (let i = 0; i < scanLines.length; i++) {
+    const scanLine = scanLines[i];
+    const displayLine = displayLines[i] ?? scanLine;
+    const trimmed = displayLine.trim();
     const snippet = trimmed.length > 300 ? trimmed.slice(0, 300) + "…" : trimmed;
     const pushAll = (re: RegExp, form: NamedRef["form"]) => {
-      for (const m of line.matchAll(re)) {
+      for (const m of scanLine.matchAll(re)) {
         const raw = m[1] ?? m[2] ?? m[3];
         if (!raw) continue;
         refs.push({ name: normalizeEsvName(raw), line: i + 1, path: relPath, snippet, form });
@@ -185,7 +227,13 @@ export async function runEsvOrphans(env: string, signal?: AbortSignal): Promise<
     try { text = fs.readFileSync(abs, "utf8"); } catch { continue; }
     scannedFiles += 1;
     const rel = path.relative(configDir, abs).split(path.sep).join("/");
-    const refs = extractNamedRefs(text, rel);
+    // For script files, blank out // and /* */ comments so commented-out
+    // references aren't reported. Line numbers are preserved.
+    const ext = path.extname(abs).toLowerCase();
+    const scanText = ext === ".js" || ext === ".groovy" || ext === ".mjs" || ext === ".cjs"
+      ? stripJsComments(text)
+      : text;
+    const refs = extractNamedRefs(scanText, rel, text);
     if (refs.length === 0) continue;
     for (const r of refs) {
       totalRefs += 1;
