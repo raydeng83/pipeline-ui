@@ -184,7 +184,10 @@ export function shouldFormatAsHtml(filePath: string): boolean {
   if (!filePath) return false;
   const lower = filePath.toLowerCase();
   if (lower.endsWith(".html") || lower.endsWith(".htm")) return true;
-  // FR email templates store HTML bodies as .md files — auto-format those too.
-  if (lower.endsWith(".md") && /email-templates\//.test(lower)) return true;
+  // FR email templates store HTML bodies as .md files. We match any .md
+  // because callers may pass a bare filename (no path segment) — formatHtml
+  // is a no-op for content that doesn't contain HTML tags, so this is safe
+  // for genuine markdown too.
+  if (lower.endsWith(".md")) return true;
   return false;
 }
