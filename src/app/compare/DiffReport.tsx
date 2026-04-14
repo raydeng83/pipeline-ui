@@ -906,6 +906,11 @@ function isMetadataFile(file: FileDiff, scope: string): boolean {
   if (scope === "endpoints") {
     return file.relativePath.endsWith(".json");
   }
+  if (scope === "email-templates") {
+    // Each template ships .md (content) + .json/.css/.html (metadata sidecars).
+    // Treat anything that isn't the markdown body as metadata.
+    return !file.relativePath.toLowerCase().endsWith(".md");
+  }
   return false;
 }
 
