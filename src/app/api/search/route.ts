@@ -68,10 +68,7 @@ function isLikelyBinaryBuffer(buf: Buffer): boolean {
 function buildQueryRegExp(q: string, isRegex: boolean, isCase: boolean, isWord: boolean): RegExp {
   let pattern = isRegex ? q : q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   if (isWord) pattern = `\\b(?:${pattern})\\b`;
-  let flags = "g";
-  // Smart case: only ignore case if the query is all lowercase and case flag is off.
-  if (!isCase && q === q.toLowerCase()) flags += "i";
-  return new RegExp(pattern, flags);
+  return new RegExp(pattern, isCase ? "g" : "gi");
 }
 
 function* walk(dir: string): Generator<string> {
