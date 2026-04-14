@@ -96,3 +96,92 @@ export function highlight(content: string, language: string): string {
   if (language === "javascript" || language === "groovy") return highlightJs(content);
   return esc(content);
 }
+
+// ── Token-based variants (React-safe, no innerHTML) ─────────────────────────
+
+export interface HighlightToken {
+  text: string;
+  color?: string;
+  bold?: boolean;
+}
+
+export function highlightJsTokens(code: string): HighlightToken[] {
+  const out: HighlightToken[] = [];
+  let i = 0;
+  let plain = "";
+  const flushPlain = () => {
+    if (plain.length > 0) { out.push({ text: plain }); plain = ""; }
+  };
+  while (i < code.length) {
+    if (code[i] === "/" && code[i + 1] === "/") {
+      flushPlain();
+      const end = code.indexOf("\n", i);
+      const text = end === -1 ? code.slice(i) : code.slice(i, end);
+      out.push({ text, color: "#6b7280" });
+      i += text.length;
+    } else if (code[i] === "/" && code[i + 1] === "*") {
+      flushPlain();
+      const end = code.indexOf("*/", i + 2);
+      const text = end === -1 ? code.slice(i) : code.slice(i, end + 2);
+      out.push({ text, color: "#6b7280" });
+      i += text.length;
+    } else if (code[i] === '"' || code[i] === "'" || code[i] === "`") {
+      flushPlain();
+      const q = code[i];
+      let j = i + 1;
+      while (j < code.length && code[j] !== q) {
+        if (code[j] === "\\") j++;
+        j++;
+      }
+      out.push({ text: code.slice(i, j + 1), color: "#86efac" });
+      i = j + 1;
+    } else if (/[a-zA-Z_$]/.test(code[i])) {
+      let j = i + 1;
+      while (j < code.length && /[a-zA-Z0-9_$]/.test(code[j])) j++;
+      const word = code.slice(i, j);
+      if (JS_KEYWORDS.has(word))      { flushPlain(); out.push({ text: word, color: "#c084fc", bold: true }); }
+      else if (JS_BUILTINS.has(word)) { flushPlain(); out.push({ text: word, color: "#f87171" }); }
+      else                            { plain += word; }
+      i = j;
+    } else if (/[0-9]/.test(code[i])) {
+      flushPlain();
+      let j = i + 1;
+      while (j < code.length && /[0-9._xXeEbBoO]/.test(code[j])) j++;
+      out.push({ text: code.slice(i, j), color: "#fbbf24" });
+      i = j;
+    } else {
+      plain += code[i];
+      i++;
+    }
+  }
+  flushPlain();
+  return out;
+}
+
+export function highlightJsonTokens(raw: string): HighlightToken[] {
+  let formatted = raw;
+  try { formatted = JSON.stringify(JSON.parse(raw), null, 2); } catch { /* use raw */ }
+  const out: HighlightToken[] = [];
+  // Split into tokens via matchAll to avoid stateful regex APIs.
+  const re = /("(?:\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g;
+  let last = 0;
+  for (const m of formatted.matchAll(re)) {
+    const idx = m.index ?? 0;
+    if (idx > last) out.push({ text: formatted.slice(last, idx) });
+    const match = m[0];
+    let color = "#60a5fa";
+    if (match.startsWith('"')) color = match.trimEnd().endsWith(":") ? "#94a3b8" : "#86efac";
+    else if (match === "true" || match === "false") color = "#fbbf24";
+    else if (match === "null") color = "#f87171";
+    out.push({ text: match, color });
+    last = idx + match.length;
+  }
+  if (last < formatted.length) out.push({ text: formatted.slice(last) });
+  return out;
+}
+
+export function highlightTokens(content: string, language: string): HighlightToken[] {
+  if (language === "json") return highlightJsonTokens(content);
+  if (language === "javascript" || language === "groovy" || language === "js") return highlightJsTokens(content);
+  return [{ text: content }];
+}

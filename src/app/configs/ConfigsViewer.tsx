@@ -7,7 +7,7 @@ import type { ViewableFile } from "@/app/api/push/item/route";
 import type { AuditItem } from "@/app/api/push/audit/route";
 import type { EndpointUsageRef } from "@/app/api/analyze/endpoint-usage/route";
 import { cn } from "@/lib/utils";
-import { highlightJs, highlightJson } from "@/lib/highlight";
+import { FileContentViewer } from "@/components/FileContentViewer";
 import { JourneyGraph } from "./JourneyGraph";
 import { WorkflowGraph } from "./WorkflowGraph";
 
@@ -38,28 +38,7 @@ function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean;
 }
 
 function FileContent({ content, fileName }: { content: string; fileName: string }) {
-  const ext = fileName.split(".").pop()?.toLowerCase();
-  if (ext === "json") {
-    return (
-      <pre
-        className="text-xs font-mono leading-relaxed p-4 overflow-auto h-full text-slate-300"
-        dangerouslySetInnerHTML={{ __html: highlightJson(content) }}
-      />
-    );
-  }
-  if (ext === "js") {
-    return (
-      <pre
-        className="text-xs font-mono leading-relaxed p-4 overflow-auto h-full text-slate-300"
-        dangerouslySetInnerHTML={{ __html: highlightJs(content) }}
-      />
-    );
-  }
-  return (
-    <pre className="text-xs font-mono leading-relaxed p-4 overflow-auto h-full text-slate-300 whitespace-pre-wrap">
-      {content}
-    </pre>
-  );
+  return <FileContentViewer content={content} fileName={fileName} />;
 }
 
 // ── File tree view ────────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { ViewableFile } from "@/app/api/push/item/route";
-import { highlight } from "@/lib/highlight";
+import { FileContentViewer } from "@/components/FileContentViewer";
 import { cn } from "@/lib/utils";
 
 interface AuditItem {
@@ -60,10 +60,6 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
   }, [handleKeyDown]);
 
   const activeFile = files?.[activeTab];
-  const highlighted = useMemo(
-    () => activeFile ? highlight(activeFile.content, activeFile.language) : "",
-    [activeFile]
-  );
 
   const handleCopy = () => {
     if (!activeFile) return;
@@ -184,9 +180,16 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
             </div>
           )}
           {activeFile && (
-            <pre
-              className="text-xs leading-relaxed font-mono text-slate-300 p-5 min-h-full"
-              dangerouslySetInnerHTML={{ __html: highlighted }}
+            <FileContentViewer
+              content={activeFile.content}
+              fileName={activeFile.name}
+              language={
+                activeFile.language === "json" ? "json"
+                : activeFile.language === "javascript" ? "js"
+                : activeFile.language === "groovy" ? "groovy"
+                : "text"
+              }
+              className="min-h-full"
             />
           )}
         </div>

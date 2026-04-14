@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
+import { FileContentViewer } from "@/components/FileContentViewer";
 import { cn } from "@/lib/utils";
 import type { SearchResponse, SearchFileResult } from "@/app/search/types";
 import { useWorkingEnv } from "@/hooks/useWorkingEnv";
@@ -304,11 +305,15 @@ export function SearchExplorer({ environments }: Props) {
                   <span className="text-xs font-mono text-slate-700 truncate">{selected.path}</span>
                   <span className="text-[10px] text-slate-400">line {selected.line}</span>
                 </div>
-                <div className="flex-1 overflow-auto font-mono text-[11px] leading-snug">
+                <div className="flex-1 overflow-hidden">
                   {fileLoading ? (
-                    <div className="p-4 text-slate-400">Loading…</div>
+                    <div className="p-4 text-slate-400 text-xs">Loading…</div>
                   ) : (
-                    <FilePreview text={fileContent} highlightLine={selected.line} />
+                    <FileContentViewer
+                      content={fileContent}
+                      fileName={selected.path}
+                      highlightLine={selected.line}
+                    />
                   )}
                 </div>
               </>
@@ -328,33 +333,3 @@ export function SearchExplorer({ environments }: Props) {
   );
 }
 
-function FilePreview({ text, highlightLine }: { text: string; highlightLine: number }) {
-  const lines = useMemo(() => text.split("\n"), [text]);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current?.querySelector(`[data-ln="${highlightLine}"]`);
-    if (el) (el as HTMLElement).scrollIntoView({ block: "center" });
-  }, [highlightLine, text]);
-
-  return (
-    <div ref={ref} className="divide-y divide-transparent">
-      {lines.map((line, i) => {
-        const ln = i + 1;
-        const active = ln === highlightLine;
-        return (
-          <div
-            key={i}
-            data-ln={ln}
-            className={cn(
-              "flex gap-3 px-4 whitespace-pre",
-              active && "bg-amber-100 border-l-4 border-amber-400"
-            )}
-          >
-            <span className="text-slate-300 w-10 shrink-0 text-right select-none">{ln}</span>
-            <span className="text-slate-800 break-all">{line || " "}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
