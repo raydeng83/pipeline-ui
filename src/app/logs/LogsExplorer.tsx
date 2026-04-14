@@ -176,6 +176,10 @@ export interface TabConfig {
   searchSeq: number;
   /** True while search is auto-paginating through server pages */
   searching: boolean;
+  // View prefs (persisted per tab)
+  terminalView?: boolean;
+  wrapLines?: boolean;
+  dedupe?: boolean;
 }
 
 // ── Field extraction ────────────────────────────────────────────────────────
@@ -1058,9 +1062,19 @@ export function LogsExplorer({
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const [showFullMessage, setShowFullMessage] = useState(false);
-  const [terminalView, setTerminalView] = useState(true); // tail mode: terminal vs paginated table
-  const [wrapLines, setWrapLines] = useState(false);      // terminal: wrap long lines
-  const [dedupe, setDedupe] = useState(false);            // collapse exact-match duplicate entries
+  // View prefs live in TabConfig so they persist per tab across reloads.
+  const terminalView = config.terminalView ?? true;
+  const wrapLines = config.wrapLines ?? false;
+  const dedupe = config.dedupe ?? false;
+  const setTerminalView = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
+    onConfigChange({ terminalView: typeof v === "function" ? v(terminalView) : v });
+  }, [onConfigChange, terminalView]);
+  const setWrapLines = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
+    onConfigChange({ wrapLines: typeof v === "function" ? v(wrapLines) : v });
+  }, [onConfigChange, wrapLines]);
+  const setDedupe = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
+    onConfigChange({ dedupe: typeof v === "function" ? v(dedupe) : v });
+  }, [onConfigChange, dedupe]);
   const [rawSearch, setRawSearch] = useState("");   // what's in the input box
   const [search, setSearch] = useState("");          // active filter (3+ chars or Enter)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
