@@ -10,6 +10,7 @@ import { JourneyDiffGraphModal, type NavEntry } from "./JourneyDiffGraph";
 import { WorkflowDiffGraphModal } from "./WorkflowDiffGraph";
 import type { PromotionTask } from "@/lib/promotion-tasks";
 import type { ScopeSelection, ConfigScope } from "@/lib/fr-config-types";
+import { useDialog } from "@/components/ConfirmDialog";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -2081,6 +2082,7 @@ function TaskItemsDrawer({
   onRemoveBulkFromTask: (task: PromotionTask, paths: string[]) => void;
   onClearTask: (task: PromotionTask) => void;
 }) {
+  const { confirm } = useDialog();
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(eligibleTasks[0]?.id ?? null);
   const [search, setSearch] = useState("");
   /** Per-task drawer row selections (keys: "<scope>/<itemId>" or bare "<scope>"). */
@@ -2393,8 +2395,14 @@ function TaskItemsDrawer({
               {currentTask ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (confirm(`Clear all items from "${currentTask.name}"?`)) onClearTask(currentTask);
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: "Clear task",
+                      message: `Clear all items from "${currentTask.name}"?`,
+                      confirmLabel: "Clear",
+                      variant: "warning",
+                    });
+                    if (ok) onClearTask(currentTask);
                   }}
                   disabled={totalItemsInTask === 0}
                   className="text-xs text-rose-600 hover:text-rose-700 disabled:opacity-40 font-medium"

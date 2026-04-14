@@ -8,6 +8,7 @@ import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { EnvEditor } from "./EnvEditor";
 import { cn } from "@/lib/utils";
 import { ServiceAccountScopeSelector } from "@/components/ServiceAccountScopeSelector";
+import { useDialog } from "@/components/ConfirmDialog";
 
 const COLOR_OPTIONS: { value: Environment["color"]; label: string }[] = [
   { value: "green",  label: "Green" },
@@ -97,6 +98,7 @@ export function EnvironmentsManager({
 }: {
   initialEnvironments: Environment[];
 }) {
+  const { confirm } = useDialog();
   const [environments, setEnvironments] = useState(initialEnvironments);
   const [editing, setEditing] = useState<Environment | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -185,7 +187,13 @@ export function EnvironmentsManager({
   };
 
   const handleDelete = async (name: string) => {
-    if (!confirm(`Delete environment "${name}"? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete environment",
+      message: `Delete environment "${name}"? This cannot be undone.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     const res = await fetch(`/api/environments/${name}`, { method: "DELETE" });
     if (res.ok) {
       setEnvironments((prev) => prev.filter((e) => e.name !== name));

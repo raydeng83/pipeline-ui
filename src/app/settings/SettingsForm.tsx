@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { GitSettings } from "@/lib/git-settings";
+import { useDialog } from "@/components/ConfirmDialog";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -46,6 +47,7 @@ interface StatusInfo {
 }
 
 export function SettingsForm({ initialSettings, targetDirAbsolute, initialHasGit }: Props) {
+  const { confirm, prompt } = useDialog();
   const [settings, setSettings] = useState<GitSettings>(initialSettings);
   const [savedSettings, setSavedSettings] = useState<GitSettings>(initialSettings);
   const [hasGit, setHasGit] = useState(initialHasGit);
@@ -127,7 +129,12 @@ export function SettingsForm({ initialSettings, targetDirAbsolute, initialHasGit
   }
 
   async function handleCommit() {
-    const message = window.prompt("Commit message:", "Manual snapshot from Settings");
+    const message = await prompt({
+      title: "Commit changes",
+      message: "Enter a commit message:",
+      defaultValue: "Manual snapshot from Settings",
+      confirmLabel: "Commit",
+    });
     if (message === null) return;
     setBusy("commit");
     try {
@@ -159,7 +166,12 @@ export function SettingsForm({ initialSettings, targetDirAbsolute, initialHasGit
       let data = await res.json();
 
       if (data.needsConfirm && data.preflight?.message) {
-        const proceed = window.confirm(data.preflight.message);
+        const proceed = await confirm({
+          title: `Confirm ${action}`,
+          message: data.preflight.message,
+          confirmLabel: "Proceed",
+          variant: "warning",
+        });
         if (!proceed) {
           flash("err", `${action} canceled.`);
           return;

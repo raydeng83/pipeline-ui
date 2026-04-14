@@ -13,6 +13,7 @@ import { LogViewer } from "@/components/LogViewer";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { DiffReport } from "@/app/compare/DiffReport";
 import { DangerousConfirmDialog } from "@/components/DangerousConfirmDialog";
+import { useDialog } from "@/components/ConfirmDialog";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
@@ -837,6 +838,7 @@ export function PromoteExecution({
   environments: Environment[];
   onTaskStatusChange: (status: TaskStatus) => void;
 }) {
+  const { confirm } = useDialog();
   const frConfigScopes = useMemo(
     () => task.items.filter((i) => getCommandType(i.scope) === "fr-config").map((i) => i.scope as ConfigScope),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -988,15 +990,19 @@ export function PromoteExecution({
                 type="button"
                 disabled={blocked}
                 title={blocked ? "Run the dry-run comparison first" : undefined}
-                onClick={() => {
+                onClick={async () => {
                   if (blocked) return;
                   if (
                     nextPhase.id === "dry-run" &&
                     task.target.mode === "local"
                   ) {
-                    if (!window.confirm(
-                      `The task target "${task.target.environment}" is set to Local mode.\n\nDry run compares the source against the target environment. A local target means no live remote data will be fetched.\n\nContinue anyway?`
-                    )) return;
+                    const ok = await confirm({
+                      title: "Local target mode",
+                      message: `The task target "${task.target.environment}" is set to Local mode.\n\nDry run compares the source against the target environment. A local target means no live remote data will be fetched.\n\nContinue anyway?`,
+                      confirmLabel: "Continue",
+                      variant: "warning",
+                    });
+                    if (!ok) return;
                   }
                   setActivePhase(nextPhase.id);
                 }}

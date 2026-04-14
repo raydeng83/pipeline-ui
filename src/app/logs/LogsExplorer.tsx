@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Fragment, startTransition, useDeferredValu
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Environment } from "@/lib/fr-config-types";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
+import { useDialog } from "@/components/ConfirmDialog";
 import { cn } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -986,6 +987,7 @@ export function LogsExplorer({
   onOpenContextTab?: (timestamp: string, source: string) => void;
 }) {
   const { env, selectedSources, sourcesError, levelFilter, mode, tailSecs, tailing, loading, preset, customBegin, customEnd, searchSeq, searching } = config;
+  const { confirm } = useDialog();
   // Derived: single source for tail mode (always takes first selected)
   const tailSource = selectedSources[0] ?? "";
 
@@ -1892,7 +1894,15 @@ export function LogsExplorer({
                   </button>
                   <button
                     type="button"
-                    onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); } }}
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: "Clear log entries",
+                        message: `Clear all ${entries.length} log entries from the screen?`,
+                        confirmLabel: "Clear",
+                        variant: "warning",
+                      });
+                      if (ok) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); }
+                    }}
                     className="text-xs text-slate-400 hover:text-slate-600 transition-colors shrink-0"
                   >
                     Clear

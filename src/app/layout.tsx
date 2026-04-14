@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { BusyProvider } from "@/hooks/useBusyState";
 import { NavBar } from "@/components/NavBar";
+import { DialogProvider } from "@/components/ConfirmDialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full bg-slate-50 text-slate-900 antialiased flex flex-col">
         <BusyProvider>
+          <DialogProvider>
           <NavBar />
           <main className="flex-1 px-6 sm:px-10 lg:px-16 py-10 w-full max-w-[1600px] mx-auto">
             {children}
@@ -40,6 +42,7 @@ export default function RootLayout({
               <span className="text-slate-400">AIC Config Pipeline</span>
             </div>
           </footer>
+          </DialogProvider>
         </BusyProvider>
       </body>
     </html>

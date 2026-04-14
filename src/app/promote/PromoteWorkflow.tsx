@@ -9,6 +9,7 @@ import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { ItemViewer } from "@/app/push/ItemViewer";
 import { JourneyGraph } from "@/app/configs/JourneyGraph";
 import { useBusyState } from "@/hooks/useBusyState";
+import { useDialog } from "@/components/ConfirmDialog";
 import { cn } from "@/lib/utils";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -798,6 +799,7 @@ export function PromoteWorkflow({
   environments: Environment[];
   initialTasks: PromotionTask[];
 }) {
+  const { confirm } = useDialog();
   const [tasks, setTasks] = useState<PromotionTask[]>(initialTasks);
   const [selectedId, setSelectedId] = useState<string | null>(initialTasks[0]?.id ?? null);
   const [panelMode, setPanelMode] = useState<PanelMode>(initialTasks.length > 0 ? "view" : "select");
@@ -884,7 +886,13 @@ export function PromoteWorkflow({
 
   const handleDelete = async () => {
     if (!selectedTask) return;
-    if (!confirm(`Delete task "${selectedTask.name}"? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete task",
+      message: `Delete task "${selectedTask.name}"? This cannot be undone.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     const res = await fetch(`/api/promotion-tasks/${selectedTask.id}`, { method: "DELETE" });
     if (res.ok) {
       const remaining = tasks.filter((t) => t.id !== selectedTask.id);
