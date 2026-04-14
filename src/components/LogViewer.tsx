@@ -12,8 +12,8 @@ interface LogViewerProps {
 }
 
 export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const debugBottomRef = useRef<HTMLDivElement>(null);
+  const mainPaneRef = useRef<HTMLDivElement>(null);
+  const debugPaneRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [debugOpen, setDebugOpen] = useState(false);
 
@@ -30,12 +30,21 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
     });
   };
 
+  // Auto-scroll the log pane itself (not the page) when new lines arrive,
+  // and only if the user was already pinned to the bottom — so manual
+  // scrolling up to inspect earlier output isn't yanked back.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = mainPaneRef.current;
+    if (!el) return;
+    const pinned = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    if (pinned) el.scrollTop = el.scrollHeight;
   }, [mainLogs.length]);
 
   useEffect(() => {
-    if (debugOpen) debugBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = debugPaneRef.current;
+    if (!el || !debugOpen) return;
+    const pinned = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    if (pinned) el.scrollTop = el.scrollHeight;
   }, [debugLogs.length, debugOpen]);
 
   const statusText =
@@ -79,7 +88,7 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
       </div>
 
       {/* Main output — stdout only */}
-      <div className="overflow-y-auto bg-slate-900 p-4 font-mono text-[12px] leading-5 min-h-[320px] max-h-[520px] rounded-b-xl">
+      <div ref={mainPaneRef} className="overflow-y-auto bg-slate-900 p-4 font-mono text-[12px] leading-5 min-h-[320px] max-h-[520px] rounded-b-xl">
         {mainLogs.length === 0 && !running && (
           <span className="text-slate-500">No output yet. Run a command to see logs.</span>
         )}
@@ -99,7 +108,6 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
               : entry.data}
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
 
       {/* Debug panel — stderr, collapsible */}
@@ -119,13 +127,12 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
             <span className="ml-1 text-slate-500">({debugLogs.length} lines)</span>
           </button>
           {debugOpen && (
-            <div className="overflow-y-auto bg-slate-950 p-3 font-mono text-xs max-h-[300px]">
+            <div ref={debugPaneRef} className="overflow-y-auto bg-slate-950 p-3 font-mono text-xs max-h-[300px]">
               {debugLogs.map((entry, i) => (
                 <div key={i} className="whitespace-pre-wrap break-all leading-5 text-yellow-300/80">
                   {entry.data}
                 </div>
               ))}
-              <div ref={debugBottomRef} />
             </div>
           )}
         </div>
