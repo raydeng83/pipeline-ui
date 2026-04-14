@@ -28,29 +28,68 @@ interface Props {
   environments: Environment[];
 }
 
+const STORAGE_KEY = "global-search-state-v1";
+
+interface PersistedState {
+  env: string;
+  query: string;
+  regex: boolean;
+  matchCase: boolean;
+  wholeWord: boolean;
+  glob: string;
+  data: SearchResponse | null;
+  expanded: string[];
+  selected: { path: string; line: number } | null;
+}
+
+function loadPersisted(): Partial<PersistedState> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Partial<PersistedState>) : {};
+  } catch { return {}; }
+}
+
 export function SearchExplorer({ environments }: Props) {
   const [workingEnv] = useWorkingEnv();
-  const [env, setEnv] = useState<string>(workingEnv || environments[0]?.name || "");
+  const persistedRef = useRef<Partial<PersistedState>>(loadPersisted());
+  const persisted = persistedRef.current;
+
+  const [env, setEnv] = useState<string>(
+    persisted.env || workingEnv || environments[0]?.name || ""
+  );
   useEffect(() => {
-    if (workingEnv && workingEnv !== env) setEnv(workingEnv);
+    if (workingEnv && workingEnv !== env && !persistedRef.current.env) setEnv(workingEnv);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workingEnv]);
 
-  const [query, setQuery] = useState("");
-  const [regex, setRegex] = useState(false);
-  const [matchCase, setMatchCase] = useState(false);
-  const [wholeWord, setWholeWord] = useState(false);
-  const [glob, setGlob] = useState("**/*.{js,groovy,json}");
+  const [query, setQuery] = useState(persisted.query ?? "");
+  const [regex, setRegex] = useState(persisted.regex ?? false);
+  const [matchCase, setMatchCase] = useState(persisted.matchCase ?? false);
+  const [wholeWord, setWholeWord] = useState(persisted.wholeWord ?? false);
+  const [glob, setGlob] = useState(persisted.glob ?? "**/*.{js,groovy,json}");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [data, setData] = useState<SearchResponse | null>(null);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [selected, setSelected] = useState<{ path: string; line: number } | null>(null);
+  const [data, setData] = useState<SearchResponse | null>(persisted.data ?? null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set(persisted.expanded ?? []));
+  const [selected, setSelected] = useState<{ path: string; line: number } | null>(persisted.selected ?? null);
   const [fileContent, setFileContent] = useState<string>("");
   const [fileLoading, setFileLoading] = useState(false);
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
   const [copyFlash, setCopyFlash] = useState(false);
+
+  // Persist whenever any non-ephemeral state changes.
+  useEffect(() => {
+    try {
+      const payload: PersistedState = {
+        env, query, regex, matchCase, wholeWord, glob,
+        data, expanded: Array.from(expanded), selected,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch { /* ignore quota errors */ }
+  }, [env, query, regex, matchCase, wholeWord, glob, data, expanded, selected]);
+
 
   useEffect(() => {
     if (!previewFullscreen) return;
@@ -68,6 +107,16 @@ export function SearchExplorer({ environments }: Props) {
   };
 
   const abortRef = useRef<AbortController | null>(null);
+
+  const handleClearAll = () => {
+    abortRef.current?.abort();
+    setQuery("");
+    setData(null);
+    setError("");
+    setExpanded(new Set());
+    setSelected(null);
+    setFileContent("");
+  };
 
   const runSearch = useCallback(async () => {
     if (!env || !query.trim()) return;
@@ -205,6 +254,15 @@ export function SearchExplorer({ environments }: Props) {
               Search
             </button>
           )}
+          <button
+            type="button"
+            onClick={handleClearAll}
+            disabled={!query && !data && !error}
+            className="px-3 py-2 text-sm font-medium border border-slate-300 text-slate-600 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            title="Clear filter and results"
+          >
+            Clear
+          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
