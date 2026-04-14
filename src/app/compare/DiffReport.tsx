@@ -567,12 +567,23 @@ const STATUS_STYLES: Record<FileDiff["status"], { badge: string; icon: string }>
   unchanged: { badge: "bg-slate-100 text-slate-500 border border-slate-200",        icon: "=" },
 };
 
+/** Auth scripts (under scripts-content/) and endpoint script files look
+ *  better with wrap + format enabled out of the box — they're long, free-form
+ *  source code rather than structured JSON config. */
+function isScriptContentFile(file: FileDiff): boolean {
+  const p = file.relativePath;
+  if (p.includes("/scripts-content/") || p.startsWith("scripts-content/")) return true;
+  if (/(?:^|\/)endpoints\/[^/]+\/[^/]+\.(?:js|groovy|ftl)$/i.test(p)) return true;
+  return false;
+}
+
 function FileRow({ file, sourceLabel, targetLabel, extraActions, checked, onToggle }: { file: FileDiff; sourceLabel: string; targetLabel: string; extraActions?: React.ReactNode; checked?: boolean; onToggle?: () => void }) {
+  const defaultOn = isScriptContentFile(file);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("diff");
   const [fullscreen, setFullscreen] = useState(false);
-  const [wrap, setWrap] = useState(false);
-  const [format, setFormat] = useState(false);
+  const [wrap, setWrap] = useState(defaultOn);
+  const [format, setFormat] = useState(defaultOn);
 
   // When format is on, pretty-print both sides and recompute diffLines client-side
   const fmtLocal    = format && file.localContent  != null ? formatContent(file.localContent,  file.relativePath) : file.localContent;
