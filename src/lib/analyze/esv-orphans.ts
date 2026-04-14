@@ -147,7 +147,10 @@ export function stripJsComments(src: string): string {
 
 const REF_RE_PLACEHOLDER      = /&\{esv\.([A-Za-z0-9._-]+)\}/g;
 const REF_RE_REALM            = /fr\.realm\.esv\.([A-Za-z0-9._-]+)/g;
-const REF_RE_SYSTEMENV_PROP   = /systemEnv(?:\.([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*)|\[\s*['"]([^'"]+)['"]\s*\]|\.getProperty\(\s*['"]([^'"]+)['"])/g;
+// Order matters: the specific getProperty(...) / [...] forms must be tried
+// before the bare `.name` form, otherwise the alternation engine will capture
+// `getProperty` (from `systemEnv.getProperty("foo")`) as the ESV name.
+const REF_RE_SYSTEMENV_PROP   = /systemEnv(?:\.getProperty\(\s*['"]([^'"]+)['"]|\[\s*['"]([^'"]+)['"]\s*\]|\.([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*))/g;
 
 function collectRefsFromContent(content: string, relPath: string): EsvReference[] {
   const refs: EsvReference[] = [];
