@@ -37,9 +37,32 @@ function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean;
   );
 }
 
-function FileContent({ content, fileName }: { content: string; fileName: string }) {
-  return <FileContentViewer content={content} fileName={fileName} />;
+function FileContent({ content, fileName, highlightLine }: { content: string; fileName: string; highlightLine?: number }) {
+  return <FileContentViewer content={content} fileName={fileName} highlightLine={highlightLine} />;
 }
+
+/** Derive the ESV name (e.g. "ad-external-basedn") from an esvs/{variables|secrets}/... path. */
+function esvNameFromPath(relPath: string | null): { name: string; kind: "variable" | "secret" } | null {
+  if (!relPath) return null;
+  const norm = relPath.replace(/\\/g, "/");
+  let kind: "variable" | "secret";
+  if (norm.startsWith("esvs/variables/")) kind = "variable";
+  else if (norm.startsWith("esvs/secrets/")) kind = "secret";
+  else return null;
+  const file = norm.split("/").pop() ?? "";
+  const base = file
+    .replace(/\.variable\.json$/i, "")
+    .replace(/\.secret\.json$/i, "")
+    .replace(/\.json$/i, "");
+  let n = base.toLowerCase();
+  if (n.startsWith("esv-")) n = n.slice(4);
+  else if (n.startsWith("esv.")) n = n.slice(4);
+  n = n.replace(/\./g, "-");
+  if (!n) return null;
+  return { name: n, kind };
+}
+
+interface UsageRef { path: string; line: number; snippet: string; form: string }
 
 // ── File tree view ────────────────────────────────────────────────────────────
 
@@ -102,6 +125,12 @@ function TreeView({ environment }: { environment: string }) {
   const [fileLoading, setFileLoading] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [highlightLine, setHighlightLine] = useState<number | undefined>(undefined);
+  const [usagesOpen, setUsagesOpen] = useState(false);
+  const [usagesLoading, setUsagesLoading] = useState(false);
+  const [usages, setUsages] = useState<UsageRef[] | null>(null);
+  const [usagesError, setUsagesError] = useState<string | null>(null);
+  const esvMeta = esvNameFromPath(selectedFile);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setFullscreen(false); };
@@ -121,11 +150,19 @@ function TreeView({ environment }: { environment: string }) {
       .finally(() => setTreeLoading(false));
   }, [environment]);
 
-  const handleFileSelect = async (relativePath: string, name: string) => {
+  const handleFileSelect = async (relativePath: string, name: string, line?: number) => {
     setSelectedFile(relativePath);
     setSelectedFileName(name);
     setFileContent(null);
     setFileLoading(true);
+    setHighlightLine(line);
+    // Clear cross-file usages state whenever the user changes file through
+    // the tree click (not through a usage click).
+    if (line === undefined) {
+      setUsagesOpen(false);
+      setUsages(null);
+      setUsagesError(null);
+    }
     try {
       const res = await fetch(`/api/configs/${environment}/file?path=${encodeURIComponent(relativePath)}`);
       const data = await res.json();
@@ -133,6 +170,29 @@ function TreeView({ environment }: { environment: string }) {
     } finally {
       setFileLoading(false);
     }
+  };
+
+  const handleFindUsages = async () => {
+    if (!esvMeta) return;
+    setUsagesOpen(true);
+    setUsagesLoading(true);
+    setUsages(null);
+    setUsagesError(null);
+    try {
+      const res = await fetch(`/api/analyze/esv-usages?env=${encodeURIComponent(environment)}&name=${encodeURIComponent(esvMeta.name)}`);
+      const data = await res.json();
+      if (!res.ok) { setUsagesError(data.error ?? `HTTP ${res.status}`); return; }
+      setUsages(data.references as UsageRef[]);
+    } catch (e) {
+      setUsagesError((e as Error).message);
+    } finally {
+      setUsagesLoading(false);
+    }
+  };
+
+  const openReference = (ref: UsageRef) => {
+    const basename = ref.path.split("/").pop() ?? ref.path;
+    handleFileSelect(ref.path, basename, ref.line);
   };
 
   const fileCount = countFiles(tree);
@@ -174,6 +234,16 @@ function TreeView({ environment }: { environment: string }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className="text-xs font-mono text-slate-300 truncate flex-1">{selectedFile}</span>
+              {esvMeta && (
+                <button
+                  type="button"
+                  title={`Find usages of esv-${esvMeta.name}`}
+                  onClick={handleFindUsages}
+                  className="shrink-0 px-2 py-0.5 text-[11px] font-medium rounded border border-sky-600 bg-sky-700/30 text-sky-200 hover:bg-sky-600/40 transition-colors"
+                >
+                  Find usages
+                </button>
+              )}
               <button
                 type="button"
                 title="Copy content"
@@ -198,9 +268,59 @@ function TreeView({ environment }: { environment: string }) {
               </button>
               <FullscreenButton fullscreen={fullscreen} onToggle={() => setFullscreen((f) => !f)} dark />
             </div>
+            {usagesOpen && esvMeta && (
+              <div className="border-b border-slate-700 bg-slate-800/80 max-h-56 overflow-y-auto">
+                <div className="px-4 py-1.5 border-b border-slate-700 bg-slate-800 flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
+                    Usages of esv-{esvMeta.name}
+                  </span>
+                  {usages && (
+                    <span className="text-[10px] text-slate-400">
+                      {usages.length} reference{usages.length === 1 ? "" : "s"}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setUsagesOpen(false)}
+                    className="ml-auto text-slate-400 hover:text-slate-200 text-xs"
+                    title="Close usages"
+                  >
+                    ✕
+                  </button>
+                </div>
+                {usagesLoading ? (
+                  <div className="px-4 py-3 text-xs text-slate-400">Scanning…</div>
+                ) : usagesError ? (
+                  <div className="px-4 py-3 text-xs text-rose-400">{usagesError}</div>
+                ) : usages && usages.length === 0 ? (
+                  <div className="px-4 py-3 text-xs text-slate-400">Not referenced anywhere.</div>
+                ) : (
+                  <div className="divide-y divide-slate-700/60">
+                    {usages?.map((ref, i) => {
+                      const isActive = selectedFile === ref.path && highlightLine === ref.line;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => openReference(ref)}
+                          className={cn(
+                            "w-full flex items-start gap-2 px-4 py-1.5 text-left text-[11px] font-mono transition-colors",
+                            isActive ? "bg-sky-900/50" : "hover:bg-slate-700/40"
+                          )}
+                        >
+                          <span className="shrink-0 text-slate-500 tabular-nums w-8 text-right">{ref.line}</span>
+                          <span className="shrink-0 text-sky-300 truncate max-w-[320px]" title={ref.path}>{ref.path}</span>
+                          <span className="flex-1 text-slate-400 break-all">{ref.snippet}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex-1 overflow-auto">
               {fileLoading && <div className="flex items-center justify-center h-full text-sm text-slate-500">Loading…</div>}
-              {!fileLoading && fileContent !== null && <FileContent content={fileContent} fileName={selectedFileName ?? ""} />}
+              {!fileLoading && fileContent !== null && <FileContent content={fileContent} fileName={selectedFileName ?? ""} highlightLine={highlightLine} />}
             </div>
           </>
         ) : (
