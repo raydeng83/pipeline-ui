@@ -82,7 +82,7 @@ const PRESETS: { label: string; value: Preset; ms: number }[] = [
 
 const LOG_SOURCES = ["am-everything", "idm-everything"] as const;
 
-const TAIL_BUFFER_MAX  = 20_000; // entries kept in memory; older ones are dropped
+const TAIL_BUFFER_MAX  = 50_000; // entries kept in memory; older ones are dropped
 const TERMINAL_ROW_H   = 20;     // px — fixed height per row (nowrap lines)
 const TERMINAL_OVERSCAN = 15;    // extra rows rendered above/below viewport
 
