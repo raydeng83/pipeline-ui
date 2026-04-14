@@ -1648,6 +1648,128 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
   });
 }
 
+/** Extract the canonical ESV name from an esvs/{variables|secrets}/... path. */
+function esvNameFromRelPath(rel: string): string | null {
+  const m = rel.match(/^esvs\/(?:variables|secrets)\/(.+)$/);
+  if (!m) return null;
+  const filename = m[1].split("/").pop() ?? "";
+  const base = filename
+    .replace(/\.variable\.json$/i, "")
+    .replace(/\.secret\.json$/i, "")
+    .replace(/\.json$/i, "");
+  let n = base.toLowerCase();
+  if (n.startsWith("esv-")) n = n.slice(4);
+  else if (n.startsWith("esv.")) n = n.slice(4);
+  return (n.replace(/\./g, "-")) || null;
+}
+
+interface EsvUsageRef { path: string; line: number; snippet: string; form: string }
+
+/** Wraps FileRow for ESV variable/secret files, adding an inline Find Usage panel. */
+function EsvScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, checked, onToggle, fileTasks = [], onRemoveFromTask }: {
+  file: FileDiff;
+  sourceLabel: string;
+  targetLabel: string;
+  sourceEnv: string;
+  targetEnv: string;
+  checked?: boolean;
+  onToggle?: () => void;
+  fileTasks?: PromotionTask[];
+  onRemoveFromTask?: (task: PromotionTask, path: string) => void;
+}) {
+  const esvName = useMemo(() => esvNameFromRelPath(file.relativePath), [file.relativePath]);
+  const [usageOpen, setUsageOpen] = useState(false);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [usageData, setUsageData] = useState<Record<string, EsvUsageRef[]> | null>(null);
+
+  const fetchUsage = useCallback(async () => {
+    if (usageData !== null || !esvName) return;
+    setUsageLoading(true);
+    try {
+      const envs = [...new Set([sourceEnv, targetEnv].filter(Boolean))];
+      const results = await Promise.all(
+        envs.map((env) =>
+          fetch(`/api/analyze/esv-usages?env=${encodeURIComponent(env)}&name=${encodeURIComponent(esvName)}`)
+            .then((r) => r.json())
+            .then((d) => [env, (d.references ?? []) as EsvUsageRef[]] as const)
+            .catch(() => [env, [] as EsvUsageRef[]] as const)
+        )
+      );
+      const map: Record<string, EsvUsageRef[]> = {};
+      for (const [env, refs] of results) map[env] = refs;
+      setUsageData(map);
+    } finally {
+      setUsageLoading(false);
+    }
+  }, [esvName, sourceEnv, targetEnv, usageData]);
+
+  const handleFindUsage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = !usageOpen;
+    setUsageOpen(next);
+    if (next) fetchUsage();
+  }, [usageOpen, fetchUsage]);
+
+  const findUsageButton = esvName ? (
+    <button
+      type="button"
+      onClick={handleFindUsage}
+      className={cn(
+        "px-1.5 py-0.5 text-[10px] font-medium rounded border transition-colors",
+        usageOpen
+          ? "bg-violet-100 text-violet-700 border-violet-200"
+          : "text-slate-500 border-slate-300 hover:text-violet-600 hover:bg-violet-50 hover:border-violet-200"
+      )}
+    >
+      Find Usage
+    </button>
+  ) : null;
+
+  const envOrder = [...new Set([sourceEnv, targetEnv].filter(Boolean))];
+  const totalRefs = usageData ? envOrder.reduce((n, env) => n + (usageData[env]?.length ?? 0), 0) : 0;
+
+  return (
+    <div>
+      <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} checked={checked} onToggle={onToggle} fileTasks={fileTasks} onRemoveFromTask={onRemoveFromTask} />
+      {usageOpen && (
+        <div className="mx-1 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
+          {usageLoading ? (
+            <p className="text-slate-400">Searching…</p>
+          ) : !usageData || totalRefs === 0 ? (
+            <p className="text-slate-400 italic">Not referenced in {envOrder.length === 1 ? "this env" : "either env"}.</p>
+          ) : (
+            <div className="space-y-2">
+              {envOrder.map((env) => {
+                const refs = usageData[env] ?? [];
+                if (refs.length === 0) return null;
+                return (
+                  <div key={env}>
+                    <p className="text-[10px] text-violet-700 font-semibold uppercase tracking-wide mb-1">
+                      <span className="font-mono">{env}</span> · {refs.length} reference{refs.length === 1 ? "" : "s"}
+                    </p>
+                    <div className="space-y-0.5">
+                      {refs.slice(0, 25).map((r, i) => (
+                        <div key={i} className="flex items-start gap-2 text-[11px] font-mono">
+                          <span className="shrink-0 text-violet-500 tabular-nums w-8 text-right">{r.line}</span>
+                          <span className="shrink-0 text-violet-700 truncate max-w-[320px]" title={r.path}>{r.path}</span>
+                          <span className="flex-1 text-slate-500 break-all">{r.snippet}</span>
+                        </div>
+                      ))}
+                      {refs.length > 25 && (
+                        <p className="text-[10px] text-violet-500 italic">… and {refs.length - 25} more</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Wraps FileRow for script files, adding an inline Find Usage panel. */
 function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles, allFiles, checked, onToggle, fileTasks = [], onRemoveFromTask }: {
   file: FileDiff;
@@ -1981,11 +2103,16 @@ function AllFilesModalScopeSection({
                 {search ? `No files match "${search}".` : "No files match the selected filter."}
               </p>
             ) : (
-              filtered.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
-                group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
-                  ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
-                  : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
-              ))
+              filtered.slice(page * pageSize, (page + 1) * pageSize).map((f) => {
+                const isEsv = /^esvs\/(variables|secrets)\//.test(f.relativePath);
+                if (group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined) {
+                  return <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />;
+                }
+                if (isEsv && sourceEnv !== undefined && targetEnv !== undefined) {
+                  return <EsvScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />;
+                }
+                return <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />;
+              })
             )}
           </div>
 
@@ -2700,9 +2827,14 @@ function ScopeSection({
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => {
                   const fileTasks = eligibleTasks.filter((t) => fileInTask(f.relativePath, t));
-                  return group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
-                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} fileTasks={fileTasks} onRemoveFromTask={onRemoveFromTask} />
-                    : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} fileTasks={fileTasks} onRemoveFromTask={onRemoveFromTask} />;
+                  const isEsv = /^esvs\/(variables|secrets)\//.test(f.relativePath);
+                  if (group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined) {
+                    return <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} fileTasks={fileTasks} onRemoveFromTask={onRemoveFromTask} />;
+                  }
+                  if (isEsv && sourceEnv !== undefined && targetEnv !== undefined) {
+                    return <EsvScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} fileTasks={fileTasks} onRemoveFromTask={onRemoveFromTask} />;
+                  }
+                  return <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} fileTasks={fileTasks} onRemoveFromTask={onRemoveFromTask} />;
                 })
               )
             ) : (
