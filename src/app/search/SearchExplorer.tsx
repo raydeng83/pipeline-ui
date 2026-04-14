@@ -9,16 +9,19 @@ import type { SearchResponse, SearchFileResult } from "@/app/search/types";
 import { useWorkingEnv } from "@/hooks/useWorkingEnv";
 
 const GLOB_PRESETS: { label: string; value: string }[] = [
-  { label: "All",              value: "" },
-  { label: "JS",               value: "**/*.js" },
-  { label: "Groovy",           value: "**/*.groovy" },
-  { label: "JSON",             value: "**/*.json" },
+  { label: "All",                 value: "" },
+  { label: "JS",                  value: "**/*.js" },
+  { label: "Groovy",              value: "**/*.groovy" },
+  { label: "JSON",                value: "**/*.json" },
   { label: "Scripts (JS+Groovy)", value: "**/*.{js,groovy}" },
-  { label: "Endpoints",        value: "endpoints/**" },
-  { label: "Realm scripts",    value: "realms/**/scripts/**" },
-  { label: "Journeys",         value: "realms/**/journeys/**" },
-  { label: "Custom nodes",     value: "custom-nodes/**" },
-  { label: "Email templates",  value: "email-templates/**" },
+  { label: "Endpoints",           value: "endpoints/**" },
+  { label: "Realm scripts",       value: "realms/**/scripts/**" },
+  { label: "Journeys",            value: "realms/**/journeys/**" },
+  { label: "Custom nodes",        value: "custom-nodes/**" },
+  { label: "Email templates",     value: "email-templates/**" },
+  { label: "IGA workflows",       value: "iga/workflows/**" },
+  { label: "IGA workflow scripts", value: "iga/workflows/**/*.js" },
+  { label: "IGA (all)",           value: "iga/**" },
 ];
 
 interface Props {
