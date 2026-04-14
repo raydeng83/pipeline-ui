@@ -498,25 +498,39 @@ function loadPersisted(): Partial<PersistedState> {
 }
 
 export function AnalyzePanel({ environments }: { environments: { name: string }[] }) {
-  const persistedRef = useMemo(() => loadPersisted(), []);
-  const [taskId, setTaskId] = useState<TaskId>(persistedRef.taskId ?? "journeys");
-  const [env, setEnv] = useState(persistedRef.env ?? environments[0]?.name ?? "");
+  // Seed state from defaults only. Rehydrating from localStorage during the
+  // initial render produces a hydration mismatch because localStorage is
+  // browser-only. Load the persisted snapshot in a post-mount effect instead.
+  const [taskId, setTaskId] = useState<TaskId>("journeys");
+  const [env, setEnv] = useState(environments[0]?.name ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [journeyResult, setJourneyResult] = useState<AnalyzeResult | null>(persistedRef.journeyResult ?? null);
-  const [esvResult, setEsvResult] = useState<EsvOrphanReport | null>(persistedRef.esvResult ?? null);
+  const [journeyResult, setJourneyResult] = useState<AnalyzeResult | null>(null);
+  const [esvResult, setEsvResult] = useState<EsvOrphanReport | null>(null);
   const [tab, setTab] = useState<"summary" | "tree" | "scripts">("summary");
   const [searchQ, setSearchQ] = useState("");
+  const [hydrated, setHydrated] = useState(false);
 
   const currentTask = TASKS.find((t) => t.id === taskId)!;
 
+  // Rehydrate from localStorage once, after mount, to avoid SSR/CSR mismatch.
+  useEffect(() => {
+    const p = loadPersisted();
+    if (p.taskId) setTaskId(p.taskId);
+    if (p.env) setEnv(p.env);
+    if (p.journeyResult) setJourneyResult(p.journeyResult);
+    if (p.esvResult) setEsvResult(p.esvResult);
+    setHydrated(true);
+  }, []);
+
   // Persist state on every relevant change so a refresh brings the result back.
   useEffect(() => {
+    if (!hydrated) return;
     try {
       const payload: PersistedState = { taskId, env, journeyResult, esvResult };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch { /* ignore quota */ }
-  }, [taskId, env, journeyResult, esvResult]);
+  }, [hydrated, taskId, env, journeyResult, esvResult]);
 
   async function runTask() {
     setLoading(true);
