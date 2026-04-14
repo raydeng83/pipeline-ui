@@ -180,6 +180,8 @@ export interface TabConfig {
   terminalView?: boolean;
   wrapLines?: boolean;
   dedupe?: boolean;
+  /** IndexedDB session id — survives reload so entries can be rehydrated */
+  sessionId?: string;
 }
 
 // ── Field extraction ────────────────────────────────────────────────────────
@@ -1177,8 +1179,11 @@ export function LogsExplorer({
   // ── Web Worker ──
   const workerRef = useRef<Worker | null>(null);
   const idbRef            = useRef<IDBDatabase | null>(null);
-  const tailSessionIdRef  = useRef<string | null>(null);
+  const sessionId         = config.sessionId;
+  const sessionIdRef      = useRef<string | undefined>(sessionId);
+  sessionIdRef.current = sessionId;
   const [tailTotalReceived, setTailTotalReceived] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
 
   const [fetchProgress, setFetchProgress] = useState<{ loaded: number; page: number; done: boolean; paused: boolean; source?: string; window?: string } | null>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1193,9 +1198,11 @@ export function LogsExplorer({
         | { type: "error"; message: string; transient?: boolean };
 
       if (msg.type === "entries") {
-        if (msg.append && idbRef.current && tailSessionIdRef.current) {
+        if (idbRef.current && sessionIdRef.current && msg.entries.length > 0) {
           // Persist every incoming batch to IndexedDB (fire-and-forget)
-          idbWriteBatch(idbRef.current, tailSessionIdRef.current, msg.entries);
+          idbWriteBatch(idbRef.current, sessionIdRef.current, msg.entries);
+        }
+        if (msg.append) {
           setTailTotalReceived((n) => n + msg.entries.length);
         }
         startTransition(() => {
@@ -1233,10 +1240,31 @@ export function LogsExplorer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Open IndexedDB for tail session persistence ──
+  // ── Open IndexedDB and rehydrate prior session entries ──
   useEffect(() => {
-    openLogDb().then((db) => { idbRef.current = db; }).catch(() => {});
-    return () => { idbRef.current?.close(); idbRef.current = null; };
+    let cancelled = false;
+    openLogDb().then(async (db) => {
+      if (cancelled) { db.close(); return; }
+      idbRef.current = db;
+      const sid = sessionIdRef.current;
+      if (sid) {
+        try {
+          const prev = await idbReadSession(db, sid);
+          if (!cancelled && prev.length > 0) {
+            const trimmed = prev.length > TAIL_BUFFER_MAX ? prev.slice(-TAIL_BUFFER_MAX) : prev;
+            startTransition(() => {
+              setEntries(trimmed);
+              setFetched(true);
+              setTailTotalReceived(prev.length);
+              setLastUpdated(new Date());
+            });
+          }
+        } catch { /* ignore */ }
+      }
+      if (!cancelled) setHydrated(true);
+    }).catch(() => { if (!cancelled) setHydrated(true); });
+    return () => { cancelled = true; idbRef.current?.close(); idbRef.current = null; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Sync tab label ──
@@ -1249,13 +1277,22 @@ export function LogsExplorer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [env, selectedSources]);
 
-  // ── Reset entries when env changes ──
+  // ── Reset entries when env changes (but not on the first mount, so refresh keeps prior logs) ──
+  const prevEnvRef = useRef<string | null>(null);
   useEffect(() => {
     if (!env) return;
+    if (prevEnvRef.current === null) {
+      prevEnvRef.current = env;
+      return;
+    }
+    if (prevEnvRef.current === env) return;
+    prevEnvRef.current = env;
     workerRef.current?.postMessage({ type: "cancel" });
-    onConfigChange({ sourcesError: "", tailing: false });
+    onConfigChange({ sourcesError: "", tailing: false, sessionId: undefined });
+    if (idbRef.current && sessionIdRef.current) idbDeleteSession(idbRef.current, sessionIdRef.current);
     setEntries([]);
     setFetched(false);
+    setTailTotalReceived(0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [env]);
 
@@ -1305,10 +1342,12 @@ export function LogsExplorer({
 
   useEffect(() => {
     if (tailing && !prevTailing.current) {
-      // Start tail — new session
-      const sessionId = `tail-${Date.now()}`;
-      tailSessionIdRef.current = sessionId;
-      if (idbRef.current) idbRegisterSession(idbRef.current, sessionId);
+      // Start tail — new session (replace any previous session for this tab)
+      if (idbRef.current && sessionIdRef.current) idbDeleteSession(idbRef.current, sessionIdRef.current);
+      const newSession = `tail-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      onConfigChange({ sessionId: newSession });
+      sessionIdRef.current = newSession;
+      if (idbRef.current) idbRegisterSession(idbRef.current, newSession);
       setTailTotalReceived(0);
       setEntries([]);
       setFetched(false);
@@ -1375,7 +1414,12 @@ export function LogsExplorer({
     setFetched(false);
     setExpandedIdx(null);
     setFetchProgress(null);
-    onConfigChange({ searching: true });
+    // New search session — replace any previously persisted entries for this tab
+    if (idbRef.current && sessionIdRef.current) idbDeleteSession(idbRef.current, sessionIdRef.current);
+    const newSession = `search-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    sessionIdRef.current = newSession;
+    if (idbRef.current) idbRegisterSession(idbRef.current, newSession);
+    onConfigChange({ searching: true, sessionId: newSession });
     workerRef.current?.postMessage({ type: "fetch", env, sources: selectedSources, beginTime, endTime, queryFilter });
     return doCleanup;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1386,9 +1430,9 @@ export function LogsExplorer({
 
   // Export the full tail session (all batches) from IndexedDB as a .log text file
   async function exportTailSession() {
-    if (!idbRef.current || !tailSessionIdRef.current) return;
+    if (!idbRef.current || !sessionIdRef.current) return;
     try {
-      const all   = await idbReadSession(idbRef.current, tailSessionIdRef.current);
+      const all   = await idbReadSession(idbRef.current, sessionIdRef.current);
       const lines = all.map((e) => formatTerminalLine(e, tailSource)).join("\n");
       const blob  = new Blob([lines], { type: "text/plain" });
       const url   = URL.createObjectURL(blob);
@@ -1994,7 +2038,12 @@ export function LogsExplorer({
                         confirmLabel: "Clear",
                         variant: "warning",
                       });
-                      if (ok) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); setTailTotalReceived(0); }
+                      if (ok) {
+                        if (idbRef.current && sessionIdRef.current) idbDeleteSession(idbRef.current, sessionIdRef.current);
+                        sessionIdRef.current = undefined;
+                        onConfigChange({ sessionId: undefined });
+                        setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); setTailTotalReceived(0);
+                      }
                     }}
                     className="text-xs text-slate-400 hover:text-slate-600 transition-colors shrink-0"
                   >
