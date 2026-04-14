@@ -424,14 +424,13 @@ function terminalLevelClass(level: string): string {
 }
 
 function TailTerminal({
-  entries, defaultSource, searchTerm, keywords, dropped, wrapLines = false,
+  entries, defaultSource, searchTerm, keywords, wrapLines = false,
   scrollToIndex = null, activeMatchIndex = null, matchCase = false, wholeWord = false,
 }: {
   entries: LogEntry[];
   defaultSource: string;
   searchTerm: string;
   keywords: string[];
-  dropped: number;
   wrapLines?: boolean;
   scrollToIndex?: number | null;
   activeMatchIndex?: number | null;
@@ -546,11 +545,6 @@ function TailTerminal({
 
   return (
     <div className="relative h-full flex flex-col bg-slate-950">
-      {dropped > 0 && (
-        <div className="px-3 py-1 text-[11px] text-amber-400 bg-amber-950/40 border-b border-slate-700 shrink-0">
-          ⚠ {dropped.toLocaleString()} older entries dropped — showing last {TAIL_BUFFER_MAX.toLocaleString()}
-        </div>
-      )}
       <div
         ref={outerRef}
         onScroll={handleScroll}
@@ -1969,7 +1963,6 @@ export function LogsExplorer({
                   defaultSource={tailSource}
                   searchTerm={search}
                   keywords={keywords}
-                  dropped={tailDropped}
                   wrapLines={wrapLines}
                   scrollToIndex={scrollToIndex}
                   activeMatchIndex={activeMatchIndex}
