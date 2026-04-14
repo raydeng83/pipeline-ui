@@ -1895,7 +1895,7 @@ export function LogsExplorer({
                         confirmLabel: "Clear",
                         variant: "warning",
                       });
-                      if (ok) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); }
+                      if (ok) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); setTailTotalReceived(0); }
                     }}
                     className="text-xs text-slate-400 hover:text-slate-600 transition-colors shrink-0"
                   >
