@@ -2210,6 +2210,19 @@ function makeDefaultConfig(environments: EnvWithLogApi[]): TabConfig {
 
 let _nextTabId = 2;
 
+const LOGS_STATE_KEY = "logs-explorer-state-v1";
+
+function sanitizeConfigForPersist(cfg: TabConfig): TabConfig {
+  return {
+    ...cfg,
+    tailing: false,
+    loading: false,
+    searching: false,
+    sourcesError: "",
+    searchSeq: 0,
+  };
+}
+
 export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi[] }) {
   const [mounted, setMounted] = useState(false);
   const [tabs, setTabs] = useState<TabDef[]>([
@@ -2218,7 +2231,40 @@ export function LogsExplorerTabs({ environments }: { environments: EnvWithLogApi
   const [activeId, setActiveId] = useState(1);
   const [fullscreen, setFullscreen] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LOGS_STATE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { tabs?: TabDef[]; activeId?: number };
+        if (Array.isArray(parsed.tabs) && parsed.tabs.length > 0) {
+          const restored = parsed.tabs.map((t) => ({
+            ...t,
+            config: sanitizeConfigForPersist({ ...makeDefaultConfig(environments), ...t.config }),
+          }));
+          setTabs(restored);
+          const maxId = Math.max(...restored.map((t) => t.id));
+          _nextTabId = maxId + 1;
+          if (parsed.activeId && restored.some((t) => t.id === parsed.activeId)) {
+            setActiveId(parsed.activeId);
+          } else {
+            setActiveId(restored[0].id);
+          }
+        }
+      }
+    } catch { /* ignore */ }
+    setMounted(true);
+  }, [environments]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      const payload = {
+        tabs: tabs.map((t) => ({ ...t, config: sanitizeConfigForPersist(t.config) })),
+        activeId,
+      };
+      localStorage.setItem(LOGS_STATE_KEY, JSON.stringify(payload));
+    } catch { /* ignore */ }
+  }, [mounted, tabs, activeId]);
 
   useEffect(() => {
     if (!fullscreen) return;
