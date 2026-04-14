@@ -59,12 +59,20 @@ function* walk(dir: string, skipRoots: string[] = []): Generator<string> {
   }
 }
 
-/** Normalize any ESV name to the canonical key (no esv- prefix, lowercase fine). */
+/**
+ * Normalize any ESV name to a canonical key.
+ *
+ * AIC treats `.` and `-` interchangeably in ESV names: a variable stored as
+ * `esv-ad-external-basedn` is referenced as `&{esv.ad.external.basedn}` in
+ * config. We canonicalize by stripping the `esv-` / `esv.` prefix, replacing
+ * every `.` with `-`, and lowercasing, so references and definitions match
+ * regardless of which separator style the source file uses.
+ */
 function normalizeEsvName(raw: string): string {
-  let n = raw.trim();
+  let n = raw.trim().toLowerCase();
   if (n.startsWith("esv-")) n = n.slice(4);
-  if (n.startsWith("esv.")) n = n.slice(4);
-  return n;
+  else if (n.startsWith("esv.")) n = n.slice(4);
+  return n.replace(/\./g, "-");
 }
 
 /**
