@@ -8,6 +8,7 @@ import {
   PROMOTE_SUBCOMMANDS,
   PromoteSubcommand,
 } from "@/lib/fr-config-types";
+import type { ScopeSelection } from "@/lib/fr-config-types";
 import type { PromotionTask, TaskStatus } from "@/lib/promotion-tasks";
 import { LogViewer } from "@/components/LogViewer";
 import { ScopedLogViewer } from "@/components/ScopedLogViewer";
@@ -326,6 +327,104 @@ function EsvPrecheckPanel({ task, visible }: { task: PromotionTask; visible: boo
   );
 }
 
+// ── Item progress panel (Dry Run) ─────────────────────────────────────────────
+
+type DryRunItemStatus = "pending" | "source" | "target" | "both" | "done" | "failed";
+
+function ItemProgressPanel({
+  selections,
+  itemStatus,
+  running,
+}: {
+  selections: ScopeSelection[];
+  itemStatus: (scope: string) => DryRunItemStatus;
+  running: boolean;
+}) {
+  const totalItems = selections.reduce((acc, s) => acc + (s.items?.length ?? 1), 0);
+  const counts = { done: 0, running: 0, failed: 0, pending: 0 };
+  for (const sel of selections) {
+    const st = itemStatus(sel.scope);
+    const n = sel.items?.length ?? 1;
+    if (st === "done") counts.done += n;
+    else if (st === "failed") counts.failed += n;
+    else if (st === "pending") counts.pending += n;
+    else counts.running += n;
+  }
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      <div className="px-3 py-1.5 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+          Items being checked
+        </span>
+        <span className="text-[10px] text-slate-400">
+          {totalItems} total · {counts.done} done{counts.running ? ` · ${counts.running} running` : ""}{counts.failed ? ` · ${counts.failed} failed` : ""}{counts.pending ? ` · ${counts.pending} pending` : ""}
+        </span>
+      </div>
+      <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+        {selections.map((sel) => {
+          const st = itemStatus(sel.scope);
+          return (
+            <div key={sel.scope} className="px-3 py-2">
+              <div className="flex items-center gap-2 mb-1">
+                <StatusDot status={st} running={running} />
+                <span className="text-xs font-semibold text-slate-700 font-mono">{sel.scope}</span>
+                <StatusLabel status={st} />
+                <span className="ml-auto text-[10px] text-slate-400">
+                  {sel.items?.length ?? "all"} item{(sel.items?.length ?? 0) === 1 ? "" : "s"}
+                </span>
+              </div>
+              {sel.items && sel.items.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 pl-4">
+                  {sel.items.map((item: string) => (
+                    <span
+                      key={item}
+                      className={cn(
+                        "inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] rounded font-mono ring-1 transition-colors",
+                        st === "done"    && "bg-emerald-50 text-emerald-700 ring-emerald-200",
+                        st === "failed"  && "bg-rose-50 text-rose-700 ring-rose-200",
+                        st === "pending" && "bg-slate-50 text-slate-500 ring-slate-200",
+                        (st === "source" || st === "target" || st === "both") && "bg-sky-50 text-sky-700 ring-sky-200"
+                      )}
+                    >
+                      {(st === "source" || st === "target" || st === "both") && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                      )}
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="pl-4 text-[10px] text-slate-400 italic">All items in scope</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function StatusDot({ status, running }: { status: DryRunItemStatus; running: boolean }) {
+  if (status === "done") return <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />;
+  if (status === "failed") return <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />;
+  if (status === "pending") return <span className={cn("w-2 h-2 rounded-full shrink-0", running ? "bg-slate-300" : "bg-slate-200")} />;
+  return <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse shrink-0" />;
+}
+
+function StatusLabel({ status }: { status: DryRunItemStatus }) {
+  const map: Record<DryRunItemStatus, { label: string; cls: string }> = {
+    done:    { label: "done",                  cls: "bg-emerald-100 text-emerald-700" },
+    failed:  { label: "failed",                cls: "bg-rose-100 text-rose-700" },
+    pending: { label: "pending",               cls: "bg-slate-100 text-slate-500" },
+    source:  { label: "pulling source",        cls: "bg-sky-100 text-sky-700" },
+    target:  { label: "pulling target",        cls: "bg-sky-100 text-sky-700" },
+    both:    { label: "pulling both sides",    cls: "bg-sky-100 text-sky-700" },
+  };
+  const { label, cls } = map[status];
+  return <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", cls)}>{label}</span>;
+}
+
 // ── Phase 2: Dry Run ──────────────────────────────────────────────────────────
 
 function DryRunPhase({
@@ -386,6 +485,42 @@ function DryRunPhase({
   const targetRunning = running && targetExitCode === null;
   const showConsole = logs.length > 0 || running;
 
+  // Derive per-scope status from scope-start / scope-end events on each side.
+  const scopeProgress = useMemo(() => {
+    type PerSide = { current: string | null; completed: Set<string>; errored: Set<string> };
+    const build = (sideLogs: typeof logs): PerSide => {
+      const completed = new Set<string>();
+      const errored = new Set<string>();
+      let current: string | null = null;
+      for (const l of sideLogs) {
+        if (l.type === "scope-start" && l.scope) current = l.scope;
+        else if (l.type === "scope-end" && l.scope) {
+          if (l.code === 0) completed.add(l.scope);
+          else errored.add(l.scope);
+          if (current === l.scope) current = null;
+        }
+      }
+      return { current, completed, errored };
+    };
+    return { source: build(sourceLogs), target: build(targetLogs) };
+  }, [sourceLogs, targetLogs]);
+
+  type ItemStatus = "pending" | "source" | "target" | "both" | "done" | "failed";
+  const itemStatus = (scope: string): ItemStatus => {
+    const s = scopeProgress.source;
+    const t = scopeProgress.target;
+    if (s.errored.has(scope) || t.errored.has(scope)) return "failed";
+    const sourceDone = s.completed.has(scope) || task.source.mode === "local" || sourceExitCode === 0;
+    const targetDone = t.completed.has(scope) || task.target.mode === "local" || targetExitCode === 0;
+    if (sourceDone && targetDone) return "done";
+    const sourceRunningNow = s.current === scope;
+    const targetRunningNow = t.current === scope;
+    if (sourceRunningNow && targetRunningNow) return "both";
+    if (sourceRunningNow) return "source";
+    if (targetRunningNow) return "target";
+    return "pending";
+  };
+
   return (
     <div className={cn(!visible && "hidden")}>
       <div className="space-y-3">
@@ -427,6 +562,16 @@ function DryRunPhase({
             </label>
           )}
         </div>
+
+        {/* Item progress panel — shows every selected item grouped by scope,
+            with live per-scope status derived from scope-start/end events. */}
+        {scopeSelections.length > 0 && (
+          <ItemProgressPanel
+            selections={scopeSelections}
+            itemStatus={itemStatus}
+            running={running}
+          />
+        )}
 
         {/* Console panels */}
         {showConsole && (
