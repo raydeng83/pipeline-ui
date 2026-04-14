@@ -193,6 +193,7 @@ function DryRunPhase({
   onIncludeDepsChange,
   hasJourneys,
   onComplete,
+  onReport,
 }: {
   task: PromotionTask;
   visible: boolean;
@@ -200,12 +201,20 @@ function DryRunPhase({
   onIncludeDepsChange: (v: boolean) => void;
   hasJourneys: boolean;
   onComplete: (s: PhaseStatus) => void;
+  onReport: (r: import("@/lib/diff-types").CompareReport) => void;
 }) {
   const { logs, running, exitCode, report, run, abort } = useStreamingLogs();
   const { setBusy } = useBusyState();
   const onCompleteRef = useRef(onComplete);
+  const onReportRef = useRef(onReport);
   useEffect(() => { onCompleteRef.current = onComplete; });
+  useEffect(() => { onReportRef.current = onReport; });
   useEffect(() => { setBusy(running); }, [running, setBusy]);
+
+  // Cache the report for step 3's diff preview
+  useEffect(() => {
+    if (report) onReportRef.current(report);
+  }, [report]);
 
   useEffect(() => {
     if (exitCode !== null && !running) onCompleteRef.current(exitCode === 0 ? "done" : "failed");
@@ -345,6 +354,7 @@ function FrConfigSection({
   targetIsControlled,
   includeDeps,
   isProdTarget,
+  dryRunReport,
   onComplete,
   onTaskStatusChange,
 }: {
@@ -352,6 +362,7 @@ function FrConfigSection({
   targetIsControlled?: boolean;
   includeDeps: boolean;
   isProdTarget: boolean;
+  dryRunReport: import("@/lib/diff-types").CompareReport | null;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
@@ -386,36 +397,10 @@ function FrConfigSection({
   };
 
   const diffLoader = useCallback(async () => {
-    const scopeSelections = frConfigItems;
-    const res = await fetch("/api/compare", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        source: task.source,
-        target: task.target,
-        scopeSelections,
-        includeDeps: task.includeDeps ?? false,
-        mode: "dry-run",
-        diffOptions: { includeMetadata: false, ignoreWhitespace: true },
-      }),
-    });
-    if (!res.ok) throw new Error(`compare returned ${res.status}`);
-    // Parse NDJSON stream to extract the report
-    const text = await res.text();
-    for (const line of text.split("\n")) {
-      if (!line.trim()) continue;
-      try {
-        const entry = JSON.parse(line) as { type: string; data?: string };
-        if (entry.type === "report" && entry.data) {
-          const report = JSON.parse(entry.data) as import("@/lib/diff-types").CompareReport;
-          const { summarizeReport } = await import("@/lib/compare");
-          return summarizeReport(report);
-        }
-      } catch { /* skip non-JSON lines */ }
-    }
-    throw new Error("compare did not emit a report");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task.source, task.target, task.includeDeps, frConfigItems.map((i) => i.scope).join(",")]);
+    if (!dryRunReport) throw new Error("Run the dry-run first to generate a diff preview");
+    const { summarizeReport } = await import("@/lib/compare");
+    return summarizeReport(dryRunReport);
+  }, [dryRunReport]);
 
   const runActualPromote = async () => {
     if (task.status === "new") onTaskStatusChange("in-progress");
@@ -669,6 +654,7 @@ function PromotePhase({
   isProdTarget,
   visible,
   includeDeps,
+  dryRunReport,
   onComplete,
   onTaskStatusChange,
 }: {
@@ -680,6 +666,7 @@ function PromotePhase({
   isProdTarget: boolean;
   visible: boolean;
   includeDeps: boolean;
+  dryRunReport: import("@/lib/diff-types").CompareReport | null;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
@@ -709,6 +696,7 @@ function PromotePhase({
               targetIsControlled={targetIsControlled}
               includeDeps={includeDeps}
               isProdTarget={isProdTarget}
+              dryRunReport={dryRunReport}
               onComplete={onComplete}
               onTaskStatusChange={onTaskStatusChange}
             />
@@ -879,6 +867,7 @@ export function PromoteExecution({
   // both the compare call and the subsequent promote call, so the user can
   // preview the effect and carry it through without going back to edit the task.
   const [includeDeps, setIncludeDeps] = useState<boolean>(task.includeDeps ?? false);
+  const [dryRunReport, setDryRunReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
   useEffect(() => { setIncludeDeps(task.includeDeps ?? false); }, [task.id, task.includeDeps]);
   const hasJourneys = task.items.some((i) => i.scope === "journeys");
 
@@ -1040,6 +1029,7 @@ export function PromoteExecution({
           onIncludeDepsChange={setIncludeDeps}
           hasJourneys={hasJourneys}
           onComplete={(s) => updatePhase("dry-run", s)}
+          onReport={setDryRunReport}
         />
         <PromotePhase
           task={task}
@@ -1050,6 +1040,7 @@ export function PromoteExecution({
           isProdTarget={environments.find((e) => e.name === task.target.environment)?.color === "red"}
           visible={activePhase === "promote"}
           includeDeps={hasJourneys ? includeDeps : false}
+          dryRunReport={dryRunReport}
           onComplete={(s) => updatePhase("promote", s)}
           onTaskStatusChange={onTaskStatusChange}
         />
