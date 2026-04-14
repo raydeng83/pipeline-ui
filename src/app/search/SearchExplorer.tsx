@@ -1,0 +1,360 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Environment } from "@/lib/fr-config-types";
+import { EnvironmentBadge } from "@/components/EnvironmentBadge";
+import { cn } from "@/lib/utils";
+import type { SearchResponse, SearchFileResult } from "@/app/search/types";
+import { useWorkingEnv } from "@/hooks/useWorkingEnv";
+
+const GLOB_PRESETS: { label: string; value: string }[] = [
+  { label: "All",              value: "" },
+  { label: "JS",               value: "**/*.js" },
+  { label: "Groovy",           value: "**/*.groovy" },
+  { label: "JSON",             value: "**/*.json" },
+  { label: "Scripts (JS+Groovy)", value: "**/*.{js,groovy}" },
+  { label: "Endpoints",        value: "endpoints/**" },
+  { label: "Realm scripts",    value: "realms/**/scripts/**" },
+  { label: "Journeys",         value: "realms/**/journeys/**" },
+  { label: "Custom nodes",     value: "custom-nodes/**" },
+  { label: "Email templates",  value: "email-templates/**" },
+];
+
+interface Props {
+  environments: Environment[];
+}
+
+export function SearchExplorer({ environments }: Props) {
+  const [workingEnv] = useWorkingEnv();
+  const [env, setEnv] = useState<string>(workingEnv || environments[0]?.name || "");
+  useEffect(() => {
+    if (workingEnv && workingEnv !== env) setEnv(workingEnv);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workingEnv]);
+
+  const [query, setQuery] = useState("");
+  const [regex, setRegex] = useState(false);
+  const [matchCase, setMatchCase] = useState(false);
+  const [wholeWord, setWholeWord] = useState(false);
+  const [glob, setGlob] = useState("**/*.{js,groovy,json}");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [data, setData] = useState<SearchResponse | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<{ path: string; line: number } | null>(null);
+  const [fileContent, setFileContent] = useState<string>("");
+  const [fileLoading, setFileLoading] = useState(false);
+
+  const abortRef = useRef<AbortController | null>(null);
+
+  const runSearch = useCallback(async () => {
+    if (!env || !query.trim()) return;
+    abortRef.current?.abort();
+    const ctl = new AbortController();
+    abortRef.current = ctl;
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams({
+        env,
+        q: query,
+        regex: regex ? "1" : "0",
+        case: matchCase ? "1" : "0",
+        word: wholeWord ? "1" : "0",
+      });
+      if (glob) params.set("glob", glob);
+      const res = await fetch(`/api/search?${params.toString()}`, { signal: ctl.signal });
+      const body = await res.json();
+      if (!res.ok) {
+        setError(body.error ?? "Search failed");
+        setData(null);
+      } else {
+        setData(body as SearchResponse);
+        // Auto-expand first 10 files so users immediately see hits
+        const firstFew = (body.results as SearchFileResult[]).slice(0, 10).map((r) => r.path);
+        setExpanded(new Set(firstFew));
+      }
+    } catch (e) {
+      if ((e as Error).name !== "AbortError") {
+        setError((e as Error).message);
+        setData(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [env, query, regex, matchCase, wholeWord, glob]);
+
+  // Load file content when a hit is clicked
+  useEffect(() => {
+    if (!selected) { setFileContent(""); return; }
+    setFileLoading(true);
+    const ctl = new AbortController();
+    fetch(`/api/configs/${encodeURIComponent(env)}/file?path=${encodeURIComponent(selected.path)}`, { signal: ctl.signal })
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+      .then((d) => setFileContent(d.content ?? ""))
+      .catch((e) => { if ((e as Error).name !== "AbortError") setFileContent(`// failed to load: ${(e as Error).message}`); })
+      .finally(() => setFileLoading(false));
+    return () => ctl.abort();
+  }, [selected, env]);
+
+  const grouped = useMemo(() => {
+    if (!data) return new Map<string, SearchFileResult[]>();
+    const m = new Map<string, SearchFileResult[]>();
+    for (const r of data.results) {
+      const arr = m.get(r.scope) ?? [];
+      arr.push(r);
+      m.set(r.scope, arr);
+    }
+    return m;
+  }, [data]);
+
+  const toggleExpand = (path: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path); else next.add(path);
+      return next;
+    });
+  };
+
+  function highlightLine(text: string, submatches: { start: number; end: number }[]) {
+    if (!submatches.length) return <>{text}</>;
+    const parts: React.ReactNode[] = [];
+    let cursor = 0;
+    submatches.sort((a, b) => a.start - b.start).forEach((sm, i) => {
+      if (sm.start > cursor) parts.push(<span key={`p${i}`}>{text.slice(cursor, sm.start)}</span>);
+      parts.push(<mark key={`m${i}`} className="bg-yellow-200 text-inherit rounded-sm px-0.5">{text.slice(sm.start, sm.end)}</mark>);
+      cursor = sm.end;
+    });
+    if (cursor < text.length) parts.push(<span key="end">{text.slice(cursor)}</span>);
+    return <>{parts}</>;
+  }
+
+  const totalHits = data?.totalMatches ?? 0;
+  const totalFiles = data?.totalFiles ?? 0;
+
+  return (
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="card-padded space-y-3">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <label className="label-xs">Environment</label>
+            <select
+              value={env}
+              onChange={(e) => setEnv(e.target.value)}
+              className="block px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
+            >
+              {environments.map((e) => (
+                <option key={e.name} value={e.name}>{e.label}</option>
+              ))}
+            </select>
+          </div>
+          {environments.find((e) => e.name === env) && (
+            <div className="pb-0.5">
+              <EnvironmentBadge env={environments.find((e) => e.name === env)!} />
+            </div>
+          )}
+          <div className="space-y-1 flex-1 min-w-[280px]">
+            <label className="label-xs">Query</label>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
+              placeholder={regex ? "Regex pattern…" : "Literal text to find…"}
+              className="block w-full px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] font-mono outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={runSearch}
+            disabled={!env || !query.trim() || loading}
+            className="btn-primary disabled:opacity-40"
+          >
+            {loading ? "Searching…" : "Search"}
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
+            <button
+              type="button"
+              title="Case sensitive"
+              onClick={() => setMatchCase((v) => !v)}
+              className={cn("px-2 py-0.5 text-[11px] font-medium font-mono transition-colors", matchCase ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50")}
+            >Aa</button>
+            <button
+              type="button"
+              title="Whole word"
+              onClick={() => setWholeWord((v) => !v)}
+              className={cn("px-2 py-0.5 text-[11px] font-medium font-mono border-l border-slate-300 transition-colors", wholeWord ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50")}
+            >[W]</button>
+            <button
+              type="button"
+              title="Regex"
+              onClick={() => setRegex((v) => !v)}
+              className={cn("px-2 py-0.5 text-[11px] font-medium font-mono border-l border-slate-300 transition-colors", regex ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50")}
+            >.*</button>
+          </div>
+          <input
+            type="text"
+            value={glob}
+            onChange={(e) => setGlob(e.target.value)}
+            placeholder="File glob (e.g. **/*.js)"
+            className="flex-1 min-w-[200px] px-3 py-1.5 rounded border border-slate-300 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] text-slate-400 mr-1">Presets:</span>
+          {GLOB_PRESETS.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => setGlob(p.value)}
+              className={cn(
+                "px-2 py-0.5 text-[11px] rounded border transition-colors",
+                glob === p.value
+                  ? "bg-slate-900 text-white border-slate-900"
+                  : "bg-white text-slate-500 border-slate-300 hover:bg-slate-50"
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {error}
+        </div>
+      )}
+
+      {/* Result summary */}
+      {data && !error && (
+        <div className="flex items-center gap-3 text-xs text-slate-500">
+          <span>
+            {totalHits.toLocaleString()} match{totalHits === 1 ? "" : "es"} in {totalFiles.toLocaleString()} file{totalFiles === 1 ? "" : "s"}
+          </span>
+          {data.truncated && <span className="text-amber-600">· results truncated</span>}
+        </div>
+      )}
+
+      {/* Results + file preview split */}
+      {data && !error && data.results.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-4">
+          {/* Results list */}
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col max-h-[calc(100vh-320px)]">
+            <div className="overflow-y-auto flex-1">
+              {Array.from(grouped.entries()).map(([scope, files]) => (
+                <div key={scope}>
+                  <div className="sticky top-0 bg-slate-50/95 backdrop-blur px-4 py-1.5 border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    {scope || "(root)"} · {files.length}
+                  </div>
+                  {files.map((f) => {
+                    const isOpen = expanded.has(f.path);
+                    return (
+                      <div key={f.path} className="border-b border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(f.path)}
+                          className="w-full flex items-center gap-2 px-4 py-1.5 hover:bg-slate-50 text-left"
+                        >
+                          <span className="text-slate-400 text-[10px] w-3">{isOpen ? "▾" : "▸"}</span>
+                          <span className="flex-1 text-xs font-mono text-slate-700 truncate">{f.path}</span>
+                          <span className="text-[10px] text-slate-400 shrink-0">{f.matches.length}</span>
+                        </button>
+                        {isOpen && (
+                          <div className="bg-slate-50/50">
+                            {f.matches.map((m, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => setSelected({ path: f.path, line: m.line })}
+                                className={cn(
+                                  "w-full flex gap-3 px-4 py-1 text-[11px] font-mono text-left hover:bg-sky-50 border-l-2",
+                                  selected?.path === f.path && selected.line === m.line
+                                    ? "bg-sky-100 border-sky-500"
+                                    : "border-transparent"
+                                )}
+                              >
+                                <span className="text-slate-400 w-10 shrink-0 text-right">{m.line}</span>
+                                <span className="text-slate-700 whitespace-pre break-all">
+                                  {highlightLine(m.text, m.submatches)}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* File preview */}
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col max-h-[calc(100vh-320px)]">
+            {selected ? (
+              <>
+                <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                  <span className="text-xs font-mono text-slate-700 truncate">{selected.path}</span>
+                  <span className="text-[10px] text-slate-400">line {selected.line}</span>
+                </div>
+                <div className="flex-1 overflow-auto font-mono text-[11px] leading-snug">
+                  {fileLoading ? (
+                    <div className="p-4 text-slate-400">Loading…</div>
+                  ) : (
+                    <FilePreview text={fileContent} highlightLine={selected.line} />
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center flex-1 text-xs text-slate-400">
+                Click a match to preview
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {data && !error && data.results.length === 0 && (
+        <div className="text-center text-sm text-slate-400 py-8">No matches.</div>
+      )}
+    </div>
+  );
+}
+
+function FilePreview({ text, highlightLine }: { text: string; highlightLine: number }) {
+  const lines = useMemo(() => text.split("\n"), [text]);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current?.querySelector(`[data-ln="${highlightLine}"]`);
+    if (el) (el as HTMLElement).scrollIntoView({ block: "center" });
+  }, [highlightLine, text]);
+
+  return (
+    <div ref={ref} className="divide-y divide-transparent">
+      {lines.map((line, i) => {
+        const ln = i + 1;
+        const active = ln === highlightLine;
+        return (
+          <div
+            key={i}
+            data-ln={ln}
+            className={cn(
+              "flex gap-3 px-4 whitespace-pre",
+              active && "bg-amber-100 border-l-4 border-amber-400"
+            )}
+          >
+            <span className="text-slate-300 w-10 shrink-0 text-right select-none">{ln}</span>
+            <span className="text-slate-800 break-all">{line || " "}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
