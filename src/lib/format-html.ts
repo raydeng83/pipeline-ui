@@ -164,11 +164,12 @@ export function formatHtml(input: string, indent = "  "): string {
       continue;
     }
     if (t.type === "text") {
-      const trimmed = t.raw.trim();
-      if (trimmed.length === 0) continue;
-      // Split long text on existing newlines, otherwise emit on one line.
-      const parts = trimmed.split(/\n+/).map((p) => p.trim()).filter(Boolean);
-      for (const p of parts) out.push(pad(depth) + p);
+      // HTML whitespace is non-significant outside <pre>/<script>/<style>
+      // (which we already capture as preserve tokens), so collapse every
+      // run of whitespace — including newlines — down to a single space.
+      const cleaned = t.raw.replace(/\s+/g, " ").trim();
+      if (!cleaned) continue;
+      out.push(pad(depth) + cleaned);
       continue;
     }
   }
