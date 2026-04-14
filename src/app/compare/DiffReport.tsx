@@ -11,6 +11,7 @@ import { WorkflowDiffGraphModal } from "./WorkflowDiffGraph";
 import type { PromotionTask } from "@/lib/promotion-tasks";
 import type { ScopeSelection, ConfigScope } from "@/lib/fr-config-types";
 import { useDialog } from "@/components/ConfirmDialog";
+import { formatScopeLabel } from "@/lib/compare";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -2731,6 +2732,7 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   const [allFilesModalOpen, setAllFilesModalOpen] = useState(false);
 
   const router = useRouter();
+  const [scopeSearch, setScopeSearch] = useState("");
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [addingToTask, setAddingToTask] = useState(false);
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
@@ -2760,6 +2762,21 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
     () => scopeGroups.filter((g) => g.scope !== "journeys"),
     [scopeGroups],
   );
+  // Apply the scope-search filter to the non-journey groups. Match against the
+  // raw scope id and the human label, so 'iga' or 'IGA Workflow' both work.
+  const visibleScopeGroups = useMemo(() => {
+    const q = scopeSearch.trim().toLowerCase();
+    if (!q) return nonJourneyScopeGroups;
+    return nonJourneyScopeGroups.filter((g) =>
+      g.scope.toLowerCase().includes(q) ||
+      formatScopeLabel(g.scope).toLowerCase().includes(q)
+    );
+  }, [nonJourneyScopeGroups, scopeSearch]);
+  const journeysVisible = useMemo(() => {
+    const q = scopeSearch.trim().toLowerCase();
+    if (!q) return true;
+    return "journeys".includes(q) || formatScopeLabel("journeys").toLowerCase().includes(q);
+  }, [scopeSearch]);
 
   // Item-level summary totals (deduped for dir-based scopes)
   const itemSummary = useMemo(() => {
@@ -2929,6 +2946,29 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
             Hide metadata files
           </label>
 
+          <div className="flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="text"
+              value={scopeSearch}
+              onChange={(e) => setScopeSearch(e.target.value)}
+              placeholder="Filter scopes…"
+              className="text-xs px-2 py-1 rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 w-44"
+            />
+            {scopeSearch && (
+              <button
+                type="button"
+                onClick={() => setScopeSearch("")}
+                className="text-slate-400 hover:text-slate-600 text-xs"
+                title="Clear scope filter"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
           {eligibleTasks.length > 0 && (
             <button
               type="button"
@@ -2961,12 +3001,15 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
                 was an actually-selected scope for this compare run. If the
                 user didn't include journeys in their scope selection, suppress
                 the tree even if the backend populated it. */}
-            {report.journeyTree && report.journeyTree.length > 0 && scopeGroups.some((g) => g.scope === "journeys") && (
+            {journeysVisible && report.journeyTree && report.journeyTree.length > 0 && scopeGroups.some((g) => g.scope === "journeys") && (
               <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} hideUnchanged={hideUnchanged} />
             )}
 
             {/* Non-journey scope sections (journeys are shown above in the tree) */}
-            {nonJourneyScopeGroups.map((group) => (
+            {visibleScopeGroups.length === 0 && scopeSearch && (
+              <p className="text-sm text-slate-400 text-center py-4">No scopes match &ldquo;{scopeSearch}&rdquo;.</p>
+            )}
+            {visibleScopeGroups.map((group) => (
               <ScopeSection
                 key={group.scope}
                 group={group}
