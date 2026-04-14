@@ -1479,54 +1479,6 @@ export function LogsExplorer({
         {saveFlash && <span className="text-xs text-emerald-500 font-medium">Saved to history</span>}
         {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
         {error && <span className="text-xs text-red-500">{error}</span>}
-        <div className="ml-auto flex items-center gap-3">
-          {fetched && !tailing && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  const data = JSON.stringify(filtered.map((e) => ({ timestamp: e.timestamp, source: e.source, type: e.type, payload: e.payload })), null, 2);
-                  const blob = new Blob([data], { type: "application/json" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `logs-${selectedSources.join("-")}-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.json`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                Export
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  autoSaveToHistory(mode as "tail" | "search", entries);
-                  setSaveFlash(true);
-                  setTimeout(() => setSaveFlash(false), 10000);
-                }}
-                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                {saveFlash ? "Saved!" : "Save"}
-              </button>
-              <button
-                type="button"
-                onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); } }}
-                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                Clear
-              </button>
-            </>
-          )}
-          <button
-            type="button"
-            onClick={() => setHistoryOpen((o) => !o)}
-            className={cn("text-xs transition-colors", historyOpen ? "text-sky-600" : "text-slate-400 hover:text-slate-600")}
-            title="Search history"
-          >
-            History
-          </button>
-        </div>
       </div>
 
       {/* ── Search history panel ── */}
@@ -1909,6 +1861,52 @@ export function LogsExplorer({
                   </button>
                 </div>
               )}
+              {fetched && !tailing && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const data = JSON.stringify(filtered.map((e) => ({ timestamp: e.timestamp, source: e.source, type: e.type, payload: e.payload })), null, 2);
+                      const blob = new Blob([data], { type: "application/json" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `logs-${selectedSources.join("-")}-${new Date().toISOString().slice(0, 19).replace(/:/g, "")}.json`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+                  >
+                    Export
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      autoSaveToHistory(mode as "tail" | "search", entries);
+                      setSaveFlash(true);
+                      setTimeout(() => setSaveFlash(false), 10000);
+                    }}
+                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+                  >
+                    {saveFlash ? "Saved!" : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { if (window.confirm(`Clear all ${entries.length} log entries?`)) { setEntries([]); setFetched(false); setError(""); clearSearch(); setExpandedIdx(null); setFetchProgress(null); } }}
+                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+                  >
+                    Clear
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                onClick={() => setHistoryOpen((o) => !o)}
+                className={cn("text-xs transition-colors shrink-0", historyOpen ? "text-sky-600" : "text-slate-400 hover:text-slate-600")}
+                title="Search history"
+              >
+                History
+              </button>
               <button
                 type="button"
                 onClick={() => onFullscreenChange?.(!fullscreen)}
@@ -2017,8 +2015,8 @@ export function LogsExplorer({
             )}
           </div>
 
-          {/* Pagination controls */}
-          {fetched && filtered.length > 0 && (
+          {/* Pagination controls — table view only */}
+          {!terminalView && fetched && filtered.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500">
