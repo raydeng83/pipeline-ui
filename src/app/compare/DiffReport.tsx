@@ -2738,6 +2738,9 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
 
   const router = useRouter();
   const [scopeSearch, setScopeSearch] = useState("");
+  const [onlyUsedEsvs, setOnlyUsedEsvs] = useState(true);
+  const [usedEsvs, setUsedEsvs] = useState<Set<string> | null>(null);
+  const [usedEsvsLoading, setUsedEsvsLoading] = useState(false);
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [addingToTask, setAddingToTask] = useState(false);
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
@@ -2761,7 +2764,49 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
     ? `${report.target.environment} (${report.target.mode})`
     : report.target.environment;
 
-  const scopeGroups = useMemo(() => groupByScope(files), [files]);
+  // Fetch the set of referenced ESV names from the source env when the
+  // "only used" toggle is enabled. Cached per-env in this component.
+  useEffect(() => {
+    if (!onlyUsedEsvs) return;
+    if (usedEsvs) return; // already loaded
+    const envName = report.source.environment;
+    if (!envName) return;
+    const ctl = new AbortController();
+    setUsedEsvsLoading(true);
+    fetch(`/api/analyze/esv-used?env=${encodeURIComponent(envName)}`, { signal: ctl.signal })
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+      .then((data) => setUsedEsvs(new Set<string>(data.names ?? [])))
+      .catch(() => { /* leave unset; filter will no-op */ })
+      .finally(() => setUsedEsvsLoading(false));
+    return () => ctl.abort();
+  }, [onlyUsedEsvs, usedEsvs, report.source.environment]);
+
+  /** Normalize an ESV filename (esv-foo.variable.json / esv-foo.secret.json / esv-foo.json) to the canonical key. */
+  const esvNameFromFilename = useCallback((filename: string): string | null => {
+    const base = filename
+      .replace(/\.variable\.json$/i, "")
+      .replace(/\.secret\.json$/i, "")
+      .replace(/\.json$/i, "");
+    let n = base.toLowerCase();
+    if (n.startsWith("esv-")) n = n.slice(4);
+    else if (n.startsWith("esv.")) n = n.slice(4);
+    n = n.replace(/\./g, "-");
+    return n || null;
+  }, []);
+
+  // Apply the onlyUsedEsvs filter to the report files before grouping.
+  const filteredFiles = useMemo(() => {
+    if (!onlyUsedEsvs || !usedEsvs) return files;
+    return files.filter((f) => {
+      const m = f.relativePath.match(/^esvs\/(variables|secrets)\/(.+)$/);
+      if (!m) return true; // non-ESV files pass through
+      const filename = m[2].split("/").pop() ?? "";
+      const name = esvNameFromFilename(filename);
+      return name ? usedEsvs.has(name) : true;
+    });
+  }, [files, onlyUsedEsvs, usedEsvs, esvNameFromFilename]);
+
+  const scopeGroups = useMemo(() => groupByScope(filteredFiles), [filteredFiles]);
   // Non-journey scope groups — journeys are shown via the JourneyTreeSection
   const nonJourneyScopeGroups = useMemo(
     () => scopeGroups.filter((g) => g.scope !== "journeys"),
@@ -2949,6 +2994,16 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
               className="accent-sky-600"
             />
             Hide metadata files
+          </label>
+          <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer select-none" title="Filter ESV variables/secrets to those actually referenced in the source environment">
+            <input
+              type="checkbox"
+              checked={onlyUsedEsvs}
+              onChange={(e) => setOnlyUsedEsvs(e.target.checked)}
+              className="accent-sky-600"
+            />
+            Only used ESVs
+            {usedEsvsLoading && <span className="text-[10px] text-slate-400">loading…</span>}
           </label>
 
           <div className="flex items-center gap-1.5">

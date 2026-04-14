@@ -287,6 +287,14 @@ export function compareDirs(
         linesRemoved: diffLines.length,
       });
     } else if (r !== undefined && l !== undefined) {
+      // ESV definitions (variables/secrets) are environment-specific by
+      // design — value drift is expected and uninteresting for promotions.
+      // Only added/removed presence matters, so treat present-on-both as
+      // unchanged regardless of content.
+      if (/^esvs\/(variables|secrets)\//.test(rel)) {
+        diffs.push({ relativePath: rel, status: "unchanged" });
+        continue;
+      }
       const rNorm = normalizeContent(r, rel, opts);
       const lNorm = normalizeContent(l, rel, opts);
       if (rNorm === lNorm) {
