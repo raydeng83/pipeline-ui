@@ -149,8 +149,11 @@ const REF_RE_PLACEHOLDER      = /&\{esv\.([A-Za-z0-9._-]+)\}/g;
 const REF_RE_REALM            = /fr\.realm\.esv\.([A-Za-z0-9._-]+)/g;
 // Order matters: the specific getProperty(...) / [...] forms must be tried
 // before the bare `.name` form, otherwise the alternation engine will capture
-// `getProperty` (from `systemEnv.getProperty("foo")`) as the ESV name.
-const REF_RE_SYSTEMENV_PROP   = /systemEnv(?:\.getProperty\(\s*['"]([^'"]+)['"]|\[\s*['"]([^'"]+)['"]\s*\]|\.([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*))/g;
+// `getProperty` (from `systemEnv.getProperty("foo")`) as the ESV name. The
+// negative lookahead on the bare `.name` form also guards against defensive
+// code like `if (systemEnv.getProperty)` where the method is referenced
+// without an immediate parenthesized call.
+const REF_RE_SYSTEMENV_PROP   = /systemEnv(?:\.getProperty\(\s*['"]([^'"]+)['"]|\[\s*['"]([^'"]+)['"]\s*\]|\.(?!getProperty\b|getSecret\b|getConfig\b)([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*))/g;
 
 function collectRefsFromContent(content: string, relPath: string): EsvReference[] {
   const refs: EsvReference[] = [];
