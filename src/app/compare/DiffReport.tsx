@@ -2267,6 +2267,7 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [addingToTask, setAddingToTask] = useState(false);
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
+  const [addError, setAddError] = useState<{ task: string; missing: string[] } | null>(null);
   const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
   // Match tasks whose source and target envs align with the comparison's
@@ -2300,8 +2301,53 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
       return next;
     });
 
+  /** Find selected paths whose content exists only on the compare target side
+   *  (status "added" from source → target == absent on source). When the task
+   *  source matches the compare source, these items can't be promoted because
+   *  there's nothing on source to push.
+   */
+  const findMissingOnSource = (paths: Set<string>, files: FileDiff[]): string[] => {
+    const missing: string[] = [];
+    for (const p of paths) {
+      // Journey-style path: journeys/<name>
+      if (p.startsWith("journeys/") && !p.includes(".")) {
+        const name = p.slice("journeys/".length);
+        const mainFile = files.find((f) =>
+          f.relativePath.endsWith(`/journeys/${name}/${name}.json`) ||
+          f.relativePath.endsWith(`journeys/${name}/${name}.json`)
+        );
+        if (mainFile && mainFile.status === "added") missing.push(p);
+        continue;
+      }
+      // iga-workflows-style path: iga-workflows/<name>
+      if (p.startsWith("iga-workflows/") && !p.includes(".")) {
+        const name = p.slice("iga-workflows/".length);
+        const anyFile = files.find((f) => workflowNameFromPath(f.relativePath) === name);
+        if (anyFile && anyFile.status === "added") missing.push(p);
+        continue;
+      }
+      // Plain file path
+      const file = files.find((f) => f.relativePath === p);
+      if (file && file.status === "added") missing.push(p);
+    }
+    return missing;
+  };
+
   const handleAddToTask = async (task: PromotionTask) => {
     setTaskDropdownOpen(false);
+    setAddError(null);
+
+    // Validate that every selected item exists on the task's source. When the
+    // task and compare share a source env, any file with status "added" is
+    // present only on target and therefore missing on source.
+    if (task.source.environment === report.source.environment) {
+      const missing = findMissingOnSource(selectedPaths, report.files);
+      if (missing.length > 0) {
+        setAddError({ task: task.name, missing });
+        return;
+      }
+    }
+
     setAddingToTask(true);
     const newItems = mergePathsIntoItems(selectedPaths, task.items);
     try {
@@ -2446,11 +2492,41 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
       )}
 
       {/* Floating action bar */}
-      {(selectedCount > 0 || addSuccess) && (
+      {(selectedCount > 0 || addSuccess || addError) && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
           {addSuccess && (
             <div className="bg-emerald-600 text-white rounded-full shadow-lg px-4 py-2 text-xs font-medium whitespace-nowrap">
               ✓ Added to &quot;{addSuccess}&quot;
+            </div>
+          )}
+          {addError && (
+            <div className="bg-white border border-rose-200 rounded-xl shadow-xl px-4 py-3 text-xs text-slate-700 max-w-lg">
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-rose-700 mb-1">
+                    Can&apos;t add {addError.missing.length} item{addError.missing.length === 1 ? "" : "s"} to &quot;{addError.task}&quot;
+                  </div>
+                  <div className="text-slate-500 mb-2">
+                    The following don&apos;t exist on the task&apos;s source ({report.source.environment}):
+                  </div>
+                  <ul className="font-mono text-[11px] text-slate-700 space-y-0.5 max-h-40 overflow-y-auto pr-2">
+                    {addError.missing.map((p) => (
+                      <li key={p} className="truncate" title={p}>• {p}</li>
+                    ))}
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAddError(null)}
+                  aria-label="Dismiss"
+                  className="text-slate-400 hover:text-slate-600 shrink-0 -mt-0.5 -mr-1 text-lg leading-none"
+                >
+                  ×
+                </button>
+              </div>
             </div>
           )}
           {selectedCount > 0 && (
