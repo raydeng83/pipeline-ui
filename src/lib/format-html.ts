@@ -173,7 +173,9 @@ export function formatHtml(input: string, indent = "  "): string {
     }
   }
 
-  return out.join("\n");
+  // Drop blank lines (the preserve block is the only place that could emit
+  // them, and email-template HTML reads better tightly packed).
+  return out.filter((ln) => ln.trim().length > 0).join("\n");
 }
 
 /** Returns true if this filename should have HTML pretty-printing applied. */
