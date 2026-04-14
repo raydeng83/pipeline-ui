@@ -1949,63 +1949,6 @@ function AllFilesModal({
   );
 }
 
-function SubGroupSection({
-  scope, subgroupKey, files, sourceLabel, targetLabel, sourceEnv, targetEnv, allFiles, groupFiles, selectedPaths, onTogglePath, forceOpen, forceSeq,
-}: {
-  scope: string;
-  subgroupKey: string;
-  files: FileDiff[];
-  sourceLabel: string;
-  targetLabel: string;
-  sourceEnv?: string;
-  targetEnv?: string;
-  allFiles: FileDiff[];
-  groupFiles: FileDiff[];
-  selectedPaths?: Set<string>;
-  onTogglePath?: (path: string) => void;
-  forceOpen?: boolean;
-  forceSeq?: number;
-}) {
-  const [open, setOpen] = useState(forceOpen ?? false);
-  const prevSeq = useRef(forceSeq);
-  if (forceSeq !== undefined && forceSeq !== prevSeq.current) {
-    prevSeq.current = forceSeq;
-    if (forceOpen !== undefined) setOpen(forceOpen);
-  }
-
-  const added    = files.filter((f) => f.status === "added").length;
-  const modified = files.filter((f) => f.status === "modified").length;
-  const removed  = files.filter((f) => f.status === "removed").length;
-  const label = humanizeSubgroup(scope, subgroupKey);
-
-  return (
-    <div className="border border-slate-200 rounded-md overflow-hidden">
-      <div
-        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50/70 cursor-pointer hover:bg-slate-100 transition-colors"
-        onClick={() => setOpen((o) => !o)}
-      >
-        <span className="text-xs font-semibold text-slate-700 flex-1 truncate">{label}</span>
-        <div className="flex items-center gap-1.5 text-[10px] font-mono shrink-0">
-          {modified > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{modified}m</span>}
-          {added    > 0 && <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{added}+</span>}
-          {removed  > 0 && <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{removed}−</span>}
-          <span className="text-slate-400">{files.length} file{files.length === 1 ? "" : "s"}</span>
-        </div>
-        <span className="text-slate-400 text-[10px] shrink-0">{open ? "▲" : "▼"}</span>
-      </div>
-      {open && (
-        <div className="p-2 space-y-1.5 bg-white">
-          {files.map((f) =>
-            scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
-              ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={groupFiles} allFiles={allFiles} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
-              : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function ScopeSection({
   group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath, hideUnchanged = true, hideMetadata = true,
 }: {
@@ -2022,14 +1965,17 @@ function ScopeSection({
   hideUnchanged?: boolean;
   hideMetadata?: boolean;
 }) {
-  const supportsSubgrouping = group.scope === "scripts" || group.scope === "endpoints";
+  const supportsTypeFilter = group.scope === "scripts";
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
   const [itemSearch, setItemSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "modified" | "added" | "removed">("all");
+  const [typeFilter, setTypeFilter] = useState<Set<string>>(new Set());
+  const [typeMenuOpen, setTypeMenuOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const searchRef = useRef<HTMLInputElement>(null);
+  const typeMenuRef = useRef<HTMLDivElement>(null);
 
   // React to parent expand/collapse all
   const prevSeq = useRef(forceSeq);
@@ -2038,18 +1984,62 @@ function ScopeSection({
     if (forceOpen !== undefined) setOpen(forceOpen);
   }
 
+  // Close the type menu on outside click
+  useEffect(() => {
+    if (!typeMenuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (typeMenuRef.current && !typeMenuRef.current.contains(e.target as Node)) setTypeMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [typeMenuOpen]);
+
   const totalLines = group.files.reduce((s, f) => s + (f.linesAdded ?? 0) + (f.linesRemoved ?? 0), 0);
+
+  // Available types for scripts scope, computed from the current group.files
+  // (post metadata/unchanged filtering on the fly so the list matches what the
+  // user could actually select).
+  const availableTypes = useMemo(() => {
+    if (!supportsTypeFilter) return [] as { key: string; label: string; count: number }[];
+    const counts = new Map<string, number>();
+    for (const f of group.files) {
+      if (hideUnchanged && f.status === "unchanged") continue;
+      if (hideMetadata && isMetadataFile(f, group.scope)) continue;
+      const key = subgroupKeyForFile(f, group.scope);
+      if (!key) continue;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .map(([key, count]) => ({ key, label: humanizeSubgroup(group.scope, key), count }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [group.files, group.scope, supportsTypeFilter, hideUnchanged, hideMetadata]);
 
   const visibleFiles = filterFiles(
     group.files.filter((f) => {
       if (hideUnchanged && f.status === "unchanged") return false;
       if (hideMetadata && isMetadataFile(f, group.scope)) return false;
-      return statusFilter === "all" || f.status === statusFilter;
+      if (statusFilter !== "all" && f.status !== statusFilter) return false;
+      if (supportsTypeFilter && typeFilter.size > 0) {
+        const key = subgroupKeyForFile(f, group.scope);
+        if (!key || !typeFilter.has(key)) return false;
+      }
+      return true;
     }),
     itemSearch,
   );
   const totalVisible = visibleFiles.length;
   const totalChanged = group.modified + group.added + group.removed;
+
+  const toggleType = (key: string) => {
+    setTypeFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+    setPage(0);
+  };
+  const clearTypes = () => { setTypeFilter(new Set()); setPage(0); };
 
   return (
     <div className={cn("border rounded-lg overflow-hidden", hasChanges ? "border-slate-200" : "border-slate-100")}>
@@ -2087,32 +2077,90 @@ function ScopeSection({
         <div className="bg-white">
           {/* Filter + search bar */}
           {(hasChanges || !hideUnchanged) && (
-            <div className="px-3 pt-3 pb-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              {/* Status filter pills */}
-              <div className="flex rounded border border-slate-300 overflow-hidden text-[10px] shrink-0">
-                {([
-                  { value: "all"      as const, label: `All (${hideUnchanged ? totalChanged : group.files.length})` },
-                  { value: "modified" as const, label: `Modified (${group.modified})` },
-                  { value: "added"    as const, label: `Added (${group.added})` },
-                  { value: "removed"  as const, label: `Removed (${group.removed})` },
-                ]).map((f) => (
-                  <button
-                    key={f.value}
-                    type="button"
-                    onClick={() => { setStatusFilter(f.value); setPage(0); }}
-                    className={cn(
-                      "px-2 py-0.5 transition-colors",
-                      statusFilter === f.value
-                        ? "bg-slate-900 text-white"
-                        : "bg-white text-slate-500 hover:bg-slate-50"
+            <div className="px-3 pt-3 pb-2 space-y-2" onClick={(e) => e.stopPropagation()}>
+              {/* Row 1: status pills + optional type filter */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Status filter pills */}
+                <div className="flex rounded border border-slate-300 overflow-hidden text-[10px] shrink-0">
+                  {([
+                    { value: "all"      as const, label: `All (${hideUnchanged ? totalChanged : group.files.length})` },
+                    { value: "modified" as const, label: `Modified (${group.modified})` },
+                    { value: "added"    as const, label: `Added (${group.added})` },
+                    { value: "removed"  as const, label: `Removed (${group.removed})` },
+                  ]).map((f) => (
+                    <button
+                      key={f.value}
+                      type="button"
+                      onClick={() => { setStatusFilter(f.value); setPage(0); }}
+                      className={cn(
+                        "px-2 py-0.5 transition-colors",
+                        statusFilter === f.value
+                          ? "bg-slate-900 text-white"
+                          : "bg-white text-slate-500 hover:bg-slate-50"
+                      )}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Type filter (scripts only) */}
+                {supportsTypeFilter && availableTypes.length > 0 && (
+                  <div className="relative" ref={typeMenuRef}>
+                    <button
+                      type="button"
+                      onClick={() => setTypeMenuOpen((o) => !o)}
+                      className={cn(
+                        "flex items-center gap-1 px-2 py-0.5 text-[10px] rounded border transition-colors",
+                        typeFilter.size > 0
+                          ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                          : "bg-white border-slate-300 text-slate-600 hover:bg-slate-50"
+                      )}
+                    >
+                      <span>Type{typeFilter.size > 0 ? ` (${typeFilter.size})` : ""}</span>
+                      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {typeMenuOpen && (
+                      <div className="absolute left-0 top-full mt-1 z-10 w-64 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-md shadow-lg py-1">
+                        {availableTypes.map((t) => {
+                          const checked = typeFilter.has(t.key);
+                          return (
+                            <label
+                              key={t.key}
+                              className="flex items-center gap-2 px-3 py-1.5 text-[11px] hover:bg-slate-50 cursor-pointer select-none"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleType(t.key)}
+                                className="accent-indigo-600 w-3 h-3"
+                              />
+                              <span className="flex-1 text-slate-700 truncate">{t.label}</span>
+                              <span className="text-[10px] text-slate-400 font-mono shrink-0">{t.count}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
                     )}
+                  </div>
+                )}
+
+                {/* Clear button (only when type filter active) */}
+                {supportsTypeFilter && typeFilter.size > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearTypes}
+                    className="px-2 py-0.5 text-[10px] rounded border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
                   >
-                    {f.label}
+                    Clear
                   </button>
-                ))}
+                )}
               </div>
-              {/* Search */}
-              <div className="relative flex-1">
+
+              {/* Row 2: search bar (full width) */}
+              <div className="relative">
                 <input
                   ref={searchRef}
                   type="text"
@@ -2165,39 +2213,6 @@ function ScopeSection({
                     />
                   ));
                 })()
-              ) : supportsSubgrouping ? (
-                (() => {
-                  // Group visible files into subgroups derived from the path
-                  // (TYPE for scripts, endpoint name for endpoints). Files
-                  // without a detectable subgroup fall into "(ungrouped)".
-                  const subgroups = new Map<string, FileDiff[]>();
-                  for (const f of visibleFiles) {
-                    const key = subgroupKeyForFile(f, group.scope) ?? "(ungrouped)";
-                    if (!subgroups.has(key)) subgroups.set(key, []);
-                    subgroups.get(key)!.push(f);
-                  }
-                  const entries = Array.from(subgroups.entries()).sort((a, b) =>
-                    humanizeSubgroup(group.scope, a[0]).localeCompare(humanizeSubgroup(group.scope, b[0]))
-                  );
-                  return entries.map(([key, files]) => (
-                    <SubGroupSection
-                      key={key}
-                      scope={group.scope}
-                      subgroupKey={key}
-                      files={files}
-                      sourceLabel={sourceLabel}
-                      targetLabel={targetLabel}
-                      sourceEnv={sourceEnv}
-                      targetEnv={targetEnv}
-                      allFiles={allFiles ?? []}
-                      groupFiles={group.files}
-                      selectedPaths={selectedPaths}
-                      onTogglePath={onTogglePath}
-                      forceOpen={forceOpen}
-                      forceSeq={forceSeq}
-                    />
-                  ));
-                })()
               ) : (
                 visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
                   group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
@@ -2211,7 +2226,7 @@ function ScopeSection({
               </p>
             )}
           </div>
-          {(hasChanges || !hideUnchanged) && !supportsSubgrouping && totalVisible > pageSize && (
+          {(hasChanges || !hideUnchanged) && totalVisible > pageSize && (
             <Pagination
               page={page} total={totalVisible} pageSize={pageSize}
               onChange={setPage}
