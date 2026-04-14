@@ -56,6 +56,34 @@ function escapeHtml(s: string): string {
 const FILE_SELECTABLE_PATH_SCOPES = new Set(["scripts", "custom-nodes", "endpoints", "schedules"]);
 const NAME_FLAG_PATH_SCOPES = new Set(["journeys", "managed-objects", "iga-workflows"]);
 
+/** True when the given relative path belongs to the task's items array. */
+function fileInTask(relativePath: string, task: PromotionTask): boolean {
+  const { scope, itemId } = pathToTaskScopeAndItem(relativePath);
+  const sel = task.items.find((s) => s.scope === scope);
+  if (!sel) return false;
+  if (sel.items === undefined) return true; // whole scope selected
+  return itemId != null && sel.items.includes(itemId);
+}
+
+/** Remove an item (identified by its relativePath) from a task's items list,
+ *  returning the new items array. Whole-scope selections are removed entirely
+ *  only when the caller passes a path that resolves to `itemId === null`; for
+ *  individual-item paths, whole-scope selections are left untouched. */
+function removeItemFromTaskItems(
+  relativePath: string,
+  items: ScopeSelection[],
+): ScopeSelection[] {
+  const { scope, itemId } = pathToTaskScopeAndItem(relativePath);
+  return items.flatMap<ScopeSelection>((s) => {
+    if (s.scope !== scope) return [s];
+    if (s.items === undefined) {
+      return itemId === null ? [] : [s];
+    }
+    const filtered = s.items.filter((i) => i !== itemId);
+    return filtered.length ? [{ ...s, items: filtered }] : [];
+  });
+}
+
 /** Map a relativePath from the diff to a { scope, itemId } for promotion task merge.
  *  itemId === null means the whole scope (no item-level selection). */
 function pathToTaskScopeAndItem(relativePath: string): { scope: string; itemId: string | null } {
@@ -577,7 +605,7 @@ function isScriptContentFile(file: FileDiff): boolean {
   return false;
 }
 
-function FileRow({ file, sourceLabel, targetLabel, extraActions, checked, onToggle }: { file: FileDiff; sourceLabel: string; targetLabel: string; extraActions?: React.ReactNode; checked?: boolean; onToggle?: () => void }) {
+function FileRow({ file, sourceLabel, targetLabel, extraActions, checked, onToggle, fileTasks = [], activeTaskId = null, onRemoveFromTask }: { file: FileDiff; sourceLabel: string; targetLabel: string; extraActions?: React.ReactNode; checked?: boolean; onToggle?: () => void; fileTasks?: PromotionTask[]; activeTaskId?: string | null; onRemoveFromTask?: (task: PromotionTask, path: string) => void }) {
   const defaultOn = isScriptContentFile(file);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("diff");
@@ -726,6 +754,45 @@ function FileRow({ file, sourceLabel, targetLabel, extraActions, checked, onTogg
           <span className="shrink-0 flex items-center gap-1.5 text-[10px] font-mono">
             {added   > 0 && <span className="text-emerald-600">+{added}</span>}
             {removed > 0 && <span className="text-red-500">−{removed}</span>}
+          </span>
+        )}
+
+        {fileTasks.length > 0 && (
+          <span className="shrink-0 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {fileTasks.map((t) => {
+              const isActive = t.id === activeTaskId;
+              const sel = t.items.find((s) => s.scope === pathToTaskScopeAndItem(file.relativePath).scope);
+              const isWholeScope = sel?.items === undefined;
+              return (
+                <span
+                  key={t.id}
+                  className={cn(
+                    "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
+                    isActive
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100",
+                  )}
+                  title={isWholeScope
+                    ? `In task "${t.name}" — whole ${sel?.scope} scope`
+                    : `In task "${t.name}"`}
+                >
+                  <span className="truncate max-w-[120px]">{t.name}{isWholeScope ? " (all)" : ""}</span>
+                  {onRemoveFromTask && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onRemoveFromTask(t, file.relativePath); }}
+                      className={cn(
+                        "leading-none text-[11px] -mr-0.5 transition-opacity",
+                        isActive ? "text-indigo-200 hover:text-white" : "text-indigo-400 hover:text-indigo-700",
+                      )}
+                      title={`Remove from "${t.name}"`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </span>
+              );
+            })}
           </span>
         )}
 
@@ -1537,7 +1604,7 @@ function filterFiles(files: FileDiff[], query: string): FileDiff[] {
 }
 
 /** Wraps FileRow for script files, adding an inline Find Usage panel. */
-function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles, allFiles, checked, onToggle }: {
+function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, groupFiles, allFiles, checked, onToggle, fileTasks = [], activeTaskId = null, onRemoveFromTask }: {
   file: FileDiff;
   sourceLabel: string;
   targetLabel: string;
@@ -1547,6 +1614,9 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
   allFiles: FileDiff[];
   checked?: boolean;
   onToggle?: () => void;
+  fileTasks?: PromotionTask[];
+  activeTaskId?: string | null;
+  onRemoveFromTask?: (task: PromotionTask, path: string) => void;
 }) {
   const [usageOpen, setUsageOpen]       = useState(false);
   const [usageLoading, setUsageLoading] = useState(false);
@@ -1638,7 +1708,7 @@ function ScriptScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetE
 
   return (
     <div>
-      <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} checked={checked} onToggle={onToggle} />
+      <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} checked={checked} onToggle={onToggle} fileTasks={fileTasks} activeTaskId={activeTaskId} onRemoveFromTask={onRemoveFromTask} />
       {usageOpen && (
         <div className="mx-1 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
           {usageLoading ? (
@@ -1960,8 +2030,156 @@ function AllFilesModal({
   );
 }
 
+function TaskItemsDrawer({
+  task, onClose, onRemoveItem, onRemoveScope, onClearAll,
+}: {
+  task: PromotionTask;
+  onClose: () => void;
+  onRemoveItem: (path: string) => void;
+  onRemoveScope: (scope: string) => void;
+  onClearAll: () => void;
+}) {
+  const [search, setSearch] = useState("");
+  const totalItems = task.items.reduce(
+    (n, s) => n + (s.items === undefined ? 1 : s.items.length),
+    0,
+  );
+  const filteredSelections = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return task.items;
+    return task.items
+      .map((s) => {
+        if (s.scope.toLowerCase().includes(q)) return s;
+        if (s.items === undefined) return null;
+        const matches = s.items.filter((i) => i.toLowerCase().includes(q));
+        return matches.length ? { ...s, items: matches } : null;
+      })
+      .filter((s): s is ScopeSelection => s !== null);
+  }, [task.items, search]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-900/40" onClick={onClose}>
+      <aside
+        className="fixed right-0 top-0 h-full w-[min(560px,100vw)] bg-white shadow-2xl flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-5 py-4 border-b border-slate-200 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="label-xs">TASK</div>
+            <div className="text-base font-semibold text-slate-900 truncate">{task.name}</div>
+            <div className="mt-1 text-[11px] text-slate-500 font-mono">
+              {task.source.environment} → {task.target.environment}
+              <span className="text-slate-400"> · {totalItems} item{totalItems === 1 ? "" : "s"}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="text-slate-400 hover:text-slate-700 text-lg leading-none -mt-1 -mr-1"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="px-5 py-3 border-b border-slate-100">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter scopes and items…"
+            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded bg-slate-50 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:bg-white"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-3 space-y-4">
+          {filteredSelections.length === 0 ? (
+            <p className="text-center text-xs text-slate-400 py-6">
+              {search ? "No matches." : "This task has no items yet."}
+            </p>
+          ) : (
+            filteredSelections.map((sel) => (
+              <div key={sel.scope} className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-100">
+                  <span className="text-xs font-semibold text-slate-700">
+                    {SCOPE_LABELS[sel.scope] ?? sel.scope}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-slate-400">
+                      {sel.items === undefined ? "all items" : `${sel.items.length} item${sel.items.length === 1 ? "" : "s"}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveScope(sel.scope)}
+                      className="text-[10px] text-rose-600 hover:text-rose-700 font-medium"
+                    >
+                      Remove scope
+                    </button>
+                  </div>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {sel.items === undefined ? (
+                    <div className="px-3 py-2 text-[11px] text-slate-500 italic">
+                      Whole-scope selection — all items promoted
+                    </div>
+                  ) : (
+                    sel.items.map((itemId) => (
+                      <div key={itemId} className="flex items-center gap-2 px-3 py-1.5 text-[11px]">
+                        <span className="flex-1 font-mono text-slate-700 truncate" title={itemId}>{itemId}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Reconstruct a pseudo-path that pathToTaskScopeAndItem
+                            // can decode back into { scope, itemId }. For NAME_FLAG
+                            // scopes the canonical path is "<scope>/<itemId>". For
+                            // FILE_SELECTABLE scopes the caller consumes {scope,itemId}
+                            // directly via onRemoveItem → removeItemFromTaskItems, but
+                            // we pass a synthetic path the helper can parse. The
+                            // easiest universal form is "<scope>/<itemId>" — this
+                            // matches both path families at the helper level because
+                            // parts.findIndex(scope) returns 0 and parts[1] = itemId.
+                            onRemoveItem(`${sel.scope}/${itemId}`);
+                          }}
+                          className="text-rose-500 hover:text-rose-700 leading-none text-[13px]"
+                          title="Remove item"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="px-5 py-3 border-t border-slate-200 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm(`Clear all items from "${task.name}"?`)) onClearAll();
+            }}
+            disabled={totalItems === 0}
+            className="text-xs text-rose-600 hover:text-rose-700 disabled:opacity-40 font-medium"
+          >
+            Clear all items
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary text-xs py-1"
+          >
+            Close
+          </button>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
 function ScopeSection({
-  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath, hideUnchanged = true, hideMetadata = true,
+  group, sourceLabel, targetLabel, forceOpen, forceSeq, sourceEnv, targetEnv, allFiles, selectedPaths, onTogglePath, hideUnchanged = true, hideMetadata = true, eligibleTasks = [], activeTask = null, onRemoveFromTask,
 }: {
   group: ScopeGroup;
   sourceLabel: string;
@@ -1975,12 +2193,16 @@ function ScopeSection({
   onTogglePath?: (path: string) => void;
   hideUnchanged?: boolean;
   hideMetadata?: boolean;
+  eligibleTasks?: PromotionTask[];
+  activeTask?: PromotionTask | null;
+  onRemoveFromTask?: (task: PromotionTask, path: string) => void;
 }) {
   const supportsTypeFilter = group.scope === "scripts";
   const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
   const [itemSearch, setItemSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "modified" | "added" | "removed">("all");
+  const [inTaskOnly, setInTaskOnly] = useState(false);
   const [typeFilter, setTypeFilter] = useState<Set<string>>(new Set());
   const [typeMenuOpen, setTypeMenuOpen] = useState(false);
   const [page, setPage] = useState(0);
@@ -2034,12 +2256,17 @@ function ScopeSection({
         const key = subgroupKeyForFile(f, group.scope);
         if (!key || !typeFilter.has(key)) return false;
       }
+      if (inTaskOnly && activeTask && !fileInTask(f.relativePath, activeTask)) return false;
       return true;
     }),
     itemSearch,
   );
   const totalVisible = visibleFiles.length;
   const totalChanged = group.modified + group.added + group.removed;
+  const inTaskCount = useMemo(
+    () => (activeTask ? group.files.filter((f) => fileInTask(f.relativePath, activeTask)).length : 0),
+    [activeTask, group.files],
+  );
 
   const toggleType = (key: string) => {
     setTypeFilter((prev) => {
@@ -2114,6 +2341,23 @@ function ScopeSection({
                     </button>
                   ))}
                 </div>
+
+                {/* In-task filter */}
+                {activeTask && (
+                  <button
+                    type="button"
+                    onClick={() => { setInTaskOnly((v) => !v); setPage(0); }}
+                    className={cn(
+                      "px-2 py-0.5 text-[10px] rounded border transition-colors",
+                      inTaskOnly
+                        ? "bg-indigo-600 border-indigo-600 text-white"
+                        : "bg-white border-slate-300 text-slate-600 hover:bg-slate-50",
+                    )}
+                    title={`Show only files already in "${activeTask.name}"`}
+                  >
+                    In task ({inTaskCount})
+                  </button>
+                )}
 
                 {/* Type filter (scripts only) */}
                 {supportsTypeFilter && availableTypes.length > 0 && (
@@ -2225,11 +2469,12 @@ function ScopeSection({
                   ));
                 })()
               ) : (
-                visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => (
-                  group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
-                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
-                    : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} />
-                ))
+                visibleFiles.slice(page * pageSize, (page + 1) * pageSize).map((f) => {
+                  const fileTasks = eligibleTasks.filter((t) => fileInTask(f.relativePath, t));
+                  return group.scope === "scripts" && sourceEnv !== undefined && targetEnv !== undefined
+                    ? <ScriptScopeFileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} groupFiles={group.files} allFiles={allFiles ?? []} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} fileTasks={fileTasks} activeTaskId={activeTask?.id ?? null} onRemoveFromTask={onRemoveFromTask} />
+                    : <FileRow key={f.relativePath} file={f} sourceLabel={sourceLabel} targetLabel={targetLabel} checked={selectedPaths?.has(f.relativePath)} onToggle={onTogglePath ? () => onTogglePath(f.relativePath) : undefined} fileTasks={fileTasks} activeTaskId={activeTask?.id ?? null} onRemoveFromTask={onRemoveFromTask} />;
+                })
               )
             ) : (
               <p className="text-xs text-slate-400 text-center py-2">
@@ -2268,6 +2513,8 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   const [addingToTask, setAddingToTask] = useState(false);
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
   const [addError, setAddError] = useState<{ task: string; missing: string[] } | null>(null);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
   // Match tasks whose source and target envs align with the comparison's
@@ -2331,6 +2578,35 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
       if (file && file.status === "added") missing.push(p);
     }
     return missing;
+  };
+
+  const activeTask = useMemo(
+    () => (activeTaskId ? eligibleTasks.find((t) => t.id === activeTaskId) ?? null : null),
+    [activeTaskId, eligibleTasks],
+  );
+
+  // Clear activeTaskId if the task disappears after a refresh.
+  useEffect(() => {
+    if (activeTaskId && !eligibleTasks.some((t) => t.id === activeTaskId)) {
+      setActiveTaskId(null);
+      setDrawerOpen(false);
+    }
+  }, [activeTaskId, eligibleTasks]);
+
+  const handleRemoveFromTask = async (task: PromotionTask, pathOrItems: string | ScopeSelection[]) => {
+    const newItems = Array.isArray(pathOrItems)
+      ? pathOrItems
+      : removeItemFromTaskItems(pathOrItems, task.items);
+    try {
+      const res = await fetch(`/api/promotion-tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...task, items: newItems }),
+      });
+      if (res.ok) router.refresh();
+    } catch {
+      // swallow — router.refresh() will not fire and UI stays in sync
+    }
   };
 
   const handleAddToTask = async (task: PromotionTask) => {
@@ -2431,6 +2707,31 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
             />
             Hide metadata files
           </label>
+
+          {eligibleTasks.length > 0 && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 ml-auto">
+              <span className="text-slate-400">Active task:</span>
+              <select
+                value={activeTaskId ?? ""}
+                onChange={(e) => setActiveTaskId(e.target.value || null)}
+                className="px-2 py-0.5 text-xs rounded border border-slate-200 bg-white text-slate-700 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+              >
+                <option value="">—</option>
+                {eligibleTasks.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+              {activeTask && (
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  className="px-2 py-0.5 text-xs rounded border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
+                >
+                  Manage items
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -2466,6 +2767,9 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
                 onTogglePath={togglePath}
                 hideUnchanged={hideUnchanged}
                 hideMetadata={hideMetadata}
+                eligibleTasks={eligibleTasks}
+                activeTask={activeTask}
+                onRemoveFromTask={handleRemoveFromTask}
               />
             ))}
           </>
@@ -2488,6 +2792,20 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
           selectedPaths={selectedPaths}
           onTogglePath={togglePath}
           onClose={() => setAllFilesModalOpen(false)}
+        />
+      )}
+
+      {/* Task drawer */}
+      {activeTask && drawerOpen && (
+        <TaskItemsDrawer
+          task={activeTask}
+          onClose={() => setDrawerOpen(false)}
+          onRemoveItem={(path) => handleRemoveFromTask(activeTask, path)}
+          onRemoveScope={(scope) => {
+            const next = activeTask.items.filter((s) => s.scope !== scope);
+            handleRemoveFromTask(activeTask, next);
+          }}
+          onClearAll={() => handleRemoveFromTask(activeTask, [])}
         />
       )}
 
