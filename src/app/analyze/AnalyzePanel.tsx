@@ -3,6 +3,28 @@
 import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import type { JourneyInfo, AnalyzeResult, AnalyzeSummary, ScriptUsage } from "@/app/api/analyze/route";
+import type { EsvOrphanReport, EsvOrphan, EsvReference } from "@/lib/analyze/esv-orphans";
+
+type TaskId = "journeys" | "esv-orphans";
+
+interface TaskDef {
+  id: TaskId;
+  name: string;
+  description: string;
+}
+
+const TASKS: TaskDef[] = [
+  {
+    id: "journeys",
+    name: "Journey analysis",
+    description: "Entry points, shared sub-journeys, orphans, and script usage across journeys.",
+  },
+  {
+    id: "esv-orphans",
+    name: "ESV orphan references",
+    description: "Find ESV placeholders and systemEnv lookups that aren't defined under esvs/.",
+  },
+];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -435,27 +457,43 @@ function ScriptUsagePanel({ scripts }: { scripts: ScriptUsage[] }) {
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 export function AnalyzePanel({ environments }: { environments: { name: string }[] }) {
+  const [taskId, setTaskId] = useState<TaskId>("journeys");
   const [env, setEnv] = useState(environments[0]?.name ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<AnalyzeResult | null>(null);
+  const [journeyResult, setJourneyResult] = useState<AnalyzeResult | null>(null);
+  const [esvResult, setEsvResult] = useState<EsvOrphanReport | null>(null);
   const [tab, setTab] = useState<"summary" | "tree" | "scripts">("summary");
   const [searchQ, setSearchQ] = useState("");
 
-  async function runAnalyze() {
+  const currentTask = TASKS.find((t) => t.id === taskId)!;
+
+  async function runTask() {
     setLoading(true);
     setError(null);
-    setResult(null);
     try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ env }),
-      });
-      const data = await res.json();
-      if (data.error) { setError(data.error); return; }
-      setResult(data as AnalyzeResult);
-      setTab("summary");
+      if (taskId === "journeys") {
+        setJourneyResult(null);
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ env }),
+        });
+        const data = await res.json();
+        if (data.error) { setError(data.error); return; }
+        setJourneyResult(data as AnalyzeResult);
+        setTab("summary");
+      } else if (taskId === "esv-orphans") {
+        setEsvResult(null);
+        const res = await fetch("/api/analyze/esv-orphans", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ env }),
+        });
+        const data = await res.json();
+        if (data.error) { setError(data.error); return; }
+        setEsvResult(data as EsvOrphanReport);
+      }
     } catch (e) {
       setError(String(e));
     } finally {
@@ -465,13 +503,30 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
 
   return (
     <div className="space-y-6">
+      {/* Task selector */}
+      <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-start gap-4 flex-wrap">
+        <div className="flex flex-col gap-1 min-w-[200px]">
+          <label className="text-xs text-slate-500 font-medium">Task</label>
+          <select
+            value={taskId}
+            onChange={(e) => { setTaskId(e.target.value as TaskId); setError(null); }}
+            className="px-3 py-1.5 text-sm border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          >
+            {TASKS.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </div>
+        <p className="flex-1 min-w-[200px] text-xs text-slate-500 pt-5">{currentTask.description}</p>
+      </div>
+
       {/* Controls */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
           <label className="text-xs text-slate-500 font-medium">Environment</label>
           <select
             value={env}
-            onChange={(e) => { setEnv(e.target.value); setResult(null); }}
+            onChange={(e) => { setEnv(e.target.value); setJourneyResult(null); setEsvResult(null); }}
             className="px-3 py-1.5 text-sm border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
           >
             {environments.map((e) => (
@@ -481,11 +536,11 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
         </div>
 
         <button
-          onClick={runAnalyze}
+          onClick={runTask}
           disabled={loading || !env}
           className="px-4 py-1.5 text-sm bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? "Analyzing…" : "Analyze"}
+          {loading ? "Analyzing…" : `Run ${currentTask.name}`}
         </button>
       </div>
 
@@ -494,10 +549,9 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
         <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{error}</div>
       )}
 
-      {/* Results */}
-      {result && (
+      {/* Journey results */}
+      {taskId === "journeys" && journeyResult && (
         <div className="space-y-4">
-          {/* Tabs */}
           <div className="flex items-center gap-1 border-b border-slate-200">
             {([
               { key: "summary" as const, label: "Summary" },
@@ -537,11 +591,169 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
             )}
           </div>
 
-          {tab === "summary" && <SummaryDashboard summary={result.summary} journeys={result.journeys} />}
-          {tab === "tree" && <JourneyDependencyTree journeys={result.journeys} searchQ={searchQ.toLowerCase()} />}
-          {tab === "scripts" && <ScriptUsagePanel scripts={result.scriptUsage} />}
+          {tab === "summary" && <SummaryDashboard summary={journeyResult.summary} journeys={journeyResult.journeys} />}
+          {tab === "tree" && <JourneyDependencyTree journeys={journeyResult.journeys} searchQ={searchQ.toLowerCase()} />}
+          {tab === "scripts" && <ScriptUsagePanel scripts={journeyResult.scriptUsage} />}
         </div>
       )}
+
+      {/* ESV orphan results */}
+      {taskId === "esv-orphans" && esvResult && (
+        <EsvOrphanReportView report={esvResult} />
+      )}
+    </div>
+  );
+}
+
+// ── ESV Orphan report view ────────────────────────────────────────────────────
+
+function EsvOrphanReportView({ report }: { report: EsvOrphanReport }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
+  const [showUnused, setShowUnused] = useState(false);
+
+  const visibleOrphans = useMemo(() => {
+    if (!query.trim()) return report.orphans;
+    const q = query.trim().toLowerCase();
+    return report.orphans.filter((o) =>
+      o.name.toLowerCase().includes(q) ||
+      o.references.some((r) => r.path.toLowerCase().includes(q))
+    );
+  }, [report.orphans, query]);
+
+  const toggle = (name: string) => setExpanded((prev) => {
+    const next = new Set(prev);
+    if (next.has(name)) next.delete(name); else next.add(name);
+    return next;
+  });
+
+  const expandAll = () => setExpanded(new Set(visibleOrphans.map((o) => o.name)));
+  const collapseAll = () => setExpanded(new Set());
+
+  return (
+    <div className="space-y-4">
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Stat value={report.orphans.length} label="Orphan ESVs" sub="referenced, not defined" color="text-rose-600" />
+        <Stat value={report.unused.length} label="Unused ESVs" sub="defined, not referenced" color="text-amber-600" />
+        <Stat value={report.totalReferences} label="Total references" sub={`across ${report.scannedFiles.toLocaleString()} files`} color="text-slate-800" />
+        <Stat value={report.totalDefinedNames} label="Defined ESVs" color="text-sky-600" />
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Filter orphan name or file path…"
+          className="flex-1 min-w-[220px] text-xs rounded border border-slate-300 px-3 py-1.5 font-mono focus:outline-none focus:ring-1 focus:ring-sky-400"
+        />
+        <button type="button" onClick={expandAll} className="text-[11px] text-slate-500 hover:text-slate-800">
+          Expand all
+        </button>
+        <span className="text-slate-300 text-[10px]">·</span>
+        <button type="button" onClick={collapseAll} className="text-[11px] text-slate-500 hover:text-slate-800">
+          Collapse all
+        </button>
+        <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer ml-auto">
+          <input type="checkbox" checked={showUnused} onChange={(e) => setShowUnused(e.target.checked)} className="accent-sky-600" />
+          Show unused defined ESVs
+        </label>
+      </div>
+
+      {/* Orphans list */}
+      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div className="px-4 py-2 border-b border-slate-100 bg-rose-50/40 text-[11px] font-semibold uppercase tracking-wide text-rose-700">
+          Orphan references — {visibleOrphans.length} {visibleOrphans.length === 1 ? "name" : "names"}
+        </div>
+        {visibleOrphans.length === 0 ? (
+          <div className="p-6 text-center text-sm text-slate-400">
+            {report.orphans.length === 0 ? "No orphan ESV references — every placeholder resolves." : "No matches."}
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {visibleOrphans.map((o) => {
+              const open = expanded.has(o.name);
+              return <OrphanRow key={o.name} orphan={o} open={open} onToggle={() => toggle(o.name)} />;
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Unused list */}
+      {showUnused && report.unused.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="px-4 py-2 border-b border-slate-100 bg-amber-50/40 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+            Unused defined ESVs — {report.unused.length}
+          </div>
+          <div className="divide-y divide-slate-100">
+            {report.unused.map((u) => (
+              <div key={u.name} className="flex items-center gap-3 px-4 py-1.5 text-xs">
+                <span className={cn(
+                  "px-1.5 py-0.5 rounded text-[10px] font-semibold",
+                  u.kind === "secret" ? "bg-rose-100 text-rose-700" : "bg-sky-100 text-sky-700"
+                )}>{u.kind}</span>
+                <span className="font-mono text-slate-800 flex-1 truncate">{u.name}</span>
+                <span className="font-mono text-slate-400 text-[10px] truncate">{u.file}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Stat({ value, label, sub, color }: { value: number | string; label: string; sub?: string; color: string }) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-lg px-4 py-3">
+      <div className={cn("text-2xl font-bold", color)}>{value}</div>
+      <div className="text-xs font-medium text-slate-600">{label}</div>
+      {sub && <div className="text-[10px] text-slate-400 mt-0.5">{sub}</div>}
+    </div>
+  );
+}
+
+function OrphanRow({ orphan, open, onToggle }: { orphan: EsvOrphan; open: boolean; onToggle: () => void }) {
+  // Count distinct files
+  const fileCount = new Set(orphan.references.map((r) => r.path)).size;
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-slate-50 transition-colors"
+      >
+        <span className="text-slate-400 text-[10px] w-3">{open ? "▾" : "▸"}</span>
+        <span className="font-mono text-xs text-rose-700 font-semibold flex-1 truncate">{orphan.name}</span>
+        <span className="text-[10px] text-slate-400 tabular-nums shrink-0">
+          {orphan.references.length} ref{orphan.references.length === 1 ? "" : "s"} · {fileCount} file{fileCount === 1 ? "" : "s"}
+        </span>
+      </button>
+      {open && (
+        <div className="bg-slate-50/60 px-4 pb-3 pt-1 space-y-1">
+          {orphan.references.map((r, i) => (
+            <RefLine key={i} reference={r} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RefLine({ reference }: { reference: EsvReference }) {
+  const formBadge = reference.form === "placeholder"
+    ? { label: "&{esv}", cls: "bg-sky-100 text-sky-700" }
+    : reference.form === "realmPlaceholder"
+    ? { label: "fr.realm", cls: "bg-indigo-100 text-indigo-700" }
+    : { label: "systemEnv", cls: "bg-violet-100 text-violet-700" };
+  return (
+    <div className="flex items-start gap-2 text-[11px] font-mono">
+      <span className={cn("shrink-0 px-1.5 py-0 rounded text-[10px] font-semibold", formBadge.cls)}>{formBadge.label}</span>
+      <span className="shrink-0 text-slate-400 tabular-nums">{reference.line}</span>
+      <span className="shrink-0 text-slate-600 truncate max-w-[260px]" title={reference.path}>{reference.path}</span>
+      <span className="flex-1 text-slate-500 break-all">{reference.snippet}</span>
     </div>
   );
 }
