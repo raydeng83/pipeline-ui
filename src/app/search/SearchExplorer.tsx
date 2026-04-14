@@ -278,6 +278,26 @@ export function SearchExplorer({ environments }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-4">
           {/* Results list */}
           <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col max-h-[calc(100vh-320px)]">
+            <div className="flex items-center gap-3 px-3 py-1.5 border-b border-slate-200 bg-slate-50/50 shrink-0">
+              <button
+                type="button"
+                onClick={() => setExpanded(new Set(data.results.map((r) => r.path)))}
+                className="text-[11px] text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Expand all
+              </button>
+              <span className="text-slate-300 text-[10px]">·</span>
+              <button
+                type="button"
+                onClick={() => setExpanded(new Set())}
+                className="text-[11px] text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Collapse all
+              </button>
+              <span className="ml-auto text-[10px] text-slate-400">
+                {expanded.size} / {data.results.length} expanded
+              </span>
+            </div>
             <div className="overflow-y-auto flex-1">
               {Array.from(grouped.entries()).map(([scope, files]) => (
                 <div key={scope}>
