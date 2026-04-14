@@ -1514,13 +1514,23 @@ export function LogsExplorer({
             {loading ? "Fetching…" : lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Starting…"}
           </div>
         )}
-        {fetched && (
-          <span className="text-xs text-slate-400">
-            {filtered.length}{filtered.length !== entries.length && `/${entries.length}`}{" "}
-            {entries.length === 1 ? "entry" : "entries"}
-            {loading && !tailing && " · loading…"}
-          </span>
-        )}
+        {(fetched || tailTotalReceived > 0) && (() => {
+          const totalReceived = mode === "tail" ? Math.max(entries.length, tailTotalReceived) : entries.length;
+          const dedupeHidden = dedupe
+            ? Array.from(dupeCounts.values()).reduce((sum, n) => sum + (n - 1), 0)
+            : 0;
+          return (
+            <span className="text-xs text-slate-400">
+              {filtered.length}
+              {filtered.length !== totalReceived && `/${totalReceived.toLocaleString()}`}{" "}
+              {totalReceived === 1 ? "entry" : "entries"}
+              {dedupe && dedupeHidden > 0 && (
+                <span className="text-amber-600"> · {dedupeHidden.toLocaleString()} deduped</span>
+              )}
+              {loading && !tailing && " · loading…"}
+            </span>
+          );
+        })()}
         {saveFlash && <span className="text-xs text-emerald-500 font-medium">Saved to history</span>}
         {sourcesError && <span className="text-xs text-red-500">{sourcesError}</span>}
         {error && <span className="text-xs text-red-500">{error}</span>}
@@ -1893,7 +1903,20 @@ export function LogsExplorer({
                 </label>
               )}
               <span className="text-xs text-slate-400 whitespace-nowrap">
-                {filtered.length} / {entries.length}
+                {(() => {
+                  const totalReceived = mode === "tail" ? Math.max(entries.length, tailTotalReceived) : entries.length;
+                  const dedupeHidden = dedupe
+                    ? Array.from(dupeCounts.values()).reduce((sum, n) => sum + (n - 1), 0)
+                    : 0;
+                  return (
+                    <>
+                      {filtered.length} / {totalReceived.toLocaleString()}
+                      {dedupe && dedupeHidden > 0 && (
+                        <span className="text-amber-600"> (−{dedupeHidden.toLocaleString()})</span>
+                      )}
+                    </>
+                  );
+                })()}
               </span>
               {!fullscreen && (
                 <div className="flex items-center gap-0.5 shrink-0">
@@ -2113,7 +2136,7 @@ export function LogsExplorer({
           )}
 
           {/* Search completed indicator */}
-          {fetchProgress && fetchProgress.done && (
+          {mode === "search" && fetchProgress && fetchProgress.done && (
             <div className={cn("flex items-center gap-2 px-4 py-2 border-t border-slate-100 shrink-0", fetchProgress.loaded > 0 ? "bg-emerald-50/50" : "bg-slate-50/50")}>
               {fetchProgress.loaded > 0 ? (
                 <svg className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
