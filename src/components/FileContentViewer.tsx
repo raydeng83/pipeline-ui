@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { highlightTokens } from "@/lib/highlight";
 
@@ -25,6 +25,13 @@ function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" 
 
 export function FileContentViewer({ content, fileName, language, className, highlightLine }: Props) {
   const lang = language ?? detectLanguage(fileName);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!highlightLine) return;
+    const el = containerRef.current?.querySelector(`[data-ln="${highlightLine}"]`);
+    if (el) (el as HTMLElement).scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [highlightLine, content]);
 
   // Tokenize, then split tokens on newlines so each source line is its own array.
   const lines = useMemo(() => {
@@ -44,6 +51,7 @@ export function FileContentViewer({ content, fileName, language, className, high
 
   return (
     <div
+      ref={containerRef}
       className={cn(
         "h-full overflow-auto bg-slate-900 text-slate-300 font-mono text-xs leading-relaxed",
         className,
@@ -55,7 +63,7 @@ export function FileContentViewer({ content, fileName, language, className, high
             const ln = i + 1;
             const isHighlighted = highlightLine === ln;
             return (
-              <tr key={i} className={cn(isHighlighted && "bg-amber-900/30")}>
+              <tr key={i} data-ln={ln} className={cn(isHighlighted && "bg-amber-900/30")}>
                 <td
                   aria-hidden
                   className={cn(

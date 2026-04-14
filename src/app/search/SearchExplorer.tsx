@@ -46,6 +46,23 @@ export function SearchExplorer({ environments }: Props) {
   const [selected, setSelected] = useState<{ path: string; line: number } | null>(null);
   const [fileContent, setFileContent] = useState<string>("");
   const [fileLoading, setFileLoading] = useState(false);
+  const [previewFullscreen, setPreviewFullscreen] = useState(false);
+  const [copyFlash, setCopyFlash] = useState(false);
+
+  useEffect(() => {
+    if (!previewFullscreen) return;
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") setPreviewFullscreen(false); };
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, [previewFullscreen]);
+
+  const handleCopyFile = () => {
+    if (!fileContent) return;
+    navigator.clipboard.writeText(fileContent).then(() => {
+      setCopyFlash(true);
+      setTimeout(() => setCopyFlash(false), 1500);
+    });
+  };
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -308,12 +325,45 @@ export function SearchExplorer({ environments }: Props) {
           </div>
 
           {/* File preview */}
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden flex flex-col max-h-[calc(100vh-320px)]">
+          <div className={cn(
+            "bg-white border border-slate-200 overflow-hidden flex flex-col",
+            previewFullscreen
+              ? "fixed inset-0 z-50 rounded-none"
+              : "rounded-lg max-h-[calc(100vh-320px)]"
+          )}>
             {selected ? (
               <>
-                <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                  <span className="text-xs font-mono text-slate-700 truncate">{selected.path}</span>
-                  <span className="text-[10px] text-slate-400">line {selected.line}</span>
+                <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center gap-3">
+                  <span className="text-xs font-mono text-slate-700 truncate flex-1 min-w-0">{selected.path}</span>
+                  <span className="text-[10px] text-slate-400 shrink-0">line {selected.line}</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyFile}
+                    disabled={!fileContent || fileLoading}
+                    title="Copy file contents"
+                    className={cn(
+                      "text-xs transition-colors shrink-0",
+                      copyFlash ? "text-emerald-600" : "text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                    )}
+                  >
+                    {copyFlash ? "Copied!" : "Copy"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewFullscreen((v) => !v)}
+                    title={previewFullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+                    className="text-slate-400 hover:text-slate-700 transition-colors shrink-0"
+                  >
+                    {previewFullscreen ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
                 <div className="flex-1 overflow-hidden">
                   {fileLoading ? (
