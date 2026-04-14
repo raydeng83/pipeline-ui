@@ -38,8 +38,23 @@ const GROUP_NAMES = Object.keys(GROUPS);
 export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSelectorProps) {
   const [mode, setMode] = useState<Mode>("basic");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
   const selectedSet = new Set(selected);
   const allSelected = selected.length === CLI_SCOPES.length;
+
+  const q = query.trim().toLowerCase();
+  const matchesScope = (s: ScopeDisplayEntry): boolean => {
+    if (!q) return true;
+    if (s.label.toLowerCase().includes(q)) return true;
+    if (s.value.toLowerCase().includes(q)) return true;
+    if (s.description?.toLowerCase().includes(q)) return true;
+    return false;
+  };
+  const matchesGroup = (groupName: string, scopes: ScopeDisplayEntry[]): boolean => {
+    if (!q) return true;
+    if (groupName.toLowerCase().includes(q)) return true;
+    return scopes.some(matchesScope);
+  };
 
   const toggleGroupExpand = useCallback((name: string) => {
     setExpandedGroups((prev) => {
@@ -100,6 +115,30 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
           ))}
         </div>
 
+        <div className="flex items-center gap-1 ml-1">
+          <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Find scope…"
+            disabled={disabled}
+            className="text-[11px] px-2 py-0.5 rounded border border-slate-200 bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-40 w-44"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="text-slate-400 hover:text-slate-600 text-xs"
+              title="Clear scope filter"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
         <button
           type="button"
           onClick={toggleAll}
@@ -117,7 +156,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
       {/* Basic mode: group-level pills */}
       {mode === "basic" && (
         <div className="flex flex-wrap gap-2">
-          {Object.entries(GROUPS).map(([groupName, scopes]) => {
+          {Object.entries(GROUPS).filter(([gn, sc]) => matchesGroup(gn, sc)).map(([groupName, scopes]) => {
             const cliGroupValues = scopes
               .filter((s) => s.cliSupported !== false)
               .map((s) => s.value as ConfigScope);
@@ -163,14 +202,16 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
           </button>
         </div>
         <div className="space-y-2.5">
-          {Object.entries(GROUPS).map(([groupName, scopes]) => {
+          {Object.entries(GROUPS).filter(([gn, sc]) => matchesGroup(gn, sc)).map(([groupName, scopes]) => {
             const cliGroupValues = scopes
               .filter((s) => s.cliSupported !== false)
               .map((s) => s.value as ConfigScope);
             const allGroupSelected = cliGroupValues.length > 0 && cliGroupValues.every((v) => selectedSet.has(v));
             const someGroupSelected = cliGroupValues.some((v) => selectedSet.has(v));
             const selectedCount = cliGroupValues.filter((v) => selectedSet.has(v)).length;
-            const isExpanded = expandedGroups.has(groupName);
+            // Auto-expand any matching group while a query is active, so the
+            // user immediately sees the rows that matched.
+            const isExpanded = q ? true : expandedGroups.has(groupName);
             const hasCliScopes = cliGroupValues.length > 0;
 
             return (
@@ -231,7 +272,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                 {/* Scope rows (collapsible) */}
                 {isExpanded && (
                   <div className="divide-y divide-slate-50">
-                    {scopes.map((scopeEntry) => {
+                    {scopes.filter(matchesScope).map((scopeEntry) => {
                       const { value, label, description, cliSupported, commandType } = scopeEntry;
                       const isUnsupported = cliSupported === false;
                       const checked = !isUnsupported && selectedSet.has(value as ConfigScope);
