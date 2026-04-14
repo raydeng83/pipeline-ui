@@ -56,7 +56,7 @@ function groupByDay(records: HistoryRecord[]): { label: string; records: History
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type TypeFilter = "all" | "pull" | "push" | "compare" | "dry-run" | "promote" | "log-search";
+type TypeFilter = "all" | "pull" | "push" | "compare" | "dry-run" | "promote" | "log-search" | "analyze";
 type StatusFilter = "all" | "success" | "failed";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -306,6 +306,7 @@ export function HistoryView({
             <option value="dry-run">Dry Run</option>
             <option value="promote">Promote</option>
             <option value="log-search">Log Search</option>
+            <option value="analyze">Analyze</option>
           </select>
 
           <select

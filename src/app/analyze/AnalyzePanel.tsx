@@ -14,6 +14,29 @@ interface TaskDef {
   description: string;
 }
 
+function postAnalyzeHistory(payload: {
+  env: string;
+  startedAt: string;
+  durationMs: number;
+  summary: string;
+  taskName: string;
+}) {
+  fetch("/api/history", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "analyze",
+      environment: payload.env,
+      scopes: [],
+      status: "success",
+      startedAt: payload.startedAt,
+      durationMs: payload.durationMs,
+      summary: payload.summary,
+      taskName: payload.taskName,
+    }),
+  }).catch(() => { /* non-fatal */ });
+}
+
 const TASKS: TaskDef[] = [
   {
     id: "journeys",
@@ -457,21 +480,48 @@ function ScriptUsagePanel({ scripts }: { scripts: ScriptUsage[] }) {
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 
+const STORAGE_KEY = "analyze-state-v1";
+
+interface PersistedState {
+  taskId: TaskId;
+  env: string;
+  journeyResult: AnalyzeResult | null;
+  esvResult: EsvOrphanReport | null;
+}
+
+function loadPersisted(): Partial<PersistedState> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Partial<PersistedState>) : {};
+  } catch { return {}; }
+}
+
 export function AnalyzePanel({ environments }: { environments: { name: string }[] }) {
-  const [taskId, setTaskId] = useState<TaskId>("journeys");
-  const [env, setEnv] = useState(environments[0]?.name ?? "");
+  const persistedRef = useMemo(() => loadPersisted(), []);
+  const [taskId, setTaskId] = useState<TaskId>(persistedRef.taskId ?? "journeys");
+  const [env, setEnv] = useState(persistedRef.env ?? environments[0]?.name ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [journeyResult, setJourneyResult] = useState<AnalyzeResult | null>(null);
-  const [esvResult, setEsvResult] = useState<EsvOrphanReport | null>(null);
+  const [journeyResult, setJourneyResult] = useState<AnalyzeResult | null>(persistedRef.journeyResult ?? null);
+  const [esvResult, setEsvResult] = useState<EsvOrphanReport | null>(persistedRef.esvResult ?? null);
   const [tab, setTab] = useState<"summary" | "tree" | "scripts">("summary");
   const [searchQ, setSearchQ] = useState("");
 
   const currentTask = TASKS.find((t) => t.id === taskId)!;
 
+  // Persist state on every relevant change so a refresh brings the result back.
+  useEffect(() => {
+    try {
+      const payload: PersistedState = { taskId, env, journeyResult, esvResult };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch { /* ignore quota */ }
+  }, [taskId, env, journeyResult, esvResult]);
+
   async function runTask() {
     setLoading(true);
     setError(null);
+    const started = new Date();
     try {
       if (taskId === "journeys") {
         setJourneyResult(null);
@@ -482,8 +532,16 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
         });
         const data = await res.json();
         if (data.error) { setError(data.error); return; }
-        setJourneyResult(data as AnalyzeResult);
+        const parsed = data as AnalyzeResult;
+        setJourneyResult(parsed);
         setTab("summary");
+        postAnalyzeHistory({
+          env,
+          startedAt: started.toISOString(),
+          durationMs: Date.now() - started.getTime(),
+          summary: `Journey analysis · ${parsed.summary.total} journeys, ${parsed.summary.orphaned} orphaned, max depth ${parsed.summary.maxDepth}`,
+          taskName: "Journey analysis",
+        });
       } else if (taskId === "esv-orphans") {
         setEsvResult(null);
         const res = await fetch("/api/analyze/esv-orphans", {
@@ -493,7 +551,15 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
         });
         const data = await res.json();
         if (data.error) { setError(data.error); return; }
-        setEsvResult(data as EsvOrphanReport);
+        const report = data as EsvOrphanReport;
+        setEsvResult(report);
+        postAnalyzeHistory({
+          env,
+          startedAt: started.toISOString(),
+          durationMs: Date.now() - started.getTime(),
+          summary: `ESV orphans · ${report.orphans.length} orphan${report.orphans.length === 1 ? "" : "s"}, ${report.unused.length} unused, ${report.totalReferences} refs across ${report.scannedFiles} files`,
+          taskName: "ESV orphan references",
+        });
       }
     } catch (e) {
       setError(String(e));
@@ -659,6 +725,41 @@ function EsvOrphanReportView({ report, env }: { report: EsvOrphanReport; env: st
   const collapseAll = () => setExpanded(new Set());
   const openReference = (r: EsvReference) => setSelected({ path: r.path, line: r.line });
 
+  const tsStamp = () => new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+
+  const exportJson = () => {
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement("a"), {
+      href: url,
+      download: `esv-orphans-${env}-${tsStamp()}.json`,
+    });
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportCsv = () => {
+    const rows: string[] = ["esv_name,form,file,line,snippet"];
+    const escape = (v: string) => {
+      const needs = /[",\n]/.test(v);
+      const q = v.replace(/"/g, '""');
+      return needs ? `"${q}"` : q;
+    };
+    for (const o of report.orphans) {
+      for (const r of o.references) {
+        rows.push([escape(o.name), escape(r.form), escape(r.path), String(r.line), escape(r.snippet)].join(","));
+      }
+    }
+    const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement("a"), {
+      href: url,
+      download: `esv-orphans-${env}-${tsStamp()}.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
       {/* Stats */}
@@ -685,10 +786,31 @@ function EsvOrphanReportView({ report, env }: { report: EsvOrphanReport; env: st
         <button type="button" onClick={collapseAll} className="text-[11px] text-slate-500 hover:text-slate-800">
           Collapse all
         </button>
-        <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer ml-auto">
-          <input type="checkbox" checked={showUnused} onChange={(e) => setShowUnused(e.target.checked)} className="accent-sky-600" />
-          Show unused defined ESVs
-        </label>
+        <div className="flex items-center gap-1.5 ml-auto">
+          <button
+            type="button"
+            onClick={exportJson}
+            disabled={report.orphans.length === 0}
+            className="px-2 py-0.5 text-[11px] font-medium rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            title="Export full report as JSON"
+          >
+            Export JSON
+          </button>
+          <button
+            type="button"
+            onClick={exportCsv}
+            disabled={report.orphans.length === 0}
+            className="px-2 py-0.5 text-[11px] font-medium rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            title="Export orphan references as CSV"
+          >
+            Export CSV
+          </button>
+          <span className="text-slate-300 text-[10px]">·</span>
+          <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer">
+            <input type="checkbox" checked={showUnused} onChange={(e) => setShowUnused(e.target.checked)} className="accent-sky-600" />
+            Show unused defined ESVs
+          </label>
+        </div>
       </div>
 
       {/* Orphans list + file preview split */}
