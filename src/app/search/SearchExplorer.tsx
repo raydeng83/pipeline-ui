@@ -167,14 +167,24 @@ export function SearchExplorer({ environments }: Props) {
               className="block w-full px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] font-mono outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white"
             />
           </div>
-          <button
-            type="button"
-            onClick={runSearch}
-            disabled={!env || !query.trim() || loading}
-            className="btn-primary disabled:opacity-40"
-          >
-            {loading ? "Searching…" : "Search"}
-          </button>
+          {loading ? (
+            <button
+              type="button"
+              onClick={() => abortRef.current?.abort()}
+              className="px-3 py-2 text-sm font-medium bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors"
+            >
+              Stop
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={runSearch}
+              disabled={!env || !query.trim()}
+              className="btn-primary disabled:opacity-40"
+            >
+              Search
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

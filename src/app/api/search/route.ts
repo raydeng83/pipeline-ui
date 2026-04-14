@@ -136,6 +136,7 @@ export async function GET(req: NextRequest) {
   let truncated = false;
 
   for (const abs of walk(configDir)) {
+    if (req.signal.aborted) { truncated = true; break; }
     const rel = path.relative(configDir, abs).split(path.sep).join("/");
     if (globRe && !globRe.test(rel)) continue;
 
