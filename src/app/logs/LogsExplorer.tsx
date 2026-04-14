@@ -426,11 +426,13 @@ function terminalLevelClass(level: string): string {
 function TailTerminal({
   entries, defaultSource, searchTerm, keywords, wrapLines = false,
   scrollToIndex = null, activeMatchIndex = null, matchCase = false, wholeWord = false,
+  dupeCounts,
 }: {
   entries: LogEntry[];
   defaultSource: string;
   searchTerm: string;
   keywords: string[];
+  dupeCounts?: Map<number, number>;
   wrapLines?: boolean;
   scrollToIndex?: number | null;
   activeMatchIndex?: number | null;
@@ -561,6 +563,7 @@ function TailTerminal({
               const entry = entries[vRow.index];
               const level = getLevel(entry);
               const line  = formatTerminalLine(entry, defaultSource);
+              const count = dupeCounts?.get(vRow.index) ?? 1;
               const isActive = activeMatchIndex === vRow.index;
               return (
                 // Outer div: stable key + measureElement for virtualizer
@@ -580,6 +583,11 @@ function TailTerminal({
                     )}
                   >
                     {highlightLine(line, isActive)}
+                    {count > 1 && (
+                      <span className="ml-2 inline-block px-1.5 py-0 rounded bg-amber-900/60 text-amber-300 text-[10px] font-semibold align-middle">
+                        ×{count}
+                      </span>
+                    )}
                   </div>
                 </div>
               );
@@ -593,6 +601,7 @@ function TailTerminal({
                 const absIdx = startIdx + i;
                 const level = getLevel(entry);
                 const line  = formatTerminalLine(entry, defaultSource);
+                const count = dupeCounts?.get(absIdx) ?? 1;
                 const isActive = activeMatchIndex === absIdx;
                 return (
                   <div
@@ -605,6 +614,11 @@ function TailTerminal({
                     )}
                   >
                     {highlightLine(line, isActive)}
+                    {count > 1 && (
+                      <span className="ml-2 inline-block px-1.5 rounded bg-amber-900/60 text-amber-300 text-[10px] font-semibold align-middle">
+                        ×{count}
+                      </span>
+                    )}
                   </div>
                 );
               })}
@@ -645,6 +659,7 @@ const EntryRow = memo(function EntryRow({
   rowIdx,
   matchCase = false,
   wholeWord = false,
+  dupeCount = 1,
 }: {
   entry: LogEntry;
   source: string;
@@ -660,6 +675,7 @@ const EntryRow = memo(function EntryRow({
   rowIdx?: number;
   matchCase?: boolean;
   wholeWord?: boolean;
+  dupeCount?: number;
 }) {
   const [txCopied, setTxCopied] = useState(false);
   const effectiveSource = entry.source ?? source;
@@ -728,6 +744,11 @@ const EntryRow = memo(function EntryRow({
         </td>
         {isText ? (
           <td colSpan={2} className="px-2 py-2 text-slate-700 align-top font-mono text-[11px]">
+            {dupeCount > 1 && (
+              <span className="mr-2 inline-block px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-semibold align-middle">
+                ×{dupeCount}
+              </span>
+            )}
             <span className={cn("break-all whitespace-pre-wrap", !showFullMessage && "line-clamp-2")}>{highlight(message)}</span>
           </td>
         ) : (
@@ -772,6 +793,11 @@ const EntryRow = memo(function EntryRow({
               ) : null}
             </td>
             <td className="px-2 py-2 text-slate-800 align-top">
+              {dupeCount > 1 && (
+                <span className="mr-2 inline-block px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-semibold align-middle">
+                  ×{dupeCount}
+                </span>
+              )}
               <span className={cn("break-all", !showFullMessage && "line-clamp-2")}>{highlight(message)}</span>
               <span className="flex items-center gap-2 mt-0.5">
                 {userId && (
@@ -1034,6 +1060,7 @@ export function LogsExplorer({
   const [showFullMessage, setShowFullMessage] = useState(false);
   const [terminalView, setTerminalView] = useState(true); // tail mode: terminal vs paginated table
   const [wrapLines, setWrapLines] = useState(false);      // terminal: wrap long lines
+  const [dedupe, setDedupe] = useState(false);            // collapse exact-match duplicate entries
   const [rawSearch, setRawSearch] = useState("");   // what's in the input box
   const [search, setSearch] = useState("");          // active filter (3+ chars or Enter)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1376,7 +1403,7 @@ export function LogsExplorer({
     })),
   [levelFiltered, defaultSourceForNav]);
 
-  const filteredWithIdx = useMemo(() => {
+  const rawFilteredWithIdx = useMemo(() => {
     if (!search) return levelFiltered.map((e, i) => ({ e, i }));
     const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const pattern = wholeWord ? `\\b${escaped}\\b` : escaped;
@@ -1387,6 +1414,28 @@ export function LogsExplorer({
       return acc;
     }, []);
   }, [levelFiltered, entryStrings, search, matchCase, wholeWord]);
+
+  // Dedupe pass — collapses exact-match duplicates to the first occurrence and tracks counts.
+  // Key: source + level + message text. When off, dupeCounts is empty and everything passes through.
+  const { filteredWithIdx, dupeCounts } = useMemo(() => {
+    if (!dedupe) return { filteredWithIdx: rawFilteredWithIdx, dupeCounts: new Map<number, number>() };
+    const seen = new Map<string, number>(); // key → position in result
+    const result: { e: LogEntry; i: number }[] = [];
+    const counts = new Map<number, number>();
+    for (const row of rawFilteredWithIdx) {
+      const msg = getMessage(row.e);
+      const level = getLevel(row.e);
+      const key = `${row.e.source ?? ""}|${level}|${msg}`;
+      const firstPos = seen.get(key);
+      if (firstPos === undefined) {
+        seen.set(key, result.length);
+        result.push(row);
+      } else {
+        counts.set(firstPos, (counts.get(firstPos) ?? 1) + 1);
+      }
+    }
+    return { filteredWithIdx: result, dupeCounts: counts };
+  }, [rawFilteredWithIdx, dedupe]);
 
   const filtered = useMemo(() => filteredWithIdx.map(({ e }) => e), [filteredWithIdx]);
 
@@ -1819,6 +1868,19 @@ export function LogsExplorer({
                   )}
                 >[W]</button>
               </div>
+              <button
+                type="button"
+                onClick={() => setDedupe((v) => !v)}
+                title={dedupe ? "Show all entries" : "Collapse exact-match duplicates"}
+                className={cn(
+                  "px-2 py-0.5 text-[11px] font-medium rounded border transition-colors shrink-0",
+                  dedupe
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-white text-slate-500 border-slate-300 hover:bg-slate-50"
+                )}
+              >
+                Dedupe
+              </button>
               {!terminalView && (
                 <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
                   <input
@@ -1964,6 +2026,7 @@ export function LogsExplorer({
                   searchTerm={search}
                   keywords={keywords}
                   wrapLines={wrapLines}
+                  dupeCounts={dupeCounts}
                   scrollToIndex={scrollToIndex}
                   activeMatchIndex={activeMatchIndex}
                   matchCase={matchCase}
@@ -2010,6 +2073,7 @@ export function LogsExplorer({
                         rowIdx={globalIdx}
                         matchCase={matchCase}
                         wholeWord={wholeWord}
+                        dupeCount={dupeCounts.get(globalIdx) ?? 1}
                       />
                     );
                   })}
