@@ -56,6 +56,11 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
     return scopes.some(matchesScope);
   };
 
+  // While a search query is active, force advanced view so the user can see
+  // matching rows (basic mode only shows group pills). Persisted mode is
+  // restored when the query is cleared.
+  const effectiveMode: Mode = q ? "advanced" : mode;
+
   const toggleGroupExpand = useCallback((name: string) => {
     setExpandedGroups((prev) => {
       const next = new Set(prev);
@@ -154,7 +159,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
       </p>
 
       {/* Basic mode: group-level pills */}
-      {mode === "basic" && (
+      {effectiveMode === "basic" && (
         <div className="flex flex-wrap gap-2">
           {Object.entries(GROUPS).filter(([gn, sc]) => matchesGroup(gn, sc)).map(([groupName, scopes]) => {
             const cliGroupValues = scopes
@@ -191,7 +196,7 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
       )}
 
       {/* Advanced mode: grouped list with descriptions */}
-      {mode === "advanced" && (
+      {effectiveMode === "advanced" && (
       <>
         <div className="flex items-center gap-2 mb-1">
           <button type="button" onClick={expandAllGroups} className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
