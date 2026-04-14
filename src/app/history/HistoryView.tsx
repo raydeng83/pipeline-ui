@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Environment } from "@/lib/fr-config-types";
 import type { HistoryRecord } from "@/lib/op-history";
 import { ActivityRow } from "@/components/ActivityRow";
-import { formatScopeLabel } from "@/lib/compare";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -73,7 +72,7 @@ function RecordDrawer({
 }) {
   return (
     <div
-      className="fixed inset-0 top-14 z-40 bg-slate-900/40"
+      className="fixed left-0 right-0 bottom-0 top-14 z-40 bg-slate-900/40"
       onClick={onClose}
     >
       <aside
@@ -213,40 +212,18 @@ function RecordDrawer({
             </div>
           )}
 
-          {/* Promoted items */}
-          {record.items && record.items.length > 0 && (
+          {/* If there are logs (future field) show a dark code block */}
+          {"logs" in record && record.logs ? (
             <div>
-              <div className="label-xs mb-2">PROMOTED ITEMS</div>
-              <div className="space-y-2">
-                {record.items.map((sel) => (
-                  <div key={sel.scope}>
-                    <div className="text-[11px] font-semibold text-slate-600">{formatScopeLabel(sel.scope)}</div>
-                    {sel.items && sel.items.length > 0 ? (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {sel.items.map((item) => (
-                          <span key={item} className="px-1.5 py-0.5 text-[10px] font-mono rounded border border-slate-200 bg-slate-50 text-slate-600">
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-[10px] text-slate-400 italic mt-0.5">All items in scope</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <div className="label-xs mb-2">LOGS</div>
+              <pre className="text-[11px] bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap break-all">
+                {String((record as { logs: unknown }).logs)}
+              </pre>
             </div>
-          )}
-
-          {/* Link to archive for full diff report */}
-          {record.type === "promote" && record.taskId && (
+          ) : (
             <div>
-              <a
-                href="/archive"
-                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-              >
-                View full details in Archive →
-              </a>
+              <div className="label-xs mb-2">LOGS</div>
+              <p className="text-xs text-slate-400 italic">No logs stored for this record.</p>
             </div>
           )}
         </div>
