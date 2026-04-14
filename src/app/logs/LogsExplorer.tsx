@@ -1863,7 +1863,7 @@ export function LogsExplorer({
                   </button>
                 </div>
               )}
-              {fetched && !tailing && (
+              {fetched && (
                 <>
                   <button
                     type="button"
