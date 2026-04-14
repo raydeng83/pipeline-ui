@@ -88,7 +88,12 @@ function collectDefinedEsvs(configDir: string): {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.toLowerCase().endsWith(".json")) continue;
-      const base = entry.name.replace(/\.json$/i, "");
+      // Some tooling emits `esv-foo.variable.json` / `esv-foo.secret.json`
+      // while other exports use bare `esv-foo.json`. Strip any of these.
+      const base = entry.name
+        .replace(/\.variable\.json$/i, "")
+        .replace(/\.secret\.json$/i, "")
+        .replace(/\.json$/i, "");
       const name = normalizeEsvName(base);
       if (!name) continue;
       const rel = path.relative(configDir, path.join(dir, entry.name)).split(path.sep).join("/");
