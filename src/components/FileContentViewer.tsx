@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { highlightTokens } from "@/lib/highlight";
+import { formatHtml, shouldFormatAsHtml } from "@/lib/format-html";
 
 interface Props {
   content: string;
@@ -27,15 +28,24 @@ export function FileContentViewer({ content, fileName, language, className, high
   const lang = language ?? detectLanguage(fileName);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Auto-format HTML-bearing email-template files (.md/.html) so the viewer
+  // shows structured indentation regardless of how messy the source file is.
+  const displayContent = useMemo(() => {
+    if (fileName && shouldFormatAsHtml(fileName)) {
+      try { return formatHtml(content); } catch { return content; }
+    }
+    return content;
+  }, [content, fileName]);
+
   useEffect(() => {
     if (!highlightLine) return;
     const el = containerRef.current?.querySelector(`[data-ln="${highlightLine}"]`);
     if (el) (el as HTMLElement).scrollIntoView({ block: "center", behavior: "smooth" });
-  }, [highlightLine, content]);
+  }, [highlightLine, displayContent]);
 
   // Tokenize, then split tokens on newlines so each source line is its own array.
   const lines = useMemo(() => {
-    const tokens = highlightTokens(content, lang === "js" || lang === "groovy" ? "javascript" : lang);
+    const tokens = highlightTokens(displayContent, lang === "js" || lang === "groovy" ? "javascript" : lang);
     const result: { text: string; color?: string; bold?: boolean }[][] = [[]];
     for (const tok of tokens) {
       const parts = tok.text.split("\n");
@@ -47,7 +57,7 @@ export function FileContentViewer({ content, fileName, language, className, high
       }
     }
     return result;
-  }, [content, lang]);
+  }, [displayContent, lang]);
 
   return (
     <div

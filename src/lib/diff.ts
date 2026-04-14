@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { DiffLine, FileDiff, CompareReport, CompareEndpoint, DiffOptions, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "./diff-types";
+import { formatHtml, shouldFormatAsHtml } from "./format-html";
 
 const MAX_LINES = 2000;
 const MAX_CONTENT_BYTES = 200_000; // 200 KB per side
@@ -140,6 +141,14 @@ function normalizeContent(content: string, filePath: string, opts: DiffOptions =
       if (!opts.includeMetadata) parsed = stripMetadata(parsed);
       result = JSON.stringify(parsed, null, 2);
     } catch { /* fall through */ }
+  }
+
+  // Pretty-print HTML-bearing email-template files (.md/.html) so a single
+  // upstream long line shows as structured indentation in both compare and
+  // browse views — the diff is computed on the formatted text so changes
+  // are line-precise.
+  if (shouldFormatAsHtml(filePath)) {
+    try { result = formatHtml(result); } catch { /* keep raw */ }
   }
 
   // Strip comments from script files
