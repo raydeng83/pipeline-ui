@@ -2222,8 +2222,11 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
           </p>
         ) : (
           <>
-            {/* Journey tree (shown first if available) */}
-            {report.journeyTree && report.journeyTree.length > 0 && (
+            {/* Journey tree (shown first if available) — only when journeys
+                was an actually-selected scope for this compare run. If the
+                user didn't include journeys in their scope selection, suppress
+                the tree even if the backend populated it. */}
+            {report.journeyTree && report.journeyTree.length > 0 && scopeGroups.some((g) => g.scope === "journeys") && (
               <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} hideUnchanged={hideUnchanged} />
             )}
 
