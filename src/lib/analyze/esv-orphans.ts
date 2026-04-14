@@ -79,7 +79,7 @@ function normalizeEsvName(raw: string): string {
  * Pull defined ESV names from esvs/variables/*.json and esvs/secrets/*.json.
  * The filename (minus .json and the esv- prefix) is authoritative.
  */
-function collectDefinedEsvs(configDir: string): {
+export function collectDefinedEsvs(configDir: string): {
   defined: Map<string, { file: string; kind: "variable" | "secret" }>;
 } {
   const defined = new Map<string, { file: string; kind: "variable" | "secret" }>();
@@ -111,7 +111,7 @@ function collectDefinedEsvs(configDir: string): {
  * String literals are honored so that `//` inside e.g. "https://..." is
  * not mistaken for a comment.
  */
-function stripJsComments(src: string): string {
+export function stripJsComments(src: string): string {
   const out = src.split("");
   const n = src.length;
   let i = 0;
@@ -177,8 +177,8 @@ function collectRefsFromContent(content: string, relPath: string): EsvReference[
  * redo the matching here (instead of threading captures through the helper
  * above) so the grouping stage gets one ref per matched name, not per match.
  */
-interface NamedRef extends EsvReference { name: string }
-function extractNamedRefs(scanText: string, relPath: string, displayText?: string): NamedRef[] {
+export interface NamedRef extends EsvReference { name: string }
+export function extractNamedRefs(scanText: string, relPath: string, displayText?: string): NamedRef[] {
   const refs: NamedRef[] = [];
   const scanLines = scanText.split("\n");
   const displayLines = (displayText ?? scanText).split("\n");

@@ -14,6 +14,7 @@ import { ScopedLogViewer } from "@/components/ScopedLogViewer";
 import { DiffReport } from "@/app/compare/DiffReport";
 import { DangerousConfirmDialog } from "@/components/DangerousConfirmDialog";
 import { useDialog } from "@/components/ConfirmDialog";
+import type { PromotePrecheckResult } from "@/lib/analyze/promote-precheck";
 import { useStreamingLogs } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
@@ -185,6 +186,146 @@ function PreparePhase({
   );
 }
 
+// ── ESV precheck panel (runs before Dry Run) ─────────────────────────────────
+
+function EsvPrecheckPanel({ task, visible }: { task: PromotionTask; visible: boolean }) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<PromotePrecheckResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  // Run once on first visibility, and whenever the task changes.
+  const taskKey = `${task.id}|${task.source.environment}|${task.target.environment}|${task.items.map((i) => `${i.scope}:${(i.items ?? []).join(",")}`).join("|")}`;
+  useEffect(() => {
+    if (!visible) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    fetch("/api/promote/esv-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sourceEnv: task.source.environment,
+        targetEnv: task.target.environment,
+        scopeSelections: task.items,
+      }),
+    })
+      .then(async (res) => {
+        const body = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) { setError(body.error ?? `HTTP ${res.status}`); return; }
+        setResult(body as PromotePrecheckResult);
+      })
+      .catch((e) => { if (!cancelled) setError((e as Error).message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, taskKey]);
+
+  if (!visible) return null;
+
+  const toggle = (name: string) => setExpanded((prev) => {
+    const next = new Set(prev);
+    if (next.has(name)) next.delete(name); else next.add(name);
+    return next;
+  });
+
+  if (loading) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs text-slate-500 flex items-center gap-2">
+        <svg className="w-3 h-3 animate-spin text-sky-600 shrink-0" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        Running ESV precheck on {task.items.length} scope{task.items.length === 1 ? "" : "s"}…
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+        ESV precheck failed: {error}
+      </div>
+    );
+  }
+
+  if (!result) return null;
+
+  if (result.missing.length === 0) {
+    return (
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 flex items-center gap-2">
+        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>
+          ESV precheck passed — every referenced ESV exists on{" "}
+          <span className="font-mono font-semibold">{task.target.environment}</span>
+          {" "}
+          ({result.totalReferencedNames} names across {result.scannedFiles} files).
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs space-y-2">
+      <div className="flex items-start gap-2">
+        <svg className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+        <div className="space-y-0.5">
+          <p className="font-semibold text-amber-800">
+            {result.missing.length} ESV{result.missing.length === 1 ? "" : "s"} referenced by selected items but missing on target
+          </p>
+          <p className="text-[11px] text-amber-700">
+            <span className="font-mono">{task.source.environment}</span>
+            {" "}
+            →
+            {" "}
+            <span className="font-mono">{task.target.environment}</span>.
+            {" "}
+            Scanned {result.scannedFiles} file{result.scannedFiles === 1 ? "" : "s"} across {task.items.length} scope{task.items.length === 1 ? "" : "s"}. Define these on the target before promoting, or the promoted config will reference unresolved ESVs.
+          </p>
+        </div>
+      </div>
+      <div className="divide-y divide-amber-200 rounded border border-amber-200 bg-white max-h-60 overflow-y-auto">
+        {result.missing.map((m) => {
+          const open = expanded.has(m.name);
+          return (
+            <div key={m.name}>
+              <button
+                type="button"
+                onClick={() => toggle(m.name)}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-amber-50 transition-colors"
+              >
+                <span className="text-amber-500 text-[10px] w-3">{open ? "▾" : "▸"}</span>
+                <span className="font-mono font-semibold text-amber-800 flex-1 truncate">esv-{m.name}</span>
+                <span className="text-[10px] text-amber-600 tabular-nums shrink-0">{m.references.length} ref{m.references.length === 1 ? "" : "s"}</span>
+              </button>
+              {open && (
+                <div className="bg-amber-50/40 px-3 pb-2 pt-1 space-y-0.5">
+                  {m.references.slice(0, 10).map((r, i) => (
+                    <div key={i} className="flex items-start gap-2 text-[11px] font-mono">
+                      <span className="shrink-0 text-amber-500 tabular-nums">{r.line}</span>
+                      <span className="shrink-0 text-amber-700 truncate max-w-[320px]" title={r.path}>{r.path}</span>
+                      <span className="flex-1 text-amber-800/80 break-all">{r.snippet}</span>
+                    </div>
+                  ))}
+                  {m.references.length > 10 && (
+                    <div className="text-[10px] text-amber-600 italic">… and {m.references.length - 10} more</div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Phase 2: Dry Run ──────────────────────────────────────────────────────────
 
 function DryRunPhase({
@@ -251,6 +392,11 @@ function DryRunPhase({
         <p className="text-xs text-slate-500">
           Simulate what will change on the target (<span className="font-mono">{task.target.environment}</span>) if the source (<span className="font-mono">{task.source.environment}</span>) is promoted to it. Review the diff carefully before proceeding.
         </p>
+
+        <EsvPrecheckPanel
+          task={task}
+          visible={visible}
+        />
 
         <div className="flex flex-wrap items-center gap-3">
           <button
