@@ -1830,6 +1830,19 @@ export function LogsExplorer({
                   Wrap
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => setDedupe((v) => !v)}
+                title={dedupe ? "Show all entries" : "Collapse exact-match duplicates"}
+                className={cn(
+                  "px-2 py-0.5 text-[11px] font-medium rounded border transition-colors shrink-0",
+                  dedupe
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-white text-slate-500 border-slate-300 hover:bg-slate-50"
+                )}
+              >
+                Dedupe
+              </button>
               <input
                 type="text"
                 value={rawSearch}
@@ -1868,19 +1881,6 @@ export function LogsExplorer({
                   )}
                 >[W]</button>
               </div>
-              <button
-                type="button"
-                onClick={() => setDedupe((v) => !v)}
-                title={dedupe ? "Show all entries" : "Collapse exact-match duplicates"}
-                className={cn(
-                  "px-2 py-0.5 text-[11px] font-medium rounded border transition-colors shrink-0",
-                  dedupe
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-500 border-slate-300 hover:bg-slate-50"
-                )}
-              >
-                Dedupe
-              </button>
               {!terminalView && (
                 <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
                   <input
