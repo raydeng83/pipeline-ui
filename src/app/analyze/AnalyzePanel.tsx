@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { JourneyInfo, AnalyzeResult, AnalyzeSummary, ScriptUsage } from "@/app/api/analyze/route";
 import type { EsvOrphanReport, EsvOrphan, EsvReference } from "@/lib/analyze/esv-orphans";
+import { FileContentViewer } from "@/components/FileContentViewer";
 
 type TaskId = "journeys" | "esv-orphans";
 
@@ -599,7 +600,7 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
 
       {/* ESV orphan results */}
       {taskId === "esv-orphans" && esvResult && (
-        <EsvOrphanReportView report={esvResult} />
+        <EsvOrphanReportView report={esvResult} env={env} />
       )}
     </div>
   );
@@ -607,10 +608,15 @@ export function AnalyzePanel({ environments }: { environments: { name: string }[
 
 // ── ESV Orphan report view ────────────────────────────────────────────────────
 
-function EsvOrphanReportView({ report }: { report: EsvOrphanReport }) {
+function EsvOrphanReportView({ report, env }: { report: EsvOrphanReport; env: string }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [showUnused, setShowUnused] = useState(false);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [selected, setSelected] = useState<{ path: string; line: number } | null>(null);
+  const [fileContent, setFileContent] = useState("");
+  const [fileLoading, setFileLoading] = useState(false);
 
   const visibleOrphans = useMemo(() => {
     if (!query.trim()) return report.orphans;
@@ -621,14 +627,37 @@ function EsvOrphanReportView({ report }: { report: EsvOrphanReport }) {
     );
   }, [report.orphans, query]);
 
+  // Reset pagination when the filter or underlying report changes.
+  useEffect(() => { setPage(0); }, [query, report]);
+
+  const totalPages = Math.max(1, Math.ceil(visibleOrphans.length / pageSize));
+  const currentPage = Math.min(page, totalPages - 1);
+  const pageStartIdx = currentPage * pageSize;
+  const pageEndIdx = Math.min(pageStartIdx + pageSize, visibleOrphans.length);
+  const pagedOrphans = visibleOrphans.slice(pageStartIdx, pageEndIdx);
+
+  // Fetch the selected file through the existing configs endpoint.
+  useEffect(() => {
+    if (!selected) { setFileContent(""); return; }
+    const ctl = new AbortController();
+    setFileLoading(true);
+    fetch(`/api/configs/${encodeURIComponent(env)}/file?path=${encodeURIComponent(selected.path)}`, { signal: ctl.signal })
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+      .then((d) => setFileContent(d.content ?? ""))
+      .catch((e) => { if ((e as Error).name !== "AbortError") setFileContent(`// failed to load: ${(e as Error).message}`); })
+      .finally(() => setFileLoading(false));
+    return () => ctl.abort();
+  }, [selected, env]);
+
   const toggle = (name: string) => setExpanded((prev) => {
     const next = new Set(prev);
     if (next.has(name)) next.delete(name); else next.add(name);
     return next;
   });
 
-  const expandAll = () => setExpanded(new Set(visibleOrphans.map((o) => o.name)));
+  const expandAll = () => setExpanded(new Set(pagedOrphans.map((o) => o.name)));
   const collapseAll = () => setExpanded(new Set());
+  const openReference = (r: EsvReference) => setSelected({ path: r.path, line: r.line });
 
   return (
     <div className="space-y-4">
@@ -662,23 +691,97 @@ function EsvOrphanReportView({ report }: { report: EsvOrphanReport }) {
         </label>
       </div>
 
-      {/* Orphans list */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="px-4 py-2 border-b border-slate-100 bg-rose-50/40 text-[11px] font-semibold uppercase tracking-wide text-rose-700">
-          Orphan references — {visibleOrphans.length} {visibleOrphans.length === 1 ? "name" : "names"}
+      {/* Orphans list + file preview split */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-4">
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+          <div className="px-4 py-2 border-b border-slate-100 bg-rose-50/40 text-[11px] font-semibold uppercase tracking-wide text-rose-700">
+            Orphan references — {visibleOrphans.length} {visibleOrphans.length === 1 ? "name" : "names"}
+          </div>
+          {visibleOrphans.length === 0 ? (
+            <div className="p-6 text-center text-sm text-slate-400">
+              {report.orphans.length === 0 ? "No orphan ESV references — every placeholder resolves." : "No matches."}
+            </div>
+          ) : (
+            <>
+              <div className="divide-y divide-slate-100 flex-1 overflow-y-auto">
+                {pagedOrphans.map((o) => {
+                  const open = expanded.has(o.name);
+                  return (
+                    <OrphanRow
+                      key={o.name}
+                      orphan={o}
+                      open={open}
+                      onToggle={() => toggle(o.name)}
+                      onOpenReference={openReference}
+                      selected={selected}
+                    />
+                  );
+                })}
+              </div>
+              {/* Pagination */}
+              {visibleOrphans.length > pageSize && (
+                <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0">
+                  <span className="text-[11px] text-slate-500">
+                    Showing {pageStartIdx + 1}–{pageEndIdx} of {visibleOrphans.length}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={pageSize}
+                      onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
+                      className="text-[11px] rounded border border-slate-300 px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                    >
+                      {[10, 25, 50, 100].map((s) => (
+                        <option key={s} value={s}>{s} / page</option>
+                      ))}
+                    </select>
+                    <div className="flex items-center gap-1">
+                      <button type="button" onClick={() => setPage(0)} disabled={currentPage <= 0} className="px-2 py-0.5 text-[11px] rounded border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">First</button>
+                      <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={currentPage <= 0} className="px-2 py-0.5 text-[11px] rounded border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">←</button>
+                      <span className="text-[11px] text-slate-500 px-1 tabular-nums">{currentPage + 1} / {totalPages}</span>
+                      <button type="button" onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={currentPage >= totalPages - 1} className="px-2 py-0.5 text-[11px] rounded border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">→</button>
+                      <button type="button" onClick={() => setPage(totalPages - 1)} disabled={currentPage >= totalPages - 1} className="px-2 py-0.5 text-[11px] rounded border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed">Last</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
-        {visibleOrphans.length === 0 ? (
-          <div className="p-6 text-center text-sm text-slate-400">
-            {report.orphans.length === 0 ? "No orphan ESV references — every placeholder resolves." : "No matches."}
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {visibleOrphans.map((o) => {
-              const open = expanded.has(o.name);
-              return <OrphanRow key={o.name} orphan={o} open={open} onToggle={() => toggle(o.name)} />;
-            })}
-          </div>
-        )}
+
+        {/* File preview */}
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col min-h-[300px] max-h-[calc(100vh-260px)]">
+          {selected ? (
+            <>
+              <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center gap-3">
+                <span className="text-xs font-mono text-slate-700 truncate flex-1 min-w-0">{selected.path}</span>
+                <span className="text-[10px] text-slate-400 shrink-0">line {selected.line}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelected(null)}
+                  className="text-slate-400 hover:text-slate-700 text-xs shrink-0"
+                  title="Close preview"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                {fileLoading ? (
+                  <div className="p-4 text-slate-400 text-xs">Loading…</div>
+                ) : (
+                  <FileContentViewer
+                    content={fileContent}
+                    fileName={selected.path}
+                    highlightLine={selected.line}
+                  />
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center flex-1 text-xs text-slate-400">
+              Click a reference to preview the file
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Unused list */}
@@ -715,7 +818,15 @@ function Stat({ value, label, sub, color }: { value: number | string; label: str
   );
 }
 
-function OrphanRow({ orphan, open, onToggle }: { orphan: EsvOrphan; open: boolean; onToggle: () => void }) {
+function OrphanRow({
+  orphan, open, onToggle, onOpenReference, selected,
+}: {
+  orphan: EsvOrphan;
+  open: boolean;
+  onToggle: () => void;
+  onOpenReference: (r: EsvReference) => void;
+  selected: { path: string; line: number } | null;
+}) {
   // Count distinct files
   const fileCount = new Set(orphan.references.map((r) => r.path)).size;
   return (
@@ -733,27 +844,38 @@ function OrphanRow({ orphan, open, onToggle }: { orphan: EsvOrphan; open: boolea
       </button>
       {open && (
         <div className="bg-slate-50/60 px-4 pb-3 pt-1 space-y-1">
-          {orphan.references.map((r, i) => (
-            <RefLine key={i} reference={r} />
-          ))}
+          {orphan.references.map((r, i) => {
+            const isActive = !!selected && selected.path === r.path && selected.line === r.line;
+            return <RefLine key={i} reference={r} active={isActive} onOpen={() => onOpenReference(r)} />;
+          })}
         </div>
       )}
     </div>
   );
 }
 
-function RefLine({ reference }: { reference: EsvReference }) {
+function RefLine({ reference, active, onOpen }: { reference: EsvReference; active: boolean; onOpen: () => void }) {
   const formBadge = reference.form === "placeholder"
     ? { label: "&{esv}", cls: "bg-sky-100 text-sky-700" }
     : reference.form === "realmPlaceholder"
     ? { label: "fr.realm", cls: "bg-indigo-100 text-indigo-700" }
     : { label: "systemEnv", cls: "bg-violet-100 text-violet-700" };
   return (
-    <div className="flex items-start gap-2 text-[11px] font-mono">
+    <button
+      type="button"
+      onClick={onOpen}
+      className={cn(
+        "w-full flex items-start gap-2 text-[11px] font-mono text-left rounded px-1.5 py-0.5 transition-colors border-l-2",
+        active
+          ? "bg-sky-100/80 border-sky-500"
+          : "hover:bg-sky-50 border-transparent"
+      )}
+      title="Open file at this line"
+    >
       <span className={cn("shrink-0 px-1.5 py-0 rounded text-[10px] font-semibold", formBadge.cls)}>{formBadge.label}</span>
       <span className="shrink-0 text-slate-400 tabular-nums">{reference.line}</span>
-      <span className="shrink-0 text-slate-600 truncate max-w-[260px]" title={reference.path}>{reference.path}</span>
+      <span className="shrink-0 text-sky-700 hover:underline truncate max-w-[260px]" title={reference.path}>{reference.path}</span>
       <span className="flex-1 text-slate-500 break-all">{reference.snippet}</span>
-    </div>
+    </button>
   );
 }
