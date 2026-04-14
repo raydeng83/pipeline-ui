@@ -585,7 +585,7 @@ function TailTerminal({
                     className={cn(
                       "px-3 py-px font-mono text-[11px] whitespace-pre-wrap break-all select-text leading-snug",
                       terminalLevelClass(level),
-                      isActive && "border-l-4 border-amber-400 pl-2.5 bg-slate-900/60 animate-match-flash",
+                      isActive && "border-l-[3px] border-amber-400 pl-2.5 bg-amber-400/15 ring-1 ring-inset ring-amber-400/40 shadow-[0_0_0_1px_rgba(251,191,36,0.25)] animate-match-flash",
                     )}
                   >
                     {highlightLine(line, isActive)}
@@ -616,7 +616,7 @@ function TailTerminal({
                     className={cn(
                       "px-3 font-mono text-[11px] whitespace-nowrap select-text",
                       terminalLevelClass(level),
-                      isActive && "border-l-4 border-amber-400 pl-2.5 bg-slate-900/60 animate-match-flash",
+                      isActive && "border-l-[3px] border-amber-400 pl-2.5 bg-amber-400/15 ring-1 ring-inset ring-amber-400/40 shadow-[0_0_0_1px_rgba(251,191,36,0.25)] animate-match-flash",
                     )}
                   >
                     {highlightLine(line, isActive)}
