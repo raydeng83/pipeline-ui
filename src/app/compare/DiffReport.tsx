@@ -2031,15 +2031,22 @@ function AllFilesModal({
 }
 
 function TaskItemsDrawer({
-  task, onClose, onRemoveItem, onRemoveScope, onClearAll,
+  task, onClose, onRemoveItem, onRemoveScope, onRemoveBulk, onClearAll, comparePathsToAdd, onAddFromCompare,
 }: {
   task: PromotionTask;
   onClose: () => void;
   onRemoveItem: (path: string) => void;
   onRemoveScope: (scope: string) => void;
+  onRemoveBulk: (paths: string[]) => void;
   onClearAll: () => void;
+  comparePathsToAdd: number;
+  onAddFromCompare: () => void;
 }) {
   const [search, setSearch] = useState("");
+  /** Selected rows inside the drawer (keys are "<scope>/<itemId>" for
+   *  individual items and "<scope>" for whole-scope selections). */
+  const [drawerSelection, setDrawerSelection] = useState<Set<string>>(new Set());
+
   const totalItems = task.items.reduce(
     (n, s) => n + (s.items === undefined ? 1 : s.items.length),
     0,
@@ -2056,6 +2063,28 @@ function TaskItemsDrawer({
       })
       .filter((s): s is ScopeSelection => s !== null);
   }, [task.items, search]);
+
+  const toggleRow = (key: string) => {
+    setDrawerSelection((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+  const clearDrawerSelection = () => setDrawerSelection(new Set());
+
+  const handleBulkRemove = () => {
+    const paths: string[] = [];
+    for (const key of drawerSelection) {
+      // Keys are "<scope>/<itemId>" for individual items and "<scope>" (bare)
+      // for whole-scope selections. Both forms decode correctly via
+      // pathToTaskScopeAndItem when passed through removeItemFromTaskItems.
+      paths.push(key);
+    }
+    onRemoveBulk(paths);
+    clearDrawerSelection();
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40" onClick={onClose}>
@@ -2082,7 +2111,7 @@ function TaskItemsDrawer({
           </button>
         </div>
 
-        <div className="px-5 py-3 border-b border-slate-100">
+        <div className="px-5 py-3 border-b border-slate-100 space-y-2">
           <input
             type="text"
             value={search}
@@ -2090,6 +2119,15 @@ function TaskItemsDrawer({
             placeholder="Filter scopes and items…"
             className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded bg-slate-50 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:bg-white"
           />
+          {comparePathsToAdd > 0 && (
+            <button
+              type="button"
+              onClick={onAddFromCompare}
+              className="w-full px-3 py-1.5 text-xs font-medium rounded border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors"
+            >
+              + Add {comparePathsToAdd} selected item{comparePathsToAdd === 1 ? "" : "s"} from compare
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-3 space-y-4">
@@ -2119,34 +2157,40 @@ function TaskItemsDrawer({
                 </div>
                 <div className="divide-y divide-slate-100">
                   {sel.items === undefined ? (
-                    <div className="px-3 py-2 text-[11px] text-slate-500 italic">
-                      Whole-scope selection — all items promoted
-                    </div>
+                    <label className="flex items-center gap-2 px-3 py-2 text-[11px] cursor-pointer hover:bg-slate-50">
+                      <input
+                        type="checkbox"
+                        checked={drawerSelection.has(sel.scope)}
+                        onChange={() => toggleRow(sel.scope)}
+                        className="accent-indigo-600 w-3 h-3"
+                      />
+                      <span className="flex-1 text-slate-500 italic">
+                        Whole-scope selection — all items promoted
+                      </span>
+                    </label>
                   ) : (
-                    sel.items.map((itemId) => (
-                      <div key={itemId} className="flex items-center gap-2 px-3 py-1.5 text-[11px]">
-                        <span className="flex-1 font-mono text-slate-700 truncate" title={itemId}>{itemId}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            // Reconstruct a pseudo-path that pathToTaskScopeAndItem
-                            // can decode back into { scope, itemId }. For NAME_FLAG
-                            // scopes the canonical path is "<scope>/<itemId>". For
-                            // FILE_SELECTABLE scopes the caller consumes {scope,itemId}
-                            // directly via onRemoveItem → removeItemFromTaskItems, but
-                            // we pass a synthetic path the helper can parse. The
-                            // easiest universal form is "<scope>/<itemId>" — this
-                            // matches both path families at the helper level because
-                            // parts.findIndex(scope) returns 0 and parts[1] = itemId.
-                            onRemoveItem(`${sel.scope}/${itemId}`);
-                          }}
-                          className="text-rose-500 hover:text-rose-700 leading-none text-[13px]"
-                          title="Remove item"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))
+                    sel.items.map((itemId) => {
+                      const rowKey = `${sel.scope}/${itemId}`;
+                      return (
+                        <label key={itemId} className="flex items-center gap-2 px-3 py-1.5 text-[11px] cursor-pointer hover:bg-slate-50">
+                          <input
+                            type="checkbox"
+                            checked={drawerSelection.has(rowKey)}
+                            onChange={() => toggleRow(rowKey)}
+                            className="accent-indigo-600 w-3 h-3"
+                          />
+                          <span className="flex-1 font-mono text-slate-700 truncate" title={itemId}>{itemId}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); onRemoveItem(rowKey); }}
+                            className="text-rose-500 hover:text-rose-700 leading-none text-[13px]"
+                            title="Remove item"
+                          >
+                            ×
+                          </button>
+                        </label>
+                      );
+                    })
                   )}
                 </div>
               </div>
@@ -2154,24 +2198,48 @@ function TaskItemsDrawer({
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-slate-200 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm(`Clear all items from "${task.name}"?`)) onClearAll();
-            }}
-            disabled={totalItems === 0}
-            className="text-xs text-rose-600 hover:text-rose-700 disabled:opacity-40 font-medium"
-          >
-            Clear all items
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary text-xs py-1"
-          >
-            Close
-          </button>
+        <div className="px-5 py-3 border-t border-slate-200 flex items-center justify-between gap-2">
+          {drawerSelection.size > 0 ? (
+            <>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-500">{drawerSelection.size} selected</span>
+                <button
+                  type="button"
+                  onClick={clearDrawerSelection}
+                  className="text-xs text-slate-400 hover:text-slate-700"
+                >
+                  Clear
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={handleBulkRemove}
+                className="px-3 py-1 text-xs font-medium rounded bg-rose-600 text-white hover:bg-rose-700 transition-colors"
+              >
+                Remove {drawerSelection.size} from task
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`Clear all items from "${task.name}"?`)) onClearAll();
+                }}
+                disabled={totalItems === 0}
+                className="text-xs text-rose-600 hover:text-rose-700 disabled:opacity-40 font-medium"
+              >
+                Clear all items
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-secondary text-xs py-1"
+              >
+                Close
+              </button>
+            </>
+          )}
         </div>
       </aside>
     </div>
@@ -2646,6 +2714,76 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   const selectedCount = selectedPaths.size;
   const selectedScopeCount = new Set([...selectedPaths].map((p) => extractScope(p))).size;
 
+  // Split the current selection by whether each path is already in the active
+  // task. Used by the floating bar breakdown and by the drawer's "Add from
+  // compare" affordance.
+  const selectionSplit = useMemo(() => {
+    if (!activeTask) return { inTask: [] as string[], notInTask: [...selectedPaths] };
+    const inTask: string[] = [];
+    const notInTask: string[] = [];
+    for (const p of selectedPaths) {
+      if (fileInTask(p, activeTask)) inTask.push(p);
+      else notInTask.push(p);
+    }
+    return { inTask, notInTask };
+  }, [selectedPaths, activeTask]);
+
+  // Bulk: add every selected-but-not-in-task path to the active task.
+  const handleAddSelectionToActiveTask = async () => {
+    if (!activeTask) return;
+    setTaskDropdownOpen(false);
+    setAddError(null);
+    const toAdd = new Set(selectionSplit.notInTask);
+    if (toAdd.size === 0) return;
+    // Reuse the missing-on-source guard from handleAddToTask.
+    if (activeTask.source.environment === report.source.environment) {
+      const missing = findMissingOnSource(toAdd, report.files);
+      if (missing.length > 0) {
+        setAddError({ task: activeTask.name, missing });
+        return;
+      }
+    }
+    setAddingToTask(true);
+    const newItems = mergePathsIntoItems(toAdd, activeTask.items);
+    try {
+      const res = await fetch(`/api/promotion-tasks/${activeTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...activeTask, items: newItems }),
+      });
+      if (res.ok) {
+        setAddSuccess(activeTask.name);
+        setSelectedPaths(new Set());
+        router.refresh();
+        setTimeout(() => setAddSuccess(null), 3000);
+      }
+    } finally {
+      setAddingToTask(false);
+    }
+  };
+
+  // Bulk: remove every selected-and-in-task path from the active task.
+  const handleRemoveSelectionFromActiveTask = async () => {
+    if (!activeTask) return;
+    const toRemove = selectionSplit.inTask;
+    if (toRemove.length === 0) return;
+    let items = activeTask.items;
+    for (const p of toRemove) items = removeItemFromTaskItems(p, items);
+    try {
+      const res = await fetch(`/api/promotion-tasks/${activeTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...activeTask, items }),
+      });
+      if (res.ok) {
+        setSelectedPaths(new Set());
+        router.refresh();
+      }
+    } catch {
+      // swallow
+    }
+  };
+
   useEffect(() => {
     if (!taskDropdownOpen) return;
     const handler = () => setTaskDropdownOpen(false);
@@ -2805,7 +2943,17 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
             const next = activeTask.items.filter((s) => s.scope !== scope);
             handleRemoveFromTask(activeTask, next);
           }}
+          onRemoveBulk={(paths) => {
+            let items = activeTask.items;
+            for (const p of paths) items = removeItemFromTaskItems(p, items);
+            handleRemoveFromTask(activeTask, items);
+          }}
           onClearAll={() => handleRemoveFromTask(activeTask, [])}
+          comparePathsToAdd={selectionSplit.notInTask.length}
+          onAddFromCompare={() => {
+            handleAddSelectionToActiveTask();
+            setDrawerOpen(false);
+          }}
         />
       )}
 
@@ -2850,17 +2998,57 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
           {selectedCount > 0 && (
             <div className="bg-white border border-slate-200 rounded-full shadow-lg px-3 py-2 flex items-center gap-3 text-xs">
               <span className="text-slate-700 font-medium whitespace-nowrap">
-                {selectedCount} item{selectedCount !== 1 ? "s" : ""} selected
+                {selectedCount} selected
                 {selectedScopeCount > 1 && <span className="text-slate-400"> · {selectedScopeCount} scopes</span>}
+                {activeTask && (
+                  <>
+                    {selectionSplit.inTask.length > 0 && (
+                      <span className="text-slate-400"> · <span className="text-indigo-600 font-semibold">{selectionSplit.inTask.length}</span> in task</span>
+                    )}
+                    {selectionSplit.notInTask.length > 0 && (
+                      <span className="text-slate-400"> · <span className="text-slate-600 font-semibold">{selectionSplit.notInTask.length}</span> not in task</span>
+                    )}
+                  </>
+                )}
               </span>
+
+              {/* Active task bulk actions */}
+              {activeTask && selectionSplit.notInTask.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleAddSelectionToActiveTask}
+                  disabled={addingToTask}
+                  className="px-3 py-1 bg-sky-600 text-white rounded-full text-xs font-medium hover:bg-sky-700 disabled:opacity-50 transition-colors whitespace-nowrap"
+                >
+                  {addingToTask ? "Adding…" : `Add ${selectionSplit.notInTask.length} to task`}
+                </button>
+              )}
+              {activeTask && selectionSplit.inTask.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleRemoveSelectionFromActiveTask}
+                  className="px-3 py-1 bg-white border border-rose-200 text-rose-700 rounded-full text-xs font-medium hover:bg-rose-50 transition-colors whitespace-nowrap"
+                >
+                  Remove {selectionSplit.inTask.length} from task
+                </button>
+              )}
+
+              {/* Generic add-to-task dropdown — always available so users can
+                  still add to a non-active task. */}
               <div className="relative">
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setTaskDropdownOpen((o) => !o); }}
                   disabled={addingToTask || eligibleTasks.length === 0}
-                  className="flex items-center gap-1 px-3 py-1 bg-sky-600 text-white rounded-full text-xs font-medium hover:bg-sky-700 disabled:opacity-50 transition-colors"
+                  className={cn(
+                    "flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap",
+                    activeTask
+                      ? "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      : "bg-sky-600 text-white hover:bg-sky-700",
+                    "disabled:opacity-50",
+                  )}
                 >
-                  {addingToTask ? "Adding…" : "Add to Task"}
+                  {activeTask ? "Add to other task" : addingToTask ? "Adding…" : "Add to Task"}
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
