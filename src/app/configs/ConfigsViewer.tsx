@@ -236,6 +236,7 @@ function SectionsView({ environment }: { environment: string }) {
   const [activeTab, setActiveTab] = useState(0);
   const [fileLoading, setFileLoading] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
+  const [scopeFilter, setScopeFilter] = useState("");
   const [fullscreen, setFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [col1Width, setCol1Width] = useState(192);
@@ -360,16 +361,48 @@ function SectionsView({ environment }: { environment: string }) {
     <div className="flex flex-1 min-h-0 rounded-lg border border-slate-200 overflow-hidden">
 
       {/* Column 1 — Scopes */}
-      <div className="shrink-0 border-r border-slate-200 bg-slate-50 overflow-y-auto" style={{ width: col1Width }}>
+      <div className="shrink-0 border-r border-slate-200 bg-slate-50 flex flex-col overflow-hidden" style={{ width: col1Width }}>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-slate-200 bg-white shrink-0">
+          <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            type="text"
+            value={scopeFilter}
+            onChange={(e) => setScopeFilter(e.target.value)}
+            placeholder="Filter scopes / items…"
+            className="flex-1 text-[11px] bg-transparent text-slate-700 placeholder-slate-400 outline-none min-w-0"
+          />
+          {scopeFilter && (
+            <button type="button" onClick={() => setScopeFilter("")} className="text-slate-400 hover:text-slate-600 shrink-0">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="flex-1 overflow-y-auto">
         {auditLoading ? (
           <div className="p-3 space-y-2">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="h-6 bg-slate-200 rounded animate-pulse" />
             ))}
           </div>
-        ) : (
-          GROUPS.map((group) => {
-            const groupScopes = CONFIG_SCOPES.filter((s) => s.group === group);
+        ) : (() => {
+          const q = scopeFilter.trim().toLowerCase();
+          return GROUPS.map((group) => {
+            const groupScopes = CONFIG_SCOPES.filter((s) => {
+              if (s.group !== group) return false;
+              if (!q) return true;
+              if (s.label.toLowerCase().includes(q)) return true;
+              if (s.value.toLowerCase().includes(q)) return true;
+              const entry = auditData.find((e) => e.scope === s.value);
+              return entry?.items.some((i) =>
+                i.label.toLowerCase().includes(q) ||
+                (i.value !== undefined && i.value.toLowerCase().includes(q))
+              ) ?? false;
+            });
+            if (groupScopes.length === 0) return null;
             return (
               <div key={group}>
                 <p className="px-3 pt-3 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{group}</p>
@@ -406,8 +439,9 @@ function SectionsView({ environment }: { environment: string }) {
                 })}
               </div>
             );
-          })
-        )}
+          });
+        })()}
+        </div>
       </div>
 
       {/* Drag handle 1 */}
