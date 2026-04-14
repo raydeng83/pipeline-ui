@@ -889,20 +889,59 @@ export function PromoteExecution({
   const runStartedAtRef = useRef<{ iso: string; ms: number } | null>(null);
   const historyEmittedRef = useRef(false);
 
+  // Per-phase timings — captured on every status transition so the history
+  // record can show what each phase actually took.
+  type PhaseTimingClient = {
+    status: PhaseStatus;
+    startedAt?: string;
+    completedAt?: string;
+    durationMs?: number;
+    _startMs?: number;
+  };
+  const phaseTimingsRef = useRef<Record<PhaseId, PhaseTimingClient>>({
+    prepare:   { status: "pending" },
+    "dry-run": { status: "pending" },
+    promote:   { status: "pending" },
+    verify:    { status: "pending" },
+  });
+
   const updatePhase = (id: PhaseId, status: PhaseStatus) => {
     setPhaseStatuses((prev) => {
+      const nowDate = new Date();
+      const nowIso = nowDate.toISOString();
+      const nowMs = nowDate.getTime();
+
       // On first transition into "running" for any phase, stamp the run start.
       if (status === "running" && !runStartedAtRef.current) {
-        const now = new Date();
-        runStartedAtRef.current = { iso: now.toISOString(), ms: now.getTime() };
+        runStartedAtRef.current = { iso: nowIso, ms: nowMs };
       }
       // If the user re-runs after a previous emission (promote phase cycles
-      // back to running), reset the emitted flag so the new run is recorded.
+      // back to running), reset the emitted flag and reset all timings.
       if (id === "promote" && status === "running" && historyEmittedRef.current) {
         historyEmittedRef.current = false;
-        const now = new Date();
-        runStartedAtRef.current = { iso: now.toISOString(), ms: now.getTime() };
+        runStartedAtRef.current = { iso: nowIso, ms: nowMs };
+        phaseTimingsRef.current = {
+          prepare:   { status: "pending" },
+          "dry-run": { status: "pending" },
+          promote:   { status: "pending" },
+          verify:    { status: "pending" },
+        };
       }
+
+      // Record this phase's timing transition.
+      const timing = { ...(phaseTimingsRef.current[id] ?? { status: "pending" }) };
+      timing.status = status;
+      if (status === "running") {
+        timing.startedAt = nowIso;
+        timing._startMs = nowMs;
+        timing.completedAt = undefined;
+        timing.durationMs = undefined;
+      } else if (status === "done" || status === "failed") {
+        timing.completedAt = nowIso;
+        if (timing._startMs != null) timing.durationMs = nowMs - timing._startMs;
+      }
+      phaseTimingsRef.current = { ...phaseTimingsRef.current, [id]: timing };
+
       return { ...prev, [id]: status };
     });
   };
@@ -924,7 +963,48 @@ export function PromoteExecution({
       promote:   phaseStatuses.promote,
       verify:    phaseStatuses.verify,
     };
+
+    // Strip _startMs (internal-only) before serializing.
+    const phaseTimings: Record<string, { status: string; startedAt?: string; completedAt?: string; durationMs?: number }> = {};
+    for (const [pid, t] of Object.entries(phaseTimingsRef.current)) {
+      phaseTimings[pid] = {
+        status: t.status,
+        startedAt: t.startedAt,
+        completedAt: t.completedAt,
+        durationMs: t.durationMs,
+      };
+    }
+
     const scopeNames = task.items.map((i) => i.scope);
+    const itemsList = task.items.map((sel) => ({ scope: sel.scope, items: sel.items }));
+
+    // Derive diff totals from the cached dry-run report (if we have one).
+    let diffTotals: { added: number; modified: number; removed: number; perScope?: Record<string, { added: number; modified: number; removed: number }> } | undefined;
+    if (dryRunReport) {
+      const perScope: Record<string, { added: number; modified: number; removed: number }> = {};
+      for (const f of dryRunReport.files) {
+        if (f.status === "unchanged") continue;
+        const scope = f.scope ?? "(unknown)";
+        const entry = perScope[scope] ?? { added: 0, modified: 0, removed: 0 };
+        if (f.status === "added") entry.added += 1;
+        else if (f.status === "modified") entry.modified += 1;
+        else if (f.status === "removed") entry.removed += 1;
+        perScope[scope] = entry;
+      }
+      diffTotals = {
+        added: dryRunReport.summary.added,
+        modified: dryRunReport.summary.modified,
+        removed: dryRunReport.summary.removed,
+        perScope,
+      };
+    }
+
+    const itemCount = task.items.reduce((acc, sel) => acc + (sel.items?.length ?? 0), 0);
+    const summaryBase = `${promoteStatus === "done" ? "Promoted" : "Promote failed"}: ${task.name}`;
+    const summaryDetail = diffTotals
+      ? ` — ${itemCount || "all"} item${itemCount === 1 ? "" : "s"} across ${scopeNames.length} scope${scopeNames.length === 1 ? "" : "s"} (+${diffTotals.added} ~${diffTotals.modified} -${diffTotals.removed})`
+      : ` (${scopeNames.length} scope${scopeNames.length === 1 ? "" : "s"})`;
+
     const payload = {
       type: "promote" as const,
       environment: `${task.source.environment} → ${task.target.environment}`,
@@ -934,10 +1014,13 @@ export function PromoteExecution({
       status: (promoteStatus === "done" ? "success" : "failed") as "success" | "failed",
       startedAt: started.iso,
       durationMs: completedMs - started.ms,
-      summary: `${promoteStatus === "done" ? "Promoted" : "Promote failed"}: ${task.name} (${scopeNames.length} scope${scopeNames.length === 1 ? "" : "s"})`,
+      summary: summaryBase + summaryDetail,
       taskId: task.id,
       taskName: task.name,
       phaseOutcomes,
+      items: itemsList,
+      diffTotals,
+      phaseTimings,
     };
     // Suppress unused warning for completedAt (kept for potential future use)
     void completedAt;

@@ -32,6 +32,30 @@ export interface OpMetadata {
   taskName?: string;
 }
 
+export interface DiffCounts {
+  added: number;
+  modified: number;
+  removed: number;
+}
+
+export interface PromoteDiffTotals extends DiffCounts {
+  /** Per-scope breakdown derived from the dry-run compare report. */
+  perScope?: Record<string, DiffCounts>;
+}
+
+export interface PromoteItem {
+  scope: string;
+  /** undefined = "all items in scope"; string[] = the explicit item identifiers selected. */
+  items?: string[];
+}
+
+export interface PhaseTiming {
+  status: string;
+  startedAt?: string;
+  completedAt?: string;
+  durationMs?: number;
+}
+
 /** Unified history record — same shape whether backed by a git commit or an op-log entry. */
 export interface HistoryRecord {
   id: string;
@@ -55,6 +79,12 @@ export interface HistoryRecord {
   logMode?: string;
   logPreset?: string;
   logEntryCount?: number;
+  // ── Promote enrichments ──
+  items?: PromoteItem[];
+  diffTotals?: PromoteDiffTotals;
+  phaseTimings?: Record<string, PhaseTiming>;
+  /** Repo HEAD captured at the moment the record was appended. */
+  repoCommit?: string;
 }
 
 /** Input shape for appendOpLog — same as HistoryRecord minus computed fields. */
@@ -75,6 +105,9 @@ export interface OpLogInput {
   logMode?: string;
   logPreset?: string;
   logEntryCount?: number;
+  items?: PromoteItem[];
+  diffTotals?: PromoteDiffTotals;
+  phaseTimings?: Record<string, PhaseTiming>;
 }
 
 // ── Git root resolution ──────────────────────────────────────────────────────
@@ -217,6 +250,18 @@ function filterRecords(entries: HistoryRecord[], opts?: CommitFilter): HistoryRe
 
 // ── Op log (JSONL) ───────────────────────────────────────────────────────────
 
+function readRepoHead(): string | undefined {
+  try {
+    const root = getHistoryGitRoot();
+    if (!root) return undefined;
+    return runShell("git rev-parse HEAD", { cwd: root, encoding: "utf-8" }).trim();
+  } catch {
+    return undefined;
+  }
+}
+
+const runShell = execSync;
+
 export function appendOpLog(input: OpLogInput): HistoryRecord {
   const id = crypto.randomUUID();
   const now = Date.now();
@@ -241,6 +286,10 @@ export function appendOpLog(input: OpLogInput): HistoryRecord {
     logMode: input.logMode,
     logPreset: input.logPreset,
     logEntryCount: input.logEntryCount,
+    items: input.items,
+    diffTotals: input.diffTotals,
+    phaseTimings: input.phaseTimings,
+    repoCommit: readRepoHead(),
   };
 
   try {

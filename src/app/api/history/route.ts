@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
     logMode: body.logMode,
     logPreset: body.logPreset,
     logEntryCount: body.logEntryCount,
+    items: body.items,
+    diffTotals: body.diffTotals,
+    phaseTimings: body.phaseTimings,
   });
   return NextResponse.json({ id: record.id });
 }
