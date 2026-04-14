@@ -386,19 +386,36 @@ function FrConfigSection({
   };
 
   const diffLoader = useCallback(async () => {
-    const scopes = frConfigItems.map((i) => i.scope);
-    const res = await fetch("/api/diff", {
+    const scopeSelections = frConfigItems;
+    const res = await fetch("/api/compare", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ target: task.target.environment, scopes, mode: "dry-run" }),
+      body: JSON.stringify({
+        source: task.source,
+        target: task.target,
+        scopeSelections,
+        includeDeps: task.includeDeps ?? false,
+        mode: "dry-run",
+        diffOptions: { includeMetadata: false, ignoreWhitespace: true },
+      }),
     });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error((body as { error?: string }).error ?? "diff failed");
+    if (!res.ok) throw new Error(`compare returned ${res.status}`);
+    // Parse NDJSON stream to extract the report
+    const text = await res.text();
+    for (const line of text.split("\n")) {
+      if (!line.trim()) continue;
+      try {
+        const entry = JSON.parse(line) as { type: string; data?: string };
+        if (entry.type === "report" && entry.data) {
+          const report = JSON.parse(entry.data) as import("@/lib/diff-types").CompareReport;
+          const { summarizeReport } = await import("@/lib/compare");
+          return summarizeReport(report);
+        }
+      } catch { /* skip non-JSON lines */ }
     }
-    return res.json();
+    throw new Error("compare did not emit a report");
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task.target.environment, frConfigItems.map((i) => i.scope).join(",")]);
+  }, [task.source, task.target, task.includeDeps, frConfigItems.map((i) => i.scope).join(",")]);
 
   const runActualPromote = async () => {
     if (task.status === "new") onTaskStatusChange("in-progress");

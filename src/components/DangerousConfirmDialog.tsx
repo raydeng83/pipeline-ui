@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DiffSummary } from "@/lib/fr-config";
+import { formatScopeLabel } from "@/lib/compare";
 
 interface Props {
   open: boolean;
@@ -124,7 +125,7 @@ export function DangerousConfirmDialog(props: Props) {
                     key={row.scope}
                     className="flex items-center gap-3 px-3.5 py-2.5 text-[12px] border-b border-slate-100 last:border-b-0"
                   >
-                    <span className="flex-1 font-mono font-medium text-slate-800">{row.scope}</span>
+                    <span className="flex-1 font-medium text-slate-800">{formatScopeLabel(row.scope)}</span>
                     <span className="text-emerald-700">+{row.added} new</span>
                     <span className="text-amber-700">~{row.modified} modified</span>
                     <span className="text-rose-700">−{row.removed} removed</span>

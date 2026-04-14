@@ -870,10 +870,17 @@ interface ScopeGroup {
   scope: string;
   label: string;
   files: FileDiff[];
+  /** Number of logical items (unique directories for dir-based scopes, else same as files.length) */
+  itemCount: number;
   added: number;
   modified: number;
   removed: number;
   unchanged: number;
+  /** Item-level status counts (for dir-based scopes, deduped by item directory) */
+  itemAdded: number;
+  itemModified: number;
+  itemRemoved: number;
+  itemUnchanged: number;
 }
 
 function extractScope(relativePath: string): string {
@@ -937,16 +944,56 @@ function groupByScope(files: FileDiff[]): ScopeGroup[] {
     map.get(scope)!.push(f);
   }
 
+  // Scopes where each "item" is a directory containing multiple files
+  const DIR_ITEM_SCOPES = new Set([
+    "endpoints", "schedules", "custom-nodes", "journeys",
+    "managed-objects", "email-templates", "themes", "iga-workflows",
+  ]);
+
   return Array.from(map.entries())
-    .map(([scope, scopeFiles]) => ({
-      scope,
-      label: SCOPE_LABELS[scope] ?? scope.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      files: scopeFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath)),
-      added:     scopeFiles.filter((f) => f.status === "added").length,
-      modified:  scopeFiles.filter((f) => f.status === "modified").length,
-      removed:   scopeFiles.filter((f) => f.status === "removed").length,
-      unchanged: scopeFiles.filter((f) => f.status === "unchanged").length,
-    }))
+    .map(([scope, scopeFiles]) => {
+      const fileAdded     = scopeFiles.filter((f) => f.status === "added").length;
+      const fileModified  = scopeFiles.filter((f) => f.status === "modified").length;
+      const fileRemoved   = scopeFiles.filter((f) => f.status === "removed").length;
+      const fileUnchanged = scopeFiles.filter((f) => f.status === "unchanged").length;
+
+      // For dir-based scopes, compute item-level counts (dedup by item directory).
+      // Each item's status = the "highest priority" status among its files:
+      //   added > removed > modified > unchanged
+      let itemCount = scopeFiles.length;
+      let itemAdded = fileAdded, itemModified = fileModified;
+      let itemRemoved = fileRemoved, itemUnchanged = fileUnchanged;
+
+      if (DIR_ITEM_SCOPES.has(scope)) {
+        const itemStatuses = new Map<string, FileDiff["status"]>();
+        const priority: Record<string, number> = { added: 3, removed: 2, modified: 1, unchanged: 0 };
+        for (const f of scopeFiles) {
+          const { itemId } = pathToTaskScopeAndItem(f.relativePath);
+          const key = itemId ?? f.relativePath;
+          const prev = itemStatuses.get(key);
+          if (!prev || (priority[f.status] ?? 0) > (priority[prev] ?? 0)) {
+            itemStatuses.set(key, f.status);
+          }
+        }
+        itemCount = itemStatuses.size;
+        itemAdded = 0; itemModified = 0; itemRemoved = 0; itemUnchanged = 0;
+        for (const status of itemStatuses.values()) {
+          if (status === "added") itemAdded++;
+          else if (status === "removed") itemRemoved++;
+          else if (status === "modified") itemModified++;
+          else itemUnchanged++;
+        }
+      }
+
+      return {
+        scope,
+        label: SCOPE_LABELS[scope] ?? scope.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        files: scopeFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath)),
+        itemCount,
+        added: fileAdded, modified: fileModified, removed: fileRemoved, unchanged: fileUnchanged,
+        itemAdded, itemModified, itemRemoved, itemUnchanged,
+      };
+    })
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
@@ -1874,11 +1921,11 @@ function AllFilesModalScopeSection({
       >
         <span className="text-sm font-semibold text-slate-700 flex-1">{group.label}</span>
         <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
-          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{group.files.length} total</span>
-          {group.modified > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{group.modified} modified</span>}
-          {group.added > 0    && <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{group.added} added</span>}
-          {group.removed > 0  && <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{group.removed} removed</span>}
-          {group.unchanged > 0 && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{group.unchanged} unchanged</span>}
+          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{group.itemCount} total</span>
+          {group.itemModified > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{group.itemModified} modified</span>}
+          {group.itemAdded > 0    && <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{group.itemAdded} added</span>}
+          {group.itemRemoved > 0  && <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{group.itemRemoved} removed</span>}
+          {group.itemUnchanged > 0 && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{group.itemUnchanged} unchanged</span>}
         </div>
         <span className="text-slate-400 text-xs shrink-0">{open ? "▲" : "▼"}</span>
       </div>
@@ -1969,7 +2016,7 @@ function AllFilesModal({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const totalFiles = scopeGroups.reduce((s, g) => s + g.files.length, 0);
+  const totalItemsInModal = scopeGroups.reduce((s, g) => s + g.itemCount, 0);
 
   return (
     <div
@@ -1980,8 +2027,8 @@ function AllFilesModal({
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-800 truncate">All Files</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">{totalFiles} file{totalFiles !== 1 ? "s" : ""} · {scopeGroups.length} scope{scopeGroups.length !== 1 ? "s" : ""}</p>
+            <p className="text-sm font-semibold text-slate-800 truncate">All Items</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">{totalItemsInModal} item{totalItemsInModal !== 1 ? "s" : ""} · {scopeGroups.length} scope{scopeGroups.length !== 1 ? "s" : ""}</p>
           </div>
           <button
             type="button"
@@ -2389,7 +2436,7 @@ function ScopeSection({
   onRemoveFromTask?: (task: PromotionTask, path: string) => void;
 }) {
   const supportsTypeFilter = group.scope === "scripts";
-  const hasChanges = group.added > 0 || group.modified > 0 || group.removed > 0;
+  const hasChanges = group.itemAdded > 0 || group.itemModified > 0 || group.itemRemoved > 0;
   const [open, setOpen] = useState(forceOpen ?? false);
   const [itemSearch, setItemSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "modified" | "added" | "removed">("all");
@@ -2476,14 +2523,14 @@ function ScopeSection({
         <span className={cn("text-sm font-semibold flex-1", hasChanges ? "text-slate-700" : "text-slate-400")}>{group.label}</span>
 
         <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
-          {group.modified > 0 && (
-            <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{group.modified} modified</span>
+          {group.itemModified > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{group.itemModified} modified</span>
           )}
-          {group.added > 0 && (
-            <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{group.added} added</span>
+          {group.itemAdded > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">{group.itemAdded} added</span>
           )}
-          {group.removed > 0 && (
-            <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{group.removed} removed</span>
+          {group.itemRemoved > 0 && (
+            <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{group.itemRemoved} removed</span>
           )}
           {!hasChanges && (
             <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-400">no differences</span>
@@ -2669,7 +2716,6 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   // Back-compat: the older `dryRunMode` boolean still works — it maps to mode="dry-run".
   const effectiveMode: DiffMode = dryRunMode ? "dry-run" : mode;
   const { summary, files } = report;
-  const total = summary.added + summary.removed + summary.modified + summary.unchanged;
   const [hideUnchanged, setHideUnchanged] = useState(!showUnchangedByDefault);
   const [hideMetadata, setHideMetadata] = useState(true);
   const [allOpen, setAllOpen] = useState<boolean | undefined>(undefined);
@@ -2706,7 +2752,20 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
     () => scopeGroups.filter((g) => g.scope !== "journeys"),
     [scopeGroups],
   );
-  const changedCount = summary.added + summary.removed + summary.modified;
+
+  // Item-level summary totals (deduped for dir-based scopes)
+  const itemSummary = useMemo(() => {
+    const s = { added: 0, modified: 0, removed: 0, unchanged: 0 };
+    for (const g of scopeGroups) {
+      s.added += g.itemAdded;
+      s.modified += g.itemModified;
+      s.removed += g.itemRemoved;
+      s.unchanged += g.itemUnchanged;
+    }
+    return s;
+  }, [scopeGroups]);
+  const totalItems = itemSummary.added + itemSummary.removed + itemSummary.modified + itemSummary.unchanged;
+  const changedCount = itemSummary.added + itemSummary.removed + itemSummary.modified;
 
   const togglePath = (path: string) =>
     setSelectedPaths((prev) => {
@@ -2823,13 +2882,13 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
 
         {/* Stats cards */}
         <div className="flex flex-wrap gap-3">
-          <Stat count={summary.modified}  label="Modified"  color="text-amber-700"   bg="bg-amber-50" />
-          <Stat count={summary.added}     label="Added"     color="text-emerald-700" bg="bg-emerald-50" />
-          <Stat count={summary.removed}   label="Removed"   color="text-rose-700"    bg="bg-rose-50" />
-          <Stat count={summary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
+          <Stat count={itemSummary.modified}  label="Modified"  color="text-amber-700"   bg="bg-amber-50" />
+          <Stat count={itemSummary.added}     label="Added"     color="text-emerald-700" bg="bg-emerald-50" />
+          <Stat count={itemSummary.removed}   label="Removed"   color="text-rose-700"    bg="bg-rose-50" />
+          <Stat count={itemSummary.unchanged} label="Unchanged" color="text-slate-500"   bg="bg-slate-50" />
           <div className="ml-auto flex items-center gap-3 self-center">
             <span className="text-xs text-slate-400">
-              {total} files · {scopeGroups.length} scopes
+              {totalItems} item{totalItems !== 1 ? "s" : ""} · {scopeGroups.length} scope{scopeGroups.length !== 1 ? "s" : ""}
             </span>
             <button
               type="button"
@@ -2884,7 +2943,7 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
 
       {/* Scope sections */}
       <div className="p-5 space-y-3">
-        {changedCount === 0 && summary.unchanged === 0 ? (
+        {changedCount === 0 && itemSummary.unchanged === 0 ? (
           <p className="text-sm text-slate-500 text-center py-4">
             No files to display.
           </p>
@@ -2920,9 +2979,9 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
             ))}
           </>
         )}
-        {!hideUnchanged && summary.unchanged > 0 && (
+        {!hideUnchanged && itemSummary.unchanged > 0 && (
           <p className="text-xs text-slate-400 text-center pt-2">
-            {summary.unchanged} file{summary.unchanged !== 1 ? "s" : ""} unchanged
+            {itemSummary.unchanged} item{itemSummary.unchanged !== 1 ? "s" : ""} unchanged
           </p>
         )}
       </div>
