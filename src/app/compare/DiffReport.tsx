@@ -12,6 +12,7 @@ import type { PromotionTask } from "@/lib/promotion-tasks";
 import type { ScopeSelection, ConfigScope } from "@/lib/fr-config-types";
 import { useDialog } from "@/components/ConfirmDialog";
 import { formatScopeLabel } from "@/lib/compare";
+import { FileContentViewer } from "@/components/FileContentViewer";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -1665,6 +1666,75 @@ function esvNameFromRelPath(rel: string): string | null {
 
 interface EsvUsageRef { path: string; line: number; snippet: string; form: string }
 
+/** Lightbox modal showing a single file at a highlighted line. */
+function FilePreviewModal({ env, path, line, onClose }: { env: string; path: string; line: number; onClose: () => void }) {
+  const [content, setContent] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ctl = new AbortController();
+    setContent(null);
+    setError(null);
+    fetch(`/api/configs/${encodeURIComponent(env)}/file?path=${encodeURIComponent(path)}`, { signal: ctl.signal })
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+      .then((d) => setContent(d.content ?? ""))
+      .catch((e) => { if ((e as Error).name !== "AbortError") setError((e as Error).message); });
+    return () => ctl.abort();
+  }, [env, path]);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, [onClose]);
+
+  const handleCopy = () => {
+    if (!content) return;
+    navigator.clipboard.writeText(content).catch(() => {});
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div
+        className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl w-[min(1100px,calc(100vw-40px))] h-[min(800px,calc(100vh-40px))] flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-3 px-4 py-2 border-b border-slate-700 bg-slate-800 shrink-0">
+          <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wide shrink-0">{env}</span>
+          <span className="text-xs font-mono text-slate-300 truncate flex-1 min-w-0" title={path}>{path}</span>
+          <span className="text-[10px] text-slate-400 shrink-0">line {line}</span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            disabled={!content}
+            className="text-[11px] text-slate-400 hover:text-slate-200 disabled:opacity-30 transition-colors shrink-0"
+            title="Copy file contents"
+          >
+            Copy
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+            title="Close (Esc)"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {error ? (
+            <div className="p-4 text-sm text-rose-400">Failed to load: {error}</div>
+          ) : content === null ? (
+            <div className="p-4 text-sm text-slate-400">Loading…</div>
+          ) : (
+            <FileContentViewer content={content} fileName={path} highlightLine={line} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Wraps FileRow for ESV variable/secret files, adding an inline Find Usage panel. */
 function EsvScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv, checked, onToggle, fileTasks = [], onRemoveFromTask }: {
   file: FileDiff;
@@ -1681,6 +1751,7 @@ function EsvScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv,
   const [usageOpen, setUsageOpen] = useState(false);
   const [usageLoading, setUsageLoading] = useState(false);
   const [usageData, setUsageData] = useState<Record<string, EsvUsageRef[]> | null>(null);
+  const [preview, setPreview] = useState<{ env: string; path: string; line: number } | null>(null);
 
   const fetchUsage = useCallback(async () => {
     if (usageData !== null || !esvName) return;
@@ -1731,6 +1802,9 @@ function EsvScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv,
   return (
     <div>
       <FileRow file={file} sourceLabel={sourceLabel} targetLabel={targetLabel} extraActions={findUsageButton} checked={checked} onToggle={onToggle} fileTasks={fileTasks} onRemoveFromTask={onRemoveFromTask} />
+      {preview && (
+        <FilePreviewModal env={preview.env} path={preview.path} line={preview.line} onClose={() => setPreview(null)} />
+      )}
       {usageOpen && (
         <div className="mx-1 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
           {usageLoading ? (
@@ -1749,11 +1823,17 @@ function EsvScopeFileRow({ file, sourceLabel, targetLabel, sourceEnv, targetEnv,
                     </p>
                     <div className="space-y-0.5">
                       {refs.slice(0, 25).map((r, i) => (
-                        <div key={i} className="flex items-start gap-2 text-[11px] font-mono">
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setPreview({ env, path: r.path, line: r.line }); }}
+                          className="w-full flex items-start gap-2 text-[11px] font-mono text-left rounded px-1 py-0.5 border-l-2 border-transparent hover:bg-violet-100 hover:border-violet-400 transition-colors"
+                          title="Open file at this line"
+                        >
                           <span className="shrink-0 text-violet-500 tabular-nums w-8 text-right">{r.line}</span>
-                          <span className="shrink-0 text-violet-700 truncate max-w-[320px]" title={r.path}>{r.path}</span>
+                          <span className="shrink-0 text-violet-700 hover:underline truncate max-w-[320px]" title={r.path}>{r.path}</span>
                           <span className="flex-1 text-slate-500 break-all">{r.snippet}</span>
-                        </div>
+                        </button>
                       ))}
                       {refs.length > 25 && (
                         <p className="text-[10px] text-violet-500 italic">… and {refs.length - 25} more</p>
