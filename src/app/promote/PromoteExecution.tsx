@@ -731,56 +731,75 @@ function FrConfigSection({
   useEffect(() => { onVerifyReportRef.current = onVerifyReport; });
   useEffect(() => { setBusy(running || verifyRunning); }, [running, verifyRunning, setBusy]);
 
-  // Auto-run verify after promote succeeds
+  // Run verify compare (source vs freshly-pulled target) and resolve the
+  // final task status based on whether the report has any non-unchanged files.
+  const runVerify = useCallback(async () => {
+    setVerifyRunning(true);
+    const scopeSelections = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
+    try {
+      const res = await fetch("/api/compare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source: { ...task.target, mode: "local" },
+          target: { ...task.source, mode: "local" },
+          scopeSelections,
+          includeDeps: task.includeDeps ?? false,
+          mode: "compare",
+          diffOptions: { includeMetadata: false, ignoreWhitespace: true },
+        }),
+      });
+      if (!res.ok) throw new Error(`verify compare returned ${res.status}`);
+      const text = await res.text();
+      let report: import("@/lib/diff-types").CompareReport | null = null;
+      for (const line of text.split("\n")) {
+        if (!line.trim()) continue;
+        try {
+          const entry = JSON.parse(line) as { type: string; data?: string };
+          if (entry.type === "report" && entry.data) {
+            report = JSON.parse(entry.data) as import("@/lib/diff-types").CompareReport;
+            break;
+          }
+        } catch { /* skip */ }
+      }
+      if (report) {
+        onVerifyReportRef.current(report);
+        const diffCount = report.files.filter((f) => f.status !== "unchanged").length;
+        if (diffCount > 0) {
+          // Target does not match source after promote — treat as failure.
+          onCompleteRef.current("failed");
+          onTaskStatusRef.current("failed");
+        } else {
+          onCompleteRef.current("done");
+          onTaskStatusRef.current("completed");
+        }
+      } else {
+        onCompleteRef.current("done");
+        onTaskStatusRef.current("completed");
+      }
+    } catch {
+      onCompleteRef.current("done"); // verify failure is non-fatal for overall status
+      onTaskStatusRef.current("completed");
+    } finally {
+      setVerifyRunning(false);
+      setVerifyDone(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task]);
+
+  // Auto-run verify after a non-controlled promote finishes.
+  // Controlled promotes run verify separately after SESSION_APPLIED + pull-target.
   useEffect(() => {
+    if (targetIsControlled) return;
     if (exitCode === null || running) return;
     if (exitCode !== 0) {
       onCompleteRef.current("failed");
       onTaskStatusRef.current("failed");
       return;
     }
-    // Push + pull succeeded — auto-verify
-    setVerifyRunning(true);
-    const scopeSelections = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
-    fetch("/api/compare", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        source: { ...task.target, mode: "local" },
-        target: { ...task.source, mode: "local" },
-        scopeSelections,
-        includeDeps: task.includeDeps ?? false,
-        mode: "compare",
-        diffOptions: { includeMetadata: false, ignoreWhitespace: true },
-      }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`verify compare returned ${res.status}`);
-        const text = await res.text();
-        for (const line of text.split("\n")) {
-          if (!line.trim()) continue;
-          try {
-            const entry = JSON.parse(line) as { type: string; data?: string };
-            if (entry.type === "report" && entry.data) {
-              const report = JSON.parse(entry.data) as import("@/lib/diff-types").CompareReport;
-              onVerifyReportRef.current(report);
-              break;
-            }
-          } catch { /* skip */ }
-        }
-        onCompleteRef.current("done");
-        onTaskStatusRef.current("completed");
-      })
-      .catch(() => {
-        onCompleteRef.current("done"); // verify failure is non-fatal
-        onTaskStatusRef.current("completed");
-      })
-      .finally(() => {
-        setVerifyRunning(false);
-        setVerifyDone(true);
-      });
+    runVerify();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exitCode, running]);
+  }, [exitCode, running, targetIsControlled]);
 
   const frConfigItems = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
   const hasJourneys = task.items.some((i) => i.scope === "journeys");
@@ -963,10 +982,47 @@ function FrConfigSection({
       }
       if (!applied) {
         pushDccLog("Timed out waiting for SESSION_APPLIED.", "stderr");
-      } else {
-        pushDccLog("Session applied successfully.");
+        setDccBusy(false);
+        onCompleteRef.current("failed");
+        onTaskStatusRef.current("failed");
+        return;
       }
-      setDccBusy(false);
+      pushDccLog("Session applied successfully.");
+
+      // Pull target now that the tenant holds the committed changes, then verify.
+      pushDccLog("Pulling target to sync local files for verify…");
+      const pullScopes = Array.from(new Set(task.items.map((i) => i.scope)));
+      try {
+        const pullRes = await fetch("/api/pull", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ environment: task.target.environment, scopes: pullScopes }),
+        });
+        if (!pullRes.ok || !pullRes.body) throw new Error(`pull returned ${pullRes.status}`);
+        const reader = pullRes.body.pipeThrough(new TextDecoderStream()).getReader();
+        let pullExit = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          for (const line of value.split("\n")) {
+            if (!line.trim()) continue;
+            try {
+              const p = JSON.parse(line) as { type?: string; code?: number };
+              if (p.type === "exit" && typeof p.code === "number") pullExit = p.code;
+            } catch { /* ignore */ }
+          }
+        }
+        if (pullExit !== 0) {
+          pushDccLog(`Pull-target exited with code ${pullExit}.`, "stderr");
+        } else {
+          pushDccLog("Pull-target completed.");
+        }
+      } catch (err) {
+        pushDccLog(`Pull-target failed: ${err instanceof Error ? err.message : String(err)}`, "stderr");
+      } finally {
+        setDccBusy(false);
+      }
+      await runVerify();
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exitCode, running]);
@@ -1276,6 +1332,21 @@ function SummaryPhase({
   const verifyChanges = verifyReport
     ? verifyReport.summary.added + verifyReport.summary.modified + verifyReport.summary.removed
     : null;
+  const failedDueToVerify = failed && (verifyChanges ?? 0) > 0;
+
+  // Group failing files by scope for a concise bullet list in the summary.
+  const failingByScope: { scope: string; paths: string[] }[] = [];
+  if (verifyReport && failedDueToVerify) {
+    const groups = new Map<string, string[]>();
+    for (const f of verifyReport.files) {
+      if (f.status === "unchanged") continue;
+      const m = f.relativePath.match(/\/([a-z0-9-]+)\//i);
+      const scope = m?.[1] ?? "other";
+      if (!groups.has(scope)) groups.set(scope, []);
+      groups.get(scope)!.push(f.relativePath);
+    }
+    for (const [scope, paths] of groups.entries()) failingByScope.push({ scope, paths });
+  }
 
   return (
     <div className={cn(!visible && "hidden")}>
@@ -1300,13 +1371,43 @@ function SummaryPhase({
           )}
           <div className="flex-1">
             <p className={cn("text-sm font-semibold", succeeded ? "text-emerald-800" : failed ? "text-red-800" : "text-slate-600")}>
-              {succeeded ? "Promotion completed successfully" : failed ? "Promotion failed" : "Promotion in progress…"}
+              {succeeded
+                ? "Promotion completed successfully"
+                : failedDueToVerify
+                  ? "Promotion completed with errors"
+                  : failed
+                    ? "Promotion failed"
+                    : "Promotion in progress…"}
             </p>
             <p className="text-xs text-slate-500 mt-0.5">
               {task.source.environment} → {task.target.environment} · {task.name}
+              {failedDueToVerify && ` · ${verifyChanges} item${verifyChanges === 1 ? "" : "s"} did not match source after promote`}
             </p>
           </div>
         </div>
+
+        {/* Failing items list when verify rejected the promote */}
+        {failedDueToVerify && failingByScope.length > 0 && (
+          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+            <div className="text-[11px] font-semibold text-red-700 mb-1 uppercase tracking-wide">
+              Items with differences
+            </div>
+            <ul className="space-y-1">
+              {failingByScope.map(({ scope, paths }) => (
+                <li key={scope} className="text-[11px]">
+                  <span className="font-semibold text-red-700">{scope}</span>{" "}
+                  <span className="text-red-500">({paths.length})</span>
+                  <div className="ml-3 mt-0.5 space-y-0.5 font-mono text-red-600">
+                    {paths.slice(0, 10).map((p) => (
+                      <div key={p} className="truncate" title={p}>{p}</div>
+                    ))}
+                    {paths.length > 10 && <div className="text-red-400">…and {paths.length - 10} more</div>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Items promoted */}
         {task.items.length > 0 && (

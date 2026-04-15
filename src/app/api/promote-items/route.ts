@@ -570,6 +570,20 @@ export async function POST(req: NextRequest) {
 
         emit({ type: "scope-end", scope: "push", code: pushFailed ? 1 : 0, ts: Date.now() });
 
+        // For controlled environments (--direct-control), defer pull-target
+        // until after the DCC session has been applied on the tenant. Pulling
+        // here would capture pre-apply state and cause spurious verify diffs.
+        if (directControl) {
+          if (pushFailed) {
+            emit({ type: "exit", code: 1, ts: Date.now() });
+          } else {
+            emit({ type: "stdout", data: `Push staged in direct-control session. Pull-target deferred until after apply.\n`, ts: Date.now() });
+            emit({ type: "exit", code: 0, ts: Date.now() });
+          }
+          controller.close();
+          return;
+        }
+
         // Step 4: Pull target to sync local files (only if push succeeded)
         if (!pushFailed) {
           emit({ type: "scope-start", scope: "pull-target", ts: Date.now() });
