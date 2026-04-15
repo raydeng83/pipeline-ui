@@ -33,12 +33,21 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
   // Auto-scroll the log pane itself (not the page) when new lines arrive,
   // and only if the user was already pinned to the bottom — so manual
   // scrolling up to inspect earlier output isn't yanked back.
+  // Also scroll to bottom when logs change entirely (tab switch).
+  const prevLogsRef = useRef(logs);
   useEffect(() => {
     const el = mainPaneRef.current;
     if (!el) return;
+    const tabSwitched = logs !== prevLogsRef.current;
+    prevLogsRef.current = logs;
+    if (tabSwitched) {
+      // Tab switch — snap to bottom
+      el.scrollTop = el.scrollHeight;
+      return;
+    }
     const pinned = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
     if (pinned) el.scrollTop = el.scrollHeight;
-  }, [mainLogs.length]);
+  }, [logs, mainLogs.length]);
 
   useEffect(() => {
     const el = debugPaneRef.current;
