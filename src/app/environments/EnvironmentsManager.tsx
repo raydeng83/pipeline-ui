@@ -101,6 +101,7 @@ export function EnvironmentsManager({
   const { confirm } = useDialog();
   const [environments, setEnvironments] = useState(initialEnvironments);
   const [editing, setEditing] = useState<Environment | null>(null);
+  const [editorBusy, setEditorBusy] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [addStep, setAddStep] = useState<AddStep>("meta");
   const [form, setForm] = useState<NewEnvForm>(EMPTY_FORM);
@@ -567,10 +568,15 @@ export function EnvironmentsManager({
       )}
 
       {/* Edit dialog */}
-      <Dialog.Root open={editing !== null} onOpenChange={(open) => { if (!open) setEditing(null); }}>
+      <Dialog.Root open={editing !== null} onOpenChange={(open) => { if (!open && !editorBusy) { setEditing(null); setEditorBusy(false); } }}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 data-[state=open]:animate-in data-[state=open]:fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[min(900px,calc(100vw-32px))] max-h-[calc(100vh-48px)] overflow-y-auto bg-white rounded-2xl shadow-2xl">
+          <Dialog.Content
+            onPointerDownOutside={(e) => { if (editorBusy) e.preventDefault(); }}
+            onInteractOutside={(e) => { if (editorBusy) e.preventDefault(); }}
+            onEscapeKeyDown={(e) => { if (editorBusy) e.preventDefault(); }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[min(900px,calc(100vw-32px))] max-h-[calc(100vh-48px)] overflow-y-auto bg-white rounded-2xl shadow-2xl"
+          >
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 {editing && <EnvironmentBadge env={editing} />}
@@ -603,6 +609,7 @@ export function EnvironmentsManager({
                 <EnvEditor
                   env={editing}
                   onUpdate={handleEnvUpdated}
+                  onBusyChange={setEditorBusy}
                 />
               )}
             </div>

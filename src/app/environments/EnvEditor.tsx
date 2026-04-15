@@ -558,11 +558,25 @@ function TestConnectionButton({
 
 // ── Restart Tenant ────────────────────────────────────────────────────────
 
-function RestartButton({ environmentName }: { environmentName: string }) {
+function RestartButton({
+  environmentName,
+  envType,
+  isDev,
+  onBusyChange,
+}: {
+  environmentName: string;
+  envType: EnvironmentType;
+  isDev: boolean;
+  onBusyChange?: (busy: boolean) => void;
+}) {
   const [logs, setLogs] = useState<string[]>([]);
   const [polling, setPolling] = useState(false);
   const [stopping, setStopping] = useState(false);
   const [finalStatus, setFinalStatus] = useState<"ready" | "error" | null>(null);
+  // For higher (non-dev) controlled envs, allow polling DCC session state
+  // instead of the tenant restart status.
+  const canUseDccMode = envType === "controlled" && !isDev;
+  const [dccMode, setDccMode] = useState(false);
   const pollingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -579,26 +593,63 @@ function RestartButton({ environmentName }: { environmentName: string }) {
     return res.json() as Promise<{ stdout: string; stderr: string; exitCode: number | null }>;
   };
 
+  const callDccState = async () => {
+    const res = await fetch("/api/dcc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ environment: environmentName, subcommand: "direct-control-state" }),
+    });
+    return res.json() as Promise<{ stdout: string; stderr: string; exitCode: number | null }>;
+  };
+
   const log = (msg: string) => setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   useEffect(() => { return () => { pollingRef.current = false; }; }, []);
 
-  const startPolling = useCallback(async () => {
+  // Notify parent (modal wrapper) whenever polling state changes so it can
+  // block accidental dismissal while a tenant poll is in flight.
+  useEffect(() => { onBusyChange?.(polling); }, [polling, onBusyChange]);
+
+  const startPolling = useCallback(async (useDcc: boolean) => {
     pollingRef.current = true;
     setPolling(true);
     setStopping(false);
     setFinalStatus(null);
+    let loggedReady = false;
     while (pollingRef.current) {
       try {
-        const statusRes = await callRestart("status");
-        if (!pollingRef.current) break;
-        const s = statusRes.stdout.trim();
-        log(`Status: ${s}`);
-        if (s === "ready") {
-          log("Environment is ready.");
-          setFinalStatus("ready");
-          pollingRef.current = false;
-          break;
+        let s: string;
+        if (useDcc) {
+          const dccRes = await callDccState();
+          if (!pollingRef.current) break;
+          let parsed: { status?: string; editable?: boolean } = {};
+          try { parsed = JSON.parse(dccRes.stdout.trim()); } catch { /* ignore */ }
+          s = parsed.status ?? dccRes.stdout.trim() ?? "unknown";
+          log(`DCC status: ${s}${parsed.editable !== undefined ? ` (editable=${parsed.editable})` : ""}`);
+          // "Ready" in DCC mode means an idle, applyable or fresh state.
+          const isReady = s === "SESSION_INITIALISED" || s === "SESSION_APPLIED" || s === "NO_SESSION";
+          if (isReady && !loggedReady) {
+            setFinalStatus("ready");
+            loggedReady = true;
+          } else if (!isReady && loggedReady) {
+            loggedReady = false;
+            setFinalStatus(null);
+          }
+        } else {
+          const statusRes = await callRestart("status");
+          if (!pollingRef.current) break;
+          s = statusRes.stdout.trim();
+          log(`Status: ${s}`);
+          if (s === "ready") {
+            if (!loggedReady) {
+              log("Environment is ready.");
+              setFinalStatus("ready");
+              loggedReady = true;
+            }
+          } else if (loggedReady) {
+            loggedReady = false;
+            setFinalStatus(null);
+          }
         }
       } catch {
         log("Error: Failed to check status");
@@ -637,7 +688,7 @@ function RestartButton({ environmentName }: { environmentName: string }) {
         return;
       }
       log("Restart initiated. Polling status...");
-      startPolling();
+      startPolling(false);
     } catch {
       log("Error: Failed to initiate restart");
       setFinalStatus("error");
@@ -647,8 +698,9 @@ function RestartButton({ environmentName }: { environmentName: string }) {
   const handlePollStatus = () => {
     setLogs([]);
     setFinalStatus(null);
-    log("Polling status...");
-    startPolling();
+    const useDcc = canUseDccMode && dccMode;
+    log(useDcc ? "Polling --direct-control state..." : "Polling status...");
+    startPolling(useDcc);
   };
 
   const statusDot = finalStatus === "ready" ? "bg-green-400" : finalStatus === "error" ? "bg-red-400" : polling ? "bg-amber-400 animate-pulse" : "bg-slate-300";
@@ -689,6 +741,18 @@ function RestartButton({ environmentName }: { environmentName: string }) {
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             Waiting for current status check to finish…
           </span>
+        )}
+        {canUseDccMode && (
+          <label className="inline-flex items-center gap-1.5 text-[11px] text-slate-600 ml-1 select-none">
+            <input
+              type="checkbox"
+              checked={dccMode}
+              disabled={polling}
+              onChange={(e) => setDccMode(e.target.checked)}
+              className="w-3.5 h-3.5 accent-sky-600"
+            />
+            Poll --direct-control state
+          </label>
         )}
       </div>
 
@@ -732,7 +796,7 @@ function RestartButton({ environmentName }: { environmentName: string }) {
 type Section = "fr-config" | "log-api";
 type SubTab = "form" | "raw";
 
-export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (updated: Environment) => void }) {
+export function EnvEditor({ env, onUpdate, onBusyChange }: { env: Environment; onUpdate?: (updated: Environment) => void; onBusyChange?: (busy: boolean) => void }) {
   const [section, setSection] = useState<Section>("fr-config");
   const [subTab, setSubTab] = useState<SubTab>("form");
   const [rawContent, setRawContent] = useState("");
@@ -932,7 +996,12 @@ export function EnvEditor({ env, onUpdate }: { env: Environment; onUpdate?: (upd
               {/* Test connection & restart */}
               <div className="py-3 border-b border-slate-100 bg-slate-50/50 space-y-3">
                 <TestConnectionButton liveValues={values} />
-                <RestartButton environmentName={env.name} />
+                <RestartButton
+                  environmentName={env.name}
+                  envType={envType}
+                  isDev={devEnvironment}
+                  onBusyChange={onBusyChange}
+                />
               </div>
 
               {/* Sub-tabs: Form / Raw */}

@@ -807,9 +807,11 @@ function FrConfigSection({
           return;
         }
 
-        // Poll until SESSION_INITIALISED
+        // Poll until SESSION_INITIALISED. Session provisioning on a cold
+        // controlled tenant takes ~130s in the field, so keep a generous
+        // budget to avoid spurious aborts.
         const pollStart = Date.now();
-        while (Date.now() - pollStart < 120_000) {
+        while (Date.now() - pollStart < 240_000) {
           await new Promise((r) => setTimeout(r, 5000));
           const pollRes = await callDcc("direct-control-state");
           let pollState: { status?: string } = {};
