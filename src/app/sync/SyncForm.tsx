@@ -162,43 +162,16 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
           </select>
         </div>
 
-        {/* Direction segmented control */}
+        {/* Direction — pull only for now */}
         <div>
           <div className="label-xs mb-1.5">DIRECTION</div>
-          <div
-            className={cn(
-              "grid grid-cols-2 gap-1 p-1 rounded-xl",
-              direction === "push" && isProd ? "bg-rose-50" : "bg-slate-100"
-            )}
-          >
+          <div className="bg-slate-100 p-1 rounded-xl inline-flex">
             <button
               type="button"
-              onClick={() => setDirection("pull")}
-              disabled={running}
-              className={cn(
-                "flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-medium transition-all disabled:opacity-50",
-                direction === "pull"
-                  ? "bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
-                  : "text-slate-500 hover:text-slate-700"
-              )}
+              disabled
+              className="flex items-center justify-center gap-2 py-2.5 px-6 rounded-lg text-[13px] font-medium bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
             >
               <ArrowDown className="w-4 h-4" /> Pull
-            </button>
-            <button
-              type="button"
-              onClick={() => setDirection("push")}
-              disabled={running}
-              className={cn(
-                "flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-medium transition-all disabled:opacity-50",
-                direction === "push"
-                  ? isProd
-                    ? "bg-white text-rose-700 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
-                    : "bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
-                  : "text-slate-500 hover:text-slate-700"
-              )}
-            >
-              <ArrowUp className="w-4 h-4" /> Push
-            </button>
           </div>
         </div>
 
