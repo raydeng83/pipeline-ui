@@ -639,6 +639,91 @@ function DryRunPhase({
   );
 }
 
+// ── Promote progress tracker ──────────────────────────────────────────────────
+
+const PROMOTE_PHASES = [
+  { scope: "resolve-deps",      label: "Resolve Deps" },
+  { scope: "prepare",           label: "Prepare" },
+  { scope: "remap-ids",         label: "Remap IDs" },
+  { scope: "remap-script-refs", label: "Remap Scripts" },
+  { scope: "push",              label: "Push" },
+  { scope: "pull-target",       label: "Pull Target" },
+];
+
+function PromoteProgress({ logs, running }: { logs: LogEntry[]; running: boolean }) {
+  const { phases, currentPhase, lineCountsByPhase } = useMemo(() => {
+    const completed = new Set<string>();
+    const errored = new Set<string>();
+    const started = new Set<string>();
+    const counts = new Map<string, number>();
+    let active: string | null = null;
+    for (const l of logs) {
+      if (l.type === "scope-start" && l.scope) {
+        started.add(l.scope);
+        active = l.scope;
+      } else if (l.type === "scope-end" && l.scope) {
+        if (l.code === 0) completed.add(l.scope);
+        else errored.add(l.scope);
+        if (active === l.scope) active = null;
+      } else if ((l.type === "stdout" || l.type === "stderr") && active) {
+        counts.set(active, (counts.get(active) ?? 0) + 1);
+      }
+    }
+    // Only show phases that have started (hide phases like resolve-deps if not triggered)
+    const visible = PROMOTE_PHASES.filter(p => started.has(p.scope));
+    const phaseStates = visible.map(p => ({
+      ...p,
+      status: errored.has(p.scope) ? "failed" as const
+        : completed.has(p.scope) ? "done" as const
+        : active === p.scope ? "running" as const
+        : started.has(p.scope) ? "running" as const
+        : "pending" as const,
+    }));
+    return { phases: phaseStates, currentPhase: active, lineCountsByPhase: counts };
+  }, [logs]);
+
+  if (phases.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {phases.map((p, i) => (
+        <div key={p.scope} className="flex items-center gap-1">
+          {i > 0 && (
+            <svg className="w-3 h-3 text-slate-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          )}
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full ring-1 font-medium transition-colors",
+              p.status === "running"
+                ? "bg-indigo-600 text-white ring-indigo-600"
+                : p.status === "done"
+                  ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                  : p.status === "failed"
+                    ? "bg-rose-50 text-rose-700 ring-rose-200"
+                    : "bg-slate-50 text-slate-500 ring-slate-200"
+            )}
+          >
+            {p.status === "running" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+            {p.status === "done" && <span>✓</span>}
+            {p.status === "failed" && <span>✗</span>}
+            {p.label}
+            {(p.status === "running" || p.status === "done" || p.status === "failed") && (lineCountsByPhase.get(p.scope) ?? 0) > 0 && (
+              <span className={cn(
+                "text-[9px] tabular-nums",
+                p.status === "running" ? "text-indigo-200" : p.status === "done" ? "text-emerald-500" : "text-rose-500"
+              )}>
+                {lineCountsByPhase.get(p.scope)}
+              </span>
+            )}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Phase 3: Promote (item-level push with ID remapping) ─────────────────────
 
 function FrConfigSection({
@@ -809,8 +894,11 @@ function FrConfigSection({
       </div>
 
       {(running || logs.length > 0) && (
-        <div className="rounded-lg border border-slate-200 overflow-hidden">
-          <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+        <div className="space-y-2">
+          <PromoteProgress logs={logs} running={running} />
+          <div className="rounded-lg border border-slate-200 overflow-hidden">
+            <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+          </div>
         </div>
       )}
 
