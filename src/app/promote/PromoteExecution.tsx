@@ -22,11 +22,10 @@ import { cn } from "@/lib/utils";
 
 // ── Types & phase definitions ─────────────────────────────────────────────────
 
-export type PhaseId = "prepare" | "dry-run" | "promote" | "summary";
+export type PhaseId = "dry-run" | "promote" | "summary";
 export type PhaseStatus = "pending" | "running" | "done" | "failed" | "skipped";
 
 const PHASE_DEFS: { id: PhaseId; label: string; description: string }[] = [
-  { id: "prepare",  label: "Prepare",  description: "Pull source config" },
   { id: "dry-run",  label: "Dry Run",  description: "Compare source vs target" },
   { id: "promote",  label: "Promote",  description: "Push, pull target & verify" },
   { id: "summary",  label: "Summary",  description: "Promotion result" },
@@ -137,66 +136,6 @@ const VARIANT_BUTTON_STYLES = {
   warning: "bg-yellow-500 hover:bg-yellow-600 text-white",
   danger:  "bg-red-600 hover:bg-red-700 text-white",
 };
-
-// ── Phase 1: Prepare ──────────────────────────────────────────────────────────
-
-function PreparePhase({
-  task,
-  visible,
-  onComplete,
-}: {
-  task: PromotionTask;
-  visible: boolean;
-  onComplete: (s: PhaseStatus) => void;
-}) {
-  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
-  const { setBusy } = useBusyState();
-  const onCompleteRef = useRef(onComplete);
-  useEffect(() => { onCompleteRef.current = onComplete; });
-  useEffect(() => { setBusy(running); }, [running, setBusy]);
-
-  useEffect(() => {
-    if (exitCode !== null && !running) onCompleteRef.current(exitCode === 0 ? "done" : "failed");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exitCode, running]);
-
-  const pullSource = () =>
-    run("/api/pull", { environment: task.source.environment, scopes: task.items.map((i) => i.scope) });
-
-  return (
-    <div className={cn(!visible && "hidden")}>
-      <div className="space-y-3">
-        <p className="text-xs text-slate-500">
-          Pull the latest config from the source environment before promoting.
-        </p>
-
-        <div className="flex flex-wrap gap-2">
-          {task.source.mode !== "local" && (
-            <button
-              onClick={pullSource}
-              disabled={running}
-              className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
-            >
-              {running ? "Pulling…" : "Pull Source"}
-            </button>
-          )}
-
-          {running && (
-            <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
-              Abort
-            </button>
-          )}
-        </div>
-
-        {(running || logs.length > 0) && (
-          <div className="rounded-lg border border-slate-200 overflow-hidden">
-            <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ── ESV precheck panel (runs before Dry Run) ─────────────────────────────────
 
@@ -1341,13 +1280,12 @@ export function PromoteExecution({
   );
 
   const [phaseStatuses, setPhaseStatuses] = useState<Record<PhaseId, PhaseStatus>>(() => ({
-    prepare:   "pending",
     "dry-run": frConfigScopes.length > 0 ? "pending" : "skipped",
     promote:   "pending",
     summary:   "pending",
   }));
 
-  const [activePhase, setActivePhase] = useState<PhaseId>("prepare");
+  const [activePhase, setActivePhase] = useState<PhaseId>("dry-run");
 
   // Shared "include dependencies" toggle for dry-run + promote. Initialized
   // from the task's saved preference; toggling it in the Dry Run phase affects
@@ -1385,7 +1323,6 @@ export function PromoteExecution({
     _startMs?: number;
   };
   const phaseTimingsRef = useRef<Record<PhaseId, PhaseTimingClient>>({
-    prepare:   { status: "pending" },
     "dry-run": { status: "pending" },
     promote:   { status: "pending" },
     summary:   { status: "pending" },
@@ -1410,7 +1347,6 @@ export function PromoteExecution({
         historyEmittedRef.current = false;
         runStartedAtRef.current = { iso: nowIso, ms: nowMs };
         phaseTimingsRef.current = {
-          prepare:   { status: "pending" },
           "dry-run": { status: "pending" },
           promote:   { status: "pending" },
           summary:   { status: "pending" },
@@ -1447,7 +1383,6 @@ export function PromoteExecution({
     const completedAt = new Date(completedMs).toISOString();
 
     const phaseOutcomes: Record<string, PhaseStatus> = {
-      prepare:   phaseStatuses.prepare,
       "dry-run": phaseStatuses["dry-run"],
       promote:   phaseStatuses.promote,
       summary:   phaseStatuses.summary,
@@ -1533,7 +1468,7 @@ export function PromoteExecution({
       })
       .catch(() => { /* non-fatal */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phaseStatuses.promote, phaseStatuses.prepare, phaseStatuses["dry-run"], phaseStatuses.summary]);
+  }, [phaseStatuses.promote, phaseStatuses["dry-run"], phaseStatuses.summary]);
 
   // Auto-advance to summary when promote completes
   useEffect(() => {
@@ -1636,11 +1571,6 @@ export function PromoteExecution({
         </div>
 
         {/* All phase panels — always mounted, only active one visible */}
-        <PreparePhase
-          task={task}
-          visible={activePhase === "prepare"}
-          onComplete={(s) => updatePhase("prepare", s)}
-        />
         <DryRunPhase
           task={task}
           visible={activePhase === "dry-run"}
