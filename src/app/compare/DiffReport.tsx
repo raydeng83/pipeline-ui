@@ -1346,7 +1346,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
     setGraphInitialFocusNodeId(nodeId);
     setGraphOpen(true);
   }, []);
-  const hasChildren = node.subJourneys.length > 0 || (showScripts && node.scripts.length > 0) || (showNodes && node.nodes.length > 0);
+  const hasChildren = node.subJourneys.length > 0 || node.scripts.length > 0 || node.nodes.length > 0;
   const s = JOURNEY_STATUS_STYLES[node.status] ?? JOURNEY_STATUS_STYLES.unchanged;
 
   const prevSeq = useRef(forceSeq);
@@ -1412,7 +1412,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           </button>
         )}
       </div>
-      {open && (hasChildren || (showScripts && node.scripts.length > 0) || (showNodes && node.nodes.length > 0)) && (
+      {open && hasChildren && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
             <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
