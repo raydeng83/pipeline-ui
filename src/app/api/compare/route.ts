@@ -246,13 +246,11 @@ export async function POST(req: NextRequest) {
             for (const sub of resolvedSubJourneys) {
               selectedNames.add(sub.toLowerCase());
             }
-            const filterTree = (
-              nodes: import("@/lib/diff-types").JourneyTreeNode[]
-            ): import("@/lib/diff-types").JourneyTreeNode[] =>
-              nodes
-                .filter((node) => selectedNames.has(node.name.toLowerCase()))
-                .map((node) => ({ ...node, subJourneys: filterTree(node.subJourneys) }));
-            report.journeyTree = filterTree(report.journeyTree);
+            // Filter only the top-level entries — keep full sub-journey hierarchy
+            // intact so users can browse every level of inner journeys.
+            report.journeyTree = report.journeyTree.filter(
+              (node) => selectedNames.has(node.name.toLowerCase()),
+            );
           }
         }
 
