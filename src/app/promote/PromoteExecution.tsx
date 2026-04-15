@@ -76,9 +76,8 @@ function Stepper({
               type="button"
               onClick={() => {
                 if (isSkipped) return;
-                // Block jumping to promote if dry-run hasn't completed
                 if (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped") return;
-                // Block going back from summary
+                if (phase.id === "summary" && statuses.promote !== "done" && statuses.promote !== "failed") return;
                 const summaryReached = statuses.summary === "done" || statuses.summary === "failed";
                 if (summaryReached && phase.id !== "summary") return;
                 onClick(phase.id);
@@ -86,6 +85,7 @@ function Stepper({
               disabled={
                 isSkipped ||
                 (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped") ||
+                (phase.id === "summary" && statuses.promote !== "done" && statuses.promote !== "failed") ||
                 ((statuses.summary === "done" || statuses.summary === "failed") && phase.id !== "summary")
               }
               className={cn(
@@ -94,6 +94,8 @@ function Stepper({
                   : ((statuses.summary === "done" || statuses.summary === "failed") && phase.id !== "summary")
                   ? "opacity-40 cursor-not-allowed"
                   : (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped")
+                  ? "opacity-40 cursor-not-allowed"
+                  : (phase.id === "summary" && statuses.promote !== "done" && statuses.promote !== "failed")
                   ? "opacity-40 cursor-not-allowed"
                   : "hover:bg-slate-50 cursor-pointer"
               )}
@@ -1579,9 +1581,9 @@ export function PromoteExecution({
               </button>
             )}
             {nextPhase && (() => {
-              const blocked = nextPhase.id === "promote" &&
-                phaseStatuses["dry-run"] !== "done" &&
-                phaseStatuses["dry-run"] !== "skipped";
+              const blocked =
+                (nextPhase.id === "promote" && phaseStatuses["dry-run"] !== "done" && phaseStatuses["dry-run"] !== "skipped") ||
+                (nextPhase.id === "summary" && phaseStatuses.promote !== "done" && phaseStatuses.promote !== "failed");
 
               return (
                 <button
