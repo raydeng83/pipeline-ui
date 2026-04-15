@@ -1519,7 +1519,19 @@ export function PromoteExecution({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    }).catch(() => { /* non-fatal */ });
+    })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        // Save the reportId back to the task for the archive page
+        if (data?.id && dryRunReport) {
+          fetch(`/api/promotion-tasks/${task.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reportId: data.id }),
+          }).catch(() => { /* non-fatal */ });
+        }
+      })
+      .catch(() => { /* non-fatal */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phaseStatuses.promote, phaseStatuses.prepare, phaseStatuses["dry-run"], phaseStatuses.summary]);
 

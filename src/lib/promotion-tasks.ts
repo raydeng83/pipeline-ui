@@ -24,6 +24,10 @@ export interface PromotionTask {
   includeDeps?: boolean;
   createdAt: string;
   updatedAt: string;
+  /** ISO timestamp when the task was archived. Present only on archived tasks. */
+  archivedAt?: string;
+  /** ID of the saved dry-run report (matches promotion-reports/{reportId}.json). */
+  reportId?: string;
 }
 
 export function readTasks(): PromotionTask[] {
@@ -33,6 +37,18 @@ export function readTasks(): PromotionTask[] {
   } catch {
     return [];
   }
+}
+
+/** Active tasks (not archived). */
+export function readActiveTasks(): PromotionTask[] {
+  return readTasks().filter((t) => !t.archivedAt);
+}
+
+/** Archived tasks, most recently archived first. */
+export function readArchivedTasks(): PromotionTask[] {
+  return readTasks()
+    .filter((t) => !!t.archivedAt)
+    .sort((a, b) => (b.archivedAt ?? "").localeCompare(a.archivedAt ?? ""));
 }
 
 function saveTasks(tasks: PromotionTask[]): void {

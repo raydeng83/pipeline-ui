@@ -1,10 +1,10 @@
 import { getEnvironments } from "@/lib/fr-config";
-import { readTasks } from "@/lib/promotion-tasks";
+import { readActiveTasks } from "@/lib/promotion-tasks";
 import { PromoteWorkflow } from "./PromoteWorkflow";
 
 export default function PromotePage() {
   const environments = getEnvironments();
-  const tasks = readTasks();
+  const tasks = readActiveTasks();
   return (
     <div className="space-y-6">
       <div>

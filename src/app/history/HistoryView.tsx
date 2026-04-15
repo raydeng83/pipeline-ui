@@ -1,11 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Environment } from "@/lib/fr-config-types";
 import type { HistoryRecord } from "@/lib/op-history";
-import type { CompareReport } from "@/lib/diff-types";
 import { ActivityRow } from "@/components/ActivityRow";
-import { DiffReport } from "@/app/compare/DiffReport";
 import { formatScopeLabel } from "@/lib/compare";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -63,58 +61,6 @@ type TypeFilter = "all" | "pull" | "push" | "compare" | "dry-run" | "promote" | 
 type StatusFilter = "all" | "success" | "failed";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
-
-// ── Promotion report loader ─────────────────────────────────────────────────
-
-function PromotionReportSection({ reportId, recordId }: { reportId: string; recordId: string }) {
-  const [report, setReport] = useState<CompareReport | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
-
-  const loadReport = useCallback(() => {
-    if (report || loading) return;
-    setLoading(true);
-    setError(null);
-    fetch(`/api/history/${recordId}/report`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`${res.status}`);
-        return res.json() as Promise<CompareReport>;
-      })
-      .then((data) => { setReport(data); setExpanded(true); })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [report, loading, recordId]);
-
-  return (
-    <div>
-      <div className="label-xs mb-2">DIFF REPORT</div>
-      {!report && !loading && !error && (
-        <button
-          type="button"
-          onClick={loadReport}
-          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-        >
-          Load dry-run diff report
-        </button>
-      )}
-      {loading && <p className="text-xs text-slate-400">Loading report...</p>}
-      {error && <p className="text-xs text-rose-500">Failed to load report ({error})</p>}
-      {report && (
-        <div>
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium mb-2"
-          >
-            {expanded ? "Hide diff report" : "Show diff report"}
-          </button>
-          {expanded && <DiffReport report={report} mode="dry-run" />}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ── Drawer ───────────────────────────────────────────────────────────────────
 
@@ -292,9 +238,16 @@ function RecordDrawer({
             </div>
           )}
 
-          {/* Diff report */}
-          {record.reportId && (
-            <PromotionReportSection reportId={record.reportId} recordId={record.id} />
+          {/* Link to archive for full diff report */}
+          {record.type === "promote" && record.taskId && (
+            <div>
+              <a
+                href="/archive"
+                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                View full details in Archive →
+              </a>
+            </div>
           )}
         </div>
       </aside>

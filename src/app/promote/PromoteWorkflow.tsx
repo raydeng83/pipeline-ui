@@ -677,6 +677,7 @@ function TaskDetail({
   onToggleFullscreen,
   onEdit,
   onDelete,
+  onArchive,
   onStatusChange,
 }: {
   task: PromotionTask;
@@ -685,6 +686,7 @@ function TaskDetail({
   onToggleFullscreen: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onArchive: () => void;
   onStatusChange: (status: TaskStatus) => void;
 }) {
   const envMap = new Map(environments.map((e) => [e.name, e]));
@@ -712,6 +714,15 @@ function TaskDetail({
           >
             Edit
           </button>
+          {(task.status === "completed" || task.status === "failed") && (
+            <button
+              onClick={onArchive}
+              disabled={busy}
+              className="px-2.5 py-1 text-xs border border-amber-200 text-amber-700 rounded hover:bg-amber-50 disabled:opacity-50 transition-colors"
+            >
+              Archive
+            </button>
+          )}
           <button
             onClick={onDelete}
             disabled={busy}
@@ -892,6 +903,20 @@ export function PromoteWorkflow({
     }
   };
 
+  const handleArchive = async (task: PromotionTask) => {
+    const res = await fetch(`/api/promotion-tasks/${task.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archivedAt: new Date().toISOString() }),
+    });
+    if (res.ok) {
+      const remaining = tasks.filter((t) => t.id !== task.id);
+      setTasks(remaining);
+      setSelectedId(remaining[0]?.id ?? null);
+      setPanelMode(remaining.length > 0 ? "view" : "select");
+    }
+  };
+
   const handleStatusChange = async (id: string, status: TaskStatus) => {
     const res = await fetch(`/api/promotion-tasks/${id}`, {
       method: "PUT",
@@ -1036,6 +1061,7 @@ export function PromoteWorkflow({
               onToggleFullscreen={() => setFullscreen((f) => !f)}
               onEdit={openEdit}
               onDelete={handleDelete}
+              onArchive={() => handleArchive(selectedTask)}
               onStatusChange={(status) => handleStatusChange(selectedTask.id, status)}
             />
           )}
