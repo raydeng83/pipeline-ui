@@ -6,7 +6,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
-import { getConfigDir, getEnvFileContent } from "./fr-config";
+import { getConfigDir, getEnvFileContent, classifyBenign } from "./fr-config";
 import { parseEnvFile } from "./env-parser";
 
 // ── Scope → frodo command mapping ─────────────────────────────────────────────
@@ -100,6 +100,8 @@ export function spawnFrodo(options: {
         );
 
         let exitCode: number | null = null;
+        let lastStderr = "";
+        let lastStdout = "";
 
         for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
           if (aborted) break;
@@ -108,6 +110,8 @@ export function spawnFrodo(options: {
             await sleep(RETRY_DELAY_MS);
           }
 
+          lastStderr = "";
+          lastStdout = "";
           exitCode = await new Promise<number | null>((resolve) => {
             const proc = spawn(
               "frodo",
@@ -116,10 +120,19 @@ export function spawnFrodo(options: {
             );
             currentProc = proc;
 
-            proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
-            proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
+            proc.stdout.on("data", (chunk: Buffer) => {
+              const s = chunk.toString();
+              lastStdout += s;
+              encode(s, "stdout");
+            });
+            proc.stderr.on("data", (chunk: Buffer) => {
+              const s = chunk.toString();
+              lastStderr += s;
+              encode(s, "stderr");
+            });
             proc.on("close", (code) => { currentProc = null; resolve(code); });
             proc.on("error", (err) => {
+              lastStderr += err.message;
               encode(`frodo not found: ${err.message}`, "stderr");
               currentProc = null;
               resolve(1);
@@ -129,11 +142,21 @@ export function spawnFrodo(options: {
           if (exitCode === 0) break;
         }
 
-        if (exitCode !== 0) anyFailed = true;
+        let benignReason: string | null = null;
+        if (exitCode !== 0) {
+          benignReason = classifyBenign(lastStderr) ?? classifyBenign(lastStdout);
+          if (benignReason) {
+            exitCode = 0;
+          } else {
+            anyFailed = true;
+          }
+        }
 
-        controller.enqueue(
-          JSON.stringify({ type: "scope-end", scope, code: exitCode, ts: Date.now() }) + "\n"
-        );
+        const endPayload: Record<string, unknown> = {
+          type: "scope-end", scope, code: exitCode, ts: Date.now(),
+        };
+        if (benignReason) endPayload.warning = benignReason;
+        controller.enqueue(JSON.stringify(endPayload) + "\n");
       }
 
       controller.enqueue(

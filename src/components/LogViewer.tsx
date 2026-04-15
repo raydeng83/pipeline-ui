@@ -9,9 +9,11 @@ interface LogViewerProps {
   running: boolean;
   exitCode: number | null;
   onClear?: () => void;
+  /** Increment this to force the debug panel open and scroll it into view. */
+  focusDebugSignal?: number;
 }
 
-export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) {
+export function LogViewer({ logs, running, exitCode, onClear, focusDebugSignal }: LogViewerProps) {
   const mainPaneRef = useRef<HTMLDivElement>(null);
   const debugPaneRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
@@ -55,6 +57,22 @@ export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) 
     const pinned = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
     if (pinned) el.scrollTop = el.scrollHeight;
   }, [debugLogs.length, debugOpen]);
+
+  // Auto-open debug panel on error.
+  useEffect(() => {
+    if (exitCode !== null && exitCode !== 0 && debugLogs.length > 0) {
+      setDebugOpen(true);
+    }
+  }, [exitCode, debugLogs.length]);
+
+  // External trigger: open debug panel and scroll to it.
+  useEffect(() => {
+    if (focusDebugSignal === undefined || focusDebugSignal === 0) return;
+    setDebugOpen(true);
+    requestAnimationFrame(() => {
+      debugPaneRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [focusDebugSignal]);
 
   const statusText =
     exitCode === null

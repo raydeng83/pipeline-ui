@@ -14,6 +14,7 @@ export interface LogEntry {
   action?: string;
   hash?: string;
   message?: string;
+  warning?: string;
   ts: number;
 }
 

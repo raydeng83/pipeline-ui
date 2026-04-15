@@ -35,11 +35,20 @@ interface PullJob {
   exitCode: number | null;
 }
 
+type ScopeState = "running" | "done" | "error" | "empty";
+interface EnvScopeState {
+  order: string[];
+  results: Map<string, ScopeState>;
+  warnings: Map<string, string>;
+  current: string | null;
+}
+
 function usePullJobs() {
   const [jobs, setJobs] = useState<PullJob[]>([]);
   // Store logs in a ref to avoid re-rendering the entire component on every line.
   // A counter state triggers re-renders at a throttled rate.
   const logsRef = useRef<Map<string, LogEntry[]>>(new Map());
+  const scopeStatesRef = useRef<Map<string, EnvScopeState>>(new Map());
   const [logTick, setLogTick] = useState(0);
   const tickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllers = useRef<Map<string, AbortController>>(new Map());
@@ -57,8 +66,14 @@ function usePullJobs() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logTick]);
 
+  const getScopeStateForEnv = useCallback((env: string): EnvScopeState => {
+    return scopeStatesRef.current.get(env) ?? { order: [], results: new Map(), warnings: new Map(), current: null };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logTick]);
+
   const startAll = useCallback((envs: Environment[], scopes: ConfigScope[]) => {
     logsRef.current.clear();
+    scopeStatesRef.current.clear();
     const initial: PullJob[] = envs.map((env) => ({
       env: env.name,
       label: env.label,
@@ -67,7 +82,10 @@ function usePullJobs() {
       logs: [],
       exitCode: null,
     }));
-    for (const env of envs) logsRef.current.set(env.name, []);
+    for (const env of envs) {
+      logsRef.current.set(env.name, []);
+      scopeStatesRef.current.set(env.name, { order: [], results: new Map(), warnings: new Map(), current: null });
+    }
     setJobs(initial);
     abortControllers.current.clear();
 
@@ -101,10 +119,30 @@ function usePullJobs() {
               try {
                 const entry = JSON.parse(line) as LogEntry;
                 logsRef.current.get(env.name)?.push(entry);
+                const st = scopeStatesRef.current.get(env.name);
+                if (st) {
+                  if (entry.type === "scope-start" && entry.scope) {
+                    if (!st.results.has(entry.scope)) st.order.push(entry.scope);
+                    st.results.set(entry.scope, "running");
+                    st.current = entry.scope;
+                  } else if (entry.type === "scope-end" && entry.scope) {
+                    const warning = (entry as LogEntry & { warning?: string }).warning;
+                    const state: ScopeState = warning
+                      ? "empty"
+                      : (entry.code ?? 0) === 0
+                        ? "done"
+                        : "error";
+                    st.results.set(entry.scope, state);
+                    if (warning) st.warnings.set(entry.scope, warning);
+                    if (st.current === entry.scope) st.current = null;
+                  }
+                }
                 if (entry.type === "exit") { hasExit = true; exitEntry = entry; }
               } catch { /* skip */ }
             }
             if (hasExit && exitEntry) {
+              const st = scopeStatesRef.current.get(env.name);
+              if (st) st.current = null;
               setJobs((prev) => prev.map((j) =>
                 j.env === env.name
                   ? { ...j, status: ((exitEntry as LogEntry).code ?? 1) === 0 ? "done" : "failed", exitCode: (exitEntry as LogEntry).code ?? 1 }
@@ -139,11 +177,12 @@ function usePullJobs() {
   const clearJobs = useCallback(() => {
     setJobs([]);
     logsRef.current.clear();
+    scopeStatesRef.current.clear();
   }, []);
 
   const anyRunning = jobs.some((j) => j.status === "running");
 
-  return { jobs, getLogsForEnv, startAll, abortAll, clearJobs, anyRunning };
+  return { jobs, getLogsForEnv, getScopeStateForEnv, startAll, abortAll, clearJobs, anyRunning };
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
@@ -160,12 +199,14 @@ export function SyncForm({
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   const { setBusy } = useBusyState();
-  const { jobs, getLogsForEnv, startAll, abortAll, clearJobs, anyRunning } = usePullJobs();
+  const { jobs, getLogsForEnv, getScopeStateForEnv, startAll, abortAll, clearJobs, anyRunning } = usePullJobs();
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const logViewerRef = useRef<HTMLDivElement>(null);
+  const [focusDebugSignal, setFocusDebugSignal] = useState(0);
 
   const focusLog = useCallback((env: string) => {
     setActiveTab(env);
+    setFocusDebugSignal((n) => n + 1);
     requestAnimationFrame(() => {
       logViewerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -289,6 +330,14 @@ export function SyncForm({
                       <div className="text-[10px] text-slate-400 mt-0.5">
                         {lastPull ? `Last pull: ${mounted ? timeAgo(lastPull) : "…"}` : "Never pulled"}
                       </div>
+                      {job?.status === "running" && (() => {
+                        const cur = getScopeStateForEnv(env.name).current;
+                        return cur ? (
+                          <div className="text-[10px] text-sky-600 mt-0.5 font-mono truncate">
+                            pulling: {cur}
+                          </div>
+                        ) : null;
+                      })()}
                       {job?.status === "failed" && (() => {
                         const err = lastErrorFor(env.name);
                         return err ? (
@@ -378,6 +427,8 @@ export function SyncForm({
                   <ul className="space-y-1">
                     {failedJobs.map((j) => {
                       const err = lastErrorFor(j.env);
+                      const st = getScopeStateForEnv(j.env);
+                      const errScopes = st.order.filter((s) => st.results.get(s) === "error");
                       return (
                         <li key={j.env} className="flex items-start gap-2 text-[11px]">
                           <button
@@ -392,9 +443,18 @@ export function SyncForm({
                           </span>
                           <span
                             className="flex-1 min-w-0 truncate font-mono text-red-600"
-                            title={err ?? undefined}
+                            title={[errScopes.length ? `scopes: ${errScopes.join(", ")}` : null, err]
+                              .filter(Boolean)
+                              .join(" — ") || undefined}
                           >
-                            {err ?? "No output"}
+                            {errScopes.length > 0 ? (
+                              <>
+                                <span className="font-semibold">{errScopes.join(", ")}</span>
+                                {err ? <span className="text-red-500"> — {err}</span> : null}
+                              </>
+                            ) : (
+                              err ?? "No output"
+                            )}
                           </span>
                           <button
                             type="button"
@@ -449,6 +509,39 @@ export function SyncForm({
                 ))}
               </div>
 
+              {/* Scope progress pills for active env */}
+              {activeJob && deferredActiveTab && (() => {
+                const st = getScopeStateForEnv(deferredActiveTab);
+                if (st.order.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap items-center gap-1.5 px-0.5">
+                    {st.order.map((s) => {
+                      const state = st.results.get(s);
+                      const warning = st.warnings.get(s);
+                      return (
+                        <span
+                          key={s}
+                          title={warning ? `${s} — ${warning}` : s}
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono rounded ring-1",
+                            state === "done" && "bg-emerald-50 text-emerald-700 ring-emerald-200",
+                            state === "error" && "bg-red-50 text-red-700 ring-red-200",
+                            state === "running" && "bg-sky-50 text-sky-700 ring-sky-200",
+                            state === "empty" && "bg-slate-50 text-slate-500 ring-slate-200",
+                          )}
+                        >
+                          {state === "running" && <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />}
+                          {state === "done" && <span>✓</span>}
+                          {state === "error" && <span>✗</span>}
+                          {state === "empty" && <span>∅</span>}
+                          {s}
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
               {/* Log viewer for active tab */}
               {activeJob && (
                 <div ref={logViewerRef}>
@@ -456,6 +549,7 @@ export function SyncForm({
                     logs={activeJobLogs}
                     running={activeJob.status === "running"}
                     exitCode={activeJob.exitCode}
+                    focusDebugSignal={focusDebugSignal}
                   />
                 </div>
               )}

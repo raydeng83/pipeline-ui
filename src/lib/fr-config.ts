@@ -9,6 +9,25 @@ import { FILENAME_FILTER_SCOPES, NAME_FLAG_SCOPES } from "./fr-config-types";
 
 const ENVIRONMENTS_DIR = path.join(process.cwd(), "environments");
 
+// Benign non-zero exit patterns — "nothing to pull" rather than real failure.
+// Shared across fr-config, frodo, and iga-api runners.
+const BENIGN_PATTERNS: { re: RegExp; reason: string }[] = [
+  { re: /Cannot convert undefined or null to object/i, reason: "no objects found" },
+  { re: /Resource '[^']+' not found/i, reason: "resource not found" },
+  { re: /Status:\s*404/i, reason: "resource not found (404)" },
+  { re: /\bNot Found\b/i, reason: "resource not found" },
+  { re: /no config metadata available/i, reason: "no config metadata" },
+  { re: /no\s+\w+_CONFIG\s+defined\s*-\s*skipping/i, reason: "not configured — skipped" },
+  { re: /Warning[^\n]*skipping/i, reason: "skipped" },
+];
+
+export function classifyBenign(buf: string): string | null {
+  for (const { re, reason } of BENIGN_PATTERNS) {
+    if (re.test(buf)) return reason;
+  }
+  return null;
+}
+
 export function getEnvironments(): Environment[] {
   const envPath = path.join(ENVIRONMENTS_DIR, "environments.json");
   if (!fs.existsSync(envPath)) {
@@ -182,6 +201,8 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
 
         const procEnv = { ...baseEnv, ...entry.extraEnv };
         let exitCode: number | null = null;
+        let lastStderr = "";
+        let lastStdout = "";
 
         for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
           if (aborted) break;
@@ -190,6 +211,8 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             await sleep(RETRY_DELAY_MS);
           }
 
+          lastStderr = "";
+          lastStdout = "";
           exitCode = await new Promise<number | null>((resolve) => {
             const envDir = path.join(ENVIRONMENTS_DIR, environment);
             const proc = spawn(
@@ -199,10 +222,19 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             );
             currentProc = proc;
 
-            proc.stdout.on("data", (chunk: Buffer) => encode(chunk.toString(), "stdout"));
-            proc.stderr.on("data", (chunk: Buffer) => encode(chunk.toString(), "stderr"));
+            proc.stdout.on("data", (chunk: Buffer) => {
+              const s = chunk.toString();
+              lastStdout += s;
+              encode(s, "stdout");
+            });
+            proc.stderr.on("data", (chunk: Buffer) => {
+              const s = chunk.toString();
+              lastStderr += s;
+              encode(s, "stderr");
+            });
             proc.on("close", (code) => { currentProc = null; resolve(code); });
             proc.on("error", (err) => {
+              lastStderr += err.message;
               encode(err.message, "stderr");
               currentProc = null;
               resolve(1);
@@ -212,14 +244,27 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
           if (exitCode === 0) break;
         }
 
-        if (exitCode !== 0) anyFailed = true;
+        let benignReason: string | null = null;
+        if (exitCode !== 0) {
+          benignReason = classifyBenign(lastStderr) ?? classifyBenign(lastStdout);
+          if (benignReason) {
+            exitCode = 0;
+          } else {
+            anyFailed = true;
+          }
+        }
 
         // Emit scope-end when this scope won't appear again
         const nextEntry = subEntries[subEntries.indexOf(entry) + 1];
         if (!nextEntry || nextEntry.scope !== entry.scope) {
-          controller.enqueue(
-            JSON.stringify({ type: "scope-end", scope: entry.scope, code: exitCode, ts: Date.now() }) + "\n"
-          );
+          const payload: Record<string, unknown> = {
+            type: "scope-end",
+            scope: entry.scope,
+            code: exitCode,
+            ts: Date.now(),
+          };
+          if (benignReason) payload.warning = benignReason;
+          controller.enqueue(JSON.stringify(payload) + "\n");
         }
       }
 
