@@ -29,8 +29,12 @@ export function formatScopeLabel(scope: string): string {
 
 function scopeOf(file: FileDiff): string | null {
   if (file.scope) return file.scope;
-  const first = file.relativePath?.split("/")[0];
-  return first || null;
+  if (!file.relativePath) return null;
+  const parts = file.relativePath.split("/");
+  // Realm-based: realms/<realm>/<scope>/...
+  if (parts[0] === "realms" && parts.length >= 3) return parts[2];
+  // Global: <scope>/...
+  return parts[0];
 }
 
 /** Scopes where each "item" is a directory containing multiple files. */
