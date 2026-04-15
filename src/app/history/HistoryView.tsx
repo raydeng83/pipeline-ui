@@ -72,11 +72,11 @@ function RecordDrawer({
 }) {
   return (
     <div
-      className="fixed inset-0 z-40 bg-slate-900/40"
+      className="fixed inset-0 top-14 z-40 bg-slate-900/40"
       onClick={onClose}
     >
       <aside
-        className="fixed right-0 top-0 h-full w-[min(560px,100vw)] bg-white shadow-2xl overflow-y-auto"
+        className="fixed right-0 top-14 bottom-0 w-[min(560px,100vw)] bg-white shadow-2xl overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
