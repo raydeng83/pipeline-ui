@@ -22,14 +22,14 @@ import { cn } from "@/lib/utils";
 
 // ── Types & phase definitions ─────────────────────────────────────────────────
 
-export type PhaseId = "prepare" | "dry-run" | "promote" | "verify";
+export type PhaseId = "prepare" | "dry-run" | "promote" | "summary";
 export type PhaseStatus = "pending" | "running" | "done" | "failed" | "skipped";
 
 const PHASE_DEFS: { id: PhaseId; label: string; description: string }[] = [
   { id: "prepare",  label: "Prepare",  description: "Pull source config" },
   { id: "dry-run",  label: "Dry Run",  description: "Compare source vs target" },
-  { id: "promote",  label: "Promote",  description: "Push all scopes to target" },
-  { id: "verify",   label: "Verify",   description: "Pull target & re-compare" },
+  { id: "promote",  label: "Promote",  description: "Push, pull target & verify" },
+  { id: "summary",  label: "Summary",  description: "Promotion result" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -78,12 +78,21 @@ function Stepper({
                 if (isSkipped) return;
                 // Block jumping to promote if dry-run hasn't completed
                 if (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped") return;
+                // Block going back from summary
+                const summaryReached = statuses.summary === "done" || statuses.summary === "failed";
+                if (summaryReached && phase.id !== "summary") return;
                 onClick(phase.id);
               }}
-              disabled={isSkipped || (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped")}
+              disabled={
+                isSkipped ||
+                (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped") ||
+                ((statuses.summary === "done" || statuses.summary === "failed") && phase.id !== "summary")
+              }
               className={cn(
                 "flex flex-col items-center gap-1 px-2 py-1 rounded transition-colors min-w-[64px]",
                 isSkipped ? "opacity-40 cursor-default"
+                  : ((statuses.summary === "done" || statuses.summary === "failed") && phase.id !== "summary")
+                  ? "opacity-40 cursor-not-allowed"
                   : (phase.id === "promote" && statuses["dry-run"] !== "done" && statuses["dry-run"] !== "skipped")
                   ? "opacity-40 cursor-not-allowed"
                   : "hover:bg-slate-50 cursor-pointer"
@@ -648,9 +657,10 @@ const PROMOTE_PHASES = [
   { scope: "remap-script-refs", label: "Remap Scripts" },
   { scope: "push",              label: "Push" },
   { scope: "pull-target",       label: "Pull Target" },
+  { scope: "verify",            label: "Verify" },
 ];
 
-function PromoteProgress({ logs, running }: { logs: LogEntry[]; running: boolean }) {
+function PromoteProgress({ logs, running, extraPhases }: { logs: LogEntry[]; running: boolean; extraPhases?: { scope: string; status: "running" | "done" | "failed" }[] }) {
   const { phases, currentPhase, lineCountsByPhase } = useMemo(() => {
     const completed = new Set<string>();
     const errored = new Set<string>();
@@ -679,8 +689,17 @@ function PromoteProgress({ logs, running }: { logs: LogEntry[]; running: boolean
         : started.has(p.scope) ? "running" as const
         : "pending" as const,
     }));
+    // Merge in extra phases (e.g. verify that runs outside the stream)
+    if (extraPhases) {
+      for (const ep of extraPhases) {
+        const def = PROMOTE_PHASES.find(p => p.scope === ep.scope);
+        if (def && !phaseStates.some(p => p.scope === ep.scope)) {
+          phaseStates.push({ ...def, status: ep.status });
+        }
+      }
+    }
     return { phases: phaseStates, currentPhase: active, lineCountsByPhase: counts };
-  }, [logs]);
+  }, [logs, extraPhases]);
 
   if (phases.length === 0) return null;
 
@@ -734,6 +753,7 @@ function FrConfigSection({
   dryRunReport,
   onComplete,
   onTaskStatusChange,
+  onVerifyReport,
 }: {
   task: PromotionTask;
   targetIsControlled?: boolean;
@@ -742,21 +762,69 @@ function FrConfigSection({
   dryRunReport: import("@/lib/diff-types").CompareReport | null;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
+  onVerifyReport: (r: import("@/lib/diff-types").CompareReport) => void;
 }) {
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
   const [promoteConfirmOpen, setPromoteConfirmOpen] = useState(false);
+  const [verifyRunning, setVerifyRunning] = useState(false);
+  const [verifyDone, setVerifyDone] = useState(false);
   const onCompleteRef = useRef(onComplete);
   const onTaskStatusRef = useRef(onTaskStatusChange);
+  const onVerifyReportRef = useRef(onVerifyReport);
   useEffect(() => { onCompleteRef.current = onComplete; });
   useEffect(() => { onTaskStatusRef.current = onTaskStatusChange; });
-  useEffect(() => { setBusy(running); }, [running, setBusy]);
+  useEffect(() => { onVerifyReportRef.current = onVerifyReport; });
+  useEffect(() => { setBusy(running || verifyRunning); }, [running, verifyRunning, setBusy]);
 
+  // Auto-run verify after promote succeeds
   useEffect(() => {
-    if (exitCode !== null && !running) {
-      onCompleteRef.current(exitCode === 0 ? "done" : "failed");
-      onTaskStatusRef.current(exitCode === 0 ? "completed" : "failed");
+    if (exitCode === null || running) return;
+    if (exitCode !== 0) {
+      onCompleteRef.current("failed");
+      onTaskStatusRef.current("failed");
+      return;
     }
+    // Push + pull succeeded — auto-verify
+    setVerifyRunning(true);
+    const scopeSelections = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
+    fetch("/api/compare", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source: { ...task.target, mode: "local" },
+        target: { ...task.source, mode: "local" },
+        scopeSelections,
+        includeDeps: task.includeDeps ?? false,
+        mode: "compare",
+        diffOptions: { includeMetadata: false, ignoreWhitespace: true },
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`verify compare returned ${res.status}`);
+        const text = await res.text();
+        for (const line of text.split("\n")) {
+          if (!line.trim()) continue;
+          try {
+            const entry = JSON.parse(line) as { type: string; data?: string };
+            if (entry.type === "report" && entry.data) {
+              const report = JSON.parse(entry.data) as import("@/lib/diff-types").CompareReport;
+              onVerifyReportRef.current(report);
+              break;
+            }
+          } catch { /* skip */ }
+        }
+        onCompleteRef.current("done");
+        onTaskStatusRef.current("completed");
+      })
+      .catch(() => {
+        onCompleteRef.current("done"); // verify failure is non-fatal
+        onTaskStatusRef.current("completed");
+      })
+      .finally(() => {
+        setVerifyRunning(false);
+        setVerifyDone(true);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exitCode, running]);
 
@@ -895,7 +963,11 @@ function FrConfigSection({
 
       {(running || logs.length > 0) && (
         <div className="space-y-2">
-          <PromoteProgress logs={logs} running={running} />
+          <PromoteProgress
+            logs={logs}
+            running={running}
+            extraPhases={verifyRunning ? [{ scope: "verify", status: "running" }] : verifyDone ? [{ scope: "verify", status: "done" }] : undefined}
+          />
           <div className="rounded-lg border border-slate-200 overflow-hidden">
             <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
           </div>
@@ -1035,6 +1107,7 @@ function PromotePhase({
   visible,
   includeDeps,
   dryRunReport,
+  onVerifyReport,
   onComplete,
   onTaskStatusChange,
 }: {
@@ -1047,6 +1120,7 @@ function PromotePhase({
   visible: boolean;
   includeDeps: boolean;
   dryRunReport: import("@/lib/diff-types").CompareReport | null;
+  onVerifyReport: (r: import("@/lib/diff-types").CompareReport) => void;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
@@ -1079,6 +1153,7 @@ function PromotePhase({
               dryRunReport={dryRunReport}
               onComplete={onComplete}
               onTaskStatusChange={onTaskStatusChange}
+              onVerifyReport={onVerifyReport}
             />
           </div>
         )}
@@ -1107,100 +1182,125 @@ function PromotePhase({
   );
 }
 
-// ── Phase 4: Verify ───────────────────────────────────────────────────────────
+// ── Phase 4: Summary ──────────────────────────────────────────────────────────
 
-function VerifyPhase({
+function SummaryPhase({
   task,
   visible,
-  includeDeps,
-  onComplete,
+  dryRunReport,
+  verifyReport,
+  phaseStatuses,
 }: {
   task: PromotionTask;
   visible: boolean;
-  includeDeps: boolean;
-  onComplete: (s: PhaseStatus) => void;
+  dryRunReport: import("@/lib/diff-types").CompareReport | null;
+  verifyReport: import("@/lib/diff-types").CompareReport | null;
+  phaseStatuses: Record<PhaseId, PhaseStatus>;
 }) {
-  const { logs, running, exitCode, report, run, abort, clear } = useStreamingLogs();
-  const { setBusy } = useBusyState();
-  const onCompleteRef = useRef(onComplete);
-  useEffect(() => { onCompleteRef.current = onComplete; });
-  useEffect(() => { setBusy(running); }, [running, setBusy]);
-  useEffect(() => {
-    if (exitCode !== null && !running)
-      onCompleteRef.current(exitCode === 0 ? "done" : "failed");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exitCode, running]);
+  const promoteStatus = phaseStatuses.promote;
+  const succeeded = promoteStatus === "done";
+  const failed = promoteStatus === "failed";
 
-  const scopeSelections = task.items.filter((i) => getCommandType(i.scope) === "fr-config");
-
-  // Verify swaps the compare direction: the just-promoted target is treated as
-  // the baseline and checked against the original source. Post-promotion the
-  // two should match exactly for the selected items. Both sides are forced to
-  // local mode — Step 1 Prepare pulled source and Step 3 Promote pulled target
-  // after the push, so the local config dirs are already in sync and another
-  // remote pull would be wasted work.
-  const compare = () => {
-    run("/api/compare", {
-      source: { ...task.target, mode: "local" },
-      target: { ...task.source, mode: "local" },
-      scopeSelections,
-      includeDeps,
-      mode: "compare",
-      diffOptions: { includeMetadata: false, ignoreWhitespace: true },
-    });
-  };
-
-  const sourceLogs = logs.filter((l) => l.side === "source");
-  const targetLogs = logs.filter((l) => l.side === "target");
-  const sourceExitCode = logs.find((l) => l.type === "exit" && l.side === "source")?.code ?? null;
-  const targetExitCode = logs.find((l) => l.type === "exit" && l.side === "target")?.code ?? null;
-  const sourceRunning = running && sourceExitCode === null;
-  const targetRunning = running && targetExitCode === null;
-  const showConsole = logs.length > 0 || running;
+  const verifyChanges = verifyReport
+    ? verifyReport.summary.added + verifyReport.summary.modified + verifyReport.summary.removed
+    : null;
 
   return (
     <div className={cn(!visible && "hidden")}>
-      <div className="space-y-3">
-        <p className="text-xs text-slate-500">
-          Check the promoted target (<span className="font-mono">{task.target.environment}</span>, used as the verify source) against the original source (<span className="font-mono">{task.source.environment}</span>, used as the verify target). The diff should be empty — any remaining differences flag an incomplete or drifted promotion.
-        </p>
-
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={compare}
-            disabled={running || scopeSelections.length === 0}
-            title={scopeSelections.length === 0 ? "No fr-config scopes in this task" : undefined}
-            className="px-3 py-1.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
-          >
-            {running ? "Verifying…" : "Start Verify"}
-          </button>
-          {running && (
-            <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
-              Abort
-            </button>
+      <div className="space-y-4">
+        {/* Status banner */}
+        <div className={cn(
+          "rounded-lg border px-4 py-3 flex items-center gap-3",
+          succeeded ? "border-emerald-200 bg-emerald-50" : failed ? "border-red-200 bg-red-50" : "border-slate-200 bg-slate-50"
+        )}>
+          {succeeded ? (
+            <svg className="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+          ) : failed ? (
+            <svg className="w-5 h-5 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5 text-slate-400 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+            </svg>
           )}
+          <div>
+            <p className={cn("text-sm font-semibold", succeeded ? "text-emerald-800" : failed ? "text-red-800" : "text-slate-600")}>
+              {succeeded ? "Promotion completed successfully" : failed ? "Promotion failed" : "Promotion in progress…"}
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {task.source.environment} → {task.target.environment} · {task.name}
+            </p>
+          </div>
         </div>
 
-        {/* Console panels */}
-        {showConsole && (
-          <div className="rounded-lg border border-slate-700 overflow-hidden grid grid-cols-2 divide-x divide-slate-700">
-            <div className="min-w-0 flex flex-col">
-              <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
-                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Source — {task.target.environment}</span>
-              </div>
-              <ScopedLogViewer logs={sourceLogs} running={sourceRunning} exitCode={sourceExitCode} />
-            </div>
-            <div className="min-w-0 flex flex-col">
-              <div className="px-3 py-1.5 bg-slate-700 border-b border-slate-600">
-                <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">Target — {task.source.environment}</span>
-              </div>
-              <ScopedLogViewer logs={targetLogs} running={targetRunning} exitCode={targetExitCode} />
+        {/* Phase summary */}
+        <div>
+          <div className="label-xs mb-2">PHASE RESULTS</div>
+          <div className="flex flex-wrap gap-1.5">
+            {PHASE_DEFS.map((p) => {
+              const st = phaseStatuses[p.id];
+              return (
+                <span
+                  key={p.id}
+                  className={cn(
+                    "px-2 py-0.5 rounded text-[11px] font-medium border",
+                    st === "done" ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      : st === "failed" ? "border-red-200 bg-red-50 text-red-700"
+                      : st === "skipped" ? "border-slate-200 bg-slate-50 text-slate-400"
+                      : "border-slate-200 bg-white text-slate-500"
+                  )}
+                >
+                  {p.label}: {st}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Items promoted */}
+        {task.items.length > 0 && (
+          <div>
+            <div className="label-xs mb-2">ITEMS PROMOTED</div>
+            <div className="flex flex-wrap gap-1.5 text-[11px]">
+              {task.items.map(({ scope, items }) => (
+                <span key={scope} className="px-2 py-0.5 rounded border border-slate-200 bg-white text-slate-600">
+                  {scopeLabel(scope)}
+                  {items && <span className="text-slate-400 ml-1">×{items.length}</span>}
+                </span>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Diff report */}
-        {report && !running && <DiffReport report={report} mode="compare" showUnchangedByDefault />}
+        {/* Verify result */}
+        {verifyReport && (
+          <div>
+            <div className="label-xs mb-2">
+              VERIFY — {verifyChanges === 0
+                ? <span className="text-emerald-600">No remaining differences</span>
+                : <span className="text-amber-600">{verifyChanges} difference{verifyChanges !== 1 ? "s" : ""} found</span>
+              }
+            </div>
+            {verifyChanges !== 0 && (
+              <DiffReport report={verifyReport} mode="compare" showUnchangedByDefault />
+            )}
+          </div>
+        )}
+
+        {/* Dry-run report */}
+        {dryRunReport && (
+          <details className="group">
+            <summary className="label-xs cursor-pointer select-none">
+              DRY-RUN DIFF REPORT <span className="text-slate-400 group-open:hidden">▸</span><span className="text-slate-400 hidden group-open:inline">▾</span>
+            </summary>
+            <div className="mt-2">
+              <DiffReport report={dryRunReport} mode="dry-run" />
+            </div>
+          </details>
+        )}
       </div>
     </div>
   );
@@ -1242,7 +1342,7 @@ export function PromoteExecution({
     prepare:   "pending",
     "dry-run": frConfigScopes.length > 0 ? "pending" : "skipped",
     promote:   "pending",
-    verify:    "pending",
+    summary:   "pending",
   }));
 
   const [activePhase, setActivePhase] = useState<PhaseId>("prepare");
@@ -1253,6 +1353,7 @@ export function PromoteExecution({
   // preview the effect and carry it through without going back to edit the task.
   const [includeDeps, setIncludeDeps] = useState<boolean>(task.includeDeps ?? false);
   const [dryRunReport, setDryRunReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
+  const [verifyReport, setVerifyReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
   useEffect(() => { setIncludeDeps(task.includeDeps ?? false); }, [task.id, task.includeDeps]);
   const hasJourneys = task.items.some((i) => i.scope === "journeys");
 
@@ -1285,7 +1386,7 @@ export function PromoteExecution({
     prepare:   { status: "pending" },
     "dry-run": { status: "pending" },
     promote:   { status: "pending" },
-    verify:    { status: "pending" },
+    summary:   { status: "pending" },
   });
 
   const updatePhase = (id: PhaseId, status: PhaseStatus) => {
@@ -1310,7 +1411,7 @@ export function PromoteExecution({
           prepare:   { status: "pending" },
           "dry-run": { status: "pending" },
           promote:   { status: "pending" },
-          verify:    { status: "pending" },
+          summary:   { status: "pending" },
         };
       }
 
@@ -1347,7 +1448,7 @@ export function PromoteExecution({
       prepare:   phaseStatuses.prepare,
       "dry-run": phaseStatuses["dry-run"],
       promote:   phaseStatuses.promote,
-      verify:    phaseStatuses.verify,
+      summary:   phaseStatuses.summary,
     };
 
     // Strip _startMs (internal-only) before serializing.
@@ -1418,7 +1519,17 @@ export function PromoteExecution({
       body: JSON.stringify(payload),
     }).catch(() => { /* non-fatal */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phaseStatuses.promote, phaseStatuses.prepare, phaseStatuses["dry-run"], phaseStatuses.verify]);
+  }, [phaseStatuses.promote, phaseStatuses.prepare, phaseStatuses["dry-run"], phaseStatuses.summary]);
+
+  // Auto-advance to summary when promote completes
+  useEffect(() => {
+    const promoteStatus = phaseStatuses.promote;
+    if (promoteStatus === "done" || promoteStatus === "failed") {
+      updatePhase("summary", promoteStatus === "done" ? "done" : "failed");
+      setActivePhase("summary");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phaseStatuses.promote]);
 
   const activeIdx = PHASE_DEFS.findIndex((p) => p.id === activePhase);
   const prevPhase = PHASE_DEFS
@@ -1455,7 +1566,7 @@ export function PromoteExecution({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {prevPhase && (
+            {prevPhase && activePhase !== "summary" && (
               <button
                 type="button"
                 onClick={() => setActivePhase(prevPhase.id)}
@@ -1535,14 +1646,16 @@ export function PromoteExecution({
           visible={activePhase === "promote"}
           includeDeps={hasJourneys ? includeDeps : false}
           dryRunReport={dryRunReport}
+          onVerifyReport={setVerifyReport}
           onComplete={(s) => updatePhase("promote", s)}
           onTaskStatusChange={onTaskStatusChange}
         />
-        <VerifyPhase
+        <SummaryPhase
           task={task}
-          visible={activePhase === "verify"}
-          includeDeps={hasJourneys ? includeDeps : false}
-          onComplete={(s) => updatePhase("verify", s)}
+          visible={activePhase === "summary"}
+          dryRunReport={dryRunReport}
+          verifyReport={verifyReport}
+          phaseStatuses={phaseStatuses}
         />
       </div>
     </div>
