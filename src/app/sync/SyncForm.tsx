@@ -46,16 +46,23 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
 
   // Walk logs to derive per-scope status from scope-start / scope-end events.
   // scope-end carries the exit code, so failed scopes get marked separately.
-  const { currentScope, completedScopes, erroredScopes } = useMemo(() => {
+  // Also count stdout lines per scope as a live activity indicator.
+  const { currentScope, completedScopes, erroredScopes, scopeLineCounts } = useMemo(() => {
     const starts: string[] = [];
     const completed = new Set<string>();
     const errored = new Set<string>();
+    const lineCounts = new Map<string, number>();
+    let activeScope: string | null = null;
     for (const entry of logs) {
       if (entry.type === "scope-start" && entry.scope) {
         starts.push(entry.scope);
+        activeScope = entry.scope;
       } else if (entry.type === "scope-end" && entry.scope) {
         if (entry.code === 0) completed.add(entry.scope);
         else errored.add(entry.scope);
+        activeScope = null;
+      } else if ((entry.type === "stdout" || entry.type === "stderr") && activeScope) {
+        lineCounts.set(activeScope, (lineCounts.get(activeScope) ?? 0) + 1);
       }
     }
     // Fallback: if no scope-end was emitted (e.g. older runner), treat earlier
@@ -67,7 +74,7 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
     const current = running && lastStarted && !completed.has(lastStarted) && !errored.has(lastStarted)
       ? lastStarted
       : null;
-    return { currentScope: current, completedScopes: completed, erroredScopes: errored };
+    return { currentScope: current, completedScopes: completed, erroredScopes: errored, scopeLineCounts: lineCounts };
   }, [logs, running]);
 
   // Load last state from localStorage
@@ -279,6 +286,14 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
                     {isErrored && <span>✗</span>}
                     {!isErrored && isDone && <span>✓</span>}
                     {s}
+                    {(isCurrent || isDone || isErrored) && (scopeLineCounts.get(s) ?? 0) > 0 && (
+                      <span className={cn(
+                        "text-[9px] tabular-nums",
+                        isCurrent ? "text-indigo-200" : isDone ? "text-emerald-500" : "text-rose-500"
+                      )}>
+                        {scopeLineCounts.get(s)}
+                      </span>
+                    )}
                   </span>
                 );
               })}
