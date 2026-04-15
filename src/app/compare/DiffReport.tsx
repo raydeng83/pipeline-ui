@@ -2969,10 +2969,11 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
-  // Match tasks whose source and target envs align with the comparison's
-  // source and target directly (same order, not reversed).
+  // Match active (non-archived) tasks whose source and target envs align
+  // with the comparison's source and target directly.
   const eligibleTasks = tasks.filter(
     (t) =>
+      !t.archivedAt &&
       t.source.environment === report.source.environment &&
       t.target.environment === report.target.environment,
   );
