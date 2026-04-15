@@ -11,7 +11,6 @@ import type { Environment } from "@/lib/fr-config-types";
 import type { ConfigScope } from "@/lib/fr-config-types";
 
 const STORAGE_KEY = "aic:sync:last";
-const AUTO_ROTATE_MS = 5000;
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -38,27 +37,43 @@ interface PullJob {
 
 function usePullJobs() {
   const [jobs, setJobs] = useState<PullJob[]>([]);
+  // Store logs in a ref to avoid re-rendering the entire component on every line.
+  // A counter state triggers re-renders at a throttled rate.
+  const logsRef = useRef<Map<string, LogEntry[]>>(new Map());
+  const [logTick, setLogTick] = useState(0);
+  const tickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllers = useRef<Map<string, AbortController>>(new Map());
 
+  const scheduleLogTick = useCallback(() => {
+    if (tickTimer.current) return;
+    tickTimer.current = setTimeout(() => {
+      tickTimer.current = null;
+      setLogTick((n) => n + 1);
+    }, 150);
+  }, []);
+
+  const getLogsForEnv = useCallback((env: string): LogEntry[] => {
+    return logsRef.current.get(env) ?? [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logTick]);
+
   const startAll = useCallback((envs: Environment[], scopes: ConfigScope[]) => {
-    // Initialize jobs
+    logsRef.current.clear();
     const initial: PullJob[] = envs.map((env) => ({
       env: env.name,
       label: env.label,
       color: env.color,
-      status: "pending",
+      status: "running",
       logs: [],
       exitCode: null,
     }));
+    for (const env of envs) logsRef.current.set(env.name, []);
     setJobs(initial);
     abortControllers.current.clear();
 
-    // Start all in parallel
     for (const env of envs) {
       const ac = new AbortController();
       abortControllers.current.set(env.name, ac);
-
-      setJobs((prev) => prev.map((j) => j.env === env.name ? { ...j, status: "running" } : j));
 
       fetch("/api/pull", {
         method: "POST",
@@ -79,52 +94,56 @@ function usePullJobs() {
             buffer += value;
             const lines = buffer.split("\n");
             buffer = lines.pop() ?? "";
-            const entries: LogEntry[] = [];
+            let hasExit = false;
+            let exitEntry: LogEntry | null = null;
             for (const line of lines) {
               if (!line.trim()) continue;
               try {
                 const entry = JSON.parse(line) as LogEntry;
-                entries.push(entry);
-                if (entry.type === "exit") {
-                  setJobs((prev) => prev.map((j) =>
-                    j.env === env.name
-                      ? { ...j, status: (entry.code ?? 1) === 0 ? "done" : "failed", exitCode: entry.code ?? 1, logs: [...j.logs, ...entries] }
-                      : j
-                  ));
-                  return;
-                }
+                logsRef.current.get(env.name)?.push(entry);
+                if (entry.type === "exit") { hasExit = true; exitEntry = entry; }
               } catch { /* skip */ }
             }
-            if (entries.length > 0) {
+            if (hasExit && exitEntry) {
               setJobs((prev) => prev.map((j) =>
-                j.env === env.name ? { ...j, logs: [...j.logs, ...entries] } : j
+                j.env === env.name
+                  ? { ...j, status: ((exitEntry as LogEntry).code ?? 1) === 0 ? "done" : "failed", exitCode: (exitEntry as LogEntry).code ?? 1 }
+                  : j
               ));
+              scheduleLogTick();
+              return;
             }
+            scheduleLogTick();
           }
-          // Stream ended without exit event
           setJobs((prev) => prev.map((j) =>
             j.env === env.name && j.status === "running" ? { ...j, status: "done", exitCode: 0 } : j
           ));
+          scheduleLogTick();
         })
         .catch((err) => {
           if ((err as Error).name === "AbortError") return;
+          logsRef.current.get(env.name)?.push({ type: "error", data: String(err), ts: Date.now() });
           setJobs((prev) => prev.map((j) =>
-            j.env === env.name ? { ...j, status: "failed", exitCode: 1, logs: [...j.logs, { type: "error", data: String(err), ts: Date.now() }] } : j
+            j.env === env.name ? { ...j, status: "failed", exitCode: 1 } : j
           ));
+          scheduleLogTick();
         });
     }
-  }, []);
+  }, [scheduleLogTick]);
 
   const abortAll = useCallback(() => {
     for (const ac of abortControllers.current.values()) ac.abort();
     setJobs((prev) => prev.map((j) => j.status === "running" ? { ...j, status: "failed", exitCode: 1 } : j));
   }, []);
 
-  const clearJobs = useCallback(() => setJobs([]), []);
+  const clearJobs = useCallback(() => {
+    setJobs([]);
+    logsRef.current.clear();
+  }, []);
 
   const anyRunning = jobs.some((j) => j.status === "running");
 
-  return { jobs, startAll, abortAll, clearJobs, anyRunning };
+  return { jobs, getLogsForEnv, startAll, abortAll, clearJobs, anyRunning };
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
@@ -139,10 +158,8 @@ export function SyncForm({
   const [selectedEnvs, setSelectedEnvs] = useState<Set<string>>(new Set());
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
   const { setBusy } = useBusyState();
-  const { jobs, startAll, abortAll, clearJobs, anyRunning } = usePullJobs();
+  const { jobs, getLogsForEnv, startAll, abortAll, clearJobs, anyRunning } = usePullJobs();
   const [activeTab, setActiveTab] = useState<string | null>(null);
-  const [autoRotate, setAutoRotate] = useState(true);
-  const rotateRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => { setBusy(anyRunning); }, [anyRunning, setBusy]);
 
@@ -159,27 +176,6 @@ export function SyncForm({
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ scopes }));
   }, [scopes]);
-
-  // Auto-rotate through running jobs
-  useEffect(() => {
-    if (!autoRotate || !anyRunning) {
-      if (rotateRef.current) { clearInterval(rotateRef.current); rotateRef.current = null; }
-      return;
-    }
-    const runningEnvs = jobs.filter((j) => j.status === "running").map((j) => j.env);
-    if (runningEnvs.length === 0) return;
-
-    rotateRef.current = setInterval(() => {
-      setActiveTab((prev) => {
-        const current = jobs.filter((j) => j.status === "running").map((j) => j.env);
-        if (current.length === 0) return prev;
-        const idx = prev ? current.indexOf(prev) : -1;
-        return current[(idx + 1) % current.length];
-      });
-    }, AUTO_ROTATE_MS);
-
-    return () => { if (rotateRef.current) clearInterval(rotateRef.current); };
-  }, [autoRotate, anyRunning, jobs]);
 
   // Set initial active tab when jobs start
   useEffect(() => {
@@ -203,12 +199,12 @@ export function SyncForm({
   const handlePull = () => {
     if (selectedEnvs.size === 0 || scopes.length === 0) return;
     const envs = environments.filter((e) => selectedEnvs.has(e.name));
-    setAutoRotate(true);
     setActiveTab(envs[0].name);
     startAll(envs, scopes);
   };
 
   const activeJob = jobs.find((j) => j.env === activeTab) ?? null;
+  const activeJobLogs = activeTab ? getLogsForEnv(activeTab) : [];
   const doneCount = jobs.filter((j) => j.status === "done").length;
   const failedCount = jobs.filter((j) => j.status === "failed").length;
   const runningCount = jobs.filter((j) => j.status === "running").length;
@@ -323,21 +319,6 @@ export function SyncForm({
                 {doneCount > 0 && <span className="text-emerald-600">{doneCount} done</span>}
                 {failedCount > 0 && <span className="text-red-600">{failedCount} failed</span>}
                 {runningCount > 0 && <span className="text-sky-600">{runningCount} running</span>}
-                <label className="ml-auto flex items-center gap-1.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={autoRotate}
-                    onChange={(e) => {
-                      setAutoRotate(e.target.checked);
-                      if (!e.target.checked && rotateRef.current) {
-                        clearInterval(rotateRef.current);
-                        rotateRef.current = null;
-                      }
-                    }}
-                    className="w-3 h-3 accent-sky-600"
-                  />
-                  <span className="text-[10px] text-slate-400">Auto-rotate</span>
-                </label>
                 {!anyRunning && (
                   <button type="button" onClick={clearJobs} className="text-[10px] text-slate-400 hover:text-slate-600">
                     Clear
@@ -369,14 +350,17 @@ export function SyncForm({
                     {job.status === "done" && <span>✓</span>}
                     {job.status === "failed" && <span>✗</span>}
                     {job.label}
-                    {job.logs.length > 0 && (
-                      <span className={cn(
-                        "text-[9px] tabular-nums",
-                        activeTab === job.env ? "text-indigo-200" : "text-slate-400"
-                      )}>
-                        {job.logs.filter((l) => l.type === "stdout" || l.type === "stderr").length}
-                      </span>
-                    )}
+                    {(() => {
+                      const logCount = getLogsForEnv(job.env).filter((l) => l.type === "stdout" || l.type === "stderr").length;
+                      return logCount > 0 ? (
+                        <span className={cn(
+                          "text-[9px] tabular-nums",
+                          activeTab === job.env ? "text-indigo-200" : "text-slate-400"
+                        )}>
+                          {logCount}
+                        </span>
+                      ) : null;
+                    })()}
                   </button>
                 ))}
               </div>
@@ -384,7 +368,7 @@ export function SyncForm({
               {/* Log viewer for active tab */}
               {activeJob && (
                 <LogViewer
-                  logs={activeJob.logs}
+                  logs={activeJobLogs}
                   running={activeJob.status === "running"}
                   exitCode={activeJob.exitCode}
                 />
