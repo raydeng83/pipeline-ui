@@ -16,7 +16,7 @@ import { DiffReport } from "@/app/compare/DiffReport";
 import { DangerousConfirmDialog } from "@/components/DangerousConfirmDialog";
 import { useDialog } from "@/components/ConfirmDialog";
 import type { PromotePrecheckResult } from "@/lib/analyze/promote-precheck";
-import { useStreamingLogs } from "@/hooks/useStreamingLogs";
+import { useStreamingLogs, type LogEntry } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import { cn } from "@/lib/utils";
 
@@ -710,6 +710,19 @@ function FrConfigSection({
   const [promoteConfirmOpen, setPromoteConfirmOpen] = useState(false);
   const [verifyRunning, setVerifyRunning] = useState(false);
   const [verifyDone, setVerifyDone] = useState(false);
+  // Tracked DCC session state while promoting to a controlled env. Used to
+  // gate the Abort button — abort is only meaningful while a session exists
+  // and has not yet started applying.
+  const [dccState, setDccState] = useState<string | null>(null);
+  const [dccBusy, setDccBusy] = useState(false);
+  const abortRequestedRef = useRef(false);
+
+  // Synthetic log entries for DCC transitions. Merged with the streaming
+  // push logs so the user sees one unified timeline in the existing log viewer.
+  const [dccLogs, setDccLogs] = useState<LogEntry[]>([]);
+  const pushDccLog = (data: string, type: "stdout" | "stderr" = "stdout") => {
+    setDccLogs((prev) => [...prev, { type, data: `[dcc] ${data}\n`, ts: Date.now() }]);
+  };
   const onCompleteRef = useRef(onComplete);
   const onTaskStatusRef = useRef(onTaskStatusChange);
   const onVerifyReportRef = useRef(onVerifyReport);
@@ -782,6 +795,35 @@ function FrConfigSection({
     return res.json();
   };
 
+  // Abort states that allow a meaningful rollback. Apply/Applied states are
+  // excluded — at that point the session is being or has been committed.
+  const ABORTABLE_DCC_STATES = new Set([
+    "SESSION_INITIALISE_REQUESTED",
+    "SESSION_INITIALISING",
+    "SESSION_INITIALISED",
+  ]);
+
+  const canAbort = targetIsControlled
+    ? running || dccBusy || (dccState !== null && ABORTABLE_DCC_STATES.has(dccState))
+    : running;
+
+  const handleAbort = async () => {
+    abortRequestedRef.current = true;
+    if (targetIsControlled) {
+      pushDccLog("User aborted — calling direct-control-abort.", "stderr");
+      try { await callDcc("direct-control-abort"); } catch { /* best-effort */ }
+      setDccState("SESSION_ABORT_REQUESTED");
+      setDccBusy(false);
+    }
+    abort();
+  };
+
+  // Merge DCC synthetic logs with streaming push logs into a unified timeline.
+  const mergedLogs = useMemo(
+    () => [...dccLogs, ...logs].sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0)),
+    [dccLogs, logs],
+  );
+
   const diffLoader = useCallback(async () => {
     if (!dryRunReport) throw new Error("Run the dry-run first to generate a diff preview");
     const { summarizeReport } = await import("@/lib/compare");
@@ -792,38 +834,70 @@ function FrConfigSection({
     if (task.status === "new") onTaskStatusChange("in-progress");
 
     if (targetIsControlled) {
+      setDccLogs([]);
+      abortRequestedRef.current = false;
+      setDccBusy(true);
+      pushDccLog("Checking direct-control session state…");
       // DCC Step 1: Check state
       const stateRes = await callDcc("direct-control-state");
       let stateJson: { status?: string } = {};
       try { stateJson = JSON.parse(stateRes.stdout.trim()); } catch { /* ignore */ }
+      setDccState(stateJson.status ?? null);
+      pushDccLog(`State: ${stateJson.status ?? "unknown"}`);
 
-      if (stateJson.status && stateJson.status !== "NO_SESSION") {
+      if (stateJson.status && stateJson.status !== "NO_SESSION" && stateJson.status !== "SESSION_APPLIED") {
         // Session already active — skip init, go straight to push
+        pushDccLog("Session already active — skipping init.");
       } else {
         // DCC Step 2: Init session
+        pushDccLog("Initialising direct-control session…");
         const initRes = await callDcc("direct-control-init");
         if (initRes.exitCode !== 0) {
+          pushDccLog(`Init failed: ${initRes.stderr || initRes.stdout}`, "stderr");
+          setDccBusy(false);
           onTaskStatusChange("failed");
           return;
         }
+        setDccState("SESSION_INITIALISE_REQUESTED");
+        pushDccLog("Init requested. Waiting for SESSION_INITIALISED…");
 
         // Poll until SESSION_INITIALISED. Session provisioning on a cold
         // controlled tenant takes ~130s in the field, so keep a generous
         // budget to avoid spurious aborts.
         const pollStart = Date.now();
+        let reached = false;
+        let lastLoggedStatus = "";
         while (Date.now() - pollStart < 240_000) {
           await new Promise((r) => setTimeout(r, 5000));
+          if (abortRequestedRef.current) { setDccBusy(false); return; }
           const pollRes = await callDcc("direct-control-state");
           let pollState: { status?: string } = {};
           try { pollState = JSON.parse(pollRes.stdout.trim()); } catch { /* ignore */ }
-          if (pollState.status === "SESSION_INITIALISED") break;
+          if (pollState.status) setDccState(pollState.status);
+          if (pollState.status && pollState.status !== lastLoggedStatus) {
+            const elapsed = Math.round((Date.now() - pollStart) / 1000);
+            pushDccLog(`${pollState.status} (${elapsed}s)`);
+            lastLoggedStatus = pollState.status;
+          }
+          if (pollState.status === "SESSION_INITIALISED") { reached = true; break; }
           if (pollState.status === "ERROR") {
+            pushDccLog("Session entered ERROR state — aborting.", "stderr");
             await callDcc("direct-control-abort");
+            setDccBusy(false);
             onTaskStatusChange("failed");
             return;
           }
         }
+        if (!reached) {
+          pushDccLog("Timed out waiting for SESSION_INITIALISED — aborting.", "stderr");
+          await callDcc("direct-control-abort");
+          setDccBusy(false);
+          onTaskStatusChange("failed");
+          return;
+        }
       }
+      pushDccLog("Session ready. Starting push with --direct-control…");
+      setDccBusy(false);
     }
 
     // DCC Step 3 (or normal): Push with directControl flag
@@ -836,21 +910,64 @@ function FrConfigSection({
     });
   };
 
-  // DCC Step 4: Apply after push completes (handled via effect on exitCode)
+  // DCC Step 4: Apply after push completes. Non-blocking `apply`, then poll
+  // state every 5s and log each transition until SESSION_APPLIED.
   useEffect(() => {
     if (!targetIsControlled || exitCode === null || running) return;
+    if (abortRequestedRef.current) return; // user already aborted
 
-    if (exitCode === 0) {
-      // Push succeeded — apply DCC changes
-      callDcc("direct-control-apply", ["--wait"]).then((res) => {
-        if (res.exitCode !== 0) {
-          callDcc("direct-control-abort");
+    (async () => {
+      if (exitCode !== 0) {
+        pushDccLog(`Push failed (exit ${exitCode}) — aborting session.`, "stderr");
+        setDccState("SESSION_ABORT_REQUESTED");
+        await callDcc("direct-control-abort");
+        return;
+      }
+
+      pushDccLog("Push complete. Applying session…");
+      setDccState("SESSION_APPLYING");
+      setDccBusy(true);
+      const applyRes = await callDcc("direct-control-apply");
+      if (applyRes.exitCode !== 0) {
+        pushDccLog(`Apply request failed: ${applyRes.stderr || applyRes.stdout}`, "stderr");
+        setDccState("SESSION_ABORT_REQUESTED");
+        await callDcc("direct-control-abort");
+        setDccBusy(false);
+        return;
+      }
+
+      // Poll until SESSION_APPLIED (or error). Apply typically takes 2-3 min
+      // on temp-dcc; allow up to 6 min for safety.
+      const pollStart = Date.now();
+      let lastLoggedStatus = "";
+      let applied = false;
+      while (Date.now() - pollStart < 360_000) {
+        await new Promise((r) => setTimeout(r, 5000));
+        if (abortRequestedRef.current) break;
+        const pollRes = await callDcc("direct-control-state");
+        let pollState: { status?: string } = {};
+        try { pollState = JSON.parse(pollRes.stdout.trim()); } catch { /* ignore */ }
+        if (pollState.status) setDccState(pollState.status);
+        if (pollState.status && pollState.status !== lastLoggedStatus) {
+          const elapsed = Math.round((Date.now() - pollStart) / 1000);
+          pushDccLog(`${pollState.status} (${elapsed}s)`);
+          lastLoggedStatus = pollState.status;
         }
-      });
-    } else {
-      // Push failed — abort DCC session
-      callDcc("direct-control-abort");
-    }
+        if (pollState.status === "SESSION_APPLIED") { applied = true; break; }
+        if (pollState.status === "ERROR") {
+          pushDccLog("Session entered ERROR state during apply — aborting.", "stderr");
+          await callDcc("direct-control-abort");
+          setDccBusy(false);
+          return;
+        }
+      }
+      if (!applied) {
+        pushDccLog("Timed out waiting for SESSION_APPLIED.", "stderr");
+      } else {
+        pushDccLog("Session applied successfully.");
+      }
+      setDccBusy(false);
+    })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exitCode, running]);
 
@@ -892,27 +1009,37 @@ function FrConfigSection({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setPromoteConfirmOpen(true)}
-          disabled={running || frConfigItems.length === 0}
+          disabled={running || dccBusy || frConfigItems.length === 0}
           className="px-4 py-1.5 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
         >
-          {running ? "Promoting…" : "Promote Selected Items"}
+          {running || dccBusy ? "Promoting…" : "Promote Selected Items"}
         </button>
-        {running && (
-          <button onClick={abort} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
+        {canAbort && (
+          <button
+            onClick={handleAbort}
+            title={targetIsControlled ? `Abort controlled session${dccState ? ` (state: ${dccState})` : ""}` : "Abort"}
+            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors"
+          >
             Abort
           </button>
         )}
       </div>
 
-      {(running || logs.length > 0) && (
+      {(running || dccBusy || mergedLogs.length > 0) && (
         <div className="space-y-2">
+          {targetIsControlled && dccState && (
+            <div className="px-3 py-1.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-mono">
+              DCC session: <span className="text-slate-800">{dccState}</span>
+              {dccBusy && <span className="ml-2 text-sky-600 animate-pulse">●</span>}
+            </div>
+          )}
           <PromoteProgress
-            logs={logs}
-            running={running}
+            logs={mergedLogs}
+            running={running || dccBusy}
             extraPhases={verifyRunning ? [{ scope: "verify", status: "running" }] : verifyDone ? [{ scope: "verify", status: "done" }] : undefined}
           />
           <div className="rounded-lg border border-slate-200 overflow-hidden">
-            <ScopedLogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
+            <ScopedLogViewer logs={mergedLogs} running={running || dccBusy} exitCode={exitCode} onClear={() => { clear(); setDccLogs([]); }} />
           </div>
         </div>
       )}
