@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useBusyState } from "@/hooks/useBusyState";
 import { useWorkingEnv } from "@/hooks/useWorkingEnv";
+import { useDialog } from "@/components/ConfirmDialog";
 import { cn } from "@/lib/utils";
 import type { Environment } from "@/lib/fr-config";
 
@@ -33,6 +34,8 @@ const COLOR_RING: Record<string, string> = {
 export function NavBar() {
   const { busy } = useBusyState();
   const pathname = usePathname();
+  const router = useRouter();
+  const { confirm } = useDialog();
   const [workingEnv] = useWorkingEnv();
   const [envs, setEnvs] = useState<Environment[]>([]);
 
@@ -50,10 +53,17 @@ export function NavBar() {
           <div className="flex items-center gap-6 min-w-0">
             <Link
               href="/"
-              className={cn(
-                "font-semibold text-[15px] tracking-tight shrink-0",
-                busy ? "text-slate-400 pointer-events-none" : "text-slate-900"
-              )}
+              onClick={busy ? async (e) => {
+                e.preventDefault();
+                const ok = await confirm({
+                  title: "Leave this page?",
+                  message: "An operation is in progress. Navigating away will lose the current task progress.",
+                  confirmLabel: "Leave",
+                  variant: "warning",
+                });
+                if (ok) router.push("/");
+              } : undefined}
+              className="font-semibold text-[15px] tracking-tight shrink-0 text-slate-900"
             >
               AIC Pipeline
             </Link>
@@ -64,14 +74,22 @@ export function NavBar() {
                   <Link
                     key={href}
                     href={href}
-                    aria-disabled={busy}
-                    tabIndex={busy ? -1 : undefined}
+                    onClick={busy ? async (e) => {
+                      e.preventDefault();
+                      const ok = await confirm({
+                        title: "Leave this page?",
+                        message: "An operation is in progress. Navigating away will lose the current task progress.",
+                        confirmLabel: "Leave",
+                        variant: "warning",
+                      });
+                      if (ok) router.push(href);
+                    } : undefined}
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap",
-                      busy
-                        ? "text-slate-300 pointer-events-none cursor-not-allowed"
-                        : isActive
-                          ? "bg-indigo-50 text-indigo-700 font-medium"
+                      isActive
+                        ? "bg-indigo-50 text-indigo-700 font-medium"
+                        : busy
+                          ? "text-slate-400 hover:text-slate-600 hover:bg-slate-50 cursor-pointer"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     )}
                   >
