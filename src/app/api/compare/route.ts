@@ -150,41 +150,39 @@ export async function POST(req: NextRequest) {
 
       let failed = false;
       try {
-        // Resolve journey dependencies BEFORE pulling so that remote
-        // pulls include sub-journeys and scripts in scopeSelections.
-        // This ensures the target pull fetches ProgressiveProfile etc.
-        // so the comparison can show their actual status.
+        // Always resolve journey dependencies so they appear in the dry-run
+        // result for reference, regardless of the includeDeps toggle.
+        // The includeDeps flag only controls whether deps are pushed in Step 3.
         let resolvedSubJourneys: string[] = [];
-        if (includeDeps && scopeSelections) {
+        let resolvedDeps: ReturnType<typeof resolveJourneyDeps> | null = null;
+        if (scopeSelections) {
           const journeyScopes = scopeSelections.filter(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
           );
           if (journeyScopes.length > 0) {
-            // Resolve from local config dir if source is local; otherwise
-            // pull source first, then resolve from the temp dir.
             const resolveDir = source.mode === "local"
               ? getConfigDir(source.environment)
               : null;
 
             if (resolveDir) {
-              const deps = resolveJourneyDeps(resolveDir, journeyScopes.flatMap((s) => s.items!));
-              resolvedSubJourneys = deps.subJourneys;
-              addDepsToSelections(deps, scopeSelections, effectiveScopes);
+              resolvedDeps = resolveJourneyDeps(resolveDir, journeyScopes.flatMap((s) => s.items!));
+              resolvedSubJourneys = resolvedDeps.subJourneys;
+              addDepsToSelections(resolvedDeps, scopeSelections, effectiveScopes);
             }
           }
         }
 
         // If source is remote and we couldn't resolve deps yet, pull source
         // first, resolve deps, then pull target with the expanded selections.
-        if (includeDeps && source.mode === "remote" && resolvedSubJourneys.length === 0 && scopeSelections) {
+        if (source.mode === "remote" && resolvedDeps === null && scopeSelections) {
           await pullSide("source", source, sourceTempDir);
           const journeyScopes = scopeSelections.filter(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
           );
           if (journeyScopes.length > 0) {
-            const deps = resolveJourneyDeps(sourceConfigDir, journeyScopes.flatMap((s) => s.items!));
-            resolvedSubJourneys = deps.subJourneys;
-            addDepsToSelections(deps, scopeSelections, effectiveScopes);
+            resolvedDeps = resolveJourneyDeps(sourceConfigDir, journeyScopes.flatMap((s) => s.items!));
+            resolvedSubJourneys = resolvedDeps.subJourneys;
+            addDepsToSelections(resolvedDeps, scopeSelections, effectiveScopes);
           }
           await pullSide("target", target, targetTempDir);
         } else {
@@ -254,63 +252,45 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // When includeDeps is false, check if the target is missing any
-        // dependency journeys / scripts that the selected journeys reference.
-        if (!includeDeps && scopeSelections) {
-          const journeyScopes = scopeSelections.filter(
-            (s) => s.scope === "journeys" && s.items && s.items.length > 0,
-          );
-          if (journeyScopes.length > 0) {
-            const resolveDir = sourceConfigDir;
-            const deps = resolveJourneyDeps(
-              resolveDir,
-              journeyScopes.flatMap((s) => s.items!),
-            );
-            if (deps.subJourneys.length > 0 || deps.scriptUuids.length > 0) {
-              // Check against the LOCAL config dir for the target (which has all
-              // journeys/scripts from prior pulls), not the temp dir which only
-              // contains the selected items.
-              const localTargetConfig = getConfigDir(target.environment);
-              const checkDir = localTargetConfig ?? targetConfigDir;
-              const targetRealmsDir = path.join(checkDir, "realms");
-              const targetJourneyNames = new Set<string>();
-              const targetScriptNames = new Set<string>();
+        // Check which resolved dependency items are missing on the target.
+        // Since deps were always pulled (added to scopeSelections above),
+        // items that don't exist on the target will have no files in targetConfigDir.
+        if (resolvedDeps && (resolvedDeps.subJourneys.length > 0 || resolvedDeps.scriptUuids.length > 0)) {
+          const targetRealmsDir = path.join(targetConfigDir, "realms");
+          const targetJourneyNames = new Set<string>();
+          const targetScriptNames = new Set<string>();
 
-              if (fs.existsSync(targetRealmsDir)) {
-                for (const realm of fs.readdirSync(targetRealmsDir, { withFileTypes: true })) {
-                  if (!realm.isDirectory()) continue;
-                  // Journeys
-                  const jDir = path.join(targetRealmsDir, realm.name, "journeys");
-                  if (fs.existsSync(jDir)) {
-                    for (const d of fs.readdirSync(jDir, { withFileTypes: true })) {
-                      if (d.isDirectory()) targetJourneyNames.add(d.name);
-                    }
-                  }
-                  // Scripts (name from config JSON)
-                  const sDir = path.join(targetRealmsDir, realm.name, "scripts", "scripts-config");
-                  if (fs.existsSync(sDir)) {
-                    for (const f of fs.readdirSync(sDir)) {
-                      if (!f.endsWith(".json")) continue;
-                      try {
-                        const json = JSON.parse(fs.readFileSync(path.join(sDir, f), "utf-8"));
-                        if (json.name) targetScriptNames.add(json.name);
-                      } catch { /* skip */ }
-                    }
-                  }
+          if (fs.existsSync(targetRealmsDir)) {
+            for (const realm of fs.readdirSync(targetRealmsDir, { withFileTypes: true })) {
+              if (!realm.isDirectory()) continue;
+              const jDir = path.join(targetRealmsDir, realm.name, "journeys");
+              if (fs.existsSync(jDir)) {
+                for (const d of fs.readdirSync(jDir, { withFileTypes: true })) {
+                  if (d.isDirectory()) targetJourneyNames.add(d.name);
                 }
               }
-
-              const missingJourneys = deps.subJourneys.filter(
-                (name) => !targetJourneyNames.has(name),
-              );
-              const missingScripts = deps.scriptUuids
-                .map((uuid) => deps.scriptNames.get(uuid) ?? uuid)
-                .filter((name) => !targetScriptNames.has(name));
-
-              if (missingJourneys.length > 0 || missingScripts.length > 0) {
-                report.missingDeps = { missingJourneys, missingScripts };
+              const sDir = path.join(targetRealmsDir, realm.name, "scripts", "scripts-config");
+              if (fs.existsSync(sDir)) {
+                for (const f of fs.readdirSync(sDir)) {
+                  if (!f.endsWith(".json")) continue;
+                  try {
+                    const json = JSON.parse(fs.readFileSync(path.join(sDir, f), "utf-8"));
+                    if (json.name) targetScriptNames.add(json.name);
+                  } catch { /* skip */ }
+                }
               }
             }
+          }
+
+          const missingJourneys = resolvedDeps.subJourneys.filter(
+            (name) => !targetJourneyNames.has(name),
+          );
+          const missingScripts = resolvedDeps.scriptUuids
+            .map((uuid) => resolvedDeps!.scriptNames.get(uuid) ?? uuid)
+            .filter((name) => !targetScriptNames.has(name));
+
+          if (missingJourneys.length > 0 || missingScripts.length > 0) {
+            report.missingDeps = { missingJourneys, missingScripts };
           }
         }
 
