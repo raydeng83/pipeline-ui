@@ -1413,9 +1413,14 @@ export function PromoteExecution({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phaseStatuses.promote, phaseStatuses.prepare, phaseStatuses["dry-run"], phaseStatuses.verify]);
 
+  const activeIdx = PHASE_DEFS.findIndex((p) => p.id === activePhase);
+  const prevPhase = PHASE_DEFS
+    .slice(0, activeIdx)
+    .reverse()
+    .find((p) => phaseStatuses[p.id] !== "skipped") ?? null;
   const nextPhase = PHASE_DEFS
-    .slice(PHASE_DEFS.findIndex((p) => p.id === activePhase) + 1)
-    .find((p) => phaseStatuses[p.id] !== "skipped");
+    .slice(activeIdx + 1)
+    .find((p) => phaseStatuses[p.id] !== "skipped") ?? null;
 
   if (task.items.length === 0) {
     return (
@@ -1442,47 +1447,60 @@ export function PromoteExecution({
               {PHASE_DEFS.find((p) => p.id === activePhase)?.description}
             </p>
           </div>
-          {nextPhase && (() => {
-            // Block advancing to promote unless dry-run is done or skipped
-            const blocked = nextPhase.id === "promote" &&
-              phaseStatuses["dry-run"] !== "done" &&
-              phaseStatuses["dry-run"] !== "skipped";
-
-            return (
+          <div className="flex items-center gap-2 shrink-0">
+            {prevPhase && (
               <button
                 type="button"
-                disabled={blocked}
-                title={blocked ? "Run the dry-run comparison first" : undefined}
-                onClick={async () => {
-                  if (blocked) return;
-                  if (
-                    nextPhase.id === "dry-run" &&
-                    task.target.mode === "local"
-                  ) {
-                    const ok = await confirm({
-                      title: "Local target mode",
-                      message: `The task target "${task.target.environment}" is set to Local mode.\n\nDry run compares the source against the target environment. A local target means no live remote data will be fetched.\n\nContinue anyway?`,
-                      confirmLabel: "Continue",
-                      variant: "warning",
-                    });
-                    if (!ok) return;
-                  }
-                  setActivePhase(nextPhase.id);
-                }}
-                className={cn(
-                  "flex items-center gap-1 text-xs transition-colors shrink-0",
-                  blocked
-                    ? "text-slate-300 cursor-not-allowed"
-                    : "text-sky-600 hover:text-sky-800"
-                )}
+                onClick={() => setActivePhase(prevPhase.id)}
+                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
               >
-                Next: {nextPhase.label}
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
+                {prevPhase.label}
               </button>
-            );
-          })()}
+            )}
+            {nextPhase && (() => {
+              const blocked = nextPhase.id === "promote" &&
+                phaseStatuses["dry-run"] !== "done" &&
+                phaseStatuses["dry-run"] !== "skipped";
+
+              return (
+                <button
+                  type="button"
+                  disabled={blocked}
+                  title={blocked ? "Run the dry-run comparison first" : undefined}
+                  onClick={async () => {
+                    if (blocked) return;
+                    if (
+                      nextPhase.id === "dry-run" &&
+                      task.target.mode === "local"
+                    ) {
+                      const ok = await confirm({
+                        title: "Local target mode",
+                        message: `The task target "${task.target.environment}" is set to Local mode.\n\nDry run compares the source against the target environment. A local target means no live remote data will be fetched.\n\nContinue anyway?`,
+                        confirmLabel: "Continue",
+                        variant: "warning",
+                      });
+                      if (!ok) return;
+                    }
+                    setActivePhase(nextPhase.id);
+                  }}
+                  className={cn(
+                    "flex items-center gap-1 text-xs transition-colors",
+                    blocked
+                      ? "text-slate-300 cursor-not-allowed"
+                      : "text-sky-600 hover:text-sky-800"
+                  )}
+                >
+                  Next: {nextPhase.label}
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              );
+            })()}
+          </div>
         </div>
 
         {/* All phase panels — always mounted, only active one visible */}
