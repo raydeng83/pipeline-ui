@@ -1131,12 +1131,14 @@ function SummaryPhase({
   dryRunReport,
   verifyReport,
   phaseStatuses,
+  onArchive,
 }: {
   task: PromotionTask;
   visible: boolean;
   dryRunReport: import("@/lib/diff-types").CompareReport | null;
   verifyReport: import("@/lib/diff-types").CompareReport | null;
   phaseStatuses: Record<PhaseId, PhaseStatus>;
+  onArchive: () => void;
 }) {
   const promoteStatus = phaseStatuses.promote;
   const succeeded = promoteStatus === "done";
@@ -1167,7 +1169,7 @@ function SummaryPhase({
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
             </svg>
           )}
-          <div>
+          <div className="flex-1">
             <p className={cn("text-sm font-semibold", succeeded ? "text-emerald-800" : failed ? "text-red-800" : "text-slate-600")}>
               {succeeded ? "Promotion completed successfully" : failed ? "Promotion failed" : "Promotion in progress…"}
             </p>
@@ -1175,6 +1177,15 @@ function SummaryPhase({
               {task.source.environment} → {task.target.environment} · {task.name}
             </p>
           </div>
+          {(succeeded || failed) && (
+            <button
+              type="button"
+              onClick={onArchive}
+              className="px-3 py-1.5 text-xs font-medium rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors shrink-0"
+            >
+              Move to Archive
+            </button>
+          )}
         </div>
 
         {/* Phase summary */}
@@ -1253,10 +1264,12 @@ export function PromoteExecution({
   task,
   environments,
   onTaskStatusChange,
+  onArchive,
 }: {
   task: PromotionTask;
   environments: Environment[];
   onTaskStatusChange: (status: TaskStatus) => void;
+  onArchive: () => void;
 }) {
   const { confirm } = useDialog();
   const { setDirty } = useBusyState();
@@ -1450,6 +1463,18 @@ export function PromoteExecution({
     // Suppress unused warning for completedAt (kept for potential future use)
     void completedAt;
 
+    // Save summary data to the task for the archive view
+    const promoteTimings = phaseTimingsRef.current;
+    const taskPatch: Record<string, unknown> = {
+      phaseOutcomes,
+      phaseTimings,
+      promotedAt: promoteTimings.promote?.startedAt ?? started.iso,
+      completedAt: new Date(completedMs).toISOString(),
+      verifyChanges: verifyReport
+        ? verifyReport.summary.added + verifyReport.summary.modified + verifyReport.summary.removed
+        : null,
+    };
+
     fetch("/api/history", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1457,14 +1482,13 @@ export function PromoteExecution({
     })
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
-        // Save the reportId back to the task for the archive page
-        if (data?.id && dryRunReport) {
-          fetch(`/api/promotion-tasks/${task.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reportId: data.id }),
-          }).catch(() => { /* non-fatal */ });
-        }
+        if (data?.id && dryRunReport) taskPatch.reportId = data.id;
+        // Save all summary data to the task
+        fetch(`/api/promotion-tasks/${task.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(taskPatch),
+        }).catch(() => { /* non-fatal */ });
       })
       .catch(() => { /* non-fatal */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1600,6 +1624,7 @@ export function PromoteExecution({
           dryRunReport={dryRunReport}
           verifyReport={verifyReport}
           phaseStatuses={phaseStatuses}
+          onArchive={onArchive}
         />
       </div>
     </div>

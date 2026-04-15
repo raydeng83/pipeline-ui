@@ -26,8 +26,18 @@ export interface PromotionTask {
   updatedAt: string;
   /** ISO timestamp when the task was archived. Present only on archived tasks. */
   archivedAt?: string;
+  /** ISO timestamp when Step 2 Promote actually started. */
+  promotedAt?: string;
+  /** ISO timestamp when verify finished (promotion fully complete). */
+  completedAt?: string;
   /** ID of the saved dry-run report (matches promotion-reports/{reportId}.json). */
   reportId?: string;
+  /** Phase outcomes from the promotion execution. */
+  phaseOutcomes?: Record<string, string>;
+  /** Phase timings from the promotion execution. */
+  phaseTimings?: Record<string, { status: string; startedAt?: string; completedAt?: string; durationMs?: number }>;
+  /** Verify report summary (changes remaining after promote). */
+  verifyChanges?: number;
 }
 
 export function readTasks(): PromotionTask[] {
@@ -39,9 +49,19 @@ export function readTasks(): PromotionTask[] {
   }
 }
 
-/** Active tasks (not archived). */
+/** Active tasks (not archived). Auto-archives completed/failed tasks on read. */
 export function readActiveTasks(): PromotionTask[] {
-  return readTasks().filter((t) => !t.archivedAt);
+  const all = readTasks();
+  let changed = false;
+  const now = new Date().toISOString();
+  for (const t of all) {
+    if (!t.archivedAt && (t.status === "completed" || t.status === "failed")) {
+      t.archivedAt = now;
+      changed = true;
+    }
+  }
+  if (changed) saveTasks(all);
+  return all.filter((t) => !t.archivedAt);
 }
 
 /** Archived tasks, most recently archived first. */

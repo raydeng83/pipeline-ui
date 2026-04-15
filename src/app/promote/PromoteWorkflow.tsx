@@ -759,7 +759,7 @@ function TaskDetail({
 
   const body = (
     <div className={cn(fullscreen && "flex-1 overflow-y-auto")}>
-      <PromoteExecution task={task} environments={environments} onTaskStatusChange={onStatusChange} />
+      <PromoteExecution task={task} environments={environments} onTaskStatusChange={onStatusChange} onArchive={() => handleArchive(task)} />
     </div>
   );
 
@@ -826,7 +826,8 @@ function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environ
               <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Source → Target</th>
               <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Scopes</th>
               <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Archived</th>
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Promoted</th>
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Completed</th>
               <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide w-20">Report</th>
             </tr>
           </thead>
@@ -874,7 +875,10 @@ function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environ
                     </span>
                   </td>
                   <td className="px-4 py-2.5 text-xs text-slate-500">
-                    {task.archivedAt ? new Date(task.archivedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                    {task.promotedAt ? new Date(task.promotedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                  </td>
+                  <td className="px-4 py-2.5 text-xs text-slate-500">
+                    {task.completedAt ? new Date(task.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                   </td>
                   <td className="px-4 py-2.5">
                     {task.reportId ? (
@@ -1071,30 +1075,30 @@ export function PromoteWorkflow({
   };
 
   const handleStatusChange = async (id: string, status: TaskStatus) => {
-    // Auto-archive on completion or failure
-    const patch: Record<string, unknown> = { status };
-    if (status === "completed" || status === "failed") {
-      patch.archivedAt = new Date().toISOString();
-    }
     const res = await fetch(`/api/promotion-tasks/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patch),
+      body: JSON.stringify({ status }),
     });
     if (res.ok) {
       const updated: PromotionTask = await res.json();
-      if (updated.archivedAt) {
-        // Move to archived list and remove from active
-        setArchivedTasks((prev) => [updated, ...prev]);
-        setTasks((prev) => {
-          const remaining = prev.filter((t) => t.id !== updated.id);
-          setSelectedId(remaining[0]?.id ?? null);
-          setPanelMode(remaining.length > 0 ? "view" : "select");
-          return remaining;
-        });
-      } else {
-        setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-      }
+      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    }
+  };
+
+  const handleArchive = async (task: PromotionTask) => {
+    const res = await fetch(`/api/promotion-tasks/${task.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archivedAt: new Date().toISOString() }),
+    });
+    if (res.ok) {
+      const updated: PromotionTask = await res.json();
+      setArchivedTasks((prev) => [updated, ...prev]);
+      const remaining = tasks.filter((t) => t.id !== task.id);
+      setTasks(remaining);
+      setSelectedId(remaining[0]?.id ?? null);
+      setPanelMode(remaining.length > 0 ? "view" : "select");
     }
   };
 
