@@ -1,287 +1,404 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogViewer } from "@/components/LogViewer";
 import { ScopeSelector } from "@/components/ScopeSelector";
-import { DangerousConfirmDialog } from "@/components/DangerousConfirmDialog";
-import { useStreamingLogs } from "@/hooks/useStreamingLogs";
+import { useStreamingLogs, type LogEntry } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
-import type { Environment, DiffSummary } from "@/lib/fr-config";
+import type { Environment } from "@/lib/fr-config-types";
 import type { ConfigScope } from "@/lib/fr-config-types";
 
-type Direction = "pull" | "push";
+const STORAGE_KEY = "aic:sync:last";
+const AUTO_ROTATE_MS = 5000;
 
-interface StoredState {
-  tenant: string;
-  direction: Direction;
-  scopes: string[];
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString();
 }
 
-const STORAGE_KEY = "aic:sync:last";
+// ── Per-environment pull job ────────────────────────────────────────────────
 
-export function SyncForm({ environments }: { environments: Environment[] }) {
-  const params = useSearchParams();
+interface PullJob {
+  env: string;
+  label: string;
+  color: string;
+  status: "pending" | "running" | "done" | "failed";
+  logs: LogEntry[];
+  exitCode: number | null;
+}
 
-  const [tenant, setTenant] = useState<string>(environments[0]?.name ?? "");
-  const direction: Direction = "pull";
+function usePullJobs() {
+  const [jobs, setJobs] = useState<PullJob[]>([]);
+  const abortControllers = useRef<Map<string, AbortController>>(new Map());
+
+  const startAll = useCallback((envs: Environment[], scopes: ConfigScope[]) => {
+    // Initialize jobs
+    const initial: PullJob[] = envs.map((env) => ({
+      env: env.name,
+      label: env.label,
+      color: env.color,
+      status: "pending",
+      logs: [],
+      exitCode: null,
+    }));
+    setJobs(initial);
+    abortControllers.current.clear();
+
+    // Start all in parallel
+    for (const env of envs) {
+      const ac = new AbortController();
+      abortControllers.current.set(env.name, ac);
+
+      setJobs((prev) => prev.map((j) => j.env === env.name ? { ...j, status: "running" } : j));
+
+      fetch("/api/pull", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ environment: env.name, scopes }),
+        signal: ac.signal,
+      })
+        .then(async (res) => {
+          if (!res.ok || !res.body) {
+            setJobs((prev) => prev.map((j) => j.env === env.name ? { ...j, status: "failed", exitCode: 1 } : j));
+            return;
+          }
+          const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+          let buffer = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += value;
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+            const entries: LogEntry[] = [];
+            for (const line of lines) {
+              if (!line.trim()) continue;
+              try {
+                const entry = JSON.parse(line) as LogEntry;
+                entries.push(entry);
+                if (entry.type === "exit") {
+                  setJobs((prev) => prev.map((j) =>
+                    j.env === env.name
+                      ? { ...j, status: (entry.code ?? 1) === 0 ? "done" : "failed", exitCode: entry.code ?? 1, logs: [...j.logs, ...entries] }
+                      : j
+                  ));
+                  return;
+                }
+              } catch { /* skip */ }
+            }
+            if (entries.length > 0) {
+              setJobs((prev) => prev.map((j) =>
+                j.env === env.name ? { ...j, logs: [...j.logs, ...entries] } : j
+              ));
+            }
+          }
+          // Stream ended without exit event
+          setJobs((prev) => prev.map((j) =>
+            j.env === env.name && j.status === "running" ? { ...j, status: "done", exitCode: 0 } : j
+          ));
+        })
+        .catch((err) => {
+          if ((err as Error).name === "AbortError") return;
+          setJobs((prev) => prev.map((j) =>
+            j.env === env.name ? { ...j, status: "failed", exitCode: 1, logs: [...j.logs, { type: "error", data: String(err), ts: Date.now() }] } : j
+          ));
+        });
+    }
+  }, []);
+
+  const abortAll = useCallback(() => {
+    for (const ac of abortControllers.current.values()) ac.abort();
+    setJobs((prev) => prev.map((j) => j.status === "running" ? { ...j, status: "failed", exitCode: 1 } : j));
+  }, []);
+
+  const clearJobs = useCallback(() => setJobs([]), []);
+
+  const anyRunning = jobs.some((j) => j.status === "running");
+
+  return { jobs, startAll, abortAll, clearJobs, anyRunning };
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
+
+export function SyncForm({
+  environments,
+  lastPullMap,
+}: {
+  environments: Environment[];
+  lastPullMap: Record<string, string>;
+}) {
+  const [selectedEnvs, setSelectedEnvs] = useState<Set<string>>(new Set());
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [activeRun, setActiveRun] = useState<{
-    direction: Direction;
-    tenant: string;
-    scopes: ConfigScope[];
-  } | null>(null);
-
-  const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
+  const { jobs, startAll, abortAll, clearJobs, anyRunning } = usePullJobs();
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const rotateRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    setBusy(running);
-  }, [running, setBusy]);
+  useEffect(() => { setBusy(anyRunning); }, [anyRunning, setBusy]);
 
-  // Walk logs to derive per-scope status from scope-start / scope-end events.
-  // scope-end carries the exit code, so failed scopes get marked separately.
-  // Also count stdout lines per scope as a live activity indicator.
-  const { currentScope, completedScopes, erroredScopes, scopeLineCounts } = useMemo(() => {
-    const starts: string[] = [];
-    const completed = new Set<string>();
-    const errored = new Set<string>();
-    const lineCounts = new Map<string, number>();
-    let activeScope: string | null = null;
-    for (const entry of logs) {
-      if (entry.type === "scope-start" && entry.scope) {
-        starts.push(entry.scope);
-        activeScope = entry.scope;
-      } else if (entry.type === "scope-end" && entry.scope) {
-        if (entry.code === 0) completed.add(entry.scope);
-        else errored.add(entry.scope);
-        activeScope = null;
-      } else if ((entry.type === "stdout" || entry.type === "stderr") && activeScope) {
-        lineCounts.set(activeScope, (lineCounts.get(activeScope) ?? 0) + 1);
-      }
-    }
-    // Fallback: if no scope-end was emitted (e.g. older runner), treat earlier
-    // scope-starts as completed once a later one begins.
-    if (starts.length > 0 && completed.size === 0 && errored.size === 0) {
-      starts.slice(0, running ? -1 : starts.length).forEach((s) => completed.add(s));
-    }
-    const lastStarted = starts[starts.length - 1] ?? null;
-    const current = running && lastStarted && !completed.has(lastStarted) && !errored.has(lastStarted)
-      ? lastStarted
-      : null;
-    return { currentScope: current, completedScopes: completed, erroredScopes: errored, scopeLineCounts: lineCounts };
-  }, [logs, running]);
-
-  // Load last state from localStorage
+  // Load saved scopes
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     try {
-      const s = JSON.parse(raw) as StoredState;
-      if (s.tenant && environments.some((e) => e.name === s.tenant)) setTenant(s.tenant);
+      const s = JSON.parse(raw) as { scopes?: string[] };
       if (Array.isArray(s.scopes)) setScopes(s.scopes as ConfigScope[]);
-    } catch {
-      // ignore malformed storage
-    }
-  }, [environments]);
+    } catch { /* ignore */ }
+  }, []);
 
-  // Persist on change
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ tenant, direction, scopes }));
-  }, [tenant, direction, scopes]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ scopes }));
+  }, [scopes]);
 
-  const tenantEnv = environments.find((e) => e.name === tenant);
-  const isProd = tenantEnv?.color === "red";
-
-  const diffLoader = useMemo(
-    (): (() => Promise<DiffSummary[]>) =>
-      async () => {
-        const res = await fetch("/api/diff", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ target: tenant, scopes, mode: "dry-run" }),
-        });
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error((body as { error?: string }).error ?? "diff failed");
-        }
-        return res.json() as Promise<DiffSummary[]>;
-      },
-    [tenant, scopes]
-  );
-
-  function startRun() {
-    if (!tenant || scopes.length === 0) return;
-    const url = direction === "pull" ? "/api/pull" : "/api/push";
-    setActiveRun({ direction, tenant, scopes: [...scopes] });
-    // Both /api/pull and /api/push accept { environment, scopes }
-    run(url, { environment: tenant, scopes });
-  }
-
-  function handleSubmit() {
-    if (direction === "push") {
-      setConfirmOpen(true);
+  // Auto-rotate through running jobs
+  useEffect(() => {
+    if (!autoRotate || !anyRunning) {
+      if (rotateRef.current) { clearInterval(rotateRef.current); rotateRef.current = null; }
       return;
     }
-    startRun();
-  }
+    const runningEnvs = jobs.filter((j) => j.status === "running").map((j) => j.env);
+    if (runningEnvs.length === 0) return;
 
-  const scopeCount = scopes.length;
-  const runButtonLabel =
-    direction === "pull"
-      ? `Pull ${scopeCount || ""}${scopeCount ? " scope" : ""}${scopeCount === 1 ? "" : scopeCount > 1 ? "s" : ""} from ${tenant || "…"}`.trim()
-      : `Push ${scopeCount || ""}${scopeCount ? " scope" : ""}${scopeCount === 1 ? "" : scopeCount > 1 ? "s" : ""} to ${tenant || "…"}`.trim();
+    rotateRef.current = setInterval(() => {
+      setActiveTab((prev) => {
+        const current = jobs.filter((j) => j.status === "running").map((j) => j.env);
+        if (current.length === 0) return prev;
+        const idx = prev ? current.indexOf(prev) : -1;
+        return current[(idx + 1) % current.length];
+      });
+    }, AUTO_ROTATE_MS);
 
-  const runButtonClass =
-    direction === "pull" ? "btn-primary" : isProd ? "btn-danger-solid" : "btn-danger-outline";
+    return () => { if (rotateRef.current) clearInterval(rotateRef.current); };
+  }, [autoRotate, anyRunning, jobs]);
+
+  // Set initial active tab when jobs start
+  useEffect(() => {
+    if (jobs.length > 0 && !activeTab) setActiveTab(jobs[0].env);
+  }, [jobs, activeTab]);
+
+  const toggleEnv = (name: string) => {
+    setSelectedEnvs((prev) => {
+      const next = new Set(prev);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
+  };
+
+  const allSelected = selectedEnvs.size === environments.length;
+  const toggleAll = () => {
+    if (allSelected) setSelectedEnvs(new Set());
+    else setSelectedEnvs(new Set(environments.map((e) => e.name)));
+  };
+
+  const handlePull = () => {
+    if (selectedEnvs.size === 0 || scopes.length === 0) return;
+    const envs = environments.filter((e) => selectedEnvs.has(e.name));
+    setAutoRotate(true);
+    setActiveTab(envs[0].name);
+    startAll(envs, scopes);
+  };
+
+  const activeJob = jobs.find((j) => j.env === activeTab) ?? null;
+  const doneCount = jobs.filter((j) => j.status === "done").length;
+  const failedCount = jobs.filter((j) => j.status === "failed").length;
+  const runningCount = jobs.filter((j) => j.status === "running").length;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      {/* LEFT: form controls */}
-      <div className="card-padded space-y-5">
-        {/* Tenant select */}
-        <div>
-          <div className="label-xs mb-1.5">TENANT</div>
-          <select
-            value={tenant}
-            onChange={(e) => setTenant(e.target.value)}
-            disabled={running}
-            className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-[13px] font-medium outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {environments.map((env) => (
-              <option key={env.name} value={env.name}>
-                {env.label} — {env.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-
-        {/* Scope selector */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="label-xs">SCOPES</span>
-            <span className="text-[11px] text-slate-400">{scopes.length} selected</span>
-          </div>
-          <ScopeSelector
-            selected={scopes}
-            onChange={setScopes}
-            disabled={running}
-            action={direction}
-          />
-        </div>
-
-        {/* Run / abort buttons */}
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!tenant || scopes.length === 0 || running}
-            className={cn("flex-1 justify-center", runButtonClass)}
-          >
-            {running ? "Running…" : runButtonLabel}
-          </button>
-          {running && (
-            <button
-              type="button"
-              onClick={abort}
-              className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-md hover:bg-red-200 transition-colors"
-            >
-              Abort
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* RIGHT: run summary + log viewer */}
-      <div className="flex flex-col gap-3 min-w-0">
-        {activeRun && (
-          <div className="card-padded">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {activeRun.direction === "pull" ? (
-                  <ArrowDown className="w-4 h-4 text-indigo-600" />
-                ) : (
-                  <ArrowUp className="w-4 h-4 text-rose-600" />
-                )}
-                <span className="text-[13px] font-semibold capitalize">
-                  {activeRun.direction}
-                </span>
-                <span className="text-[13px] text-slate-500">·</span>
-                <span className="text-[13px] font-mono text-slate-700">
-                  {activeRun.tenant}
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-400">
-                {activeRun.scopes.length} scope{activeRun.scopes.length === 1 ? "" : "s"}
-              </span>
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* LEFT: environment list + scopes */}
+        <div className="space-y-5">
+          {/* Environment list */}
+          <div className="card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+              <span className="label-xs">ENVIRONMENTS</span>
+              <button
+                type="button"
+                onClick={toggleAll}
+                disabled={anyRunning}
+                className="text-xs text-sky-600 hover:text-sky-800 disabled:opacity-40"
+              >
+                {allSelected ? "Deselect all" : "Select all"}
+              </button>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {activeRun.scopes.map((s) => {
-                const isCurrent = s === currentScope;
-                const isErrored = erroredScopes.has(s);
-                const isDone = completedScopes.has(s);
+            <div className="divide-y divide-slate-100">
+              {environments.map((env) => {
+                const checked = selectedEnvs.has(env.name);
+                const lastPull = lastPullMap[env.name];
+                const job = jobs.find((j) => j.env === env.name);
                 return (
-                  <span
-                    key={s}
+                  <label
+                    key={env.name}
                     className={cn(
-                      "inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded-full ring-1 font-mono transition-colors",
-                      isCurrent
-                        ? "bg-indigo-600 text-white ring-indigo-600 shadow-[0_0_0_3px_rgba(99,102,241,0.18)]"
-                        : isErrored
-                          ? "bg-rose-50 text-rose-700 ring-rose-200"
-                          : isDone
-                            ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                            : "bg-slate-50 text-slate-500 ring-slate-200"
+                      "flex items-center gap-3 px-4 py-2.5 transition-colors cursor-pointer",
+                      anyRunning ? "opacity-60 cursor-default" : "hover:bg-slate-50",
+                      checked && !anyRunning && "bg-sky-50/50"
                     )}
                   >
-                    {isCurrent && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    )}
-                    {isErrored && <span>✗</span>}
-                    {!isErrored && isDone && <span>✓</span>}
-                    {s}
-                    {(isCurrent || isDone || isErrored) && (scopeLineCounts.get(s) ?? 0) > 0 && (
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleEnv(env.name)}
+                      disabled={anyRunning}
+                      className="w-3.5 h-3.5 accent-sky-600 shrink-0"
+                    />
+                    <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", `bg-${env.color}-400`)} style={{ backgroundColor: `var(--color-${env.color}-400, currentColor)` }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-slate-800">{env.label}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">{env.name}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">
+                        {lastPull ? `Last pull: ${timeAgo(lastPull)}` : "Never pulled"}
+                      </div>
+                    </div>
+                    {/* Job status indicator */}
+                    {job && (
                       <span className={cn(
-                        "text-[9px] tabular-nums",
-                        isCurrent ? "text-indigo-200" : isDone ? "text-emerald-500" : "text-rose-500"
+                        "text-[10px] font-medium px-1.5 py-0.5 rounded-full",
+                        job.status === "running" && "bg-sky-100 text-sky-700 animate-pulse",
+                        job.status === "done" && "bg-emerald-100 text-emerald-700",
+                        job.status === "failed" && "bg-red-100 text-red-700",
+                        job.status === "pending" && "bg-slate-100 text-slate-500",
                       )}>
-                        {scopeLineCounts.get(s)}
+                        {job.status === "running" ? "pulling…" : job.status}
                       </span>
                     )}
-                  </span>
+                  </label>
                 );
               })}
             </div>
           </div>
-        )}
-        <LogViewer logs={logs} running={running} exitCode={exitCode} onClear={clear} />
-      </div>
 
-      {/* Push confirmation dialog */}
-      {tenantEnv && (
-        <DangerousConfirmDialog
-          open={confirmOpen}
-          title={`Push to ${tenantEnv.label}`}
-          subtitle={
-            isProd
-              ? "This writes repo config to a live production tenant. Review the preview below."
-              : "Review the changes below before pushing."
-          }
-          tenantName={tenantEnv.name}
-          requireTypeToConfirm={isProd}
-          blockUntilDiffLoaded={isProd}
-          diffLoader={diffLoader}
-          onConfirm={() => {
-            setConfirmOpen(false);
-            startRun();
-          }}
-          onCancel={() => setConfirmOpen(false)}
-        />
-      )}
+          {/* Scope selector */}
+          <div className="card-padded">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="label-xs">SCOPES</span>
+              <span className="text-[11px] text-slate-400">{scopes.length} selected</span>
+            </div>
+            <ScopeSelector selected={scopes} onChange={setScopes} disabled={anyRunning} action="pull" />
+          </div>
+
+          {/* Pull button */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handlePull}
+              disabled={selectedEnvs.size === 0 || scopes.length === 0 || anyRunning}
+              className="btn-primary flex-1 justify-center"
+            >
+              {anyRunning
+                ? `Pulling ${runningCount} environment${runningCount !== 1 ? "s" : ""}…`
+                : `Pull ${selectedEnvs.size || ""} environment${selectedEnvs.size === 1 ? "" : "s"}`}
+            </button>
+            {anyRunning && (
+              <button
+                type="button"
+                onClick={abortAll}
+                className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-md hover:bg-red-200 transition-colors"
+              >
+                Abort All
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT: log viewer with env tabs */}
+        <div className="flex flex-col gap-3 min-w-0">
+          {jobs.length > 0 && (
+            <>
+              {/* Summary bar */}
+              <div className="flex items-center gap-3 text-xs text-slate-500">
+                <span>{jobs.length} environment{jobs.length !== 1 ? "s" : ""}</span>
+                {doneCount > 0 && <span className="text-emerald-600">{doneCount} done</span>}
+                {failedCount > 0 && <span className="text-red-600">{failedCount} failed</span>}
+                {runningCount > 0 && <span className="text-sky-600">{runningCount} running</span>}
+                <label className="ml-auto flex items-center gap-1.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={autoRotate}
+                    onChange={(e) => {
+                      setAutoRotate(e.target.checked);
+                      if (!e.target.checked && rotateRef.current) {
+                        clearInterval(rotateRef.current);
+                        rotateRef.current = null;
+                      }
+                    }}
+                    className="w-3 h-3 accent-sky-600"
+                  />
+                  <span className="text-[10px] text-slate-400">Auto-rotate</span>
+                </label>
+                {!anyRunning && (
+                  <button type="button" onClick={clearJobs} className="text-[10px] text-slate-400 hover:text-slate-600">
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Environment tabs */}
+              <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+                {jobs.map((job) => (
+                  <button
+                    key={job.env}
+                    type="button"
+                    onClick={() => { setActiveTab(job.env); setAutoRotate(false); }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full ring-1 transition-colors whitespace-nowrap",
+                      activeTab === job.env
+                        ? "bg-indigo-600 text-white ring-indigo-600"
+                        : job.status === "done"
+                          ? "bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100"
+                          : job.status === "failed"
+                            ? "bg-red-50 text-red-700 ring-red-200 hover:bg-red-100"
+                            : job.status === "running"
+                              ? "bg-sky-50 text-sky-700 ring-sky-200 hover:bg-sky-100"
+                              : "bg-slate-50 text-slate-500 ring-slate-200 hover:bg-slate-100"
+                    )}
+                  >
+                    {job.status === "running" && <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />}
+                    {job.status === "done" && <span>✓</span>}
+                    {job.status === "failed" && <span>✗</span>}
+                    {job.label}
+                    {job.logs.length > 0 && (
+                      <span className={cn(
+                        "text-[9px] tabular-nums",
+                        activeTab === job.env ? "text-indigo-200" : "text-slate-400"
+                      )}>
+                        {job.logs.filter((l) => l.type === "stdout" || l.type === "stderr").length}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Log viewer for active tab */}
+              {activeJob && (
+                <LogViewer
+                  logs={activeJob.logs}
+                  running={activeJob.status === "running"}
+                  exitCode={activeJob.exitCode}
+                />
+              )}
+            </>
+          )}
+
+          {jobs.length === 0 && (
+            <div className="card-padded text-center text-sm text-slate-400 py-10">
+              Select environments and scopes, then click Pull.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
