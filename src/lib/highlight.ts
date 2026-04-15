@@ -97,6 +97,22 @@ export function highlight(content: string, language: string): string {
   return esc(content);
 }
 
+// ── Line-numbered wrapper ───────────────────────────────────────────────────
+
+/** Wrap highlighted HTML with line numbers using a two-column table layout. */
+export function withLineNumbers(highlightedHtml: string): string {
+  const lines = highlightedHtml.split("\n");
+  // If the last line is empty (trailing newline), drop it
+  if (lines.length > 1 && lines[lines.length - 1] === "") lines.pop();
+  const gutterWidth = String(lines.length).length;
+  return lines
+    .map(
+      (line, i) =>
+        `<span style="display:inline-block;width:${gutterWidth + 1}ch;text-align:right;padding-right:1.5ch;color:#475569;user-select:none;opacity:0.5">${i + 1}</span>${line}`,
+    )
+    .join("\n");
+}
+
 // ── Token-based variants (React-safe, no innerHTML) ─────────────────────────
 
 export interface HighlightToken {

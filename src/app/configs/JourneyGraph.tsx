@@ -22,6 +22,7 @@ import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
 import { highlightJs, ScriptOverlay } from "./ScriptOverlay";
+import { withLineNumbers } from "@/lib/highlight";
 import { JourneyOutlineView  } from "./JourneyOutlineView";
 import { JourneyTableView    } from "./JourneyTableView";
 import { JourneySwimLaneView } from "./JourneySwimLaneView";
@@ -581,7 +582,7 @@ function NodeInfoDrawer({
   }, [drawerTab, config, environment, scriptContent]);
 
   const scriptHighlighted = useMemo(
-    () => (scriptContent ? highlightJs(scriptContent) : null),
+    () => (scriptContent ? withLineNumbers(highlightJs(scriptContent)) : null),
     [scriptContent],
   );
 
@@ -1552,7 +1553,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
                       <div className="flex-1 overflow-auto">
                         <pre
                           className="px-4 pb-4 text-[11px] font-mono leading-relaxed text-slate-300"
-                          dangerouslySetInnerHTML={{ __html: highlightJs(previewModal.scriptContent) }}
+                          dangerouslySetInnerHTML={{ __html: withLineNumbers(highlightJs(previewModal.scriptContent)) }}
                         />
                       </div>
                     ) : (

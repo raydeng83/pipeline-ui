@@ -24,6 +24,7 @@ import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
 import { highlightJs, ScriptOverlay } from "./ScriptOverlay";
+import { withLineNumbers } from "@/lib/highlight";
 import { parseWorkflowData, type WorkflowData, type WorkflowStep, type WorkflowStepKind } from "@/lib/workflow-graph";
 import type { ViewableFile } from "@/app/api/push/item/route";
 
@@ -288,7 +289,7 @@ function StepDrawer({
 
   const scriptContent = scriptFile?.content ?? null;
   const scriptHighlighted = useMemo(
-    () => (scriptContent ? highlightJs(scriptContent) : null),
+    () => (scriptContent ? withLineNumbers(highlightJs(scriptContent)) : null),
     [scriptContent],
   );
 
@@ -871,7 +872,7 @@ function WorkflowGraphInner({ workflow, workflowId, files }: {
                     <div className="overflow-auto h-full">
                       <pre
                         className="px-4 pb-4 text-[11px] font-mono leading-relaxed text-slate-300"
-                        dangerouslySetInnerHTML={{ __html: highlightJs(previewModal.scriptContent) }}
+                        dangerouslySetInnerHTML={{ __html: withLineNumbers(highlightJs(previewModal.scriptContent)) }}
                       />
                     </div>
                   </div>

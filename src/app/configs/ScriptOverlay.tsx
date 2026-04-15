@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { highlightJs } from "@/lib/highlight";
+import { highlightJs, withLineNumbers } from "@/lib/highlight";
 
 export { highlightJs };
 
@@ -16,7 +16,7 @@ export function ScriptOverlay({ name, content, onClose }: { name: string; conten
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const highlighted = useMemo(() => highlightJs(content), [content]);
+  const highlighted = useMemo(() => withLineNumbers(highlightJs(content)), [content]);
 
   function handleCopy() {
     navigator.clipboard.writeText(content).then(() => {

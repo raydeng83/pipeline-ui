@@ -21,7 +21,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
-import { highlightJs } from "@/lib/highlight";
+import { highlightJs, withLineNumbers } from "@/lib/highlight";
 import { js_beautify } from "js-beautify";
 import { ScriptOverlay } from "../configs/ScriptOverlay";
 import { DiffMinimap } from "./DiffMinimap";
@@ -522,7 +522,7 @@ function DiffLegend() {
 function UnchangedScriptViewer({ name, content }: { name: string; content: string }) {
   const [copied, setCopied]         = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  const highlighted = useMemo(() => highlightJs(content), [content]);
+  const highlighted = useMemo(() => withLineNumbers(highlightJs(content)), [content]);
 
   function handleCopy() {
     navigator.clipboard.writeText(content).then(() => {
@@ -2833,7 +2833,7 @@ export function JourneyDiffGraphModal({
                           <div className="flex-1 overflow-auto">
                             <pre
                               className="px-4 pb-4 text-[11px] font-mono leading-relaxed text-slate-300"
-                              dangerouslySetInnerHTML={{ __html: highlightJs(previewModal.scriptContent) }}
+                              dangerouslySetInnerHTML={{ __html: withLineNumbers(highlightJs(previewModal.scriptContent)) }}
                             />
                           </div>
                         ) : (
