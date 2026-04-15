@@ -26,9 +26,7 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
   const params = useSearchParams();
 
   const [tenant, setTenant] = useState<string>(environments[0]?.name ?? "");
-  const [direction, setDirection] = useState<Direction>(
-    (params.get("direction") as Direction) || "pull"
-  );
+  const direction: Direction = "pull";
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [activeRun, setActiveRun] = useState<{
@@ -84,7 +82,6 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
     try {
       const s = JSON.parse(raw) as StoredState;
       if (s.tenant && environments.some((e) => e.name === s.tenant)) setTenant(s.tenant);
-      if (s.direction === "pull" || s.direction === "push") setDirection(s.direction);
       if (Array.isArray(s.scopes)) setScopes(s.scopes as ConfigScope[]);
     } catch {
       // ignore malformed storage
