@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Environment, ScopeSelection, CONFIG_SCOPES } from "@/lib/fr-config-types";
 import type { PromotionTask, TaskStatus, TaskEndpoint } from "@/lib/promotion-tasks";
+import type { CompareReport } from "@/lib/diff-types";
 import { PromotionItemPicker } from "./PromotionItemPicker";
 import { PromoteExecution } from "./PromoteExecution";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 import { ItemViewer } from "@/app/push/ItemViewer";
 import { JourneyGraph } from "@/app/configs/JourneyGraph";
+import { DiffReport } from "@/app/compare/DiffReport";
 import { useBusyState } from "@/hooks/useBusyState";
 import { useDialog } from "@/components/ConfirmDialog";
 import { cn } from "@/lib/utils";
@@ -677,7 +679,6 @@ function TaskDetail({
   onToggleFullscreen,
   onEdit,
   onDelete,
-  onArchive,
   onStatusChange,
 }: {
   task: PromotionTask;
@@ -686,7 +687,6 @@ function TaskDetail({
   onToggleFullscreen: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onArchive: () => void;
   onStatusChange: (status: TaskStatus) => void;
 }) {
   const envMap = new Map(environments.map((e) => [e.name, e]));
@@ -714,15 +714,6 @@ function TaskDetail({
           >
             Edit
           </button>
-          {(task.status === "completed" || task.status === "failed") && (
-            <button
-              onClick={onArchive}
-              disabled={busy}
-              className="px-2.5 py-1 text-xs border border-amber-200 text-amber-700 rounded hover:bg-amber-50 disabled:opacity-50 transition-colors"
-            >
-              Archive
-            </button>
-          )}
           <button
             onClick={onDelete}
             disabled={busy}
@@ -789,6 +780,178 @@ function TaskDetail({
   );
 }
 
+// ── Archive table ────────────────────────────────────────────────────────────
+
+function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environments: Environment[] }) {
+  const envMap = new Map(environments.map((e) => [e.name, e]));
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [report, setReport] = useState<CompareReport | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
+
+  const selected = tasks.find((t) => t.id === selectedId) ?? null;
+
+  const loadReport = (task: PromotionTask) => {
+    if (!task.reportId) return;
+    setReportLoading(true);
+    setReportError(null);
+    setReport(null);
+    fetch(`/api/history/${task.reportId}/report`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`${res.status}`);
+        return res.json() as Promise<CompareReport>;
+      })
+      .then(setReport)
+      .catch((e) => setReportError(e.message))
+      .finally(() => setReportLoading(false));
+  };
+
+  const selectTask = (id: string) => {
+    setSelectedId((prev) => prev === id ? null : id);
+    setReport(null);
+    setReportError(null);
+  };
+
+  if (tasks.length === 0) {
+    return <p className="text-sm text-slate-400 text-center py-10">No archived tasks yet.</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="card overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50 text-left">
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Task</th>
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Source → Target</th>
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Scopes</th>
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Archived</th>
+              <th className="px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide w-20">Report</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {tasks.map((task) => {
+              const srcLabel = envMap.get(task.source.environment)?.label ?? task.source.environment;
+              const tgtLabel = envMap.get(task.target.environment)?.label ?? task.target.environment;
+              const isSelected = selectedId === task.id;
+              return (
+                <tr
+                  key={task.id}
+                  onClick={() => selectTask(task.id)}
+                  className={cn(
+                    "cursor-pointer transition-colors",
+                    isSelected ? "bg-indigo-50" : "hover:bg-slate-50"
+                  )}
+                >
+                  <td className="px-4 py-2.5">
+                    <span className="font-medium text-slate-800">{task.name}</span>
+                    {task.description && <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[200px]">{task.description}</p>}
+                  </td>
+                  <td className="px-4 py-2.5 text-xs text-slate-600">
+                    <span className="font-mono">{srcLabel}</span>
+                    <span className="text-slate-400 mx-1">→</span>
+                    <span className="font-mono">{tgtLabel}</span>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex flex-wrap gap-1">
+                      {task.items.map((sel) => (
+                        <span key={sel.scope} className="px-1.5 py-0.5 text-[10px] rounded border border-slate-200 bg-slate-50 text-slate-600">
+                          {scopeLabel(sel.scope)}
+                          {sel.items && <span className="text-slate-400 ml-0.5">×{sel.items.length}</span>}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span className={cn(
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border",
+                      task.status === "completed"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-red-50 text-red-700 border-red-200"
+                    )}>
+                      {task.status === "completed" ? "✓ Completed" : "✗ Failed"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-xs text-slate-500">
+                    {task.archivedAt ? new Date(task.archivedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {task.reportId ? (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); selectTask(task.id); loadReport(task); }}
+                        className="text-[10px] text-indigo-600 hover:text-indigo-700 font-medium"
+                      >
+                        View
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-slate-300">—</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Detail panel below the table */}
+      {selected && (
+        <div className="card-padded space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-800">{selected.name}</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {envMap.get(selected.source.environment)?.label ?? selected.source.environment} → {envMap.get(selected.target.environment)?.label ?? selected.target.environment}
+                {selected.description && <> · {selected.description}</>}
+              </p>
+            </div>
+            <button type="button" onClick={() => setSelectedId(null)} className="text-slate-400 hover:text-slate-600">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Items */}
+          <div>
+            <div className="label-xs mb-1.5">ITEMS</div>
+            <div className="flex flex-wrap gap-1">
+              {selected.items.flatMap((sel) =>
+                sel.items?.map((item) => (
+                  <span key={`${sel.scope}/${item}`} className="px-1.5 py-0.5 text-[10px] font-mono rounded border border-slate-200 bg-slate-50 text-slate-600">
+                    {item}
+                  </span>
+                )) ?? [
+                  <span key={sel.scope} className="px-1.5 py-0.5 text-[10px] rounded border border-slate-200 bg-slate-50 text-slate-500 italic">
+                    {scopeLabel(sel.scope)} (all)
+                  </span>
+                ]
+              )}
+            </div>
+          </div>
+
+          {/* Diff report */}
+          {selected.reportId && (
+            <div>
+              <div className="label-xs mb-1.5">DRY-RUN DIFF REPORT</div>
+              {reportLoading && <p className="text-xs text-slate-400">Loading report...</p>}
+              {reportError && <p className="text-xs text-rose-500">Failed to load ({reportError})</p>}
+              {!report && !reportLoading && !reportError && (
+                <button type="button" onClick={() => loadReport(selected)} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                  Load diff report
+                </button>
+              )}
+              {report && <DiffReport report={report} mode="dry-run" />}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 type PanelMode = "select" | "new" | "edit" | "view";
@@ -796,12 +959,16 @@ type PanelMode = "select" | "new" | "edit" | "view";
 export function PromoteWorkflow({
   environments,
   initialTasks,
+  initialArchived = [],
 }: {
   environments: Environment[];
   initialTasks: PromotionTask[];
+  initialArchived?: PromotionTask[];
 }) {
   const { confirm } = useDialog();
   const [tasks, setTasks] = useState<PromotionTask[]>(initialTasks);
+  const [archivedTasks, setArchivedTasks] = useState<PromotionTask[]>(initialArchived);
+  const [promoteTab, setPromoteTab] = useState<"tasks" | "archive">("tasks");
   const [selectedId, setSelectedId] = useState<string | null>(initialTasks[0]?.id ?? null);
   const [panelMode, setPanelMode] = useState<PanelMode>(initialTasks.length > 0 ? "view" : "select");
   const [form, setForm] = useState<TaskFormState>(emptyForm(environments));
@@ -903,29 +1070,31 @@ export function PromoteWorkflow({
     }
   };
 
-  const handleArchive = async (task: PromotionTask) => {
-    const res = await fetch(`/api/promotion-tasks/${task.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ archivedAt: new Date().toISOString() }),
-    });
-    if (res.ok) {
-      const remaining = tasks.filter((t) => t.id !== task.id);
-      setTasks(remaining);
-      setSelectedId(remaining[0]?.id ?? null);
-      setPanelMode(remaining.length > 0 ? "view" : "select");
-    }
-  };
-
   const handleStatusChange = async (id: string, status: TaskStatus) => {
+    // Auto-archive on completion or failure
+    const patch: Record<string, unknown> = { status };
+    if (status === "completed" || status === "failed") {
+      patch.archivedAt = new Date().toISOString();
+    }
     const res = await fetch(`/api/promotion-tasks/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(patch),
     });
     if (res.ok) {
       const updated: PromotionTask = await res.json();
-      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      if (updated.archivedAt) {
+        // Move to archived list and remove from active
+        setArchivedTasks((prev) => [updated, ...prev]);
+        setTasks((prev) => {
+          const remaining = prev.filter((t) => t.id !== updated.id);
+          setSelectedId(remaining[0]?.id ?? null);
+          setPanelMode(remaining.length > 0 ? "view" : "select");
+          return remaining;
+        });
+      } else {
+        setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      }
     }
   };
 
@@ -934,11 +1103,43 @@ export function PromoteWorkflow({
 
   return (
     <div className="space-y-6">
+      {/* Sub-tabs */}
+      <div className="flex items-center gap-1 border-b border-slate-200">
+        <button
+          type="button"
+          onClick={() => setPromoteTab("tasks")}
+          className={cn(
+            "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+            promoteTab === "tasks"
+              ? "border-indigo-600 text-indigo-700"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          )}
+        >
+          Tasks
+        </button>
+        <button
+          type="button"
+          onClick={() => setPromoteTab("archive")}
+          className={cn(
+            "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+            promoteTab === "archive"
+              ? "border-indigo-600 text-indigo-700"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          )}
+        >
+          Archive {archivedTasks.length > 0 && <span className="ml-1 text-xs text-slate-400">({archivedTasks.length})</span>}
+        </button>
+      </div>
+
+      {promoteTab === "archive" && (
+        <ArchiveTable tasks={archivedTasks} environments={environments} />
+      )}
+
+      {promoteTab === "tasks" && (<>
       {/* Page header */}
       <header className="flex items-start justify-between gap-6">
         <div>
-          <h1 className="page-title">Promote</h1>
-          <p className="section-subtitle mt-1">
+          <p className="section-subtitle">
             Move verified config from a source tenant to a target tenant, safely.
           </p>
         </div>
@@ -1061,7 +1262,6 @@ export function PromoteWorkflow({
               onToggleFullscreen={() => setFullscreen((f) => !f)}
               onEdit={openEdit}
               onDelete={handleDelete}
-              onArchive={() => handleArchive(selectedTask)}
               onStatusChange={(status) => handleStatusChange(selectedTask.id, status)}
             />
           )}
@@ -1073,6 +1273,7 @@ export function PromoteWorkflow({
           )}
         </div>
       </div>
+      </>)}
     </div>
   );
 }
