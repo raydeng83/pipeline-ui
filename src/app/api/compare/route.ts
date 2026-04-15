@@ -267,8 +267,12 @@ export async function POST(req: NextRequest) {
               journeyScopes.flatMap((s) => s.items!),
             );
             if (deps.subJourneys.length > 0 || deps.scriptUuids.length > 0) {
-              // Build name sets for target journeys and scripts
-              const targetRealmsDir = path.join(targetConfigDir, "realms");
+              // Check against the LOCAL config dir for the target (which has all
+              // journeys/scripts from prior pulls), not the temp dir which only
+              // contains the selected items.
+              const localTargetConfig = getConfigDir(target.environment);
+              const checkDir = localTargetConfig ?? targetConfigDir;
+              const targetRealmsDir = path.join(checkDir, "realms");
               const targetJourneyNames = new Set<string>();
               const targetScriptNames = new Set<string>();
 
