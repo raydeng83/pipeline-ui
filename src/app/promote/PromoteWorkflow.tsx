@@ -679,6 +679,7 @@ function TaskDetail({
   onToggleFullscreen,
   onEdit,
   onDelete,
+  onArchive,
   onStatusChange,
 }: {
   task: PromotionTask;
@@ -687,6 +688,7 @@ function TaskDetail({
   onToggleFullscreen: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onArchive: () => void;
   onStatusChange: (status: TaskStatus) => void;
 }) {
   const envMap = new Map(environments.map((e) => [e.name, e]));
@@ -759,7 +761,7 @@ function TaskDetail({
 
   const body = (
     <div className={cn(fullscreen && "flex-1 overflow-y-auto")}>
-      <PromoteExecution task={task} environments={environments} onTaskStatusChange={onStatusChange} onArchive={() => handleArchive(task)} />
+      <PromoteExecution task={task} environments={environments} onTaskStatusChange={onStatusChange} onArchive={onArchive} />
     </div>
   );
 
@@ -1266,6 +1268,7 @@ export function PromoteWorkflow({
               onToggleFullscreen={() => setFullscreen((f) => !f)}
               onEdit={openEdit}
               onDelete={handleDelete}
+              onArchive={() => handleArchive(selectedTask)}
               onStatusChange={(status) => handleStatusChange(selectedTask.id, status)}
             />
           )}
