@@ -172,6 +172,7 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
               className="flex items-center justify-center gap-2 py-2.5 px-6 rounded-lg text-[13px] font-medium bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
             >
               <ArrowDown className="w-4 h-4" /> Pull
+            </button>
           </div>
         </div>
 
