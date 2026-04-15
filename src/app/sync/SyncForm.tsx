@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogViewer } from "@/components/LogViewer";
@@ -157,9 +157,19 @@ export function SyncForm({
 }) {
   const [selectedEnvs, setSelectedEnvs] = useState<Set<string>>(new Set());
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const { setBusy } = useBusyState();
   const { jobs, getLogsForEnv, startAll, abortAll, clearJobs, anyRunning } = usePullJobs();
   const [activeTab, setActiveTab] = useState<string | null>(null);
+  const logViewerRef = useRef<HTMLDivElement>(null);
+
+  const focusLog = useCallback((env: string) => {
+    setActiveTab(env);
+    requestAnimationFrame(() => {
+      logViewerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
 
   useEffect(() => { setBusy(anyRunning); }, [anyRunning, setBusy]);
 
@@ -203,11 +213,33 @@ export function SyncForm({
     startAll(envs, scopes);
   };
 
-  const activeJob = jobs.find((j) => j.env === activeTab) ?? null;
-  const activeJobLogs = activeTab ? getLogsForEnv(activeTab) : [];
+  const deferredActiveTab = useDeferredValue(activeTab);
+  const activeJob = jobs.find((j) => j.env === deferredActiveTab) ?? null;
+  const activeJobLogs = deferredActiveTab ? getLogsForEnv(deferredActiveTab) : [];
   const doneCount = jobs.filter((j) => j.status === "done").length;
   const failedCount = jobs.filter((j) => j.status === "failed").length;
   const runningCount = jobs.filter((j) => j.status === "running").length;
+
+  const lastErrorFor = (envName: string): string | null => {
+    const entries = getLogsForEnv(envName);
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const e = entries[i];
+      if (e.type === "error" || e.type === "stderr") {
+        const s = String(e.data ?? "").trim();
+        if (s) return s.split("\n").filter(Boolean).pop() ?? s;
+      }
+    }
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const e = entries[i];
+      if (e.type === "stdout") {
+        const s = String(e.data ?? "").trim();
+        if (s) return s.split("\n").filter(Boolean).pop() ?? s;
+      }
+    }
+    return null;
+  };
+
+  const failedJobs = jobs.filter((j) => j.status === "failed");
 
   return (
     <div className="space-y-5">
@@ -255,8 +287,19 @@ export function SyncForm({
                         <span className="text-[10px] text-slate-400 font-mono">{env.name}</span>
                       </div>
                       <div className="text-[10px] text-slate-400 mt-0.5">
-                        {lastPull ? `Last pull: ${timeAgo(lastPull)}` : "Never pulled"}
+                        {lastPull ? `Last pull: ${mounted ? timeAgo(lastPull) : "…"}` : "Never pulled"}
                       </div>
+                      {job?.status === "failed" && (() => {
+                        const err = lastErrorFor(env.name);
+                        return err ? (
+                          <div
+                            className="text-[10px] text-red-600 mt-0.5 truncate font-mono"
+                            title={err}
+                          >
+                            {err}
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
                     {/* Job status indicator */}
                     {job && (
@@ -267,7 +310,7 @@ export function SyncForm({
                         job.status === "failed" && "bg-red-100 text-red-700",
                         job.status === "pending" && "bg-slate-100 text-slate-500",
                       )}>
-                        {job.status === "running" ? "pulling…" : job.status}
+                        {job.status === "running" ? "pulling…" : job.status === "failed" ? "with errors" : job.status}
                       </span>
                     )}
                   </label>
@@ -317,7 +360,7 @@ export function SyncForm({
               <div className="flex items-center gap-3 text-xs text-slate-500">
                 <span>{jobs.length} environment{jobs.length !== 1 ? "s" : ""}</span>
                 {doneCount > 0 && <span className="text-emerald-600">{doneCount} done</span>}
-                {failedCount > 0 && <span className="text-red-600">{failedCount} failed</span>}
+                {failedCount > 0 && <span className="text-red-600">{failedCount} with errors</span>}
                 {runningCount > 0 && <span className="text-sky-600">{runningCount} running</span>}
                 {!anyRunning && (
                   <button type="button" onClick={clearJobs} className="text-[10px] text-slate-400 hover:text-slate-600">
@@ -325,6 +368,47 @@ export function SyncForm({
                   </button>
                 )}
               </div>
+
+              {/* Failure banner */}
+              {failedJobs.length > 0 && !anyRunning && (
+                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+                  <div className="text-[11px] font-semibold text-red-700 mb-1">
+                    {failedJobs.length} environment{failedJobs.length !== 1 ? "s" : ""} completed with errors
+                  </div>
+                  <ul className="space-y-1">
+                    {failedJobs.map((j) => {
+                      const err = lastErrorFor(j.env);
+                      return (
+                        <li key={j.env} className="flex items-start gap-2 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => focusLog(j.env)}
+                            className="shrink-0 font-medium text-red-700 hover:underline"
+                          >
+                            {j.label}
+                          </button>
+                          <span className="text-red-500">
+                            {j.exitCode != null ? `(exit ${j.exitCode})` : ""}
+                          </span>
+                          <span
+                            className="flex-1 min-w-0 truncate font-mono text-red-600"
+                            title={err ?? undefined}
+                          >
+                            {err ?? "No output"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => focusLog(j.env)}
+                            className="shrink-0 text-[10px] text-red-600 hover:text-red-800 underline"
+                          >
+                            View log
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
 
               {/* Environment tabs */}
               <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
@@ -367,11 +451,13 @@ export function SyncForm({
 
               {/* Log viewer for active tab */}
               {activeJob && (
-                <LogViewer
-                  logs={activeJobLogs}
-                  running={activeJob.status === "running"}
-                  exitCode={activeJob.exitCode}
-                />
+                <div ref={logViewerRef}>
+                  <LogViewer
+                    logs={activeJobLogs}
+                    running={activeJob.status === "running"}
+                    exitCode={activeJob.exitCode}
+                  />
+                </div>
               )}
             </>
           )}
