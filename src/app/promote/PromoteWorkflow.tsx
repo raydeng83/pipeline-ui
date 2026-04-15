@@ -705,16 +705,6 @@ function TaskDetail({
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
-          <select
-            value={task.status}
-            onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-            disabled={busy}
-            className="rounded border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50"
-          >
-            {(Object.keys(STATUS_CONFIG) as TaskStatus[]).map((s) => (
-              <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
-            ))}
-          </select>
           <button
             onClick={onEdit}
             disabled={busy}
