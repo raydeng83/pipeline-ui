@@ -162,19 +162,6 @@ export function SyncForm({ environments }: { environments: Environment[] }) {
           </select>
         </div>
 
-        {/* Direction — pull only for now */}
-        <div>
-          <div className="label-xs mb-1.5">DIRECTION</div>
-          <div className="bg-slate-100 p-1 rounded-xl inline-flex">
-            <button
-              type="button"
-              disabled
-              className="flex items-center justify-center gap-2 py-2.5 px-6 rounded-lg text-[13px] font-medium bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
-            >
-              <ArrowDown className="w-4 h-4" /> Pull
-            </button>
-          </div>
-        </div>
 
         {/* Scope selector */}
         <div>
