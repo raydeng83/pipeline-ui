@@ -89,9 +89,7 @@ export function NavBar() {
                       "px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap",
                       isActive
                         ? "bg-indigo-50 text-indigo-700 font-medium"
-                        : warnOnLeave
-                          ? "text-slate-400 hover:text-slate-500"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     )}
                   >
                     {label}
