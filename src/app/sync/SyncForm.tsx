@@ -332,7 +332,7 @@ export function SyncForm({
                   <button
                     key={job.env}
                     type="button"
-                    onClick={() => { setActiveTab(job.env); setAutoRotate(false); }}
+                    onClick={() => setActiveTab(job.env)}
                     className={cn(
                       "inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full ring-1 transition-colors whitespace-nowrap",
                       activeTab === job.env
