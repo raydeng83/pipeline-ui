@@ -1218,6 +1218,10 @@ export function PromoteExecution({
   onTaskStatusChange: (status: TaskStatus) => void;
 }) {
   const { confirm } = useDialog();
+  const { setDirty } = useBusyState();
+
+  // Clear dirty flag on unmount
+  useEffect(() => () => setDirty(false), [setDirty]);
   const frConfigScopes = useMemo(
     () => task.items.filter((i) => getCommandType(i.scope) === "fr-config").map((i) => i.scope as ConfigScope),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1285,6 +1289,9 @@ export function PromoteExecution({
   });
 
   const updatePhase = (id: PhaseId, status: PhaseStatus) => {
+    // Mark as dirty once any phase starts — user has progress to lose
+    if (status === "done" || status === "running") setDirty(true);
+
     setPhaseStatuses((prev) => {
       const nowDate = new Date();
       const nowIso = nowDate.toISOString();

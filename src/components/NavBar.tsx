@@ -32,7 +32,8 @@ const COLOR_RING: Record<string, string> = {
 };
 
 export function NavBar() {
-  const { busy } = useBusyState();
+  const { busy, dirty } = useBusyState();
+  const warnOnLeave = busy || dirty;
   const pathname = usePathname();
   const router = useRouter();
   const { confirm } = useDialog();
@@ -53,11 +54,11 @@ export function NavBar() {
           <div className="flex items-center gap-6 min-w-0">
             <Link
               href="/"
-              onClick={busy ? async (e) => {
+              onClick={warnOnLeave ? async (e) => {
                 e.preventDefault();
                 const ok = await confirm({
-                  title: "Leave this page?",
-                  message: "An operation is in progress. Navigating away will lose the current task progress.",
+                  title: "Leave this page? Progress will be lost.",
+                  message: "You have an operation in progress or unsaved task state. Navigating away will discard it.",
                   confirmLabel: "Leave",
                   variant: "warning",
                 });
@@ -74,11 +75,11 @@ export function NavBar() {
                   <Link
                     key={href}
                     href={href}
-                    onClick={busy ? async (e) => {
+                    onClick={warnOnLeave ? async (e) => {
                       e.preventDefault();
                       const ok = await confirm({
-                        title: "Leave this page?",
-                        message: "An operation is in progress. Navigating away will lose the current task progress.",
+                        title: "Leave this page? Progress will be lost.",
+                        message: "You have an operation in progress or unsaved task state. Navigating away will discard it.",
                         confirmLabel: "Leave",
                         variant: "warning",
                       });
@@ -88,9 +89,7 @@ export function NavBar() {
                       "px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap",
                       isActive
                         ? "bg-indigo-50 text-indigo-700 font-medium"
-                        : busy
-                          ? "text-slate-400 hover:text-slate-600 hover:bg-slate-50 cursor-pointer"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     )}
                   >
                     {label}
