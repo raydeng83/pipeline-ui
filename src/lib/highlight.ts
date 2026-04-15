@@ -108,7 +108,7 @@ export function withLineNumbers(highlightedHtml: string): string {
   return lines
     .map(
       (line, i) =>
-        `<span style="display:inline-block;width:${gutterWidth + 1}ch;text-align:right;padding-right:1.5ch;color:#475569;user-select:none;opacity:0.5">${i + 1}</span>${line}`,
+        `<span style="display:inline-block;width:${gutterWidth + 1}ch;text-align:right;padding-right:1.5ch;margin-right:1ch;border-right:1px solid #334155;color:#64748b;user-select:none">${i + 1}</span>${line}`,
     )
     .join("\n");
 }
