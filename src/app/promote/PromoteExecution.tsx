@@ -1177,39 +1177,6 @@ function SummaryPhase({
               {task.source.environment} → {task.target.environment} · {task.name}
             </p>
           </div>
-          {(succeeded || failed) && (
-            <button
-              type="button"
-              onClick={onArchive}
-              className="px-3 py-1.5 text-xs font-medium rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors shrink-0"
-            >
-              Move to Archive
-            </button>
-          )}
-        </div>
-
-        {/* Phase summary */}
-        <div>
-          <div className="label-xs mb-2">PHASE RESULTS</div>
-          <div className="flex flex-wrap gap-1.5">
-            {PHASE_DEFS.map((p) => {
-              const st = phaseStatuses[p.id];
-              return (
-                <span
-                  key={p.id}
-                  className={cn(
-                    "px-2 py-0.5 rounded text-[11px] font-medium border",
-                    st === "done" ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : st === "failed" ? "border-red-200 bg-red-50 text-red-700"
-                      : st === "skipped" ? "border-slate-200 bg-slate-50 text-slate-400"
-                      : "border-slate-200 bg-white text-slate-500"
-                  )}
-                >
-                  {p.label}: {st}
-                </span>
-              );
-            })}
-          </div>
         </div>
 
         {/* Items promoted */}
@@ -1292,13 +1259,17 @@ export function PromoteExecution({
     [task.items]
   );
 
+  // If the task is already completed/failed (e.g. coming back from another tab),
+  // initialize directly to the summary phase.
+  const taskDone = task.status === "completed" || task.status === "failed";
+
   const [phaseStatuses, setPhaseStatuses] = useState<Record<PhaseId, PhaseStatus>>(() => ({
-    "dry-run": frConfigScopes.length > 0 ? "pending" : "skipped",
-    promote:   "pending",
-    summary:   "pending",
+    "dry-run": taskDone ? "done" : frConfigScopes.length > 0 ? "pending" : "skipped",
+    promote:   taskDone ? (task.status === "completed" ? "done" : "failed") : "pending",
+    summary:   taskDone ? (task.status === "completed" ? "done" : "failed") : "pending",
   }));
 
-  const [activePhase, setActivePhase] = useState<PhaseId>("dry-run");
+  const [activePhase, setActivePhase] = useState<PhaseId>(taskDone ? "summary" : "dry-run");
 
   // Shared "include dependencies" toggle for dry-run + promote. Initialized
   // from the task's saved preference; toggling it in the Dry Run phase affects
@@ -1525,7 +1496,20 @@ export function PromoteExecution({
 
   return (
     <div className="p-4 space-y-4">
-      <Stepper statuses={phaseStatuses} active={activePhase} onClick={setActivePhase} />
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <Stepper statuses={phaseStatuses} active={activePhase} onClick={setActivePhase} />
+        </div>
+        {(phaseStatuses.promote === "done" || phaseStatuses.promote === "failed") && (
+          <button
+            type="button"
+            onClick={onArchive}
+            className="px-3 py-1.5 text-xs font-medium rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors shrink-0"
+          >
+            Move to Archive
+          </button>
+        )}
+      </div>
 
       <div className="border-t border-slate-100 pt-4 space-y-3">
         {/* Phase header */}
