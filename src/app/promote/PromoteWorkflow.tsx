@@ -784,12 +784,15 @@ function TaskDetail({
 
 // ── Archive table ────────────────────────────────────────────────────────────
 
+const ARCHIVE_PAGE_SIZE = 10;
+
 function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environments: Environment[] }) {
   const envMap = new Map(environments.map((e) => [e.name, e]));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [report, setReport] = useState<CompareReport | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
 
   const selected = tasks.find((t) => t.id === selectedId) ?? null;
 
@@ -834,7 +837,7 @@ function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environ
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {tasks.map((task) => {
+            {tasks.slice(page * ARCHIVE_PAGE_SIZE, (page + 1) * ARCHIVE_PAGE_SIZE).map((task) => {
               const srcLabel = envMap.get(task.source.environment)?.label ?? task.source.environment;
               const tgtLabel = envMap.get(task.target.environment)?.label ?? task.target.environment;
               const isSelected = selectedId === task.id;
@@ -900,6 +903,50 @@ function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environ
             })}
           </tbody>
         </table>
+        {tasks.length > ARCHIVE_PAGE_SIZE && (
+          <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50 text-xs text-slate-500">
+            <span>
+              {page * ARCHIVE_PAGE_SIZE + 1}–{Math.min((page + 1) * ARCHIVE_PAGE_SIZE, tasks.length)} of {tasks.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setPage(0)}
+                disabled={page === 0}
+                className="px-1.5 py-0.5 rounded border border-slate-200 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ««
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="px-1.5 py-0.5 rounded border border-slate-200 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ‹
+              </button>
+              <span className="px-2">
+                Page {page + 1} of {Math.ceil(tasks.length / ARCHIVE_PAGE_SIZE)}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(Math.ceil(tasks.length / ARCHIVE_PAGE_SIZE) - 1, p + 1))}
+                disabled={(page + 1) * ARCHIVE_PAGE_SIZE >= tasks.length}
+                className="px-1.5 py-0.5 rounded border border-slate-200 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ›
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage(Math.ceil(tasks.length / ARCHIVE_PAGE_SIZE) - 1)}
+                disabled={(page + 1) * ARCHIVE_PAGE_SIZE >= tasks.length}
+                className="px-1.5 py-0.5 rounded border border-slate-200 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                »»
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detail panel below the table */}
