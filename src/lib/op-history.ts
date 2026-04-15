@@ -9,6 +9,7 @@ const REPO_ROOT = process.cwd();
 const ENVIRONMENTS_DIR = path.join(REPO_ROOT, "environments");
 const OP_LOG_PATH = path.join(ENVIRONMENTS_DIR, ".op-log.jsonl");
 const OP_LOG_MAX = 500;
+const REPORTS_DIR = path.join(ENVIRONMENTS_DIR, "promotion-reports");
 
 export type OpType = "pull" | "push" | "compare" | "dry-run" | "promote" | "log-search" | "analyze";
 export type OpStatus = "success" | "failed";
@@ -83,6 +84,8 @@ export interface HistoryRecord {
   items?: PromoteItem[];
   diffTotals?: PromoteDiffTotals;
   phaseTimings?: Record<string, PhaseTiming>;
+  /** ID of a saved CompareReport file in promotion-reports/ (promote ops only). */
+  reportId?: string;
   /** Repo HEAD captured at the moment the record was appended. */
   repoCommit?: string;
 }
@@ -108,6 +111,7 @@ export interface OpLogInput {
   items?: PromoteItem[];
   diffTotals?: PromoteDiffTotals;
   phaseTimings?: Record<string, PhaseTiming>;
+  reportId?: string;
 }
 
 // ── Git root resolution ──────────────────────────────────────────────────────
@@ -289,6 +293,7 @@ export function appendOpLog(input: OpLogInput): HistoryRecord {
     items: input.items,
     diffTotals: input.diffTotals,
     phaseTimings: input.phaseTimings,
+    reportId: input.reportId,
     repoCommit: readRepoHead(),
   };
 
@@ -363,4 +368,23 @@ export function readHistoryEntry(id: string): HistoryRecord | null {
   if (op) return op;
   const commits = readCommitHistory({ limit: 2000 });
   return commits.find((c) => c.id === id || c.commitHash === id) ?? null;
+}
+
+// ── Promotion reports (CompareReport JSON files) ────────────────────────────
+
+/** Save a CompareReport JSON for a promotion record. Returns the report ID. */
+export function savePromotionReport(reportId: string, report: unknown): void {
+  if (!fs.existsSync(REPORTS_DIR)) fs.mkdirSync(REPORTS_DIR, { recursive: true });
+  fs.writeFileSync(path.join(REPORTS_DIR, `${reportId}.json`), JSON.stringify(report));
+}
+
+/** Load a saved CompareReport by ID. Returns null if not found. */
+export function loadPromotionReport(reportId: string): unknown | null {
+  const fp = path.join(REPORTS_DIR, `${reportId}.json`);
+  if (!fs.existsSync(fp)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(fp, "utf-8"));
+  } catch {
+    return null;
+  }
 }

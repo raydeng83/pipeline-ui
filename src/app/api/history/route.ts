@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readHistoryMerged, appendOpLog, type OpType, type OpStatus } from "@/lib/op-history";
+import crypto from "crypto";
+import { readHistoryMerged, appendOpLog, savePromotionReport, type OpType, type OpStatus } from "@/lib/op-history";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -17,6 +18,16 @@ export async function POST(req: NextRequest) {
   if (!body.type || !body.environment) {
     return NextResponse.json({ error: "Missing type or environment" }, { status: 400 });
   }
+  // Pre-save the report file so we can include the reportId in the op-log entry
+  let reportId: string | undefined;
+  if (body.report) {
+    try {
+      const id = crypto.randomUUID();
+      savePromotionReport(id, body.report);
+      reportId = id;
+    } catch { /* non-fatal */ }
+  }
+
   const record = appendOpLog({
     type: body.type as OpType,
     environment: String(body.environment),
@@ -37,6 +48,8 @@ export async function POST(req: NextRequest) {
     items: body.items,
     diffTotals: body.diffTotals,
     phaseTimings: body.phaseTimings,
+    reportId,
   });
+
   return NextResponse.json({ id: record.id });
 }

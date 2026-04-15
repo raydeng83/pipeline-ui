@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Environment } from "@/lib/fr-config-types";
 import type { HistoryRecord } from "@/lib/op-history";
+import type { CompareReport } from "@/lib/diff-types";
 import { ActivityRow } from "@/components/ActivityRow";
+import { DiffReport } from "@/app/compare/DiffReport";
+import { formatScopeLabel } from "@/lib/compare";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -60,6 +63,58 @@ type TypeFilter = "all" | "pull" | "push" | "compare" | "dry-run" | "promote" | 
 type StatusFilter = "all" | "success" | "failed";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
+// ── Promotion report loader ─────────────────────────────────────────────────
+
+function PromotionReportSection({ reportId, recordId }: { reportId: string; recordId: string }) {
+  const [report, setReport] = useState<CompareReport | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  const loadReport = useCallback(() => {
+    if (report || loading) return;
+    setLoading(true);
+    setError(null);
+    fetch(`/api/history/${recordId}/report`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`${res.status}`);
+        return res.json() as Promise<CompareReport>;
+      })
+      .then((data) => { setReport(data); setExpanded(true); })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [report, loading, recordId]);
+
+  return (
+    <div>
+      <div className="label-xs mb-2">DIFF REPORT</div>
+      {!report && !loading && !error && (
+        <button
+          type="button"
+          onClick={loadReport}
+          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+        >
+          Load dry-run diff report
+        </button>
+      )}
+      {loading && <p className="text-xs text-slate-400">Loading report...</p>}
+      {error && <p className="text-xs text-rose-500">Failed to load report ({error})</p>}
+      {report && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium mb-2"
+          >
+            {expanded ? "Hide diff report" : "Show diff report"}
+          </button>
+          {expanded && <DiffReport report={report} mode="dry-run" />}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Drawer ───────────────────────────────────────────────────────────────────
 
@@ -212,19 +267,34 @@ function RecordDrawer({
             </div>
           )}
 
-          {/* If there are logs (future field) show a dark code block */}
-          {"logs" in record && record.logs ? (
+          {/* Promoted items */}
+          {record.items && record.items.length > 0 && (
             <div>
-              <div className="label-xs mb-2">LOGS</div>
-              <pre className="text-[11px] bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap break-all">
-                {String((record as { logs: unknown }).logs)}
-              </pre>
+              <div className="label-xs mb-2">PROMOTED ITEMS</div>
+              <div className="space-y-2">
+                {record.items.map((sel) => (
+                  <div key={sel.scope}>
+                    <div className="text-[11px] font-semibold text-slate-600">{formatScopeLabel(sel.scope)}</div>
+                    {sel.items && sel.items.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {sel.items.map((item) => (
+                          <span key={item} className="px-1.5 py-0.5 text-[10px] font-mono rounded border border-slate-200 bg-slate-50 text-slate-600">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-slate-400 italic mt-0.5">All items in scope</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          ) : (
-            <div>
-              <div className="label-xs mb-2">LOGS</div>
-              <p className="text-xs text-slate-400 italic">No logs stored for this record.</p>
-            </div>
+          )}
+
+          {/* Diff report */}
+          {record.reportId && (
+            <PromotionReportSection reportId={record.reportId} recordId={record.id} />
           )}
         </div>
       </aside>

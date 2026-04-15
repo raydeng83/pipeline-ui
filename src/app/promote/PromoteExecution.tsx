@@ -1400,6 +1400,7 @@ export function PromoteExecution({
       items: itemsList,
       diffTotals,
       phaseTimings,
+      report: dryRunReport ?? undefined,
     };
     // Suppress unused warning for completedAt (kept for potential future use)
     void completedAt;
