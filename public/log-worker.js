@@ -17,8 +17,10 @@
  *   { type: "error",    message: string }
  */
 
-let tailInterval = null;
-let tailCookie = null;
+// Tail state is keyed by source so we can tail multiple sources concurrently
+// (e.g. am-everything + idm-everything on the same screen).
+let tailIntervals = new Map(); // source -> intervalId
+let tailCookies = new Map();   // source -> pagedResultsCookie
 let currentFetchId = 0;
 
 // Search pagination state
@@ -171,7 +173,8 @@ async function doFetch(env, sources, beginTime, endTime, queryFilter, fetchId) {
 
 async function doTailPoll(env, source) {
   try {
-    const data = await apiPost({ env, source, tail: true, cookie: tailCookie ?? undefined }, MAX_RETRIES);
+    const cookie = tailCookies.get(source) ?? undefined;
+    const data = await apiPost({ env, source, tail: true, cookie }, MAX_RETRIES);
 
     if (data.error) {
       self.postMessage({ type: "error", message: data.error });
@@ -179,9 +182,14 @@ async function doTailPoll(env, source) {
     }
 
     const entries = Array.isArray(data.result) ? data.result : [];
-    tailCookie = data.pagedResultsCookie ?? null;
+    tailCookies.set(source, data.pagedResultsCookie ?? null);
 
     if (entries.length > 0) {
+      // Tag each entry with its source so the UI can distinguish when
+      // multiple sources are tailed on the same screen.
+      for (const entry of entries) {
+        if (entry && typeof entry === "object" && entry.source == null) entry.source = source;
+      }
       self.postMessage({ type: "entries", entries, append: true });
     }
   } catch (e) {
@@ -190,11 +198,9 @@ async function doTailPoll(env, source) {
 }
 
 function stopTail() {
-  if (tailInterval !== null) {
-    clearInterval(tailInterval);
-    tailInterval = null;
-  }
-  tailCookie = null;
+  for (const id of tailIntervals.values()) clearInterval(id);
+  tailIntervals.clear();
+  tailCookies.clear();
 }
 
 function stopSearch() {
@@ -236,13 +242,26 @@ self.onmessage = async function (e) {
       self.postMessage({ type: "progress", loaded: 0, page: 0, done: true, paused: false });
       break;
 
-    case "tail-start":
+    case "tail-start": {
       stopTail();
       stopSearch();
       currentFetchId++;
-      await doTailPoll(msg.env, msg.source);
-      tailInterval = setInterval(() => doTailPoll(msg.env, msg.source), msg.tailSecs * 1000);
+      // Accept either new multi-source (msg.sources) or legacy single (msg.source)
+      const tailSources = Array.isArray(msg.sources) && msg.sources.length > 0
+        ? msg.sources.filter(Boolean)
+        : msg.source ? [msg.source] : [];
+      if (tailSources.length === 0) {
+        self.postMessage({ type: "error", message: "No log source selected for tailing." });
+        break;
+      }
+      // Kick off an initial poll for each source in parallel, then schedule intervals.
+      await Promise.all(tailSources.map((src) => doTailPoll(msg.env, src)));
+      for (const src of tailSources) {
+        const id = setInterval(() => doTailPoll(msg.env, src), msg.tailSecs * 1000);
+        tailIntervals.set(src, id);
+      }
       break;
+    }
 
     case "tail-stop":
       stopTail();

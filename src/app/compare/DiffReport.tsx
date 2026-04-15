@@ -1342,10 +1342,52 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
   const [graphOpen, setGraphOpen] = useState(false);
   const [graphInitialFocusNodeId, setGraphInitialFocusNodeId] = useState<string | null>(null);
 
+  // Find-usage state (where this journey is used as an inner journey)
+  type JourneyUsageRef = { journey: string; nodeName: string; nodeType: string; nodeUuid: string; env: string };
+  const [usageOpen, setUsageOpen] = useState(false);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [usageData, setUsageData] = useState<JourneyUsageRef[] | null>(null);
+  const [usageGraphTarget, setUsageGraphTarget] = useState<{ journeyName: string; nodeUuid: string } | null>(null);
+
   const handleViewScriptInJourney = useCallback((nodeId: string | null) => {
     setGraphInitialFocusNodeId(nodeId);
     setGraphOpen(true);
   }, []);
+
+  const handleFindUsage = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (usageOpen) { setUsageOpen(false); return; }
+    setUsageOpen(true);
+    if (usageData !== null) return;
+    setUsageLoading(true);
+    try {
+      const envs = [...new Set([sourceEnv, targetEnv].filter(Boolean))];
+      const results = await Promise.all(
+        envs.map((env) =>
+          fetch(`/api/analyze/journey-usage?env=${encodeURIComponent(env)}&journeyName=${encodeURIComponent(node.name)}`)
+            .then((r) => r.json())
+            .then((d) => (d.usedBy ?? []).map((u: Omit<JourneyUsageRef, "env">) => ({ ...u, env })))
+            .catch(() => [] as JourneyUsageRef[])
+        )
+      );
+      const seen = new Set<string>();
+      const merged: JourneyUsageRef[] = [];
+      for (const ref of results.flat()) {
+        const key = `${ref.env}::${ref.journey}::${ref.nodeUuid}`;
+        if (!seen.has(key)) { seen.add(key); merged.push(ref); }
+      }
+      setUsageData(merged);
+    } finally {
+      setUsageLoading(false);
+    }
+  }, [usageOpen, usageData, node.name, sourceEnv, targetEnv]);
+
+  const usageGraphFile = useMemo(
+    () => usageGraphTarget
+      ? files.find((f) => f.relativePath.endsWith(`/journeys/${usageGraphTarget.journeyName}/${usageGraphTarget.journeyName}.json`))
+      : undefined,
+    [files, usageGraphTarget],
+  );
   const hasChildren =
     node.subJourneys.length > 0 ||
     (showScripts && node.scripts.length > 0) ||
@@ -1423,7 +1465,56 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
             </svg>
           </button>
         )}
+        <button
+          type="button"
+          title="Find usage as inner journey"
+          onClick={handleFindUsage}
+          className={cn(
+            "shrink-0 px-1.5 py-0 text-[10px] font-medium rounded transition-colors",
+            usageOpen
+              ? "bg-violet-100 text-violet-700"
+              : "text-slate-400 hover:text-violet-600 hover:bg-violet-50"
+          )}
+        >
+          Find Usage
+        </button>
       </div>
+      {usageOpen && (
+        <div className="ml-6 mt-0.5 mb-1 px-2.5 py-2 rounded bg-violet-50 border border-violet-100 text-xs">
+          {usageLoading ? (
+            <p className="text-slate-400">Searching…</p>
+          ) : !usageData || usageData.length === 0 ? (
+            <p className="text-slate-400 italic">Not used as an inner journey.</p>
+          ) : (
+            <div className="space-y-1">
+              <p className="text-[10px] text-violet-600 font-semibold uppercase tracking-wide mb-1">
+                Used in {usageData.length} {usageData.length === 1 ? "place" : "places"}
+              </p>
+              {usageData.map((ref, i) => (
+                <div key={i} className="flex items-center gap-2 text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUsageGraphTarget({ journeyName: ref.journey, nodeUuid: ref.nodeUuid });
+                    }}
+                    className="text-violet-700 hover:text-violet-900 hover:underline font-medium"
+                  >
+                    {ref.journey}
+                  </button>
+                  <span className="text-slate-400">→</span>
+                  <span className="text-slate-600">{ref.nodeName}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">{ref.nodeType}</span>
+                  {ref.env && (
+                    <span className="text-[9px] text-violet-500 bg-violet-100 px-1 rounded">{ref.env}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       {open && hasChildren && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
@@ -1481,6 +1572,21 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           ancestorPath={ancestorPath}
           initialFocusNodeId={graphInitialFocusNodeId ?? undefined}
           onClose={() => { setGraphOpen(false); setGraphInitialFocusNodeId(null); }}
+        />
+      )}
+      {usageGraphTarget && (
+        <JourneyDiffGraphModal
+          journeyName={usageGraphTarget.journeyName}
+          localContent={usageGraphFile?.localContent}
+          remoteContent={usageGraphFile?.remoteContent}
+          nodeInfos={[]}
+          sourceLabel={sourceLabel}
+          targetLabel={targetLabel}
+          sourceEnv={sourceEnv}
+          targetEnv={targetEnv}
+          files={files}
+          initialFocusNodeId={usageGraphTarget.nodeUuid}
+          onClose={() => setUsageGraphTarget(null)}
         />
       )}
     </div>

@@ -1014,7 +1014,9 @@ export function LogsExplorer({
 }) {
   const { env, selectedSources, sourcesError, levelFilter, mode, tailSecs, tailing, loading, preset, customBegin, customEnd, searchSeq, searching } = config;
   const { confirm } = useDialog();
-  // Derived: single source for tail mode (always takes first selected)
+  // Derived: sources used for tail mode — all selected sources are tailed concurrently.
+  // `tailSource` (singular) is kept as the first for UI affordances that still expect one.
+  const tailSources = selectedSources;
   const tailSource = selectedSources[0] ?? "";
 
   const [keywordsRaw, setKeywordsRaw] = useState("");
@@ -1352,17 +1354,17 @@ export function LogsExplorer({
       setEntries([]);
       setFetched(false);
       setError("");
-      workerRef.current?.postMessage({ type: "tail-start", env, source: tailSource, tailSecs });
+      workerRef.current?.postMessage({ type: "tail-start", env, sources: tailSources, tailSecs });
     } else if (!tailing && prevTailing.current) {
       // Stop tail
       workerRef.current?.postMessage({ type: "tail-stop" });
     } else if (tailing && prevTailing.current) {
-      // Restart tail (tailSecs changed)
-      workerRef.current?.postMessage({ type: "tail-start", env, source: tailSource, tailSecs });
+      // Restart tail (tailSecs or selected sources changed)
+      workerRef.current?.postMessage({ type: "tail-start", env, sources: tailSources, tailSecs });
     }
     prevTailing.current = tailing;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tailing, tailSecs]);
+  }, [tailing, tailSecs, tailSources.join(",")]);
 
   // ── React to search mode fetch trigger ──
   const prevSearchSeq = useRef(0);

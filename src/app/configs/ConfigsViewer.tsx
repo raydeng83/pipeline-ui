@@ -364,6 +364,7 @@ function SectionsView({ environment }: { environment: string }) {
   const [usageOpen, setUsageOpen] = useState(false);
   const [usageData, setUsageData] = useState<{ journey: string; nodeName: string; nodeType: string; nodeUuid: string }[] | null>(null);
   const [usageLoading, setUsageLoading] = useState(false);
+  const [journeyUsageData, setJourneyUsageData] = useState<{ journey: string; nodeName: string; nodeType: string; nodeUuid: string }[] | null>(null);
   const [endpointUsageData, setEndpointUsageData] = useState<EndpointUsageRef[] | null>(null);
   const [focusNodeId, setFocusNodeId] = useState<string | undefined>(undefined);
   const pendingFocusRef = useRef<string | undefined>(undefined);
@@ -409,7 +410,7 @@ function SectionsView({ environment }: { environment: string }) {
   }, [environment]);
 
   // Reset usage panel when item changes
-  useEffect(() => { setUsageOpen(false); setUsageData(null); setEndpointUsageData(null); }, [selectedItem]);
+  useEffect(() => { setUsageOpen(false); setUsageData(null); setEndpointUsageData(null); setJourneyUsageData(null); }, [selectedItem]);
 
   const fetchUsage = useCallback(() => {
     if (!selectedItem || selectedScope !== "scripts") return;
@@ -419,6 +420,17 @@ function SectionsView({ environment }: { environment: string }) {
       .then((r) => r.json())
       .then((data) => setUsageData(data.usedBy ?? []))
       .catch(() => setUsageData([]))
+      .finally(() => setUsageLoading(false));
+  }, [environment, selectedScope, selectedItem]);
+
+  const fetchJourneyUsage = useCallback(() => {
+    if (!selectedItem || selectedScope !== "journeys") return;
+    setUsageOpen(true);
+    setUsageLoading(true);
+    fetch(`/api/analyze/journey-usage?env=${encodeURIComponent(environment)}&journeyName=${encodeURIComponent(selectedItem.id)}`)
+      .then((r) => r.json())
+      .then((data) => setJourneyUsageData(data.usedBy ?? []))
+      .catch(() => setJourneyUsageData([]))
       .finally(() => setUsageLoading(false));
   }, [environment, selectedScope, selectedItem]);
 
@@ -733,6 +745,20 @@ function SectionsView({ environment }: { environment: string }) {
                   Find Usage
                 </button>
               )}
+              {selectedScope === "journeys" && (
+                <button
+                  type="button"
+                  onClick={fetchJourneyUsage}
+                  className={cn(
+                    "shrink-0 px-2 py-0.5 text-[10px] font-medium rounded transition-colors",
+                    usageOpen
+                      ? "bg-violet-100 text-violet-700"
+                      : "text-slate-400 hover:text-violet-600 hover:bg-violet-50"
+                  )}
+                >
+                  Find Usage
+                </button>
+              )}
               {selectedScope === "endpoints" && (
                 <button
                   type="button"
@@ -790,6 +816,47 @@ function SectionsView({ environment }: { environment: string }) {
                         <span className="text-slate-500">→</span>
                         <span className="text-slate-400">{ref.nodeName}</span>
                         <span className="text-[10px] text-slate-500 font-mono">{ref.nodeType}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Journey usage panel */}
+            {usageOpen && selectedScope === "journeys" && (
+              <div className="px-4 py-2.5 border-b border-slate-200 bg-violet-50 shrink-0 max-h-48 overflow-y-auto">
+                {usageLoading ? (
+                  <p className="text-xs text-slate-500">Searching…</p>
+                ) : !journeyUsageData || journeyUsageData.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic">Not used as an inner journey.</p>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-violet-700 font-semibold uppercase tracking-wide">
+                      Used in {journeyUsageData.length} {journeyUsageData.length === 1 ? "journey" : "journeys"}
+                    </p>
+                    {journeyUsageData.map((ref, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        <span className="w-2 h-2 rounded-full bg-violet-400 shrink-0" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const journeyItem = auditData
+                              .find((e) => e.scope === "journeys")
+                              ?.items.find((item: { id: string }) => item.id === ref.journey);
+                            if (journeyItem) {
+                              pendingFocusRef.current = ref.nodeUuid;
+                              setSelectedScope("journeys");
+                              setSelectedItem(journeyItem);
+                              setUsageOpen(false);
+                            }
+                          }}
+                          className="text-violet-700 hover:text-violet-900 hover:underline font-medium"
+                        >
+                          {ref.journey}
+                        </button>
+                        <span className="text-slate-400">→</span>
+                        <span className="text-slate-600">{ref.nodeName}</span>
                       </div>
                     ))}
                   </div>
