@@ -144,14 +144,26 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={toggleAll}
-          disabled={disabled}
-          className="ml-auto text-xs text-sky-600 hover:text-sky-800 disabled:opacity-40"
-        >
-          {allSelected ? "Deselect all" : "Select all"}
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          {selected.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onChange([])}
+              disabled={disabled}
+              className="text-xs text-slate-500 hover:text-slate-700 disabled:opacity-40"
+            >
+              Clear
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={toggleAll}
+            disabled={disabled}
+            className="text-xs text-sky-600 hover:text-sky-800 disabled:opacity-40"
+          >
+            {allSelected ? "Deselect all" : "Select all"}
+          </button>
+        </div>
       </div>
 
       <p className={cn("text-xs text-slate-400", selected.length > 0 && "invisible")}>
