@@ -1390,6 +1390,15 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           {hasChildren ? (open ? "▾" : "▸") : ""}
         </span>
         <span className={cn("w-2 h-2 rounded-full shrink-0", s.dot)} />
+        {node.isEntry ? (
+          <svg className="w-3.5 h-3.5 shrink-0 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+          </svg>
+        ) : (
+          <svg className="w-3.5 h-3.5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+          </svg>
+        )}
         <span className={cn("text-xs flex-1 min-w-0 truncate", depth === 0 ? "font-semibold text-slate-800" : "text-slate-700")} title={node.name}>
           {node.name}
         </span>
