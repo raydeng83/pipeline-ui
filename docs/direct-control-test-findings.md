@@ -654,3 +654,160 @@ The admin console uses an `idmAdminClient` token (authorization_code grant, scop
 
 The admin console also enforces alphanumeric-only connector names client-side (JavaScript validation before the PUT).
 
+---
+
+## AD/LDAP connector creation via 3-step flow — verified (2026-04-16)
+
+Date: 2026-04-16
+Tenant: `sandbox1` (`openam-commkentsb1-useast1-sandbox.id.forgerock.io`)
+Source connector: `kyexternalgov` (LDAP connector, `rcs-cluster-external`, host `EDEVVM-DC1.edev.extdev.ky.gov:636`)
+
+### Summary
+
+The 3-step connector creation flow (`createFullConfig` → strip `operationOptions` → `PUT If-None-Match: "*"`) works for **AD/LDAP connectors** with a service account token. This supersedes the earlier finding that LDAP creates were "blocked by test infrastructure" — the key was using encrypted credentials from the same tenant (which the server decrypts server-side) instead of dummy/plaintext credentials against an unreachable host.
+
+### Key findings
+
+1. **`createFullConfig` accepts encrypted `$crypto` credentials from the same tenant.** The server decrypts them server-side before passing to the RCS for schema discovery. No need to know the plaintext password — just read the existing connector's config from the tenant and reuse it.
+
+2. **LDAP schema discovery returned richer object types than the source connector uses.** The source `kyexternalgov` was configured with only `User` and `Group` object types. `createFullConfig` queried the LDAP schema and returned `__ACCOUNT__`, `__GROUP__`, `__SERVER_INFO__`, and `organizationalUnit` — the full set available from the AD server.
+
+3. **The LDAP host must be reachable from the RCS at creation time.** `createFullConfig` routes through the RCS to the LDAP server to read its schema. If the host is unreachable or credentials are invalid, it returns 503. This is a hard prerequisite — there is no way to create an LDAP connector without a live backend.
+
+4. **Runtime registration worked immediately** (201 → `_action=test` returned `ok: true`). This is consistent with the CSV connector test after the provisioner was re-warmed.
+
+### Updated connector creation findings table
+
+| Connector type | `createFullConfig` works? | Live backend needed? | 3-step flow proven? |
+|---|---|---|---|
+| CSV | Yes (file read is local to RCS) | File must exist on RCS host | ✅ Yes |
+| LDAP/AD | Yes (with encrypted creds from same tenant) | Yes — host must be TCP-reachable from RCS | ✅ Yes |
+| Scripted REST | Untested | Likely yes — script execution may probe the endpoint | Unknown |
+
+### Runbook — create an AD connector by duplicating an existing one
+
+All commands assume CWD is `environments/sandbox1`.
+
+#### 0. Obtain a bearer token
+
+```bash
+export TENANT=https://openam-commkentsb1-useast1-sandbox.id.forgerock.io
+export TOKEN=$(fr-config-push direct-control-state -D 2>&1 \
+  | grep -oE 'Bearer [A-Za-z0-9_.\-]+' | head -1 | cut -d' ' -f2)
+echo "Token length: ${#TOKEN}"
+```
+
+#### 1. Read source AD connector from tenant
+
+```bash
+SOURCE_CONNECTOR=kyexternalgov
+curl -sS "$TENANT/openidm/config/provisioner.openicf/$SOURCE_CONNECTOR" \
+  -H "Authorization: Bearer $TOKEN" \
+  | jq 'del(._id, ._rev)' > /tmp/ad-source.json
+
+# Verify: should show host, principal, encrypted credentials, connectorHostRef
+jq '{host: .configurationProperties.host, principal: .configurationProperties.principal, credentials_type: (.configurationProperties.credentials | type), connectorHostRef: .connectorRef.connectorHostRef, enabled}' \
+  /tmp/ad-source.json
+```
+
+Expected output:
+```json
+{
+  "host": "EDEVVM-DC1.edev.extdev.ky.gov",
+  "principal": "CN=SD-KYID-FR-AIC-EXT,OU=KOG,OU=ServiceAccounts,OU=AA,DC=edev,DC=extdev,DC=ky,DC=gov",
+  "credentials_type": "object",
+  "connectorHostRef": "rcs-cluster-external",
+  "enabled": true
+}
+```
+
+Note: `credentials_type` is `"object"` because the tenant returns the encrypted `$crypto` blob. This is correct — `createFullConfig` decrypts it server-side.
+
+#### 2. Schema discovery via createFullConfig
+
+```bash
+curl -sS -X POST "$TENANT/openidm/system?_action=createFullConfig" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @/tmp/ad-source.json \
+  -o /tmp/ad-enriched.json \
+  -w "createFullConfig status: %{http_code}\n"
+
+# Verify: should be 200, objectTypes populated from LDAP schema
+jq '{bundleVersion: .connectorRef.bundleVersion, objectTypes: (.objectTypes | keys), hasOperationOptions: has("operationOptions")}' \
+  /tmp/ad-enriched.json
+```
+
+Expected output:
+```json
+{
+  "bundleVersion": "[1.5.20.12, 1.6.0.0)",
+  "objectTypes": ["__ACCOUNT__", "__GROUP__", "__SERVER_INFO__", "organizationalUnit"],
+  "hasOperationOptions": true
+}
+```
+
+If this returns **503 "The required service is not available"**: the RCS cannot reach the LDAP host. Verify:
+- RCS is connected: `POST /openidm/system?_action=testConnectorServers`
+- LDAP host is network-reachable from the RCS host
+- Credentials are valid enough for LDAP schema read
+
+#### 3. Strip operationOptions and create
+
+```bash
+NEW_CONNECTOR=leadtest
+jq 'del(.operationOptions)' /tmp/ad-enriched.json > /tmp/ad-final.json
+
+curl -sS -X PUT "$TENANT/openidm/config/provisioner.openicf/$NEW_CONNECTOR" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -H 'If-None-Match: "*"' \
+  -d @/tmp/ad-final.json \
+  -w "\nPUT status: %{http_code}\n"
+```
+
+Expected: **201 Created**.
+
+#### 4. Verify runtime registration
+
+```bash
+curl -sS -X POST "$TENANT/openidm/system/$NEW_CONNECTOR?_action=test" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  | jq '{name, ok, error}'
+```
+
+Expected: `{"name":"leadtest","ok":true,"error":null}`.
+
+Note: `ok: false` with `"connector not available"` means registered but the RCS/LDAP connection failed at test time — this is still a successful creation. A `404` means runtime registration failed entirely.
+
+#### 5. Cleanup
+
+```bash
+curl -sS -X DELETE "$TENANT/openidm/config/provisioner.openicf/$NEW_CONNECTOR" \
+  -H "Authorization: Bearer $TOKEN" \
+  -w "\nDELETE status: %{http_code}\n"
+```
+
+### Implications for cross-environment promote of AD connectors
+
+When promoting an AD connector from environment A to environment B:
+
+1. **Read the source connector config from environment A** (not from the local file system — the local file may have stale encrypted credentials from the wrong tenant).
+2. **Replace the encrypted `$crypto` credentials** with either:
+   - Plaintext password for the target environment's service account (IDM encrypts on write), or
+   - An ESV reference (`&{esv.connector.password}`) if the target environment has the ESV configured.
+3. **Update `configurationProperties` as needed** for the target environment: `host`, `failover`, `principal`, `baseContexts` may all differ between environments.
+4. **Run `createFullConfig` against the target tenant** — this validates that the RCS can reach the LDAP host with the provided credentials and discovers the schema.
+5. **`PUT` with `If-None-Match: "*"`** to create on the target tenant.
+
+The source connector's `objectTypes` should NOT be copied verbatim — let `createFullConfig` rediscover them from the target LDAP server, as the schema may differ between environments.
+
+### Test artifacts (all cleaned up)
+
+| Connector | Type | Created via | Cleaned up |
+|---|---|---|---|
+| `lecsvtest` | CSV File Connector | Admin console UI | ✅ Deleted |
+| `lecsvtest2` | CSV File Connector | 3-step API flow (duplicated from lecsvtest) | ✅ Deleted |
+| `leadtest` | LDAP Connector (AD) | 3-step API flow (duplicated from kyexternalgov) | ✅ Deleted |
+
