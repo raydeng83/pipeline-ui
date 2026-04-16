@@ -490,3 +490,167 @@ For any promote task that includes `connector-definitions`:
 
 3. **Credential handling**: always use plaintext credentials in the pushed config, never encrypted `$crypto` blobs from a different environment. IDM encrypts on write using the target tenant's own symmetric key. ESV references (`&{esv.name}`) are the preferred pattern for cross-environment promotes.
 
+---
+
+## Connector creation via API — runbook (2026-04-16)
+
+Date: 2026-04-16
+Tenant: `sandbox1` (`openam-commkentsb1-useast1-sandbox.id.forgerock.io`)
+
+### Summary
+
+The 3-step connector creation flow works with a **service account token** on AIC cloud. The steps are:
+
+1. `POST /openidm/system?_action=createFullConfig` — schema discovery via RCS
+2. Strip `operationOptions` from the response
+3. `PUT /openidm/config/provisioner.openicf/<name>` with `If-None-Match: "*"` — returns 201, triggers runtime registration
+
+### Constraints discovered
+
+- **Connector names must be alphanumeric only.** The admin console enforces this (no hyphens, underscores, or special characters). Names like `le-csv-test` are rejected; `lecsvtest` works.
+- **`bundleVersion` should be the exact resolved version** (e.g. `"1.5.20.34"`), not a range (e.g. `"[1.5.20.11, 1.6.0.0)"`). The `createFullConfig` response returns the resolved version when the input uses it. To get the resolved version, call `POST /openidm/system?_action=availableConnectors` first, or read it from an existing connector on the tenant.
+- **The source connector config must come from the tenant** (via GET on an existing connector or from `createFullConfig`). Do not hand-assemble configs — the tenant enriches them with defaults (`operationTimeout`, `resultsHandlerConfig`, `poolConfigOption`, etc.) that may be required.
+- **Do NOT trigger `fr-config-push restart` before creating connectors.** A tenant restart disrupts the provisioner's config-change listener. In our testing, all 3-step creation attempts failed (201 returned, config stored, but no runtime registration) after a restart. The provisioner recovered after a connector was created through the admin console UI, after which the 3-step flow worked again. Avoid restarts in any automated connector creation workflow.
+
+### Verified test: duplicate an existing connector
+
+Created `lecsvtest` through the admin console (CSV File Connector, `rcs-connector-internal-1`, same CSV file as `CSVFileRoleTest`). Then duplicated it as `lecsvtest2` via the 3-step flow with a service account token. `lecsvtest2` appeared immediately in the runtime with `ok: true`.
+
+### Runbook — replay commands
+
+All commands assume CWD is `environments/sandbox1`.
+
+#### 0. Obtain a bearer token
+
+```bash
+export TENANT=https://openam-commkentsb1-useast1-sandbox.id.forgerock.io
+export TOKEN=$(fr-config-push direct-control-state -D 2>&1 \
+  | grep -oE 'Bearer [A-Za-z0-9_.\-]+' | head -1 | cut -d' ' -f2)
+echo "Token length: ${#TOKEN}"
+# Expected: non-zero (typically ~1600 chars)
+```
+
+#### 1. Read source connector from tenant
+
+Pick any existing connector that is runtime-registered. Strip `_id` and `_rev` so the body is reusable for a new name.
+
+```bash
+SOURCE_CONNECTOR=lecsvtest
+curl -sS "$TENANT/openidm/config/provisioner.openicf/$SOURCE_CONNECTOR" \
+  -H "Authorization: Bearer $TOKEN" \
+  | jq 'del(._id, ._rev)' > /tmp/source-connector.json
+
+# Verify
+jq '{enabled, connectorRef: .connectorRef, objectTypes: (.objectTypes | keys)}' \
+  /tmp/source-connector.json
+```
+
+#### 2. Schema discovery via createFullConfig
+
+```bash
+curl -sS -X POST "$TENANT/openidm/system?_action=createFullConfig" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @/tmp/source-connector.json \
+  -o /tmp/enriched-connector.json \
+  -w "createFullConfig status: %{http_code}\n"
+
+# Verify: should be 200, objectTypes populated
+jq '{bundleVersion: .connectorRef.bundleVersion, objectTypes: (.objectTypes | keys), hasOperationOptions: has("operationOptions")}' \
+  /tmp/enriched-connector.json
+```
+
+Expected output:
+```json
+{
+  "bundleVersion": "1.5.20.34",
+  "objectTypes": ["__ACCOUNT__"],
+  "hasOperationOptions": true
+}
+```
+
+If this returns **503**, the RCS referenced by `connectorHostRef` is not connected. Check with:
+```bash
+curl -sS -X POST "$TENANT/openidm/system?_action=testConnectorServers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  | jq '[.openicf[] | {name, ok}]'
+```
+
+#### 3. Strip operationOptions and create
+
+IDM rejects `operationOptions` on PUT. Remove it, then PUT with `If-None-Match: "*"` for create-only semantics.
+
+```bash
+NEW_CONNECTOR=lecsvtest2
+jq 'del(.operationOptions)' /tmp/enriched-connector.json > /tmp/final-connector.json
+
+curl -sS -X PUT "$TENANT/openidm/config/provisioner.openicf/$NEW_CONNECTOR" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -H 'If-None-Match: "*"' \
+  -d @/tmp/final-connector.json \
+  -w "\nPUT status: %{http_code}\n"
+```
+
+Expected: **201 Created**. If you get **200**, the connector already existed and was treated as an update (no runtime registration for new connectors via this path).
+
+#### 4. Verify runtime registration
+
+```bash
+# Single connector test
+curl -sS -X POST "$TENANT/openidm/system/$NEW_CONNECTOR?_action=test" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  | jq '{name, ok, error}'
+
+# Expected: {"name":"lecsvtest2","ok":true,"error":null}
+# "ok":false with "connector not available" also means registered but RCS is down — still success.
+# 404 means runtime registration failed.
+```
+
+```bash
+# Full runtime list (confirm it appears alongside existing connectors)
+curl -sS -X POST "$TENANT/openidm/system?_action=test" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  | jq '[.[] | {name, ok}]'
+```
+
+#### 5. Pull back locally
+
+```bash
+fr-config-pull connector-definitions -n $NEW_CONNECTOR
+jq '{_id, enabled, connectorRef}' config/sync/connectors/$NEW_CONNECTOR.json
+```
+
+#### 6. Cleanup (when done testing)
+
+```bash
+curl -sS -X DELETE "$TENANT/openidm/config/provisioner.openicf/$NEW_CONNECTOR" \
+  -H "Authorization: Bearer $TOKEN" \
+  -w "\nDELETE status: %{http_code}\n"
+
+rm -f config/sync/connectors/$NEW_CONNECTOR.json
+```
+
+### Failure mode: 201 but no runtime registration
+
+If the PUT returns 201 but the connector does not appear in `_action=test` (404 on single-connector test), the provisioner's config-change listener is not firing. Known causes:
+
+1. **Recent tenant restart** (`fr-config-push restart`) — the provisioner subsystem's listener may not recover automatically. Workaround: create any connector through the admin console UI first; this re-warms the provisioner. Subsequent API-based creations will work.
+2. **`enabled: false` in the config body** — the provisioner may skip runtime registration for disabled connectors. Always set `"enabled": true` in the body.
+
+### HAR analysis — admin console vs API
+
+Captured a HAR of the admin console creating `test234` on sandbox1. The admin console sequence is:
+
+1. `POST /openidm/system?_action=createFullConfig` → 200
+2. `PUT /openidm/config/provisioner.openicf/test234` with `If-None-Match: "*"` → 201
+3. (UI navigates to connector edit page — JS file loads only, no additional API calls)
+4. `POST /openidm/system/test234?_action=test` → 200 (already in runtime)
+
+The admin console uses an `idmAdminClient` token (authorization_code grant, scope `fr:idm:*`). Our service account uses `service-account` client (JWT-bearer grant, same scope). **Both work** for the 3-step flow when the provisioner listener is healthy. The admin console does NOT use any hidden API endpoint — the sequence is identical to what we execute programmatically.
+
+The admin console also enforces alphanumeric-only connector names client-side (JavaScript validation before the PUT).
+
