@@ -91,8 +91,12 @@ function DiffStepNode({ data }: NodeProps) {
     kind: WorkflowStepKind;
     diffStatus: DiffStatus;
     isFocused?: boolean;
+    isCompact?: boolean;
+    isSearchMatch?: boolean;
   };
   const diff = DIFF_STATUS_STYLE[d.diffStatus] ?? DIFF_STATUS_STYLE.unchanged;
+  const w = d.isCompact ? 120 : NODE_W;
+  const h = d.isCompact ? 44  : NODE_H;
 
   return (
     <div
@@ -101,23 +105,28 @@ function DiffStepNode({ data }: NodeProps) {
         diff.border,
         diff.bg,
         d.isFocused && "ring-4 ring-red-500 ring-offset-2",
+        d.isSearchMatch && "ring-2 ring-sky-500",
       )}
-      style={{ width: NODE_W, height: NODE_H }}
+      style={{ width: w, height: h }}
     >
       <Handle type="target" position={Position.Left}  style={{ background: "#94a3b8" }} />
-      <div className="px-2.5 py-2 h-full flex flex-col justify-between">
+      <div className={cn("h-full flex flex-col justify-between", d.isCompact ? "px-1.5 py-1" : "px-2.5 py-2")}>
         <div className="flex items-start gap-1.5">
           {KIND_ICON[d.kind]}
-          <span className="text-[11px] font-medium leading-tight text-slate-700 line-clamp-2">{d.displayName}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className={cn("text-[9px] font-bold px-1 rounded", diff.badge)}>
-            {d.diffStatus === "unchanged" ? KIND_LABEL[d.kind] : d.diffStatus}
+          <span className={cn("font-medium leading-tight text-slate-700 line-clamp-2", d.isCompact ? "text-[9px]" : "text-[11px]")}>
+            {d.displayName}
           </span>
-          {d.diffStatus === "unchanged" && (
-            <span className="text-[9px] text-slate-400">{KIND_LABEL[d.kind]}</span>
-          )}
         </div>
+        {!d.isCompact && (
+          <div className="flex items-center gap-1">
+            <span className={cn("text-[9px] font-bold px-1 rounded", diff.badge)}>
+              {d.diffStatus === "unchanged" ? KIND_LABEL[d.kind] : d.diffStatus}
+            </span>
+            {d.diffStatus === "unchanged" && (
+              <span className="text-[9px] text-slate-400">{KIND_LABEL[d.kind]}</span>
+            )}
+          </div>
+        )}
       </div>
       <Handle type="source" position={Position.Right} style={{ background: "#94a3b8" }} />
     </div>
@@ -370,16 +379,6 @@ export function WorkflowDiffGraphModal({
     queueMicrotask(() => { syncingRef.current = false; });
   }, [syncViewports]);
 
-  // When sync is toggled off, clear any stale external viewport so each side manages itself
-  useEffect(() => {
-    if (!syncViewports) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLeftViewport(null);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRightViewport(null);
-    }
-  }, [syncViewports]);
-
   // Parse local and remote workflows from the file diffs
   const { localWorkflow, remoteWorkflow } = useMemo(() => {
     // Find top-level JSON (has staticNodes)
@@ -442,6 +441,13 @@ export function WorkflowDiffGraphModal({
     return m;
   }, [workflowFiles]);
 
+  const handleNodeActivate = useCallback((nodeId: string | null) => {
+    if (!nodeId) { setActiveStep(null); return; }
+    const step = diffData.steps.find((s) => s.id === nodeId);
+    const fd   = stepFileDiffMap.get(nodeId);
+    if (step) setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
+  }, [diffData.steps, stepFileDiffMap]);
+
   // Keyboard close
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -488,6 +494,55 @@ export function WorkflowDiffGraphModal({
           </div>
           <button
             type="button"
+            onClick={() => setHideUnchanged((v) => !v)}
+            title="Hide unchanged steps"
+            className={cn(
+              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
+              hideUnchanged ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+            )}
+          >
+            Hide unchanged
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsCompact((v) => !v)}
+            title={isCompact ? "Switch to normal layout" : "Switch to compact layout"}
+            className={cn(
+              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
+              isCompact ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+            )}
+          >
+            Compact
+          </button>
+          {viewMode === "side-by-side" && (
+            <button
+              type="button"
+              onClick={() => {
+                setSyncViewports((v) => {
+                  const next = !v;
+                  if (!next) { setLeftViewport(null); setRightViewport(null); }
+                  return next;
+                });
+              }}
+              title="Sync viewports between panels"
+              className={cn(
+                "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
+                syncViewports ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+              )}
+            >
+              Sync viewports
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setFitKey((k) => k + 1)}
+            title="Fit all steps to view"
+            className="px-2.5 py-1 text-[11px] rounded border text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400 shrink-0"
+          >
+            Fit
+          </button>
+          <button
+            type="button"
             onClick={onClose}
             className="shrink-0 p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
@@ -513,12 +568,7 @@ export function WorkflowDiffGraphModal({
                 fitKey={fitKey}
                 externalViewport={null}
                 onViewportChange={() => {}}
-                onNodeActivate={(nodeId) => {
-                  if (!nodeId) { setActiveStep(null); return; }
-                  const step = diffData.steps.find((s) => s.id === nodeId);
-                  const fd   = stepFileDiffMap.get(nodeId);
-                  if (step) setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
-                }}
+                onNodeActivate={handleNodeActivate}
                 searchQuery={searchQuery}
                 flashNodeId={activeStep?.step.id ?? null}
                 onPaneClearFocus={() => setActiveStep(null)}
@@ -538,12 +588,7 @@ export function WorkflowDiffGraphModal({
                     fitKey={fitKey}
                     externalViewport={leftViewport}
                     onViewportChange={handleLeftMove}
-                    onNodeActivate={(nodeId) => {
-                      if (!nodeId) { setActiveStep(null); return; }
-                      const step = diffData.steps.find((s) => s.id === nodeId);
-                      const fd   = stepFileDiffMap.get(nodeId);
-                      if (step) setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
-                    }}
+                    onNodeActivate={handleNodeActivate}
                     searchQuery={searchQuery}
                     flashNodeId={activeStep?.step.id ?? null}
                     onPaneClearFocus={() => setActiveStep(null)}
@@ -562,12 +607,7 @@ export function WorkflowDiffGraphModal({
                     fitKey={fitKey}
                     externalViewport={rightViewport}
                     onViewportChange={handleRightMove}
-                    onNodeActivate={(nodeId) => {
-                      if (!nodeId) { setActiveStep(null); return; }
-                      const step = diffData.steps.find((s) => s.id === nodeId);
-                      const fd   = stepFileDiffMap.get(nodeId);
-                      if (step) setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
-                    }}
+                    onNodeActivate={handleNodeActivate}
                     searchQuery={searchQuery}
                     flashNodeId={activeStep?.step.id ?? null}
                     onPaneClearFocus={() => setActiveStep(null)}
