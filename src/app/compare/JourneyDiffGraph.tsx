@@ -671,12 +671,7 @@ function ScriptFileEntry({ f }: { f: FileDiff }) {
           <div className="flex-1 min-h-0 overflow-hidden flex">
             {diffLines.length > 0 ? (
               hasBothSides && fsTab === "files" ? (
-                <>
-                  <div ref={fsScrollRef} className="flex-1 overflow-auto">
-                    <SplitDiffView lines={diffLines} />
-                  </div>
-                  <DiffMinimap lines={diffLines} scrollRef={fsScrollRef} />
-                </>
+                <SplitDiffView lines={diffLines} fullscreen />
               ) : (
                 <>
                   <div ref={fsScrollRef} className="flex-1 overflow-auto text-[11px] font-mono leading-5">
