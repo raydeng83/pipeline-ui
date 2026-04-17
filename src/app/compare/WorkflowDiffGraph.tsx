@@ -2,23 +2,17 @@
 
 import { useMemo, useEffect, useCallback, useRef, useState } from "react";
 import {
-  ReactFlow,
-  ReactFlowProvider,
-  Background,
-  Controls,
-  MiniMap,
   Handle,
   Position,
-  useNodesState,
-  useEdgesState,
-  useReactFlow,
   MarkerType,
   type NodeProps,
   type Node,
   type Edge,
+  type Viewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { cn } from "@/lib/utils";
+import { DiffGraphCanvas } from "@/components/diff-graph/DiffGraphCanvas";
 import { parseWorkflowData, kindFromId, type WorkflowData, type WorkflowStep, type WorkflowStepKind } from "@/lib/workflow-graph";
 import type { FileDiff } from "@/lib/diff-types";
 
@@ -236,66 +230,6 @@ function buildGraph(diffData: WorkflowDiffData, focusedId: string | null): { nod
   return { nodes, edges };
 }
 
-// ── Canvas inner ──────────────────────────────────────────────────────────────
-
-function CanvasInner({
-  diffData,
-  focusedId,
-  onNodeClick,
-  onPaneClick,
-}: {
-  diffData: WorkflowDiffData;
-  focusedId: string | null;
-  onNodeClick: (id: string, step: DiffStep) => void;
-  onPaneClick: () => void;
-}) {
-  const { nodes: initNodes, edges: initEdges } = useMemo(
-    () => buildGraph(diffData, focusedId),
-    [diffData, focusedId],
-  );
-  const [nodes, , onNodesChange] = useNodesState(initNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initEdges);
-  const { fitView } = useReactFlow();
-
-  useEffect(() => {
-    const t = setTimeout(() => { void fitView({ padding: 0.15, duration: 200 }); }, 80);
-    return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fitView]);
-
-  return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      nodeTypes={NODE_TYPES}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onNodeClick={(_, node) => {
-        const step = diffData.steps.find((s) => s.id === node.id);
-        if (step) onNodeClick(node.id, step);
-      }}
-      onPaneClick={onPaneClick}
-      nodesDraggable={false}
-      nodesConnectable={false}
-    >
-      <Background />
-      <Controls />
-      <MiniMap
-        nodeColor={(n) => {
-          if (n.type === "wfDiffStart") return "#10b981";
-          if (n.type === "wfDiffEnd")   return "#475569";
-          const s = (n.data as { diffStatus?: DiffStatus }).diffStatus;
-          if (s === "added")    return "#34d399";
-          if (s === "removed")  return "#f87171";
-          if (s === "modified") return "#fbbf24";
-          return "#e2e8f0";
-        }}
-        maskColor="rgba(241,245,249,0.7)"
-      />
-    </ReactFlow>
-  );
-}
-
 // ── Side panel ────────────────────────────────────────────────────────────────
 
 function StepDetailPanel({
@@ -410,6 +344,41 @@ export function WorkflowDiffGraphModal({
   onClose,
 }: WorkflowDiffGraphModalProps) {
   const [activeStep, setActiveStep] = useState<{ step: DiffStep; local?: string; remote?: string } | null>(null);
+  const [viewMode,      setViewMode]      = useState<"merged" | "side-by-side">("merged");
+  const [hideUnchanged, setHideUnchanged] = useState(false);
+  const [isCompact,     setIsCompact]     = useState(false);
+  const [syncViewports, setSyncViewports] = useState(true);
+  const [searchQuery,   setSearchQuery]   = useState("");
+  const [fitKey,        setFitKey]        = useState(0);
+  const [leftViewport,  setLeftViewport]  = useState<Viewport | null>(null);
+  const [rightViewport, setRightViewport] = useState<Viewport | null>(null);
+  const syncingRef = useRef(false);
+
+  const handleLeftMove = useCallback((vp: Viewport) => {
+    if (syncingRef.current) return;
+    if (!syncViewports) return;
+    syncingRef.current = true;
+    setRightViewport(vp);
+    queueMicrotask(() => { syncingRef.current = false; });
+  }, [syncViewports]);
+
+  const handleRightMove = useCallback((vp: Viewport) => {
+    if (syncingRef.current) return;
+    if (!syncViewports) return;
+    syncingRef.current = true;
+    setLeftViewport(vp);
+    queueMicrotask(() => { syncingRef.current = false; });
+  }, [syncViewports]);
+
+  // When sync is toggled off, clear any stale external viewport so each side manages itself
+  useEffect(() => {
+    if (!syncViewports) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLeftViewport(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRightViewport(null);
+    }
+  }, [syncViewports]);
 
   // Parse local and remote workflows from the file diffs
   const { localWorkflow, remoteWorkflow } = useMemo(() => {
@@ -442,6 +411,21 @@ export function WorkflowDiffGraphModal({
     [localWorkflow, remoteWorkflow],
   );
 
+  // Filter diffData by side. Modified is currently not produced by buildDiffData;
+  // if it becomes produced later, it should appear on both sides.
+  const leftDiffData = useMemo(() => ({
+    ...diffData,
+    steps: diffData.steps.filter((s) => s.diffStatus !== "added"),
+  }), [diffData]);
+  const rightDiffData = useMemo(() => ({
+    ...diffData,
+    steps: diffData.steps.filter((s) => s.diffStatus !== "removed"),
+  }), [diffData]);
+
+  const mergedGraph = useMemo(() => buildGraph(diffData,      activeStep?.step.id ?? null), [diffData,      activeStep]);
+  const leftGraph   = useMemo(() => buildGraph(leftDiffData,  activeStep?.step.id ?? null), [leftDiffData,  activeStep]);
+  const rightGraph  = useMemo(() => buildGraph(rightDiffData, activeStep?.step.id ?? null), [rightDiffData, activeStep]);
+
   // Build a map of stepId → FileDiff for the side panel content
   const stepFileDiffMap = useMemo(() => {
     const m = new Map<string, FileDiff>();
@@ -465,13 +449,6 @@ export function WorkflowDiffGraphModal({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const handleNodeClick = useCallback((id: string, step: DiffStep) => {
-    const fd = stepFileDiffMap.get(id);
-    setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
-  }, [stepFileDiffMap]);
-
-  const handlePaneClick = useCallback(() => setActiveStep(null), []);
-
   const stats = useMemo(() => ({
     added:    diffData.steps.filter((s) => s.diffStatus === "added").length,
     removed:  diffData.steps.filter((s) => s.diffStatus === "removed").length,
@@ -494,6 +471,21 @@ export function WorkflowDiffGraphModal({
             {stats.modified > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{stats.modified} modified</span>}
             {stats.removed  > 0 && <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{stats.removed} removed</span>}
           </div>
+          <div className="flex rounded border border-slate-300 overflow-hidden text-[11px] shrink-0">
+            {(["merged", "side-by-side"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setViewMode(m)}
+                className={cn(
+                  "px-3 py-1 transition-colors capitalize",
+                  viewMode === m ? "bg-slate-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
+                )}
+              >
+                {m === "side-by-side" ? "Side by side" : "Merged"}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -509,16 +501,80 @@ export function WorkflowDiffGraphModal({
 
         {/* Body */}
         <div className="flex flex-1 overflow-hidden min-h-0">
-          {/* Graph */}
-          <div className="flex-1 overflow-hidden min-w-0 bg-slate-50">
-            <ReactFlowProvider>
-              <CanvasInner
-                diffData={diffData}
-                focusedId={activeStep?.step.id ?? null}
-                onNodeClick={handleNodeClick}
-                onPaneClick={handlePaneClick}
+          {/* Graph area */}
+          <div className="flex-1 min-h-0 flex overflow-hidden bg-slate-50">
+            {viewMode === "merged" ? (
+              <DiffGraphCanvas
+                baseNodes={mergedGraph.nodes}
+                baseEdges={mergedGraph.edges}
+                nodeTypes={NODE_TYPES}
+                hideUnchanged={hideUnchanged}
+                isCompact={isCompact}
+                fitKey={fitKey}
+                externalViewport={null}
+                onViewportChange={() => {}}
+                onNodeActivate={(nodeId) => {
+                  if (!nodeId) { setActiveStep(null); return; }
+                  const step = diffData.steps.find((s) => s.id === nodeId);
+                  const fd   = stepFileDiffMap.get(nodeId);
+                  if (step) setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
+                }}
+                searchQuery={searchQuery}
+                flashNodeId={activeStep?.step.id ?? null}
+                onPaneClearFocus={() => setActiveStep(null)}
               />
-            </ReactFlowProvider>
+            ) : (
+              <>
+                <div className="flex-1 min-w-0 relative border-r border-slate-200">
+                  <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
+                    {sourceLabel}
+                  </span>
+                  <DiffGraphCanvas
+                    baseNodes={leftGraph.nodes}
+                    baseEdges={leftGraph.edges}
+                    nodeTypes={NODE_TYPES}
+                    hideUnchanged={hideUnchanged}
+                    isCompact={isCompact}
+                    fitKey={fitKey}
+                    externalViewport={leftViewport}
+                    onViewportChange={handleLeftMove}
+                    onNodeActivate={(nodeId) => {
+                      if (!nodeId) { setActiveStep(null); return; }
+                      const step = diffData.steps.find((s) => s.id === nodeId);
+                      const fd   = stepFileDiffMap.get(nodeId);
+                      if (step) setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
+                    }}
+                    searchQuery={searchQuery}
+                    flashNodeId={activeStep?.step.id ?? null}
+                    onPaneClearFocus={() => setActiveStep(null)}
+                  />
+                </div>
+                <div className="flex-1 min-w-0 relative">
+                  <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
+                    {targetLabel}
+                  </span>
+                  <DiffGraphCanvas
+                    baseNodes={rightGraph.nodes}
+                    baseEdges={rightGraph.edges}
+                    nodeTypes={NODE_TYPES}
+                    hideUnchanged={hideUnchanged}
+                    isCompact={isCompact}
+                    fitKey={fitKey}
+                    externalViewport={rightViewport}
+                    onViewportChange={handleRightMove}
+                    onNodeActivate={(nodeId) => {
+                      if (!nodeId) { setActiveStep(null); return; }
+                      const step = diffData.steps.find((s) => s.id === nodeId);
+                      const fd   = stepFileDiffMap.get(nodeId);
+                      if (step) setActiveStep({ step, local: fd?.localContent, remote: fd?.remoteContent });
+                    }}
+                    searchQuery={searchQuery}
+                    flashNodeId={activeStep?.step.id ?? null}
+                    onPaneClearFocus={() => setActiveStep(null)}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* Side panel */}
@@ -529,7 +585,7 @@ export function WorkflowDiffGraphModal({
               remoteContent={activeStep.remote}
               sourceLabel={sourceLabel}
               targetLabel={targetLabel}
-              onClose={handlePaneClick}
+              onClose={() => setActiveStep(null)}
             />
           )}
         </div>
