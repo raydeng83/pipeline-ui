@@ -13,6 +13,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { cn } from "@/lib/utils";
 import { DiffGraphCanvas } from "@/components/diff-graph/DiffGraphCanvas";
+import { WorkflowOutlineView } from "@/app/configs/WorkflowOutlineView";
 import { parseWorkflowData, kindFromId, type WorkflowData, type WorkflowStep, type WorkflowStepKind } from "@/lib/workflow-graph";
 import type { FileDiff } from "@/lib/diff-types";
 
@@ -362,6 +363,8 @@ export function WorkflowDiffGraphModal({
   const [fitKey,        setFitKey]        = useState(0);
   const [leftViewport,  setLeftViewport]  = useState<Viewport | null>(null);
   const [rightViewport, setRightViewport] = useState<Viewport | null>(null);
+  const [displayView,   setDisplayView]   = useState<"graph" | "outline">("graph");
+  const [zoomToNodeId,  setZoomToNodeId]  = useState<string | null>(null);
   const syncingRef = useRef(false);
 
   const handleLeftMove = useCallback((vp: Viewport) => {
@@ -479,90 +482,111 @@ export function WorkflowDiffGraphModal({
             {stats.removed  > 0 && <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-700">{stats.removed} removed</span>}
           </div>
           <div className="flex rounded border border-slate-300 overflow-hidden text-[11px] shrink-0">
-            {(["merged", "side-by-side"] as const).map((m) => (
+            {(["graph", "outline"] as const).map((v) => (
               <button
-                key={m}
+                key={v}
                 type="button"
-                onClick={() => setViewMode(m)}
+                onClick={() => setDisplayView(v)}
                 className={cn(
                   "px-3 py-1 transition-colors capitalize",
-                  viewMode === m ? "bg-slate-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
+                  displayView === v ? "bg-slate-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
                 )}
               >
-                {m === "side-by-side" ? "Side by side" : "Merged"}
+                {v}
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => setHideUnchanged((v) => !v)}
-            title="Hide unchanged steps"
-            className={cn(
-              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
-              hideUnchanged ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
-            )}
-          >
-            Hide unchanged
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsCompact((v) => !v)}
-            title={isCompact ? "Switch to normal layout" : "Switch to compact layout"}
-            className={cn(
-              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
-              isCompact ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
-            )}
-          >
-            Compact
-          </button>
-          {viewMode === "side-by-side" && (
-            <button
-              type="button"
-              onClick={() => {
-                setSyncViewports((v) => {
-                  const next = !v;
-                  if (!next) { setLeftViewport(null); setRightViewport(null); }
-                  return next;
-                });
-              }}
-              title="Sync viewports between panels"
-              className={cn(
-                "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
-                syncViewports ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
-              )}
-            >
-              Sync viewports
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setFitKey((k) => k + 1)}
-            title="Fit all steps to view"
-            className="px-2.5 py-1 text-[11px] rounded border text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400 shrink-0"
-          >
-            Fit
-          </button>
-          <div className="flex items-center gap-1 shrink-0 relative">
-            <input
-              type="text"
-              placeholder="Search steps…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-40 px-2 py-1 text-[11px] rounded border border-slate-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-            />
-            {searchQuery && (
+          {displayView === "graph" && (
+            <>
+              <div className="flex rounded border border-slate-300 overflow-hidden text-[11px] shrink-0">
+                {(["merged", "side-by-side"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setViewMode(m)}
+                    className={cn(
+                      "px-3 py-1 transition-colors capitalize",
+                      viewMode === m ? "bg-slate-600 text-white" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
+                    )}
+                  >
+                    {m === "side-by-side" ? "Side by side" : "Merged"}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
-                title="Clear search"
-                className="absolute right-1 text-slate-400 hover:text-slate-600"
+                onClick={() => setHideUnchanged((v) => !v)}
+                title="Hide unchanged steps"
+                className={cn(
+                  "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
+                  hideUnchanged ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+                )}
               >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                Hide unchanged
               </button>
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => setIsCompact((v) => !v)}
+                title={isCompact ? "Switch to normal layout" : "Switch to compact layout"}
+                className={cn(
+                  "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
+                  isCompact ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+                )}
+              >
+                Compact
+              </button>
+              {viewMode === "side-by-side" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSyncViewports((v) => {
+                      const next = !v;
+                      if (!next) { setLeftViewport(null); setRightViewport(null); }
+                      return next;
+                    });
+                  }}
+                  title="Sync viewports between panels"
+                  className={cn(
+                    "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0",
+                    syncViewports ? "bg-sky-600 text-white border-sky-600" : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+                  )}
+                >
+                  Sync viewports
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setFitKey((k) => k + 1)}
+                title="Fit all steps to view"
+                className="px-2.5 py-1 text-[11px] rounded border text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400 shrink-0"
+              >
+                Fit
+              </button>
+              <div className="flex items-center gap-1 shrink-0 relative">
+                <input
+                  type="text"
+                  placeholder="Search steps…"
+                  aria-label="Search steps"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-40 pl-2 pr-6 py-1 text-[11px] rounded border border-slate-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    title="Clear search"
+                    aria-label="Clear search"
+                    className="absolute right-1 text-slate-400 hover:text-slate-600"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </>
+          )}
           <button
             type="button"
             onClick={onClose}
@@ -579,65 +603,80 @@ export function WorkflowDiffGraphModal({
         {/* Body */}
         <div className="flex flex-1 overflow-hidden min-h-0">
           {/* Graph area */}
-          <div className="flex-1 min-h-0 flex overflow-hidden bg-slate-50">
-            {viewMode === "merged" ? (
-              <DiffGraphCanvas
-                baseNodes={mergedGraph.nodes}
-                baseEdges={mergedGraph.edges}
-                nodeTypes={NODE_TYPES}
-                hideUnchanged={hideUnchanged}
-                isCompact={isCompact}
-                fitKey={fitKey}
-                externalViewport={null}
-                onViewportChange={() => {}}
-                onNodeActivate={handleNodeActivate}
-                searchQuery={searchQuery}
-                flashNodeId={activeStep?.step.id ?? null}
-                onPaneClearFocus={() => setActiveStep(null)}
+          {displayView === "outline" ? (
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <WorkflowOutlineView
+                steps={diffData.steps}
+                onNavigate={(id) => {
+                  setZoomToNodeId(id);
+                  setDisplayView("graph");
+                }}
               />
-            ) : (
-              <>
-                <div className="flex-1 min-w-0 relative border-r border-slate-200">
-                  <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
-                    {sourceLabel}
-                  </span>
-                  <DiffGraphCanvas
-                    baseNodes={leftGraph.nodes}
-                    baseEdges={leftGraph.edges}
-                    nodeTypes={NODE_TYPES}
-                    hideUnchanged={hideUnchanged}
-                    isCompact={isCompact}
-                    fitKey={fitKey}
-                    externalViewport={leftViewport}
-                    onViewportChange={handleLeftMove}
-                    onNodeActivate={handleNodeActivate}
-                    searchQuery={searchQuery}
-                    flashNodeId={activeStep?.step.id ?? null}
-                    onPaneClearFocus={() => setActiveStep(null)}
-                  />
-                </div>
-                <div className="flex-1 min-w-0 relative">
-                  <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
-                    {targetLabel}
-                  </span>
-                  <DiffGraphCanvas
-                    baseNodes={rightGraph.nodes}
-                    baseEdges={rightGraph.edges}
-                    nodeTypes={NODE_TYPES}
-                    hideUnchanged={hideUnchanged}
-                    isCompact={isCompact}
-                    fitKey={fitKey}
-                    externalViewport={rightViewport}
-                    onViewportChange={handleRightMove}
-                    onNodeActivate={handleNodeActivate}
-                    searchQuery={searchQuery}
-                    flashNodeId={activeStep?.step.id ?? null}
-                    onPaneClearFocus={() => setActiveStep(null)}
-                  />
-                </div>
-              </>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex-1 min-h-0 flex overflow-hidden bg-slate-50">
+              {viewMode === "merged" ? (
+                <DiffGraphCanvas
+                  baseNodes={mergedGraph.nodes}
+                  baseEdges={mergedGraph.edges}
+                  nodeTypes={NODE_TYPES}
+                  hideUnchanged={hideUnchanged}
+                  isCompact={isCompact}
+                  fitKey={fitKey}
+                  externalViewport={null}
+                  onViewportChange={() => {}}
+                  onNodeActivate={handleNodeActivate}
+                  searchQuery={searchQuery}
+                  flashNodeId={activeStep?.step.id ?? null}
+                  zoomToNodeId={zoomToNodeId}
+                  onPaneClearFocus={() => setActiveStep(null)}
+                />
+              ) : (
+                <>
+                  <div className="flex-1 min-w-0 relative border-r border-slate-200">
+                    <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
+                      {sourceLabel}
+                    </span>
+                    <DiffGraphCanvas
+                      baseNodes={leftGraph.nodes}
+                      baseEdges={leftGraph.edges}
+                      nodeTypes={NODE_TYPES}
+                      hideUnchanged={hideUnchanged}
+                      isCompact={isCompact}
+                      fitKey={fitKey}
+                      externalViewport={leftViewport}
+                      onViewportChange={handleLeftMove}
+                      onNodeActivate={handleNodeActivate}
+                      searchQuery={searchQuery}
+                      flashNodeId={activeStep?.step.id ?? null}
+                      zoomToNodeId={zoomToNodeId}
+                      onPaneClearFocus={() => setActiveStep(null)}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 relative">
+                    <span className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/90 text-slate-600 text-[10px] px-2 py-1 rounded border border-slate-200 shadow-sm pointer-events-none">
+                      {targetLabel}
+                    </span>
+                    <DiffGraphCanvas
+                      baseNodes={rightGraph.nodes}
+                      baseEdges={rightGraph.edges}
+                      nodeTypes={NODE_TYPES}
+                      hideUnchanged={hideUnchanged}
+                      isCompact={isCompact}
+                      fitKey={fitKey}
+                      externalViewport={rightViewport}
+                      onViewportChange={handleRightMove}
+                      onNodeActivate={handleNodeActivate}
+                      searchQuery={searchQuery}
+                      flashNodeId={activeStep?.step.id ?? null}
+                      zoomToNodeId={zoomToNodeId}
+                      onPaneClearFocus={() => setActiveStep(null)}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Side panel */}
           {activeStep && (
