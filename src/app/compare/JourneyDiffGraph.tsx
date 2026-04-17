@@ -1301,6 +1301,10 @@ function PreviewDiffJourneyGraph({ localContent, remoteContent }: { localContent
       baseNodes={nodes}
       baseEdges={edges}
       nodeTypes={nodeTypes}
+      applyLayout={applyLayout}
+      applyCompactLayout={applyCompactLayout}
+      miniMapNodeColor={journeyMiniMapNodeColor}
+      legend={<DiffLegend />}
       hideUnchanged={false}
       isCompact={false}
       fitKey={0}
@@ -2290,7 +2294,7 @@ export function JourneyDiffGraphModal({
                   externalViewport={leftExternalVP}
                   onViewportChange={handleLeftMove}
                   onNodeActivate={handleNodeActivate}
-              onNodeDoubleClick={handleNodeDoubleActivate}
+                  onNodeDoubleClick={handleNodeDoubleActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
                   onPaneClearFocus={clearFocusNode}
@@ -2318,7 +2322,7 @@ export function JourneyDiffGraphModal({
                   externalViewport={rightExternalVP}
                   onViewportChange={handleRightMove}
                   onNodeActivate={handleNodeActivate}
-              onNodeDoubleClick={handleNodeDoubleActivate}
+                  onNodeDoubleClick={handleNodeDoubleActivate}
                   searchQuery={searchQuery}
                   flashNodeId={flashNodeId}
                   onPaneClearFocus={clearFocusNode}
