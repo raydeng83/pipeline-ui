@@ -14,7 +14,7 @@ import "@xyflow/react/dist/style.css";
 import { cn } from "@/lib/utils";
 import { DiffGraphCanvas } from "@/components/diff-graph/DiffGraphCanvas";
 import { WorkflowOutlineView } from "@/app/configs/WorkflowOutlineView";
-import { parseWorkflowData, kindFromId, type WorkflowData, type WorkflowStep, type WorkflowStepKind } from "@/lib/workflow-graph";
+import { parseWorkflowData, type WorkflowData, type WorkflowStep, type WorkflowStepKind } from "@/lib/workflow-graph";
 import type { FileDiff } from "@/lib/diff-types";
 
 // ── Diff status ───────────────────────────────────────────────────────────────
@@ -608,8 +608,9 @@ export function WorkflowDiffGraphModal({
               <WorkflowOutlineView
                 steps={diffData.steps}
                 onNavigate={(id) => {
-                  setZoomToNodeId(id);
+                  setZoomToNodeId(null);
                   setDisplayView("graph");
+                  requestAnimationFrame(() => setZoomToNodeId(id));
                 }}
               />
             </div>

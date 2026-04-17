@@ -65,6 +65,7 @@ export function WorkflowOutlineView({ steps, onNavigate }: WorkflowOutlineViewPr
                 <li key={s.id}>
                   <button
                     type="button"
+                    aria-label={`${STATUS_LABEL[status]} ${KIND_LABEL[s.kind]}: ${s.displayName}`}
                     onClick={() => onNavigate(s.id)}
                     className="w-full px-3 py-1.5 flex items-center gap-2 text-left hover:bg-slate-50 transition-colors"
                   >
