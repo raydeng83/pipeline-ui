@@ -2190,10 +2190,10 @@ function WorkflowGroupRow({
           type="button"
           title="View workflow graph"
           onClick={(e) => { e.stopPropagation(); setGraphOpen(true); }}
-          className="shrink-0 p-1 rounded text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
+          className="shrink-0 p-1 rounded text-slate-400 hover:text-sky-500 transition-colors"
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
           </svg>
         </button>
       </div>
@@ -3000,7 +3000,7 @@ function ScopeSection({
                 <p className="text-xs text-slate-400 text-center py-2">
                   {itemSearch ? `No items match "${itemSearch}".` : "No items match the selected filter."}
                 </p>
-              ) : group.scope === "iga-workflows" ? (
+              ) : group.scope === "iga" ? (
                 // Group workflow files by workflow name, show one row per workflow
                 (() => {
                   const grouped = new Map<string, FileDiff[]>();
