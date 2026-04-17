@@ -822,7 +822,7 @@ function SplitDiffView({ lines, fullscreen }: { lines: DiffLineLocal[]; fullscre
   return (
     <div className={cn(
       "flex bg-slate-950 overflow-hidden",
-      fullscreen ? "flex-1 min-h-0" : "max-h-[500px]",
+      fullscreen ? "flex-1 min-h-0 h-full" : "max-h-[500px]",
     )}>
       <div ref={scrollRef} className="flex-1 overflow-auto text-[10px] font-mono leading-5">
         <table className="w-full border-collapse table-fixed">
