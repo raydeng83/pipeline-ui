@@ -432,7 +432,7 @@ In `src/app/compare/JourneyDiffGraph.tsx`:
      }
    };
    ```
-   Pass `miniMapNodeColor={journeyMiniMapNodeColor}` at every call site. (The simple `PreviewDiffJourneyGraph` instance at line 1625 can omit `applyLayout`, `legend`, etc. if they aren't already passed — the optional props default sensibly.)
+   Pass `miniMapNodeColor={journeyMiniMapNodeColor}` at every call site. The `PreviewDiffJourneyGraph` instance at line 1625 must ALSO pass `applyLayout`, `applyCompactLayout`, `miniMapNodeColor={journeyMiniMapNodeColor}`, and `legend={<DiffLegend />}` — its nodes come from `parseMergedDiffGraph` with `position: { x: 0, y: 0 }` and would stack at origin without a layout pass. The previous in-file canvas hardcoded those; now that they're props, every journey call site (including the preview) must pass them.
 
 5. Imports to remove (if no longer used after deleting the extracted region): `ReactFlow`, `ReactFlowProvider`, `Background`, `Controls`, `MiniMap`, `Panel`, `useNodesState`, `useReactFlow`, `NodeProps`, `Viewport`, `EdgeMouseHandler` from `@xyflow/react`. Verify each by grepping: `grep -n "ReactFlow\|useNodesState\|useReactFlow" src/app/compare/JourneyDiffGraph.tsx`. If the only remaining references were inside the extracted region, drop them; otherwise keep.
 
