@@ -2,21 +2,12 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef, Fragment } from "react";
 import {
-  ReactFlow,
-  ReactFlowProvider,
-  Background,
-  Controls,
-  MiniMap,
-  Panel,
   Handle,
   Position,
-  useReactFlow,
-  useNodesState,
   type Node,
   type Edge,
   type NodeProps,
   type Viewport,
-  type EdgeMouseHandler,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
@@ -25,6 +16,7 @@ import { highlightJs, withLineNumbers } from "@/lib/highlight";
 import { js_beautify } from "js-beautify";
 import { ScriptOverlay } from "../configs/ScriptOverlay";
 import { DiffMinimap } from "./DiffMinimap";
+import { DiffGraphCanvas } from "@/components/diff-graph/DiffGraphCanvas";
 import {
   parseMergedDiffGraph,
   parseSingleSideGraph,
@@ -417,6 +409,19 @@ const nodeTypes = {
   failureNode:     DiffFailureNodeComponent,
 };
 
+const journeyMiniMapNodeColor = (n: Node): string => {
+  if (n.data.diffStatus === "modified") {
+    if (n.data.modifiedReason === "script")     return "#f97316";
+    if (n.data.modifiedReason === "subjourney") return "#8b5cf6";
+    return "#f59e0b";
+  }
+  switch (n.data.diffStatus as "added" | "removed" | "unchanged") {
+    case "added":   return "#10b981";
+    case "removed": return "#ef4444";
+    default:        return "#94a3b8";
+  }
+};
+
 // ── Dagre layout ──────────────────────────────────────────────────────────────
 
 function getNodeDims(node: Node): [number, number] {
@@ -466,34 +471,6 @@ function applyLayout(nodes: Node[], edges: Edge[]): Node[] {
 
 function applyCompactLayout(nodes: Node[], edges: Edge[]): Node[] {
   return runDagreLayout(nodes, edges, { nodesep: 25, ranksep: 60 });
-}
-
-// ── Path tracing helper ───────────────────────────────────────────────────────
-
-function getConnected(nodeId: string, edges: Edge[]) {
-  const ancestors   = new Set<string>();
-  const descendants = new Set<string>();
-  let queue = [nodeId];
-  while (queue.length) {
-    const cur = queue.shift()!;
-    for (const e of edges) {
-      if (e.target === cur && !ancestors.has(e.source)) {
-        ancestors.add(e.source);
-        queue.push(e.source);
-      }
-    }
-  }
-  queue = [nodeId];
-  while (queue.length) {
-    const cur = queue.shift()!;
-    for (const e of edges) {
-      if (e.source === cur && !descendants.has(e.target)) {
-        descendants.add(e.target);
-        queue.push(e.target);
-      }
-    }
-  }
-  return { ancestors, descendants };
 }
 
 // ── Legend ────────────────────────────────────────────────────────────────────
@@ -1310,308 +1287,6 @@ function NodeDetailPanel({
   );
 }
 
-// ── DiffGraphCanvasInner ──────────────────────────────────────────────────────
-
-interface DiffGraphCanvasInnerProps {
-  baseNodes: Node[];
-  baseEdges: Edge[];
-  hideUnchanged: boolean;
-  isCompact: boolean;
-  fitKey: number;
-  externalViewport: Viewport | null;
-  onViewportChange: (vp: Viewport) => void;
-  onNodeActivate?: (nodeId: string | null, nodeData: Record<string, unknown>) => void;
-  onNodeDoubleClick?: (nodeId: string, nodeData: Record<string, unknown>) => void;
-  searchQuery: string;
-  flashNodeId: string | null;
-  onPaneClearFocus?: () => void;
-  zoomToNodeId?: string | null;
-  scriptNames?: Map<string, string>;
-}
-
-function DiffGraphCanvasInner({
-  baseNodes,
-  baseEdges,
-  hideUnchanged,
-  isCompact,
-  fitKey,
-  externalViewport,
-  onViewportChange,
-  onNodeActivate,
-  onNodeDoubleClick: onNodeDoubleClickProp,
-  searchQuery,
-  flashNodeId,
-  onPaneClearFocus,
-  zoomToNodeId,
-  scriptNames,
-}: DiffGraphCanvasInnerProps) {
-  const { fitView, setViewport, getViewport } = useReactFlow();
-  const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
-  const [hoveredEdgeId, setHoveredEdgeId]     = useState<string | null>(null);
-  const [pinnedEdgeId, setPinnedEdgeId]       = useState<string | null>(null);
-
-  const layoutedNodes = useMemo(
-    () => isCompact
-      ? applyCompactLayout(baseNodes, baseEdges)
-      : applyLayout(baseNodes, baseEdges),
-    [baseNodes, baseEdges, isCompact],
-  );
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
-
-  // Sync nodes when layoutedNodes changes and fit view (skip all-fit when a node-specific zoom is pending)
-  useEffect(() => {
-    setNodes(layoutedNodes);
-    if (zoomToNodeId) return; // node-specific zoom will handle fit
-    const t = setTimeout(() => { void fitView({ duration: 200 }); }, 80);
-    return () => clearTimeout(t);
-  }, [layoutedNodes, setNodes, fitView, zoomToNodeId]);
-
-  // Fit view when fitKey changes
-  useEffect(() => {
-    void fitView({ duration: 200 });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fitKey]);
-
-  // Sync external viewport
-  useEffect(() => {
-    if (externalViewport) {
-      setViewport(externalViewport, { duration: 0 });
-    }
-  }, [externalViewport, setViewport]);
-
-  // Edge handlers
-  const handleEdgeMouseEnter: EdgeMouseHandler = useCallback((_e, edge) => setHoveredEdgeId(edge.id), []);
-  const handleEdgeMouseLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), []);
-  const handleEdgeClick: EdgeMouseHandler      = useCallback((_e, edge) => setPinnedEdgeId((p) => p === edge.id ? null : edge.id), []);
-
-  // Arrow key panning
-  useEffect(() => {
-    const PAN = 120;
-    const handler = (e: KeyboardEvent) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      e.preventDefault();
-      const vp = getViewport();
-      const dx = e.key === "ArrowLeft" ? PAN : e.key === "ArrowRight" ? -PAN : 0;
-      const dy = e.key === "ArrowUp"   ? PAN : e.key === "ArrowDown"  ? -PAN : 0;
-      setViewport({ x: vp.x + dx, y: vp.y + dy, zoom: vp.zoom }, { duration: 100 });
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [getViewport, setViewport]);
-
-  // Zoom to a specific node (used when opening the graph from a script row).
-  // Delay must exceed the layoutedNodes effect's fitView(all) window (80ms start + 200ms anim = 280ms)
-  // to avoid the all-fit animation overriding the node-specific zoom.
-  useEffect(() => {
-    if (!zoomToNodeId) return;
-    const t = setTimeout(() => {
-      void fitView({ nodes: [{ id: zoomToNodeId }], duration: 600, padding: 0.35 });
-    }, 350);
-    return () => clearTimeout(t);
-  }, [zoomToNodeId, fitView]);
-
-  // Apply hideUnchanged filter
-  const visibleNodeIds = useMemo(() => {
-    if (!hideUnchanged) return new Set(nodes.map((n) => n.id));
-    return new Set(
-      nodes
-        .filter((n) => (n.data.diffStatus as DiffStatus) !== "unchanged")
-        .map((n) => n.id),
-    );
-  }, [nodes, hideUnchanged]);
-
-  const filteredNodes = useMemo(
-    () => nodes.filter((n) => visibleNodeIds.has(n.id)),
-    [nodes, visibleNodeIds],
-  );
-
-  const filteredEdges = useMemo(
-    () => baseEdges.filter(
-      (e) => visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target),
-    ),
-    [baseEdges, visibleNodeIds],
-  );
-
-  // Clear stale selection when the node set changes (e.g. descending into a
-  // sub-journey). Without this, selectedNodeId would still point at a node
-  // from the parent graph, causing every node in the new graph to fail the
-  // path-highlight check and render at 15% opacity.
-  useEffect(() => {
-    if (!selectedNodeId) return;
-    if (!filteredNodes.some((n) => n.id === selectedNodeId)) {
-      setSelectedNodeId(null);
-      onNodeActivate?.(null, {});
-    }
-  }, [filteredNodes, selectedNodeId, onNodeActivate]);
-
-  // Path tracing
-  const highlighted = useMemo(() => {
-    if (!selectedNodeId) return null;
-    const { ancestors, descendants } = getConnected(selectedNodeId, filteredEdges);
-    const set = new Set([selectedNodeId, ...ancestors, ...descendants]);
-    return set;
-  }, [selectedNodeId, filteredEdges]);
-
-  // Search matches — node label or script name; includes page-child nodes
-  const searchMatches = useMemo(() => {
-    if (!searchQuery.trim()) return new Set<string>();
-    const q = searchQuery.toLowerCase();
-    const ids = new Set<string>();
-    for (const n of nodes) {
-      const labelMatch  = String(n.data.label ?? "").toLowerCase().includes(q);
-      const scriptMatch = n.data.nodeType === "ScriptedDecisionNode" &&
-        (scriptNames?.get(n.id) ?? "").toLowerCase().includes(q);
-      if (labelMatch || scriptMatch) {
-        ids.add(n.id);
-        if (n.parentId) ids.add(n.parentId); // highlight parent group too
-      }
-    }
-    return ids;
-  }, [searchQuery, nodes, scriptNames]);
-
-  useEffect(() => {
-    if (searchMatches.size === 0) return;
-    // fitView only on top-level nodes (child positions are relative to parent)
-    const topIds = [...searchMatches].filter((id) => !id.includes("__child__"));
-    if (topIds.length === 0) return;
-    const t = setTimeout(() => {
-      void fitView({ nodes: topIds.map((id) => ({ id })), duration: 500, padding: 0.4 });
-    }, 50);
-    return () => clearTimeout(t);
-  }, [searchMatches, fitView]);
-
-  // Apply opacity/animation to nodes and edges based on selection
-  const styledNodes = useMemo(() => {
-    return filteredNodes.map((n) => {
-      const onPath = highlighted ? highlighted.has(n.id) : true;
-      return {
-        ...n,
-        data: {
-          ...n.data,
-          isFocused:     n.id === flashNodeId,
-          isSearchMatch: searchMatches.has(n.id),
-        },
-        style: {
-          ...n.style,
-          opacity: highlighted ? (onPath ? 1 : 0.15) : 1,
-          transition: "opacity 0.2s",
-        },
-      };
-    });
-  }, [filteredNodes, highlighted, flashNodeId, searchMatches]);
-
-  const styledEdges = useMemo(() => {
-    const activeEdgeId = hoveredEdgeId ?? pinnedEdgeId;
-    return filteredEdges.map((e) => {
-      const isHovered = e.id === hoveredEdgeId;
-      const isPinned  = e.id === pinnedEdgeId;
-      const isActive  = e.id === activeEdgeId;
-      const onPath    = highlighted ? (highlighted.has(e.source) && highlighted.has(e.target)) : true;
-
-      let opacity = 1;
-      if (activeEdgeId)     opacity = isActive ? 1 : 0.06;
-      else if (highlighted) opacity = onPath ? 1 : 0.06;
-
-      const baseStroke = (e.style?.stroke as string | undefined) ?? "#64748b";
-      const stroke = isHovered ? "#3b82f6" : isPinned ? "#7c3aed" : baseStroke;
-
-      return {
-        ...e,
-        style: {
-          ...e.style,
-          opacity,
-          strokeWidth: isActive ? 3 : 1.5,
-          stroke,
-          transition: "opacity 0.15s, stroke-width 0.15s",
-        },
-        animated: !activeEdgeId && onPath && !!highlighted,
-        label: opacity < 0.5 ? undefined : e.label,
-      };
-    });
-  }, [filteredEdges, highlighted, hoveredEdgeId, pinnedEdgeId]);
-
-  const miniMapNodeColor = useCallback((n: Node): string => {
-    if (n.data.diffStatus === "modified") {
-      if (n.data.modifiedReason === "script")    return "#f97316"; // orange
-      if (n.data.modifiedReason === "subjourney") return "#8b5cf6"; // violet
-      return "#f59e0b"; // amber
-    }
-    switch (n.data.diffStatus as DiffStatus) {
-      case "added":     return "#10b981";
-      case "removed":   return "#ef4444";
-      default:          return "#94a3b8";
-    }
-  }, []);
-
-  const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    const nodeData = node.data as Record<string, unknown>;
-    if (selectedNodeId === node.id) {
-      setSelectedNodeId(null);
-      onNodeActivate?.(null, {});
-    } else {
-      setSelectedNodeId(node.id);
-      onNodeActivate?.(node.id, nodeData);
-    }
-  }, [selectedNodeId, onNodeActivate]);
-
-  const handleNodeDoubleClick = useCallback((_: React.MouseEvent, node: Node) => {
-    const nodeData = node.data as Record<string, unknown>;
-    onNodeDoubleClickProp?.(node.id, nodeData);
-  }, [onNodeDoubleClickProp]);
-
-  const handlePaneClick = useCallback(() => {
-    setSelectedNodeId(null);
-    onNodeActivate?.(null, {});
-    onPaneClearFocus?.();
-  }, [onNodeActivate, onPaneClearFocus]);
-
-  return (
-    <ReactFlow
-      nodes={styledNodes}
-      edges={styledEdges}
-      nodeTypes={nodeTypes}
-      onMove={(_, vp) => onViewportChange(vp)}
-      onNodeClick={handleNodeClick}
-      onNodeDoubleClick={handleNodeDoubleClick}
-      onPaneClick={handlePaneClick}
-      onEdgeMouseEnter={handleEdgeMouseEnter}
-      onEdgeMouseLeave={handleEdgeMouseLeave}
-      onEdgeClick={handleEdgeClick}
-      onNodesChange={onNodesChange}
-      nodesDraggable
-      snapToGrid
-      snapGrid={[20, 20]}
-      fitView
-      minZoom={0.1}
-      maxZoom={2}
-    >
-      <Background color="#e2e8f0" gap={20} size={1} />
-      <Controls showInteractive={false} showFitView={false} />
-      <MiniMap nodeColor={miniMapNodeColor} zoomable pannable />
-      <Panel position="top-left">
-        <DiffLegend />
-      </Panel>
-    </ReactFlow>
-  );
-}
-
-// ── DiffGraphCanvas ───────────────────────────────────────────────────────────
-
-interface DiffGraphCanvasProps extends DiffGraphCanvasInnerProps {
-  className?: string;
-}
-
-function DiffGraphCanvas({ className, ...innerProps }: DiffGraphCanvasProps) {
-  return (
-    <div className={cn("w-full h-full", className)}>
-      <ReactFlowProvider>
-        <DiffGraphCanvasInner {...innerProps} />
-      </ReactFlowProvider>
-    </div>
-  );
-}
 
 // ── PreviewDiffJourneyGraph ───────────────────────────────────────────────────
 
@@ -1625,6 +1300,7 @@ function PreviewDiffJourneyGraph({ localContent, remoteContent }: { localContent
     <DiffGraphCanvas
       baseNodes={nodes}
       baseEdges={edges}
+      nodeTypes={nodeTypes}
       hideUnchanged={false}
       isCompact={false}
       fitKey={0}
@@ -2575,6 +2251,11 @@ export function JourneyDiffGraphModal({
               className="flex-1"
               baseNodes={mergedNodes}
               baseEdges={mergedEdges}
+              nodeTypes={nodeTypes}
+              applyLayout={applyLayout}
+              applyCompactLayout={applyCompactLayout}
+              miniMapNodeColor={journeyMiniMapNodeColor}
+              legend={<DiffLegend />}
               hideUnchanged={hideUnchanged}
               isCompact={isCompact}
               fitKey={fitKey}
@@ -2598,6 +2279,11 @@ export function JourneyDiffGraphModal({
                 <DiffGraphCanvas
                   baseNodes={localNodes}
                   baseEdges={localEdges}
+                  nodeTypes={nodeTypes}
+                  applyLayout={applyLayout}
+                  applyCompactLayout={applyCompactLayout}
+                  miniMapNodeColor={journeyMiniMapNodeColor}
+                  legend={<DiffLegend />}
                   hideUnchanged={hideUnchanged}
                   isCompact={isCompact}
                   fitKey={fitKey}
@@ -2621,6 +2307,11 @@ export function JourneyDiffGraphModal({
                 <DiffGraphCanvas
                   baseNodes={remoteNodes}
                   baseEdges={remoteEdges}
+                  nodeTypes={nodeTypes}
+                  applyLayout={applyLayout}
+                  applyCompactLayout={applyCompactLayout}
+                  miniMapNodeColor={journeyMiniMapNodeColor}
+                  legend={<DiffLegend />}
                   hideUnchanged={hideUnchanged}
                   isCompact={isCompact}
                   fitKey={fitKey}
