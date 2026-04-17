@@ -822,7 +822,7 @@ function SplitDiffView({ lines, fullscreen }: { lines: DiffLineLocal[]; fullscre
   return (
     <div className={cn(
       "flex bg-slate-950 overflow-hidden",
-      fullscreen ? "flex-1 min-h-0 h-full" : "max-h-[500px]",
+      fullscreen ? "flex-1 min-h-0" : "max-h-[500px]",
     )}>
       <div ref={scrollRef} className="flex-1 overflow-auto text-[10px] font-mono leading-5">
         <table className="w-full border-collapse table-fixed">
@@ -2784,7 +2784,12 @@ export function JourneyDiffGraphModal({
                         )}
                         {previewModal.scriptDiffLines && (previewModal.scriptTab ?? "diff") === "files" ? (
                           /* Files tab — per-file diff list */
-                          <div className="flex-1 overflow-y-auto divide-y divide-slate-800">
+                          <div className={cn(
+                            "divide-y divide-slate-800",
+                            showFullscreen
+                              ? "flex-1 min-h-0 flex flex-col overflow-hidden"
+                              : "flex-1 overflow-y-auto",
+                          )}>
                             {[previewModal.scriptConfigFile, previewModal.scriptContentFile]
                               .filter((f): f is FileDiff => !!f && f.status !== "unchanged")
                               .map((f) => {
@@ -2806,8 +2811,14 @@ export function JourneyDiffGraphModal({
                                 const added   = diffLines.filter((l) => l.type === "added").length;
                                 const removed = diffLines.filter((l) => l.type === "removed").length;
                                 return (
-                                  <div key={f.relativePath} className="p-3">
-                                    <div className="flex items-center gap-2 mb-1.5">
+                                  <div key={f.relativePath} className={cn(
+                                    "p-3",
+                                    showFullscreen && "flex-1 min-h-0 flex flex-col overflow-hidden",
+                                  )}>
+                                    <div className={cn(
+                                      "flex items-center gap-2 mb-1.5",
+                                      showFullscreen && "shrink-0",
+                                    )}>
                                       <svg className={cn("w-3 h-3 shrink-0", isConfig ? "text-slate-400" : "text-violet-400")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                         {isConfig
                                           ? <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -2822,7 +2833,7 @@ export function JourneyDiffGraphModal({
                                         </span>
                                       )}
                                     </div>
-                                    {diffLines.length > 0 && <SplitDiffView lines={diffLines} />}
+                                    {diffLines.length > 0 && <SplitDiffView lines={diffLines} fullscreen={showFullscreen} />}
                                   </div>
                                 );
                               })}

@@ -50,3 +50,4 @@ next-env.d.ts
 .worktrees/
 .superpowers/
 .claude/
+.playwright-mcp/
