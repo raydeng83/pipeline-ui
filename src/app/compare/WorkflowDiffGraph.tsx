@@ -104,8 +104,9 @@ function DiffStepNode({ data }: NodeProps) {
         "border rounded-lg shadow-sm relative",
         diff.border,
         diff.bg,
-        d.isFocused && "ring-4 ring-red-500 ring-offset-2",
-        d.isSearchMatch && "ring-2 ring-sky-500",
+        d.isFocused
+          ? "ring-4 ring-red-500 ring-offset-2"
+          : d.isSearchMatch && "ring-2 ring-sky-500",
       )}
       style={{ width: w, height: h }}
     >
@@ -541,6 +542,27 @@ export function WorkflowDiffGraphModal({
           >
             Fit
           </button>
+          <div className="flex items-center gap-1 shrink-0 relative">
+            <input
+              type="text"
+              placeholder="Search steps…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-40 px-2 py-1 text-[11px] rounded border border-slate-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                title="Clear search"
+                className="absolute right-1 text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           <button
             type="button"
             onClick={onClose}
