@@ -791,8 +791,9 @@ function clientDiff(aText: string, bText: string): DiffLineLocal[] {
   return lines;
 }
 
-function SplitDiffView({ lines }: { lines: DiffLineLocal[] }) {
+function SplitDiffView({ lines, fullscreen }: { lines: DiffLineLocal[]; fullscreen?: boolean }) {
   type SplitRow = { left: string | null; leftRem: boolean; right: string | null; rightAdd: boolean };
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const rows = useMemo((): SplitRow[] => {
     const result: SplitRow[] = [];
@@ -824,33 +825,39 @@ function SplitDiffView({ lines }: { lines: DiffLineLocal[] }) {
   }, [lines]);
 
   return (
-    <div className="bg-slate-950 text-[10px] font-mono leading-5">
-      <table className="w-full border-collapse table-fixed">
-        <thead>
-          <tr className="border-b border-slate-700 bg-slate-900 text-[9px] text-slate-500 sticky top-0 z-10">
-            <th className="px-3 py-1 text-left font-normal border-r border-slate-700 w-1/2">Source</th>
-            <th className="px-3 py-1 text-left font-normal w-1/2">Modified</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i}>
-              <td className={cn(
-                "px-3 py-0 whitespace-pre-wrap break-all align-top border-r border-slate-800 w-1/2",
-                row.leftRem ? "bg-red-950 text-red-300" : "text-slate-400",
-              )}>
-                {row.left ?? ""}
-              </td>
-              <td className={cn(
-                "px-3 py-0 whitespace-pre-wrap break-all align-top w-1/2",
-                row.rightAdd ? "bg-emerald-950 text-emerald-300" : "text-slate-400",
-              )}>
-                {row.right ?? ""}
-              </td>
+    <div className={cn(
+      "flex bg-slate-950 overflow-hidden",
+      fullscreen ? "flex-1 min-h-0" : "max-h-[500px]",
+    )}>
+      <div ref={scrollRef} className="flex-1 overflow-auto text-[10px] font-mono leading-5">
+        <table className="w-full border-collapse table-fixed">
+          <thead>
+            <tr className="border-b border-slate-700 bg-slate-900 text-[9px] text-slate-500 sticky top-0 z-10">
+              <th className="px-3 py-1 text-left font-normal border-r border-slate-700 w-1/2">Source</th>
+              <th className="px-3 py-1 text-left font-normal w-1/2">Modified</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i}>
+                <td className={cn(
+                  "px-3 py-0 whitespace-pre-wrap break-all align-top border-r border-slate-800 w-1/2",
+                  row.leftRem ? "bg-red-950 text-red-300" : "text-slate-400",
+                )}>
+                  {row.left ?? ""}
+                </td>
+                <td className={cn(
+                  "px-3 py-0 whitespace-pre-wrap break-all align-top w-1/2",
+                  row.rightAdd ? "bg-emerald-950 text-emerald-300" : "text-slate-400",
+                )}>
+                  {row.right ?? ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <DiffMinimap lines={lines} scrollRef={scrollRef} />
     </div>
   );
 }
