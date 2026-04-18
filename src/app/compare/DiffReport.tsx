@@ -13,6 +13,7 @@ import type { ScopeSelection, ConfigScope } from "@/lib/fr-config-types";
 import { useDialog } from "@/components/ConfirmDialog";
 import { formatScopeLabel } from "@/lib/compare";
 import { FileContentViewer } from "@/components/FileContentViewer";
+import { pathToScopeItem } from "@/lib/scope-paths";
 
 // ── Client-side content formatting ───────────────────────────────────────────
 
@@ -887,10 +888,16 @@ interface ScopeGroup {
 }
 
 function extractScope(relativePath: string): string {
+  // Prefer the shared parser so all three layouts resolve consistently:
+  //   realms/<realm>/<scope>/...   (upstream CLI)
+  //   <realm>/<scope>/...           (vendored pull)
+  //   <scope>/...                   (global scopes)
+  // Falling back to the first segment keeps behavior stable for paths the
+  // parser can't classify.
+  const parsed = pathToScopeItem(relativePath);
+  if (parsed) return parsed.scope;
   const parts = relativePath.split("/");
-  // Realm-based: realms/<realm>/<scope>/...
   if (parts[0] === "realms" && parts.length >= 3) return parts[2];
-  // Global: <scope>/...
   return parts[0];
 }
 
