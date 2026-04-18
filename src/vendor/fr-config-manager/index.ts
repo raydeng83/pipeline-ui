@@ -461,3 +461,67 @@ export async function pushLocales(opts: {
 }): Promise<void> {
   await localesPush.pushLocales(opts);
 }
+
+// ── endpoints ────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const endpointsPull = require("./pull/endpoints.js") as {
+  pullEndpoints: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullEndpoints(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await endpointsPull.pullEndpoints(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const endpointsPush = require("./push/update-idm-endpoints.js") as {
+  pushEndpoints: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushEndpoints(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await endpointsPush.pushEndpoints(opts);
+}
+
+// ── internal-roles ───────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const internalRolesPull = require("./pull/internal-roles.js") as {
+  pullInternalRoles: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullInternalRoles(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await internalRolesPull.pullInternalRoles(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const internalRolesPush = require("./push/update-internal-roles.js") as {
+  pushInternalRoles: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushInternalRoles(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await internalRolesPush.pushInternalRoles(opts);
+}
