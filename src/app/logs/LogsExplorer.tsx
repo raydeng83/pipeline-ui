@@ -408,7 +408,7 @@ function ResizableHeader({
 // ── JSON view ─────────────────────────────────────────────────────────────────
 // Single pretty-printed JSON document over all filtered entries. Filters, level
 // filter, and dedupe are already applied by the caller; this just serializes.
-function JsonLogView({ entries }: { entries: LogEntry[] }) {
+function JsonLogView({ entries, wrapLines = false }: { entries: LogEntry[]; wrapLines?: boolean }) {
   const text = useMemo(() => JSON.stringify(entries, null, 2), [entries]);
   const [copied, setCopied] = useState(false);
   const onCopy = () => {
@@ -427,7 +427,12 @@ function JsonLogView({ entries }: { entries: LogEntry[] }) {
       >
         {copied ? "Copied" : "Copy JSON"}
       </button>
-      <pre className="p-4 pt-2 font-mono text-[12px] leading-5 text-slate-700 whitespace-pre">
+      <pre
+        className={cn(
+          "p-4 pt-2 font-mono text-[12px] leading-5 text-slate-700",
+          wrapLines ? "whitespace-pre-wrap break-all" : "whitespace-pre",
+        )}
+      >
         {text}
       </pre>
     </div>
@@ -1929,8 +1934,8 @@ export function LogsExplorer({
                   JSON
                 </button>
               </div>
-              {/* Wrap toggle — terminal view only */}
-              {terminalView && (
+              {/* Wrap toggle — available in terminal and JSON views */}
+              {(viewMode === "terminal" || viewMode === "json") && (
                 <button
                   type="button"
                   onClick={() => setWrapLines((w) => !w)}
@@ -2176,7 +2181,7 @@ export function LogsExplorer({
                   {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
                 </div>
               ) : (
-                <JsonLogView entries={filtered} />
+                <JsonLogView entries={filtered} wrapLines={wrapLines} />
               )
             ) : !fetched ? (
               <div className="flex items-center justify-center h-full min-h-[160px]">
