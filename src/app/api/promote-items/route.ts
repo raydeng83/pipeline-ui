@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -305,40 +305,18 @@ export async function POST(req: NextRequest) {
               copyDirSync(srcDir, destDir);
               emit({ type: "stdout", data: `  Copied ${sel.scope}: ${relPath} (all)\n`, ts: Date.now() });
             } else if (sel.scope === "managed-objects") {
-              // IDM's PUT /openidm/config/managed is a full-config replace — sending
-              // just the selected object fails with "Cannot read property 'schema' from undefined"
-              // because IDM tries to resolve cross-relationships against siblings that are
-              // no longer in objects[]. Seed the temp dir with target's full set first,
-              // then overlay the selected source items so unselected siblings stay unchanged.
+              // Vendored push merges the selected object into target's current
+              // managed config at the REST level (GET → splice → PUT), so we
+              // only need to stage the source's selected dirs.
               fs.mkdirSync(destDir, { recursive: true });
-              const targetSrcDir = path.join(targetConfigDir, relPath);
-              let seeded = 0;
-              let skipped = 0;
-              if (fs.existsSync(targetSrcDir)) {
-                // Only copy subdirs that have the expected <name>/<name>.json —
-                // fr-config-push fails with ENOENT on incomplete pull dirs otherwise.
-                for (const entry of fs.readdirSync(targetSrcDir, { withFileTypes: true })) {
-                  if (!entry.isDirectory()) continue;
-                  const objJson = path.join(targetSrcDir, entry.name, `${entry.name}.json`);
-                  if (!fs.existsSync(objJson)) {
-                    skipped += 1;
-                    emit({ type: "stdout", data: `  Skipping incomplete managed-object dir: ${entry.name} (missing ${entry.name}.json)\n`, ts: Date.now() });
-                    continue;
-                  }
-                  copyDirSync(path.join(targetSrcDir, entry.name), path.join(destDir, entry.name));
-                  seeded += 1;
-                }
-                emit({ type: "stdout", data: `  Seeded ${seeded} managed-object(s) from target${skipped ? ` (skipped ${skipped})` : ""}\n`, ts: Date.now() });
-              }
               for (const itemId of sel.items) {
                 const srcItem = path.join(srcDir, itemId);
                 const destItem = path.join(destDir, itemId);
                 if (fs.existsSync(srcItem) && fs.statSync(srcItem).isDirectory()) {
-                  fs.rmSync(destItem, { recursive: true, force: true });
                   copyDirSync(srcItem, destItem);
                 }
               }
-              emit({ type: "stdout", data: `  Overlaid ${sel.items.length} managed-object(s) from source\n`, ts: Date.now() });
+              emit({ type: "stdout", data: `  Copied ${sel.items.length} managed-object(s) from source\n`, ts: Date.now() });
             } else if (sel.scope === "scripts") {
               // Scripts: items are filenames in scripts-config (e.g., "uuid.json")
               // Copy matching scripts-config files + their scripts-content
@@ -571,36 +549,83 @@ export async function POST(req: NextRequest) {
 
         // ── Push ──────────────────────────────────────────────────────────
         emit({ type: "scope-start", scope: "push", ts: Date.now() });
-        emit({ type: "stdout", data: `Pushing ${pushScopes.length} scope(s): ${pushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
 
-        const { stream: pushStream } = spawnFrConfig({
-          command: "fr-config-push",
-          environment: targetEnvironment,
-          scopes: pushScopes as import("@/lib/fr-config-types").ConfigScope[],
-          envOverrides: { CONFIG_DIR: tempConfigDir },
-          ...(directControl ? { globalArgs: ["--direct-control"] } : {}),
-        });
+        // Run managed-objects push via vendored function when item-filtered —
+        // its REST-level merge replaces the target-seed hack entirely.
+        const managedSel = scopeSelections.find(
+          (s) => s.scope === "managed-objects" && s.items && s.items.length > 0,
+        );
+        let managedPushFailed = false;
+        if (managedSel && !directControl) {
+          const targetEnvVars = parseEnvFile(getEnvFileContent(targetEnvironment));
+          const tenantUrl = targetEnvVars.TENANT_BASE_URL ?? "";
+          if (!tenantUrl) {
+            emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment}.\n`, ts: Date.now() });
+            managedPushFailed = true;
+          } else {
+            let token: string | null = null;
+            try { token = await getAccessToken(targetEnvVars); }
+            catch (err) {
+              emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              managedPushFailed = true;
+            }
+            if (token) {
+              for (const itemId of managedSel.items!) {
+                emit({ type: "stdout", data: `  Pushing managed-objects "${itemId}" (vendored)...\n`, ts: Date.now() });
+                try {
+                  await pushManagedObjects({
+                    configDir: tempConfigDir,
+                    tenantUrl,
+                    token,
+                    name: itemId,
+                    log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
+                  });
+                } catch (err) {
+                  managedPushFailed = true;
+                  emit({ type: "stderr", data: `  Push failed for "${itemId}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                }
+              }
+            }
+          }
+        }
 
-        const reader = pushStream.getReader();
-        let pushFailed = false;
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          for (const line of value.split("\n")) {
-            if (!line.trim()) continue;
-            try {
-              const parsed = JSON.parse(line);
-              if (parsed.type === "exit") {
-                if (parsed.code !== 0) pushFailed = true;
-                continue;
+        // Remove managed-objects from the spawn set when we handled it above.
+        const spawnPushScopes = managedSel && !directControl
+          ? pushScopes.filter((s) => s !== "managed-objects")
+          : pushScopes;
+
+        let pushFailed = managedPushFailed;
+
+        if (spawnPushScopes.length > 0) {
+          emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
+          const { stream: pushStream } = spawnFrConfig({
+            command: "fr-config-push",
+            environment: targetEnvironment,
+            scopes: spawnPushScopes as import("@/lib/fr-config-types").ConfigScope[],
+            envOverrides: { CONFIG_DIR: tempConfigDir },
+            ...(directControl ? { globalArgs: ["--direct-control"] } : {}),
+          });
+
+          const reader = pushStream.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            for (const line of value.split("\n")) {
+              if (!line.trim()) continue;
+              try {
+                const parsed = JSON.parse(line);
+                if (parsed.type === "exit") {
+                  if (parsed.code !== 0) pushFailed = true;
+                  continue;
+                }
+                if (parsed.type === "scope-start" || parsed.type === "scope-end") {
+                  emit({ type: "stdout", data: `[${parsed.scope}] ${parsed.type === "scope-start" ? "started" : `finished (exit ${parsed.code})`}\n`, ts: Date.now() });
+                  continue;
+                }
+                controller.enqueue(line + "\n");
+              } catch {
+                controller.enqueue(line + "\n");
               }
-              if (parsed.type === "scope-start" || parsed.type === "scope-end") {
-                emit({ type: "stdout", data: `[${parsed.scope}] ${parsed.type === "scope-start" ? "started" : `finished (exit ${parsed.code})`}\n`, ts: Date.now() });
-                continue;
-              }
-              controller.enqueue(line + "\n");
-            } catch {
-              controller.enqueue(line + "\n");
             }
           }
         }
