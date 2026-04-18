@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useCallback, useEffect, createContext, useCo
 import { useRouter } from "next/navigation";
 import { DiffMinimap } from "./DiffMinimap";
 import type { CompareReport, FileDiff, DiffLine, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "@/lib/diff-types";
+import type { SemanticJourneyReport, EqualityReason } from "@/lib/diff-types";
 import { cn } from "@/lib/utils";
 import { js_beautify } from "js-beautify";
 import { JourneyDiffGraphModal, type NavEntry } from "./JourneyDiffGraph";
@@ -1344,7 +1345,20 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel, journeyName, no
   );
 }
 
-function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [], selectedPaths, onTogglePath }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[]; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void }) {
+function reasonLabel(r: EqualityReason): string {
+  switch (r.kind) {
+    case "header":             return `header: ${r.fields.join(", ")}`;
+    case "node-set":           return `nodes Δ: +${r.added.length}/-${r.removed.length}`;
+    case "node-settings":      return `node: ${r.stableKey}`;
+    case "script-missing":     return `script missing (${r.side}): ${r.identity}`;
+    case "script-body":        return `script body: ${r.identity}`;
+    case "script-meta":        return `script meta: ${r.identity}`;
+    case "subjourney-missing": return `sub missing (${r.side}): ${r.name}`;
+    case "subjourney-diff":    return `sub: ${r.name}`;
+  }
+}
+
+function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [], selectedPaths, onTogglePath, semanticReports }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[]; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void; semanticReports?: SemanticJourneyReport[] }) {
   const [open, setOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [graphInitialFocusNodeId, setGraphInitialFocusNodeId] = useState<string | null>(null);
@@ -1460,6 +1474,19 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
         {node.isEntry && (
           <span className="text-[10px] px-1 py-0 rounded bg-sky-100 text-sky-700 border border-sky-200 shrink-0">Entry</span>
         )}
+        {(() => {
+          const rep = semanticReports?.find((r) => r.name === node.name);
+          if (!rep || !rep.reasons || rep.reasons.length === 0) return null;
+          return (
+            <span className="ml-2 flex gap-1 flex-wrap">
+              {rep.reasons.map((r, i) => (
+                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200" title={JSON.stringify(r)}>
+                  {reasonLabel(r)}
+                </span>
+              ))}
+            </span>
+          );
+        })()}
         {canShowGraph && (
           <button
             type="button"
@@ -1525,7 +1552,7 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
       {open && hasChildren && (
         <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
           {node.subJourneys.map((child) => (
-            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
+            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} selectedPaths={selectedPaths} onTogglePath={onTogglePath} semanticReports={semanticReports} />
           ))}
           {showScripts && node.scripts.length > 0 && (
             <div className="mt-1 space-y-0.5">
@@ -1633,7 +1660,7 @@ function filterJourneyTree(
   });
 }
 
-function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv, selectedPaths, onTogglePath, hideUnchanged = false }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void; hideUnchanged?: boolean }) {
+function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parentForceSeq, files, sourceLabel, targetLabel, sourceEnv, targetEnv, selectedPaths, onTogglePath, hideUnchanged = false, semanticReports }: { tree: JourneyTreeNode[]; forceOpen?: boolean; forceSeq?: number; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void; hideUnchanged?: boolean; semanticReports?: SemanticJourneyReport[] }) {
   const [open, setOpen] = useState(true);
   const [statusFilter, setStatusFilter] = useState<JourneyStatusFilter>("all");
   const [searchQ, setSearchQ] = useState("");
@@ -1748,7 +1775,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
               <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
             ) : (
               filtered.slice(page * pageSize, (page + 1) * pageSize).map((node) => (
-                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
+                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} selectedPaths={selectedPaths} onTogglePath={onTogglePath} semanticReports={semanticReports} />
               ))
             )}
           </div>
@@ -3387,7 +3414,7 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
                 user didn't include journeys in their scope selection, suppress
                 the tree even if the backend populated it. */}
             {journeysVisible && report.journeyTree && report.journeyTree.length > 0 && scopeGroups.some((g) => g.scope === "journeys") && (
-              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} hideUnchanged={hideUnchanged} />
+              <JourneyTreeSection tree={report.journeyTree} forceOpen={allOpen} forceSeq={allOpenSeq} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={report.source.environment} targetEnv={report.target.environment} selectedPaths={selectedPaths} onTogglePath={togglePath} hideUnchanged={hideUnchanged} semanticReports={report.semanticJourneys} />
             )}
 
             {/* Non-journey scope sections (journeys are shown above in the tree) */}
