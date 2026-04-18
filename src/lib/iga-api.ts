@@ -141,11 +141,13 @@ export async function getAccessToken(
 
 // ── Pagination helpers ────────────────────────────────────────────────────────
 
+type AuthedFetch = (url: string, init?: RequestInit) => Promise<Response>;
+
 /** Cursor-based pagination using searchAfterKey (application, entitlement, notification). */
 async function* paginateCursor(
   tenantUrl: string,
   endpoint: string,
-  token: string,
+  authedFetch: AuthedFetch,
   pageSize = 100
 ): AsyncGenerator<Record<string, unknown>> {
   let searchAfterKey: unknown[] | null = null;
@@ -157,7 +159,7 @@ async function* paginateCursor(
       url.searchParams.set("_searchAfterKey", JSON.stringify(searchAfterKey));
     }
 
-    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
+    const res = await authedFetch(url.toString());
     if (!res.ok) throw new Error(`IGA API ${res.status}: ${endpoint}`);
 
     const data = await res.json() as {
@@ -176,7 +178,7 @@ async function* paginateCursor(
 async function* paginateOffset(
   tenantUrl: string,
   endpoint: string,
-  token: string,
+  authedFetch: AuthedFetch,
   pageSize = 100
 ): AsyncGenerator<Record<string, unknown>> {
   let offset = 0;
@@ -187,7 +189,7 @@ async function* paginateOffset(
     url.searchParams.set("_pagedResultsOffset", String(offset));
     url.searchParams.set("_queryFilter", "true");
 
-    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
+    const res = await authedFetch(url.toString());
     if (!res.ok) throw new Error(`IGA API ${res.status}: ${endpoint}`);
 
     const data = await res.json() as {
@@ -206,13 +208,13 @@ async function* paginateOffset(
 function paginateIga(
   tenantUrl: string,
   endpoint: string,
-  token: string,
+  authedFetch: AuthedFetch,
   cfg: IgaScopeConfig,
   pageSize = 100
 ): AsyncGenerator<Record<string, unknown>> {
   return cfg.pagination === "offset"
-    ? paginateOffset(tenantUrl, endpoint, token, pageSize)
-    : paginateCursor(tenantUrl, endpoint, token, pageSize);
+    ? paginateOffset(tenantUrl, endpoint, authedFetch, pageSize)
+    : paginateCursor(tenantUrl, endpoint, authedFetch, pageSize);
 }
 
 // ── Runner ────────────────────────────────────────────────────────────────────
@@ -253,6 +255,44 @@ export function runIgaApi(options: {
       const RETRY_DELAY_MS = 3000;
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+      // Acquire access token once up-front; refresh only on 401/403 inside
+      // authedFetch. Retries on other (transient) errors reuse the same token.
+      let token: string;
+      try {
+        log("Acquiring access token…");
+        token = await getAccessToken(envVars);
+        log("Token acquired. Will refresh only on 401/403.");
+      } catch (err) {
+        log(`Failed to acquire access token: ${err instanceof Error ? err.message : String(err)}`, true);
+        emit("exit", { code: 1 });
+        controller.close();
+        return;
+      }
+
+      const authedFetch: AuthedFetch = async (url, init = {}) => {
+        const call = () =>
+          fetch(url, {
+            ...init,
+            headers: {
+              ...((init.headers as Record<string, string> | undefined) ?? {}),
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        let res = await call();
+        if (res.status === 401 || res.status === 403) {
+          log(`Auth ${res.status} on ${url} — refreshing access token…`);
+          try {
+            token = await getAccessToken(envVars);
+            log("Token refreshed.");
+          } catch (err) {
+            log(`Token refresh failed: ${err instanceof Error ? err.message : String(err)}`, true);
+            return res;
+          }
+          res = await call();
+        }
+        return res;
+      };
+
       let anyFailed = false;
 
       for (const scope of scopes) {
@@ -272,10 +312,6 @@ export function runIgaApi(options: {
           }
 
           try {
-          log(`[${scope}] Acquiring access token…`);
-          const token = await getAccessToken(envVars);
-          log(`[${scope}] Token acquired.`);
-
           if (isPull) {
             // ── Pull (export) ────────────────────────────────────────────────
             const scopeDir = path.join(configDir, cfg.subdir);
@@ -284,7 +320,7 @@ export function runIgaApi(options: {
             log(`[${scope}] Fetching from ${tenantUrl}${cfg.endpoint}…`);
             let count = 0;
 
-            for await (const item of paginateIga(tenantUrl, cfg.endpoint, token, cfg)) {
+            for await (const item of paginateIga(tenantUrl, cfg.endpoint, authedFetch, cfg)) {
               if (aborted) break;
 
               // Build a safe filename — for assignments use formId+objectId composite
@@ -305,9 +341,8 @@ export function runIgaApi(options: {
 
               // Fetch full detail if the list only returns a summary
               if (cfg.fetchDetail) {
-                const detailRes = await fetch(
-                  `${tenantUrl}${cfg.endpoint}/${encodeURIComponent(fileId)}`,
-                  { headers: { Authorization: `Bearer ${token}` } }
+                const detailRes = await authedFetch(
+                  `${tenantUrl}${cfg.endpoint}/${encodeURIComponent(fileId)}`
                 );
                 if (detailRes.ok) {
                   fullItem = await detailRes.json() as Record<string, unknown>;
@@ -352,11 +387,11 @@ export function runIgaApi(options: {
                 const id = typeof rawId === "string" ? rawId : path.basename(file, ".json");
 
                 // Try PUT (update); fall back to POST (create)
-                const putRes = await fetch(
+                const putRes = await authedFetch(
                   `${tenantUrl}${cfg.endpoint}/${encodeURIComponent(id)}`,
                   {
                     method: "PUT",
-                    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(content),
                   }
                 );
@@ -364,11 +399,11 @@ export function runIgaApi(options: {
                 if (putRes.ok) {
                   log(`[${scope}] Updated: ${id}`);
                 } else {
-                  const postRes = await fetch(
+                  const postRes = await authedFetch(
                     `${tenantUrl}${cfg.endpoint}`,
                     {
                       method: "POST",
-                      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                      headers: { "Content-Type": "application/json" },
                       body: JSON.stringify(content),
                     }
                   );
@@ -392,10 +427,15 @@ export function runIgaApi(options: {
           break; // success — no more retries
 
         } catch (err) {
-          log(`[${scope}] Error: ${err instanceof Error ? err.message : String(err)}`, true);
-          if (attempt === MAX_RETRIES) {
+          const msg = err instanceof Error ? err.message : String(err);
+          log(`[${scope}] Error: ${msg}`, true);
+          // If auth is still failing after authedFetch's inline refresh, don't
+          // burn outer retries — refreshing again won't help.
+          const isAuthFail = /IGA API 40[13]:/.test(msg);
+          if (isAuthFail || attempt === MAX_RETRIES) {
             emit("scope-end", { scope, code: 1 });
             anyFailed = true;
+            break;
           }
         }
         } // end retry loop
