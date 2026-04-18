@@ -949,3 +949,20 @@ const oidcProvidersPush = require("./push/update-oidc-providers.js") as {
 export async function pushOidcProviders(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
   await oidcProvidersPush.pushOidcProviders(opts);
 }
+
+// ── AM realm-config (generic — powers "authentication" scope today) ──────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const amRealmPull = require("./pull/am-realm-config.js") as {
+  pullAmRealmConfig: (opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; configName: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullAmRealmConfig(opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; configName: string; log?: (line: string) => void }): Promise<void> {
+  await amRealmPull.pullAmRealmConfig(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const amRealmPush = require("./push/update-am-realm-config.js") as {
+  pushAmRealmConfig: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; configName: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushAmRealmConfig(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; configName: string; log?: (line: string) => void }): Promise<void> {
+  await amRealmPush.pushAmRealmConfig(opts);
+}

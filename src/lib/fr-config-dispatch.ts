@@ -232,6 +232,13 @@ export async function dispatchFrConfig(input: DispatchInput): Promise<DispatchRe
         case "oidc-providers":
           await vendor.pullOidcProviders({ exportDir, tenantUrl, token: t, realms, name, log });
           return { handled: true, code: 0 };
+        case "authentication":
+          await vendor.pullAmRealmConfig({ exportDir, tenantUrl, token: t, realms, configName: "authentication", log });
+          return { handled: true, code: 0 };
+        case "config-metadata":
+          // Display-only metadata; no on-disk representation. No-op.
+          emit(`config-metadata: display-only, nothing to pull\n`, "stdout");
+          return { handled: true, code: 0 };
         default:
           return { handled: false };
       }
@@ -350,6 +357,12 @@ export async function dispatchFrConfig(input: DispatchInput): Promise<DispatchRe
         return { handled: true, code: 0 };
       case "oidc-providers":
         await vendor.pushOidcProviders({ configDir, tenantUrl, token: t, realms, name, envVars, log });
+        return { handled: true, code: 0 };
+      case "authentication":
+        await vendor.pushAmRealmConfig({ configDir, tenantUrl, token: t, realms, configName: "authentication", log });
+        return { handled: true, code: 0 };
+      case "config-metadata":
+        emit(`config-metadata: display-only, nothing to push\n`, "stdout");
         return { handled: true, code: 0 };
       default:
         return { handled: false };
