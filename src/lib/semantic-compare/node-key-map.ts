@@ -1,5 +1,5 @@
 // src/lib/semantic-compare/node-key-map.ts
-interface NodeLike {
+export interface NodeLike {
   nodeType?: string;
   displayName?: string;
   connections?: Record<string, string>;

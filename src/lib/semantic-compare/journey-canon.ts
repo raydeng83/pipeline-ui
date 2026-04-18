@@ -1,6 +1,6 @@
 import type { CanonicalJourney, CanonicalNode } from "./types";
 import { sortKeys, stripFields } from "./json-canon";
-import { buildNodeKeyMap } from "./node-key-map";
+import { buildNodeKeyMap, type NodeLike } from "./node-key-map";
 import { canonicalizeNode } from "./node-canon";
 
 const STRIP_TOP = ["_id", "_rev"];
@@ -12,7 +12,7 @@ export function canonicalizeJourney(
   nodeFiles: Record<string, Record<string, unknown>>,
   scriptMap: Map<string, string>,
 ): CanonicalJourney {
-  const nodeKeyMap = buildNodeKeyMap(treeJson as { nodes?: Record<string, unknown>; entryNodeId?: string });
+  const nodeKeyMap = buildNodeKeyMap(treeJson as { nodes?: Record<string, NodeLike>; entryNodeId?: string });
 
   // Canonicalize each node file.
   const nodes = new Map<string, CanonicalNode>();
