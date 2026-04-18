@@ -92,6 +92,25 @@ function stripMetadata(obj: unknown): unknown {
   return obj;
 }
 
+/**
+ * Canonicalize JSON by alphabetically sorting object keys at every level so
+ * diffs aren't sensitive to key insertion order — IDM reorders keys when it
+ * round-trips managed-object configs, and fr-config-pull's script extraction
+ * moves `file` around, which caused spurious "modified" results even when
+ * the semantic content was identical.
+ */
+function sortJsonKeys(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(sortJsonKeys);
+  if (obj && typeof obj === "object") {
+    const sorted: Record<string, unknown> = {};
+    for (const k of Object.keys(obj as Record<string, unknown>).sort()) {
+      sorted[k] = sortJsonKeys((obj as Record<string, unknown>)[k]);
+    }
+    return sorted;
+  }
+  return obj;
+}
+
 /** Strip single-line (//) and multi-line (/* *​/) comments from JS/Groovy code. */
 function stripComments(code: string): string {
   let result = "";
@@ -139,6 +158,7 @@ function normalizeContent(content: string, filePath: string, opts: DiffOptions =
     try {
       let parsed = JSON.parse(result);
       if (!opts.includeMetadata) parsed = stripMetadata(parsed);
+      parsed = sortJsonKeys(parsed);
       result = JSON.stringify(parsed, null, 2);
     } catch { /* fall through */ }
   }
