@@ -65,10 +65,25 @@ async function restUpsert(url, data, token, apiVersion) {
   }
 }
 
-async function restPost(url, data, token, apiVersion) {
+async function restPost(url, dataOrParams, dataOrToken, tokenOrApiVersion, maybeApiVersion) {
+  // Accept both (url, data, token, apiVersion) and
+  // (url, params, data, token, apiVersion) shapes. Upstream uses both.
+  let params, data, token, apiVersion;
+  if (typeof dataOrToken === "string") {
+    // 4-arg form: (url, data, token, apiVersion)
+    data = dataOrParams;
+    token = dataOrToken;
+    apiVersion = tokenOrApiVersion;
+  } else {
+    // 5-arg form: (url, params, data, token, apiVersion)
+    params = dataOrParams;
+    data = dataOrToken;
+    token = tokenOrApiVersion;
+    apiVersion = maybeApiVersion;
+  }
   const headers = { "Content-Type": "application/json" };
   if (apiVersion) headers["Accept-Api-Version"] = apiVersion;
-  return httpRequest({ method: "POST", url, data, headers }, token);
+  return httpRequest({ method: "POST", url, data, headers, ...(params ? { params } : {}) }, token);
 }
 
 async function restDelete(url, token, apiVersion) {
