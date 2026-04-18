@@ -116,6 +116,59 @@ interface FormCache {
 }
 const formCache: FormCache = {};
 
+// ── Recent scope sets ─────────────────────────────────────────────────────────
+
+const RECENT_SCOPES_KEY = "compare-recent-scopes";
+const MAX_RECENT_SCOPES = 8;
+
+interface RecentScopeSet {
+  scopes: ConfigScope[];
+  lastUsed: number;
+}
+
+function canonicalScopeKey(scopes: ConfigScope[]): string {
+  return [...scopes].sort().join(",");
+}
+
+function loadRecentScopes(): RecentScopeSet[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(RECENT_SCOPES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((e): e is RecentScopeSet =>
+      e && Array.isArray(e.scopes) && typeof e.lastUsed === "number",
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentScopes(scopes: ConfigScope[]): RecentScopeSet[] {
+  if (typeof window === "undefined" || scopes.length === 0) return loadRecentScopes();
+  const key = canonicalScopeKey(scopes);
+  const current = loadRecentScopes().filter((e) => canonicalScopeKey(e.scopes) !== key);
+  const next = [{ scopes: [...scopes], lastUsed: Date.now() }, ...current].slice(0, MAX_RECENT_SCOPES);
+  try {
+    window.localStorage.setItem(RECENT_SCOPES_KEY, JSON.stringify(next));
+  } catch { /* quota */ }
+  return next;
+}
+
+function removeRecentScope(key: string): RecentScopeSet[] {
+  if (typeof window === "undefined") return [];
+  const next = loadRecentScopes().filter((e) => canonicalScopeKey(e.scopes) !== key);
+  try {
+    window.localStorage.setItem(RECENT_SCOPES_KEY, JSON.stringify(next));
+  } catch { /* quota */ }
+  return next;
+}
+
+function formatScopeList(scopes: ConfigScope[]): string {
+  return scopes.map((s) => s.replace(/-/g, " ")).join(", ");
+}
+
 // ── Main form ─────────────────────────────────────────────────────────────────
 
 export function CompareForm({ environments, tasks = [] }: { environments: Environment[]; tasks?: PromotionTask[] }) {
@@ -125,6 +178,10 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
   const [target, setTarget] = useState<Endpoint>(formCache.target ?? { environment: defaultEnv, mode: "remote" });
   const [scopes, setScopes] = useState<ConfigScope[]>(formCache.scopes ?? []);
   const [includeMetadata, setIncludeMetadata] = useState<boolean>(formCache.includeMetadata ?? false);
+  const [recentScopes, setRecentScopes] = useState<RecentScopeSet[]>([]);
+
+  // Rehydrate recent-scope history after mount to avoid SSR/CSR mismatch.
+  useEffect(() => { setRecentScopes(loadRecentScopes()); }, []);
 
   const { logs, running, sourceExitCode, targetExitCode, report, run, abort, clear } =
     useStreamingLogs();
@@ -150,6 +207,7 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
   const showConsole = logs.length > 0 || running;
 
   const handleCompare = () => {
+    setRecentScopes(saveRecentScopes(scopes));
     run("/api/compare", {
       source,
       target,
@@ -157,6 +215,10 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
       mode: "compare",
       diffOptions: { includeMetadata, ignoreWhitespace: true },
     });
+  };
+
+  const handleRemoveRecent = (key: string) => {
+    setRecentScopes(removeRecentScope(key));
   };
 
   return (
@@ -197,6 +259,49 @@ export function CompareForm({ environments, tasks = [] }: { environments: Enviro
             disabled={running}
           />
         </div>
+
+        {recentScopes.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-medium text-slate-500 mr-0.5">Recent:</span>
+            {recentScopes.map((entry) => {
+              const key = canonicalScopeKey(entry.scopes);
+              const active = canonicalScopeKey(scopes) === key;
+              return (
+                <span
+                  key={key}
+                  className={cn(
+                    "group inline-flex items-center gap-1 rounded-full ring-1 text-[11px] overflow-hidden transition-colors",
+                    active
+                      ? "bg-indigo-50 text-indigo-700 ring-indigo-200"
+                      : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50",
+                  )}
+                >
+                  <button
+                    type="button"
+                    disabled={running}
+                    onClick={() => setScopes([...entry.scopes])}
+                    title={`Apply ${entry.scopes.length} scope${entry.scopes.length === 1 ? "" : "s"}: ${formatScopeList(entry.scopes)}`}
+                    className="px-2.5 py-0.5 max-w-[320px] truncate disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {entry.scopes.length === 1
+                      ? formatScopeList(entry.scopes)
+                      : `${entry.scopes.length} scopes · ${formatScopeList(entry.scopes)}`}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={running}
+                    onClick={() => handleRemoveRecent(key)}
+                    title="Remove from recent"
+                    aria-label="Remove from recent"
+                    className="pr-1.5 pl-0.5 text-slate-400 hover:text-rose-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         <ScopeSelector selected={scopes} onChange={setScopes} disabled={running} action="compare" />
 
