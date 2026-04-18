@@ -1503,8 +1503,8 @@ function SummaryPhase({
           </div>
         )}
 
-        {/* Error + full logs for failed promotion */}
-        {failed && (() => {
+        {/* Error + full logs — rendered for both succeeded and failed runs */}
+        {(() => {
           const liveAll = promoteLogs.filter(
             (l) => l.type === "stdout" || l.type === "stderr" || l.type === "error",
           );
@@ -1800,7 +1800,9 @@ export function PromoteExecution({
         ? verifyReport.summary.added + verifyReport.summary.modified + verifyReport.summary.removed
         : null,
     };
-    if (promoteStatus === "failed") {
+    // Persist logs for both succeeded and failed tasks so they survive
+    // page refresh, archive/restore, and tab switches.
+    {
       const visible = promoteLogs.filter(
         (l) => l.type === "stdout" || l.type === "stderr" || l.type === "error",
       );
