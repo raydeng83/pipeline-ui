@@ -17,6 +17,14 @@
 - `pull/org-privileges.js` — adapted from `packages/fr-config-pull/src/scripts/orgPrivileges.js`
 - `push/update-password-policy.js` — adapted from `packages/fr-config-push/src/scripts/update-password-policy.js`
 - `push/update-org-privileges.js` — adapted from `packages/fr-config-push/src/scripts/update-org-privileges.js`
+- `pull/cookie-domains.js` — adapted from `packages/fr-config-pull/src/scripts/cookieDomains.js`
+- `pull/cors.js` — adapted from `packages/fr-config-pull/src/scripts/cors.js`
+- `pull/csp.js` — adapted from `packages/fr-config-pull/src/scripts/csp.js`
+- `pull/locales.js` — adapted from `packages/fr-config-pull/src/scripts/locales.js`
+- `push/update-cookie-domains.js` — adapted from `packages/fr-config-push/src/scripts/update-cookie-domains.js`
+- `push/update-cors.js` — adapted from `packages/fr-config-push/src/scripts/update-cors.js`
+- `push/update-csp.js` — adapted from `packages/fr-config-push/src/scripts/update-csp.js`
+- `push/update-locales.js` — adapted from `packages/fr-config-push/src/scripts/update-locales.js`
 
 ## Local patches
 
@@ -40,6 +48,12 @@
 5. **`push/update-password-policy.js`** — `continue`s to the next realm when
    one has no config, instead of upstream's unconditional `return` which
    silently skips later realms after the first missing one.
+6. **`pull/locales.js`** — awaits each per-locale `restGet`. Upstream uses
+   `restGet(...).then(...)` inside a `forEach` with no outer await, so the
+   function returns before the writes complete. In-process this was racy.
+7. **`pull/csp.js`** — dropped the `cspOverridesFile` merge feature (unused
+   by the app) to avoid vendoring `lodash.merge` and upstream's
+   `escapePlaceholders` helper.
 
 ## Sync process
 
