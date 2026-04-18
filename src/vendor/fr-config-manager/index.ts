@@ -623,3 +623,105 @@ export async function pushThemes(opts: {
 }): Promise<void> {
   await themesPush.pushThemes(opts);
 }
+
+// ── email-provider ───────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const emailProviderPull = require("./pull/email-provider.js") as {
+  pullEmailProvider: (opts: { exportDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullEmailProvider(opts: { exportDir: string; tenantUrl: string; token: string; log?: (line: string) => void }): Promise<void> {
+  await emailProviderPull.pullEmailProvider(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const emailProviderPush = require("./push/update-email-provider.js") as {
+  pushEmailProvider: (opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushEmailProvider(opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }): Promise<void> {
+  await emailProviderPush.pushEmailProvider(opts);
+}
+
+// ── schedules ────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const schedulesPull = require("./pull/schedules.js") as {
+  pullSchedules: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullSchedules(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await schedulesPull.pullSchedules(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const schedulesPush = require("./push/update-idm-schedules.js") as {
+  pushSchedules: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushSchedules(opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await schedulesPush.pushSchedules(opts);
+}
+
+// ── iga-workflows ────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const igaWorkflowsPull = require("./pull/iga-workflows.js") as {
+  pullIgaWorkflows: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; includeImmutable?: boolean; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullIgaWorkflows(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; includeImmutable?: boolean; log?: (line: string) => void }): Promise<void> {
+  await igaWorkflowsPull.pullIgaWorkflows(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const igaWorkflowsPush = require("./push/update-iga-workflows.js") as {
+  pushIgaWorkflows: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; draft?: boolean; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushIgaWorkflows(opts: { configDir: string; tenantUrl: string; token: string; name?: string; draft?: boolean; log?: (line: string) => void }): Promise<void> {
+  await igaWorkflowsPush.pushIgaWorkflows(opts);
+}
+
+// ── terms-and-conditions ─────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const termsPull = require("./pull/terms-and-conditions.js") as {
+  pullTermsAndConditions: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullTermsAndConditions(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await termsPull.pullTermsAndConditions(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const termsPush = require("./push/update-terms-and-conditions.js") as {
+  pushTermsAndConditions: (opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushTermsAndConditions(opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }): Promise<void> {
+  await termsPush.pushTermsAndConditions(opts);
+}
+
+// ── service-objects ──────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const serviceObjectsPull = require("./pull/service-objects.js") as {
+  pullServiceObjects: (opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullServiceObjects(opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }): Promise<void> {
+  await serviceObjectsPull.pullServiceObjects(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const serviceObjectsPush = require("./push/update-service-objects.js") as {
+  pushServiceObjects: (opts: { configDir: string; tenantUrl: string; token: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushServiceObjects(opts: { configDir: string; tenantUrl: string; token: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await serviceObjectsPush.pushServiceObjects(opts);
+}
+
+// ── raw ──────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const rawPull = require("./pull/raw.js") as {
+  pullRawConfig: (opts: { exportDir: string; tenantUrl: string; token: string; requestedPath?: string; requestedPushApiVersion?: { protocol: string; resource: string }; descriptorFile?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullRawConfig(opts: { exportDir: string; tenantUrl: string; token: string; requestedPath?: string; requestedPushApiVersion?: { protocol: string; resource: string }; descriptorFile?: string; log?: (line: string) => void }): Promise<void> {
+  await rawPull.pullRawConfig(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const rawPush = require("./push/update-raw.js") as {
+  pushRawConfig: (opts: { configDir: string; tenantUrl: string; token: string; requestedPath?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushRawConfig(opts: { configDir: string; tenantUrl: string; token: string; requestedPath?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await rawPush.pushRawConfig(opts);
+}
