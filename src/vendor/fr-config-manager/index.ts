@@ -776,3 +776,105 @@ const servicesPush = require("./push/update-services.js") as {
 export async function pushServices(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
   await servicesPush.pushServices(opts);
 }
+
+// ── telemetry ────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const telemetryPull = require("./pull/telemetry.js") as {
+  pullTelemetry: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; category?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullTelemetry(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; category?: string; log?: (line: string) => void }): Promise<void> {
+  await telemetryPull.pullTelemetry(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const telemetryPush = require("./push/update-telemetry.js") as {
+  pushTelemetry: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; category?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushTelemetry(opts: { configDir: string; tenantUrl: string; token: string; name?: string; category?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await telemetryPush.pushTelemetry(opts);
+}
+
+// ── connector-definitions ────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const connectorDefsPull = require("./pull/connector-definitions.js") as {
+  pullConnectorDefinitions: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullConnectorDefinitions(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await connectorDefsPull.pullConnectorDefinitions(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const connectorDefsPush = require("./push/update-connector-definitions.js") as {
+  pushConnectorDefinitions: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushConnectorDefinitions(opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await connectorDefsPush.pushConnectorDefinitions(opts);
+}
+
+// ── connector-mappings ───────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const connectorMappingsPull = require("./pull/connector-mappings.js") as {
+  pullConnectorMappings: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullConnectorMappings(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await connectorMappingsPull.pullConnectorMappings(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const connectorMappingsPush = require("./push/update-connector-mappings.js") as {
+  pushConnectorMappings: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushConnectorMappings(opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await connectorMappingsPush.pushConnectorMappings(opts);
+}
+
+// ── remote-servers ───────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const remoteServersPull = require("./pull/remote-servers.js") as {
+  pullRemoteServers: (opts: { exportDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullRemoteServers(opts: { exportDir: string; tenantUrl: string; token: string; log?: (line: string) => void }): Promise<void> {
+  await remoteServersPull.pullRemoteServers(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const remoteServersPush = require("./push/update-remote-servers.js") as {
+  pushRemoteServers: (opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushRemoteServers(opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }): Promise<void> {
+  await remoteServersPush.pushRemoteServers(opts);
+}
+
+// ── secrets ──────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const secretsPull = require("./pull/secrets.js") as {
+  pullSecrets: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; activeOnly?: boolean; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullSecrets(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; activeOnly?: boolean; log?: (line: string) => void }): Promise<void> {
+  await secretsPull.pullSecrets(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const secretsPush = require("./push/update-secrets.js") as {
+  pushSecrets: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; prune?: boolean; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushSecrets(opts: { configDir: string; tenantUrl: string; token: string; name?: string; prune?: boolean; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await secretsPush.pushSecrets(opts);
+}
+
+// ── secret-mappings ──────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const secretMappingsPull = require("./pull/secret-mappings.js") as {
+  pullSecretMappings: (opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullSecretMappings(opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
+  await secretMappingsPull.pullSecretMappings(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const secretMappingsPush = require("./push/update-secret-mappings.js") as {
+  pushSecretMappings: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushSecretMappings(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
+  await secretMappingsPush.pushSecretMappings(opts);
+}
