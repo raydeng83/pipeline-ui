@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import { parseEnvFile } from "./env-parser";
+import { dispatchFrConfig } from "./fr-config-dispatch";
 export type { FrCommand, ConfigScope, Environment, RunOptions, ScopeSelection } from "./fr-config-types";
 export { CONFIG_SCOPES, FILENAME_FILTER_SCOPES, NAME_FLAG_SCOPES } from "./fr-config-types";
 import type { Environment, RunOptions, ScopeSelection } from "./fr-config-types";
@@ -108,24 +109,12 @@ export function saveLogApiCredentials(environmentName: string, creds: LogApiCred
 }
 
 /** Load an env file and merge its values into process.env for a child process. */
-/**
- * PATH with `node_modules/.bin` prepended. Used by any code that spawns
- * fr-config-pull / fr-config-push / frodo so the locally-installed binaries
- * resolve without a global install.
- */
-export function pathWithLocalBin(): string {
-  const localBin = path.join(process.cwd(), "node_modules", ".bin");
-  const sep = process.platform === "win32" ? ";" : ":";
-  const basePath = process.env.PATH ?? "";
-  return basePath.includes(localBin) ? basePath : `${localBin}${sep}${basePath}`;
-}
-
 function buildEnv(environmentName: string, overrides?: Record<string, string>): NodeJS.ProcessEnv {
   const filePath = getEnvFilePath(environmentName);
   const fileVars = fs.existsSync(filePath)
     ? parseEnvFile(fs.readFileSync(filePath, "utf-8"))
     : {};
-  return { ...process.env, PATH: pathWithLocalBin(), ...fileVars, ...overrides };
+  return { ...process.env, ...fileVars, ...overrides };
 }
 
 // ── Subcommand entry ──────────────────────────────────────────────────────────
@@ -225,33 +214,56 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
 
           lastStderr = "";
           lastStdout = "";
-          exitCode = await new Promise<number | null>((resolve) => {
-            const envDir = path.join(ENVIRONMENTS_DIR, environment);
-            const proc = spawn(
-              command,
-              [entry.scope, "--debug", ...globalArgs, ...entry.extraArgs],
-              { env: procEnv, shell: true, cwd: envDir }
-            );
-            currentProc = proc;
+          const envDir = path.join(ENVIRONMENTS_DIR, environment);
+          const captureEmit = (data: string, type: "stdout" | "stderr") => {
+            if (type === "stdout") lastStdout += data;
+            else lastStderr += data;
+            encode(data, type);
+          };
 
-            proc.stdout.on("data", (chunk: Buffer) => {
-              const s = chunk.toString();
-              lastStdout += s;
-              encode(s, "stdout");
-            });
-            proc.stderr.on("data", (chunk: Buffer) => {
-              const s = chunk.toString();
-              lastStderr += s;
-              encode(s, "stderr");
-            });
-            proc.on("close", (code) => { currentProc = null; resolve(code); });
-            proc.on("error", (err) => {
-              lastStderr += err.message;
-              encode(err.message, "stderr");
-              currentProc = null;
-              resolve(1);
-            });
+          // Try in-process dispatch first (for fr-config-pull / fr-config-push
+          // scopes we've vendored). Falls through to spawn only for frodo and
+          // any scope the dispatcher doesn't handle.
+          const dispatched = await dispatchFrConfig({
+            command,
+            scope: entry.scope,
+            envVars: procEnv as Record<string, string | undefined>,
+            envDir,
+            extraArgs: [...globalArgs, ...entry.extraArgs],
+            extraEnv: entry.extraEnv,
+            emit: captureEmit,
           });
+
+          if (dispatched.handled) {
+            exitCode = dispatched.code ?? 0;
+          } else {
+            exitCode = await new Promise<number | null>((resolve) => {
+              const proc = spawn(
+                command,
+                [entry.scope, "--debug", ...globalArgs, ...entry.extraArgs],
+                { env: procEnv, shell: true, cwd: envDir }
+              );
+              currentProc = proc;
+
+              proc.stdout.on("data", (chunk: Buffer) => {
+                const s = chunk.toString();
+                lastStdout += s;
+                encode(s, "stdout");
+              });
+              proc.stderr.on("data", (chunk: Buffer) => {
+                const s = chunk.toString();
+                lastStderr += s;
+                encode(s, "stderr");
+              });
+              proc.on("close", (code) => { currentProc = null; resolve(code); });
+              proc.on("error", (err) => {
+                lastStderr += err.message;
+                encode(err.message, "stderr");
+                currentProc = null;
+                resolve(1);
+              });
+            });
+          }
 
           if (exitCode === 0) break;
         }

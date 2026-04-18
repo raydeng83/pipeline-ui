@@ -878,3 +878,20 @@ const secretMappingsPush = require("./push/update-secret-mappings.js") as {
 export async function pushSecretMappings(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
   await secretMappingsPush.pushSecretMappings(opts);
 }
+
+// ── saml ─────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const samlPull = require("./pull/saml.js") as {
+  pullSaml: (opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullSaml(opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }): Promise<void> {
+  await samlPull.pullSaml(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const samlPush = require("./push/update-saml.js") as {
+  pushSaml: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushSaml(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await samlPush.pushSaml(opts);
+}
