@@ -120,3 +120,69 @@ export async function pushScripts(opts: {
 }): Promise<void> {
   await scriptsPush.updateScripts(opts);
 }
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const journeysPull = require("./pull/journeys.js") as {
+  exportJourneys: (opts: {
+    exportDir: string;
+    tenantUrl: string;
+    token: string;
+    realms?: string[];
+    name?: string;
+    pullDependencies?: boolean;
+    clean?: boolean;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+/**
+ * Pull AM authentication trees (journeys) from `tenantUrl` into
+ * `exportDir/<realm>/journeys/<id>/{<id>.json, nodes/}`. With
+ * `pullDependencies: true`, referenced scripts and (when `name` is set)
+ * inner journeys are pulled too.
+ */
+export async function pullJourneys(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  name?: string;
+  pullDependencies?: boolean;
+  clean?: boolean;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await journeysPull.exportJourneys(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const journeysPush = require("./push/update-auth-trees.js") as {
+  updateAuthTrees: (opts: {
+    configDir: string;
+    tenantUrl: string;
+    token: string;
+    realms?: string[];
+    name?: string;
+    pushInnerJourneys?: boolean;
+    pushScripts?: boolean;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+/**
+ * Push AM authentication trees (journeys) from
+ * `configDir/realms/<realm>/journeys/`. PageNode sub-nodes pushed first,
+ * then top-level nodes, then the tree itself. InnerTreeEvaluatorNodes
+ * cascade when `pushInnerJourneys` is true (default when no `name` is set).
+ */
+export async function pushJourneys(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  name?: string;
+  pushInnerJourneys?: boolean;
+  pushScripts?: boolean;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await journeysPush.updateAuthTrees(opts);
+}
