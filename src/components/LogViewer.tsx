@@ -19,8 +19,12 @@ function deriveScopeStatuses(
   logs: LogEntry[],
   expectedScopes: string[],
 ): { name: string; status: ScopeStatus; code: number | null }[] {
+  // Seed from expectedScopes when provided so the pill row is a stable
+  // checklist. When no expectedScopes are given (e.g. promote final push),
+  // fall back to discovering scopes from the log stream in arrival order.
   const map = new Map<string, { name: string; status: ScopeStatus; code: number | null }>();
   const order: string[] = [];
+  const hasExpected = expectedScopes.length > 0;
 
   for (const s of expectedScopes) {
     if (!map.has(s)) {
@@ -32,8 +36,13 @@ function deriveScopeStatuses(
   for (const entry of logs) {
     if (entry.type === "scope-start" && entry.scope) {
       if (!map.has(entry.scope)) {
-        map.set(entry.scope, { name: entry.scope, status: "running", code: null });
-        order.push(entry.scope);
+        // Only add dynamically when we have no pre-declared checklist.
+        // When expectedScopes is set, a scope-start for an unknown name
+        // is ignored rather than growing the pill row mid-run.
+        if (!hasExpected) {
+          map.set(entry.scope, { name: entry.scope, status: "running", code: null });
+          order.push(entry.scope);
+        }
       } else {
         const row = map.get(entry.scope)!;
         if (row.status === "pending") row.status = "running";
@@ -73,13 +82,19 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
   const mainPaneRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
-  const scopeRows = useMemo(() => deriveScopeStatuses(logs, expectedScopes ?? []), [logs, expectedScopes]);
+  // SyncForm mutates the logs array in place and bumps a tick to re-render,
+  // so the array reference is stable but length grows. Keying these memos on
+  // logs.length (plus reference, to catch clear/reset) ensures recompute.
+  const scopeRows = useMemo(
+    () => deriveScopeStatuses(logs, expectedScopes ?? []),
+    [logs, logs.length, expectedScopes],
+  );
 
   // Flat log view: all stdout/stderr/error lines in arrival order, plus
   // subtle separators for scope-start / scope-end and the final exit line.
   const flatLines = useMemo(
     () => logs.filter((e) => e.type === "stdout" || e.type === "stderr" || e.type === "error" || e.type === "exit" || e.type === "scope-start" || e.type === "scope-end"),
-    [logs],
+    [logs, logs.length],
   );
 
   const handleCopy = () => {
@@ -97,12 +112,13 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
     });
   };
 
-  // Auto-scroll to bottom on every new line.
+  // Auto-scroll to bottom on every new line. logs.length captures in-place
+  // pushes from SyncForm's mutable log array (reference is stable).
   useEffect(() => {
     const el = mainPaneRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [logs]);
+  }, [logs, logs.length]);
 
   const statusText =
     exitCode === null
