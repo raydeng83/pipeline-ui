@@ -13,6 +13,10 @@
 - `push/update-auth-trees.js` — adapted from `packages/fr-config-push/src/scripts/update-auth-trees.js`
 - `pull/idm-flat-config.js` — adapted from `packages/fr-config-pull/src/scripts/idmFlatConfig.js`
 - `push/idm-flat-config.js` — generalizes five upstream scripts (`update-audit`, `update-idm-access-config`, `update-idm-authentication-config`, `update-kba-config`, `update-ui-config`) into one parameterized PUT
+- `pull/password-policy.js` — adapted from `packages/fr-config-pull/src/scripts/fieldPolicy.js`
+- `pull/org-privileges.js` — adapted from `packages/fr-config-pull/src/scripts/orgPrivileges.js`
+- `push/update-password-policy.js` — adapted from `packages/fr-config-push/src/scripts/update-password-policy.js`
+- `push/update-org-privileges.js` — adapted from `packages/fr-config-push/src/scripts/update-org-privileges.js`
 
 ## Local patches
 
@@ -28,6 +32,14 @@
    fires them without awaiting, racing script-dep writes and inner-journey
    pulls against the outer journey's node writes. Also scoped the
    `journeyCache` to per-call state (was module-level, leaked across calls).
+4. **`pull/password-policy.js`** — writes to `{exportDir}/realms/<realm>/password-policy/...`
+   instead of upstream's `{exportDir}/<realm>/password-policy/...`. Upstream
+   `fieldPolicy.js` uses one layout on pull but `update-password-policy.js`
+   reads from a different layout (`realms/<realm>/...`), so a pull+push
+   round trip breaks without manual reorganization.
+5. **`push/update-password-policy.js`** — `continue`s to the next realm when
+   one has no config, instead of upstream's unconditional `return` which
+   silently skips later realms after the first missing one.
 
 ## Sync process
 
