@@ -16,9 +16,9 @@ const REPORT: CompareReport = {
   generatedAt: "2026-04-13T00:00:00Z",
   summary: { added: 0, removed: 0, modified: 0, unchanged: 0 },
   files: [
-    { scope: "journeys", path: "journeys/Login", status: "added" } as any,
-    { scope: "journeys", path: "journeys/MFA",   status: "modified" } as any,
-    { scope: "scripts",  path: "scripts/foo.js", status: "removed" } as any,
+    { scope: "journeys", relativePath: "journeys/Login", status: "added" } as any,
+    { scope: "journeys", relativePath: "journeys/MFA",   status: "modified" } as any,
+    { scope: "scripts",  relativePath: "scripts/foo.js", status: "removed" } as any,
   ],
 };
 

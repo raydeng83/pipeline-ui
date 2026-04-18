@@ -14,10 +14,10 @@ function mkReport(files: FileDiff[]): CompareReport {
 
 function mkFile(scope: string, status: FileDiff["status"], name = `${scope}/x`): FileDiff {
   return {
-    scope: scope as FileDiff["scope"],
+    scope,
     status,
-    path: name,
-  } as any as FileDiff;
+    relativePath: name,
+  } as FileDiff;
 }
 
 describe("summarizeReport", () => {

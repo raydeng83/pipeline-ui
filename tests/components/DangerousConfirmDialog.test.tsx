@@ -23,7 +23,7 @@ describe("DangerousConfirmDialog", () => {
       />
     );
 
-    await waitFor(() => expect(screen.getByText(/journeys/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/journeys/i)).toBeInTheDocument());
     const confirm = screen.getByRole("button", { name: /confirm/i });
     expect(confirm).toBeDisabled();
 
@@ -70,7 +70,7 @@ describe("DangerousConfirmDialog", () => {
         onCancel={() => {}}
       />
     );
-    await waitFor(() => expect(screen.getByText(/journeys/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/journeys/i)).toBeInTheDocument());
     const confirm = screen.getByRole("button", { name: /confirm/i });
     expect(confirm).toBeEnabled();
     // Should be no type-to-confirm input visible
@@ -103,7 +103,7 @@ describe("DangerousConfirmDialog", () => {
 
     // Resolve diff and wait for re-render
     resolveDiff(diff);
-    await waitFor(() => expect(screen.getByText(/journeys/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/journeys/i)).toBeInTheDocument());
 
     // Type-to-confirm now becomes the only remaining gate
     const input = screen.getByPlaceholderText(/type/i);
