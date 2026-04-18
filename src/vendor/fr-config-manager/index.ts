@@ -895,3 +895,54 @@ const samlPush = require("./push/update-saml.js") as {
 export async function pushSaml(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
   await samlPush.pushSaml(opts);
 }
+
+// ── variables (ESV) ──────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const variablesPull = require("./pull/variables.js") as {
+  pullVariables: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullVariables(opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }): Promise<void> {
+  await variablesPull.pullVariables(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const variablesPush = require("./push/update-variables.js") as {
+  pushVariables: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushVariables(opts: { configDir: string; tenantUrl: string; token: string; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await variablesPush.pushVariables(opts);
+}
+
+// ── am-agents ────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const amAgentsPull = require("./pull/am-agents.js") as {
+  pullAmAgents: (opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullAmAgents(opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
+  await amAgentsPull.pullAmAgents(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const amAgentsPush = require("./push/update-am-agents.js") as {
+  pushAmAgents: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushAmAgents(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await amAgentsPush.pushAmAgents(opts);
+}
+
+// ── oidc-providers ───────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const oidcProvidersPull = require("./pull/oidc-providers.js") as {
+  pullOidcProviders: (opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullOidcProviders(opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
+  await oidcProvidersPull.pullOidcProviders(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const oidcProvidersPush = require("./push/update-oidc-providers.js") as {
+  pushOidcProviders: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushOidcProviders(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await oidcProvidersPush.pushOidcProviders(opts);
+}

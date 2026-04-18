@@ -227,6 +227,15 @@ export async function dispatchFrConfig(input: DispatchInput): Promise<DispatchRe
         case "saml":
           await vendor.pullSaml({ exportDir, tenantUrl, token: t, descriptorFile: descriptorOf(envVars, envDir, "SAML_CONFIG_FILE"), log });
           return { handled: true, code: 0 };
+        case "variables":
+          await vendor.pullVariables({ exportDir, tenantUrl, token: t, name, log });
+          return { handled: true, code: 0 };
+        case "am-agents":
+          await vendor.pullAmAgents({ exportDir, tenantUrl, token: t, realms, name, log });
+          return { handled: true, code: 0 };
+        case "oidc-providers":
+          await vendor.pullOidcProviders({ exportDir, tenantUrl, token: t, realms, name, log });
+          return { handled: true, code: 0 };
         default:
           return { handled: false };
       }
@@ -336,6 +345,15 @@ export async function dispatchFrConfig(input: DispatchInput): Promise<DispatchRe
         return { handled: true, code: 0 };
       case "saml":
         await vendor.pushSaml({ configDir, tenantUrl, token: t, realms, name, envVars, log });
+        return { handled: true, code: 0 };
+      case "variables":
+        await vendor.pushVariables({ configDir, tenantUrl, token: t, name, envVars, log });
+        return { handled: true, code: 0 };
+      case "am-agents":
+        await vendor.pushAmAgents({ configDir, tenantUrl, token: t, realms, name, envVars, log });
+        return { handled: true, code: 0 };
+      case "oidc-providers":
+        await vendor.pushOidcProviders({ configDir, tenantUrl, token: t, realms, name, envVars, log });
         return { handled: true, code: 0 };
       default:
         return { handled: false };

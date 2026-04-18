@@ -1,13 +1,19 @@
 /**
- * Frodo CLI runner — handles am-agents and oidc-providers scopes.
- * Spawns `frodo` commands using the service account credentials from the .env file.
+ * Frodo scope runner — handles am-agents, oidc-providers, and variables.
+ *
+ * Previously spawned the `frodo` CLI. Now dispatches the 3 scopes to the
+ * vendored in-process pull/push functions. spawnFrodo keeps the same
+ * `{ stream, abort }` return shape so callers in /api/pull, /api/push, etc.
+ * don't need changes.
  */
 
-import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import { getConfigDir, getEnvFileContent, classifyBenign } from "./fr-config";
 import { parseEnvFile } from "./env-parser";
+import { dispatchFrConfig } from "./fr-config-dispatch";
+
+const ENVIRONMENTS_DIR = path.join(process.cwd(), "environments");
 
 // ── Scope → frodo command mapping ─────────────────────────────────────────────
 
@@ -46,26 +52,16 @@ export function spawnFrodo(options: {
   environment: string;
 }): { stream: ReadableStream<string>; abort: () => void } {
   const { command, scopes, environment } = options;
-  const isPull = command === "fr-config-pull";
 
   const configDir = getConfigDir(environment);
   const envContent = getEnvFileContent(environment);
   const envVars = parseEnvFile(envContent);
-
-  const frodoEnv: NodeJS.ProcessEnv = {
-    ...process.env,
-    FRODO_HOST: envVars.TENANT_BASE_URL ? `${envVars.TENANT_BASE_URL}/am` : "",
-    FRODO_SA_ID: envVars.SERVICE_ACCOUNT_ID ?? "",
-    FRODO_SA_JWK: envVars.SERVICE_ACCOUNT_KEY ?? "",
-    FRODO_REALM: JSON.parse(envVars.REALMS ?? '["alpha"]')[0] ?? "alpha",
-    FRODO_NO_CACHE: "1",
-  };
+  const envDir = path.join(ENVIRONMENTS_DIR, environment);
 
   const MAX_RETRIES = 2;
   const RETRY_DELAY_MS = 3000;
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  let currentProc: ReturnType<typeof spawn> | null = null;
   let aborted = false;
 
   const stream = new ReadableStream<string>({
@@ -81,17 +77,17 @@ export function spawnFrodo(options: {
         const cfg = FRODO_SCOPE_CONFIG[scope];
         if (!cfg) continue;
 
-        const args = isPull ? cfg.pullArgs : cfg.pushArgs;
-        const targetDir = configDir ? path.join(configDir, cfg.subdir) : "";
-
         if (!configDir) {
           encode(`Config dir not found for environment "${environment}"`, "stderr");
           anyFailed = true;
           continue;
         }
 
-        // Ensure target directory exists for pull
-        if (isPull && !fs.existsSync(targetDir)) {
+        // Ensure target directory exists for pull so vendored writes have a
+        // home — the vendored functions also mkdir, this just mirrors the
+        // old behavior.
+        const targetDir = path.join(configDir, cfg.subdir);
+        if (command === "fr-config-pull" && !fs.existsSync(targetDir)) {
           fs.mkdirSync(targetDir, { recursive: true });
         }
 
@@ -112,32 +108,30 @@ export function spawnFrodo(options: {
 
           lastStderr = "";
           lastStdout = "";
-          exitCode = await new Promise<number | null>((resolve) => {
-            const proc = spawn(
-              "frodo",
-              [...args, "-D", targetDir],
-              { env: frodoEnv, shell: true, cwd: targetDir }
-            );
-            currentProc = proc;
+          const captureEmit = (data: string, type: "stdout" | "stderr") => {
+            if (type === "stdout") lastStdout += data;
+            else lastStderr += data;
+            encode(data, type);
+          };
 
-            proc.stdout.on("data", (chunk: Buffer) => {
-              const s = chunk.toString();
-              lastStdout += s;
-              encode(s, "stdout");
-            });
-            proc.stderr.on("data", (chunk: Buffer) => {
-              const s = chunk.toString();
-              lastStderr += s;
-              encode(s, "stderr");
-            });
-            proc.on("close", (code) => { currentProc = null; resolve(code); });
-            proc.on("error", (err) => {
-              lastStderr += err.message;
-              encode(`frodo not found: ${err.message}`, "stderr");
-              currentProc = null;
-              resolve(1);
-            });
+          const dispatched = await dispatchFrConfig({
+            command,
+            scope,
+            envVars: envVars as Record<string, string | undefined>,
+            envDir,
+            extraArgs: [],
+            extraEnv: {},
+            emit: captureEmit,
           });
+
+          if (dispatched.handled) {
+            exitCode = dispatched.code ?? 0;
+          } else {
+            // No vendored handler for this scope — surface it clearly instead
+            // of silently leaving it out.
+            encode(`frodo scope "${scope}" is not vendored (dispatcher returned unhandled)\n`, "stderr");
+            exitCode = 1;
+          }
 
           if (exitCode === 0) break;
         }
@@ -166,7 +160,6 @@ export function spawnFrodo(options: {
     },
     cancel() {
       aborted = true;
-      currentProc?.kill("SIGTERM");
     },
   });
 
@@ -174,7 +167,6 @@ export function spawnFrodo(options: {
     stream,
     abort: () => {
       aborted = true;
-      currentProc?.kill("SIGTERM");
     },
   };
 }
