@@ -10,4 +10,4 @@ export { canonicalizeNode } from "./node-canon";
 export { canonicalizeJourney } from "./journey-canon";
 export { journeysEqual } from "./journey-equal";
 export { NODE_REFS, getRefsFor } from "./node-refs";
-export { sortKeys, stripFields, normalizeEsvEscapes } from "./json-canon";
+export { sortKeys, stripFields, normalizeEsvEscapes, normalizeJsonEsvEscapes } from "./json-canon";

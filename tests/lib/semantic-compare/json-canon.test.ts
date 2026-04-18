@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sortKeys, stripFields, normalizeEsvEscapes } from "@/lib/semantic-compare/json-canon";
+import { sortKeys, stripFields, normalizeEsvEscapes, normalizeJsonEsvEscapes } from "@/lib/semantic-compare/json-canon";
 
 describe("json-canon", () => {
   it("sortKeys sorts object keys recursively", () => {
@@ -25,6 +25,27 @@ describe("json-canon", () => {
   it("normalizeEsvEscapes treats \\${foo} and ${foo} equal", () => {
     expect(normalizeEsvEscapes("\\${foo}")).toBe("${foo}");
     expect(normalizeEsvEscapes("${foo}")).toBe("${foo}");
+  });
+
+  it("normalizeJsonEsvEscapes walks every string leaf", () => {
+    const input = {
+      url: "https://\\${tenant}.example.com",
+      arr: ["\\${a}", "plain", 42],
+      nested: { key: "\\${nested}", clean: "no-esv" },
+      notString: 7,
+    };
+    const out = normalizeJsonEsvEscapes(input) as Record<string, unknown>;
+    expect(out.url).toBe("https://${tenant}.example.com");
+    expect((out.arr as unknown[])[0]).toBe("${a}");
+    expect((out.arr as unknown[])[1]).toBe("plain");
+    expect((out.arr as unknown[])[2]).toBe(42);
+    expect((out.nested as Record<string, unknown>).key).toBe("${nested}");
+    expect(out.notString).toBe(7);
+  });
+
+  it("normalizeJsonEsvEscapes is a no-op when no ESV placeholders exist", () => {
+    const input = { a: "plain", b: [1, 2], c: { d: "hi" } };
+    expect(normalizeJsonEsvEscapes(input)).toEqual(input);
   });
 
   it("stripFields + sortKeys composes", () => {

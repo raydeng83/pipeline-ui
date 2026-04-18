@@ -1,5 +1,5 @@
 import type { CanonicalNode } from "./types";
-import { sortKeys, stripFields } from "./json-canon";
+import { sortKeys, stripFields, normalizeJsonEsvEscapes } from "./json-canon";
 import { getRefsFor } from "./node-refs";
 
 // Fields stripped only from the top-level node object.
@@ -50,6 +50,9 @@ export function canonicalizeNode(
     }
   }
 
+  // Normalize ESV escape artifacts in every string leaf so \${foo} and ${foo}
+  // compare equal regardless of which exporter produced the file.
+  payload = normalizeJsonEsvEscapes(payload) as Record<string, unknown>;
   payload = sortKeys(payload) as Record<string, unknown>;
 
   return { stableKey, nodeType, displayName, payload };

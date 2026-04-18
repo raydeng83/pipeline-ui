@@ -42,6 +42,12 @@ describe("script-canon", () => {
     expect(normalizeScriptBody("")).toBe("");
   });
 
+  it("normalizeScriptBody collapses vendored-pull ESV escape artifacts", () => {
+    expect(normalizeScriptBody('var x = "\\${tenant}";')).toBe('var x = "${tenant}";\n');
+    // Upstream (unescaped) form must round-trip unchanged.
+    expect(normalizeScriptBody('var x = "${tenant}";')).toBe('var x = "${tenant}";\n');
+  });
+
   it("description defaults to null for 'null' string", () => {
     const s = canonicalizeScript(baseConfig, "");
     expect(s.description).toBe(null);

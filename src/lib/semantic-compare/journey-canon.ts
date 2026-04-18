@@ -1,5 +1,5 @@
 import type { CanonicalJourney, CanonicalNode } from "./types";
-import { sortKeys, stripFields } from "./json-canon";
+import { sortKeys, stripFields, normalizeJsonEsvEscapes } from "./json-canon";
 import { buildNodeKeyMap, type NodeLike } from "./node-key-map";
 import { canonicalizeNode } from "./node-canon";
 
@@ -81,7 +81,9 @@ export function canonicalizeJourney(
     deepStripped.nodes = rewritten;
   }
 
-  const header = sortKeys(deepStripped) as Record<string, unknown>;
+  // Normalize ESV escape artifacts in every string leaf before sorting so
+  // the same placeholder compares equal across vendored / upstream exporters.
+  const header = sortKeys(normalizeJsonEsvEscapes(deepStripped)) as Record<string, unknown>;
 
   return { name, header, nodes, staticNodeKeys, referencedScripts, referencedSubJourneys };
 }

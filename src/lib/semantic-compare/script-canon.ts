@@ -1,4 +1,5 @@
 import type { CanonicalScript } from "./types";
+import { normalizeEsvEscapes } from "./json-canon";
 
 export interface ScriptConfig {
   name: string;
@@ -14,14 +15,23 @@ export function scriptIdentity(cfg: ScriptConfig): string {
   return `${cfg.context}/${cfg.name}`;
 }
 
-/** Normalize script body for comparison: line endings, BOM, trailing whitespace, final newline. */
+/**
+ * Normalize script body for comparison:
+ *   - strip BOM
+ *   - CRLF → LF
+ *   - trim trailing whitespace per line
+ *   - ensure a single trailing newline
+ *   - collapse vendored-pull escape artifacts (\${foo} → ${foo}) so the same
+ *     ESV reference compares equal whether emitted by upstream or the
+ *     vendored exporter
+ */
 export function normalizeScriptBody(raw: string): string {
   if (!raw) return "";
   let s = raw.replace(/^\uFEFF/, "");         // strip BOM
   s = s.replace(/\r\n?/g, "\n");              // CRLF -> LF
   s = s.split("\n").map((line) => line.replace(/[ \t]+$/, "")).join("\n");
   if (!s.endsWith("\n")) s += "\n";
-  return s;
+  return normalizeEsvEscapes(s);
 }
 
 export function canonicalizeScript(cfg: ScriptConfig, body: string): CanonicalScript {
