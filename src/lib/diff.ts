@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import type { DiffLine, FileDiff, CompareReport, CompareEndpoint, DiffOptions, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "./diff-types";
 import { formatHtml, shouldFormatAsHtml } from "./format-html";
+import { getRealmRoots } from "./realm-paths";
 
 const MAX_LINES = 2000;
 const MAX_CONTENT_BYTES = 200_000; // 200 KB per side
@@ -62,14 +63,11 @@ function resolveScopeDirs(configDir: string, scopes: string[]): string[] {
   const dirs: string[] = [];
   for (const scope of scopes) {
     if (scope in REALM_SCOPE_SUBDIR) {
-      // Realm-based scope: scan all realms
-      const realmsDir = path.join(configDir, "realms");
-      if (fs.existsSync(realmsDir)) {
-        for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-          if (!realm.isDirectory()) continue;
-          const scopePath = path.join(realmsDir, realm.name, REALM_SCOPE_SUBDIR[scope]);
-          if (fs.existsSync(scopePath)) dirs.push(scopePath);
-        }
+      const subdir = REALM_SCOPE_SUBDIR[scope];
+      // Both upstream (configDir/realms/<r>/subdir) and vendored
+      // (configDir/<r>/subdir) layouts are supported.
+      for (const root of getRealmRoots(configDir, subdir)) {
+        dirs.push(path.join(root, subdir));
       }
     } else {
       const dirName = SCOPE_DIR[scope] ?? scope;
@@ -359,14 +357,9 @@ interface JourneyMeta {
 
 function scanJourneys(configDir: string): Map<string, JourneyMeta> {
   const map = new Map<string, JourneyMeta>();
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return map;
 
-  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-    if (!realm.isDirectory()) continue;
-    const journeysDir = path.join(realmsDir, realm.name, "journeys");
-    if (!fs.existsSync(journeysDir)) continue;
-
+  for (const realmRoot of getRealmRoots(configDir, "journeys")) {
+    const journeysDir = path.join(realmRoot, "journeys");
     for (const jDir of fs.readdirSync(journeysDir, { withFileTypes: true })) {
       if (!jDir.isDirectory()) continue;
       const mainFile = path.join(journeysDir, jDir.name, `${jDir.name}.json`);
@@ -427,12 +420,8 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
 /** Build UUID → script name mapping from scripts-config dir. */
 function buildScriptNameMap(configDir: string): Map<string, string> {
   const map = new Map<string, string>();
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return map;
-  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-    if (!realm.isDirectory()) continue;
-    const configPath = path.join(realmsDir, realm.name, "scripts", "scripts-config");
-    if (!fs.existsSync(configPath)) continue;
+  for (const realmRoot of getRealmRoots(configDir, "scripts/scripts-config")) {
+    const configPath = path.join(realmRoot, "scripts", "scripts-config");
     for (const f of fs.readdirSync(configPath)) {
       if (!f.endsWith(".json")) continue;
       try {
@@ -602,12 +591,8 @@ export function buildReport(
   // Resolve script name → UUID using config files from both dirs
   const scriptNameToUUID = new Map<string, string>();
   for (const dir of [sourceDir, targetDir]) {
-    const realmsDir = path.join(dir, "realms");
-    if (!fs.existsSync(realmsDir)) continue;
-    for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-      if (!realm.isDirectory()) continue;
-      const cfgDir = path.join(realmsDir, realm.name, "scripts", "scripts-config");
-      if (!fs.existsSync(cfgDir)) continue;
+    for (const realmRoot of getRealmRoots(dir, "scripts/scripts-config")) {
+      const cfgDir = path.join(realmRoot, "scripts", "scripts-config");
       for (const f of fs.readdirSync(cfgDir)) {
         if (!f.endsWith(".json")) continue;
         try {

@@ -7,6 +7,7 @@ import { buildReport } from "@/lib/diff";
 import type { CompareEndpoint } from "@/lib/diff-types";
 import { appendOpLog } from "@/lib/op-history";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
+import { getRealmRoots } from "@/lib/realm-paths";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 
 /** Add resolved journey deps (sub-journeys + scripts) to scope selections. */
@@ -256,29 +257,23 @@ export async function POST(req: NextRequest) {
         // Since deps were always pulled (added to scopeSelections above),
         // items that don't exist on the target will have no files in targetConfigDir.
         if (resolvedDeps && (resolvedDeps.subJourneys.length > 0 || resolvedDeps.scriptUuids.length > 0)) {
-          const targetRealmsDir = path.join(targetConfigDir, "realms");
           const targetJourneyNames = new Set<string>();
           const targetScriptNames = new Set<string>();
 
-          if (fs.existsSync(targetRealmsDir)) {
-            for (const realm of fs.readdirSync(targetRealmsDir, { withFileTypes: true })) {
-              if (!realm.isDirectory()) continue;
-              const jDir = path.join(targetRealmsDir, realm.name, "journeys");
-              if (fs.existsSync(jDir)) {
-                for (const d of fs.readdirSync(jDir, { withFileTypes: true })) {
-                  if (d.isDirectory()) targetJourneyNames.add(d.name);
-                }
-              }
-              const sDir = path.join(targetRealmsDir, realm.name, "scripts", "scripts-config");
-              if (fs.existsSync(sDir)) {
-                for (const f of fs.readdirSync(sDir)) {
-                  if (!f.endsWith(".json")) continue;
-                  try {
-                    const json = JSON.parse(fs.readFileSync(path.join(sDir, f), "utf-8"));
-                    if (json.name) targetScriptNames.add(json.name);
-                  } catch { /* skip */ }
-                }
-              }
+          for (const realmRoot of getRealmRoots(targetConfigDir, "journeys")) {
+            const jDir = path.join(realmRoot, "journeys");
+            for (const d of fs.readdirSync(jDir, { withFileTypes: true })) {
+              if (d.isDirectory()) targetJourneyNames.add(d.name);
+            }
+          }
+          for (const realmRoot of getRealmRoots(targetConfigDir, "scripts/scripts-config")) {
+            const sDir = path.join(realmRoot, "scripts", "scripts-config");
+            for (const f of fs.readdirSync(sDir)) {
+              if (!f.endsWith(".json")) continue;
+              try {
+                const json = JSON.parse(fs.readFileSync(path.join(sDir, f), "utf-8"));
+                if (json.name) targetScriptNames.add(json.name);
+              } catch { /* skip */ }
             }
           }
 

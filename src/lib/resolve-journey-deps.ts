@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getRealmRoots } from "./realm-paths";
 
 export interface JourneyDeps {
   /** Inner journey names discovered recursively */
@@ -18,22 +19,18 @@ export function resolveJourneyDeps(
   configDir: string,
   journeyNames: string[],
 ): JourneyDeps {
-  const realmsDir = path.join(configDir, "realms");
   const scriptNames = new Map<string, string>(); // uuid → name
 
-  // Build script UUID → name map from scripts-config
-  if (fs.existsSync(realmsDir)) {
-    for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-      if (!realm.isDirectory()) continue;
-      const cfgDir = path.join(realmsDir, realm.name, "scripts", "scripts-config");
-      if (!fs.existsSync(cfgDir)) continue;
-      for (const f of fs.readdirSync(cfgDir)) {
-        if (!f.endsWith(".json")) continue;
-        try {
-          const json = JSON.parse(fs.readFileSync(path.join(cfgDir, f), "utf-8"));
-          if (json._id && json.name) scriptNames.set(json._id, json.name);
-        } catch { /* skip */ }
-      }
+  // Build script UUID → name map from scripts-config across both layouts
+  // (configDir/realms/<r>/... and configDir/<r>/...).
+  for (const realmRoot of getRealmRoots(configDir, "scripts/scripts-config")) {
+    const cfgDir = path.join(realmRoot, "scripts", "scripts-config");
+    for (const f of fs.readdirSync(cfgDir)) {
+      if (!f.endsWith(".json")) continue;
+      try {
+        const json = JSON.parse(fs.readFileSync(path.join(cfgDir, f), "utf-8"));
+        if (json._id && json.name) scriptNames.set(json._id, json.name);
+      } catch { /* skip */ }
     }
   }
 
@@ -44,12 +41,8 @@ export function resolveJourneyDeps(
     if (visited.has(journeyName)) return;
     visited.add(journeyName);
 
-    if (!fs.existsSync(realmsDir)) return;
-    for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-      if (!realm.isDirectory()) continue;
-      const nodesDir = path.join(realmsDir, realm.name, "journeys", journeyName, "nodes");
-      if (!fs.existsSync(nodesDir)) continue;
-
+    for (const realmRoot of getRealmRoots(configDir, path.join("journeys", journeyName, "nodes"))) {
+      const nodesDir = path.join(realmRoot, "journeys", journeyName, "nodes");
       for (const nf of fs.readdirSync(nodesDir)) {
         const fp = path.join(nodesDir, nf);
         if (fs.statSync(fp).isDirectory()) continue;
