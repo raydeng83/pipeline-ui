@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config";
+import { spawnFrConfig, getConfigDir, getEnvFileContent, pathWithLocalBin } from "@/lib/fr-config";
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
@@ -1236,7 +1236,7 @@ export async function POST(req: NextRequest) {
           // Pull each scope/item using spawn directly (scripts need --name flag)
           const { spawn: spawnProc } = await import("child_process");
           const pullEnvVars = parseEnvFile(getEnvFileContent(targetEnvironment));
-          const pullEnv = { ...process.env, ...pullEnvVars };
+          const pullEnv = { ...process.env, PATH: pathWithLocalBin(), ...pullEnvVars };
           const pullCwd = path.join(process.cwd(), "environments", targetEnvironment);
 
           for (const sel of scopeSelections) {

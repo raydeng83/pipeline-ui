@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { spawn } from "child_process";
+import { pathWithLocalBin } from "@/lib/fr-config";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
   };
 
   const args = debug ? ["test", "--debug"] : ["test"];
-  const env = { ...process.env, ...envVars };
+  const env = { ...process.env, PATH: pathWithLocalBin(), ...envVars };
 
   const stream = new ReadableStream<string>({
     start(controller) {

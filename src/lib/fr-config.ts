@@ -108,12 +108,24 @@ export function saveLogApiCredentials(environmentName: string, creds: LogApiCred
 }
 
 /** Load an env file and merge its values into process.env for a child process. */
+/**
+ * PATH with `node_modules/.bin` prepended. Used by any code that spawns
+ * fr-config-pull / fr-config-push / frodo so the locally-installed binaries
+ * resolve without a global install.
+ */
+export function pathWithLocalBin(): string {
+  const localBin = path.join(process.cwd(), "node_modules", ".bin");
+  const sep = process.platform === "win32" ? ";" : ":";
+  const basePath = process.env.PATH ?? "";
+  return basePath.includes(localBin) ? basePath : `${localBin}${sep}${basePath}`;
+}
+
 function buildEnv(environmentName: string, overrides?: Record<string, string>): NodeJS.ProcessEnv {
   const filePath = getEnvFilePath(environmentName);
   const fileVars = fs.existsSync(filePath)
     ? parseEnvFile(fs.readFileSync(filePath, "utf-8"))
     : {};
-  return { ...process.env, ...fileVars, ...overrides };
+  return { ...process.env, PATH: pathWithLocalBin(), ...fileVars, ...overrides };
 }
 
 // ── Subcommand entry ──────────────────────────────────────────────────────────
