@@ -19,12 +19,13 @@ function deriveScopeStatuses(
   logs: LogEntry[],
   expectedScopes: string[],
 ): { name: string; status: ScopeStatus; code: number | null }[] {
-  // Seed from expectedScopes when provided so the pill row is a stable
-  // checklist. When no expectedScopes are given (e.g. promote final push),
-  // fall back to discovering scopes from the log stream in arrival order.
+  // Pill row is only rendered when the caller supplies expectedScopes.
+  // Callers that render their own scope progress UI (e.g. SyncForm) should
+  // omit the prop; in that case this returns [] and LogViewer hides the row.
+  if (expectedScopes.length === 0) return [];
+
   const map = new Map<string, { name: string; status: ScopeStatus; code: number | null }>();
   const order: string[] = [];
-  const hasExpected = expectedScopes.length > 0;
 
   for (const s of expectedScopes) {
     if (!map.has(s)) {
@@ -35,18 +36,8 @@ function deriveScopeStatuses(
 
   for (const entry of logs) {
     if (entry.type === "scope-start" && entry.scope) {
-      if (!map.has(entry.scope)) {
-        // Only add dynamically when we have no pre-declared checklist.
-        // When expectedScopes is set, a scope-start for an unknown name
-        // is ignored rather than growing the pill row mid-run.
-        if (!hasExpected) {
-          map.set(entry.scope, { name: entry.scope, status: "running", code: null });
-          order.push(entry.scope);
-        }
-      } else {
-        const row = map.get(entry.scope)!;
-        if (row.status === "pending") row.status = "running";
-      }
+      const row = map.get(entry.scope);
+      if (row && row.status === "pending") row.status = "running";
     } else if (entry.type === "scope-end" && entry.scope) {
       const row = map.get(entry.scope);
       if (row) {

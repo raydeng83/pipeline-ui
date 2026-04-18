@@ -546,7 +546,6 @@ export function SyncForm({
                     logs={activeJobLogs}
                     running={activeJob.status === "running"}
                     exitCode={activeJob.exitCode}
-                    expectedScopes={scopes}
                   />
                 </div>
               )}
