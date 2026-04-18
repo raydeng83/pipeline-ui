@@ -14,7 +14,20 @@ async function saveDescendents(targetDir, amEndpoint, serviceName, token, emit) 
   const url = `${amEndpoint}/${serviceName}?_action=nextdescendents`;
   emit(`POST ${url}\n`);
   // Upstream used restPost with { _action: nextdescendents } as params
-  const response = await restPost(`${amEndpoint}/${serviceName}`, { _action: "nextdescendents" }, null, token, "protocol=1.0,resource=1.0");
+  let response;
+  try {
+    response = await restPost(`${amEndpoint}/${serviceName}`, { _action: "nextdescendents" }, null, token, "protocol=1.0,resource=1.0");
+  } catch (err) {
+    // AIC returns 400 when a service has no descendents (e.g. authenticatorPushService).
+    // Upstream fr-config-manager lets this bubble up and kill the whole scope, which in
+    // AIC means every service alphabetically after the first such offender is skipped.
+    // Treat it as "no descendents, move on" to keep the rest of the realm pulling.
+    if (err && err.response && err.response.status === 400) {
+      emit(`  ℹ no descendents for ${serviceName}\n`);
+      return;
+    }
+    throw err;
+  }
   const descendents = response.data.result;
   const serviceDir = path.join(targetDir, serviceName);
   for (const descendent of descendents) {
