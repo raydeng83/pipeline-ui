@@ -6,6 +6,9 @@
 **Vendored files:**
 - `common/restClient.js` — subset of `packages/fr-config-common/src/restClient.js`
 - `pull/managed.js` — adapted from `packages/fr-config-pull/src/scripts/managed.js`
+- `pull/scripts.js` — adapted from `packages/fr-config-pull/src/scripts/scripts.js`
+- `push/update-managed-objects.js` — adapted from `packages/fr-config-push/src/scripts/update-managed-objects.js`
+- `push/update-scripts.js` — adapted from `packages/fr-config-push/src/scripts/update-scripts.js`
 
 ## Local patches
 
@@ -13,6 +16,9 @@
    `--name` filter works regardless of object order in the IDM response. Upstream
    bug at `scripts/managed.js:66` causes the pull to abort on the first
    non-matching object.
+2. **`push/update-scripts.js`** — inner `pushScript` call is `await`ed. Upstream
+   (`update-scripts.js:208`) fires the calls concurrently without awaiting, so
+   failures are swallowed and ordering is non-deterministic.
 
 ## Sync process
 
