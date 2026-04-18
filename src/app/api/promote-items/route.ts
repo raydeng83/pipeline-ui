@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -550,51 +550,107 @@ export async function POST(req: NextRequest) {
         // ── Push ──────────────────────────────────────────────────────────
         emit({ type: "scope-start", scope: "push", ts: Date.now() });
 
-        // Run managed-objects push via vendored function when item-filtered —
-        // its REST-level merge replaces the target-seed hack entirely.
+        // Route managed-objects + scripts through vendored push functions.
+        // Everything else stays on fr-config-push spawn.
         const managedSel = scopeSelections.find(
           (s) => s.scope === "managed-objects" && s.items && s.items.length > 0,
         );
+        const scriptsSel = scopeSelections.find(
+          (s) => s.scope === "scripts" && s.items && s.items.length > 0,
+        );
+
+        const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
+        const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
+        let pushToken: string | null = null;
+        const ensurePushToken = async (): Promise<string | null> => {
+          if (pushToken) return pushToken;
+          if (!tenantUrlForPush) {
+            emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment}.\n`, ts: Date.now() });
+            return null;
+          }
+          try {
+            pushToken = await getAccessToken(targetEnvVarsForPush);
+            return pushToken;
+          } catch (err) {
+            emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+            return null;
+          }
+        };
+
         let managedPushFailed = false;
         if (managedSel && !directControl) {
-          const targetEnvVars = parseEnvFile(getEnvFileContent(targetEnvironment));
-          const tenantUrl = targetEnvVars.TENANT_BASE_URL ?? "";
-          if (!tenantUrl) {
-            emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment}.\n`, ts: Date.now() });
+          const token = await ensurePushToken();
+          if (!token) {
             managedPushFailed = true;
           } else {
-            let token: string | null = null;
-            try { token = await getAccessToken(targetEnvVars); }
-            catch (err) {
-              emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
-              managedPushFailed = true;
-            }
-            if (token) {
-              for (const itemId of managedSel.items!) {
-                emit({ type: "stdout", data: `  Pushing managed-objects "${itemId}" (vendored)...\n`, ts: Date.now() });
-                try {
-                  await pushManagedObjects({
-                    configDir: tempConfigDir,
-                    tenantUrl,
-                    token,
-                    name: itemId,
-                    log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
-                  });
-                } catch (err) {
-                  managedPushFailed = true;
-                  emit({ type: "stderr", data: `  Push failed for "${itemId}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
-                }
+            for (const itemId of managedSel.items!) {
+              emit({ type: "stdout", data: `  Pushing managed-objects "${itemId}" (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushManagedObjects({
+                  configDir: tempConfigDir,
+                  tenantUrl: tenantUrlForPush,
+                  token,
+                  name: itemId,
+                  log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
+                });
+              } catch (err) {
+                managedPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for "${itemId}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
               }
             }
           }
         }
 
-        // Remove managed-objects from the spawn set when we handled it above.
-        const spawnPushScopes = managedSel && !directControl
-          ? pushScopes.filter((s) => s !== "managed-objects")
-          : pushScopes;
+        let scriptsPushFailed = false;
+        if (scriptsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            scriptsPushFailed = true;
+          } else {
+            const realms = targetEnvVarsForPush.REALMS ? (JSON.parse(targetEnvVarsForPush.REALMS) as string[]) : ["alpha"];
+            // Build uuid → script-name lookup from temp dir so per-name push works.
+            const uuidToScriptName = new Map<string, string>();
+            for (const dir of resolveScopeDirs(tempConfigDir, "scripts")) {
+              const cfgDir = path.join(dir, "scripts-config");
+              if (!fs.existsSync(cfgDir)) continue;
+              for (const f of fs.readdirSync(cfgDir)) {
+                if (!f.endsWith(".json")) continue;
+                try {
+                  const json = JSON.parse(fs.readFileSync(path.join(cfgDir, f), "utf-8"));
+                  if (json.name) uuidToScriptName.set(path.basename(f, ".json"), json.name);
+                } catch { /* skip */ }
+              }
+            }
+            for (const itemId of scriptsSel.items!) {
+              const baseId = itemId.replace(/\.json$/, "");
+              const scriptName = uuidToScriptName.get(baseId) ?? baseId;
+              emit({ type: "stdout", data: `  Pushing script "${scriptName}" (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushScripts({
+                  configDir: tempConfigDir,
+                  tenantUrl: tenantUrlForPush,
+                  token,
+                  realms,
+                  name: scriptName,
+                  log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
+                });
+              } catch (err) {
+                scriptsPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for "${scriptName}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
 
-        let pushFailed = managedPushFailed;
+        // Remove vendor-handled scopes from the spawn set.
+        const spawnPushScopes = pushScopes.filter((s) => {
+          if (directControl) return true;
+          if (managedSel && s === "managed-objects") return false;
+          if (scriptsSel && s === "scripts") return false;
+          return true;
+        });
+
+        let pushFailed = managedPushFailed || scriptsPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -676,18 +732,30 @@ export async function POST(req: NextRequest) {
 
           for (const sel of scopeSelections) {
             if (sel.scope === "scripts" && sel.items && sel.items.length > 0) {
-              // Pull each script by name
-              for (const itemId of sel.items) {
-                const scriptName = uuidToName.get(itemId) ?? uuidToName.get(itemId.replace(/\.json$/, "")) ?? itemId;
-                emit({ type: "stdout", data: `  Pulling script "${scriptName}"...\n`, ts: Date.now() });
-                const code = await new Promise<number | null>((resolve) => {
-                  const proc = spawnProc("fr-config-pull", ["scripts", "--name", scriptName], { env: pullEnv, shell: true, cwd: pullCwd });
-                  proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
-                  proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
-                  proc.on("close", (c) => resolve(c));
-                  proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
-                });
-                if (code !== 0) emit({ type: "stderr", data: `  Pull failed for "${scriptName}" (exit ${code})\n`, ts: Date.now() });
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              const realms = pullEnvVars.REALMS ? (JSON.parse(pullEnvVars.REALMS) as string[]) : ["alpha"];
+              const prefixes = pullEnvVars.SCRIPT_PREFIXES ? (JSON.parse(pullEnvVars.SCRIPT_PREFIXES) as string[]) : [""];
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping scripts pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) {
+                  emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  for (const itemId of sel.items) {
+                    const scriptName = uuidToName.get(itemId) ?? uuidToName.get(itemId.replace(/\.json$/, "")) ?? itemId;
+                    emit({ type: "stdout", data: `  Pulling script "${scriptName}" (vendored)...\n`, ts: Date.now() });
+                    try {
+                      await pullScripts({ exportDir, tenantUrl, token, realms, prefixes, name: scriptName, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+                    } catch (err) {
+                      emit({ type: "stderr", data: `  Pull failed for "${scriptName}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                    }
+                  }
+                }
               }
             } else if (sel.items && sel.items.length > 0) {
               // fr-config-pull managed-objects --name has an upstream bug (managed.js:66
