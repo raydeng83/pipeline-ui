@@ -1344,7 +1344,7 @@ function JourneyScriptRow({ sc, files, sourceLabel, targetLabel, journeyName, no
   );
 }
 
-function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [], selectedPaths, onTogglePath }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[]; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void }) {
+function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes, files, sourceLabel, targetLabel, sourceEnv, targetEnv, ancestorPath = [], selectedPaths, onTogglePath, hideUnchanged = false }: { node: JourneyTreeNode; depth: number; forceOpen?: boolean; forceSeq?: number; showScripts?: boolean; showNodes?: boolean; files: FileDiff[]; sourceLabel: string; targetLabel: string; sourceEnv: string; targetEnv: string; ancestorPath?: NavEntry[]; selectedPaths?: Set<string>; onTogglePath?: (path: string) => void; hideUnchanged?: boolean }) {
   const [open, setOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [graphInitialFocusNodeId, setGraphInitialFocusNodeId] = useState<string | null>(null);
@@ -1522,49 +1522,62 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
           )}
         </div>
       )}
-      {open && hasChildren && (
-        <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
-          {node.subJourneys.map((child) => (
-            <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
-          ))}
-          {showScripts && node.scripts.length > 0 && (
-            <div className="mt-1 space-y-0.5">
-              {node.scripts.map((sc) => (
-                <JourneyScriptRow
-                  key={sc.uuid}
-                  sc={sc}
-                  files={files}
-                  sourceLabel={sourceLabel}
-                  targetLabel={targetLabel}
-                  journeyName={node.name}
-                  nodeInfos={node.nodes}
-                  sourceEnv={sourceEnv}
-                  targetEnv={targetEnv}
-                  onViewInJourney={handleViewScriptInJourney}
-                />
-              ))}
-            </div>
-          )}
-          {showNodes && node.nodes.length > 0 && (
-            <div className="mt-1 space-y-0.5">
-              {node.nodes.map((nd) => {
-                const ns = JOURNEY_STATUS_STYLES[nd.status] ?? JOURNEY_STATUS_STYLES.unchanged;
-                return (
-                  <div key={nd.uuid} className="flex items-center gap-1.5 py-0.5 text-xs">
-                    <span className="w-3 shrink-0" />
-                    <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V19.5m0 2.25l-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
-                    </svg>
-                    <span className="text-slate-500 truncate" title={`${nd.nodeType} (${nd.uuid})`}>{nd.name}</span>
-                    <span className="text-[10px] text-slate-400 shrink-0">{nd.nodeType}</span>
-                    <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ns.badge)}>{ns.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+      {open && hasChildren && (() => {
+        // When "Hide unchanged" is on, drop unchanged sub-journeys, scripts,
+        // and individual nodes so the expanded branch shows only deltas.
+        const visibleSubs = hideUnchanged
+          ? node.subJourneys.filter((s) => s.status !== "unchanged")
+          : node.subJourneys;
+        const visibleScripts = hideUnchanged
+          ? node.scripts.filter((s) => s.status !== "unchanged")
+          : node.scripts;
+        const visibleNodes = hideUnchanged
+          ? node.nodes.filter((n) => n.status !== "unchanged")
+          : node.nodes;
+        return (
+          <div className="ml-4 border-l border-slate-200 pl-3 mt-0.5 space-y-0.5">
+            {visibleSubs.map((child) => (
+              <JourneyNode key={child.name} node={child} depth={depth + 1} forceOpen={forceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} ancestorPath={childAncestorPath} selectedPaths={selectedPaths} onTogglePath={onTogglePath} hideUnchanged={hideUnchanged} />
+            ))}
+            {showScripts && visibleScripts.length > 0 && (
+              <div className="mt-1 space-y-0.5">
+                {visibleScripts.map((sc) => (
+                  <JourneyScriptRow
+                    key={sc.uuid}
+                    sc={sc}
+                    files={files}
+                    sourceLabel={sourceLabel}
+                    targetLabel={targetLabel}
+                    journeyName={node.name}
+                    nodeInfos={node.nodes}
+                    sourceEnv={sourceEnv}
+                    targetEnv={targetEnv}
+                    onViewInJourney={handleViewScriptInJourney}
+                  />
+                ))}
+              </div>
+            )}
+            {showNodes && visibleNodes.length > 0 && (
+              <div className="mt-1 space-y-0.5">
+                {visibleNodes.map((nd) => {
+                  const ns = JOURNEY_STATUS_STYLES[nd.status] ?? JOURNEY_STATUS_STYLES.unchanged;
+                  return (
+                    <div key={nd.uuid} className="flex items-center gap-1.5 py-0.5 text-xs">
+                      <span className="w-3 shrink-0" />
+                      <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V19.5m0 2.25l-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
+                      </svg>
+                      <span className="text-slate-500 truncate" title={`${nd.nodeType} (${nd.uuid})`}>{nd.name}</span>
+                      <span className="text-[10px] text-slate-400 shrink-0">{nd.nodeType}</span>
+                      <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ns.badge)}>{ns.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
       {graphOpen && (
         <JourneyDiffGraphModal
           journeyName={node.name}
@@ -1748,7 +1761,7 @@ function JourneyTreeSection({ tree, forceOpen: parentForceOpen, forceSeq: parent
               <p className="text-xs text-slate-400 italic">No journeys match the filter.</p>
             ) : (
               filtered.slice(page * pageSize, (page + 1) * pageSize).map((node) => (
-                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} selectedPaths={selectedPaths} onTogglePath={onTogglePath} />
+                <JourneyNode key={node.name} node={node} depth={0} forceOpen={localForceOpen} forceSeq={forceSeq} showScripts={showScripts} showNodes={showNodes} files={files} sourceLabel={sourceLabel} targetLabel={targetLabel} sourceEnv={sourceEnv} targetEnv={targetEnv} selectedPaths={selectedPaths} onTogglePath={onTogglePath} hideUnchanged={hideUnchanged} />
               ))
             )}
           </div>

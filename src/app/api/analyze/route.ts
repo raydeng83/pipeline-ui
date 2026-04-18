@@ -92,7 +92,8 @@ export async function POST(req: NextRequest) {
         for (const nodeFile of fs.readdirSync(nodesDir)) {
           const fp = path.join(nodesDir, nodeFile);
           if (fs.statSync(fp).isDirectory()) continue;
-          const uuidMatch = nodeFile.match(/- ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
+          // Accept both "NodeType - uuid.json" and "NodeType_-_uuid.json" filename conventions.
+          const uuidMatch = nodeFile.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
           try {
             const nodeData = JSON.parse(fs.readFileSync(fp, "utf-8")) as {
               tree?: string; script?: string; _type?: { _id?: string; name?: string };

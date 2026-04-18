@@ -386,7 +386,9 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
             if (fs.statSync(fp).isDirectory()) continue;
             try {
               const nd = JSON.parse(fs.readFileSync(fp, "utf-8")) as { tree?: string; script?: string; _type?: { _id?: string; name?: string }; _id?: string };
-              const m = nf.match(/- ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
+              // Accept both "NodeType - uuid.json" and "NodeType_-_uuid.json"
+              // (vendored pull replaces spaces with underscores).
+              const m = nf.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
               const uuid = m?.[1] ?? nd._id ?? "";
               const nodeType = nd._type?._id ?? "unknown";
               const nodeName = nd._type?.name ?? nf.replace(/\s*-\s*[0-9a-f-]+\.json$/i, "");
