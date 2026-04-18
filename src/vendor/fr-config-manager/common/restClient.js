@@ -39,4 +39,12 @@ async function restGet(url, params, token) {
   return httpRequest({ method: "GET", url, params }, token);
 }
 
-module.exports = { restGet };
+async function restPut(url, data, token, apiVersion, ifMatch, ifNoneMatch) {
+  const headers = { "Content-Type": "application/json" };
+  if (apiVersion) headers["Accept-Api-Version"] = apiVersion;
+  if (ifMatch) headers["If-Match"] = ifMatch;
+  if (ifNoneMatch) headers["If-None-Match"] = ifNoneMatch;
+  return httpRequest({ method: "PUT", url, data, headers }, token);
+}
+
+module.exports = { restGet, restPut };
