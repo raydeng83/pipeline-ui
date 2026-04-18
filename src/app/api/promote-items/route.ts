@@ -308,12 +308,25 @@ export async function POST(req: NextRequest) {
               // because IDM tries to resolve cross-relationships against siblings that are
               // no longer in objects[]. Seed the temp dir with target's full set first,
               // then overlay the selected source items so unselected siblings stay unchanged.
+              fs.mkdirSync(destDir, { recursive: true });
               const targetSrcDir = path.join(targetConfigDir, relPath);
+              let seeded = 0;
+              let skipped = 0;
               if (fs.existsSync(targetSrcDir)) {
-                copyDirSync(targetSrcDir, destDir);
-                emit({ type: "stdout", data: `  Seeded managed-objects from target: ${relPath}\n`, ts: Date.now() });
-              } else {
-                fs.mkdirSync(destDir, { recursive: true });
+                // Only copy subdirs that have the expected <name>/<name>.json —
+                // fr-config-push fails with ENOENT on incomplete pull dirs otherwise.
+                for (const entry of fs.readdirSync(targetSrcDir, { withFileTypes: true })) {
+                  if (!entry.isDirectory()) continue;
+                  const objJson = path.join(targetSrcDir, entry.name, `${entry.name}.json`);
+                  if (!fs.existsSync(objJson)) {
+                    skipped += 1;
+                    emit({ type: "stdout", data: `  Skipping incomplete managed-object dir: ${entry.name} (missing ${entry.name}.json)\n`, ts: Date.now() });
+                    continue;
+                  }
+                  copyDirSync(path.join(targetSrcDir, entry.name), path.join(destDir, entry.name));
+                  seeded += 1;
+                }
+                emit({ type: "stdout", data: `  Seeded ${seeded} managed-object(s) from target${skipped ? ` (skipped ${skipped})` : ""}\n`, ts: Date.now() });
               }
               for (const itemId of sel.items) {
                 const srcItem = path.join(srcDir, itemId);
