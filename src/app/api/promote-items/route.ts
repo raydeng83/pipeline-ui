@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config";
+import { dispatchFrConfig } from "@/lib/fr-config-dispatch";
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
@@ -1319,17 +1320,24 @@ export async function POST(req: NextRequest) {
                 }
                 continue;
               }
-              // Non-script scopes with item selection: pull by --name if supported
+              // Non-script scopes with item selection: dispatch in-process
+              // (vendored functions). No CLI spawn.
               for (const itemId of sel.items) {
-                emit({ type: "stdout", data: `  Pulling ${sel.scope} "${itemId}"...\n`, ts: Date.now() });
-                const code = await new Promise<number | null>((resolve) => {
-                  const proc = spawnProc("fr-config-pull", [sel.scope, "--name", itemId], { env: pullEnv, shell: true, cwd: pullCwd });
-                  proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
-                  proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
-                  proc.on("close", (c) => resolve(c));
-                  proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
+                emit({ type: "stdout", data: `  Pulling ${sel.scope} "${itemId}" (vendored)...\n`, ts: Date.now() });
+                const result = await dispatchFrConfig({
+                  command: "fr-config-pull",
+                  scope: sel.scope,
+                  envVars: pullEnvVars as Record<string, string | undefined>,
+                  envDir: pullCwd,
+                  extraArgs: ["--name", itemId],
+                  extraEnv: {},
+                  emit: (data, type) => emit({ type, data, ts: Date.now() }),
                 });
-                if (code !== 0) emit({ type: "stderr", data: `  Pull failed for "${itemId}" (exit ${code})\n`, ts: Date.now() });
+                if (!result.handled) {
+                  emit({ type: "stderr", data: `  Scope "${sel.scope}" has no vendored pull — not supported.\n`, ts: Date.now() });
+                } else if ((result.code ?? 0) !== 0) {
+                  emit({ type: "stderr", data: `  Pull failed for "${itemId}" (exit ${result.code})\n`, ts: Date.now() });
+                }
               }
             } else if (isIdmFlatScope(sel.scope)) {
               const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
@@ -1581,16 +1589,22 @@ export async function POST(req: NextRequest) {
                 }
               }
             } else {
-              // Entire scope: pull all (still spawned for scopes we haven't vendored yet)
-              emit({ type: "stdout", data: `  Pulling ${sel.scope} (all)...\n`, ts: Date.now() });
-              const code = await new Promise<number | null>((resolve) => {
-                const proc = spawnProc("fr-config-pull", [sel.scope], { env: pullEnv, shell: true, cwd: pullCwd });
-                proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
-                proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
-                proc.on("close", (c) => resolve(c));
-                proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
+              // Entire scope: pull all — dispatch in-process (vendored).
+              emit({ type: "stdout", data: `  Pulling ${sel.scope} (all, vendored)...\n`, ts: Date.now() });
+              const result = await dispatchFrConfig({
+                command: "fr-config-pull",
+                scope: sel.scope,
+                envVars: pullEnvVars as Record<string, string | undefined>,
+                envDir: pullCwd,
+                extraArgs: [],
+                extraEnv: {},
+                emit: (data, type) => emit({ type, data, ts: Date.now() }),
               });
-              if (code !== 0) emit({ type: "stderr", data: `  Pull failed for ${sel.scope} (exit ${code})\n`, ts: Date.now() });
+              if (!result.handled) {
+                emit({ type: "stderr", data: `  Scope "${sel.scope}" has no vendored pull — not supported.\n`, ts: Date.now() });
+              } else if ((result.code ?? 0) !== 0) {
+                emit({ type: "stderr", data: `  Pull failed for ${sel.scope} (exit ${result.code})\n`, ts: Date.now() });
+              }
             }
           }
 
