@@ -579,7 +579,9 @@ export async function POST(req: NextRequest) {
         const igaWorkflowsSel = scopeSelections.find((s) => s.scope === "iga-workflows");
         const termsSel = scopeSelections.find((s) => s.scope === "terms-and-conditions");
         const serviceObjectsSel = scopeSelections.find((s) => s.scope === "service-objects");
-        const rawSel = scopeSelections.find((s) => s.scope === "raw");
+        // "raw" isn't in ConfigScope, so this comparison is currently always false
+        // by the type system. Kept for future alignment if the type is extended.
+        const rawSel = scopeSelections.find((s) => (s.scope as string) === "raw");
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -1014,7 +1016,7 @@ export async function POST(req: NextRequest) {
           if (igaWorkflowsSel && s === "iga-workflows") return false;
           if (termsSel && s === "terms-and-conditions") return false;
           if (serviceObjectsSel && s === "service-objects") return false;
-          if (rawSel && s === "raw") return false;
+          if (rawSel && (s as string) === "raw") return false;
           return true;
         });
 
@@ -1248,7 +1250,7 @@ export async function POST(req: NextRequest) {
                   }
                 }
               }
-            } else if (sel.scope === "email-provider" || sel.scope === "schedules" || sel.scope === "iga-workflows" || sel.scope === "terms-and-conditions" || sel.scope === "service-objects" || sel.scope === "raw") {
+            } else if (sel.scope === "email-provider" || sel.scope === "schedules" || sel.scope === "iga-workflows" || sel.scope === "terms-and-conditions" || sel.scope === "service-objects" || (sel.scope as string) === "raw") {
               const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
               if (!tenantUrl) {
                 emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping ${sel.scope} pull.\n`, ts: Date.now() });
@@ -1276,7 +1278,7 @@ export async function POST(req: NextRequest) {
                         // service-objects pull needs a descriptor file; skip gracefully if none.
                         const descriptorFile = pullEnvVars.SERVICE_OBJECTS_CONFIG_FILE ? path.resolve(pullCwd, pullEnvVars.SERVICE_OBJECTS_CONFIG_FILE) : undefined;
                         await pullServiceObjects({ exportDir, tenantUrl, token, descriptorFile, log: logLine });
-                      } else if (sel.scope === "raw") {
+                      } else if ((sel.scope as string) === "raw") {
                         const descriptorFile = pullEnvVars.RAW_CONFIG ? path.resolve(pullCwd, pullEnvVars.RAW_CONFIG) : undefined;
                         await pullRawConfig({ exportDir, tenantUrl, token, requestedPath: itemId, descriptorFile, log: logLine });
                       }
