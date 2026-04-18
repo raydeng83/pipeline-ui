@@ -663,6 +663,21 @@ export async function POST(req: NextRequest) {
                 if (code !== 0) emit({ type: "stderr", data: `  Pull failed for "${scriptName}" (exit ${code})\n`, ts: Date.now() });
               }
             } else if (sel.items && sel.items.length > 0) {
+              // fr-config-pull managed-objects --name has an upstream bug (managed.js:66
+              // uses `return` instead of `continue`, aborting on the first non-matching
+              // object). Pull the whole scope instead so all updated objects land on disk.
+              if (sel.scope === "managed-objects") {
+                emit({ type: "stdout", data: `  Pulling ${sel.scope} (all, workaround for --name upstream bug)...\n`, ts: Date.now() });
+                const code = await new Promise<number | null>((resolve) => {
+                  const proc = spawnProc("fr-config-pull", [sel.scope], { env: pullEnv, shell: true, cwd: pullCwd });
+                  proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
+                  proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
+                  proc.on("close", (c) => resolve(c));
+                  proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
+                });
+                if (code !== 0) emit({ type: "stderr", data: `  Pull failed for ${sel.scope} (exit ${code})\n`, ts: Date.now() });
+                continue;
+              }
               // Non-script scopes with item selection: pull by --name if supported
               for (const itemId of sel.items) {
                 emit({ type: "stdout", data: `  Pulling ${sel.scope} "${itemId}"...\n`, ts: Date.now() });
