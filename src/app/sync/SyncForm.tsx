@@ -235,6 +235,24 @@ export function SyncForm({
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ scopes }));
   }, [scopes]);
 
+  // Persisted collapse state for the two selector cards.
+  const [envsExpanded, setEnvsExpanded] = useState<boolean>(true);
+  const [scopesExpanded, setScopesExpanded] = useState<boolean>(true);
+  useEffect(() => {
+    try {
+      const e = localStorage.getItem("aic:sync:envsExpanded");
+      const s = localStorage.getItem("aic:sync:scopesExpanded");
+      if (e !== null) setEnvsExpanded(e !== "false");
+      if (s !== null) setScopesExpanded(s !== "false");
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("aic:sync:envsExpanded", String(envsExpanded)); } catch { /* ignore */ }
+  }, [envsExpanded]);
+  useEffect(() => {
+    try { localStorage.setItem("aic:sync:scopesExpanded", String(scopesExpanded)); } catch { /* ignore */ }
+  }, [scopesExpanded]);
+
   // Set initial active tab when jobs start
   useEffect(() => {
     if (jobs.length > 0 && !activeTab) setActiveTab(jobs[0].env);
@@ -296,17 +314,52 @@ export function SyncForm({
         <div className="space-y-5">
           {/* Environment list */}
           <div className="card overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
-              <span className="label-xs">ENVIRONMENTS</span>
+            <div
+              role="button"
+              tabIndex={0}
+              aria-expanded={envsExpanded}
+              onClick={() => setEnvsExpanded((v) => !v)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setEnvsExpanded((v) => !v);
+                }
+              }}
+              className={cn(
+                "flex items-center justify-between px-4 py-2.5 bg-slate-50 hover:bg-slate-100/70 transition-colors cursor-pointer select-none",
+                envsExpanded && "border-b border-slate-100",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <svg
+                  className={cn(
+                    "w-3 h-3 text-slate-400 transition-transform",
+                    envsExpanded ? "rotate-0" : "-rotate-90",
+                  )}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                <span className="label-xs">ENVIRONMENTS</span>
+                {!envsExpanded && (
+                  <span className="text-[11px] text-slate-400">
+                    {selectedEnvs.size} of {environments.length} selected
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
-                onClick={toggleAll}
+                onClick={(e) => { e.stopPropagation(); toggleAll(); }}
                 disabled={anyRunning}
                 className="text-xs text-sky-600 hover:text-sky-800 disabled:opacity-40"
               >
                 {allSelected ? "Deselect all" : "Select all"}
               </button>
             </div>
+            {envsExpanded && (
             <div className="divide-y divide-slate-100">
               {environments.map((env) => {
                 const checked = selectedEnvs.has(env.name);
@@ -373,15 +426,49 @@ export function SyncForm({
                 );
               })}
             </div>
+            )}
           </div>
 
           {/* Scope selector */}
-          <div className="card-padded">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="label-xs">SCOPES</span>
+          <div className="card overflow-hidden">
+            <div
+              role="button"
+              tabIndex={0}
+              aria-expanded={scopesExpanded}
+              onClick={() => setScopesExpanded((v) => !v)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setScopesExpanded((v) => !v);
+                }
+              }}
+              className={cn(
+                "flex items-center justify-between px-4 py-2.5 bg-slate-50 hover:bg-slate-100/70 transition-colors cursor-pointer select-none",
+                scopesExpanded && "border-b border-slate-100",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <svg
+                  className={cn(
+                    "w-3 h-3 text-slate-400 transition-transform",
+                    scopesExpanded ? "rotate-0" : "-rotate-90",
+                  )}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                <span className="label-xs">SCOPES</span>
+              </div>
               <span className="text-[11px] text-slate-400">{scopes.length} selected</span>
             </div>
-            <ScopeSelector selected={scopes} onChange={setScopes} disabled={anyRunning} action="pull" />
+            {scopesExpanded && (
+              <div className="px-4 py-3">
+                <ScopeSelector selected={scopes} onChange={setScopes} disabled={anyRunning} action="pull" />
+              </div>
+            )}
           </div>
 
           {/* Pull button */}
