@@ -370,11 +370,12 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Step 1b: Copy referenced sub-journeys and scripts so fr-config-push
+        // Step 1b: Copy referenced sub-journeys and scripts so the push step
         // can resolve InnerTreeEvaluatorNode / ScriptedDecisionNode references.
-        // Without this, the push fails with ENOENT when reading the inner journey file.
-        // These are copied from source even if includeDeps is false — they'll be
-        // pushed to target, but that's required for referential integrity.
+        // Without this, push fails with ENOENT when reading the inner journey
+        // file. These are copied from source even if includeDeps is false —
+        // they'll be pushed to target, but that's required for referential
+        // integrity.
         {
           const journeyScope = scopeSelections.find(
             (s) => s.scope === "journeys" && s.items && s.items.length > 0
