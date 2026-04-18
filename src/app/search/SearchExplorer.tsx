@@ -169,14 +169,21 @@ export function SearchExplorer({ environments }: Props) {
   }, [selected, env]);
 
   const grouped = useMemo(() => {
-    if (!data) return new Map<string, SearchFileResult[]>();
+    if (!data) return [] as { scope: string; files: SearchFileResult[] }[];
     const m = new Map<string, SearchFileResult[]>();
     for (const r of data.results) {
       const arr = m.get(r.scope) ?? [];
       arr.push(r);
       m.set(r.scope, arr);
     }
-    return m;
+    return Array.from(m.entries())
+      .map(([scope, files]) => ({ scope, files }))
+      .sort((a, b) => {
+        // "(root)" / unknown scopes sink to the bottom; everything else is alpha.
+        const rank = (s: string) => (s && s !== "other" ? 0 : 1);
+        const d = rank(a.scope) - rank(b.scope);
+        return d !== 0 ? d : a.scope.localeCompare(b.scope);
+      });
   }, [data]);
 
   const toggleExpand = (path: string) => {
@@ -357,10 +364,10 @@ export function SearchExplorer({ environments }: Props) {
               </span>
             </div>
             <div className="overflow-y-auto flex-1">
-              {Array.from(grouped.entries()).map(([scope, files]) => (
+              {grouped.map(({ scope, files }) => (
                 <div key={scope}>
                   <div className="sticky top-0 bg-slate-50/95 backdrop-blur px-4 py-1.5 border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                    {scope || "(root)"} · {files.length}
+                    {scope || "(root)"} · {files.length} file{files.length === 1 ? "" : "s"}
                   </div>
                   {files.map((f) => {
                     const isOpen = expanded.has(f.path);

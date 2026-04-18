@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import { getConfigDir } from "@/lib/fr-config";
+import { pathToScopeItem } from "@/lib/scope-paths";
 import type { SearchResponse, SearchFileResult, SearchMatch } from "@/app/search/types";
 
 export const dynamic = "force-dynamic";
@@ -161,7 +162,11 @@ export async function GET(req: NextRequest) {
     if (matches.length === 0) continue;
     if (results.length >= MAX_RESULTS) { truncated = true; break; }
 
-    const scope = rel.split("/")[0] ?? "";
+    // Map the on-disk path back to a config scope (journeys, scripts,
+    // managed-objects, …) so results group by scope rather than by the
+    // top-level directory, which for realm-based paths is just the realm.
+    const parsed = pathToScopeItem(rel);
+    const scope = parsed?.scope ?? (rel.split("/")[0] ?? "");
     results.push({ path: rel, scope, matches });
     totalMatches += matches.length;
   }
