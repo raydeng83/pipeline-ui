@@ -337,3 +337,127 @@ export async function pushOrgPrivileges(opts: {
 }): Promise<void> {
   await orgPrivilegesPush.pushOrgPrivileges(opts);
 }
+
+// ── cookie-domains ───────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cookieDomainsPull = require("./pull/cookie-domains.js") as {
+  pullCookieDomains: (opts: { exportDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullCookieDomains(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await cookieDomainsPull.pullCookieDomains(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cookieDomainsPush = require("./push/update-cookie-domains.js") as {
+  pushCookieDomains: (opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushCookieDomains(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await cookieDomainsPush.pushCookieDomains(opts);
+}
+
+// ── cors ─────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const corsPull = require("./pull/cors.js") as {
+  pullCors: (opts: { exportDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullCors(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await corsPull.pullCors(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const corsPush = require("./push/update-cors.js") as {
+  pushCors: (opts: { configDir: string; tenantUrl: string; token: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushCors(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await corsPush.pushCors(opts);
+}
+
+// ── csp ──────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cspPull = require("./pull/csp.js") as {
+  pullCsp: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullCsp(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await cspPull.pullCsp(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cspPush = require("./push/update-csp.js") as {
+  pushCsp: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushCsp(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await cspPush.pushCsp(opts);
+}
+
+// ── locales ──────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const localesPull = require("./pull/locales.js") as {
+  pullLocales: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullLocales(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await localesPull.pullLocales(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const localesPush = require("./push/update-locales.js") as {
+  pushLocales: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushLocales(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await localesPush.pushLocales(opts);
+}
