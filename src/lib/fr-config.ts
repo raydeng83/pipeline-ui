@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { parseEnvFile } from "./env-parser";
 import { dispatchFrConfig } from "./fr-config-dispatch";
+import { getAccessToken } from "./iga-api";
 export type { FrCommand, ConfigScope, Environment, RunOptions, ScopeSelection } from "./fr-config-types";
 export { CONFIG_SCOPES, FILENAME_FILTER_SCOPES, NAME_FLAG_SCOPES } from "./fr-config-types";
 import type { Environment, RunOptions, ScopeSelection } from "./fr-config-types";
@@ -183,6 +184,18 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
 
       let anyFailed = false;
 
+      // Acquire one bearer token up front and share it across every
+      // dispatched scope. The JWT exchange takes ~200–400ms on a cold cache;
+      // paying that N times per pull was showing up as "first item is slow".
+      let sharedToken: string | undefined;
+      try {
+        sharedToken = await getAccessToken(baseEnv as Record<string, string>);
+      } catch (err) {
+        encode(`token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, "stderr");
+        // Continue — individual dispatches will retry per-scope and surface
+        // their own errors, matching the pre-cache behavior.
+      }
+
       // Group consecutive entries by scope so the log viewer shows one section per scope
       let currentScope: string | null = null;
 
@@ -232,6 +245,7 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             extraArgs: [...globalArgs, ...entry.extraArgs],
             extraEnv: entry.extraEnv,
             emit: captureEmit,
+            token: sharedToken,
           });
 
           if (dispatched.handled) {

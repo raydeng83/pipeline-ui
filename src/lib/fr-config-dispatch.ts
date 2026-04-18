@@ -28,6 +28,12 @@ export interface DispatchInput {
   /** filenameFilter etc. */
   extraEnv: Record<string, string>;
   emit: (data: string, type: "stdout" | "stderr") => void;
+  /**
+   * Optional pre-acquired bearer token. When provided, skips the
+   * getAccessToken() call — lets a caller share one token across many
+   * dispatches in the same pull/push run (spawnFrConfig does this).
+   */
+  token?: string;
 }
 
 export interface DispatchResult {
@@ -101,8 +107,10 @@ export async function dispatchFrConfig(input: DispatchInput): Promise<DispatchRe
   const filterItems = itemsFromFilter(extraEnv.filenameFilter);
   const log = (line: string) => emit(line, "stdout");
 
-  // Acquire token lazily — only if the scope actually calls through to REST.
-  let token: string | null = null;
+  // Reuse the caller's pre-acquired token when available; otherwise fetch
+  // one lazily via getAccessToken(). Callers that run many scopes in a row
+  // (spawnFrConfig) pass a shared token so the JWT exchange only happens once.
+  let token: string | null = input.token ?? null;
   const getToken = async () => {
     if (token) return token;
     try {
