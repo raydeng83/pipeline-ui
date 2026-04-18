@@ -34,7 +34,17 @@ async function pullOidcProviders({ exportDir, tenantUrl, token, realms, name, lo
     const servicesBase = `${tenantUrl}/am/json/realms/root/realms/${realm}/realm-config/services/SocialIdentityProviders`;
     emit(`POST ${servicesBase} (nextdescendents)\n`);
     // restPost 5-arg form: url, params, data, token, apiVersion
-    const res = await restPost(servicesBase, { _action: "nextdescendents" }, null, token, "protocol=1.0,resource=1.0");
+    let res;
+    try {
+      res = await restPost(servicesBase, { _action: "nextdescendents" }, null, token, "protocol=1.0,resource=1.0");
+    } catch (err) {
+      // AIC returns 400 when SocialIdentityProviders has no configured descendents
+      if (err && err.response && err.response.status === 400) {
+        emit(`  ℹ no OIDC providers to export in realm ${realm}\n`);
+        continue;
+      }
+      throw err;
+    }
     const providers = res.data.result ?? [];
 
     const targetDir = path.join(exportDir, "realms", realm, SUBDIR);

@@ -36,7 +36,17 @@ async function pullServices({ exportDir, tenantUrl, realms, token, name, log }) 
 
     const amEndpoint = `${tenantUrl}/am/json/realms/root/realms/${realm}/realm-config/services`;
     emit(`GET ${amEndpoint}\n`);
-    const response = await restGet(amEndpoint, { _queryFilter: "true" }, token);
+    let response;
+    try {
+      response = await restGet(amEndpoint, { _queryFilter: "true" }, token);
+    } catch (err) {
+      // AIC returns 400 for empty services in some realms — treat as "nothing to export"
+      if (err && err.response && err.response.status === 400) {
+        emit(`  ℹ no services to export in realm ${realm}\n`);
+        continue;
+      }
+      throw err;
+    }
     const services = response.data.result;
 
     for (const service of services) {

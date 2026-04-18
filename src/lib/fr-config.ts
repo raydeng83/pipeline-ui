@@ -237,6 +237,12 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             await sleep(RETRY_DELAY_MS);
           }
 
+          // Decide whether the previous attempt failed with an auth error
+          // before we clear lastStderr. Only 401/403 justify burning a fresh
+          // token; other failures (400, 5xx, network) retry with same token.
+          const needsAuthRefresh = attempt > 0 &&
+            /status code (401|403)|\bHTTP\s*(401|403)\b/i.test(lastStderr);
+
           lastStderr = "";
           lastStdout = "";
           const envDir = path.join(ENVIRONMENTS_DIR, environment);
@@ -246,10 +252,7 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             encode(data, type);
           };
 
-          // Refresh if cache expired; force-refresh on retries so an expired
-          // or invalidated token from the previous attempt doesn't repeat the
-          // same 401.
-          const tokenForScope = await refreshToken(attempt > 0);
+          const tokenForScope = await refreshToken(needsAuthRefresh);
 
           // Try in-process dispatch first (for fr-config-pull / fr-config-push
           // scopes we've vendored). Falls through to spawn only for frodo and
