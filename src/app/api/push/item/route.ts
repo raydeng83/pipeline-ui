@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
+import { findRealmContaining } from "@/lib/realm-paths";
 import fs from "fs";
 import path from "path";
 
@@ -61,32 +62,6 @@ const REALM_SCOPE_SUBDIR: Record<string, string> = {
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-
-/**
- * Returns the realm-root directory whose <subpath> exists, or null.
- * Supports both on-disk layouts:
- *   - configDir/realms/<realm>/<subpath>   (upstream-style)
- *   - configDir/<realm>/<subpath>           (vendored pull output)
- * Callers use the returned root to derive sibling paths (e.g. scripts content).
- */
-function findRealmContaining(configDir: string, subpath: string): string | null {
-  const realmsRoot = path.join(configDir, "realms");
-  if (fs.existsSync(realmsRoot)) {
-    for (const e of fs.readdirSync(realmsRoot, { withFileTypes: true })) {
-      if (!e.isDirectory()) continue;
-      const root = path.join(realmsRoot, e.name);
-      if (fs.existsSync(path.join(root, subpath))) return root;
-    }
-  }
-  if (fs.existsSync(configDir)) {
-    for (const e of fs.readdirSync(configDir, { withFileTypes: true })) {
-      if (!e.isDirectory() || e.name === "realms") continue;
-      const root = path.join(configDir, e.name);
-      if (fs.existsSync(path.join(root, subpath))) return root;
-    }
-  }
-  return null;
-}
 
 function readFile(filePath: string): ViewableFile | null {
   if (!fs.existsSync(filePath)) return null;

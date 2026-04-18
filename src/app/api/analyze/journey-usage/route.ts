@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
+import { getRealmRoots } from "@/lib/realm-paths";
 import fs from "fs";
 import path from "path";
 
@@ -18,9 +19,6 @@ export async function GET(req: NextRequest) {
   const configDir = getConfigDir(env);
   if (!configDir) return NextResponse.json({ error: "Config dir not found" }, { status: 404 });
 
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return NextResponse.json({ usedBy: [] });
-
   const usedBy: {
     journey: string;
     nodeName: string;
@@ -28,11 +26,8 @@ export async function GET(req: NextRequest) {
     nodeUuid: string;
   }[] = [];
 
-  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-    if (!realm.isDirectory()) continue;
-    const journeysDir = path.join(realmsDir, realm.name, "journeys");
-    if (!fs.existsSync(journeysDir)) continue;
-
+  for (const realmRoot of getRealmRoots(configDir, "journeys")) {
+    const journeysDir = path.join(realmRoot, "journeys");
     for (const jDir of fs.readdirSync(journeysDir, { withFileTypes: true })) {
       if (!jDir.isDirectory()) continue;
       if (jDir.name === journeyName) continue; // skip self

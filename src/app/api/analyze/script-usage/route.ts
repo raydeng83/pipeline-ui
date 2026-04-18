@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
+import { getRealmRoots } from "@/lib/realm-paths";
 import fs from "fs";
 import path from "path";
 
 /** Resolve script UUID(s) from a human-readable name by scanning scripts-config dirs. */
-function resolveScriptIdsByName(realmsDir: string, scriptName: string): string[] {
+function resolveScriptIdsByName(configDir: string, scriptName: string): string[] {
   const ids: string[] = [];
-  if (!fs.existsSync(realmsDir)) return ids;
-  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-    if (!realm.isDirectory()) continue;
-    const scriptsConfigDir = path.join(realmsDir, realm.name, "scripts", "scripts-config");
-    if (!fs.existsSync(scriptsConfigDir)) continue;
+  for (const realmRoot of getRealmRoots(configDir, "scripts/scripts-config")) {
+    const scriptsConfigDir = path.join(realmRoot, "scripts", "scripts-config");
     for (const file of fs.readdirSync(scriptsConfigDir)) {
       const fp = path.join(scriptsConfigDir, file);
       try {
@@ -35,25 +33,16 @@ export async function GET(req: NextRequest) {
   const configDir = getConfigDir(env);
   if (!configDir) return NextResponse.json({ error: "Config dir not found" }, { status: 404 });
 
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return NextResponse.json({ usedBy: [] });
-
-  // If only a name is provided, resolve it to UUID(s) first
   let resolvedIds: string[] | null = null;
   if (!scriptId && scriptName) {
-    resolvedIds = resolveScriptIdsByName(realmsDir, scriptName);
+    resolvedIds = resolveScriptIdsByName(configDir, scriptName);
     if (resolvedIds.length === 0) return NextResponse.json({ usedBy: [] });
   }
 
-  // If scriptId is provided, find usage for that specific script
-  // If not, return all script usages (for the full panel)
   const usedBy: { journey: string; nodeName: string; nodeType: string; nodeUuid: string; scriptUuid: string; scriptName: string }[] = [];
 
-  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-    if (!realm.isDirectory()) continue;
-    const journeysDir = path.join(realmsDir, realm.name, "journeys");
-    if (!fs.existsSync(journeysDir)) continue;
-
+  for (const realmRoot of getRealmRoots(configDir, "journeys")) {
+    const journeysDir = path.join(realmRoot, "journeys");
     for (const jDir of fs.readdirSync(journeysDir, { withFileTypes: true })) {
       if (!jDir.isDirectory()) continue;
       const nodesDir = path.join(journeysDir, jDir.name, "nodes");

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
+import { getRealmRoots } from "@/lib/realm-paths";
 import fs from "fs";
 import path from "path";
 
@@ -17,17 +18,14 @@ export interface EndpointUsageRef {
 
 /** Resolve script UUID + name from content file name + context directory. */
 function resolveScriptByName(
-  realmsDir: string,
+  configDir: string,
   scriptName: string,
   context: string,
 ): { id: string; name: string } | null {
-  if (!fs.existsSync(realmsDir)) return null;
-  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-    if (!realm.isDirectory()) continue;
-    const configDir = path.join(realmsDir, realm.name, "scripts", "scripts-config");
-    if (!fs.existsSync(configDir)) continue;
-    for (const file of fs.readdirSync(configDir)) {
-      const fp = path.join(configDir, file);
+  for (const realmRoot of getRealmRoots(configDir, "scripts/scripts-config")) {
+    const scriptsConfigDir = path.join(realmRoot, "scripts", "scripts-config");
+    for (const file of fs.readdirSync(scriptsConfigDir)) {
+      const fp = path.join(scriptsConfigDir, file);
       try {
         const json = JSON.parse(fs.readFileSync(fp, "utf-8"));
         if (json.name === scriptName && json.context === context) {
@@ -54,30 +52,24 @@ export async function GET(req: NextRequest) {
   const usedBy: EndpointUsageRef[] = [];
 
   // ── 1. Journey scripts ─────────────────────────────────────────────────────
-  const realmsDir = path.join(configDir, "realms");
-  if (fs.existsSync(realmsDir)) {
-    for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-      if (!realm.isDirectory()) continue;
-      const scriptsContentDir = path.join(realmsDir, realm.name, "scripts", "scripts-content");
-      if (!fs.existsSync(scriptsContentDir)) continue;
+  for (const realmRoot of getRealmRoots(configDir, "scripts/scripts-content")) {
+    const scriptsContentDir = path.join(realmRoot, "scripts", "scripts-content");
+    for (const ctxEntry of fs.readdirSync(scriptsContentDir, { withFileTypes: true })) {
+      if (!ctxEntry.isDirectory()) continue;
+      const ctxDir = path.join(scriptsContentDir, ctxEntry.name);
 
-      for (const ctxEntry of fs.readdirSync(scriptsContentDir, { withFileTypes: true })) {
-        if (!ctxEntry.isDirectory()) continue;
-        const ctxDir = path.join(scriptsContentDir, ctxEntry.name);
-
-        for (const sf of fs.readdirSync(ctxDir, { withFileTypes: true })) {
-          if (!sf.isFile()) continue;
-          const fp = path.join(ctxDir, sf.name);
-          try {
-            const content = fs.readFileSync(fp, "utf-8");
-            if (!content.includes(pattern)) continue;
-            const scriptName = path.basename(sf.name, path.extname(sf.name));
-            const resolved = resolveScriptByName(realmsDir, scriptName, ctxEntry.name);
-            if (resolved && !usedBy.some((r) => r.type === "script" && r.scriptId === resolved.id)) {
-              usedBy.push({ type: "script", scriptId: resolved.id, scriptName: resolved.name });
-            }
-          } catch { /* skip */ }
-        }
+      for (const sf of fs.readdirSync(ctxDir, { withFileTypes: true })) {
+        if (!sf.isFile()) continue;
+        const fp = path.join(ctxDir, sf.name);
+        try {
+          const content = fs.readFileSync(fp, "utf-8");
+          if (!content.includes(pattern)) continue;
+          const scriptName = path.basename(sf.name, path.extname(sf.name));
+          const resolved = resolveScriptByName(configDir, scriptName, ctxEntry.name);
+          if (resolved && !usedBy.some((r) => r.type === "script" && r.scriptId === resolved.id)) {
+            usedBy.push({ type: "script", scriptId: resolved.id, scriptName: resolved.name });
+          }
+        } catch { /* skip */ }
       }
     }
   }
