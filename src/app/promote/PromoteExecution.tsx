@@ -1569,6 +1569,7 @@ export function PromoteExecution({
   const [dryRunReport, setDryRunReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
   const [verifyReport, setVerifyReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
   const [promoteLogs, setPromoteLogs] = useState<LogEntry[]>([]);
+  const [restartKey, setRestartKey] = useState(0);
   useEffect(() => { setIncludeDeps(task.includeDeps ?? false); }, [task.id, task.includeDeps]);
   const hasJourneys = task.items.some((i) => i.scope === "journeys");
 
@@ -1781,6 +1782,7 @@ export function PromoteExecution({
     setDryRunReport(null);
     setVerifyReport(null);
     setPromoteLogs([]);
+    setRestartKey((k) => k + 1);
     historyEmittedRef.current = false;
     runStartedAtRef.current = null;
     setDirty(false);
@@ -1899,6 +1901,7 @@ export function PromoteExecution({
 
         {/* All phase panels — always mounted, only active one visible */}
         <DryRunPhase
+          key={`dry-run-${restartKey}`}
           task={task}
           visible={activePhase === "dry-run"}
           includeDeps={includeDeps}
@@ -1908,6 +1911,7 @@ export function PromoteExecution({
           onReport={setDryRunReport}
         />
         <PromotePhase
+          key={`promote-${restartKey}`}
           task={task}
           frConfigScopes={frConfigScopes}
           frodoScopes={frodoScopes}
