@@ -33,3 +33,33 @@ export async function pullManagedObjects(opts: {
     opts.token,
   );
 }
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pushMod = require("./push/update-managed-objects.js") as {
+  updateManagedObjects: (opts: {
+    configDir: string;
+    tenantUrl: string;
+    token: string;
+    name?: string;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+/**
+ * Push managed-objects from `configDir/managed-objects/**` to `tenantUrl`.
+ *
+ * When `name` is passed, only that object is sent; the function GETs the
+ * target's current full config, splices in the one object, and PUTs back —
+ * so sibling objects aren't accidentally reset. When `name` is omitted,
+ * every subdir under `configDir/managed-objects/` is pushed as a full
+ * replace (matches fr-config-push's default behavior).
+ */
+export async function pushManagedObjects(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await pushMod.updateManagedObjects(opts);
+}
