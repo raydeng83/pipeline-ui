@@ -69,9 +69,46 @@ function pillClasses(status: ScopeStatus): string {
   return "bg-slate-100 text-slate-500 ring-1 ring-slate-200";
 }
 
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightMatches(text: string, query: string): React.ReactNode {
+  if (!query || !text) return text;
+  const regex = new RegExp(`(${escapeRegex(query)})`, "gi");
+  const parts = text.split(regex);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <mark key={i} className="bg-yellow-400/40 text-yellow-100 rounded-sm px-0.5">{part}</mark>
+    ) : (
+      part
+    )
+  );
+}
+
+function countMatches(text: string, query: string): number {
+  if (!query || !text) return 0;
+  const lower = query.toLowerCase();
+  const haystack = text.toLowerCase();
+  let count = 0;
+  let idx = 0;
+  while (true) {
+    idx = haystack.indexOf(lower, idx);
+    if (idx === -1) break;
+    count++;
+    idx += lower.length;
+  }
+  return count;
+}
+
 export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: LogViewerProps) {
   const mainPaneRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [filterMode, setFilterMode] = useState(false);
 
   // SyncForm mutates the logs array in place and bumps a tick to re-render,
   // so the array reference is stable but length grows. Keying these memos on
@@ -87,6 +124,17 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
     () => logs.filter((e) => e.type === "stdout" || e.type === "stderr" || e.type === "error" || e.type === "exit" || e.type === "scope-start" || e.type === "scope-end"),
     [logs, logs.length],
   );
+
+  const matchCount = useMemo(() => {
+    if (!search) return 0;
+    let total = 0;
+    for (const e of flatLines) {
+      if (e.type === "stdout" || e.type === "stderr" || e.type === "error") {
+        total += countMatches(e.data ?? "", search);
+      }
+    }
+    return total;
+  }, [flatLines, search]);
 
   const handleCopy = () => {
     const text = logs
@@ -110,6 +158,27 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [logs, logs.length]);
+
+  useEffect(() => {
+    if (logs.length === 0) {
+      setSearch("");
+      setSearchOpen(false);
+      setFilterMode(false);
+    }
+  }, [logs.length]);
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  const handleToggleSearch = () => {
+    if (searchOpen) {
+      setSearch("");
+      setSearchOpen(false);
+    } else {
+      setSearchOpen(true);
+    }
+  };
 
   const statusText =
     exitCode === null
@@ -158,6 +227,16 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
         )}
         {logs.length > 0 && (
           <div className="ml-auto flex items-center gap-3 text-[11px] text-slate-500">
+            <button
+              onClick={handleToggleSearch}
+              className={cn(
+                "transition-colors",
+                searchOpen ? "text-sky-600 hover:text-sky-700" : "hover:text-slate-800",
+              )}
+              title="Search logs"
+            >
+              Search
+            </button>
             <button onClick={handleCopy} className="hover:text-slate-800 transition-colors">
               {copied ? "Copied" : "Copy"}
             </button>
@@ -167,6 +246,50 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
           </div>
         )}
       </div>
+
+      {/* Search bar — filter/highlight log lines by keyword. */}
+      {searchOpen && (
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 border-b border-slate-200/60">
+          <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Escape") handleToggleSearch(); }}
+            placeholder="Search logs…"
+            className="flex-1 bg-transparent text-[12px] font-mono text-slate-700 placeholder-slate-400 outline-none"
+          />
+          {search && (
+            <span className="text-[10px] font-mono text-slate-500 shrink-0">
+              {matchCount} match{matchCount !== 1 ? "es" : ""}
+            </span>
+          )}
+          <button
+            onClick={() => setFilterMode((f) => !f)}
+            className={cn(
+              "text-[10px] px-1.5 py-0.5 rounded transition-colors shrink-0",
+              filterMode
+                ? "bg-sky-600 text-white"
+                : "text-slate-500 hover:text-slate-700",
+            )}
+            title={filterMode ? "Showing only matching lines" : "Showing all lines with highlights"}
+          >
+            Filter
+          </button>
+          <button
+            onClick={() => { setSearch(""); searchInputRef.current?.focus(); }}
+            className="text-slate-400 hover:text-slate-600 shrink-0"
+            title="Clear search"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Scope pills — compact status row above the log pane. */}
       {scopeRows.length > 0 && (
@@ -224,6 +347,9 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
               </div>
             );
           }
+          if (filterMode && search && !(entry.data ?? "").toLowerCase().includes(search.toLowerCase())) {
+            return null;
+          }
           return (
             <div
               key={i}
@@ -234,7 +360,7 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
                 entry.type === "stdout" && "text-slate-100",
               )}
             >
-              {entry.data}
+              {search ? highlightMatches(entry.data ?? "", search) : entry.data}
             </div>
           );
         })}
