@@ -94,8 +94,7 @@ function ScopeRow({
           entry.items.length > 0 ? "cursor-pointer select-none" : "cursor-default",
           included
             ? "bg-sky-50 border-l-sky-500 hover:bg-sky-100"
-            : "bg-slate-100 border-l-transparent hover:bg-slate-200",
-          !included && "opacity-60",
+            : "bg-slate-50 border-l-transparent hover:bg-slate-100",
         )}
         onClick={entry.items.length > 0 ? () => setOpen((o) => !o) : undefined}
       >
@@ -388,6 +387,8 @@ export function PromotionItemPicker({
       })
     : null;
 
+  const [searchQuery, setSearchQuery] = useState("");
+
   const includedCount = Object.keys(selections).length;
   const totalItems = auditData
     ? auditData.reduce((sum, e) => {
@@ -451,31 +452,51 @@ export function PromotionItemPicker({
         {/* Body */}
         <div className="flex overflow-hidden" style={{ maxHeight: 460 }}>
           {/* Left nav */}
-          <div className="w-32 shrink-0 border-r border-slate-200 overflow-y-auto bg-slate-50">
-            {loading
-              ? Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="h-7 mx-2 my-1 rounded bg-slate-200 animate-pulse" />
-                ))
-              : (sortedAuditData ?? []).map((entry) => {
-                  const included = Object.prototype.hasOwnProperty.call(selections, entry.scope);
-                  return (
-                    <button
-                      key={entry.scope}
-                      type="button"
-                      onClick={() => scrollToScope(entry.scope)}
-                      className={cn(
-                        "w-full text-left px-2.5 py-1.5 text-[11px] leading-tight transition-colors border-l-2",
-                        activeScope === entry.scope
-                          ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
-                          : "border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700",
-                        !included && "opacity-40"
-                      )}
-                    >
-                      {scopeLabel(entry.scope)}
-                    </button>
-                  );
-                })
-            }
+          <div className="w-32 shrink-0 border-r border-slate-200 flex flex-col bg-slate-50">
+            <div className="px-2 py-1.5 border-b border-slate-200">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search…"
+                className="w-full text-[10px] px-2 py-1 rounded border border-slate-200 bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+              />
+            </div>
+            <div className="overflow-y-auto flex-1">
+              {loading
+                ? Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="h-7 mx-2 my-1 rounded bg-slate-200 animate-pulse" />
+                  ))
+                : (sortedAuditData ?? [])
+                    .filter((entry) => {
+                      if (!searchQuery.trim()) return true;
+                      const q = searchQuery.toLowerCase();
+                      // Match scope label or any item label/id
+                      if (scopeLabel(entry.scope).toLowerCase().includes(q)) return true;
+                      return entry.items.some((i) => i.label.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
+                    })
+                    .map((entry) => {
+                      const included = Object.prototype.hasOwnProperty.call(selections, entry.scope);
+                      return (
+                        <button
+                          key={entry.scope}
+                          type="button"
+                          onClick={() => scrollToScope(entry.scope)}
+                          className={cn(
+                            "w-full text-left px-2.5 py-1.5 text-[11px] leading-tight transition-colors border-l-2",
+                            activeScope === entry.scope
+                              ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
+                              : included
+                                ? "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-700"
+                                : "border-transparent text-slate-400 hover:bg-slate-100 hover:text-slate-500"
+                          )}
+                        >
+                          {scopeLabel(entry.scope)}
+                        </button>
+                      );
+                    })
+              }
+            </div>
           </div>
 
           {/* Scope rows */}
@@ -487,7 +508,14 @@ export function PromotionItemPicker({
                     <div className="h-3 flex-1 bg-slate-100 rounded" />
                   </div>
                 ))
-              : (sortedAuditData ?? []).map((entry) => (
+              : (sortedAuditData ?? [])
+                  .filter((entry) => {
+                    if (!searchQuery.trim()) return true;
+                    const q = searchQuery.toLowerCase();
+                    if (scopeLabel(entry.scope).toLowerCase().includes(q)) return true;
+                    return entry.items.some((i) => i.label.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
+                  })
+                  .map((entry) => (
                   <div
                     key={entry.scope}
                     data-scope={entry.scope}
