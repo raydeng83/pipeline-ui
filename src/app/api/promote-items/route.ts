@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -569,6 +569,8 @@ export async function POST(req: NextRequest) {
         const corsSel = scopeSelections.find((s) => s.scope === "cors");
         const cspSel = scopeSelections.find((s) => s.scope === "csp");
         const localesSel = scopeSelections.find((s) => s.scope === "locales");
+        const endpointsSel = scopeSelections.find((s) => s.scope === "endpoints");
+        const internalRolesSel = scopeSelections.find((s) => s.scope === "internal-roles");
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -824,6 +826,44 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let endpointsPushFailed = false;
+        if (endpointsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            endpointsPushFailed = true;
+          } else {
+            const items = endpointsSel.items && endpointsSel.items.length > 0 ? endpointsSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing endpoint${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushEndpoints({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+              } catch (err) {
+                endpointsPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for endpoints${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
+
+        let internalRolesPushFailed = false;
+        if (internalRolesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            internalRolesPushFailed = true;
+          } else {
+            const items = internalRolesSel.items && internalRolesSel.items.length > 0 ? internalRolesSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing internal-role${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushInternalRoles({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+              } catch (err) {
+                internalRolesPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for internal-roles${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
@@ -837,10 +877,12 @@ export async function POST(req: NextRequest) {
           if (corsSel && s === "cors") return false;
           if (cspSel && s === "csp") return false;
           if (localesSel && s === "locales") return false;
+          if (endpointsSel && s === "endpoints") return false;
+          if (internalRolesSel && s === "internal-roles") return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed || endpointsPushFailed || internalRolesPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -1067,6 +1109,33 @@ export async function POST(req: NextRequest) {
                     await pullOrgPrivileges({ exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
                   } catch (err) {
                     emit({ type: "stderr", data: `  Pull failed for org-privileges: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
+            } else if (sel.scope === "endpoints" || sel.scope === "internal-roles") {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping ${sel.scope} pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  const logLine = (line: string) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() });
+                  const items = sel.items && sel.items.length > 0 ? sel.items : [undefined];
+                  for (const itemId of items) {
+                    emit({ type: "stdout", data: `  Pulling ${sel.scope}${itemId ? ` "${itemId}"` : ""} (vendored)...\n`, ts: Date.now() });
+                    try {
+                      if (sel.scope === "endpoints") {
+                        await pullEndpoints({ exportDir, tenantUrl, token, name: itemId, log: logLine });
+                      } else {
+                        await pullInternalRoles({ exportDir, tenantUrl, token, name: itemId, log: logLine });
+                      }
+                    } catch (err) {
+                      emit({ type: "stderr", data: `  Pull failed for ${sel.scope}${itemId ? ` "${itemId}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                    }
                   }
                 }
               }
