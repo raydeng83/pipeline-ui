@@ -725,3 +725,54 @@ const rawPush = require("./push/update-raw.js") as {
 export async function pushRawConfig(opts: { configDir: string; tenantUrl: string; token: string; requestedPath?: string; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
   await rawPush.pushRawConfig(opts);
 }
+
+// ── authz-policies ───────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const authzPull = require("./pull/authz-policies.js") as {
+  pullAuthzPolicies: (opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullAuthzPolicies(opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }): Promise<void> {
+  await authzPull.pullAuthzPolicies(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const authzPush = require("./push/update-policies.js") as {
+  pushAuthzPolicies: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushAuthzPolicies(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; log?: (line: string) => void }): Promise<void> {
+  await authzPush.pushAuthzPolicies(opts);
+}
+
+// ── oauth2-agents ────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const agentsPull = require("./pull/oauth2-agents.js") as {
+  pullOauth2Agents: (opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullOauth2Agents(opts: { exportDir: string; tenantUrl: string; token: string; descriptorFile?: string; log?: (line: string) => void }): Promise<void> {
+  await agentsPull.pullOauth2Agents(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const agentsPush = require("./push/update-agents.js") as {
+  pushOauth2Agents: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; envVars?: Record<string, string | undefined>; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushOauth2Agents(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; envVars?: Record<string, string | undefined>; log?: (line: string) => void }): Promise<void> {
+  await agentsPush.pushOauth2Agents(opts);
+}
+
+// ── services ─────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const servicesPull = require("./pull/services.js") as {
+  pullServices: (opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pullServices(opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
+  await servicesPull.pullServices(opts);
+}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const servicesPush = require("./push/update-services.js") as {
+  pushServices: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+export async function pushServices(opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }): Promise<void> {
+  await servicesPush.pushServices(opts);
+}
