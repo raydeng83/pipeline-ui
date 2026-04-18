@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  serverExternalPackages: ["axios"],
 };
 
 export default nextConfig;
