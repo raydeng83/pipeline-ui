@@ -30,7 +30,7 @@ function decodeOrNot(input, encoded) {
   return isBase64(input) ? Buffer.from(input, "base64").toString("utf-8") : input;
 }
 
-function processThemes(themes, fileDir, name) {
+function processThemes(themes, fileDir, name, emit) {
   for (const theme of themes) {
     if (name && name !== theme.name) continue;
 
@@ -57,6 +57,7 @@ function processThemes(themes, fileDir, name) {
     }
 
     fs.writeFileSync(path.join(themePath, `${theme.name}.json`), JSON.stringify(theme, null, 2));
+    emit(`  ← ${theme.name}\n`);
   }
 }
 
@@ -74,7 +75,7 @@ async function pullThemes({ exportDir, tenantUrl, realms, token, name, log }) {
     if (!response.data.realm || !response.data.realm[realm]) continue;
 
     const fileDir = path.join(exportDir, realm, EXPORT_SUB_DIR);
-    processThemes(response.data.realm[realm], fileDir, name);
+    processThemes(response.data.realm[realm], fileDir, name, emit);
   }
 }
 

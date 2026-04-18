@@ -65,6 +65,8 @@ async function processJourneys(ctx) {
     if (clean) fs.rmSync(nodeDir, { recursive: true, force: true });
     if (!fs.existsSync(nodeDir)) fs.mkdirSync(nodeDir, { recursive: true });
 
+    emit(`  ← ${realm}/${journey._id}\n`);
+
     for (const [nodeId, nodeInfo] of Object.entries(journey.nodes)) {
       const nodeType = nodeInfo.nodeType;
       nodeCache = await cacheNodesByType(nodeCache, nodeType, tenantUrl, realm, token);

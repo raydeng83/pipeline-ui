@@ -28,6 +28,7 @@ async function pullInternalRoles({ exportDir, tenantUrl, token, name, log }) {
     if (name && name !== role.name) continue;
     if (!role.privileges || role.privileges.length === 0) continue;
     fs.writeFileSync(path.join(targetDir, `${role.name}.json`), JSON.stringify(role, null, 2));
+    emit(`  ← ${role.name}\n`);
   }
 }
 

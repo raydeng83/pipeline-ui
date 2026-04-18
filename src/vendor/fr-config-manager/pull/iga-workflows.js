@@ -50,6 +50,7 @@ async function pullIgaWorkflows({ exportDir, tenantUrl, token, name, includeImmu
     if (!fs.existsSync(workflowPath)) fs.mkdirSync(workflowPath, { recursive: true });
     breakoutSteps(workflow, workflowPath);
     fs.writeFileSync(path.join(workflowPath, `${workflow.name}.json`), JSON.stringify(workflow, null, 2));
+    emit(`  ← ${workflow.name}\n`);
   }
 
   if (name && !workflowFound) emit(`Workflow ${name} not found\n`);

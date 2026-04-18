@@ -47,6 +47,7 @@ async function pullOidcProviders({ exportDir, tenantUrl, token, realms, name, lo
         path.join(targetDir, `${providerId}.json`),
         JSON.stringify(escapePlaceholders(provider), null, 2),
       );
+      emit(`  ← ${realm}/${providerId}\n`);
     }
   }
 }

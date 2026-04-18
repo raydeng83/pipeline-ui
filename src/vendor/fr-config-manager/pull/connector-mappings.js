@@ -46,6 +46,7 @@ async function pullConnectorMappings({ exportDir, tenantUrl, token, name, log })
       }
     }
     fs.writeFileSync(path.join(mappingPath, `${mapping.name}.json`), JSON.stringify(mapping, null, 2));
+    emit(`  ← ${mapping.name}\n`);
   }
 }
 

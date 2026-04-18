@@ -43,6 +43,7 @@ async function pullTelemetry({ exportDir, tenantUrl, token, name, category, log 
         }
       }
       fs.writeFileSync(path.join(jsonDir, `${provider.id}.json`), JSON.stringify(provider, null, 2));
+      emit(`  ← ${telemetryCategory}/${provider.id}\n`);
     }
   }
 }

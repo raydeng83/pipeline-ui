@@ -26,6 +26,7 @@ async function pullConnectorDefinitions({ exportDir, tenantUrl, token, name, log
     const connectorName = connector._id.split("/")[1];
     if (name && name !== connectorName) continue;
     fs.writeFileSync(path.join(fileDir, `${connectorName}.json`), JSON.stringify(connector, null, 2));
+    emit(`  ← ${connectorName}\n`);
   }
 }
 

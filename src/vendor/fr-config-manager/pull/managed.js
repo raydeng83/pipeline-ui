@@ -62,10 +62,13 @@ async function processManagedObjects(
   name,
   pullCustomRelationships,
   tenantUrl,
-  token
+  token,
+  emit
 ) {
-  //console.log("managed objects", JSON.stringify(managedObjects, null, 2));
+  emit = typeof emit === "function" ? emit : () => {};
   try {
+    const matching = name ? managedObjects.filter((o) => o.name === name) : managedObjects;
+    emit(`Writing ${matching.length} managed-object${matching.length === 1 ? "" : "s"}\n`);
     for (const managedObject of managedObjects) {
       if (name && name !== managedObject.name) {
         // LOCAL PATCH: upstream uses `return` here, which aborts the loop on
@@ -73,6 +76,7 @@ async function processManagedObjects(
         // --name silently wrote nothing whenever the target wasn't first.
         continue;
       }
+      emit(`  ← ${managedObject.name}\n`);
 
       const objectPath = path.join(targetDir, managedObject.name);
 
@@ -160,27 +164,26 @@ async function exportManagedObjects(
   tenantUrl,
   name,
   pullCustomRelationships,
-  token
+  token,
+  log
 ) {
-  try {
-    const idmEndpoint = `${tenantUrl}/openidm/config/managed`;
+  const emit = typeof log === "function" ? log : () => {};
+  const idmEndpoint = `${tenantUrl}/openidm/config/managed`;
+  emit(`GET ${idmEndpoint}\n`);
+  const response = await restGet(idmEndpoint, null, token);
 
-    const response = await restGet(idmEndpoint, null, token);
+  const managedObjects = response.data.objects;
 
-    const managedObjects = response.data.objects;
-
-    const fileDir = path.join(exportDir, EXPORT_SUBDIR);
-    await processManagedObjects(
-      managedObjects,
-      fileDir,
-      name,
-      pullCustomRelationships,
-      tenantUrl,
-      token
-    );
-  } catch (err) {
-    console.log(err);
-  }
+  const fileDir = path.join(exportDir, EXPORT_SUBDIR);
+  await processManagedObjects(
+    managedObjects,
+    fileDir,
+    name,
+    pullCustomRelationships,
+    tenantUrl,
+    token,
+    emit,
+  );
 }
 
 module.exports.exportManagedObjects = exportManagedObjects;

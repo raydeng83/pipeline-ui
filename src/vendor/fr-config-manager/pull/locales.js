@@ -31,9 +31,9 @@ async function pullLocales({ exportDir, tenantUrl, token, name, log }) {
     if (name && name !== localeName) continue;
 
     const idmEndpoint = `${tenantUrl}/openidm/config/${locale._id}`;
-    emit(`GET ${idmEndpoint}\n`);
     const response = await restGet(idmEndpoint, null, token);
     fs.writeFileSync(path.join(dir, `${localeName}.json`), JSON.stringify(response.data, null, 2));
+    emit(`  ← ${localeName}\n`);
   }
 }
 

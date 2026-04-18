@@ -29,6 +29,7 @@ async function pullIdmFlatConfig({ exportDir, subdir, filename, endpointName, te
   const targetDir = path.join(exportDir, subdir);
   if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
   fs.writeFileSync(path.join(targetDir, filename), JSON.stringify(response.data, null, 2));
+  emit(`  ← ${subdir}/${filename}\n`);
 }
 
 module.exports = { pullIdmFlatConfig };

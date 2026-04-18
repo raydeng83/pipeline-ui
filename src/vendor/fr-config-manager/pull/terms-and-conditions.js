@@ -29,6 +29,8 @@ async function pullTermsAndConditions({ exportDir, tenantUrl, token, name, log }
     const versionPath = path.join(fileDir, version.version);
     if (!fs.existsSync(versionPath)) fs.mkdirSync(versionPath, { recursive: true });
 
+    emit(`  ← version ${version.version} (${Object.keys(version.termsTranslations ?? {}).length} lang)\n`);
+
     for (const [language, text] of Object.entries(version.termsTranslations ?? {})) {
       const relFileName = path.join(version.version, `${language}.html`);
       fs.writeFileSync(path.join(fileDir, relFileName), text);

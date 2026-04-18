@@ -44,7 +44,6 @@ async function pullAmAgents({ exportDir, tenantUrl, token, realms, name, log }) 
       if (name && name !== agentId) continue;
 
       const agentUrl = `${agentsBase}/${agentType}/${agentId}`;
-      emit(`GET ${agentUrl}\n`);
       const agent = (await restGet(agentUrl, null, token)).data;
 
       const typeDir = path.join(exportDir, "realms", realm, BASE_SUBDIR, agentType);
@@ -53,6 +52,7 @@ async function pullAmAgents({ exportDir, tenantUrl, token, realms, name, log }) 
         path.join(typeDir, `${agentId}.json`),
         JSON.stringify(escapePlaceholders(agent), null, 2),
       );
+      emit(`  ← ${realm}/${agentType}/${agentId}\n`);
     }
   }
 }

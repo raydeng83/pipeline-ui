@@ -40,6 +40,7 @@ async function pullEndpoints({ exportDir, tenantUrl, token, name, log }) {
       path.join(endpointDir, `${endpointName}.json`),
       JSON.stringify(endpoint, null, 2),
     );
+    emit(`  ← ${endpointName}\n`);
   }
 }
 

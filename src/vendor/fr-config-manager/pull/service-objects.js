@@ -68,6 +68,7 @@ async function pullServiceObjects({ exportDir, tenantUrl, token, descriptorFile,
       const targetDir = path.join(exportDir, "service-objects", objectType);
       if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
       fs.writeFileSync(path.join(targetDir, `${systemObject.searchValue}.json`), JSON.stringify(merged, null, 2));
+      emit(`  ← ${objectType}/${systemObject.searchValue}\n`);
     }
   }
 }

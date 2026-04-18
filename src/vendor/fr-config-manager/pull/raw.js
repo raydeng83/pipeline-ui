@@ -70,6 +70,7 @@ async function pullRawConfig({ exportDir, tenantUrl, token, requestedPath, reque
     const dir = path.dirname(fullPath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(fullPath, JSON.stringify(config, null, 2));
+    emit(`  ← ${urlPath.replace(/^\//, "")}\n`);
   }
 }
 

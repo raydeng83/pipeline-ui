@@ -30,6 +30,7 @@ async function pullRemoteServers({ exportDir, tenantUrl, token, log }) {
   const dir = path.join(exportDir, "sync", "rcs");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "provisioner.openicf.connectorinfoprovider.json"), JSON.stringify(response.data, null, 2));
+  emit(`  ← provisioner.openicf.connectorinfoprovider.json\n`);
 }
 
 module.exports = { pullRemoteServers };

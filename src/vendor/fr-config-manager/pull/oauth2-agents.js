@@ -62,6 +62,7 @@ async function pullOauth2Agents({ exportDir, tenantUrl, token, descriptorFile, l
         const targetDir = path.join(exportDir, "realms", realm, EXPORT_SUBDIR, agentType);
         if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
         fs.writeFileSync(path.join(targetDir, `${agentId}.json`), JSON.stringify(config, null, 2));
+        emit(`  ← ${realm}/${agentType}/${agentId}\n`);
       }
     }
   }

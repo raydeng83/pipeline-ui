@@ -69,6 +69,7 @@ async function pullSecrets({ exportDir, tenantUrl, token, name, activeOnly, log 
     }
 
     fs.writeFileSync(path.join(targetDir, `${secret._id}.json`), JSON.stringify(secretObject, null, 2));
+    emit(`  ← ${secret._id}\n`);
   }
 }
 

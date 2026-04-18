@@ -33,6 +33,7 @@ async function pullPasswordPolicy({ exportDir, tenantUrl, realms, token, log }) 
       path.join(targetDir, `${objectName}-password-policy.json`),
       JSON.stringify(response.data, null, 2),
     );
+    emit(`  ← ${realm}/${objectName}-password-policy\n`);
   }
 }
 

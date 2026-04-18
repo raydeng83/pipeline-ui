@@ -22,7 +22,8 @@ async function saveResourceType(exportDir, resourceTypeUuid, realm, tenantUrl, t
   fs.writeFileSync(path.join(resourceTypeDir, `${resourceType.name}.json`), JSON.stringify(resourceType, null, 2));
 }
 
-async function exportPolicies(exportDir, targetDir, realm, policySet, tenantUrl, token) {
+async function exportPolicies(exportDir, targetDir, realm, policySet, tenantUrl, token, emit) {
+  const log = typeof emit === "function" ? emit : () => {};
   const policyDir = path.join(targetDir, "policies");
   if (!fs.existsSync(policyDir)) fs.mkdirSync(policyDir, { recursive: true });
 
@@ -31,6 +32,7 @@ async function exportPolicies(exportDir, targetDir, realm, policySet, tenantUrl,
 
   for (const policy of response.data.result) {
     fs.writeFileSync(path.join(policyDir, `${policy.name}.json`), JSON.stringify(policy, null, 2));
+    log(`    ← policy ${policy.name}\n`);
     if (policy.resourceTypeUuid) {
       await saveResourceType(exportDir, policy.resourceTypeUuid, realm, tenantUrl, token);
     }
@@ -58,8 +60,9 @@ async function pullAuthzPolicies({ exportDir, tenantUrl, token, descriptorFile, 
       const targetDir = path.join(exportDir, "realms", realm, EXPORT_SUBDIR, "policy-sets", policySet);
       if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
       fs.writeFileSync(path.join(targetDir, `${policySet}.json`), JSON.stringify(response.data, null, 2));
+      emit(`  ← ${realm}/policy-sets/${policySet}\n`);
 
-      await exportPolicies(exportDir, targetDir, realm, policySet, tenantUrl, token);
+      await exportPolicies(exportDir, targetDir, realm, policySet, tenantUrl, token, emit);
     }
   }
 }

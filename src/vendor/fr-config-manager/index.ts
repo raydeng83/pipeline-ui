@@ -10,6 +10,7 @@ const managed = require("./pull/managed.js") as {
     name: string | undefined,
     pullCustomRelationships: boolean,
     token: string,
+    log?: (line: string) => void,
   ) => Promise<void>;
 };
 
@@ -24,6 +25,7 @@ export async function pullManagedObjects(opts: {
   token: string;
   name?: string;
   pullCustomRelationships?: boolean;
+  log?: (line: string) => void;
 }): Promise<void> {
   await managed.exportManagedObjects(
     opts.exportDir,
@@ -31,6 +33,7 @@ export async function pullManagedObjects(opts: {
     opts.name,
     opts.pullCustomRelationships ?? false,
     opts.token,
+    opts.log,
   );
 }
 

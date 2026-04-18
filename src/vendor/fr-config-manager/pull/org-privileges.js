@@ -37,6 +37,7 @@ async function pullOrgPrivileges({ exportDir, tenantUrl, token, name, log }) {
       path.join(filePath, `${configEntry}.json`),
       JSON.stringify(response.data, null, 2),
     );
+    emit(`  ← ${configEntry}\n`);
   }
 }
 

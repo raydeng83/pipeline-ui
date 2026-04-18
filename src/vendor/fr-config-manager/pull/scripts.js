@@ -53,6 +53,7 @@ function processScripts(scripts, exportDir, name, emit) {
     if (name && name !== script.name) continue;
     scriptNotFound = false;
     saveScriptToFile(script, exportDir);
+    emit(`  ← ${script.name}\n`);
   }
   if (name && scriptNotFound) emit(`Script not found: ${name}\n`);
 }

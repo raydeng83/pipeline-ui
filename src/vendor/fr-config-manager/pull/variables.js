@@ -27,13 +27,14 @@ async function pullVariables({ exportDir, tenantUrl, token, name, log }) {
   const targetDir = path.join(exportDir, SUBDIR);
   if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
-  for (const variable of variables) {
-    if (name && name !== variable._id) continue;
-    // Fields of interest: _id, description, expressionType, valueBase64, lastChangeDate.
-    // We intentionally strip mutable server-side fields that don't round-trip.
+  const matching = name ? variables.filter((v) => v._id === name) : variables;
+  emit(`Writing ${matching.length} variable${matching.length === 1 ? "" : "s"}\n`);
+
+  for (const variable of matching) {
     const { _id, description, expressionType, valueBase64 } = variable;
     const doc = { _id, description, expressionType, valueBase64 };
     fs.writeFileSync(path.join(targetDir, `${_id}.json`), JSON.stringify(doc, null, 2));
+    emit(`  ← ${_id}\n`);
   }
 }
 

@@ -44,9 +44,9 @@ async function pullServices({ exportDir, tenantUrl, realms, token, name, log }) 
       if (EXCLUDE_SERVICES.includes(serviceName)) continue;
       if (name && name !== serviceName) continue;
 
-      emit(`GET ${amEndpoint}/${serviceName}\n`);
       const serviceResponse = await restGet(`${amEndpoint}/${serviceName}`, null, token);
       fs.writeFileSync(path.join(targetDir, `${serviceName}.json`), JSON.stringify(serviceResponse.data, null, 2));
+      emit(`  ← ${realm}/${serviceName}\n`);
 
       await saveDescendents(targetDir, amEndpoint, serviceName, token, emit);
     }

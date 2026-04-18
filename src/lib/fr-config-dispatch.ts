@@ -126,11 +126,7 @@ export async function dispatchFrConfig(input: DispatchInput): Promise<DispatchRe
       switch (scope) {
         case "managed-objects":
           for (const n of (filterItems ?? (name ? [name] : [undefined as string | undefined]))) {
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const managedPullMod = require("@/vendor/fr-config-manager/pull/managed.js") as {
-              exportManagedObjects: (exportDir: string, tenantUrl: string, name: string | undefined, pullCustomRelationships: boolean, token: string) => Promise<void>;
-            };
-            await managedPullMod.exportManagedObjects(exportDir, tenantUrl, n, false, t);
+            await vendor.pullManagedObjects({ exportDir, tenantUrl, token: t, name: n, log });
           }
           return { handled: true, code: 0 };
         case "scripts":

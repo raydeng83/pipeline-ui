@@ -27,12 +27,13 @@ async function pullCsp({ exportDir, tenantUrl, token, name, log }) {
 
   for (const policy of policies) {
     const endpoint = `${tenantUrl}/environment/content-security-policy/${policy}`;
-    emit(`GET ${endpoint}\n`);
     const response = await restGet(endpoint, null, token);
     csp[policy] = response.data;
+    emit(`  ← ${policy}\n`);
   }
 
   fs.writeFileSync(path.join(dir, "csp.json"), JSON.stringify(csp, null, 2));
+  emit(`Wrote csp/csp.json\n`);
 }
 
 module.exports = { pullCsp, CSP_POLICIES };

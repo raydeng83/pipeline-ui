@@ -48,6 +48,7 @@ async function pullEmailTemplates({ exportDir, tenantUrl, token, name, log }) {
     }
 
     fs.writeFileSync(path.join(templatePath, `${templateName}.json`), JSON.stringify(template, null, 2));
+    emit(`  ← ${templateName}\n`);
   }
 }
 

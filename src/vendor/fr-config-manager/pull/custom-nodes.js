@@ -72,6 +72,7 @@ async function pullCustomNodes({ exportDir, tenantUrl, token, name, log }) {
 
     saveScriptToFile(node, exportSubDir);
     fs.writeFileSync(path.join(exportSubDir, `${nodeName}.json`), JSON.stringify(node, null, 2));
+    emit(`  ← ${nodeName}\n`);
   }
 
   if (name && !nodeFound) emit(`Custom node not found: ${name}\n`);

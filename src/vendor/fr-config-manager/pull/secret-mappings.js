@@ -27,6 +27,7 @@ async function pullSecretMappings({ exportDir, tenantUrl, realms, token, name, l
     for (const mapping of response.data.result ?? []) {
       if (name && name !== mapping._id) continue;
       fs.writeFileSync(path.join(targetDir, `${mapping._id}.json`), JSON.stringify(mapping, null, 2));
+      emit(`  ← ${realm}/${mapping._id}\n`);
     }
   }
 }

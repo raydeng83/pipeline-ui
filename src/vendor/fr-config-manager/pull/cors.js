@@ -51,6 +51,7 @@ async function pullCors({ exportDir, tenantUrl, token, log }) {
   const dir = path.join(exportDir, "cors");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "cors-config.json"), JSON.stringify(corsConfig, null, 2));
+  emit(`  ← cors-config.json (${(corsConfig.corsServices ?? []).length} service${(corsConfig.corsServices ?? []).length === 1 ? "" : "s"})\n`);
 }
 
 module.exports = { pullCors };

@@ -41,6 +41,7 @@ async function pullSchedules({ exportDir, tenantUrl, token, name, log }) {
     }
 
     fs.writeFileSync(path.join(scheduleDir, `${scheduleName}.json`), JSON.stringify(schedule, null, 2));
+    emit(`  ← ${scheduleName}\n`);
   }
 }
 

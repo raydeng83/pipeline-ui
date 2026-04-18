@@ -21,6 +21,7 @@ async function pullCookieDomains({ exportDir, tenantUrl, token, log }) {
   const dir = path.join(exportDir, "cookie-domains");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "cookie-domains.json"), JSON.stringify(response.data, null, 2));
+  emit(`  ← cookie-domains.json\n`);
 }
 
 module.exports = { pullCookieDomains };

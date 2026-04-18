@@ -90,6 +90,7 @@ async function pullSaml({ exportDir, tenantUrl, token, descriptorFile, log }) {
       const targetDir = path.join(exportDir, "realms", realm, EXPORT_SUBDIR, samlLocation);
       if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
       fs.writeFileSync(path.join(targetDir, `${fileName}.json`), JSON.stringify({ config, metadata }, null, 2));
+      emit(`  ← ${realm}/${samlLocation}/${fileName}\n`);
     }
 
     for (const cotName of samlConfig[realm].circlesOfTrust ?? []) {
@@ -100,6 +101,7 @@ async function pullSaml({ exportDir, tenantUrl, token, descriptorFile, log }) {
         const targetDir = path.join(exportDir, "realms", realm, EXPORT_SUBDIR, "COT");
         if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
         fs.writeFileSync(path.join(targetDir, `${cotName}.json`), JSON.stringify(cot, null, 2));
+        emit(`  ← ${realm}/COT/${cotName}\n`);
       } catch (e) {
         if (e?.response?.status === 404) {
           emit(`COT does not exist: ${cotName}\n`);

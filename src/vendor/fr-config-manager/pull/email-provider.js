@@ -21,6 +21,7 @@ async function pullEmailProvider({ exportDir, tenantUrl, token, log }) {
   const dir = path.join(exportDir, "email-provider");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "external.email.json"), JSON.stringify(response.data, null, 2));
+  emit(`  ← external.email.json\n`);
 }
 
 module.exports = { pullEmailProvider };
