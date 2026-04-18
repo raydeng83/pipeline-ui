@@ -695,6 +695,7 @@ function FrConfigSection({
   onComplete,
   onTaskStatusChange,
   onVerifyReport,
+  onLogsChange,
 }: {
   task: PromotionTask;
   targetIsControlled?: boolean;
@@ -704,9 +705,13 @@ function FrConfigSection({
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
   onVerifyReport: (r: import("@/lib/diff-types").CompareReport) => void;
+  onLogsChange: (logs: LogEntry[]) => void;
 }) {
   const { logs, running, exitCode, run, abort, clear } = useStreamingLogs();
   const { setBusy } = useBusyState();
+  const onLogsChangeRef = useRef(onLogsChange);
+  useEffect(() => { onLogsChangeRef.current = onLogsChange; });
+  useEffect(() => { onLogsChangeRef.current(logs); }, [logs]);
   const [promoteConfirmOpen, setPromoteConfirmOpen] = useState(false);
   const [verifyRunning, setVerifyRunning] = useState(false);
   const [verifyDone, setVerifyDone] = useState(false);
@@ -1234,6 +1239,7 @@ function PromotePhase({
   includeDeps,
   dryRunReport,
   onVerifyReport,
+  onPromoteLogs,
   onComplete,
   onTaskStatusChange,
 }: {
@@ -1247,6 +1253,7 @@ function PromotePhase({
   includeDeps: boolean;
   dryRunReport: import("@/lib/diff-types").CompareReport | null;
   onVerifyReport: (r: import("@/lib/diff-types").CompareReport) => void;
+  onPromoteLogs: (logs: LogEntry[]) => void;
   onComplete: (s: PhaseStatus) => void;
   onTaskStatusChange: (s: TaskStatus) => void;
 }) {
@@ -1280,6 +1287,7 @@ function PromotePhase({
               onComplete={onComplete}
               onTaskStatusChange={onTaskStatusChange}
               onVerifyReport={onVerifyReport}
+              onLogsChange={onPromoteLogs}
             />
           </div>
         )}
@@ -1315,15 +1323,19 @@ function SummaryPhase({
   visible,
   dryRunReport,
   verifyReport,
+  promoteLogs,
   phaseStatuses,
   onArchive,
+  onRestart,
 }: {
   task: PromotionTask;
   visible: boolean;
   dryRunReport: import("@/lib/diff-types").CompareReport | null;
   verifyReport: import("@/lib/diff-types").CompareReport | null;
+  promoteLogs: LogEntry[];
   phaseStatuses: Record<PhaseId, PhaseStatus>;
   onArchive: () => void;
+  onRestart: () => void;
 }) {
   const promoteStatus = phaseStatuses.promote;
   const succeeded = promoteStatus === "done";
@@ -1407,6 +1419,32 @@ function SummaryPhase({
               ))}
             </ul>
           </div>
+        )}
+
+        {/* Error logs for failed promotion */}
+        {failed && (() => {
+          const errorLogs = promoteLogs.filter((l) => l.type === "stderr" || l.type === "error");
+          return errorLogs.length > 0 ? (
+            <div>
+              <div className="label-xs mb-2">ERROR LOGS</div>
+              <div className="bg-slate-900 rounded-lg overflow-auto max-h-64 p-3 font-mono text-[11px] leading-5">
+                {errorLogs.map((l, i) => (
+                  <div key={i} className="whitespace-pre-wrap break-all text-red-400">{l.data}</div>
+                ))}
+              </div>
+            </div>
+          ) : null;
+        })()}
+
+        {/* Restart button for failed tasks */}
+        {failed && (
+          <button
+            type="button"
+            onClick={onRestart}
+            className="px-4 py-1.5 text-xs font-medium rounded bg-sky-600 text-white hover:bg-sky-700 transition-colors"
+          >
+            Restart Task
+          </button>
         )}
 
         {/* Items promoted */}
@@ -1508,6 +1546,7 @@ export function PromoteExecution({
   const [includeDeps, setIncludeDeps] = useState<boolean>(task.includeDeps ?? false);
   const [dryRunReport, setDryRunReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
   const [verifyReport, setVerifyReport] = useState<import("@/lib/diff-types").CompareReport | null>(null);
+  const [promoteLogs, setPromoteLogs] = useState<LogEntry[]>([]);
   useEffect(() => { setIncludeDeps(task.includeDeps ?? false); }, [task.id, task.includeDeps]);
   const hasJourneys = task.items.some((i) => i.scope === "journeys");
 
@@ -1705,6 +1744,23 @@ export function PromoteExecution({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phaseStatuses.promote]);
 
+  const handleRestart = () => {
+    setPhaseStatuses({
+      "dry-run": frConfigScopes.length > 0 ? "pending" : "skipped",
+      promote: "pending",
+      summary: "pending",
+    });
+    setActivePhase("dry-run");
+    setDryRunReport(null);
+    setVerifyReport(null);
+    setPromoteLogs([]);
+    historyEmittedRef.current = false;
+    runStartedAtRef.current = null;
+    setDirty(false);
+    // Reset task status back to new
+    onTaskStatusChange("new");
+  };
+
   const activeIdx = PHASE_DEFS.findIndex((p) => p.id === activePhase);
   const prevPhase = PHASE_DEFS
     .slice(0, activeIdx)
@@ -1829,6 +1885,7 @@ export function PromoteExecution({
           includeDeps={hasJourneys ? includeDeps : false}
           dryRunReport={dryRunReport}
           onVerifyReport={setVerifyReport}
+          onPromoteLogs={setPromoteLogs}
           onComplete={(s) => updatePhase("promote", s)}
           onTaskStatusChange={onTaskStatusChange}
         />
@@ -1837,8 +1894,10 @@ export function PromoteExecution({
           visible={activePhase === "summary"}
           dryRunReport={dryRunReport}
           verifyReport={verifyReport}
+          promoteLogs={promoteLogs}
           phaseStatuses={phaseStatuses}
           onArchive={onArchive}
+          onRestart={handleRestart}
         />
       </div>
     </div>

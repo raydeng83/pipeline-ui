@@ -49,13 +49,13 @@ export function readTasks(): PromotionTask[] {
   }
 }
 
-/** Active tasks (not archived). Auto-archives completed/failed tasks on read. */
+/** Active tasks (not archived). Auto-archives completed tasks on read; failed tasks stay active. */
 export function readActiveTasks(): PromotionTask[] {
   const all = readTasks();
   let changed = false;
   const now = new Date().toISOString();
   for (const t of all) {
-    if (!t.archivedAt && (t.status === "completed" || t.status === "failed")) {
+    if (!t.archivedAt && t.status === "completed") {
       t.archivedAt = now;
       changed = true;
     }
