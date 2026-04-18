@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles, pullEmailTemplates, pushEmailTemplates, pullCustomNodes, pushCustomNodes, pullThemes, pushThemes } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -571,6 +571,9 @@ export async function POST(req: NextRequest) {
         const localesSel = scopeSelections.find((s) => s.scope === "locales");
         const endpointsSel = scopeSelections.find((s) => s.scope === "endpoints");
         const internalRolesSel = scopeSelections.find((s) => s.scope === "internal-roles");
+        const emailTemplatesSel = scopeSelections.find((s) => s.scope === "email-templates");
+        const customNodesSel = scopeSelections.find((s) => s.scope === "custom-nodes");
+        const themesSel = scopeSelections.find((s) => s.scope === "themes");
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -864,6 +867,49 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let emailTemplatesPushFailed = false;
+        if (emailTemplatesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { emailTemplatesPushFailed = true; }
+          else {
+            const items = emailTemplatesSel.items && emailTemplatesSel.items.length > 0 ? emailTemplatesSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing email-template${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try { await pushEmailTemplates({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+              catch (err) { emailTemplatesPushFailed = true; emit({ type: "stderr", data: `  Push failed for email-templates${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+            }
+          }
+        }
+
+        let customNodesPushFailed = false;
+        if (customNodesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { customNodesPushFailed = true; }
+          else {
+            const items = customNodesSel.items && customNodesSel.items.length > 0 ? customNodesSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing custom-node${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try { await pushCustomNodes({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+              catch (err) { customNodesPushFailed = true; emit({ type: "stderr", data: `  Push failed for custom-nodes${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+            }
+          }
+        }
+
+        let themesPushFailed = false;
+        if (themesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { themesPushFailed = true; }
+          else {
+            const realms = targetEnvVarsForPush.REALMS ? (JSON.parse(targetEnvVarsForPush.REALMS) as string[]) : ["alpha"];
+            const items = themesSel.items && themesSel.items.length > 0 ? themesSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing theme${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try { await pushThemes({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, realms, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+              catch (err) { themesPushFailed = true; emit({ type: "stderr", data: `  Push failed for themes${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
@@ -879,10 +925,13 @@ export async function POST(req: NextRequest) {
           if (localesSel && s === "locales") return false;
           if (endpointsSel && s === "endpoints") return false;
           if (internalRolesSel && s === "internal-roles") return false;
+          if (emailTemplatesSel && s === "email-templates") return false;
+          if (customNodesSel && s === "custom-nodes") return false;
+          if (themesSel && s === "themes") return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed || endpointsPushFailed || internalRolesPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed || endpointsPushFailed || internalRolesPushFailed || emailTemplatesPushFailed || customNodesPushFailed || themesPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -1109,6 +1158,36 @@ export async function POST(req: NextRequest) {
                     await pullOrgPrivileges({ exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
                   } catch (err) {
                     emit({ type: "stderr", data: `  Pull failed for org-privileges: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
+            } else if (sel.scope === "email-templates" || sel.scope === "custom-nodes" || sel.scope === "themes") {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              const realms = pullEnvVars.REALMS ? (JSON.parse(pullEnvVars.REALMS) as string[]) : ["alpha"];
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping ${sel.scope} pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  const logLine = (line: string) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() });
+                  const items = sel.items && sel.items.length > 0 ? sel.items : [undefined];
+                  for (const itemId of items) {
+                    emit({ type: "stdout", data: `  Pulling ${sel.scope}${itemId ? ` "${itemId}"` : ""} (vendored)...\n`, ts: Date.now() });
+                    try {
+                      if (sel.scope === "email-templates") {
+                        await pullEmailTemplates({ exportDir, tenantUrl, token, name: itemId, log: logLine });
+                      } else if (sel.scope === "custom-nodes") {
+                        await pullCustomNodes({ exportDir, tenantUrl, token, name: itemId, log: logLine });
+                      } else if (sel.scope === "themes") {
+                        await pullThemes({ exportDir, tenantUrl, token, realms, name: itemId, log: logLine });
+                      }
+                    } catch (err) {
+                      emit({ type: "stderr", data: `  Pull failed for ${sel.scope}${itemId ? ` "${itemId}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                    }
                   }
                 }
               }
