@@ -336,11 +336,6 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
                                   No CLI
                                 </span>
                               )}
-                              {!isUnsupported && commandType === "frodo" && (
-                                <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200 leading-none">
-                                  frodo
-                                </span>
-                              )}
                               {!isUnsupported && commandType === "iga-api" && (
                                 <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-teal-100 text-teal-700 border border-teal-200 leading-none">
                                   IGA API
