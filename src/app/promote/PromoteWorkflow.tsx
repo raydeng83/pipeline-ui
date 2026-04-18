@@ -1193,7 +1193,7 @@ export function PromoteWorkflow({
               : "border-transparent text-slate-500 hover:text-slate-700"
           )}
         >
-          Tasks
+          Tasks {tasks.length > 0 && <span className="ml-1 text-xs text-slate-400">({tasks.length})</span>}
         </button>
         <button
           type="button"
