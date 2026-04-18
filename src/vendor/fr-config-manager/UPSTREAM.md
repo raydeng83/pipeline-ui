@@ -11,6 +11,8 @@
 - `push/update-managed-objects.js` — adapted from `packages/fr-config-push/src/scripts/update-managed-objects.js`
 - `push/update-scripts.js` — adapted from `packages/fr-config-push/src/scripts/update-scripts.js`
 - `push/update-auth-trees.js` — adapted from `packages/fr-config-push/src/scripts/update-auth-trees.js`
+- `pull/idm-flat-config.js` — adapted from `packages/fr-config-pull/src/scripts/idmFlatConfig.js`
+- `push/idm-flat-config.js` — generalizes five upstream scripts (`update-audit`, `update-idm-access-config`, `update-idm-authentication-config`, `update-kba-config`, `update-ui-config`) into one parameterized PUT
 
 ## Local patches
 
