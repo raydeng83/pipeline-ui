@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles, pullEmailTemplates, pushEmailTemplates, pullCustomNodes, pushCustomNodes, pullThemes, pushThemes, pullEmailProvider, pushEmailProvider, pullSchedules, pushSchedules, pullIgaWorkflows, pushIgaWorkflows, pullTermsAndConditions, pushTermsAndConditions, pullServiceObjects, pushServiceObjects, pullRawConfig, pushRawConfig } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles, pullEmailTemplates, pushEmailTemplates, pullCustomNodes, pushCustomNodes, pullThemes, pushThemes, pullEmailProvider, pushEmailProvider, pullSchedules, pushSchedules, pullIgaWorkflows, pushIgaWorkflows, pullTermsAndConditions, pushTermsAndConditions, pullServiceObjects, pushServiceObjects, pullRawConfig, pushRawConfig, pullAuthzPolicies, pushAuthzPolicies, pullOauth2Agents, pushOauth2Agents, pullServices, pushServices } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -582,6 +582,9 @@ export async function POST(req: NextRequest) {
         // "raw" isn't in ConfigScope, so this comparison is currently always false
         // by the type system. Kept for future alignment if the type is extended.
         const rawSel = scopeSelections.find((s) => (s.scope as string) === "raw");
+        const authzPoliciesSel = scopeSelections.find((s) => s.scope === "authz-policies");
+        const oauth2AgentsSel = scopeSelections.find((s) => s.scope === "oauth2-agents");
+        const servicesSel = scopeSelections.find((s) => s.scope === "services");
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -993,6 +996,45 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let authzPoliciesPushFailed = false;
+        if (authzPoliciesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { authzPoliciesPushFailed = true; }
+          else {
+            const realms = targetEnvVarsForPush.REALMS ? (JSON.parse(targetEnvVarsForPush.REALMS) as string[]) : ["alpha"];
+            emit({ type: "stdout", data: `  Pushing authz-policies (vendored)...\n`, ts: Date.now() });
+            try { await pushAuthzPolicies({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, realms, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+            catch (err) { authzPoliciesPushFailed = true; emit({ type: "stderr", data: `  Push failed for authz-policies: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+          }
+        }
+
+        let oauth2AgentsPushFailed = false;
+        if (oauth2AgentsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { oauth2AgentsPushFailed = true; }
+          else {
+            const realms = targetEnvVarsForPush.REALMS ? (JSON.parse(targetEnvVarsForPush.REALMS) as string[]) : ["alpha"];
+            emit({ type: "stdout", data: `  Pushing oauth2-agents (vendored)...\n`, ts: Date.now() });
+            try { await pushOauth2Agents({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, realms, envVars: targetEnvVarsForPush, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+            catch (err) { oauth2AgentsPushFailed = true; emit({ type: "stderr", data: `  Push failed for oauth2-agents: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+          }
+        }
+
+        let servicesPushFailed = false;
+        if (servicesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { servicesPushFailed = true; }
+          else {
+            const realms = targetEnvVarsForPush.REALMS ? (JSON.parse(targetEnvVarsForPush.REALMS) as string[]) : ["alpha"];
+            const items = servicesSel.items && servicesSel.items.length > 0 ? servicesSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing service${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try { await pushServices({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, realms, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+              catch (err) { servicesPushFailed = true; emit({ type: "stderr", data: `  Push failed for services${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
@@ -1017,10 +1059,13 @@ export async function POST(req: NextRequest) {
           if (termsSel && s === "terms-and-conditions") return false;
           if (serviceObjectsSel && s === "service-objects") return false;
           if (rawSel && (s as string) === "raw") return false;
+          if (authzPoliciesSel && s === "authz-policies") return false;
+          if (oauth2AgentsSel && s === "oauth2-agents") return false;
+          if (servicesSel && s === "services") return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed || endpointsPushFailed || internalRolesPushFailed || emailTemplatesPushFailed || customNodesPushFailed || themesPushFailed || emailProviderPushFailed || schedulesPushFailed || igaWorkflowsPushFailed || termsPushFailed || serviceObjectsPushFailed || rawPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed || endpointsPushFailed || internalRolesPushFailed || emailTemplatesPushFailed || customNodesPushFailed || themesPushFailed || emailProviderPushFailed || schedulesPushFailed || igaWorkflowsPushFailed || termsPushFailed || serviceObjectsPushFailed || rawPushFailed || authzPoliciesPushFailed || oauth2AgentsPushFailed || servicesPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -1247,6 +1292,36 @@ export async function POST(req: NextRequest) {
                     await pullOrgPrivileges({ exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
                   } catch (err) {
                     emit({ type: "stderr", data: `  Pull failed for org-privileges: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
+            } else if (sel.scope === "authz-policies" || sel.scope === "oauth2-agents" || sel.scope === "services") {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              const realms = pullEnvVars.REALMS ? (JSON.parse(pullEnvVars.REALMS) as string[]) : ["alpha"];
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping ${sel.scope} pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  const logLine = (line: string) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() });
+                  emit({ type: "stdout", data: `  Pulling ${sel.scope} (vendored)...\n`, ts: Date.now() });
+                  try {
+                    if (sel.scope === "authz-policies") {
+                      const descriptorFile = pullEnvVars.POLICY_SETS_CONFIG_FILE ? path.resolve(pullCwd, pullEnvVars.POLICY_SETS_CONFIG_FILE) : undefined;
+                      await pullAuthzPolicies({ exportDir, tenantUrl, token, descriptorFile, log: logLine });
+                    } else if (sel.scope === "oauth2-agents") {
+                      const descriptorFile = pullEnvVars.AGENTS_CONFIG_FILE ? path.resolve(pullCwd, pullEnvVars.AGENTS_CONFIG_FILE) : undefined;
+                      await pullOauth2Agents({ exportDir, tenantUrl, token, descriptorFile, log: logLine });
+                    } else {
+                      const name = sel.items && sel.items.length === 1 ? sel.items[0] : undefined;
+                      await pullServices({ exportDir, tenantUrl, token, realms, name, log: logLine });
+                    }
+                  } catch (err) {
+                    emit({ type: "stderr", data: `  Pull failed for ${sel.scope}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
                   }
                 }
               }
