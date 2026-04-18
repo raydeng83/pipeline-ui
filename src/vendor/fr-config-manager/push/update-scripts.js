@@ -78,4 +78,15 @@ async function updateScripts({ configDir, tenantUrl, realms, name, token, log })
   }
 }
 
-module.exports = { updateScripts };
+async function pushScriptById({ configDir, scriptId, tenantUrl, realm, token, log }) {
+  const emit = typeof log === "function" ? log : () => {};
+  const baseDir = path.join(configDir, "realms", realm, "scripts");
+  const configFile = path.join(baseDir, "scripts-config", `${scriptId}.json`);
+  if (!fs.existsSync(configFile)) {
+    throw new Error(`script ${scriptId} not found at ${configFile}`);
+  }
+  const script = JSON.parse(fs.readFileSync(configFile, "utf-8"));
+  await pushScript(script, baseDir, tenantUrl, realm, token, emit);
+}
+
+module.exports = { updateScripts, pushScriptById };
