@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles, pullEmailTemplates, pushEmailTemplates, pullCustomNodes, pushCustomNodes, pullThemes, pushThemes } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles, pullEmailTemplates, pushEmailTemplates, pullCustomNodes, pushCustomNodes, pullThemes, pushThemes, pullEmailProvider, pushEmailProvider, pullSchedules, pushSchedules, pullIgaWorkflows, pushIgaWorkflows, pullTermsAndConditions, pushTermsAndConditions, pullServiceObjects, pushServiceObjects, pullRawConfig, pushRawConfig } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -574,6 +574,12 @@ export async function POST(req: NextRequest) {
         const emailTemplatesSel = scopeSelections.find((s) => s.scope === "email-templates");
         const customNodesSel = scopeSelections.find((s) => s.scope === "custom-nodes");
         const themesSel = scopeSelections.find((s) => s.scope === "themes");
+        const emailProviderSel = scopeSelections.find((s) => s.scope === "email-provider");
+        const schedulesSel = scopeSelections.find((s) => s.scope === "schedules");
+        const igaWorkflowsSel = scopeSelections.find((s) => s.scope === "iga-workflows");
+        const termsSel = scopeSelections.find((s) => s.scope === "terms-and-conditions");
+        const serviceObjectsSel = scopeSelections.find((s) => s.scope === "service-objects");
+        const rawSel = scopeSelections.find((s) => s.scope === "raw");
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -910,6 +916,81 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let emailProviderPushFailed = false;
+        if (emailProviderSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { emailProviderPushFailed = true; }
+          else {
+            emit({ type: "stdout", data: `  Pushing email-provider (vendored)...\n`, ts: Date.now() });
+            try { await pushEmailProvider({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+            catch (err) { emailProviderPushFailed = true; emit({ type: "stderr", data: `  Push failed for email-provider: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+          }
+        }
+
+        let schedulesPushFailed = false;
+        if (schedulesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { schedulesPushFailed = true; }
+          else {
+            const items = schedulesSel.items && schedulesSel.items.length > 0 ? schedulesSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing schedule${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try { await pushSchedules({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+              catch (err) { schedulesPushFailed = true; emit({ type: "stderr", data: `  Push failed for schedules${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+            }
+          }
+        }
+
+        let igaWorkflowsPushFailed = false;
+        if (igaWorkflowsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { igaWorkflowsPushFailed = true; }
+          else {
+            const items = igaWorkflowsSel.items && igaWorkflowsSel.items.length > 0 ? igaWorkflowsSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing iga-workflow${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try { await pushIgaWorkflows({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+              catch (err) { igaWorkflowsPushFailed = true; emit({ type: "stderr", data: `  Push failed for iga-workflows${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+            }
+          }
+        }
+
+        let termsPushFailed = false;
+        if (termsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { termsPushFailed = true; }
+          else {
+            emit({ type: "stdout", data: `  Pushing terms-and-conditions (vendored)...\n`, ts: Date.now() });
+            try { await pushTermsAndConditions({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+            catch (err) { termsPushFailed = true; emit({ type: "stderr", data: `  Push failed for terms-and-conditions: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+          }
+        }
+
+        let serviceObjectsPushFailed = false;
+        if (serviceObjectsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { serviceObjectsPushFailed = true; }
+          else {
+            emit({ type: "stdout", data: `  Pushing service-objects (vendored)...\n`, ts: Date.now() });
+            try { await pushServiceObjects({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, envVars: targetEnvVarsForPush, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+            catch (err) { serviceObjectsPushFailed = true; emit({ type: "stderr", data: `  Push failed for service-objects: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+          }
+        }
+
+        let rawPushFailed = false;
+        if (rawSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) { rawPushFailed = true; }
+          else {
+            const items = rawSel.items && rawSel.items.length > 0 ? rawSel.items : [undefined];
+            for (const requestedPath of items) {
+              emit({ type: "stdout", data: `  Pushing raw${requestedPath ? ` ${requestedPath}` : ""} (vendored)...\n`, ts: Date.now() });
+              try { await pushRawConfig({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, requestedPath, envVars: targetEnvVarsForPush, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) }); }
+              catch (err) { rawPushFailed = true; emit({ type: "stderr", data: `  Push failed for raw${requestedPath ? ` ${requestedPath}` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
@@ -928,10 +1009,16 @@ export async function POST(req: NextRequest) {
           if (emailTemplatesSel && s === "email-templates") return false;
           if (customNodesSel && s === "custom-nodes") return false;
           if (themesSel && s === "themes") return false;
+          if (emailProviderSel && s === "email-provider") return false;
+          if (schedulesSel && s === "schedules") return false;
+          if (igaWorkflowsSel && s === "iga-workflows") return false;
+          if (termsSel && s === "terms-and-conditions") return false;
+          if (serviceObjectsSel && s === "service-objects") return false;
+          if (rawSel && s === "raw") return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed || endpointsPushFailed || internalRolesPushFailed || emailTemplatesPushFailed || customNodesPushFailed || themesPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed || endpointsPushFailed || internalRolesPushFailed || emailTemplatesPushFailed || customNodesPushFailed || themesPushFailed || emailProviderPushFailed || schedulesPushFailed || igaWorkflowsPushFailed || termsPushFailed || serviceObjectsPushFailed || rawPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -1158,6 +1245,44 @@ export async function POST(req: NextRequest) {
                     await pullOrgPrivileges({ exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
                   } catch (err) {
                     emit({ type: "stderr", data: `  Pull failed for org-privileges: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
+            } else if (sel.scope === "email-provider" || sel.scope === "schedules" || sel.scope === "iga-workflows" || sel.scope === "terms-and-conditions" || sel.scope === "service-objects" || sel.scope === "raw") {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping ${sel.scope} pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  const logLine = (line: string) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() });
+                  const items = sel.items && sel.items.length > 0 ? sel.items : [undefined];
+                  for (const itemId of items) {
+                    emit({ type: "stdout", data: `  Pulling ${sel.scope}${itemId ? ` "${itemId}"` : ""} (vendored)...\n`, ts: Date.now() });
+                    try {
+                      if (sel.scope === "email-provider") {
+                        await pullEmailProvider({ exportDir, tenantUrl, token, log: logLine });
+                      } else if (sel.scope === "schedules") {
+                        await pullSchedules({ exportDir, tenantUrl, token, name: itemId, log: logLine });
+                      } else if (sel.scope === "iga-workflows") {
+                        await pullIgaWorkflows({ exportDir, tenantUrl, token, name: itemId, log: logLine });
+                      } else if (sel.scope === "terms-and-conditions") {
+                        await pullTermsAndConditions({ exportDir, tenantUrl, token, name: itemId, log: logLine });
+                      } else if (sel.scope === "service-objects") {
+                        // service-objects pull needs a descriptor file; skip gracefully if none.
+                        const descriptorFile = pullEnvVars.SERVICE_OBJECTS_CONFIG_FILE ? path.resolve(pullCwd, pullEnvVars.SERVICE_OBJECTS_CONFIG_FILE) : undefined;
+                        await pullServiceObjects({ exportDir, tenantUrl, token, descriptorFile, log: logLine });
+                      } else if (sel.scope === "raw") {
+                        const descriptorFile = pullEnvVars.RAW_CONFIG ? path.resolve(pullCwd, pullEnvVars.RAW_CONFIG) : undefined;
+                        await pullRawConfig({ exportDir, tenantUrl, token, requestedPath: itemId, descriptorFile, log: logLine });
+                      }
+                    } catch (err) {
+                      emit({ type: "stderr", data: `  Pull failed for ${sel.scope}${itemId ? ` "${itemId}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                    }
                   }
                 }
               }
