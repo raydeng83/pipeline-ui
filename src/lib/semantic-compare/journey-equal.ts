@@ -49,6 +49,24 @@ export function journeysEqual(
     for (const r of sr.reasons) reasons.push(r);
   }
 
+  // 5. Referenced inner journeys (recursive with cycle guard).
+  if (ctx.journeysA && ctx.journeysB) {
+    const visited = ctx.visited ?? new Set<string>();
+    const refSubs = new Set([...a.referencedSubJourneys, ...b.referencedSubJourneys]);
+    for (const name of refSubs) {
+      if (visited.has(name)) continue;
+      const ja = ctx.journeysA.get(name);
+      const jb = ctx.journeysB.get(name);
+      if (!ja && !jb) continue;
+      if (!ja) { reasons.push({ kind: "subjourney-missing", name, side: "source" }); continue; }
+      if (!jb) { reasons.push({ kind: "subjourney-missing", name, side: "target" }); continue; }
+      const nextVisited = new Set(visited);
+      nextVisited.add(name);
+      const sub = journeysEqual(ja, jb, { ...ctx, visited: nextVisited });
+      if (!sub.equal) reasons.push({ kind: "subjourney-diff", name, reasons: sub.reasons });
+    }
+  }
+
   return { equal: reasons.length === 0, reasons };
 }
 

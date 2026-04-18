@@ -81,3 +81,47 @@ describe("journeysEqual (single level, no recursion)", () => {
     expect(r.reasons).toContainEqual({ kind: "script-body", identity: "CTX/S" });
   });
 });
+
+describe("journeysEqual recursion", () => {
+  it("recurses into inner journeys when resolvers provided", () => {
+    const sub = mkJourney({
+      name: "Sub",
+      header: { identityResource: "managed/alpha_user", enabled: true },
+    });
+    const subChanged = mkJourney({
+      name: "Sub",
+      header: { identityResource: "managed/alpha_user", enabled: false },
+    });
+    const outer  = mkJourney({ name: "Outer", referencedSubJourneys: new Set(["Sub"]) });
+    const outer2 = mkJourney({ name: "Outer", referencedSubJourneys: new Set(["Sub"]) });
+    const r = journeysEqual(outer, outer2, {
+      scriptsA: new Map(), scriptsB: new Map(),
+      journeysA: new Map([["Sub", sub]]),
+      journeysB: new Map([["Sub", subChanged]]),
+    });
+    expect(r.reasons).toContainEqual(expect.objectContaining({
+      kind: "subjourney-diff",
+      name: "Sub",
+    }));
+  });
+
+  it("flags missing inner journey", () => {
+    const outer = mkJourney({ referencedSubJourneys: new Set(["Missing"]) });
+    const r = journeysEqual(outer, outer, {
+      scriptsA: new Map(), scriptsB: new Map(),
+      journeysA: new Map([["Missing", mkJourney({ name: "Missing" })]]),
+      journeysB: new Map(),
+    });
+    expect(r.reasons).toContainEqual({ kind: "subjourney-missing", name: "Missing", side: "target" });
+  });
+
+  it("handles cycles gracefully (self-reference)", () => {
+    const self = mkJourney({ name: "Self", referencedSubJourneys: new Set(["Self"]) });
+    const r = journeysEqual(self, self, {
+      scriptsA: new Map(), scriptsB: new Map(),
+      journeysA: new Map([["Self", self]]),
+      journeysB: new Map([["Self", self]]),
+    });
+    expect(r.equal).toBe(true);
+  });
+});
