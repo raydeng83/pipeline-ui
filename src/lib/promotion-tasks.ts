@@ -38,6 +38,8 @@ export interface PromotionTask {
   phaseTimings?: Record<string, { status: string; startedAt?: string; completedAt?: string; durationMs?: number }>;
   /** Verify report summary (changes remaining after promote). */
   verifyChanges?: number;
+  /** Stderr/error log lines captured during a failed promote, shown in the summary. */
+  errorLogs?: { type: "stderr" | "error"; data: string }[];
 }
 
 export function readTasks(): PromotionTask[] {
@@ -91,12 +93,14 @@ export function createTask(
 
 export function updateTask(
   id: string,
-  patch: Partial<Omit<PromotionTask, "id" | "createdAt">>
+  patch: Partial<Omit<PromotionTask, "id" | "createdAt">> & { archivedAt?: string | null },
 ): PromotionTask | null {
   const tasks = readTasks();
   const idx = tasks.findIndex((t) => t.id === id);
   if (idx === -1) return null;
-  tasks[idx] = { ...tasks[idx], ...patch, updatedAt: new Date().toISOString() };
+  const merged = { ...tasks[idx], ...patch, updatedAt: new Date().toISOString() };
+  if (patch.archivedAt === null) delete merged.archivedAt;
+  tasks[idx] = merged as PromotionTask;
   saveTasks(tasks);
   return tasks[idx];
 }

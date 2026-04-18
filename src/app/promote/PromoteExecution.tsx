@@ -1318,6 +1318,36 @@ function PromotePhase({
 
 // ── Phase 4: Summary ──────────────────────────────────────────────────────────
 
+function ErrorLogs({ logs }: { logs: { type: string; data?: string }[] }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    const text = logs.map((l) => l.data ?? "").join("");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <div className="label-xs">ERROR LOGS</div>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="text-[11px] text-slate-500 hover:text-slate-800 transition-colors"
+        >
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+      <div className="bg-slate-900 rounded-lg overflow-auto max-h-64 p-3 font-mono text-[11px] leading-5">
+        {logs.map((l, i) => (
+          <div key={i} className="whitespace-pre-wrap break-all text-red-400">{l.data}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SummaryPhase({
   task,
   visible,
@@ -1423,17 +1453,9 @@ function SummaryPhase({
 
         {/* Error logs for failed promotion */}
         {failed && (() => {
-          const errorLogs = promoteLogs.filter((l) => l.type === "stderr" || l.type === "error");
-          return errorLogs.length > 0 ? (
-            <div>
-              <div className="label-xs mb-2">ERROR LOGS</div>
-              <div className="bg-slate-900 rounded-lg overflow-auto max-h-64 p-3 font-mono text-[11px] leading-5">
-                {errorLogs.map((l, i) => (
-                  <div key={i} className="whitespace-pre-wrap break-all text-red-400">{l.data}</div>
-                ))}
-              </div>
-            </div>
-          ) : null;
+          const live = promoteLogs.filter((l) => l.type === "stderr" || l.type === "error");
+          const errorLogs = live.length > 0 ? live : (task.errorLogs ?? []);
+          return errorLogs.length > 0 ? <ErrorLogs logs={errorLogs} /> : null;
         })()}
 
         {/* Restart button for failed tasks */}
@@ -1714,6 +1736,11 @@ export function PromoteExecution({
         ? verifyReport.summary.added + verifyReport.summary.modified + verifyReport.summary.removed
         : null,
     };
+    if (promoteStatus === "failed") {
+      taskPatch.errorLogs = promoteLogs
+        .filter((l) => l.type === "stderr" || l.type === "error")
+        .map((l) => ({ type: l.type as "stderr" | "error", data: l.data ?? "" }));
+    }
 
     fetch("/api/history", {
       method: "POST",

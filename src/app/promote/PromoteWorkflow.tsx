@@ -786,7 +786,7 @@ function TaskDetail({
 
 const ARCHIVE_PAGE_SIZE = 10;
 
-function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environments: Environment[] }) {
+function ArchiveTable({ tasks, environments, onRestore }: { tasks: PromotionTask[]; environments: Environment[]; onRestore?: (task: PromotionTask) => void }) {
   const envMap = new Map(environments.map((e) => [e.name, e]));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [report, setReport] = useState<CompareReport | null>(null);
@@ -886,17 +886,29 @@ function ArchiveTable({ tasks, environments }: { tasks: PromotionTask[]; environ
                     {task.completedAt ? new Date(task.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                   </td>
                   <td className="px-4 py-2.5">
-                    {task.reportId ? (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); selectTask(task.id); loadReport(task); }}
-                        className="text-[10px] text-indigo-600 hover:text-indigo-700 font-medium"
-                      >
-                        View
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-slate-300">—</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {task.reportId && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); selectTask(task.id); loadReport(task); }}
+                          className="text-[10px] text-indigo-600 hover:text-indigo-700 font-medium"
+                        >
+                          View
+                        </button>
+                      )}
+                      {task.status === "failed" && onRestore && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onRestore(task); }}
+                          className="text-[10px] text-emerald-600 hover:text-emerald-700 font-medium"
+                        >
+                          Restore
+                        </button>
+                      )}
+                      {!task.reportId && !(task.status === "failed" && onRestore) && (
+                        <span className="text-[10px] text-slate-300">—</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -1151,6 +1163,19 @@ export function PromoteWorkflow({
     }
   };
 
+  const handleRestore = async (task: PromotionTask) => {
+    const res = await fetch(`/api/promotion-tasks/${task.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ archivedAt: null }),
+    });
+    if (res.ok) {
+      const updated: PromotionTask = await res.json();
+      setArchivedTasks((prev) => prev.filter((t) => t.id !== task.id));
+      setTasks((prev) => [updated, ...prev]);
+    }
+  };
+
   const selectedSrcEnv = selectedTask ? environments.find((e) => e.name === selectedTask.source.environment) : null;
   const selectedTgtEnv = selectedTask ? environments.find((e) => e.name === selectedTask.target.environment) : null;
 
@@ -1185,7 +1210,7 @@ export function PromoteWorkflow({
       </div>
 
       {promoteTab === "archive" && (
-        <ArchiveTable tasks={archivedTasks} environments={environments} />
+        <ArchiveTable tasks={archivedTasks} environments={environments} onRestore={handleRestore} />
       )}
 
       {promoteTab === "tasks" && (<>
