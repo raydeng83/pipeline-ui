@@ -347,7 +347,15 @@ const ALL_SCOPES = CONFIG_SCOPES.map((s) => s.value);
 
 const GROUPS = Array.from(new Set(CONFIG_SCOPES.map((s) => s.group)));
 
-function SectionsView({ environment }: { environment: string }) {
+function SectionsView({
+  environment,
+  preselect,
+  onPreselectApplied,
+}: {
+  environment: string;
+  preselect?: { scope: string; item: string } | null;
+  onPreselectApplied?: () => void;
+}) {
   const [auditData, setAuditData] = useState<AuditEntry[]>([]);
   const [auditLoading, setAuditLoading] = useState(false);
   const [selectedScope, setSelectedScope] = useState<string | null>(null);
@@ -411,6 +419,28 @@ function SectionsView({ environment }: { environment: string }) {
 
   // Reset usage panel when item changes
   useEffect(() => { setUsageOpen(false); setUsageData(null); setEndpointUsageData(null); setJourneyUsageData(null); }, [selectedItem]);
+
+  // Apply an incoming "Find in Browse" deep link once audit data is loaded.
+  // Matches scope exactly; for the item we try exact id match, then
+  // case-insensitive prefix, then basename-stripped (.json) to absorb the
+  // script UUID vs filename mismatch from different callers.
+  useEffect(() => {
+    if (!preselect || auditLoading || auditData.length === 0) return;
+    const entry = auditData.find((e) => e.scope === preselect.scope);
+    if (!entry) { onPreselectApplied?.(); return; }
+    setSelectedScope(preselect.scope);
+    if (preselect.item) {
+      const needle = preselect.item.toLowerCase();
+      const stripped = needle.replace(/\.json$/, "");
+      const match =
+        entry.items.find((i) => i.id === preselect.item) ??
+        entry.items.find((i) => i.id.toLowerCase() === needle) ??
+        entry.items.find((i) => i.id.toLowerCase().replace(/\.json$/, "") === stripped) ??
+        entry.items.find((i) => i.label.toLowerCase() === needle);
+      if (match) setSelectedItem(match);
+    }
+    onPreselectApplied?.();
+  }, [preselect, auditData, auditLoading, onPreselectApplied]);
 
   const fetchUsage = useCallback(() => {
     if (!selectedItem || selectedScope !== "scripts") return;
@@ -1031,6 +1061,25 @@ function SectionsView({ environment }: { environment: string }) {
 export function ConfigsViewer({ environments }: { environments: Environment[] }) {
   const [selectedEnv, setSelectedEnv] = useState(environments[0]?.name ?? "");
   const [view, setView] = useState<"tree" | "sections">("sections");
+  // Hint that SectionsView uses for initial selection; cleared after first apply.
+  const [preselect, setPreselect] = useState<{ scope: string; item: string } | null>(null);
+
+  // Hydrate env/scope/item from URL query params on mount so a "Find in Browse"
+  // link from the Analyze page can deep-link into a specific item.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const p = new URLSearchParams(window.location.search);
+    const envParam = p.get("env") ?? p.get("environment");
+    const scope = p.get("scope");
+    const item = p.get("item");
+    if (envParam && environments.some((e) => e.name === envParam)) {
+      setSelectedEnv(envParam);
+    }
+    if (scope || item) {
+      setView("sections");
+      setPreselect({ scope: scope ?? "", item: item ?? "" });
+    }
+  }, [environments]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-14rem)] gap-4">
@@ -1072,7 +1121,7 @@ export function ConfigsViewer({ environments }: { environments: Environment[] })
       </div>
 
       {view === "sections"
-        ? <SectionsView environment={selectedEnv} />
+        ? <SectionsView environment={selectedEnv} preselect={preselect} onPreselectApplied={() => setPreselect(null)} />
         : <TreeView environment={selectedEnv} />
       }
     </div>

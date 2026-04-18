@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { JourneyInfo, AnalyzeResult, AnalyzeSummary, ScriptUsage } from "@/app/api/analyze/route";
 import type { EsvOrphanReport, EsvOrphan, EsvReference } from "@/lib/analyze/esv-orphans";
 import { FileContentViewer } from "@/components/FileContentViewer";
+import { pathToScopeItem } from "@/lib/scope-paths";
 
 type TaskId = "journeys" | "esv-orphans";
 
@@ -889,7 +890,31 @@ function EsvOrphanReportView({ report, env }: { report: EsvOrphanReport; env: st
           {selected ? (
             <>
               <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center gap-3">
-                <span className="text-xs font-mono text-slate-700 truncate flex-1 min-w-0">{selected.path}</span>
+                {(() => {
+                  const parsed = pathToScopeItem(selected.path);
+                  const itemName = parsed?.item || selected.path.split("/").pop() || selected.path;
+                  return (
+                    <>
+                      <span className="text-xs font-mono text-slate-700 truncate flex-1 min-w-0" title={selected.path}>
+                        {parsed?.scope ? (
+                          <span className="text-slate-400">{parsed.scope} / </span>
+                        ) : null}
+                        <span className="text-slate-800">{itemName}</span>
+                      </span>
+                      {parsed && parsed.item && (
+                        <a
+                          href={`/configs?env=${encodeURIComponent(env)}&scope=${encodeURIComponent(parsed.scope)}&item=${encodeURIComponent(parsed.item)}`}
+                          target="_blank"
+                          rel="noopener"
+                          className="text-[11px] text-sky-600 hover:text-sky-800 hover:underline shrink-0"
+                          title="Open this item in the Browse tab"
+                        >
+                          Find in Browse ↗
+                        </a>
+                      )}
+                    </>
+                  );
+                })()}
                 <span className="text-[10px] text-slate-400 shrink-0">line {selected.line}</span>
                 <button
                   type="button"
@@ -954,6 +979,28 @@ function Stat({ value, label, sub, color }: { value: number | string; label: str
   );
 }
 
+/** Group an orphan's references by derived scope. Unresolvable paths fall into "other". */
+function groupRefsByScope(refs: EsvReference[]): { scope: string; refs: EsvReference[] }[] {
+  const byScope = new Map<string, EsvReference[]>();
+  for (const r of refs) {
+    const parsed = pathToScopeItem(r.path);
+    const scope = parsed?.scope ?? "other";
+    if (!byScope.has(scope)) byScope.set(scope, []);
+    byScope.get(scope)!.push(r);
+  }
+  return Array.from(byScope.entries())
+    .map(([scope, refs]) => ({ scope, refs }))
+    .sort((a, b) => (a.scope === "other" ? 1 : b.scope === "other" ? -1 : a.scope.localeCompare(b.scope)));
+}
+
+/** Derive the item label for a reference path (basename fallback). */
+function refItemLabel(path: string): string {
+  const parsed = pathToScopeItem(path);
+  if (parsed?.item) return parsed.item;
+  const segs = path.replace(/\\/g, "/").split("/");
+  return segs[segs.length - 1] ?? path;
+}
+
 function OrphanRow({
   orphan, open, onToggle, onOpenReference, selected,
 }: {
@@ -963,8 +1010,8 @@ function OrphanRow({
   onOpenReference: (r: EsvReference) => void;
   selected: { path: string; line: number } | null;
 }) {
-  // Count distinct files
   const fileCount = new Set(orphan.references.map((r) => r.path)).size;
+  const grouped = useMemo(() => groupRefsByScope(orphan.references), [orphan.references]);
   return (
     <div>
       <button
@@ -979,11 +1026,25 @@ function OrphanRow({
         </span>
       </button>
       {open && (
-        <div className="bg-slate-50/60 px-4 pb-3 pt-1 space-y-1">
-          {orphan.references.map((r, i) => {
-            const isActive = !!selected && selected.path === r.path && selected.line === r.line;
-            return <RefLine key={i} reference={r} active={isActive} onOpen={() => onOpenReference(r)} />;
-          })}
+        <div className="bg-slate-50/60 px-4 pb-3 pt-1 space-y-2">
+          {grouped.map((group) => (
+            <div key={group.scope} className="space-y-0.5">
+              <div className="flex items-center gap-2 pl-1.5 pt-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                  {group.scope}
+                </span>
+                <span className="text-[10px] text-slate-400 tabular-nums">
+                  {group.refs.length} ref{group.refs.length === 1 ? "" : "s"}
+                </span>
+              </div>
+              <div className="space-y-0.5">
+                {group.refs.map((r, i) => {
+                  const isActive = !!selected && selected.path === r.path && selected.line === r.line;
+                  return <RefLine key={i} reference={r} active={isActive} onOpen={() => onOpenReference(r)} />;
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -996,6 +1057,7 @@ function RefLine({ reference, active, onOpen }: { reference: EsvReference; activ
     : reference.form === "realmPlaceholder"
     ? { label: "fr.realm", cls: "bg-indigo-100 text-indigo-700" }
     : { label: "systemEnv", cls: "bg-violet-100 text-violet-700" };
+  const item = refItemLabel(reference.path);
   return (
     <button
       type="button"
@@ -1006,11 +1068,11 @@ function RefLine({ reference, active, onOpen }: { reference: EsvReference; activ
           ? "bg-sky-100/80 border-sky-500"
           : "hover:bg-sky-50 border-transparent"
       )}
-      title="Open file at this line"
+      title={`${reference.path}:${reference.line}`}
     >
       <span className={cn("shrink-0 px-1.5 py-0 rounded text-[10px] font-semibold", formBadge.cls)}>{formBadge.label}</span>
       <span className="shrink-0 text-slate-400 tabular-nums">{reference.line}</span>
-      <span className="shrink-0 text-sky-700 hover:underline truncate max-w-[260px]" title={reference.path}>{reference.path}</span>
+      <span className="shrink-0 text-sky-700 hover:underline truncate max-w-[260px]" title={reference.path}>{item}</span>
       <span className="flex-1 text-slate-500 break-all">{reference.snippet}</span>
     </button>
   );
