@@ -302,6 +302,28 @@ export async function POST(req: NextRequest) {
               // No item filter — copy entire scope
               copyDirSync(srcDir, destDir);
               emit({ type: "stdout", data: `  Copied ${sel.scope}: ${relPath} (all)\n`, ts: Date.now() });
+            } else if (sel.scope === "managed-objects") {
+              // IDM's PUT /openidm/config/managed is a full-config replace — sending
+              // just the selected object fails with "Cannot read property 'schema' from undefined"
+              // because IDM tries to resolve cross-relationships against siblings that are
+              // no longer in objects[]. Seed the temp dir with target's full set first,
+              // then overlay the selected source items so unselected siblings stay unchanged.
+              const targetSrcDir = path.join(targetConfigDir, relPath);
+              if (fs.existsSync(targetSrcDir)) {
+                copyDirSync(targetSrcDir, destDir);
+                emit({ type: "stdout", data: `  Seeded managed-objects from target: ${relPath}\n`, ts: Date.now() });
+              } else {
+                fs.mkdirSync(destDir, { recursive: true });
+              }
+              for (const itemId of sel.items) {
+                const srcItem = path.join(srcDir, itemId);
+                const destItem = path.join(destDir, itemId);
+                if (fs.existsSync(srcItem) && fs.statSync(srcItem).isDirectory()) {
+                  fs.rmSync(destItem, { recursive: true, force: true });
+                  copyDirSync(srcItem, destItem);
+                }
+              }
+              emit({ type: "stdout", data: `  Overlaid ${sel.items.length} managed-object(s) from source\n`, ts: Date.now() });
             } else if (sel.scope === "scripts") {
               // Scripts: items are filenames in scripts-config (e.g., "uuid.json")
               // Copy matching scripts-config files + their scripts-content
