@@ -73,18 +73,37 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function highlightMatches(text: string, query: string): React.ReactNode {
+function highlightMatches(
+  text: string,
+  query: string,
+  startIdx: number,
+  activeIdx: number,
+): React.ReactNode {
   if (!query || !text) return text;
   const regex = new RegExp(`(${escapeRegex(query)})`, "gi");
   const parts = text.split(regex);
   if (parts.length === 1) return text;
-  return parts.map((part, i) =>
-    i % 2 === 1 ? (
-      <mark key={i} className="bg-yellow-400/40 text-yellow-100 rounded-sm px-0.5">{part}</mark>
-    ) : (
-      part
-    )
-  );
+  let matchIdx = startIdx;
+  return parts.map((part, i) => {
+    if (i % 2 === 0) return part;
+    const isActive = matchIdx === activeIdx;
+    const el = (
+      <mark
+        key={i}
+        data-match-idx={matchIdx}
+        className={cn(
+          "rounded-sm px-0.5",
+          isActive
+            ? "bg-amber-300 text-slate-900 ring-1 ring-amber-200"
+            : "bg-yellow-400/40 text-yellow-100",
+        )}
+      >
+        {part}
+      </mark>
+    );
+    matchIdx++;
+    return el;
+  });
 }
 
 function countMatches(text: string, query: string): number {
@@ -109,6 +128,8 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterMode, setFilterMode] = useState(false);
+  const [currentMatch, setCurrentMatch] = useState(0);
+  const [jumpInput, setJumpInput] = useState("");
 
   // SyncForm mutates the logs array in place and bumps a tick to re-render,
   // so the array reference is stable but length grows. Keying these memos on
@@ -125,15 +146,20 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
     [logs, logs.length],
   );
 
-  const matchCount = useMemo(() => {
-    if (!search) return 0;
-    let total = 0;
-    for (const e of flatLines) {
+  // lineStart[i] = running match index at the start of flatLines[i];
+  // total match count is the running total after the last line.
+  const { lineStart, matchCount } = useMemo(() => {
+    const arr = new Array<number>(flatLines.length).fill(0);
+    if (!search) return { lineStart: arr, matchCount: 0 };
+    let acc = 0;
+    for (let i = 0; i < flatLines.length; i++) {
+      arr[i] = acc;
+      const e = flatLines[i];
       if (e.type === "stdout" || e.type === "stderr" || e.type === "error") {
-        total += countMatches(e.data ?? "", search);
+        acc += countMatches(e.data ?? "", search);
       }
     }
-    return total;
+    return { lineStart: arr, matchCount: acc };
   }, [flatLines, search]);
 
   const handleCopy = () => {
@@ -151,25 +177,56 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
     });
   };
 
-  // Auto-scroll to bottom on every new line. logs.length captures in-place
-  // pushes from SyncForm's mutable log array (reference is stable).
+  // Auto-scroll to bottom on every new line, but stay out of the user's way
+  // while they're navigating match highlights.
   useEffect(() => {
+    if (search) return;
     const el = mainPaneRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
-  }, [logs, logs.length]);
+  }, [logs, logs.length, search]);
 
   useEffect(() => {
     if (logs.length === 0) {
       setSearch("");
       setSearchOpen(false);
       setFilterMode(false);
+      setCurrentMatch(0);
     }
   }, [logs.length]);
 
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
+
+  // Reset active match when the query changes; clamp when the match set shrinks
+  // (e.g. new lines arrived that changed counts, or filter toggled).
+  useEffect(() => {
+    setCurrentMatch(0);
+  }, [search]);
+  useEffect(() => {
+    if (matchCount === 0) {
+      setCurrentMatch(0);
+    } else if (currentMatch >= matchCount) {
+      setCurrentMatch(matchCount - 1);
+    }
+  }, [matchCount, currentMatch]);
+
+  // Sync the numeric jump input with the active match.
+  useEffect(() => {
+    setJumpInput(matchCount > 0 ? String(currentMatch + 1) : "");
+  }, [currentMatch, matchCount]);
+
+  // Scroll the active match into view when it changes.
+  useEffect(() => {
+    if (!search || matchCount === 0) return;
+    const pane = mainPaneRef.current;
+    if (!pane) return;
+    const el = pane.querySelector(
+      `[data-match-idx="${currentMatch}"]`,
+    ) as HTMLElement | null;
+    if (el) el.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [currentMatch, search, matchCount, filterMode, logs.length]);
 
   const handleToggleSearch = () => {
     if (searchOpen) {
@@ -178,6 +235,25 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
     } else {
       setSearchOpen(true);
     }
+  };
+
+  const goPrev = () => {
+    if (matchCount === 0) return;
+    setCurrentMatch((i) => (i - 1 + matchCount) % matchCount);
+  };
+  const goNext = () => {
+    if (matchCount === 0) return;
+    setCurrentMatch((i) => (i + 1) % matchCount);
+  };
+  const commitJump = () => {
+    if (matchCount === 0) return;
+    const n = parseInt(jumpInput, 10);
+    if (Number.isNaN(n)) {
+      setJumpInput(String(currentMatch + 1));
+      return;
+    }
+    const clamped = Math.max(1, Math.min(matchCount, n));
+    setCurrentMatch(clamped - 1);
   };
 
   const statusText =
@@ -258,14 +334,65 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Escape") handleToggleSearch(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                handleToggleSearch();
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (e.shiftKey) goPrev();
+                else goNext();
+              }
+            }}
             placeholder="Search logs…"
             className="flex-1 bg-transparent text-[12px] font-mono text-slate-700 placeholder-slate-400 outline-none"
           />
           {search && (
-            <span className="text-[10px] font-mono text-slate-500 shrink-0">
-              {matchCount} match{matchCount !== 1 ? "es" : ""}
-            </span>
+            <div className="flex items-center gap-1 text-[10px] font-mono text-slate-500 shrink-0">
+              <button
+                onClick={goPrev}
+                disabled={matchCount === 0}
+                className="px-1 py-0.5 rounded hover:bg-slate-200 disabled:opacity-40 disabled:hover:bg-transparent"
+                title="Previous match (Shift+Enter)"
+                aria-label="Previous match"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={jumpInput}
+                onChange={(e) => setJumpInput(e.target.value.replace(/[^\d]/g, ""))}
+                onBlur={commitJump}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitJump();
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    setJumpInput(matchCount > 0 ? String(currentMatch + 1) : "");
+                    searchInputRef.current?.focus();
+                  }
+                }}
+                disabled={matchCount === 0}
+                className="w-8 bg-transparent text-center text-slate-600 outline-none rounded disabled:opacity-40 focus:bg-white focus:ring-1 focus:ring-sky-300"
+                title="Jump to match"
+                aria-label="Jump to match"
+              />
+              <span className="text-slate-400">of {matchCount}</span>
+              <button
+                onClick={goNext}
+                disabled={matchCount === 0}
+                className="px-1 py-0.5 rounded hover:bg-slate-200 disabled:opacity-40 disabled:hover:bg-transparent"
+                title="Next match (Enter)"
+                aria-label="Next match"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           )}
           <button
             onClick={() => setFilterMode((f) => !f)}
@@ -360,7 +487,9 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
                 entry.type === "stdout" && "text-slate-100",
               )}
             >
-              {search ? highlightMatches(entry.data ?? "", search) : entry.data}
+              {search
+                ? highlightMatches(entry.data ?? "", search, lineStart[i] ?? 0, currentMatch)
+                : entry.data}
             </div>
           );
         })}
