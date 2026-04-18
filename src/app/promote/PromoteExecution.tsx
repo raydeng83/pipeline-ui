@@ -1318,6 +1318,58 @@ function PromotePhase({
 
 // ── Phase 4: Summary ──────────────────────────────────────────────────────────
 
+function FullLog({ logs }: { logs: { type: string; data?: string }[] }) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    const text = logs.map((l) => l.data ?? "").join("");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="label-xs flex items-center gap-1 hover:text-slate-700 transition-colors"
+        >
+          <svg className={cn("w-3 h-3 transition-transform", open && "rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+          FULL LOG ({logs.length} line{logs.length === 1 ? "" : "s"})
+        </button>
+        {open && (
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="text-[11px] text-slate-500 hover:text-slate-800 transition-colors"
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        )}
+      </div>
+      {open && (
+        <div className="bg-slate-900 rounded-lg overflow-auto max-h-96 p-3 font-mono text-[11px] leading-5">
+          {logs.map((l, i) => (
+            <div
+              key={i}
+              className={cn(
+                "whitespace-pre-wrap break-all",
+                l.type === "stderr" || l.type === "error" ? "text-red-400" : "text-slate-300",
+              )}
+            >
+              {l.data}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ErrorLogs({ logs }: { logs: { type: string; data?: string }[] }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
@@ -1451,11 +1503,22 @@ function SummaryPhase({
           </div>
         )}
 
-        {/* Error logs for failed promotion */}
+        {/* Error + full logs for failed promotion */}
         {failed && (() => {
-          const live = promoteLogs.filter((l) => l.type === "stderr" || l.type === "error");
-          const errorLogs = live.length > 0 ? live : (task.errorLogs ?? []);
-          return errorLogs.length > 0 ? <ErrorLogs logs={errorLogs} /> : null;
+          const liveAll = promoteLogs.filter(
+            (l) => l.type === "stdout" || l.type === "stderr" || l.type === "error",
+          );
+          const allLogs = liveAll.length > 0 ? liveAll : (task.promoteLogs ?? []);
+          const errorLogs = allLogs.length > 0
+            ? allLogs.filter((l) => l.type === "stderr" || l.type === "error")
+            : (task.errorLogs ?? []);
+          if (errorLogs.length === 0 && allLogs.length === 0) return null;
+          return (
+            <>
+              {errorLogs.length > 0 && <ErrorLogs logs={errorLogs} />}
+              {allLogs.length > 0 && <FullLog logs={allLogs} />}
+            </>
+          );
         })()}
 
         {/* Restart button for failed tasks */}
@@ -1738,7 +1801,14 @@ export function PromoteExecution({
         : null,
     };
     if (promoteStatus === "failed") {
-      taskPatch.errorLogs = promoteLogs
+      const visible = promoteLogs.filter(
+        (l) => l.type === "stdout" || l.type === "stderr" || l.type === "error",
+      );
+      taskPatch.promoteLogs = visible.map((l) => ({
+        type: l.type as "stdout" | "stderr" | "error",
+        data: l.data ?? "",
+      }));
+      taskPatch.errorLogs = visible
         .filter((l) => l.type === "stderr" || l.type === "error")
         .map((l) => ({ type: l.type as "stderr" | "error", data: l.data ?? "" }));
     }

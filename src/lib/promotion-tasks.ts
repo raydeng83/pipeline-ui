@@ -40,6 +40,8 @@ export interface PromotionTask {
   verifyChanges?: number;
   /** Stderr/error log lines captured during a failed promote, shown in the summary. */
   errorLogs?: { type: "stderr" | "error"; data: string }[];
+  /** Full stdout/stderr/error log from a failed promote run, shown collapsibly in the summary. */
+  promoteLogs?: { type: "stdout" | "stderr" | "error"; data: string }[];
 }
 
 export function readTasks(): PromotionTask[] {
