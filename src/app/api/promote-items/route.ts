@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -563,6 +563,8 @@ export async function POST(req: NextRequest) {
           (s) => s.scope === "journeys" && s.items && s.items.length > 0,
         );
         const idmFlatSels = scopeSelections.filter((s) => isIdmFlatScope(s.scope));
+        const passwordPolicySel = scopeSelections.find((s) => s.scope === "password-policy");
+        const orgPrivilegesSel = scopeSelections.find((s) => s.scope === "org-privileges");
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -700,6 +702,54 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let passwordPolicyPushFailed = false;
+        if (passwordPolicySel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            passwordPolicyPushFailed = true;
+          } else {
+            const realms = targetEnvVarsForPush.REALMS ? (JSON.parse(targetEnvVarsForPush.REALMS) as string[]) : ["alpha"];
+            emit({ type: "stdout", data: `  Pushing password-policy (vendored)...\n`, ts: Date.now() });
+            try {
+              await pushPasswordPolicy({
+                configDir: tempConfigDir,
+                tenantUrl: tenantUrlForPush,
+                token,
+                realms,
+                log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
+              });
+            } catch (err) {
+              passwordPolicyPushFailed = true;
+              emit({ type: "stderr", data: `  Push failed for password-policy: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+            }
+          }
+        }
+
+        let orgPrivilegesPushFailed = false;
+        if (orgPrivilegesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            orgPrivilegesPushFailed = true;
+          } else {
+            const items = orgPrivilegesSel.items && orgPrivilegesSel.items.length > 0 ? orgPrivilegesSel.items : [undefined];
+            for (const itemId of items) {
+              emit({ type: "stdout", data: `  Pushing org-privileges${itemId ? ` "${itemId}"` : ""} (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushOrgPrivileges({
+                  configDir: tempConfigDir,
+                  tenantUrl: tenantUrlForPush,
+                  token,
+                  name: itemId,
+                  log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
+                });
+              } catch (err) {
+                orgPrivilegesPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for org-privileges${itemId ? ` "${itemId}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
@@ -707,10 +757,12 @@ export async function POST(req: NextRequest) {
           if (scriptsSel && s === "scripts") return false;
           if (journeysSel && s === "journeys") return false;
           if (isIdmFlatScope(s)) return false;
+          if (passwordPolicySel && s === "password-policy") return false;
+          if (orgPrivilegesSel && s === "org-privileges") return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -898,6 +950,45 @@ export async function POST(req: NextRequest) {
                     await pullIdmFlatScope({ scope: sel.scope, exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
                   } catch (err) {
                     emit({ type: "stderr", data: `  Pull failed for ${sel.scope}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
+            } else if (sel.scope === "password-policy") {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              const realms = pullEnvVars.REALMS ? (JSON.parse(pullEnvVars.REALMS) as string[]) : ["alpha"];
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping password-policy pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  emit({ type: "stdout", data: `  Pulling password-policy (vendored)...\n`, ts: Date.now() });
+                  try {
+                    await pullPasswordPolicy({ exportDir, tenantUrl, token, realms, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+                  } catch (err) {
+                    emit({ type: "stderr", data: `  Pull failed for password-policy: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
+            } else if (sel.scope === "org-privileges") {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping org-privileges pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  emit({ type: "stdout", data: `  Pulling org-privileges (vendored)...\n`, ts: Date.now() });
+                  try {
+                    await pullOrgPrivileges({ exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+                  } catch (err) {
+                    emit({ type: "stderr", data: `  Pull failed for org-privileges: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
                   }
                 }
               }
