@@ -125,11 +125,28 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
   const mainPaneRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
-  const [search, setSearch] = useState("");
+  const [rawSearch, setRawSearch] = useState("");   // input value
+  const [search, setSearch] = useState("");          // applied query (drives highlight + filter)
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterMode, setFilterMode] = useState(false);
   const [currentMatch, setCurrentMatch] = useState(0);
   const [jumpInput, setJumpInput] = useState("");
+
+  const applySearch = (val: string) => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    setSearch(val);
+  };
+  const handleSearchChange = (val: string) => {
+    setRawSearch(val);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (val.length === 0) {
+      applySearch("");
+    } else if (val.length >= 3) {
+      searchDebounceRef.current = setTimeout(() => applySearch(val), 400);
+    }
+    // 1–2 chars: leave active query alone until threshold or Enter.
+  };
 
   // SyncForm mutates the logs array in place and bumps a tick to re-render,
   // so the array reference is stable but length grows. Keying these memos on
@@ -188,7 +205,8 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
 
   useEffect(() => {
     if (logs.length === 0) {
-      setSearch("");
+      setRawSearch("");
+      applySearch("");
       setSearchOpen(false);
       setFilterMode(false);
       setCurrentMatch(0);
@@ -230,7 +248,8 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
 
   const handleToggleSearch = () => {
     if (searchOpen) {
-      setSearch("");
+      setRawSearch("");
+      applySearch("");
       setSearchOpen(false);
     } else {
       setSearchOpen(true);
@@ -332,20 +351,32 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
           <input
             ref={searchInputRef}
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={rawSearch}
+            onChange={(e) => handleSearchChange(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Escape") {
                 handleToggleSearch();
               } else if (e.key === "Enter") {
                 e.preventDefault();
-                if (e.shiftKey) goPrev();
-                else goNext();
+                if (rawSearch !== search) {
+                  applySearch(rawSearch);
+                } else if (matchCount > 0) {
+                  if (e.shiftKey) goPrev();
+                  else goNext();
+                }
               }
             }}
-            placeholder="Search logs…"
+            placeholder="Search logs — Enter to apply"
             className="flex-1 bg-transparent text-[12px] font-mono text-slate-700 placeholder-slate-400 outline-none"
           />
+          {rawSearch && rawSearch !== search && (
+            <span
+              className="text-[10px] font-mono text-slate-400 shrink-0"
+              title="Press Enter to search"
+            >
+              Enter ↵
+            </span>
+          )}
           {search && (
             <div className="flex items-center gap-1 text-[10px] font-mono text-slate-500 shrink-0">
               <button
@@ -407,7 +438,11 @@ export function LogViewer({ logs, running, exitCode, onClear, expectedScopes }: 
             Filter
           </button>
           <button
-            onClick={() => { setSearch(""); searchInputRef.current?.focus(); }}
+            onClick={() => {
+              setRawSearch("");
+              applySearch("");
+              searchInputRef.current?.focus();
+            }}
             className="text-slate-400 hover:text-slate-600 shrink-0"
             title="Clear search"
           >
