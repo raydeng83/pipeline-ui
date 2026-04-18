@@ -195,7 +195,10 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
       const refreshToken = async (force = false): Promise<string | undefined> => {
         if (!force && sharedToken && Date.now() - sharedTokenAt < TOKEN_TTL_MS) return sharedToken;
         try {
-          sharedToken = await getAccessToken(baseEnv as Record<string, string>);
+          sharedToken = await getAccessToken(
+            baseEnv as Record<string, string>,
+            (msg) => encode(`[token] ${msg}\n`, "stderr"),
+          );
           sharedTokenAt = Date.now();
         } catch (err) {
           encode(`token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, "stderr");

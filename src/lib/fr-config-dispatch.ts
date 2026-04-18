@@ -114,7 +114,10 @@ export async function dispatchFrConfig(input: DispatchInput): Promise<DispatchRe
   const getToken = async () => {
     if (token) return token;
     try {
-      token = await getAccessToken(envVars as Record<string, string>);
+      token = await getAccessToken(
+        envVars as Record<string, string>,
+        (msg) => emit(`[token] ${msg}\n`, "stderr"),
+      );
       return token;
     } catch (err) {
       emit(`dispatch: token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, "stderr");

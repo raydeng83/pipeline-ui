@@ -74,7 +74,17 @@ export const IGA_API_SCOPES = Object.keys(IGA_SCOPE_CONFIG);
 
 // ── Token acquisition ─────────────────────────────────────────────────────────
 
-export async function getAccessToken(envVars: Record<string, string>): Promise<string> {
+/** Mask a bearer token for safe logging: "eyJh…3f2A" style. */
+function maskToken(t: string): string {
+  if (!t) return "<empty>";
+  if (t.length <= 12) return "****";
+  return `${t.slice(0, 4)}…${t.slice(-4)} (${t.length} chars)`;
+}
+
+export async function getAccessToken(
+  envVars: Record<string, string>,
+  log?: (msg: string) => void,
+): Promise<string> {
   const tenantUrl = envVars.TENANT_BASE_URL ?? "";
   const saId = envVars.SERVICE_ACCOUNT_ID ?? "";
   const saKey = envVars.SERVICE_ACCOUNT_KEY ?? "";
@@ -83,6 +93,8 @@ export async function getAccessToken(envVars: Record<string, string>): Promise<s
     .split(" ").filter(Boolean).join(" ");
 
   const tokenEndpoint = `${tenantUrl}/am/oauth2/access_token`;
+  log?.(`→ POST ${tokenEndpoint} (sa=${saId || "<missing>"}, scope=${scope})`);
+
   const jwk = JSON.parse(saKey);
   const key = await importJWK(jwk, "RS256");
 
@@ -108,10 +120,22 @@ export async function getAccessToken(envVars: Record<string, string>): Promise<s
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });
 
-  const data = await res.json() as { access_token?: string; error?: string };
+  const data = await res.json() as {
+    access_token?: string;
+    error?: string;
+    error_description?: string;
+    expires_in?: number;
+    scope?: string;
+    token_type?: string;
+  };
   if (!data.access_token) {
-    throw new Error(`Token error: ${data.error ?? JSON.stringify(data)}`);
+    const msg = data.error_description ?? data.error ?? JSON.stringify(data);
+    log?.(`✗ token error (HTTP ${res.status}): ${msg}`);
+    throw new Error(`Token error: ${msg}`);
   }
+  const granted = data.scope ?? "(not reported)";
+  const ttl = data.expires_in != null ? `${data.expires_in}s` : "(unknown)";
+  log?.(`✓ token acquired ${maskToken(data.access_token)} · expires_in=${ttl} · granted=${granted}`);
   return data.access_token;
 }
 
