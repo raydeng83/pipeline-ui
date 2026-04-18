@@ -903,7 +903,7 @@ function EsvOrphanReportView({ report, env }: { report: EsvOrphanReport; env: st
                       </span>
                       {parsed && parsed.item && (
                         <a
-                          href={`/configs?env=${encodeURIComponent(env)}&scope=${encodeURIComponent(parsed.scope)}&item=${encodeURIComponent(parsed.item)}`}
+                          href={`/configs?env=${encodeURIComponent(env)}&file=${encodeURIComponent(selected.path)}&line=${selected.line}`}
                           target="_blank"
                           rel="noopener"
                           className="text-[11px] text-sky-600 hover:text-sky-800 hover:underline shrink-0"

@@ -353,7 +353,7 @@ function SectionsView({
   onPreselectApplied,
 }: {
   environment: string;
-  preselect?: { scope: string; item: string } | null;
+  preselect?: { scope: string; item: string; fileName?: string; line?: number } | null;
   onPreselectApplied?: () => void;
 }) {
   const [auditData, setAuditData] = useState<AuditEntry[]>([]);
@@ -420,6 +420,10 @@ function SectionsView({
   // Reset usage panel when item changes
   useEffect(() => { setUsageOpen(false); setUsageData(null); setEndpointUsageData(null); setJourneyUsageData(null); }, [selectedItem]);
 
+  // Track the file name + line to highlight after files load (deep-link flow).
+  const pendingFileSelection = useRef<{ fileName?: string; line?: number } | null>(null);
+  const [highlightLine, setHighlightLine] = useState<number | undefined>(undefined);
+
   // Apply an incoming "Find in Browse" deep link once audit data is loaded.
   // Matches scope exactly; for the item we try exact id match, then
   // case-insensitive prefix, then basename-stripped (.json) to absorb the
@@ -437,10 +441,20 @@ function SectionsView({
         entry.items.find((i) => i.id.toLowerCase() === needle) ??
         entry.items.find((i) => i.id.toLowerCase().replace(/\.json$/, "") === stripped) ??
         entry.items.find((i) => i.label.toLowerCase() === needle);
-      if (match) setSelectedItem(match);
+      if (match) {
+        setSelectedItem(match);
+        // Remember the target file + line so we can activate the right tab
+        // once /api/push/item returns the list of viewable files.
+        if (preselect.fileName || preselect.line) {
+          pendingFileSelection.current = { fileName: preselect.fileName, line: preselect.line };
+        }
+      }
     }
     onPreselectApplied?.();
   }, [preselect, auditData, auditLoading, onPreselectApplied]);
+
+  // Clear highlight when the user navigates to a different item.
+  useEffect(() => { setHighlightLine(undefined); }, [selectedItem]);
 
   const fetchUsage = useCallback(() => {
     if (!selectedItem || selectedScope !== "scripts") return;
@@ -487,12 +501,25 @@ function SectionsView({
     fetch(`/api/push/item?${params}`)
       .then((r) => r.json())
       .then((data: { files: ViewableFile[] }) => {
-        setFiles(data.files ?? []);
+        const loaded = data.files ?? [];
+        setFiles(loaded);
         // Apply pending focus after file loads (graph needs time to render)
         if (pendingFocusRef.current) {
           const nodeId = pendingFocusRef.current;
           pendingFocusRef.current = undefined;
           setTimeout(() => setFocusNodeId(nodeId), 800);
+        }
+        // Apply a pending file-tab + line selection from a "Find in Browse"
+        // deep link. Match the target file by basename, then set the active
+        // tab and highlight line.
+        const pending = pendingFileSelection.current;
+        if (pending && loaded.length > 0) {
+          pendingFileSelection.current = null;
+          if (pending.fileName) {
+            const idx = loaded.findIndex((f) => f.name === pending.fileName);
+            if (idx >= 0) setActiveTab(idx);
+          }
+          if (pending.line) setHighlightLine(pending.line);
         }
       })
       .catch(() => setFiles([]))
@@ -719,7 +746,7 @@ function SectionsView({
                     <button
                       key={f.name}
                       type="button"
-                      onClick={() => setActiveTab(i)}
+                      onClick={() => { setActiveTab(i); setHighlightLine(undefined); }}
                       className={cn(
                         "px-3 py-1 text-[10px] shrink-0 border-b-2 transition-colors",
                         i === activeTab
@@ -1028,7 +1055,7 @@ function SectionsView({
               )}
               {!fileLoading && activeFile && selectedScope !== "journeys" && selectedScope !== "iga-workflows" && (
                 <div className="overflow-auto h-full">
-                  <FileContent content={activeFile.content} fileName={activeFile.name} />
+                  <FileContent content={activeFile.content} fileName={activeFile.name} highlightLine={highlightLine} />
                 </div>
               )}
             </div>
@@ -1062,23 +1089,50 @@ export function ConfigsViewer({ environments }: { environments: Environment[] })
   const [selectedEnv, setSelectedEnv] = useState(environments[0]?.name ?? "");
   const [view, setView] = useState<"tree" | "sections">("sections");
   // Hint that SectionsView uses for initial selection; cleared after first apply.
-  const [preselect, setPreselect] = useState<{ scope: string; item: string } | null>(null);
+  const [preselect, setPreselect] = useState<{
+    scope: string;
+    item: string;
+    fileName?: string;
+    line?: number;
+  } | null>(null);
 
   // Hydrate env/scope/item from URL query params on mount so a "Find in Browse"
   // link from the Analyze page can deep-link into a specific item.
+  // Accepts either (scope, item) or a richer (file, line) that resolves to
+  // the audit item id server-side (needed for script content files whose
+  // audit id is a UUID that can't be derived from the path alone).
   useEffect(() => {
     if (typeof window === "undefined") return;
     const p = new URLSearchParams(window.location.search);
     const envParam = p.get("env") ?? p.get("environment");
     const scope = p.get("scope");
     const item = p.get("item");
-    if (envParam && environments.some((e) => e.name === envParam)) {
-      setSelectedEnv(envParam);
-    }
-    if (scope || item) {
+    const file = p.get("file");
+    const lineStr = p.get("line");
+    const line = lineStr ? Number(lineStr) || undefined : undefined;
+
+    const envResolved = envParam && environments.some((e) => e.name === envParam) ? envParam : null;
+    if (envResolved) setSelectedEnv(envResolved);
+
+    if (file) {
       setView("sections");
-      setPreselect({ scope: scope ?? "", item: item ?? "" });
+      fetch(`/api/configs/${encodeURIComponent(envResolved ?? selectedEnv)}/resolve-file?path=${encodeURIComponent(file)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!data || data.error) return;
+          setPreselect({
+            scope: data.scope,
+            item: data.itemId,
+            fileName: data.fileName,
+            line,
+          });
+        })
+        .catch(() => { /* ignore */ });
+    } else if (scope || item) {
+      setView("sections");
+      setPreselect({ scope: scope ?? "", item: item ?? "", line });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environments]);
 
   return (
