@@ -177,6 +177,8 @@ export interface TabConfig {
   /** True while search is auto-paginating through server pages */
   searching: boolean;
   // View prefs (persisted per tab)
+  viewMode?: "terminal" | "table" | "json";
+  /** @deprecated — use viewMode. Retained so old persisted tabs still open on the right view. */
   terminalView?: boolean;
   wrapLines?: boolean;
   dedupe?: boolean;
@@ -400,6 +402,35 @@ function ResizableHeader({
         className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-sky-400/40 transition-colors"
       />
     </th>
+  );
+}
+
+// ── JSON view ─────────────────────────────────────────────────────────────────
+// Single pretty-printed JSON document over all filtered entries. Filters, level
+// filter, and dedupe are already applied by the caller; this just serializes.
+function JsonLogView({ entries }: { entries: LogEntry[] }) {
+  const text = useMemo(() => JSON.stringify(entries, null, 2), [entries]);
+  const [copied, setCopied] = useState(false);
+  const onCopy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  };
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onCopy}
+        className="sticky top-2 float-right mr-2 px-2 py-1 text-[11px] font-medium rounded border border-slate-300 bg-white/90 backdrop-blur text-slate-600 hover:bg-slate-50 z-10 shadow-sm"
+        title="Copy JSON to clipboard"
+      >
+        {copied ? "Copied" : "Copy JSON"}
+      </button>
+      <pre className="p-4 pt-2 font-mono text-[12px] leading-5 text-slate-700 whitespace-pre">
+        {text}
+      </pre>
+    </div>
   );
 }
 
@@ -1067,12 +1098,15 @@ export function LogsExplorer({
 
   const [showFullMessage, setShowFullMessage] = useState(false);
   // View prefs live in TabConfig so they persist per tab across reloads.
-  const terminalView = config.terminalView ?? true;
+  const viewMode: "terminal" | "table" | "json" =
+    config.viewMode ?? (config.terminalView === false ? "table" : "terminal");
+  const terminalView = viewMode === "terminal";
   const wrapLines = config.wrapLines ?? false;
   const dedupe = config.dedupe ?? false;
-  const setTerminalView = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
-    onConfigChange({ terminalView: typeof v === "function" ? v(terminalView) : v });
-  }, [onConfigChange, terminalView]);
+  const setViewMode = useCallback((v: "terminal" | "table" | "json") => {
+    // Also write terminalView for backward compat with any pre-existing persisted state.
+    onConfigChange({ viewMode: v, terminalView: v === "terminal" });
+  }, [onConfigChange]);
   const setWrapLines = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
     onConfigChange({ wrapLines: typeof v === "function" ? v(wrapLines) : v });
   }, [onConfigChange, wrapLines]);
@@ -1559,10 +1593,10 @@ export function LogsExplorer({
 
   // Scroll highlighted row into view after switching to table view
   useEffect(() => {
-    if (terminalView || highlightedTableIdx === null) return;
+    if (viewMode !== "table" || highlightedTableIdx === null) return;
     const el = scrollContainerRef.current?.querySelector(`[data-row-idx="${highlightedTableIdx}"]`);
     if (el) el.scrollIntoView({ block: "center" });
-  }, [terminalView, highlightedTableIdx]);
+  }, [viewMode, highlightedTableIdx]);
 
   return (
     <div className="space-y-4">
@@ -1854,14 +1888,14 @@ export function LogsExplorer({
 
             {/* Row 2: view toggle + filter + count + height controls + fullscreen */}
             <div className="flex items-center gap-3 px-4 py-2 border-t border-slate-100">
-              {/* Terminal / Table toggle — available in all modes */}
+              {/* Terminal / Table / JSON toggle — available in all modes */}
               <div className="flex rounded border border-slate-300 overflow-hidden shrink-0">
                 <button
                   type="button"
-                  onClick={() => setTerminalView(true)}
+                  onClick={() => setViewMode("terminal")}
                   className={cn(
                     "px-2 py-0.5 text-[11px] font-medium transition-colors",
-                    terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                    viewMode === "terminal" ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
                   )}
                 >
                   Terminal
@@ -1869,7 +1903,7 @@ export function LogsExplorer({
                 <button
                   type="button"
                   onClick={() => {
-                    setTerminalView(false);
+                    setViewMode("table");
                     if (activeMatchIndex !== null) {
                       setHighlightedTableIdx(activeMatchIndex);
                       setPage(Math.floor(activeMatchIndex / pageSize) + 1);
@@ -1877,11 +1911,22 @@ export function LogsExplorer({
                     }
                   }}
                   className={cn(
-                    "px-2 py-0.5 text-[11px] font-medium transition-colors",
-                    !terminalView ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                    "px-2 py-0.5 text-[11px] font-medium border-l border-slate-300 transition-colors",
+                    viewMode === "table" ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
                   )}
                 >
                   Table
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("json")}
+                  className={cn(
+                    "px-2 py-0.5 text-[11px] font-medium border-l border-slate-300 transition-colors",
+                    viewMode === "json" ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+                  )}
+                  title="Show all entries as one JSON document"
+                >
+                  JSON
                 </button>
               </div>
               {/* Wrap toggle — terminal view only */}
@@ -1951,7 +1996,7 @@ export function LogsExplorer({
                   )}
                 >[W]</button>
               </div>
-              {!terminalView && (
+              {viewMode === "table" && (
                 <label className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap cursor-pointer shrink-0">
                   <input
                     type="checkbox"
@@ -2096,7 +2141,7 @@ export function LogsExplorer({
             )}
             style={fullscreen ? undefined : { height: tableHeight }}
           >
-            {terminalView ? (
+            {viewMode === "terminal" ? (
               !fetched && !tailing ? (
                 <div className="flex items-center justify-center h-full min-h-[160px] bg-slate-950">
                   <p className="text-sm text-slate-500 font-mono">Select sources and start tailing or run a search</p>
@@ -2120,6 +2165,18 @@ export function LogsExplorer({
                   matchCase={matchCase}
                   wholeWord={wholeWord}
                 />
+              )
+            ) : viewMode === "json" ? (
+              !fetched ? (
+                <div className="flex items-center justify-center h-full min-h-[160px]">
+                  <p className="text-sm text-slate-400">Select at least one source and click Tail Logs or Search</p>
+                </div>
+              ) : !deferredIsActive ? null : filtered.length === 0 && !searching ? (
+                <div className="p-8 text-center text-sm text-slate-400">
+                  {entries.length === 0 ? "No log entries returned for this time range." : "No entries match the filter."}
+                </div>
+              ) : (
+                <JsonLogView entries={filtered} />
               )
             ) : !fetched ? (
               <div className="flex items-center justify-center h-full min-h-[160px]">
@@ -2171,7 +2228,7 @@ export function LogsExplorer({
           </div>
 
           {/* Pagination controls — table view only */}
-          {!terminalView && fetched && filtered.length > 0 && (
+          {viewMode === "table" && fetched && filtered.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500">
