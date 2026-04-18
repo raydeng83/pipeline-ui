@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -558,6 +558,9 @@ export async function POST(req: NextRequest) {
         const scriptsSel = scopeSelections.find(
           (s) => s.scope === "scripts" && s.items && s.items.length > 0,
         );
+        const journeysSel = scopeSelections.find(
+          (s) => s.scope === "journeys" && s.items && s.items.length > 0,
+        );
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -642,15 +645,44 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let journeysPushFailed = false;
+        if (journeysSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            journeysPushFailed = true;
+          } else {
+            const realms = targetEnvVarsForPush.REALMS ? (JSON.parse(targetEnvVarsForPush.REALMS) as string[]) : ["alpha"];
+            for (const itemId of journeysSel.items!) {
+              emit({ type: "stdout", data: `  Pushing journey "${itemId}" (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushJourneys({
+                  configDir: tempConfigDir,
+                  tenantUrl: tenantUrlForPush,
+                  token,
+                  realms,
+                  name: itemId,
+                  pushInnerJourneys: includeDeps === true,
+                  pushScripts: false,
+                  log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
+                });
+              } catch (err) {
+                journeysPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for journey "${itemId}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
           if (managedSel && s === "managed-objects") return false;
           if (scriptsSel && s === "scripts") return false;
+          if (journeysSel && s === "journeys") return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -731,7 +763,31 @@ export async function POST(req: NextRequest) {
           const pullCwd = path.join(process.cwd(), "environments", targetEnvironment);
 
           for (const sel of scopeSelections) {
-            if (sel.scope === "scripts" && sel.items && sel.items.length > 0) {
+            if (sel.scope === "journeys" && sel.items && sel.items.length > 0) {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              const realms = pullEnvVars.REALMS ? (JSON.parse(pullEnvVars.REALMS) as string[]) : ["alpha"];
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping journeys pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) {
+                  emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  for (const itemId of sel.items) {
+                    emit({ type: "stdout", data: `  Pulling journey "${itemId}" (vendored)...\n`, ts: Date.now() });
+                    try {
+                      await pullJourneys({ exportDir, tenantUrl, token, realms, name: itemId, pullDependencies: includeDeps === true, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+                    } catch (err) {
+                      emit({ type: "stderr", data: `  Pull failed for journey "${itemId}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                    }
+                  }
+                }
+              }
+            } else if (sel.scope === "scripts" && sel.items && sel.items.length > 0) {
               const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
               const realms = pullEnvVars.REALMS ? (JSON.parse(pullEnvVars.REALMS) as string[]) : ["alpha"];
               const prefixes = pullEnvVars.SCRIPT_PREFIXES ? (JSON.parse(pullEnvVars.SCRIPT_PREFIXES) as string[]) : [""];
