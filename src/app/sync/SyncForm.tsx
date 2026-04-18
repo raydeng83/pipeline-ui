@@ -35,7 +35,7 @@ interface PullJob {
   exitCode: number | null;
 }
 
-type ScopeState = "running" | "done" | "error" | "empty";
+type ScopeState = "pending" | "running" | "done" | "error" | "empty";
 interface EnvScopeState {
   order: string[];
   results: Map<string, ScopeState>;
@@ -84,7 +84,17 @@ function usePullJobs() {
     }));
     for (const env of envs) {
       logsRef.current.set(env.name, []);
-      scopeStatesRef.current.set(env.name, { order: [], results: new Map(), warnings: new Map(), current: null });
+      // Seed every selected scope as pending up front so the pill row shows
+      // the full checklist immediately, then flips entries to running/done/
+      // error as scope-start/scope-end events arrive.
+      const seeded = new Map<string, ScopeState>();
+      for (const s of scopes) seeded.set(s, "pending");
+      scopeStatesRef.current.set(env.name, {
+        order: [...scopes],
+        results: seeded,
+        warnings: new Map(),
+        current: null,
+      });
     }
     setJobs(initial);
     abortControllers.current.clear();
@@ -513,20 +523,22 @@ export function SyncForm({
                 return (
                   <div className="flex flex-wrap items-center gap-1.5 px-0.5">
                     {st.order.map((s) => {
-                      const state = st.results.get(s);
+                      const state = st.results.get(s) ?? "pending";
                       const warning = st.warnings.get(s);
                       return (
                         <span
                           key={s}
                           title={warning ? `${s} — ${warning}` : s}
                           className={cn(
-                            "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono rounded ring-1",
+                            "inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono rounded ring-1 transition-colors",
+                            state === "pending" && "bg-slate-50 text-slate-400 ring-slate-200",
+                            state === "running" && "bg-sky-50 text-sky-700 ring-sky-300 ring-2",
                             state === "done" && "bg-emerald-50 text-emerald-700 ring-emerald-200",
                             state === "error" && "bg-red-50 text-red-700 ring-red-200",
-                            state === "running" && "bg-sky-50 text-sky-700 ring-sky-200",
                             state === "empty" && "bg-slate-50 text-slate-500 ring-slate-200",
                           )}
                         >
+                          {state === "pending" && <span>○</span>}
                           {state === "running" && <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />}
                           {state === "done" && <span>✓</span>}
                           {state === "error" && <span>✗</span>}
