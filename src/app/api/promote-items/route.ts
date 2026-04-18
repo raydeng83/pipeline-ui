@@ -7,6 +7,7 @@ import { dispatchFrConfig } from "@/lib/fr-config-dispatch";
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
+import { getRealmRoots } from "@/lib/realm-paths";
 import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales, pullEndpoints, pushEndpoints, pullInternalRoles, pushInternalRoles, pullEmailTemplates, pushEmailTemplates, pullCustomNodes, pushCustomNodes, pullThemes, pushThemes, pullEmailProvider, pushEmailProvider, pullSchedules, pushSchedules, pullIgaWorkflows, pushIgaWorkflows, pullTermsAndConditions, pushTermsAndConditions, pullServiceObjects, pushServiceObjects, pullRawConfig, pushRawConfig, pullAuthzPolicies, pushAuthzPolicies, pullOauth2Agents, pushOauth2Agents, pullServices, pushServices, pullTelemetry, pushTelemetry, pullConnectorDefinitions, pushConnectorDefinitions, pullConnectorMappings, pushConnectorMappings, pullRemoteServers, pushRemoteServers, pullSecrets, pushSecrets, pullSecretMappings, pushSecretMappings } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
@@ -50,12 +51,8 @@ function copyDirSync(src: string, dest: string) {
 /** Resolve scope to absolute directory paths within a config dir. */
 function resolveScopeDirs(configDir: string, scope: string): string[] {
   if (scope in REALM_SCOPE_SUBDIR) {
-    const realmsDir = path.join(configDir, "realms");
-    if (!fs.existsSync(realmsDir)) return [];
-    return fs.readdirSync(realmsDir, { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => path.join(realmsDir, e.name, REALM_SCOPE_SUBDIR[scope]))
-      .filter((d) => fs.existsSync(d));
+    const subdir = REALM_SCOPE_SUBDIR[scope];
+    return getRealmRoots(configDir, subdir).map((root) => path.join(root, subdir));
   }
   const dirName = SCOPE_DIR[scope] ?? scope;
   const d = path.join(configDir, dirName);

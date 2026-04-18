@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
+import { getRealmRoots } from "@/lib/realm-paths";
 import fs from "fs";
 import path from "path";
 
@@ -49,18 +50,16 @@ export async function POST(req: NextRequest) {
   const configDir = getConfigDir(env);
   if (!configDir) return NextResponse.json({ error: "No config dir for environment." }, { status: 400 });
 
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) {
-    return NextResponse.json({ error: "No realms directory found — pull config first." }, { status: 404 });
+  const journeyRealmRoots = getRealmRoots(configDir, "journeys");
+  if (journeyRealmRoots.length === 0) {
+    return NextResponse.json({ error: "No journeys found — pull config first." }, { status: 404 });
   }
 
   const journeyMap = new Map<string, JourneyInfo>();
   const scriptReverseIndex = new Map<string, { journey: string; nodeName: string; nodeType: string }[]>();
 
-  for (const realm of fs.readdirSync(realmsDir)) {
-    const journeysDir = path.join(realmsDir, realm, "journeys");
-    if (!fs.existsSync(journeysDir)) continue;
-
+  for (const realmRoot of journeyRealmRoots) {
+    const journeysDir = path.join(realmRoot, "journeys");
     for (const journeyName of fs.readdirSync(journeysDir)) {
       const journeyDir = path.join(journeysDir, journeyName);
       const stat = fs.statSync(journeyDir);
@@ -154,9 +153,8 @@ export async function POST(req: NextRequest) {
 
   // Build script usage from reverse index + script configs
   const scriptUsage: ScriptUsage[] = [];
-  for (const realm of fs.readdirSync(realmsDir)) {
-    const configPath = path.join(realmsDir, realm, "scripts", "scripts-config");
-    if (!fs.existsSync(configPath)) continue;
+  for (const realmRoot of getRealmRoots(configDir, "scripts/scripts-config")) {
+    const configPath = path.join(realmRoot, "scripts", "scripts-config");
     for (const f of fs.readdirSync(configPath)) {
       if (!f.endsWith(".json")) continue;
       try {

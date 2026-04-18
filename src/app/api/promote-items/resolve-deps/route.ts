@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
+import { getRealmRoots } from "@/lib/realm-paths";
 import fs from "fs";
 import path from "path";
 
@@ -13,16 +14,10 @@ function scanJourneyDeps(configDir: string, journeyName: string, visited: Set<st
   if (visited.has(journeyName)) return [];
   visited.add(journeyName);
 
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return [];
-
   const deps: JourneyDep[] = [];
 
-  for (const realm of fs.readdirSync(realmsDir, { withFileTypes: true })) {
-    if (!realm.isDirectory()) continue;
-    const journeyDir = path.join(realmsDir, realm.name, "journeys", journeyName);
-    if (!fs.existsSync(journeyDir)) continue;
-
+  for (const realmRoot of getRealmRoots(configDir, path.join("journeys", journeyName))) {
+    const journeyDir = path.join(realmRoot, "journeys", journeyName);
     const nodesDir = path.join(journeyDir, "nodes");
     const scripts: { uuid: string; name: string }[] = [];
     const subJourneys: string[] = [];
@@ -30,7 +25,7 @@ function scanJourneyDeps(configDir: string, journeyName: string, visited: Set<st
     if (fs.existsSync(nodesDir)) {
       // Build script UUID → name map
       const scriptNameMap = new Map<string, string>();
-      const scriptsConfigDir = path.join(realmsDir, realm.name, "scripts", "scripts-config");
+      const scriptsConfigDir = path.join(realmRoot, "scripts", "scripts-config");
       if (fs.existsSync(scriptsConfigDir)) {
         for (const f of fs.readdirSync(scriptsConfigDir)) {
           if (!f.endsWith(".json")) continue;

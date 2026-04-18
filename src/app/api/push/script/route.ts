@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getConfigDir } from "@/lib/fr-config";
+import { findRealmContaining } from "@/lib/realm-paths";
 import fs from "fs";
 import path from "path";
-
-function getRealms(configDir: string): string[] {
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return [];
-  return fs.readdirSync(realmsDir, { withFileTypes: true })
-    .filter((e) => e.isDirectory()).map((e) => e.name).sort();
-}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -22,31 +16,27 @@ export async function GET(req: NextRequest) {
   const configDir = getConfigDir(environment);
   if (!configDir) return NextResponse.json({ error: "Config dir not found" }, { status: 404 });
 
-  for (const realm of getRealms(configDir)) {
-    const configFile = path.join(configDir, "realms", realm, "scripts", "scripts-config", `${scriptId}.json`);
-    if (!fs.existsSync(configFile)) continue;
+  const realmRoot = findRealmContaining(configDir, path.join("scripts", "scripts-config", `${scriptId}.json`));
+  if (!realmRoot) return NextResponse.json({ error: "Script not found" }, { status: 404 });
 
-    let scriptMeta: { name?: string; script?: { file?: string } };
-    try {
-      scriptMeta = JSON.parse(fs.readFileSync(configFile, "utf-8"));
-    } catch {
-      continue;
-    }
-
-    const relFile = scriptMeta.script?.file;
-    if (!relFile) {
-      return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null, filename: null });
-    }
-
-    const contentFile = path.join(configDir, "realms", realm, "scripts", relFile);
-    if (!fs.existsSync(contentFile)) {
-      return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null, filename: path.basename(relFile) });
-    }
-
-    const content = fs.readFileSync(contentFile, "utf-8");
-    const filename = path.basename(relFile);
-    return NextResponse.json({ name: scriptMeta.name ?? scriptId, content, filename });
+  const configFile = path.join(realmRoot, "scripts", "scripts-config", `${scriptId}.json`);
+  let scriptMeta: { name?: string; script?: { file?: string } };
+  try {
+    scriptMeta = JSON.parse(fs.readFileSync(configFile, "utf-8"));
+  } catch {
+    return NextResponse.json({ error: "Script config unreadable" }, { status: 500 });
   }
 
-  return NextResponse.json({ error: "Script not found" }, { status: 404 });
+  const relFile = scriptMeta.script?.file;
+  if (!relFile) {
+    return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null, filename: null });
+  }
+
+  const contentFile = path.join(realmRoot, "scripts", relFile);
+  if (!fs.existsSync(contentFile)) {
+    return NextResponse.json({ name: scriptMeta.name ?? scriptId, content: null, filename: path.basename(relFile) });
+  }
+
+  const content = fs.readFileSync(contentFile, "utf-8");
+  return NextResponse.json({ name: scriptMeta.name ?? scriptId, content, filename: path.basename(relFile) });
 }
