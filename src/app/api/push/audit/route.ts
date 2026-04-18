@@ -69,13 +69,35 @@ export interface AuditItem {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function getRealms(configDir: string): string[] {
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return [];
-  return fs.readdirSync(realmsDir, { withFileTypes: true })
-    .filter((e) => e.isDirectory())
-    .map((e) => e.name)
-    .sort();
+/**
+ * Resolve realm directories that contain the given subdir.
+ * Supports both layouts on disk:
+ *   - configDir/realms/<realm>/<subdir>   (upstream-style)
+ *   - configDir/<realm>/<subdir>           (vendored pull output)
+ * Returns absolute paths to the <subdir> directories that exist.
+ */
+function getRealmDirs(configDir: string, subdir: string): string[] {
+  const found: string[] = [];
+  const seen = new Set<string>();
+  const push = (p: string) => { if (!seen.has(p) && fs.existsSync(p)) { seen.add(p); found.push(p); } };
+
+  const realmsRoot = path.join(configDir, "realms");
+  if (fs.existsSync(realmsRoot)) {
+    for (const e of fs.readdirSync(realmsRoot, { withFileTypes: true })) {
+      if (e.isDirectory()) push(path.join(realmsRoot, e.name, subdir));
+    }
+  }
+  if (fs.existsSync(configDir)) {
+    for (const e of fs.readdirSync(configDir, { withFileTypes: true })) {
+      // Skip the "realms" umbrella (handled above) and top-level scope dirs
+      // that coincidentally share a name with realms is never an issue because
+      // we filter by the presence of <subdir> inside.
+      if (e.isDirectory() && e.name !== "realms") {
+        push(path.join(configDir, e.name, subdir));
+      }
+    }
+  }
+  return found.sort();
 }
 
 function countFiles(dir: string): number {
@@ -180,10 +202,7 @@ function auditScope(configDir: string, scope: string) {
   // Realm-based scope
   if (scope in REALM_SCOPE_SUBDIR) {
     const subdir = REALM_SCOPE_SUBDIR[scope];
-    const realms = getRealms(configDir);
-    const realmDirs = realms
-      .map((r) => path.join(configDir, "realms", r, subdir))
-      .filter((d) => fs.existsSync(d));
+    const realmDirs = getRealmDirs(configDir, subdir);
 
     const fileCount = realmDirs.reduce((sum, d) => sum + countFiles(d), 0);
     const exists = realmDirs.length > 0;
