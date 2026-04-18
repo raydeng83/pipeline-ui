@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -562,6 +562,7 @@ export async function POST(req: NextRequest) {
         const journeysSel = scopeSelections.find(
           (s) => s.scope === "journeys" && s.items && s.items.length > 0,
         );
+        const idmFlatSels = scopeSelections.filter((s) => isIdmFlatScope(s.scope));
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -674,16 +675,42 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let idmFlatPushFailed = false;
+        if (idmFlatSels.length > 0 && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            idmFlatPushFailed = true;
+          } else {
+            for (const sel of idmFlatSels) {
+              if (!isIdmFlatScope(sel.scope)) continue;
+              emit({ type: "stdout", data: `  Pushing ${sel.scope} (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushIdmFlatScope({
+                  scope: sel.scope,
+                  configDir: tempConfigDir,
+                  tenantUrl: tenantUrlForPush,
+                  token,
+                  log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }),
+                });
+              } catch (err) {
+                idmFlatPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for ${sel.scope}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
           if (managedSel && s === "managed-objects") return false;
           if (scriptsSel && s === "scripts") return false;
           if (journeysSel && s === "journeys") return false;
+          if (isIdmFlatScope(s)) return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -855,8 +882,27 @@ export async function POST(req: NextRequest) {
                 });
                 if (code !== 0) emit({ type: "stderr", data: `  Pull failed for "${itemId}" (exit ${code})\n`, ts: Date.now() });
               }
+            } else if (isIdmFlatScope(sel.scope)) {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping ${sel.scope} pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  emit({ type: "stdout", data: `  Pulling ${sel.scope} (vendored)...\n`, ts: Date.now() });
+                  try {
+                    await pullIdmFlatScope({ scope: sel.scope, exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+                  } catch (err) {
+                    emit({ type: "stderr", data: `  Pull failed for ${sel.scope}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
             } else {
-              // Entire scope: pull all
+              // Entire scope: pull all (still spawned for scopes we haven't vendored yet)
               emit({ type: "stdout", data: `  Pulling ${sel.scope} (all)...\n`, ts: Date.now() });
               const code = await new Promise<number | null>((resolve) => {
                 const proc = spawnProc("fr-config-pull", [sel.scope], { env: pullEnv, shell: true, cwd: pullCwd });
