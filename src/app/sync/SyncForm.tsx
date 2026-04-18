@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogViewer } from "@/components/LogViewer";
@@ -43,156 +43,188 @@ interface EnvScopeState {
   current: string | null;
 }
 
-function usePullJobs() {
-  const [jobs, setJobs] = useState<PullJob[]>([]);
-  // Store logs in a ref to avoid re-rendering the entire component on every line.
-  // A counter state triggers re-renders at a throttled rate.
-  const logsRef = useRef<Map<string, LogEntry[]>>(new Map());
-  const scopeStatesRef = useRef<Map<string, EnvScopeState>>(new Map());
-  const [logTick, setLogTick] = useState(0);
-  const tickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const abortControllers = useRef<Map<string, AbortController>>(new Map());
+// ── Pull jobs store ──────────────────────────────────────────────────────────
+// Module-scope singleton so jobs + logs survive SyncForm unmount when the user
+// navigates to another tab and comes back. React subscribes via the hook below.
 
-  const scheduleLogTick = useCallback(() => {
-    if (tickTimer.current) return;
-    tickTimer.current = setTimeout(() => {
-      tickTimer.current = null;
-      setLogTick((n) => n + 1);
-    }, 150);
-  }, []);
+const EMPTY_SCOPE_STATE: EnvScopeState = { order: [], results: new Map(), warnings: new Map(), current: null };
 
-  const getLogsForEnv = useCallback((env: string): LogEntry[] => {
-    return logsRef.current.get(env) ?? [];
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logTick]);
+const pullStore = {
+  jobs: [] as PullJob[],
+  logs: new Map<string, LogEntry[]>(),
+  scopeStates: new Map<string, EnvScopeState>(),
+  abortControllers: new Map<string, AbortController>(),
+  listeners: new Set<() => void>(),
+  version: 0,
+  tickTimer: null as ReturnType<typeof setTimeout> | null,
+};
 
-  const getScopeStateForEnv = useCallback((env: string): EnvScopeState => {
-    return scopeStatesRef.current.get(env) ?? { order: [], results: new Map(), warnings: new Map(), current: null };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logTick]);
+function emitPullStore(): void {
+  pullStore.version++;
+  for (const l of pullStore.listeners) l();
+}
+function schedulePullStoreTick(): void {
+  if (pullStore.tickTimer) return;
+  pullStore.tickTimer = setTimeout(() => {
+    pullStore.tickTimer = null;
+    emitPullStore();
+  }, 150);
+}
+function subscribePullStore(l: () => void): () => void {
+  pullStore.listeners.add(l);
+  return () => { pullStore.listeners.delete(l); };
+}
 
-  const startAll = useCallback((envs: Environment[], scopes: ConfigScope[]) => {
-    logsRef.current.clear();
-    scopeStatesRef.current.clear();
-    const initial: PullJob[] = envs.map((env) => ({
-      env: env.name,
-      label: env.label,
-      color: env.color,
-      status: "running",
-      logs: [],
-      exitCode: null,
-    }));
-    for (const env of envs) {
-      logsRef.current.set(env.name, []);
-      // Seed every selected scope as pending up front so the pill row shows
-      // the full checklist immediately, then flips entries to running/done/
-      // error as scope-start/scope-end events arrive.
-      const seeded = new Map<string, ScopeState>();
-      for (const s of scopes) seeded.set(s, "pending");
-      scopeStatesRef.current.set(env.name, {
-        order: [...scopes],
-        results: seeded,
-        warnings: new Map(),
-        current: null,
-      });
-    }
-    setJobs(initial);
-    abortControllers.current.clear();
+function startAllJobs(envs: Environment[], scopes: ConfigScope[]): void {
+  pullStore.logs.clear();
+  pullStore.scopeStates.clear();
+  pullStore.jobs = envs.map((env) => ({
+    env: env.name,
+    label: env.label,
+    color: env.color,
+    status: "running",
+    logs: [],
+    exitCode: null,
+  }));
+  for (const env of envs) {
+    pullStore.logs.set(env.name, []);
+    // Seed every selected scope as pending up front so the pill row shows
+    // the full checklist immediately, then flips entries to running/done/
+    // error as scope-start/scope-end events arrive.
+    const seeded = new Map<string, ScopeState>();
+    for (const s of scopes) seeded.set(s, "pending");
+    pullStore.scopeStates.set(env.name, {
+      order: [...scopes],
+      results: seeded,
+      warnings: new Map(),
+      current: null,
+    });
+  }
+  pullStore.abortControllers.clear();
+  emitPullStore();
 
-    for (const env of envs) {
-      const ac = new AbortController();
-      abortControllers.current.set(env.name, ac);
+  for (const env of envs) {
+    const ac = new AbortController();
+    pullStore.abortControllers.set(env.name, ac);
 
-      fetch("/api/pull", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ environment: env.name, scopes }),
-        signal: ac.signal,
-      })
-        .then(async (res) => {
-          if (!res.ok || !res.body) {
-            setJobs((prev) => prev.map((j) => j.env === env.name ? { ...j, status: "failed", exitCode: 1 } : j));
+    fetch("/api/pull", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ environment: env.name, scopes }),
+      signal: ac.signal,
+    })
+      .then(async (res) => {
+        if (!res.ok || !res.body) {
+          pullStore.jobs = pullStore.jobs.map((j) => j.env === env.name ? { ...j, status: "failed", exitCode: 1 } : j);
+          emitPullStore();
+          return;
+        }
+        const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += value;
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          let hasExit = false;
+          let exitEntry: LogEntry | null = null;
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const entry = JSON.parse(line) as LogEntry;
+              pullStore.logs.get(env.name)?.push(entry);
+              const st = pullStore.scopeStates.get(env.name);
+              if (st) {
+                if (entry.type === "scope-start" && entry.scope) {
+                  if (!st.results.has(entry.scope)) st.order.push(entry.scope);
+                  st.results.set(entry.scope, "running");
+                  st.current = entry.scope;
+                } else if (entry.type === "scope-end" && entry.scope) {
+                  const warning = (entry as LogEntry & { warning?: string }).warning;
+                  const state: ScopeState = warning
+                    ? "empty"
+                    : (entry.code ?? 0) === 0
+                      ? "done"
+                      : "error";
+                  st.results.set(entry.scope, state);
+                  if (warning) st.warnings.set(entry.scope, warning);
+                  if (st.current === entry.scope) st.current = null;
+                }
+              }
+              if (entry.type === "exit") { hasExit = true; exitEntry = entry; }
+            } catch { /* skip */ }
+          }
+          if (hasExit && exitEntry) {
+            const st = pullStore.scopeStates.get(env.name);
+            if (st) st.current = null;
+            const code = (exitEntry as LogEntry).code ?? 1;
+            pullStore.jobs = pullStore.jobs.map((j) =>
+              j.env === env.name
+                ? { ...j, status: code === 0 ? "done" : "failed", exitCode: code }
+                : j
+            );
+            schedulePullStoreTick();
             return;
           }
-          const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
-          let buffer = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += value;
-            const lines = buffer.split("\n");
-            buffer = lines.pop() ?? "";
-            let hasExit = false;
-            let exitEntry: LogEntry | null = null;
-            for (const line of lines) {
-              if (!line.trim()) continue;
-              try {
-                const entry = JSON.parse(line) as LogEntry;
-                logsRef.current.get(env.name)?.push(entry);
-                const st = scopeStatesRef.current.get(env.name);
-                if (st) {
-                  if (entry.type === "scope-start" && entry.scope) {
-                    if (!st.results.has(entry.scope)) st.order.push(entry.scope);
-                    st.results.set(entry.scope, "running");
-                    st.current = entry.scope;
-                  } else if (entry.type === "scope-end" && entry.scope) {
-                    const warning = (entry as LogEntry & { warning?: string }).warning;
-                    const state: ScopeState = warning
-                      ? "empty"
-                      : (entry.code ?? 0) === 0
-                        ? "done"
-                        : "error";
-                    st.results.set(entry.scope, state);
-                    if (warning) st.warnings.set(entry.scope, warning);
-                    if (st.current === entry.scope) st.current = null;
-                  }
-                }
-                if (entry.type === "exit") { hasExit = true; exitEntry = entry; }
-              } catch { /* skip */ }
-            }
-            if (hasExit && exitEntry) {
-              const st = scopeStatesRef.current.get(env.name);
-              if (st) st.current = null;
-              setJobs((prev) => prev.map((j) =>
-                j.env === env.name
-                  ? { ...j, status: ((exitEntry as LogEntry).code ?? 1) === 0 ? "done" : "failed", exitCode: (exitEntry as LogEntry).code ?? 1 }
-                  : j
-              ));
-              scheduleLogTick();
-              return;
-            }
-            scheduleLogTick();
-          }
-          setJobs((prev) => prev.map((j) =>
-            j.env === env.name && j.status === "running" ? { ...j, status: "done", exitCode: 0 } : j
-          ));
-          scheduleLogTick();
-        })
-        .catch((err) => {
-          if ((err as Error).name === "AbortError") return;
-          logsRef.current.get(env.name)?.push({ type: "error", data: String(err), ts: Date.now() });
-          setJobs((prev) => prev.map((j) =>
-            j.env === env.name ? { ...j, status: "failed", exitCode: 1 } : j
-          ));
-          scheduleLogTick();
-        });
-    }
-  }, [scheduleLogTick]);
+          schedulePullStoreTick();
+        }
+        pullStore.jobs = pullStore.jobs.map((j) =>
+          j.env === env.name && j.status === "running" ? { ...j, status: "done", exitCode: 0 } : j
+        );
+        schedulePullStoreTick();
+      })
+      .catch((err) => {
+        if ((err as Error).name === "AbortError") return;
+        pullStore.logs.get(env.name)?.push({ type: "error", data: String(err), ts: Date.now() });
+        pullStore.jobs = pullStore.jobs.map((j) =>
+          j.env === env.name ? { ...j, status: "failed", exitCode: 1 } : j
+        );
+        schedulePullStoreTick();
+      });
+  }
+}
 
-  const abortAll = useCallback(() => {
-    for (const ac of abortControllers.current.values()) ac.abort();
-    setJobs((prev) => prev.map((j) => j.status === "running" ? { ...j, status: "failed", exitCode: 1 } : j));
-  }, []);
+function abortAllJobs(): void {
+  for (const ac of pullStore.abortControllers.values()) ac.abort();
+  pullStore.jobs = pullStore.jobs.map((j) => j.status === "running" ? { ...j, status: "failed", exitCode: 1 } : j);
+  emitPullStore();
+}
 
-  const clearJobs = useCallback(() => {
-    setJobs([]);
-    logsRef.current.clear();
-    scopeStatesRef.current.clear();
-  }, []);
+function clearAllJobs(): void {
+  pullStore.jobs = [];
+  pullStore.logs.clear();
+  pullStore.scopeStates.clear();
+  emitPullStore();
+}
 
-  const anyRunning = jobs.some((j) => j.status === "running");
-
-  return { jobs, getLogsForEnv, getScopeStateForEnv, startAll, abortAll, clearJobs, anyRunning };
+function usePullJobs() {
+  // useSyncExternalStore wires the module-level version into React re-renders.
+  // The selector just returns the version; all real data comes from pullStore
+  // via the getter functions below, which are stable references.
+  useSyncExternalStore(
+    subscribePullStore,
+    () => pullStore.version,
+    () => 0,
+  );
+  const getLogsForEnv = useCallback(
+    (env: string): LogEntry[] => pullStore.logs.get(env) ?? [],
+    [],
+  );
+  const getScopeStateForEnv = useCallback(
+    (env: string): EnvScopeState => pullStore.scopeStates.get(env) ?? EMPTY_SCOPE_STATE,
+    [],
+  );
+  const anyRunning = pullStore.jobs.some((j) => j.status === "running");
+  return {
+    jobs: pullStore.jobs,
+    getLogsForEnv,
+    getScopeStateForEnv,
+    startAll: startAllJobs,
+    abortAll: abortAllJobs,
+    clearJobs: clearAllJobs,
+    anyRunning,
+  };
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
