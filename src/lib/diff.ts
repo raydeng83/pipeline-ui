@@ -3,6 +3,7 @@ import path from "path";
 import type { DiffLine, FileDiff, CompareReport, CompareEndpoint, DiffOptions, JourneyTreeNode, JourneyScript, JourneyNodeInfo } from "./diff-types";
 import { formatHtml, shouldFormatAsHtml } from "./format-html";
 import { getRealmRoots } from "./realm-paths";
+import { loadSemanticJourneys } from "./semantic-compare-adapter";
 
 const MAX_LINES = 2000;
 const MAX_CONTENT_BYTES = 200_000; // 200 KB per side
@@ -621,6 +622,8 @@ export function buildReport(
     journeyTree = buildJourneyTree(sourceDir, targetDir, changedJourneys, changedScripts, changedNodeFiles, forceIncludeJourneys);
   } catch { /* ignore */ }
 
+  const semanticJourneys = loadSemanticJourneys(sourceDir, targetDir, scopes ?? []);
+
   return {
     source,
     target,
@@ -629,5 +632,6 @@ export function buildReport(
     summary,
     files,
     journeyTree,
+    ...(semanticJourneys ? { semanticJourneys } : {}),
   };
 }

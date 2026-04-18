@@ -1,3 +1,13 @@
+import type { EqualityReason } from "./semantic-compare/types";
+export type { EqualityReason } from "./semantic-compare/types";
+
+export interface SemanticJourneyReport {
+  name: string;
+  status: "equal" | "modified" | "added" | "removed";
+  /** Present only when both sides exist (status === "modified" or "equal"). */
+  reasons?: EqualityReason[];
+}
+
 export interface DiffLine {
   type: "context" | "added" | "removed";
   content: string;
@@ -70,4 +80,6 @@ export interface CompareReport {
   files: FileDiff[];
   journeyTree?: JourneyTreeNode[];
   missingDeps?: MissingDepsWarning;
+  /** Per-journey semantic equality report (undefined when journeys aren't in scope). */
+  semanticJourneys?: SemanticJourneyReport[];
 }
