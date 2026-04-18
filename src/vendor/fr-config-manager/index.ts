@@ -525,3 +525,101 @@ export async function pushInternalRoles(opts: {
 }): Promise<void> {
   await internalRolesPush.pushInternalRoles(opts);
 }
+
+// ── email-templates ──────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const emailTemplatesPull = require("./pull/email-templates.js") as {
+  pullEmailTemplates: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullEmailTemplates(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await emailTemplatesPull.pullEmailTemplates(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const emailTemplatesPush = require("./push/update-email-templates.js") as {
+  pushEmailTemplates: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushEmailTemplates(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await emailTemplatesPush.pushEmailTemplates(opts);
+}
+
+// ── custom-nodes ─────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const customNodesPull = require("./pull/custom-nodes.js") as {
+  pullCustomNodes: (opts: { exportDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullCustomNodes(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await customNodesPull.pullCustomNodes(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const customNodesPush = require("./push/update-custom-nodes.js") as {
+  pushCustomNodes: (opts: { configDir: string; tenantUrl: string; token: string; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushCustomNodes(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await customNodesPush.pushCustomNodes(opts);
+}
+
+// ── themes ───────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const themesPull = require("./pull/themes.js") as {
+  pullThemes: (opts: { exportDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pullThemes(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await themesPull.pullThemes(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const themesPush = require("./push/update-themes.js") as {
+  pushThemes: (opts: { configDir: string; tenantUrl: string; token: string; realms?: string[]; name?: string; log?: (line: string) => void }) => Promise<void>;
+};
+
+export async function pushThemes(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await themesPush.pushThemes(opts);
+}
