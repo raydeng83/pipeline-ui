@@ -63,3 +63,60 @@ export async function pushManagedObjects(opts: {
 }): Promise<void> {
   await pushMod.updateManagedObjects(opts);
 }
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const scriptsPull = require("./pull/scripts.js") as {
+  exportScripts: (opts: {
+    exportDir: string;
+    tenantUrl: string;
+    token: string;
+    realms?: string[];
+    prefixes?: string[];
+    name?: string;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+/**
+ * Pull AM scripts from all realms (filtered by prefixes / name) into
+ * `exportDir/<realm>/scripts/{scripts-config,scripts-content}/`.
+ */
+export async function pullScripts(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  prefixes?: string[];
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await scriptsPull.exportScripts(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const scriptsPush = require("./push/update-scripts.js") as {
+  updateScripts: (opts: {
+    configDir: string;
+    tenantUrl: string;
+    token: string;
+    realms?: string[];
+    name?: string;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+/**
+ * Push AM scripts from `configDir/realms/<realm>/scripts/scripts-config/*.json`.
+ * When `name` is passed, only that script is pushed; `realms` must have exactly
+ * one entry in that case.
+ */
+export async function pushScripts(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await scriptsPush.updateScripts(opts);
+}
