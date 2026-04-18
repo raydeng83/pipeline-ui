@@ -25,6 +25,10 @@
 - `push/update-cors.js` — adapted from `packages/fr-config-push/src/scripts/update-cors.js`
 - `push/update-csp.js` — adapted from `packages/fr-config-push/src/scripts/update-csp.js`
 - `push/update-locales.js` — adapted from `packages/fr-config-push/src/scripts/update-locales.js`
+- `pull/endpoints.js` — adapted from `packages/fr-config-pull/src/scripts/endpoints.js`
+- `push/update-idm-endpoints.js` — adapted from `packages/fr-config-push/src/scripts/update-idm-endpoints.js`
+- `pull/internal-roles.js` — adapted from `packages/fr-config-pull/src/scripts/internalRoles.js`
+- `push/update-internal-roles.js` — adapted from `packages/fr-config-push/src/scripts/update-internal-roles.js`
 
 ## Local patches
 
