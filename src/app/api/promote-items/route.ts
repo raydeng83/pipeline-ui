@@ -6,7 +6,7 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
-import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges } from "@/vendor/fr-config-manager";
+import { pullManagedObjects, pushManagedObjects, pullScripts, pushScripts, pullJourneys, pushJourneys, isIdmFlatScope, pullIdmFlatScope, pushIdmFlatScope, pullPasswordPolicy, pushPasswordPolicy, pullOrgPrivileges, pushOrgPrivileges, pullCookieDomains, pushCookieDomains, pullCors, pushCors, pullCsp, pushCsp, pullLocales, pushLocales } from "@/vendor/fr-config-manager";
 import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
@@ -565,6 +565,10 @@ export async function POST(req: NextRequest) {
         const idmFlatSels = scopeSelections.filter((s) => isIdmFlatScope(s.scope));
         const passwordPolicySel = scopeSelections.find((s) => s.scope === "password-policy");
         const orgPrivilegesSel = scopeSelections.find((s) => s.scope === "org-privileges");
+        const cookieDomainsSel = scopeSelections.find((s) => s.scope === "cookie-domains");
+        const corsSel = scopeSelections.find((s) => s.scope === "cors");
+        const cspSel = scopeSelections.find((s) => s.scope === "csp");
+        const localesSel = scopeSelections.find((s) => s.scope === "locales");
 
         const targetEnvVarsForPush = parseEnvFile(getEnvFileContent(targetEnvironment));
         const tenantUrlForPush = targetEnvVarsForPush.TENANT_BASE_URL ?? "";
@@ -750,6 +754,76 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        let cookieDomainsPushFailed = false;
+        if (cookieDomainsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            cookieDomainsPushFailed = true;
+          } else {
+            emit({ type: "stdout", data: `  Pushing cookie-domains (vendored)...\n`, ts: Date.now() });
+            try {
+              await pushCookieDomains({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+            } catch (err) {
+              cookieDomainsPushFailed = true;
+              emit({ type: "stderr", data: `  Push failed for cookie-domains: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+            }
+          }
+        }
+
+        let corsPushFailed = false;
+        if (corsSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            corsPushFailed = true;
+          } else {
+            emit({ type: "stdout", data: `  Pushing cors (vendored)...\n`, ts: Date.now() });
+            try {
+              await pushCors({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+            } catch (err) {
+              corsPushFailed = true;
+              emit({ type: "stderr", data: `  Push failed for cors: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+            }
+          }
+        }
+
+        let cspPushFailed = false;
+        if (cspSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            cspPushFailed = true;
+          } else {
+            const items = cspSel.items && cspSel.items.length > 0 ? cspSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing csp${name ? ` "${name}"` : ""} (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushCsp({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+              } catch (err) {
+                cspPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for csp${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
+
+        let localesPushFailed = false;
+        if (localesSel && !directControl) {
+          const token = await ensurePushToken();
+          if (!token) {
+            localesPushFailed = true;
+          } else {
+            const items = localesSel.items && localesSel.items.length > 0 ? localesSel.items : [undefined];
+            for (const name of items) {
+              emit({ type: "stdout", data: `  Pushing locale${name ? ` "${name}"` : "s"} (vendored)...\n`, ts: Date.now() });
+              try {
+                await pushLocales({ configDir: tempConfigDir, tenantUrl: tenantUrlForPush, token, name, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
+              } catch (err) {
+                localesPushFailed = true;
+                emit({ type: "stderr", data: `  Push failed for locales${name ? ` "${name}"` : ""}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+              }
+            }
+          }
+        }
+
         // Remove vendor-handled scopes from the spawn set.
         const spawnPushScopes = pushScopes.filter((s) => {
           if (directControl) return true;
@@ -759,10 +833,14 @@ export async function POST(req: NextRequest) {
           if (isIdmFlatScope(s)) return false;
           if (passwordPolicySel && s === "password-policy") return false;
           if (orgPrivilegesSel && s === "org-privileges") return false;
+          if (cookieDomainsSel && s === "cookie-domains") return false;
+          if (corsSel && s === "cors") return false;
+          if (cspSel && s === "csp") return false;
+          if (localesSel && s === "locales") return false;
           return true;
         });
 
-        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed;
+        let pushFailed = managedPushFailed || scriptsPushFailed || journeysPushFailed || idmFlatPushFailed || passwordPolicyPushFailed || orgPrivilegesPushFailed || cookieDomainsPushFailed || corsPushFailed || cspPushFailed || localesPushFailed;
 
         if (spawnPushScopes.length > 0) {
           emit({ type: "stdout", data: `Pushing ${spawnPushScopes.length} scope(s) via fr-config-push: ${spawnPushScopes.join(", ")}${directControl ? " (via /mutable endpoints)" : ""}...\n`, ts: Date.now() });
@@ -989,6 +1067,36 @@ export async function POST(req: NextRequest) {
                     await pullOrgPrivileges({ exportDir, tenantUrl, token, log: (line) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() }) });
                   } catch (err) {
                     emit({ type: "stderr", data: `  Pull failed for org-privileges: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
+              }
+            } else if (sel.scope === "cookie-domains" || sel.scope === "cors" || sel.scope === "csp" || sel.scope === "locales") {
+              const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+              if (!tenantUrl) {
+                emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping ${sel.scope} pull.\n`, ts: Date.now() });
+              } else {
+                let token: string | null = null;
+                try { token = await getAccessToken(pullEnvVars); }
+                catch (err) { emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() }); }
+                if (token) {
+                  const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                  const exportDir = path.resolve(pullCwd, configDirRel);
+                  const logLine = (line: string) => emit({ type: "stdout", data: `  ${line}`, ts: Date.now() });
+                  emit({ type: "stdout", data: `  Pulling ${sel.scope} (vendored)...\n`, ts: Date.now() });
+                  try {
+                    if (sel.scope === "cookie-domains") {
+                      await pullCookieDomains({ exportDir, tenantUrl, token, log: logLine });
+                    } else if (sel.scope === "cors") {
+                      await pullCors({ exportDir, tenantUrl, token, log: logLine });
+                    } else if (sel.scope === "csp") {
+                      const name = sel.items && sel.items.length === 1 ? sel.items[0] : undefined;
+                      await pullCsp({ exportDir, tenantUrl, token, name, log: logLine });
+                    } else if (sel.scope === "locales") {
+                      const name = sel.items && sel.items.length === 1 ? sel.items[0] : undefined;
+                      await pullLocales({ exportDir, tenantUrl, token, name, log: logLine });
+                    }
+                  } catch (err) {
+                    emit({ type: "stderr", data: `  Pull failed for ${sel.scope}: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
                   }
                 }
               }
