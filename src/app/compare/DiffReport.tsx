@@ -3078,11 +3078,15 @@ export function DiffReport({ report, tasks = [], mode = "compare", dryRunMode, s
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
 
-  // Match active (non-archived) tasks whose source and target envs align
-  // with the comparison's source and target directly.
+  // Match tasks that are still editable — not archived and not terminal —
+  // and whose source and target envs align with the comparison.
+  // Completed/failed tasks represent finalized runs; adding items to them
+  // would silently reset their status, so exclude them.
   const eligibleTasks = tasks.filter(
     (t) =>
       !t.archivedAt &&
+      t.status !== "completed" &&
+      t.status !== "failed" &&
       t.source.environment === report.source.environment &&
       t.target.environment === report.target.environment,
   );
