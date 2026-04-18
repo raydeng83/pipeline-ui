@@ -184,17 +184,26 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
 
       let anyFailed = false;
 
-      // Acquire one bearer token up front and share it across every
-      // dispatched scope. The JWT exchange takes ~200–400ms on a cold cache;
-      // paying that N times per pull was showing up as "first item is slow".
+      // Cache a bearer token across scopes so the JWT exchange (~200–400ms)
+      // only happens once per minute instead of once per scope. A strict
+      // "share once for the whole pull" strategy breaks down on long runs
+      // where the token expires mid-pull — callers then hit 401s that retry
+      // can't recover from because the retry reuses the same stale token.
+      const TOKEN_TTL_MS = 60_000;
       let sharedToken: string | undefined;
-      try {
-        sharedToken = await getAccessToken(baseEnv as Record<string, string>);
-      } catch (err) {
-        encode(`token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, "stderr");
-        // Continue — individual dispatches will retry per-scope and surface
-        // their own errors, matching the pre-cache behavior.
-      }
+      let sharedTokenAt = 0;
+      const refreshToken = async (force = false): Promise<string | undefined> => {
+        if (!force && sharedToken && Date.now() - sharedTokenAt < TOKEN_TTL_MS) return sharedToken;
+        try {
+          sharedToken = await getAccessToken(baseEnv as Record<string, string>);
+          sharedTokenAt = Date.now();
+        } catch (err) {
+          encode(`token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, "stderr");
+          sharedToken = undefined;
+        }
+        return sharedToken;
+      };
+      await refreshToken();
 
       // Group consecutive entries by scope so the log viewer shows one section per scope
       let currentScope: string | null = null;
@@ -234,6 +243,11 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             encode(data, type);
           };
 
+          // Refresh if cache expired; force-refresh on retries so an expired
+          // or invalidated token from the previous attempt doesn't repeat the
+          // same 401.
+          const tokenForScope = await refreshToken(attempt > 0);
+
           // Try in-process dispatch first (for fr-config-pull / fr-config-push
           // scopes we've vendored). Falls through to spawn only for frodo and
           // any scope the dispatcher doesn't handle.
@@ -245,7 +259,7 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
             extraArgs: [...globalArgs, ...entry.extraArgs],
             extraEnv: entry.extraEnv,
             emit: captureEmit,
-            token: sharedToken,
+            token: tokenForScope,
           });
 
           if (dispatched.handled) {
