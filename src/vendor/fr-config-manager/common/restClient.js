@@ -47,4 +47,34 @@ async function restPut(url, data, token, apiVersion, ifMatch, ifNoneMatch) {
   return httpRequest({ method: "PUT", url, data, headers }, token);
 }
 
-module.exports = { restGet, restPut };
+/**
+ * Upsert: PUT with If-Match "*" when the resource exists, else PUT with
+ * If-None-Match "*". Upstream's restUpsert GETs first to detect existence;
+ * preserve that behavior.
+ */
+async function restUpsert(url, data, token, apiVersion) {
+  try {
+    await restGet(url, null, token);
+    return await restPut(url, data, token, apiVersion, "*", undefined);
+  } catch (e) {
+    const status = e?.response?.status;
+    if (status === 404) {
+      return await restPut(url, data, token, apiVersion, undefined, "*");
+    }
+    throw e;
+  }
+}
+
+async function restPost(url, data, token, apiVersion) {
+  const headers = { "Content-Type": "application/json" };
+  if (apiVersion) headers["Accept-Api-Version"] = apiVersion;
+  return httpRequest({ method: "POST", url, data, headers }, token);
+}
+
+async function restDelete(url, token, apiVersion) {
+  const headers = {};
+  if (apiVersion) headers["Accept-Api-Version"] = apiVersion;
+  return httpRequest({ method: "DELETE", url, headers }, token);
+}
+
+module.exports = { restGet, restPut, restUpsert, restPost, restDelete };
