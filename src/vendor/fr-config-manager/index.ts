@@ -186,3 +186,70 @@ export async function pushJourneys(opts: {
 }): Promise<void> {
   await journeysPush.updateAuthTrees(opts);
 }
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const flatPull = require("./pull/idm-flat-config.js") as {
+  pullIdmFlatConfig: (opts: {
+    exportDir: string;
+    subdir: string;
+    filename: string;
+    endpointName: string;
+    tenantUrl: string;
+    token: string;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const flatPush = require("./push/idm-flat-config.js") as {
+  pushIdmFlatConfig: (opts: {
+    configDir: string;
+    subdir: string;
+    filename: string;
+    endpointName: string;
+    tenantUrl: string;
+    token: string;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+/**
+ * Project scope → IDM flat-config endpoint mapping. Matches upstream fr-config-
+ * manager's per-scope push/pull scripts byte-for-byte (dir names, filenames,
+ * and endpoint paths).
+ */
+export const IDM_FLAT_SCOPES = {
+  "access-config":       { subdir: "access-config",             filename: "access.json",             endpointName: "access" },
+  "audit":               { subdir: "audit",                     filename: "audit.json",              endpointName: "audit" },
+  "idm-authentication":  { subdir: "idm-authentication-config", filename: "authentication.json",     endpointName: "authentication" },
+  "kba":                 { subdir: "kba",                       filename: "selfservice.kba.json",    endpointName: "selfservice.kba" },
+  "ui-config":           { subdir: "ui",                        filename: "ui-configuration.json",   endpointName: "ui/configuration" },
+} as const;
+
+export type IdmFlatScope = keyof typeof IDM_FLAT_SCOPES;
+
+export function isIdmFlatScope(s: string): s is IdmFlatScope {
+  return Object.prototype.hasOwnProperty.call(IDM_FLAT_SCOPES, s);
+}
+
+export async function pullIdmFlatScope(opts: {
+  scope: IdmFlatScope;
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  const cfg = IDM_FLAT_SCOPES[opts.scope];
+  await flatPull.pullIdmFlatConfig({ ...cfg, exportDir: opts.exportDir, tenantUrl: opts.tenantUrl, token: opts.token, log: opts.log });
+}
+
+export async function pushIdmFlatScope(opts: {
+  scope: IdmFlatScope;
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  const cfg = IDM_FLAT_SCOPES[opts.scope];
+  await flatPush.pushIdmFlatConfig({ ...cfg, configDir: opts.configDir, tenantUrl: opts.tenantUrl, token: opts.token, log: opts.log });
+}
