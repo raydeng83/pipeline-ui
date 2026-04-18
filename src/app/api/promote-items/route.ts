@@ -6,6 +6,8 @@ import { spawnFrConfig, getConfigDir, getEnvFileContent } from "@/lib/fr-config"
 import { parseEnvFile } from "@/lib/env-parser";
 import type { ScopeSelection } from "@/lib/fr-config-types";
 import { resolveJourneyDeps } from "@/lib/resolve-journey-deps";
+import { pullManagedObjects } from "@/vendor/fr-config-manager";
+import { getAccessToken } from "@/lib/iga-api";
 
 // ── Scope → directory mapping (mirrors push/audit route) ─────────────────────
 
@@ -667,15 +669,28 @@ export async function POST(req: NextRequest) {
               // uses `return` instead of `continue`, aborting on the first non-matching
               // object). Pull the whole scope instead so all updated objects land on disk.
               if (sel.scope === "managed-objects") {
-                emit({ type: "stdout", data: `  Pulling ${sel.scope} (all, workaround for --name upstream bug)...\n`, ts: Date.now() });
-                const code = await new Promise<number | null>((resolve) => {
-                  const proc = spawnProc("fr-config-pull", [sel.scope], { env: pullEnv, shell: true, cwd: pullCwd });
-                  proc.stdout.on("data", (chunk: Buffer) => emit({ type: "stdout", data: chunk.toString(), ts: Date.now() }));
-                  proc.stderr.on("data", (chunk: Buffer) => emit({ type: "stderr", data: chunk.toString(), ts: Date.now() }));
-                  proc.on("close", (c) => resolve(c));
-                  proc.on("error", (err) => { emit({ type: "stderr", data: err.message + "\n", ts: Date.now() }); resolve(1); });
-                });
-                if (code !== 0) emit({ type: "stderr", data: `  Pull failed for ${sel.scope} (exit ${code})\n`, ts: Date.now() });
+                const tenantUrl = pullEnvVars.TENANT_BASE_URL ?? "";
+                if (!tenantUrl) {
+                  emit({ type: "stderr", data: `  TENANT_BASE_URL missing for ${targetEnvironment} — skipping managed-objects pull.\n`, ts: Date.now() });
+                  continue;
+                }
+                let token: string;
+                try {
+                  token = await getAccessToken(pullEnvVars);
+                } catch (err) {
+                  emit({ type: "stderr", data: `  Token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  continue;
+                }
+                const configDirRel = pullEnvVars.CONFIG_DIR ?? "./config";
+                const exportDir = path.resolve(pullCwd, configDirRel);
+                for (const itemId of sel.items) {
+                  emit({ type: "stdout", data: `  Pulling ${sel.scope} "${itemId}" (vendored)...\n`, ts: Date.now() });
+                  try {
+                    await pullManagedObjects({ exportDir, tenantUrl, token, name: itemId });
+                  } catch (err) {
+                    emit({ type: "stderr", data: `  Pull failed for "${itemId}": ${err instanceof Error ? err.message : String(err)}\n`, ts: Date.now() });
+                  }
+                }
                 continue;
               }
               // Non-script scopes with item selection: pull by --name if supported

@@ -74,7 +74,7 @@ export const IGA_API_SCOPES = Object.keys(IGA_SCOPE_CONFIG);
 
 // ── Token acquisition ─────────────────────────────────────────────────────────
 
-async function getAccessToken(envVars: Record<string, string>): Promise<string> {
+export async function getAccessToken(envVars: Record<string, string>): Promise<string> {
   const tenantUrl = envVars.TENANT_BASE_URL ?? "";
   const saId = envVars.SERVICE_ACCOUNT_ID ?? "";
   const saKey = envVars.SERVICE_ACCOUNT_KEY ?? "";
