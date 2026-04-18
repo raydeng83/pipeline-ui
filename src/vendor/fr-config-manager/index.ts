@@ -253,3 +253,87 @@ export async function pushIdmFlatScope(opts: {
   const cfg = IDM_FLAT_SCOPES[opts.scope];
   await flatPush.pushIdmFlatConfig({ ...cfg, configDir: opts.configDir, tenantUrl: opts.tenantUrl, token: opts.token, log: opts.log });
 }
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const passwordPolicyPull = require("./pull/password-policy.js") as {
+  pullPasswordPolicy: (opts: {
+    exportDir: string;
+    tenantUrl: string;
+    token: string;
+    realms?: string[];
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+export async function pullPasswordPolicy(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  log?: (line: string) => void;
+}): Promise<void> {
+  await passwordPolicyPull.pullPasswordPolicy(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const passwordPolicyPush = require("./push/update-password-policy.js") as {
+  pushPasswordPolicy: (opts: {
+    configDir: string;
+    tenantUrl: string;
+    token: string;
+    realms?: string[];
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+export async function pushPasswordPolicy(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  realms?: string[];
+  log?: (line: string) => void;
+}): Promise<void> {
+  await passwordPolicyPush.pushPasswordPolicy(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const orgPrivilegesPull = require("./pull/org-privileges.js") as {
+  pullOrgPrivileges: (opts: {
+    exportDir: string;
+    tenantUrl: string;
+    token: string;
+    name?: string;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+export async function pullOrgPrivileges(opts: {
+  exportDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await orgPrivilegesPull.pullOrgPrivileges(opts);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const orgPrivilegesPush = require("./push/update-org-privileges.js") as {
+  pushOrgPrivileges: (opts: {
+    configDir: string;
+    tenantUrl: string;
+    token: string;
+    name?: string;
+    log?: (line: string) => void;
+  }) => Promise<void>;
+};
+
+export async function pushOrgPrivileges(opts: {
+  configDir: string;
+  tenantUrl: string;
+  token: string;
+  name?: string;
+  log?: (line: string) => void;
+}): Promise<void> {
+  await orgPrivilegesPush.pushOrgPrivileges(opts);
+}
