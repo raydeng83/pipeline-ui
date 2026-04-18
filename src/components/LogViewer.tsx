@@ -9,21 +9,19 @@ interface LogViewerProps {
   running: boolean;
   exitCode: number | null;
   onClear?: () => void;
-  /** Increment this to force the debug panel open and scroll it into view. */
-  focusDebugSignal?: number;
 }
 
-export function LogViewer({ logs, running, exitCode, onClear, focusDebugSignal }: LogViewerProps) {
+export function LogViewer({ logs, running, exitCode, onClear }: LogViewerProps) {
   const mainPaneRef = useRef<HTMLDivElement>(null);
-  const debugPaneRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
-  const [debugOpen, setDebugOpen] = useState(false);
 
-  const mainLogs = logs.filter((e) => e.type !== "stderr");
-  const debugLogs = logs.filter((e) => e.type === "stderr");
+  // All log lines render in the same pane — stdout, stderr, and errors
+  // inline. stderr is styled amber so it's distinguishable without needing
+  // a separate console.
+  const visibleLogs = logs;
 
   const handleCopy = () => {
-    const text = mainLogs
+    const text = visibleLogs
       .map((e) => (e.type === "exit" ? `\n[Process exited with code ${e.code}]` : e.data))
       .join("");
     navigator.clipboard.writeText(text).then(() => {
@@ -35,7 +33,6 @@ export function LogViewer({ logs, running, exitCode, onClear, focusDebugSignal }
   // Auto-scroll the log pane itself (not the page) when new lines arrive,
   // and only if the user was already pinned to the bottom — so manual
   // scrolling up to inspect earlier output isn't yanked back.
-  // Also scroll to bottom when logs change entirely (tab switch).
   const prevLogsRef = useRef(logs);
   useEffect(() => {
     const el = mainPaneRef.current;
@@ -43,36 +40,12 @@ export function LogViewer({ logs, running, exitCode, onClear, focusDebugSignal }
     const tabSwitched = logs !== prevLogsRef.current;
     prevLogsRef.current = logs;
     if (tabSwitched) {
-      // Tab switch — snap to bottom
       el.scrollTop = el.scrollHeight;
       return;
     }
     const pinned = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
     if (pinned) el.scrollTop = el.scrollHeight;
-  }, [logs, mainLogs.length]);
-
-  useEffect(() => {
-    const el = debugPaneRef.current;
-    if (!el || !debugOpen) return;
-    const pinned = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
-    if (pinned) el.scrollTop = el.scrollHeight;
-  }, [debugLogs.length, debugOpen]);
-
-  // Auto-open debug panel on error.
-  useEffect(() => {
-    if (exitCode !== null && exitCode !== 0 && debugLogs.length > 0) {
-      setDebugOpen(true);
-    }
-  }, [exitCode, debugLogs.length]);
-
-  // External trigger: open debug panel and scroll to it.
-  useEffect(() => {
-    if (focusDebugSignal === undefined || focusDebugSignal === 0) return;
-    setDebugOpen(true);
-    requestAnimationFrame(() => {
-      debugPaneRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [focusDebugSignal]);
+  }, [logs, visibleLogs.length]);
 
   const statusText =
     exitCode === null
@@ -114,17 +87,18 @@ export function LogViewer({ logs, running, exitCode, onClear, focusDebugSignal }
         )}
       </div>
 
-      {/* Main output — stdout only */}
+      {/* Unified output — stdout, stderr, and errors render together. */}
       <div ref={mainPaneRef} className="overflow-y-auto bg-slate-900 p-4 font-mono text-[12px] leading-5 min-h-[320px] max-h-[520px] rounded-b-xl">
-        {mainLogs.length === 0 && !running && (
+        {visibleLogs.length === 0 && !running && (
           <span className="text-slate-500">No output yet. Run a command to see logs.</span>
         )}
-        {mainLogs.map((entry, i) => (
+        {visibleLogs.map((entry, i) => (
           <div
             key={i}
             className={cn(
               "whitespace-pre-wrap break-all leading-5",
               entry.type === "error" && "text-red-400",
+              entry.type === "stderr" && "text-amber-300/90",
               entry.type === "exit" && entry.code === 0 && "text-green-400 font-bold",
               entry.type === "exit" && entry.code !== 0 && "text-red-400 font-bold",
               entry.type === "stdout" && "text-slate-100"
@@ -136,34 +110,6 @@ export function LogViewer({ logs, running, exitCode, onClear, focusDebugSignal }
           </div>
         ))}
       </div>
-
-      {/* Debug panel — stderr, collapsible */}
-      {debugLogs.length > 0 && (
-        <div className="border-t border-slate-700 rounded-b-md overflow-hidden">
-          <button
-            onClick={() => setDebugOpen((o) => !o)}
-            className="w-full flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-xs text-slate-400 hover:text-slate-200 transition-colors"
-          >
-            <svg
-              className={cn("w-3 h-3 transition-transform shrink-0", debugOpen ? "" : "-rotate-90")}
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-            <span>Debug output</span>
-            <span className="ml-1 text-slate-500">({debugLogs.length} lines)</span>
-          </button>
-          {debugOpen && (
-            <div ref={debugPaneRef} className="overflow-y-auto bg-slate-950 p-3 font-mono text-xs max-h-[300px]">
-              {debugLogs.map((entry, i) => (
-                <div key={i} className="whitespace-pre-wrap break-all leading-5 text-yellow-300/80">
-                  {entry.data}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

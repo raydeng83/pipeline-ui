@@ -202,11 +202,8 @@ export function SyncForm({
   const { jobs, getLogsForEnv, getScopeStateForEnv, startAll, abortAll, clearJobs, anyRunning } = usePullJobs();
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const logViewerRef = useRef<HTMLDivElement>(null);
-  const [focusDebugSignal, setFocusDebugSignal] = useState(0);
-
   const focusLog = useCallback((env: string) => {
     setActiveTab(env);
-    setFocusDebugSignal((n) => n + 1);
     requestAnimationFrame(() => {
       logViewerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -549,7 +546,6 @@ export function SyncForm({
                     logs={activeJobLogs}
                     running={activeJob.status === "running"}
                     exitCode={activeJob.exitCode}
-                    focusDebugSignal={focusDebugSignal}
                   />
                 </div>
               )}

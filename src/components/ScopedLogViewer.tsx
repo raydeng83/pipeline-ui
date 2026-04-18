@@ -36,7 +36,7 @@ function buildSections(logs: LogEntry[]): ScopeSection[] {
       current.exitCode = entry.code ?? null;
       current.endTs = entry.ts;
       current = null;
-    } else if (current && (entry.type === "stdout" || entry.type === "error")) {
+    } else if (current && (entry.type === "stdout" || entry.type === "stderr" || entry.type === "error")) {
       current.lines.push(entry);
     }
   }
@@ -123,7 +123,9 @@ function SectionDetails({ lines, search, filterMode }: { lines: LogEntry[]; sear
           key={i}
           className={cn(
             "whitespace-pre-wrap break-all leading-5 animate-log-line",
-            entry.type === "error" ? "text-red-400" : "text-slate-300"
+            entry.type === "error" && "text-red-400",
+            entry.type === "stderr" && "text-amber-300/90",
+            entry.type === "stdout" && "text-slate-300",
           )}
         >
           {search ? highlightMatches(entry.data ?? "", search) : entry.data}
@@ -154,7 +156,6 @@ export function ScopedLogViewer({
 }: ScopedLogViewerProps) {
   const userManagedRef = useRef<Set<string>>(new Set());
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [debugOpen, setDebugOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -162,7 +163,6 @@ export function ScopedLogViewer({
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const sections = buildSections(logs);
-  const debugEntries = logs.filter((e) => e.type === "stderr");
 
   // Duration: time between first scope-start and exit event
   const firstStartTs = logs.find((e) => e.type === "scope-start")?.ts ?? null;
@@ -190,7 +190,6 @@ export function ScopedLogViewer({
     if (logs.length === 0) {
       userManagedRef.current = new Set();
       setExpanded(new Set());
-      setDebugOpen(false);
       setSearch("");
       setSearchOpen(false);
     }
@@ -294,7 +293,7 @@ export function ScopedLogViewer({
 
   const hasSections = sections.length > 0;
   const flatLogs = logs.filter(
-    (e) => e.type === "stdout" || e.type === "error"
+    (e) => e.type === "stdout" || e.type === "stderr" || e.type === "error"
   );
 
   return (
@@ -555,7 +554,9 @@ export function ScopedLogViewer({
                     key={i}
                     className={cn(
                       "whitespace-pre-wrap break-all leading-5 animate-log-line",
-                      entry.type === "error" ? "text-red-400" : "text-slate-200"
+                      entry.type === "error" && "text-red-400",
+                      entry.type === "stderr" && "text-amber-300/90",
+                      entry.type === "stdout" && "text-slate-200",
                     )}
                   >
                     {search ? highlightMatches(entry.data ?? "", search) : entry.data}
@@ -639,48 +640,7 @@ export function ScopedLogViewer({
         );
       })}
 
-      {/* ── Debug panel (stderr) ──────────────────────────────────────────── */}
-      {debugEntries.length > 0 && (
-        <div className="border-t border-slate-700">
-          <button
-            onClick={() => setDebugOpen((o) => !o)}
-            className="w-full flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-xs text-slate-400 hover:text-slate-200 transition-colors"
-          >
-            <svg
-              className={cn(
-                "w-3 h-3 transition-transform shrink-0",
-                debugOpen ? "" : "-rotate-90"
-              )}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-            <span>Debug output</span>
-            <span className="ml-1 text-slate-500">
-              ({debugEntries.length} lines)
-            </span>
-          </button>
-          {debugOpen && (
-            <div className="overflow-y-auto bg-slate-950 p-3 font-mono text-xs max-h-72">
-              {debugEntries.map((entry, i) => (
-                <div
-                  key={i}
-                  className="whitespace-pre-wrap break-all leading-5 text-yellow-300/80"
-                >
-                  {search ? highlightMatches(entry.data ?? "", search) : entry.data}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Debug (stderr) is now rendered inline inside each scope section. */}
     </div>
   );
 }
