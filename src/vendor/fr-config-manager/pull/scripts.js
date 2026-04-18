@@ -82,4 +82,11 @@ async function exportScripts({ exportDir, tenantUrl, realms, prefixes, name, tok
   }
 }
 
-module.exports = { exportScripts };
+async function exportScriptById({ exportDir, tenantUrl, realm, id, token }) {
+  const amEndpoint = `${tenantUrl}/am/json/${realm}/scripts/${id}`;
+  const response = await restGet(amEndpoint, null, token);
+  const fileDir = path.join(exportDir, realm, SCRIPT_SUB_DIR);
+  saveScriptToFile(response.data, fileDir);
+}
+
+module.exports = { exportScripts, exportScriptById };
