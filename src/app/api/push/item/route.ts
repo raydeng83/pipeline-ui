@@ -62,11 +62,30 @@ const REALM_SCOPE_SUBDIR: Record<string, string> = {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function getRealms(configDir: string): string[] {
-  const realmsDir = path.join(configDir, "realms");
-  if (!fs.existsSync(realmsDir)) return [];
-  return fs.readdirSync(realmsDir, { withFileTypes: true })
-    .filter((e) => e.isDirectory()).map((e) => e.name).sort();
+/**
+ * Returns the realm-root directory whose <subpath> exists, or null.
+ * Supports both on-disk layouts:
+ *   - configDir/realms/<realm>/<subpath>   (upstream-style)
+ *   - configDir/<realm>/<subpath>           (vendored pull output)
+ * Callers use the returned root to derive sibling paths (e.g. scripts content).
+ */
+function findRealmContaining(configDir: string, subpath: string): string | null {
+  const realmsRoot = path.join(configDir, "realms");
+  if (fs.existsSync(realmsRoot)) {
+    for (const e of fs.readdirSync(realmsRoot, { withFileTypes: true })) {
+      if (!e.isDirectory()) continue;
+      const root = path.join(realmsRoot, e.name);
+      if (fs.existsSync(path.join(root, subpath))) return root;
+    }
+  }
+  if (fs.existsSync(configDir)) {
+    for (const e of fs.readdirSync(configDir, { withFileTypes: true })) {
+      if (!e.isDirectory() || e.name === "realms") continue;
+      const root = path.join(configDir, e.name);
+      if (fs.existsSync(path.join(root, subpath))) return root;
+    }
+  }
+  return null;
 }
 
 function readFile(filePath: string): ViewableFile | null {
@@ -90,34 +109,27 @@ function readDir(dir: string): ViewableFile[] {
 // ── Item resolution ────────────────────────────────────────────────────────────
 
 function resolveScriptFiles(configDir: string, itemId: string): ViewableFile[] {
-  const realms = getRealms(configDir);
-  for (const realm of realms) {
-    const configPath = path.join(configDir, "realms", realm, "scripts", "scripts-config", itemId);
-    if (!fs.existsSync(configPath)) continue;
+  const realmRoot = findRealmContaining(configDir, path.join("scripts", "scripts-config", itemId));
+  if (!realmRoot) return [];
 
-    const files: ViewableFile[] = [];
+  const configPath = path.join(realmRoot, "scripts", "scripts-config", itemId);
+  const files: ViewableFile[] = [];
 
-    // Try to find the content file (.js / .groovy)
-    try {
-      const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-      const { name, context, language } = config;
-      if (name && context) {
-        const ext = language === "GROOVY" ? ".groovy" : ".js";
-        const contentPath = path.join(
-          configDir, "realms", realm, "scripts", "scripts-content", context, `${name}${ext}`
-        );
-        const contentFile = readFile(contentPath);
-        if (contentFile) files.push(contentFile);
-      }
-    } catch { /* ignore parse errors */ }
+  // Try to find the content file (.js / .groovy)
+  try {
+    const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    const { name, context, language } = config;
+    if (name && context) {
+      const ext = language === "GROOVY" ? ".groovy" : ".js";
+      const contentPath = path.join(realmRoot, "scripts", "scripts-content", context, `${name}${ext}`);
+      const contentFile = readFile(contentPath);
+      if (contentFile) files.push(contentFile);
+    }
+  } catch { /* ignore parse errors */ }
 
-    // Always include the config JSON
-    const configFile = readFile(configPath);
-    if (configFile) files.push(configFile);
-
-    return files;
-  }
-  return [];
+  const configFile = readFile(configPath);
+  if (configFile) files.push(configFile);
+  return files;
 }
 
 function resolveWorkflowFiles(configDir: string, itemId: string): ViewableFile[] {
@@ -145,14 +157,9 @@ function resolveWorkflowFiles(configDir: string, itemId: string): ViewableFile[]
 }
 
 function resolveJourneyFiles(configDir: string, itemId: string): ViewableFile[] {
-  const realms = getRealms(configDir);
-  for (const realm of realms) {
-    const journeyDir = path.join(configDir, "realms", realm, "journeys", itemId);
-    if (!fs.existsSync(journeyDir)) continue;
-    // Return top-level JSON files only (skip nodes/ subdirectory)
-    return readDir(journeyDir);
-  }
-  return [];
+  const realmRoot = findRealmContaining(configDir, path.join("journeys", itemId));
+  if (!realmRoot) return [];
+  return readDir(path.join(realmRoot, "journeys", itemId));
 }
 
 function resolveItemFiles(configDir: string, scope: string, itemId: string): ViewableFile[] {
@@ -160,20 +167,15 @@ function resolveItemFiles(configDir: string, scope: string, itemId: string): Vie
   if (scope === "journeys")      return resolveJourneyFiles(configDir, itemId);
   if (scope === "iga-workflows") return resolveWorkflowFiles(configDir, itemId);
 
-  // Realm-based scope — item is a directory name
+  // Realm-based scope — item is a directory name or a file
   if (scope in REALM_SCOPE_SUBDIR) {
     const subdir = REALM_SCOPE_SUBDIR[scope];
-    const realms = getRealms(configDir);
-    for (const realm of realms) {
-      const itemDir = path.join(configDir, "realms", realm, subdir, itemId);
-      if (fs.existsSync(itemDir) && fs.statSync(itemDir).isDirectory()) {
-        return readDir(itemDir);
-      }
-      // Could also be a file
-      const itemFile = readFile(path.join(configDir, "realms", realm, subdir, itemId));
-      if (itemFile) return [itemFile];
-    }
-    return [];
+    const realmRoot = findRealmContaining(configDir, path.join(subdir, itemId));
+    if (!realmRoot) return [];
+    const itemPath = path.join(realmRoot, subdir, itemId);
+    if (fs.statSync(itemPath).isDirectory()) return readDir(itemPath);
+    const itemFile = readFile(itemPath);
+    return itemFile ? [itemFile] : [];
   }
 
   // Direct scope — item is a filename or directory
