@@ -184,22 +184,18 @@ export function spawnFrConfig(options: RunOptions & { envOverrides?: Record<stri
 
       let anyFailed = false;
 
-      // Cache a bearer token across scopes so the JWT exchange (~200–400ms)
-      // only happens once per minute instead of once per scope. A strict
-      // "share once for the whole pull" strategy breaks down on long runs
-      // where the token expires mid-pull — callers then hit 401s that retry
-      // can't recover from because the retry reuses the same stale token.
-      const TOKEN_TTL_MS = 60_000;
+      // Acquire one bearer token at the start of the run and reuse it for
+      // every scope. Tokens are valid for ~15 min, so there's no reason to
+      // re-mint mid-run. If the tenant returns 401/403, the outer retry loop
+      // passes force=true to `refreshToken` and we re-acquire on demand.
       let sharedToken: string | undefined;
-      let sharedTokenAt = 0;
       const refreshToken = async (force = false): Promise<string | undefined> => {
-        if (!force && sharedToken && Date.now() - sharedTokenAt < TOKEN_TTL_MS) return sharedToken;
+        if (!force && sharedToken) return sharedToken;
         try {
           sharedToken = await getAccessToken(
             baseEnv as Record<string, string>,
             (msg) => encode(`[token] ${msg}\n`, "stderr"),
           );
-          sharedTokenAt = Date.now();
         } catch (err) {
           encode(`token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, "stderr");
           sharedToken = undefined;
