@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sortKeys, stripFields, normalizeEsvEscapes, normalizeJsonEsvEscapes } from "@/lib/semantic-compare/json-canon";
+import { sortKeys, stripFields, normalizeEsvEscapes, normalizeJsonEsvEscapes, isEmptyJsonValue } from "@/lib/semantic-compare/json-canon";
 
 describe("json-canon", () => {
   it("sortKeys sorts object keys recursively", () => {
@@ -41,6 +41,26 @@ describe("json-canon", () => {
     expect((out.arr as unknown[])[2]).toBe(42);
     expect((out.nested as Record<string, unknown>).key).toBe("${nested}");
     expect(out.notString).toBe(7);
+  });
+
+  it("isEmptyJsonValue matches null, empty containers, and recursively-empty shapes", () => {
+    expect(isEmptyJsonValue(null)).toBe(true);
+    expect(isEmptyJsonValue(undefined)).toBe(true);
+    expect(isEmptyJsonValue("")).toBe(true);
+    expect(isEmptyJsonValue("   ")).toBe(true);
+    expect(isEmptyJsonValue([])).toBe(true);
+    expect(isEmptyJsonValue({})).toBe(true);
+    expect(isEmptyJsonValue({ forNodes: {}, structural: [] })).toBe(true);
+    expect(isEmptyJsonValue([[], {}])).toBe(true);
+  });
+
+  it("isEmptyJsonValue returns false for meaningful content", () => {
+    expect(isEmptyJsonValue("x")).toBe(false);
+    expect(isEmptyJsonValue(0)).toBe(false);
+    expect(isEmptyJsonValue(false)).toBe(false);
+    expect(isEmptyJsonValue(["a"])).toBe(false);
+    expect(isEmptyJsonValue({ k: "v" })).toBe(false);
+    expect(isEmptyJsonValue({ forNodes: { n1: { x: 1 } }, structural: [] })).toBe(false);
   });
 
   it("normalizeJsonEsvEscapes is a no-op when no ESV placeholders exist", () => {

@@ -1,5 +1,5 @@
 import type { CanonicalJourney, CanonicalNode } from "./types";
-import { sortKeys, stripFields, normalizeJsonEsvEscapes } from "./json-canon";
+import { sortKeys, stripFields, normalizeJsonEsvEscapes, isEmptyJsonValue } from "./json-canon";
 import { buildNodeKeyMap, type NodeLike } from "./node-key-map";
 import { canonicalizeNode } from "./node-canon";
 
@@ -40,11 +40,26 @@ export function canonicalizeJourney(
   for (const f of STRIP_TOP) delete stripped[f];
   const deepStripped = stripFields(stripped, STRIP_DEEP) as Record<string, unknown>;
 
-  // Remove uiConfig.annotations
+  // Normalize uiConfig.
+  // `annotations` (canvas sticky notes) is always cosmetic — strip it.
+  // For remaining fields (notably `categories`), the ForgeRock exporter stores
+  // stringified JSON like `"[]"` or `"{\"forNodes\":{},\"structural\":[]}"`.
+  // When that string parses to an empty container, treat it as equivalent to
+  // the field being absent — otherwise `{ categories: "[]" }` on one side and
+  // `{}` on the other triggers a spurious "header: uiConfig" reason even when
+  // the two journeys are semantically identical. If uiConfig ends up empty,
+  // drop it entirely so it doesn't differ from an absent uiConfig.
   if (deepStripped.uiConfig && typeof deepStripped.uiConfig === "object") {
     const ui = { ...(deepStripped.uiConfig as Record<string, unknown>) };
     delete ui.annotations;
-    deepStripped.uiConfig = ui;
+    for (const [k, v] of Object.entries(ui)) {
+      if (typeof v !== "string") continue;
+      try {
+        if (isEmptyJsonValue(JSON.parse(v))) delete ui[k];
+      } catch { /* not JSON — keep as-is */ }
+    }
+    if (Object.keys(ui).length === 0) delete deepStripped.uiConfig;
+    else deepStripped.uiConfig = ui;
   }
 
   // Rewrite entryNodeId

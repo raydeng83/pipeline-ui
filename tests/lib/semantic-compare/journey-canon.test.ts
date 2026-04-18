@@ -81,4 +81,30 @@ describe("canonicalizeJourney", () => {
     expect(c.staticNodeKeys.has("startNode")).toBe(true);
     expect(c.staticNodeKeys.has("end")).toBe(true);
   });
+
+  it("drops uiConfig fields whose stringified JSON parses to an empty value", () => {
+    const tree = {
+      ...treeJson,
+      uiConfig: { categories: "[]", annotations: "{\"forNodes\":{},\"structural\":[]}" },
+    };
+    const c = canonicalizeJourney("my-journey", tree, nodeFiles, scriptMap);
+    // annotations is always stripped; categories: "[]" is an empty-equivalent,
+    // so the whole uiConfig object collapses and gets dropped from the header.
+    expect(c.header.uiConfig).toBeUndefined();
+  });
+
+  it("keeps uiConfig.categories when it carries real content", () => {
+    const tree = {
+      ...treeJson,
+      uiConfig: { categories: "[\"Authentication\"]" },
+    };
+    const c = canonicalizeJourney("my-journey", tree, nodeFiles, scriptMap);
+    expect(c.header.uiConfig).toEqual({ categories: "[\"Authentication\"]" });
+  });
+
+  it("journey with `{ categories: '[]' }` equals journey with `{}` via canonical header", () => {
+    const a = canonicalizeJourney("same", { ...treeJson, uiConfig: { categories: "[]" } }, nodeFiles, scriptMap);
+    const b = canonicalizeJourney("same", { ...treeJson, uiConfig: { annotations: "{\"forNodes\":{},\"structural\":[]}" } }, nodeFiles, scriptMap);
+    expect(JSON.stringify(a.header)).toBe(JSON.stringify(b.header));
+  });
 });

@@ -30,6 +30,24 @@ export function normalizeEsvEscapes(s: string): string {
 }
 
 /**
+ * True when a parsed JSON value carries no meaningful content — null, an empty
+ * array, an empty object, an empty string, or a container whose every leaf is
+ * itself empty by this definition. Used to treat cosmetic fields like
+ * `uiConfig.categories: "[]"` and `uiConfig.annotations: "{…empty…}"` as
+ * equivalent to the field being absent.
+ */
+export function isEmptyJsonValue(v: unknown): boolean {
+  if (v == null) return true;
+  if (typeof v === "string") return v.trim() === "";
+  if (Array.isArray(v)) return v.length === 0 || v.every(isEmptyJsonValue);
+  if (typeof v === "object") {
+    const vals = Object.values(v as Record<string, unknown>);
+    return vals.length === 0 || vals.every(isEmptyJsonValue);
+  }
+  return false;
+}
+
+/**
  * Recursively apply `normalizeEsvEscapes` to every string leaf in a JSON value.
  * Used inside the canonicalization pipeline so vendored-pull escape artifacts
  * (`\${foo}`) and upstream literals (`${foo}`) compare equal in node payloads
