@@ -837,12 +837,22 @@ export function buildReport(
     if (nm) changedNodeFiles.set(`${nm[1]}/${nm[2]}`, f.status);
   }
 
+  // Run the whole-journey semantic comparator first so we can prune file-diff
+  // noise from changedJourneys before building the tree. Without this, journey
+  // files that differ only in tenant-side _rev, empty-but-differently-shaped
+  // uiConfig, or node-entry key order get flagged "modified" and cascade up to
+  // any InnerTreeEvaluatorNode that references them.
+  const semanticJourneys = loadSemanticJourneys(sourceDir, targetDir, scopes ?? []);
+  if (semanticJourneys) {
+    for (const rep of semanticJourneys) {
+      if (rep.status === "equal") changedJourneys.delete(rep.name);
+    }
+  }
+
   let journeyTree: JourneyTreeNode[] | undefined;
   try {
     journeyTree = buildJourneyTree(sourceDir, targetDir, changedJourneys, changedScripts, changedScriptNames, changedNodeFiles, forceIncludeJourneys);
   } catch { /* ignore */ }
-
-  const semanticJourneys = loadSemanticJourneys(sourceDir, targetDir, scopes ?? []);
 
   return {
     source,
