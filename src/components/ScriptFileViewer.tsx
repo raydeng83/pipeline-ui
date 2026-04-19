@@ -612,16 +612,21 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     });
   }, [symbols, foldRegions]);
 
+  // Sticky-scope focus line — prefer the explicit active line (last clicked
+  // row, goto, outline/find jump) so clicking a line updates the scope header
+  // immediately. Fall back to the topmost visible line when nothing is active.
+  const scopeFocusLine = currentLine ?? topVisibleLine;
+
   const currentScope = useMemo(() => {
-    if (topVisibleLine == null) return null;
+    if (scopeFocusLine == null) return null;
     let best: (typeof symbolRanges)[number] | null = null;
     for (const r of symbolRanges) {
-      if (topVisibleLine >= r.line && topVisibleLine <= r.endLine && r.endLine > r.line) {
+      if (scopeFocusLine >= r.line && scopeFocusLine <= r.endLine && r.endLine > r.line) {
         if (!best || r.line > best.line) best = r;
       }
     }
     return best;
-  }, [symbolRanges, topVisibleLine]);
+  }, [symbolRanges, scopeFocusLine]);
 
   // Throttle scroll handling via rAF; find the first visible, non-folded row
   // and remember its line number.
@@ -863,7 +868,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
       {/* Content + Outline/References sidebar */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <div className="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col">
-          {currentScope && topVisibleLine != null && topVisibleLine > currentScope.line && (
+          {currentScope && (
             <div className="flex items-center gap-2 px-4 py-0.5 border-b border-slate-800 bg-slate-900/95 backdrop-blur text-[11px] text-slate-400 shrink-0">
               <span className="text-slate-500 text-[10px] uppercase tracking-wider">in</span>
               <button
@@ -893,6 +898,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
               indentGuides
               onScroll={handleViewerScroll}
               scrollRequest={scrollRequest ?? undefined}
+              onLineClick={(ln) => setCurrentLine(ln)}
             />
           </div>
         </div>
@@ -985,6 +991,7 @@ function Sidebar({
           count={g.items.length}
           collapsed={collapsedGroups.has(g.id)}
           onToggle={onToggleGroup}
+          accent={symbolAccent(g.id)}
         >
           {g.items.map((s, i) => (
             <button
@@ -1068,5 +1075,17 @@ function refAccent(id: string): string | undefined {
   if (id === "ref:esv") return "text-emerald-400";
   if (id === "ref:library") return "text-violet-400";
   if (id === "ref:endpoint") return "text-sky-400";
+  return undefined;
+}
+
+// Palette matches the in-file syntax highlighting so the outline visually
+// echoes the tokens on the page. Functions/method share the function-call
+// sky; constants share the number amber; let and var pick non-colliding
+// hues (emerald / rose) so all four groups are distinguishable at a glance.
+function symbolAccent(id: string): string | undefined {
+  if (id === "sym:function") return "text-sky-400";
+  if (id === "sym:const")    return "text-amber-300";
+  if (id === "sym:let")      return "text-emerald-400";
+  if (id === "sym:var")      return "text-rose-400";
   return undefined;
 }
