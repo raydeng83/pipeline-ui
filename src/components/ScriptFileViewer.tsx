@@ -3,6 +3,7 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { FileContentViewer } from "./FileContentViewer";
+import { formatJavaScript } from "@/lib/format-js";
 
 export type NavigateTarget =
   | { scope: "scripts"; scriptName: string }
@@ -382,11 +383,42 @@ interface LastCommit {
 
 export function ScriptFileViewer({ content, fileName, environment, relPath, highlightLine, onNavigate }: Props) {
   const language: "js" | "groovy" = fileName.toLowerCase().endsWith(".groovy") ? "groovy" : "js";
+  const canFormat = language === "js";
 
-  const symbols = useMemo(() => detectSymbols(content, language), [content, language]);
-  const references = useMemo(() => detectReferences(content), [content]);
-  const foldRegions = useMemo(() => computeFoldRegions(content), [content]);
-  const commentSpans = useMemo(() => extractCommentSpans(content), [content]);
+  // Format state. Downstream analyses (symbols, refs, fold, comments, find,
+  // overlays) all run on the effective content so line numbers stay consistent.
+  const [formatEnabled, setFormatEnabled] = useState(false);
+  const [formatted, setFormatted] = useState<string | null>(null);
+  const [formatLoading, setFormatLoading] = useState(false);
+  const [formatError, setFormatError] = useState<string | null>(null);
+
+  const formatKey = `${formatEnabled ? "on" : "off"}|${content}`;
+  const [prevFormatKey, setPrevFormatKey] = useState(formatKey);
+  if (prevFormatKey !== formatKey) {
+    setPrevFormatKey(formatKey);
+    setFormatted(null);
+    setFormatError(null);
+    setFormatLoading(formatEnabled);
+  }
+
+  useEffect(() => {
+    if (!formatEnabled) return;
+    let cancelled = false;
+    formatJavaScript(content).then(({ text, error }) => {
+      if (cancelled) return;
+      setFormatted(text);
+      setFormatError(error ?? null);
+      setFormatLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [formatEnabled, content]);
+
+  const effectiveContent = formatEnabled && formatted != null ? formatted : content;
+
+  const symbols = useMemo(() => detectSymbols(effectiveContent, language), [effectiveContent, language]);
+  const references = useMemo(() => detectReferences(effectiveContent), [effectiveContent]);
+  const foldRegions = useMemo(() => computeFoldRegions(effectiveContent), [effectiveContent]);
+  const commentSpans = useMemo(() => extractCommentSpans(effectiveContent), [effectiveContent]);
   const hasAnyComment = commentSpans.length > 0;
   const hasHideableCodeComments = useMemo(() => commentSpans.some((s) => classifyComment(s) === "code"), [commentSpans]);
 
@@ -495,11 +527,11 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     if (!findQuery) return [];
     const q = findQuery.toLowerCase();
     const out: number[] = [];
-    content.split("\n").forEach((line, i) => {
+    effectiveContent.split("\n").forEach((line, i) => {
       if (line.toLowerCase().includes(q)) out.push(i + 1);
     });
     return out;
-  }, [findQuery, content]);
+  }, [findQuery, effectiveContent]);
 
   // Reset findIdx on query change (render-time adjustment to avoid effect)
   const [prevQuery, setPrevQuery] = useState(findQuery);
@@ -743,6 +775,35 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
           Wrap
         </button>
 
+        {/* Format (Prettier) — JS only */}
+        {canFormat && (
+          <button
+            type="button"
+            onClick={() => setFormatEnabled((f) => !f)}
+            aria-pressed={formatEnabled}
+            title={
+              formatError
+                ? `Prettier failed: ${formatError}`
+                : formatEnabled
+                  ? "Show original formatting"
+                  : "Pretty-print with Prettier (remove/add blank lines, normalize indentation)"
+            }
+            className={cn(
+              "px-2 py-0.5 rounded transition-colors flex items-center gap-1",
+              formatError
+                ? "bg-amber-900/40 text-amber-300"
+                : formatEnabled
+                  ? "bg-sky-900/40 text-sky-300 hover:bg-sky-900/60"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800",
+            )}
+          >
+            {formatLoading && (
+              <span className="inline-block w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" />
+            )}
+            Format
+          </button>
+        )}
+
         {/* Last commit header — right aligned */}
         <div className="ml-auto text-[10px] text-slate-500 truncate max-w-[50%]">
           {lastCommit === "loading" ? (
@@ -763,7 +824,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <div ref={scrollRef} className="flex-1 min-w-0 min-h-0 overflow-hidden">
           <FileContentViewer
-            content={content}
+            content={effectiveContent}
             fileName={fileName}
             highlightLine={currentMatchLine}
             matchLines={matchLineSet}
