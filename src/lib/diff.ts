@@ -354,6 +354,8 @@ interface JourneyMeta {
   nodeScripts: Map<string, string>;
   /** nodeUUID → sub-journey name (for InnerTreeEvaluatorNode) */
   nodeSubJourneys: Map<string, string>;
+  /** nodeUUID → raw node JSON body (from the per-node file). Used for canonical compare. */
+  rawNodes: Map<string, Record<string, unknown>>;
 }
 
 function scanJourneys(configDir: string): Map<string, JourneyMeta> {
@@ -379,13 +381,14 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
         const allNodes: JourneyNodeMeta[] = [];
         const nodeScripts = new Map<string, string>();
         const nodeSubJourneys = new Map<string, string>();
+        const rawNodes = new Map<string, Record<string, unknown>>();
         const nodesDir = path.join(journeysDir, jDir.name, "nodes");
         if (fs.existsSync(nodesDir)) {
           for (const nf of fs.readdirSync(nodesDir)) {
             const fp = path.join(nodesDir, nf);
             if (fs.statSync(fp).isDirectory()) continue;
             try {
-              const nd = JSON.parse(fs.readFileSync(fp, "utf-8")) as { tree?: string; script?: string; _type?: { _id?: string; name?: string }; _id?: string };
+              const nd = JSON.parse(fs.readFileSync(fp, "utf-8")) as Record<string, unknown> & { tree?: string; script?: string; _type?: { _id?: string; name?: string }; _id?: string };
               // Accept both "NodeType - uuid.json" and "NodeType_-_uuid.json"
               // (vendored pull replaces spaces with underscores).
               const m = nf.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.json$/i);
@@ -401,6 +404,7 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
                 nodeScripts.set(uuid, nd.script);
               }
               allNodes.push({ uuid, name: nodeName, nodeType });
+              if (uuid) rawNodes.set(uuid, nd);
             } catch { /* skip */ }
           }
         }
@@ -413,6 +417,7 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
           allNodes,
           nodeScripts,
           nodeSubJourneys,
+          rawNodes,
         });
       } catch { /* skip */ }
     }
@@ -436,6 +441,151 @@ function buildScriptNameMap(configDir: string): Map<string, string> {
   return map;
 }
 
+/** Build theme UUID → theme name mapping from realms/*\/themes/<name>/<name>.json. */
+function buildThemeNameMap(configDir: string): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const realmRoot of getRealmRoots(configDir, "themes")) {
+    const themesDir = path.join(realmRoot, "themes");
+    for (const entry of fs.readdirSync(themesDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const jsonPath = path.join(themesDir, entry.name, `${entry.name}.json`);
+      if (!fs.existsSync(jsonPath)) continue;
+      try {
+        const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+        if (data._id && data.name) map.set(data._id, data.name);
+      } catch { /* skip */ }
+    }
+  }
+  return map;
+}
+
+// ── Canonical node form ──────────────────────────────────────────────────────
+// Strip per-env noise (UUIDs, revisions, layout) and resolve reference UUIDs to
+// stable names so two semantically-equal nodes produce byte-identical output
+// across environments.
+
+const CANON_NOISE_KEYS = new Set(["_rev", "x", "y", "version", "nodeVersion"]);
+
+interface CanonCtx {
+  scriptNames: Map<string, string>;
+  themeNames: Map<string, string>;
+  /** Sibling nodes in the same journey. Used to rewrite connection UUIDs. */
+  siblings: Map<string, Record<string, unknown>>;
+}
+
+function stableStringify(v: unknown): string {
+  if (v === null || v === undefined) return JSON.stringify(v ?? null);
+  if (Array.isArray(v)) return "[" + v.map(stableStringify).join(",") + "]";
+  if (typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    const keys = Object.keys(o).sort();
+    return "{" + keys.map((k) => JSON.stringify(k) + ":" + stableStringify(o[k])).join(",") + "}";
+  }
+  return JSON.stringify(v);
+}
+
+function siblingLabel(uuid: string, ctx: CanonCtx): string {
+  const n = ctx.siblings.get(uuid);
+  if (!n) return `:uuid:${uuid}`;
+  const disp = typeof n.displayName === "string" ? n.displayName : "";
+  const t = n._type as { _id?: string } | undefined;
+  const type = t?._id ?? "";
+  return `${type}::${disp}`;
+}
+
+/** Recursively strip noise from nested objects/arrays. */
+function canonRecurse(v: unknown): unknown {
+  if (v === null || typeof v !== "object") return v;
+  if (Array.isArray(v)) return v.map(canonRecurse);
+  const o = v as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [k, val] of Object.entries(o)) {
+    if (CANON_NOISE_KEYS.has(k) || k === "_id") continue;
+    out[k] = canonRecurse(val);
+  }
+  return out;
+}
+
+function canonicalizeNode(node: Record<string, unknown>, ctx: CanonCtx): string {
+  // Build outcome-id → stable label map from the node's own _outcomes. Scripted
+  // decisions assign random UUIDs to each outcome; the displayName is stable.
+  const outcomeLabel = new Map<string, string>();
+  const outcomes = (node._outcomes as Array<Record<string, unknown>> | undefined) ?? [];
+  for (const o of outcomes) {
+    const id = typeof o.id === "string" ? o.id : null;
+    if (!id) continue;
+    const disp = typeof o.displayName === "string" ? o.displayName : "";
+    outcomeLabel.set(id, disp || id);
+  }
+
+  const out: Record<string, unknown> = {};
+
+  for (const [k, v] of Object.entries(node)) {
+    if (CANON_NOISE_KEYS.has(k) || k === "_id") continue;
+
+    if (k === "_type" && v && typeof v === "object") {
+      // Keep the node-type discriminator but drop per-instance fields.
+      const t = v as Record<string, unknown>;
+      out[k] = { _id: t._id, name: t.name };
+      continue;
+    }
+
+    if (k === "script" && typeof v === "string") {
+      out[k] = ctx.scriptNames.get(v) ?? `:unresolved-script:${v}`;
+      continue;
+    }
+
+    if (k === "stage" && v && typeof v === "object") {
+      const s = { ...(v as Record<string, unknown>) };
+      if (typeof s.themeId === "string") {
+        s.themeId = ctx.themeNames.get(s.themeId) ?? `:unresolved-theme:${s.themeId}`;
+      }
+      out[k] = canonRecurse(s);
+      continue;
+    }
+
+    if (k === "connections" && v && typeof v === "object" && !Array.isArray(v)) {
+      // Rewrite both the outcome-UUID keys and the target-UUID values to
+      // stable labels, so source/target forms match when the graph topology
+      // is the same modulo per-env UUIDs.
+      const rewritten: Record<string, string> = {};
+      for (const [outKey, tgt] of Object.entries(v as Record<string, unknown>)) {
+        const label = outcomeLabel.get(outKey) ?? outKey;
+        rewritten[label] = typeof tgt === "string" ? siblingLabel(tgt, ctx) : String(tgt);
+      }
+      out[k] = rewritten;
+      continue;
+    }
+
+    if (k === "_outcomes" && Array.isArray(v)) {
+      out[k] = v.map((o: unknown) => {
+        if (!o || typeof o !== "object") return o;
+        const rec = o as Record<string, unknown>;
+        const id = typeof rec.id === "string" ? rec.id : "";
+        const disp = typeof rec.displayName === "string" ? rec.displayName : "";
+        return { id: outcomeLabel.get(id) ?? id, displayName: disp };
+      });
+      continue;
+    }
+
+    if (k === "nodes" && Array.isArray(v)) {
+      // PageNode sub-node list: keep only the stable identity fields. The
+      // sub-nodes' full bodies live in separate files and are canonicalized
+      // independently.
+      out[k] = v.map((sub: unknown) => {
+        if (!sub || typeof sub !== "object") return sub;
+        const r = sub as Record<string, unknown>;
+        return { nodeType: r.nodeType, displayName: r.displayName };
+      });
+      continue;
+    }
+
+    out[k] = canonRecurse(v);
+  }
+
+  return stableStringify(out);
+}
+
 function buildJourneyTree(
   sourceDir: string,
   targetDir: string,
@@ -448,10 +598,45 @@ function buildJourneyTree(
   const sourceJourneys = scanJourneys(sourceDir);
   const targetJourneys = scanJourneys(targetDir);
 
-  // Build script UUID → name from both sides
+  // Per-env name maps for canonicalization (keep separate so UUIDs resolve
+  // using the side they actually came from). A merged view is also used below
+  // for display lookups where we don't care which env contributed the name.
+  const srcScriptNames = buildScriptNameMap(sourceDir);
+  const tgtScriptNames = buildScriptNameMap(targetDir);
+  const srcThemeNames = buildThemeNameMap(sourceDir);
+  const tgtThemeNames = buildThemeNameMap(targetDir);
   const scriptNames = new Map<string, string>();
-  for (const [k, v] of buildScriptNameMap(sourceDir)) scriptNames.set(k, v);
-  for (const [k, v] of buildScriptNameMap(targetDir)) scriptNames.set(k, v);
+  for (const [k, v] of srcScriptNames) scriptNames.set(k, v);
+  for (const [k, v] of tgtScriptNames) scriptNames.set(k, v);
+
+  // Per-node canonical status for journeys present on both sides. A node whose
+  // canonical form matches across envs is "unchanged" even if its raw JSON
+  // differs (e.g. different UUIDs, layout shifts, revision bumps). Nodes only
+  // on one side become "added"/"removed".
+  const canonicalNodeStatus = new Map<string, FileDiff["status"]>();
+  for (const name of new Set([...sourceJourneys.keys(), ...targetJourneys.keys()])) {
+    const sMeta = sourceJourneys.get(name);
+    const tMeta = targetJourneys.get(name);
+    if (!sMeta || !tMeta) continue;
+    const sCtx: CanonCtx = { scriptNames: srcScriptNames, themeNames: srcThemeNames, siblings: sMeta.rawNodes };
+    const tCtx: CanonCtx = { scriptNames: tgtScriptNames, themeNames: tgtThemeNames, siblings: tMeta.rawNodes };
+    const uuids = new Set([...sMeta.rawNodes.keys(), ...tMeta.rawNodes.keys()]);
+    for (const uuid of uuids) {
+      const sNode = sMeta.rawNodes.get(uuid);
+      const tNode = tMeta.rawNodes.get(uuid);
+      let status: FileDiff["status"];
+      if (sNode && tNode) {
+        status = canonicalizeNode(sNode, sCtx) === canonicalizeNode(tNode, tCtx)
+          ? "unchanged"
+          : "modified";
+      } else if (sNode) {
+        status = "removed";
+      } else {
+        status = "added";
+      }
+      canonicalNodeStatus.set(`${name}/${uuid}`, status);
+    }
+  }
 
   const allNames = new Set([...sourceJourneys.keys(), ...targetJourneys.keys()]);
   const calledBy = new Map<string, string[]>();
@@ -512,7 +697,12 @@ function buildJourneyTree(
       };
 
       for (const nm of meta.allNodes) {
-        const nodeFileStatus = changedNodeFiles.get(`${name}/${nm.uuid}`) ?? "unchanged";
+        // Prefer canonical equality when available (it correctly classifies
+        // nodes that differ only in noise like _id/_rev/x/y). Fall back to the
+        // raw file-diff status when the journey exists on only one side.
+        const nodeFileStatus = canonicalNodeStatus.get(`${name}/${nm.uuid}`)
+          ?? changedNodeFiles.get(`${name}/${nm.uuid}`)
+          ?? "unchanged";
         let nodeStatus: FileDiff["status"] = nodeFileStatus;
         let modifiedReason: "script" | "subjourney" | undefined;
 
