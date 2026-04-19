@@ -1088,8 +1088,24 @@ function SectionsView({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+const ENV_STORAGE_KEY = "aic:configs:env";
+
 export function ConfigsViewer({ environments }: { environments: Environment[] }) {
-  const [selectedEnv, setSelectedEnv] = useState(environments[0]?.name ?? "");
+  // Persist the env picker across reloads. Fall back to the first env if the
+  // stored value no longer exists in the environments list (e.g. tenant was
+  // renamed or removed).
+  const [selectedEnv, setSelectedEnv] = useState(() => {
+    if (typeof window === "undefined") return environments[0]?.name ?? "";
+    try {
+      const saved = window.localStorage.getItem(ENV_STORAGE_KEY);
+      if (saved && environments.some((e) => e.name === saved)) return saved;
+    } catch { /* ignore */ }
+    return environments[0]?.name ?? "";
+  });
+  useEffect(() => {
+    if (!selectedEnv) return;
+    try { window.localStorage.setItem(ENV_STORAGE_KEY, selectedEnv); } catch { /* ignore */ }
+  }, [selectedEnv]);
   const [view, setView] = useState<"tree" | "sections">("sections");
   // Hint that SectionsView uses for initial selection; cleared after first apply.
   const [preselect, setPreselect] = useState<{
