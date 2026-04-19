@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef } from "react";
+import { Fragment, ReactNode, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { highlightTokens } from "@/lib/highlight";
 import { formatHtml, shouldFormatAsHtml } from "@/lib/format-html";
@@ -20,6 +20,14 @@ interface Props {
   matchLines?: Set<number>;
   /** Called when a line is clicked. Used for path-at-cursor in JSON raw view. */
   onLineClick?: (line: number) => void;
+  /** Map of startLine → endLine for foldable regions. A chevron is shown at startLine. */
+  foldRegions?: Map<number, number>;
+  /** Set of startLines whose region is currently folded. */
+  foldedStartLines?: Set<number>;
+  /** Toggle handler invoked when the chevron at startLine is clicked. */
+  onToggleFold?: (startLine: number) => void;
+  /** Per-line content appended after the tokens (reference link badges, etc.). */
+  lineOverlays?: Map<number, ReactNode>;
 }
 
 function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" | "text" {
@@ -30,7 +38,20 @@ function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" 
   return "text";
 }
 
-export function FileContentViewer({ content, fileName, language, className, highlightLine, wrap, matchLines, onLineClick }: Props) {
+export function FileContentViewer({
+  content,
+  fileName,
+  language,
+  className,
+  highlightLine,
+  wrap,
+  matchLines,
+  onLineClick,
+  foldRegions,
+  foldedStartLines,
+  onToggleFold,
+  lineOverlays,
+}: Props) {
   const lang = language ?? detectLanguage(fileName);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -77,8 +98,19 @@ export function FileContentViewer({ content, fileName, language, className, high
         <tbody>
           {lines.map((tokens, i) => {
             const ln = i + 1;
+            // Skip lines hidden by a folded ancestor.
+            if (foldRegions && foldedStartLines) {
+              for (const startLine of foldedStartLines) {
+                const endLine = foldRegions.get(startLine);
+                if (endLine != null && ln > startLine && ln <= endLine) return null;
+              }
+            }
             const isHighlighted = highlightLine === ln;
             const isMatch = !isHighlighted && matchLines?.has(ln);
+            const foldEnd = foldRegions?.get(ln);
+            const isFoldable = foldEnd != null;
+            const isFolded = isFoldable && foldedStartLines?.has(ln);
+            const overlay = lineOverlays?.get(ln);
             return (
               <tr
                 key={i}
@@ -97,7 +129,21 @@ export function FileContentViewer({ content, fileName, language, className, high
                     isHighlighted && "bg-amber-900/40 text-amber-300 font-semibold",
                   )}
                 >
-                  {ln}
+                  {isFoldable && onToggleFold ? (
+                    <span className="inline-flex items-center gap-1 justify-end">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onToggleFold(ln); }}
+                        className="text-slate-500 hover:text-slate-200 w-3 text-[10px] leading-none"
+                        title={isFolded ? "Unfold" : "Fold"}
+                      >
+                        {isFolded ? "▶" : "▼"}
+                      </button>
+                      <span>{ln}</span>
+                    </span>
+                  ) : (
+                    ln
+                  )}
                 </td>
                 <td className={cn("pl-4 pr-4", wrap ? "whitespace-pre-wrap break-words" : "whitespace-pre")}>
                   {tokens.length === 0 ? (
@@ -115,6 +161,12 @@ export function FileContentViewer({ content, fileName, language, className, high
                       </Fragment>
                     ))
                   )}
+                  {isFolded && foldEnd != null && (
+                    <span className="ml-2 text-slate-500 italic text-[10px]">
+                      … {foldEnd - ln} line{foldEnd - ln === 1 ? "" : "s"} folded
+                    </span>
+                  )}
+                  {overlay != null && <span className="ml-3">{overlay}</span>}
                 </td>
               </tr>
             );

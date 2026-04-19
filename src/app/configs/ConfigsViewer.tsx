@@ -9,6 +9,7 @@ import type { EndpointUsageRef } from "@/app/api/analyze/endpoint-usage/route";
 import { cn } from "@/lib/utils";
 import { FileContentViewer } from "@/components/FileContentViewer";
 import { JsonFileViewer } from "@/components/JsonFileViewer";
+import { ScriptFileViewer, type NavigateTarget } from "@/components/ScriptFileViewer";
 import { JourneyGraph } from "./JourneyGraph";
 import { WorkflowGraph } from "./WorkflowGraph";
 
@@ -554,6 +555,47 @@ function SectionsView({
     setItemFilter("");
   };
 
+  // Resolve a ScriptFileViewer reference click (ESV / library / endpoint) to
+  // an audit item and switch the Browse view to it.
+  const handleNavigateTarget = useCallback((target: NavigateTarget) => {
+    const pickItem = (scope: string, match: (id: string, label: string) => boolean) => {
+      const entry = auditData.find((e) => e.scope === scope);
+      if (!entry) return;
+      const found = entry.items.find((it) => match(it.id, it.label));
+      if (!found) return;
+      setSelectedScope(scope);
+      setSelectedItem(found);
+      setItemFilter("");
+    };
+    if (target.scope === "variables" || target.scope === "secrets") {
+      const needle = target.esvName.toLowerCase();
+      // Try variables first, then secrets — caller defaults to variables but
+      // many auth scripts reach for secret ESVs via the same form.
+      const tryScopes = target.scope === "secrets" ? ["secrets", "variables"] : ["variables", "secrets"];
+      for (const scope of tryScopes) {
+        const entry = auditData.find((e) => e.scope === scope);
+        const found = entry?.items.find((it) => {
+          const id = it.id.toLowerCase();
+          return id === `esv-${needle}.json` || id === `esv-${needle}.variable.json` || id === `esv-${needle}.secret.json` || id.includes(needle);
+        });
+        if (found && entry) {
+          setSelectedScope(scope);
+          setSelectedItem(found);
+          setItemFilter("");
+          return;
+        }
+      }
+    } else if (target.scope === "scripts") {
+      const needle = target.scriptName.toLowerCase();
+      pickItem("scripts", (_, label) => label.toLowerCase() === needle);
+    } else if (target.scope === "scripts-by-id") {
+      pickItem("scripts", (id) => id === target.scriptId || id === `${target.scriptId}.json`);
+    } else if (target.scope === "endpoints") {
+      const needle = target.endpointName.toLowerCase();
+      pickItem("endpoints", (id) => id.toLowerCase() === needle || id.toLowerCase() === `${needle}.json` || id.toLowerCase().startsWith(`${needle}.`));
+    }
+  }, [auditData]);
+
   const scopeEntry = auditData.find((e) => e.scope === selectedScope);
   const filterLower = itemFilter.trim().toLowerCase();
   const filteredItems = scopeEntry
@@ -1088,6 +1130,18 @@ function SectionsView({
                       content={activeFile.content}
                       fileName={activeFile.name}
                       highlightLine={highlightLine}
+                    />
+                  </div>
+                ) : (activeFile.name.toLowerCase().endsWith(".js") || activeFile.name.toLowerCase().endsWith(".groovy")) ? (
+                  <div className="h-full min-h-0 overflow-hidden">
+                    <ScriptFileViewer
+                      key={`${selectedItem?.id ?? ""}:${activeFile.name}`}
+                      content={activeFile.content}
+                      fileName={activeFile.name}
+                      environment={environment}
+                      relPath={activeFile.relPath}
+                      highlightLine={highlightLine}
+                      onNavigate={handleNavigateTarget}
                     />
                   </div>
                 ) : (
