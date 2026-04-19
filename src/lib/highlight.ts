@@ -14,27 +14,72 @@ const JS_KEYWORDS = new Set([
 ]);
 const JS_BUILTINS = new Set(["true","false","null","undefined","NaN","Infinity"]);
 
+// Keywords after which a following `/` starts a regex literal rather than
+// a division operator. Identifier/number/`)`/`]`/`}` contexts mean division.
+const REGEX_CONTEXT_KEYWORDS = new Set([
+  "return","typeof","delete","void","new","in","of","instanceof",
+  "throw","case","yield","await","else","do",
+]);
+
+/**
+ * Parse a JS regex literal starting at `code[i]` (which must be `/`). Returns
+ * the sliced text and the index just after it, or null if the token doesn't
+ * terminate on the same line (unterminated — treat as division to avoid
+ * swallowing the rest of the file).
+ */
+function parseRegexLiteral(code: string, i: number): { text: string; end: number } | null {
+  let j = i + 1;
+  let inClass = false;
+  while (j < code.length) {
+    const c = code[j];
+    if (c === "\n") return null;
+    if (c === "\\") { j += 2; continue; }
+    if (c === "[") { inClass = true; j++; continue; }
+    if (c === "]" && inClass) { inClass = false; j++; continue; }
+    if (c === "/" && !inClass) {
+      j++;
+      while (j < code.length && /[gimsuy]/.test(code[j])) j++;
+      return { text: code.slice(i, j), end: j };
+    }
+    j++;
+  }
+  return null;
+}
+
 export function highlightJs(code: string): string {
   const out: string[] = [];
   let i = 0;
+  let canBeRegex = true;
 
   function span(color: string, text: string, bold = false) {
     return `<span style="color:${color}${bold ? ";font-weight:500" : ""}">${esc(text)}</span>`;
   }
 
   while (i < code.length) {
-    if (code[i] === "/" && code[i + 1] === "/") {
+    const c = code[i];
+    if (c === "/" && code[i + 1] === "/") {
       const end = code.indexOf("\n", i);
       const text = end === -1 ? code.slice(i) : code.slice(i, end);
       out.push(span("#6b7280", text));
       i += text.length;
-    } else if (code[i] === "/" && code[i + 1] === "*") {
+    } else if (c === "/" && code[i + 1] === "*") {
       const end = code.indexOf("*/", i + 2);
       const text = end === -1 ? code.slice(i) : code.slice(i, end + 2);
       out.push(span("#6b7280", text));
       i += text.length;
-    } else if (code[i] === '"' || code[i] === "'" || code[i] === "`") {
-      const q = code[i];
+    } else if (c === "/" && canBeRegex) {
+      const re = parseRegexLiteral(code, i);
+      if (re) {
+        out.push(span("#f59e0b", re.text));
+        i = re.end;
+        canBeRegex = false;
+        continue;
+      }
+      out.push(esc(c));
+      i++;
+      canBeRegex = true;
+    } else if (c === '"' || c === "'" || c === "`") {
+      const q = c;
       let j = i + 1;
       while (j < code.length && code[j] !== q) {
         if (code[j] === "\\") j++;
@@ -42,7 +87,8 @@ export function highlightJs(code: string): string {
       }
       out.push(span("#86efac", code.slice(i, j + 1)));
       i = j + 1;
-    } else if (/[a-zA-Z_$]/.test(code[i])) {
+      canBeRegex = false;
+    } else if (/[a-zA-Z_$]/.test(c)) {
       let j = i + 1;
       while (j < code.length && /[a-zA-Z0-9_$]/.test(code[j])) j++;
       const word = code.slice(i, j);
@@ -50,14 +96,18 @@ export function highlightJs(code: string): string {
       else if (JS_BUILTINS.has(word)) out.push(span("#f87171", word));
       else                            out.push(esc(word));
       i = j;
-    } else if (/[0-9]/.test(code[i])) {
+      canBeRegex = REGEX_CONTEXT_KEYWORDS.has(word);
+    } else if (/[0-9]/.test(c)) {
       let j = i + 1;
       while (j < code.length && /[0-9._xXeEbBoO]/.test(code[j])) j++;
       out.push(span("#fbbf24", code.slice(i, j)));
       i = j;
+      canBeRegex = false;
     } else {
-      out.push(esc(code[i]));
+      out.push(esc(c));
       i++;
+      if (c === ")" || c === "]" || c === "}") canBeRegex = false;
+      else if (!/\s/.test(c)) canBeRegex = true;
     }
   }
   return out.join("");
@@ -125,25 +175,43 @@ export function highlightJsTokens(code: string): HighlightToken[] {
   const out: HighlightToken[] = [];
   let i = 0;
   let plain = "";
+  // Tracks whether a `/` at position i should be parsed as a regex literal
+  // (true) or a division operator (false). Flipped by what came just before.
+  let canBeRegex = true;
   const flushPlain = () => {
     if (plain.length > 0) { out.push({ text: plain }); plain = ""; }
   };
   while (i < code.length) {
-    if (code[i] === "/" && code[i + 1] === "/") {
+    const c = code[i];
+    if (c === "/" && code[i + 1] === "/") {
       flushPlain();
       const end = code.indexOf("\n", i);
       const text = end === -1 ? code.slice(i) : code.slice(i, end);
       out.push({ text, color: "#6b7280" });
       i += text.length;
-    } else if (code[i] === "/" && code[i + 1] === "*") {
+      // Comments are whitespace-equivalent for regex-context tracking.
+    } else if (c === "/" && code[i + 1] === "*") {
       flushPlain();
       const end = code.indexOf("*/", i + 2);
       const text = end === -1 ? code.slice(i) : code.slice(i, end + 2);
       out.push({ text, color: "#6b7280" });
       i += text.length;
-    } else if (code[i] === '"' || code[i] === "'" || code[i] === "`") {
+    } else if (c === "/" && canBeRegex) {
+      const re = parseRegexLiteral(code, i);
+      if (re) {
+        flushPlain();
+        out.push({ text: re.text, color: "#f59e0b" });
+        i = re.end;
+        canBeRegex = false;
+        continue;
+      }
+      plain += c;
+      i++;
+      // A lone `/` in expression position is odd but treat it as an operator.
+      canBeRegex = true;
+    } else if (c === '"' || c === "'" || c === "`") {
       flushPlain();
-      const q = code[i];
+      const q = c;
       let j = i + 1;
       while (j < code.length && code[j] !== q) {
         if (code[j] === "\\") j++;
@@ -151,7 +219,8 @@ export function highlightJsTokens(code: string): HighlightToken[] {
       }
       out.push({ text: code.slice(i, j + 1), color: "#86efac" });
       i = j + 1;
-    } else if (/[a-zA-Z_$]/.test(code[i])) {
+      canBeRegex = false;
+    } else if (/[a-zA-Z_$]/.test(c)) {
       let j = i + 1;
       while (j < code.length && /[a-zA-Z0-9_$]/.test(code[j])) j++;
       const word = code.slice(i, j);
@@ -159,15 +228,21 @@ export function highlightJsTokens(code: string): HighlightToken[] {
       else if (JS_BUILTINS.has(word)) { flushPlain(); out.push({ text: word, color: "#f87171" }); }
       else                            { plain += word; }
       i = j;
-    } else if (/[0-9]/.test(code[i])) {
+      // Most keywords force regex context; identifiers/builtins don't.
+      canBeRegex = REGEX_CONTEXT_KEYWORDS.has(word);
+    } else if (/[0-9]/.test(c)) {
       flushPlain();
       let j = i + 1;
       while (j < code.length && /[0-9._xXeEbBoO]/.test(code[j])) j++;
       out.push({ text: code.slice(i, j), color: "#fbbf24" });
       i = j;
+      canBeRegex = false;
     } else {
-      plain += code[i];
+      plain += c;
       i++;
+      if (c === ")" || c === "]" || c === "}") canBeRegex = false;
+      else if (!/\s/.test(c)) canBeRegex = true;
+      // whitespace: leave canBeRegex unchanged.
     }
   }
   flushPlain();
