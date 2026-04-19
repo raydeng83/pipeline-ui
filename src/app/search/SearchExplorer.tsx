@@ -424,6 +424,15 @@ export function SearchExplorer({ environments }: Props) {
                 <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center gap-3">
                   <span className="text-xs font-mono text-slate-700 truncate flex-1 min-w-0">{selected.path}</span>
                   <span className="text-[10px] text-slate-400 shrink-0">line {selected.line}</span>
+                  <a
+                    href={`/configs?env=${encodeURIComponent(env)}&file=${encodeURIComponent(selected.path)}&line=${selected.line}`}
+                    target="_blank"
+                    rel="noopener"
+                    className="text-[11px] text-sky-600 hover:text-sky-800 hover:underline shrink-0"
+                    title="Open this file in the Browse tab"
+                  >
+                    Find in Browse ↗
+                  </a>
                   <button
                     type="button"
                     onClick={handleCopyFile}
