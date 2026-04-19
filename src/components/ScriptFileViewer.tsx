@@ -835,6 +835,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
             onToggleFold={toggleFold}
             lineOverlays={lineOverlays}
             hiddenLines={hiddenLines}
+            indentGuides
             onLineClick={(ln) => setCurrentLine(ln)}
           />
         </div>

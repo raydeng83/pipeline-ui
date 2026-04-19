@@ -32,6 +32,8 @@ interface Props {
   hiddenLines?: Set<number>;
   /** The "current" line (last clicked/selected). Rendered as a subtle row background with a left accent — distinct from highlightLine which is the strong find-match focus. */
   activeLine?: number;
+  /** When true, draw faint vertical guides in the leading-whitespace region of each line (assumes 2-space indent). */
+  indentGuides?: boolean;
 }
 
 function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" | "text" {
@@ -40,6 +42,29 @@ function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" 
   if (ext === "js" || ext === "mjs" || ext === "cjs") return "js";
   if (ext === "groovy") return "groovy";
   return "text";
+}
+
+/** Drop up to `count` leading space characters from the start of a token list. */
+function stripLeadingSpaces<T extends { text: string }>(tokens: T[], count: number): T[] {
+  const out: T[] = [];
+  let remaining = count;
+  let consumed = false;
+  for (const t of tokens) {
+    if (consumed) { out.push(t); continue; }
+    if (remaining <= 0) { out.push(t); consumed = true; continue; }
+    let k = 0;
+    while (k < t.text.length && t.text[k] === " " && remaining > 0) { k++; remaining--; }
+    if (k === t.text.length) {
+      // Fully whitespace-stripped — drop this token entirely if remaining > 0.
+      if (remaining > 0) continue;
+      // remaining is 0 and we consumed the whole token — emit the empty tail so
+      // the strip markers stay accurate (unlikely but safe).
+      continue;
+    }
+    out.push({ ...t, text: t.text.slice(k) });
+    consumed = true;
+  }
+  return out;
 }
 
 export function FileContentViewer({
@@ -57,6 +82,7 @@ export function FileContentViewer({
   lineOverlays,
   hiddenLines,
   activeLine,
+  indentGuides,
 }: Props) {
   const lang = language ?? detectLanguage(fileName);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,6 +117,18 @@ export function FileContentViewer({
     }
     return result;
   }, [displayContent, lang]);
+
+  // Per-line leading-space count, for drawing indent guides. Based on the raw
+  // text (not tokens) since the tokenizer preserves whitespace as plain text.
+  const leadingSpaces = useMemo(() => {
+    if (!indentGuides) return null;
+    const rawLines = displayContent.split("\n");
+    return rawLines.map((l) => {
+      let n = 0;
+      while (n < l.length && l[n] === " ") n++;
+      return n;
+    });
+  }, [displayContent, indentGuides]);
 
   return (
     <div
@@ -156,21 +194,37 @@ export function FileContentViewer({
                   )}
                 </td>
                 <td className={cn("pl-4 pr-4", wrap ? "whitespace-pre-wrap break-words" : "whitespace-pre")}>
-                  {tokens.length === 0 ? (
-                    <span> </span>
-                  ) : (
-                    tokens.map((t, j) => (
-                      <Fragment key={j}>
-                        {t.color ? (
-                          <span style={{ color: t.color, fontWeight: t.bold ? 500 : undefined }}>
-                            {t.text}
+                  {(() => {
+                    const leading = leadingSpaces?.[i] ?? 0;
+                    const guideLevels = Math.floor(leading / 2);
+                    const displayTokens = guideLevels > 0 ? stripLeadingSpaces(tokens, guideLevels * 2) : tokens;
+                    return (
+                      <>
+                        {guideLevels > 0 && (
+                          <span aria-hidden className="select-none">
+                            {Array.from({ length: guideLevels }, (_, k) => (
+                              <span key={k} className="text-slate-700">│ </span>
+                            ))}
                           </span>
-                        ) : (
-                          t.text
                         )}
-                      </Fragment>
-                    ))
-                  )}
+                        {displayTokens.length === 0 ? (
+                          <span> </span>
+                        ) : (
+                          displayTokens.map((t, j) => (
+                            <Fragment key={j}>
+                              {t.color ? (
+                                <span style={{ color: t.color, fontWeight: t.bold ? 500 : undefined }}>
+                                  {t.text}
+                                </span>
+                              ) : (
+                                t.text
+                              )}
+                            </Fragment>
+                          ))
+                        )}
+                      </>
+                    );
+                  })()}
                   {isFolded && foldEnd != null && (
                     <span className="ml-2 text-slate-500 italic text-[10px]">
                       … {foldEnd - ln} line{foldEnd - ln === 1 ? "" : "s"} folded
