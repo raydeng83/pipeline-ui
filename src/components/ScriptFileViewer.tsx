@@ -391,7 +391,10 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
 
   // Format state. Downstream analyses (symbols, refs, fold, comments, find,
   // overlays) all run on the effective content so line numbers stay consistent.
-  const [formatEnabled, setFormatEnabled] = useState(false);
+  // Default formatting on for JS so poorly-indented source (common with
+  // pulled ForgeRock scripts) renders with Prettier's normalized layout.
+  // Users can still toggle off to see the raw file exactly as on disk.
+  const [formatEnabled, setFormatEnabled] = useState(canFormat);
   const [formatted, setFormatted] = useState<string | null>(null);
   const [formatLoading, setFormatLoading] = useState(false);
   const [formatError, setFormatError] = useState<string | null>(null);
