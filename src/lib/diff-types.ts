@@ -45,7 +45,10 @@ export interface JourneyScript {
 
 export interface JourneyNodeInfo {
   uuid: string;
+  /** Generic node-type label (e.g. "Scripted Decision") — the non-distinctive fallback. */
   name: string;
+  /** Human-authored label from the journey's main JSON (e.g. "Device_Context"). */
+  displayName?: string;
   nodeType: string;
   status: "modified" | "added" | "removed" | "unchanged";
   /** Why this node is "modified" — distinguishes script vs sub-journey changes */

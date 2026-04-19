@@ -341,6 +341,7 @@ export function compareDirs(
 interface JourneyNodeMeta {
   uuid: string;
   name: string;
+  displayName?: string;
   nodeType: string;
 }
 
@@ -370,10 +371,14 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
 
       try {
         const data = JSON.parse(fs.readFileSync(mainFile, "utf-8"));
-        const nodes = (data.nodes ?? {}) as Record<string, { nodeType?: string }>;
+        const nodes = (data.nodes ?? {}) as Record<string, { nodeType?: string; displayName?: string }>;
         const innerTreeUUIDs = new Set<string>();
+        const uuidToDisplayName = new Map<string, string>();
         for (const [uuid, node] of Object.entries(nodes)) {
           if (node.nodeType === "InnerTreeEvaluatorNode") innerTreeUUIDs.add(uuid);
+          if (typeof node.displayName === "string" && node.displayName) {
+            uuidToDisplayName.set(uuid, node.displayName);
+          }
         }
 
         const subJourneys: string[] = [];
@@ -403,7 +408,8 @@ function scanJourneys(configDir: string): Map<string, JourneyMeta> {
                 scriptUUIDs.push(nd.script);
                 nodeScripts.set(uuid, nd.script);
               }
-              allNodes.push({ uuid, name: nodeName, nodeType });
+              const displayName = uuidToDisplayName.get(uuid);
+              allNodes.push({ uuid, name: nodeName, displayName, nodeType });
               if (uuid) rawNodes.set(uuid, nd);
             } catch { /* skip */ }
           }
@@ -731,7 +737,7 @@ function buildJourneyTree(
           }
         }
 
-        nodes.push({ uuid: nm.uuid, name: nm.name, nodeType: nm.nodeType, status: nodeStatus, modifiedReason });
+        nodes.push({ uuid: nm.uuid, name: nm.name, displayName: nm.displayName, nodeType: nm.nodeType, status: nodeStatus, modifiedReason });
       }
       nodes.sort((a, b) => a.name.localeCompare(b.name));
     }

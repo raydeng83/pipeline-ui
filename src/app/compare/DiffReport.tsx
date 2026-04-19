@@ -1561,13 +1561,14 @@ function JourneyNode({ node, depth, forceOpen, forceSeq, showScripts, showNodes,
               <div className="mt-1 space-y-0.5">
                 {visibleNodes.map((nd) => {
                   const ns = JOURNEY_STATUS_STYLES[nd.status] ?? JOURNEY_STATUS_STYLES.unchanged;
+                  const label = nd.displayName || nd.name;
                   return (
                     <div key={nd.uuid} className="flex items-center gap-1.5 py-0.5 text-xs">
                       <span className="w-3 shrink-0" />
                       <svg className="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V19.5m0 2.25l-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
                       </svg>
-                      <span className="text-slate-500 truncate" title={`${nd.nodeType} (${nd.uuid})`}>{nd.name}</span>
+                      <span className="text-slate-700 truncate" title={`${nd.nodeType} (${nd.uuid})`}>{label}</span>
                       <span className="text-[10px] text-slate-400 shrink-0">{nd.nodeType}</span>
                       <span className={cn("text-[10px] px-1 py-0 rounded border shrink-0", ns.badge)}>{ns.label}</span>
                     </div>
