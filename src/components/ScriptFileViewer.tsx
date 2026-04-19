@@ -547,7 +547,11 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     setFindIdx(0);
   }
   const clampedIdx = matches.length === 0 ? 0 : Math.min(findIdx, matches.length - 1);
-  const currentMatchLine = matches.length > 0 ? matches[clampedIdx] : currentLine;
+  // Strictly the find-match focus — never fall back to currentLine. Falling
+  // back would cause FileContentViewer's highlight-line scroll effect to
+  // re-center on every click / unfold / goto, which feels like the page is
+  // jumping around. currentLine still drives the subtle activeLine style.
+  const currentMatchLine = matches.length > 0 ? matches[clampedIdx] : undefined;
   const matchLineSet = useMemo(() => new Set(matches), [matches]);
 
   // Imperative scroll plumbing — bumped any time goto/outline/find wants the
@@ -558,6 +562,24 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const requestScrollTo = useCallback((ln: number) => {
     setScrollRequest({ line: ln, nonce: Date.now() });
   }, []);
+
+  // Sync the highlightLine prop (deep-link from URL) into a one-shot scroll
+  // request. Done via prop-compare at render time — no effect, so the rule
+  // against setState-in-effect doesn't trip. First render: prevHlProp is the
+  // sentinel "unset" and differs from the prop, so we schedule the scroll.
+  // If the prop later changes (another deep-link click in the same session)
+  // we re-scroll to the new target.
+  const [prevHlProp, setPrevHlProp] = useState<number | undefined | "unset">("unset");
+  if (prevHlProp !== highlightLine) {
+    setPrevHlProp(highlightLine);
+    if (highlightLine != null) {
+      // Use the line number itself as the nonce — deterministic so it's
+      // safe at render time, and in practice deep-links don't repeat the
+      // same line twice within one mount (ConfigsViewer remounts the
+      // component on file switch via its key prop).
+      setScrollRequest({ line: highlightLine, nonce: highlightLine });
+    }
+  }
 
   // Unfold any ancestor region that would hide a target line.
   const unfoldAncestors = useCallback((ln: number) => {
