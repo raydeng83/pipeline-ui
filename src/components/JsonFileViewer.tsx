@@ -264,6 +264,26 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
   const [jumpKey, setJumpKey] = useState("");
   const [pathCopied, setPathCopied] = useState(false);
   const [wrap, setWrap] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(192);
+
+  const startSidebarDrag = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = sidebarWidth;
+    const onMove = (ev: MouseEvent) => {
+      // Dragging leftward widens the sidebar.
+      const next = Math.max(140, Math.min(640, startW + (startX - ev.clientX)));
+      setSidebarWidth(next);
+    };
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+    };
+    document.body.style.cursor = "col-resize";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [sidebarWidth]);
 
   // When a deep-link supplies a highlightLine, flip to raw mode as soon as
   // the prop arrives. Uses the "compare to previous prop during render" pattern
@@ -616,7 +636,18 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
         </div>
 
         {toc.length > 0 && (
-          <aside className="w-48 shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto">
+          <>
+            <div
+              onMouseDown={startSidebarDrag}
+              role="separator"
+              aria-orientation="vertical"
+              title="Drag to resize outline"
+              className="w-1 shrink-0 cursor-col-resize bg-slate-800 hover:bg-sky-500/60 transition-colors"
+            />
+          <aside
+            style={{ width: sidebarWidth }}
+            className="shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto"
+          >
             <div className="px-3 py-1.5 text-[10px] uppercase text-slate-500 font-semibold tracking-wider border-b border-slate-800 sticky top-0 bg-slate-900/90 backdrop-blur">
               Outline
             </div>
@@ -645,6 +676,7 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
               })}
             </div>
           </aside>
+          </>
         )}
       </div>
     </div>

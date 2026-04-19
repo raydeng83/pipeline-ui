@@ -397,11 +397,70 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const [foldedStartLines, setFoldedStartLines] = useState<Set<number>>(new Set());
   const [currentLine, setCurrentLine] = useState<number | undefined>(highlightLine);
   const [commentMode, setCommentMode] = useState<CommentMode>("all");
+  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  const startSidebarDrag = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = sidebarWidth;
+    const onMove = (ev: MouseEvent) => {
+      const next = Math.max(160, Math.min(640, startW + (startX - ev.clientX)));
+      setSidebarWidth(next);
+    };
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+    };
+    document.body.style.cursor = "col-resize";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [sidebarWidth]);
 
   const hiddenLines = useMemo(
     () => computeHiddenByCommentMode(commentSpans, commentMode),
     [commentSpans, commentMode],
   );
+
+  const symbolGroups = useMemo<SymbolGroup[]>(() => {
+    const defs: { id: string; label: string; match: (s: Symbol) => boolean }[] = [
+      { id: "sym:function", label: "Functions", match: (s) => s.kind === "function" || s.kind === "method" },
+      { id: "sym:const",    label: "Constants", match: (s) => s.kind === "const" },
+      { id: "sym:let",      label: "Let",       match: (s) => s.kind === "let" },
+      { id: "sym:var",      label: "Var",       match: (s) => s.kind === "var" },
+    ];
+    return defs
+      .map((d) => ({ id: d.id, label: d.label, items: symbols.filter(d.match) }))
+      .filter((g) => g.items.length > 0);
+  }, [symbols]);
+
+  const referenceGroups = useMemo<ReferenceGroup[]>(() => {
+    const defs: { id: string; label: string; kind: Reference["kind"] }[] = [
+      { id: "ref:esv",      label: "ESVs",      kind: "esv" },
+      { id: "ref:library",  label: "Scripts",   kind: "library" },
+      { id: "ref:endpoint", label: "Endpoints", kind: "endpoint" },
+    ];
+    return defs
+      .map((d) => ({ id: d.id, label: d.label, items: references.filter((r) => r.kind === d.kind) }))
+      .filter((g) => g.items.length > 0);
+  }, [references]);
+
+  const allGroupIds = useMemo(
+    () => [...symbolGroups.map((g) => g.id), ...referenceGroups.map((g) => g.id)],
+    [symbolGroups, referenceGroups],
+  );
+
+  const toggleGroup = useCallback((id: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+  const expandAllGroups = useCallback(() => setCollapsedGroups(new Set()), []);
+  const collapseAllGroups = useCallback(() => setCollapsedGroups(new Set(allGroupIds)), [allGroupIds]);
 
   // Resetting last-commit to "loading" happens via render-time prop compare so
   // it doesn't trip `react-hooks/set-state-in-effect`; the actual fetch lives
@@ -718,77 +777,175 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
         </div>
 
         {(symbols.length > 0 || references.length > 0) && (
-          <aside className="w-56 shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto">
-            {symbols.length > 0 && (
-              <div>
-                <div className="px-3 py-1.5 text-[10px] uppercase text-slate-500 font-semibold tracking-wider border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur">
-                  Outline ({symbols.length})
-                </div>
-                <div className="py-1">
-                  {symbols.map((s, i) => (
-                    <button
-                      key={`${s.name}-${s.line}-${i}`}
-                      type="button"
-                      onClick={() => goTo(s.line)}
-                      className={cn(
-                        "flex items-baseline gap-2 w-full text-left px-3 py-0.5 text-xs font-mono truncate transition-colors",
-                        currentLine === s.line
-                          ? "bg-sky-900/40 text-sky-200"
-                          : "text-slate-300 hover:text-slate-100 hover:bg-slate-800",
-                      )}
-                      title={`Line ${s.line}`}
-                    >
-                      <span className="text-[9px] uppercase text-slate-500 shrink-0 w-5">{kindLabel(s.kind)}</span>
-                      <span className="truncate">{s.name}</span>
-                      <span className="ml-auto text-[10px] text-slate-500 tabular-nums shrink-0">{s.line}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {references.length > 0 && (
-              <div>
-                <div className="px-3 py-1.5 text-[10px] uppercase text-slate-500 font-semibold tracking-wider border-b border-t border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur">
-                  References ({references.length})
-                </div>
-                <div className="py-1">
-                  {references.map((r, i) => (
-                    <button
-                      key={`${r.kind}-${r.label}-${r.line}-${i}`}
-                      type="button"
-                      onClick={() => { goTo(r.line); onNavigate?.(r.target); }}
-                      className="flex items-baseline gap-2 w-full text-left px-3 py-0.5 text-xs font-mono truncate text-slate-300 hover:text-slate-100 hover:bg-slate-800 transition-colors"
-                      title={`Line ${r.line} · Open ${r.kind}`}
-                    >
-                      <span
-                        className={cn(
-                          "text-[9px] uppercase shrink-0 w-5 text-right",
-                          r.kind === "esv" ? "text-emerald-400" : r.kind === "library" ? "text-violet-400" : "text-sky-400",
-                        )}
-                      >
-                        {r.kind === "esv" ? "esv" : r.kind === "library" ? "scr" : "ep"}
-                      </span>
-                      <span className="truncate">{r.label}</span>
-                      <span className="ml-auto text-[10px] text-slate-500 tabular-nums shrink-0">{r.line}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
+          <>
+            <div
+              onMouseDown={startSidebarDrag}
+              role="separator"
+              aria-orientation="vertical"
+              title="Drag to resize outline"
+              className="w-1 shrink-0 cursor-col-resize bg-slate-800 hover:bg-sky-500/60 transition-colors"
+            />
+            <Sidebar
+              width={sidebarWidth}
+              symbolGroups={symbolGroups}
+              referenceGroups={referenceGroups}
+              collapsedGroups={collapsedGroups}
+              onToggleGroup={toggleGroup}
+              onExpandAllGroups={expandAllGroups}
+              onCollapseAllGroups={collapseAllGroups}
+              currentLine={currentLine}
+              onGoTo={goTo}
+              onOpenRef={(r) => { goTo(r.line); onNavigate?.(r.target); }}
+            />
+          </>
         )}
       </div>
     </div>
   );
 }
 
-function kindLabel(k: Symbol["kind"]): string {
-  switch (k) {
-    case "function": return "fn";
-    case "method":   return "fn";
-    case "const":    return "c";
-    case "let":      return "l";
-    case "var":      return "v";
-  }
+// ── Outline grouping ─────────────────────────────────────────────────────────
+
+interface SymbolGroup { id: string; label: string; items: Symbol[] }
+interface ReferenceGroup { id: string; label: string; items: Reference[] }
+
+function Sidebar({
+  width,
+  symbolGroups,
+  referenceGroups,
+  collapsedGroups,
+  onToggleGroup,
+  onExpandAllGroups,
+  onCollapseAllGroups,
+  currentLine,
+  onGoTo,
+  onOpenRef,
+}: {
+  width: number;
+  symbolGroups: SymbolGroup[];
+  referenceGroups: ReferenceGroup[];
+  collapsedGroups: Set<string>;
+  onToggleGroup: (id: string) => void;
+  onExpandAllGroups: () => void;
+  onCollapseAllGroups: () => void;
+  currentLine: number | undefined;
+  onGoTo: (line: number) => void;
+  onOpenRef: (r: Reference) => void;
+}) {
+  return (
+    <aside
+      style={{ width }}
+      className="shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto"
+    >
+      <div className="flex items-center gap-1 px-2 py-1 border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur z-10 text-[10px]">
+        <button
+          type="button"
+          onClick={onExpandAllGroups}
+          className="px-1.5 py-0.5 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          title="Expand every group"
+        >
+          Expand all
+        </button>
+        <button
+          type="button"
+          onClick={onCollapseAllGroups}
+          className="px-1.5 py-0.5 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          title="Collapse every group"
+        >
+          Collapse all
+        </button>
+      </div>
+
+      {symbolGroups.map((g) => (
+        <GroupSection
+          key={g.id}
+          id={g.id}
+          label={g.label}
+          count={g.items.length}
+          collapsed={collapsedGroups.has(g.id)}
+          onToggle={onToggleGroup}
+        >
+          {g.items.map((s, i) => (
+            <button
+              key={`${s.name}-${s.line}-${i}`}
+              type="button"
+              onClick={() => onGoTo(s.line)}
+              className={cn(
+                "flex items-baseline gap-2 w-full text-left px-3 py-0.5 text-xs font-mono truncate transition-colors",
+                currentLine === s.line
+                  ? "bg-sky-900/40 text-sky-200"
+                  : "text-slate-300 hover:text-slate-100 hover:bg-slate-800",
+              )}
+              title={`Line ${s.line}`}
+            >
+              <span className="truncate">{s.name}</span>
+              <span className="ml-auto text-[10px] text-slate-500 tabular-nums shrink-0">{s.line}</span>
+            </button>
+          ))}
+        </GroupSection>
+      ))}
+
+      {referenceGroups.map((g) => (
+        <GroupSection
+          key={g.id}
+          id={g.id}
+          label={g.label}
+          count={g.items.length}
+          collapsed={collapsedGroups.has(g.id)}
+          onToggle={onToggleGroup}
+          accent={refAccent(g.id)}
+        >
+          {g.items.map((r, i) => (
+            <button
+              key={`${r.kind}-${r.label}-${r.line}-${i}`}
+              type="button"
+              onClick={() => onOpenRef(r)}
+              className="flex items-baseline gap-2 w-full text-left px-3 py-0.5 text-xs font-mono truncate text-slate-300 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+              title={`Line ${r.line} · Open ${r.kind}`}
+            >
+              <span className="truncate">{r.label}</span>
+              <span className="ml-auto text-[10px] text-slate-500 tabular-nums shrink-0">{r.line}</span>
+            </button>
+          ))}
+        </GroupSection>
+      ))}
+    </aside>
+  );
+}
+
+function GroupSection({
+  id, label, count, collapsed, onToggle, accent, children,
+}: {
+  id: string;
+  label: string;
+  count: number;
+  collapsed: boolean;
+  onToggle: (id: string) => void;
+  accent?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => onToggle(id)}
+        className="flex items-center w-full gap-2 px-2 py-1 text-[10px] uppercase text-slate-400 font-semibold tracking-wider border-b border-slate-800 hover:bg-slate-800 hover:text-slate-200 transition-colors"
+        aria-expanded={!collapsed}
+      >
+        <span className="w-3 text-slate-500 text-[10px] leading-none shrink-0">
+          {collapsed ? "▶" : "▼"}
+        </span>
+        <span className={cn("truncate", accent)}>{label}</span>
+        <span className="ml-auto text-slate-500 tabular-nums shrink-0">{count}</span>
+      </button>
+      {!collapsed && <div className="py-1">{children}</div>}
+    </div>
+  );
+}
+
+function refAccent(id: string): string | undefined {
+  if (id === "ref:esv") return "text-emerald-400";
+  if (id === "ref:library") return "text-violet-400";
+  if (id === "ref:endpoint") return "text-sky-400";
+  return undefined;
 }
