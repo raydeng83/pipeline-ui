@@ -34,6 +34,8 @@ interface Props {
   activeLine?: number;
   /** When true, draw faint vertical guides in the leading-whitespace region of each line (assumes 2-space indent). */
   indentGuides?: boolean;
+  /** Receives scroll events on the viewer's inner scroll container — used for sticky-scope tracking. */
+  onScroll?: React.UIEventHandler<HTMLDivElement>;
 }
 
 function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" | "text" {
@@ -83,6 +85,7 @@ export function FileContentViewer({
   hiddenLines,
   activeLine,
   indentGuides,
+  onScroll,
 }: Props) {
   const lang = language ?? detectLanguage(fileName);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -133,6 +136,7 @@ export function FileContentViewer({
   return (
     <div
       ref={containerRef}
+      onScroll={onScroll}
       className={cn(
         "h-full overflow-auto bg-slate-900 text-slate-300 code-mono text-[13px] leading-[1.55] scrollbar-thin",
         className,

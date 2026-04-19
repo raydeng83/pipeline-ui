@@ -431,6 +431,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const [commentMode, setCommentMode] = useState<CommentMode>("all");
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [topVisibleLine, setTopVisibleLine] = useState<number | null>(null);
 
   const startSidebarDrag = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -604,6 +605,50 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     if (matches.length === 0) return;
     setFindIdx((i) => (i - 1 + matches.length) % matches.length);
   }, [matches.length]);
+
+  // Derive line ranges for each symbol so we can show a sticky header with
+  // the enclosing function when the user scrolls past its declaration. Fold
+  // regions are keyed by the line that opens a `{`; functions sometimes open
+  // the brace on the next line, so we check both.
+  const symbolRanges = useMemo(() => {
+    return symbols.map((s) => {
+      const end = foldRegions.get(s.line) ?? foldRegions.get(s.line + 1) ?? s.line;
+      return { ...s, endLine: end };
+    });
+  }, [symbols, foldRegions]);
+
+  const currentScope = useMemo(() => {
+    if (topVisibleLine == null) return null;
+    let best: (typeof symbolRanges)[number] | null = null;
+    for (const r of symbolRanges) {
+      if (topVisibleLine >= r.line && topVisibleLine <= r.endLine && r.endLine > r.line) {
+        if (!best || r.line > best.line) best = r;
+      }
+    }
+    return best;
+  }, [symbolRanges, topVisibleLine]);
+
+  // Throttle scroll handling via rAF; find the first visible, non-folded row
+  // and remember its line number.
+  const scrollRafRef = useRef<number | null>(null);
+  const handleViewerScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    if (scrollRafRef.current != null) return;
+    scrollRafRef.current = requestAnimationFrame(() => {
+      scrollRafRef.current = null;
+      const rect = container.getBoundingClientRect();
+      const rows = container.querySelectorAll<HTMLElement>("[data-ln]");
+      for (const row of rows) {
+        const r = row.getBoundingClientRect();
+        if (r.bottom > rect.top + 4) {
+          const n = Number(row.dataset.ln);
+          if (Number.isFinite(n)) setTopVisibleLine(n);
+          return;
+        }
+      }
+      setTopVisibleLine(null);
+    });
+  }, []);
 
   // Group references by line for overlay rendering.
   const lineOverlays = useMemo<Map<number, ReactNode>>(() => {
@@ -822,22 +867,39 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
 
       {/* Content + Outline/References sidebar */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        <div ref={scrollRef} className="flex-1 min-w-0 min-h-0 overflow-hidden">
-          <FileContentViewer
-            content={effectiveContent}
-            fileName={fileName}
-            highlightLine={currentMatchLine}
-            activeLine={currentLine}
-            matchLines={matchLineSet}
-            wrap={wrap}
-            foldRegions={foldRegions}
-            foldedStartLines={foldedStartLines}
-            onToggleFold={toggleFold}
-            lineOverlays={lineOverlays}
-            hiddenLines={hiddenLines}
-            indentGuides
-            onLineClick={(ln) => setCurrentLine(ln)}
-          />
+        <div ref={scrollRef} className="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col">
+          {currentScope && topVisibleLine != null && topVisibleLine > currentScope.line && (
+            <div className="flex items-center gap-2 px-4 py-0.5 border-b border-slate-800 bg-slate-900/95 backdrop-blur text-[11px] text-slate-400 shrink-0">
+              <span className="text-slate-500 text-[10px] uppercase tracking-wider">in</span>
+              <button
+                type="button"
+                onClick={() => goTo(currentScope.line)}
+                className="code-mono text-sky-300 hover:text-sky-200 truncate"
+                title={`Jump to line ${currentScope.line}`}
+              >
+                {currentScope.name}
+              </button>
+              <span className="text-slate-600 tabular-nums">:{currentScope.line}</span>
+            </div>
+          )}
+          <div className="flex-1 min-h-0">
+            <FileContentViewer
+              content={effectiveContent}
+              fileName={fileName}
+              highlightLine={currentMatchLine}
+              activeLine={currentLine}
+              matchLines={matchLineSet}
+              wrap={wrap}
+              foldRegions={foldRegions}
+              foldedStartLines={foldedStartLines}
+              onToggleFold={toggleFold}
+              lineOverlays={lineOverlays}
+              hiddenLines={hiddenLines}
+              indentGuides
+              onLineClick={(ln) => setCurrentLine(ln)}
+              onScroll={handleViewerScroll}
+            />
+          </div>
         </div>
 
         {(symbols.length > 0 || references.length > 0) && (
