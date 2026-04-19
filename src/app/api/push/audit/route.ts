@@ -206,8 +206,10 @@ function auditScope(configDir: string, scope: string) {
   const exists = fs.existsSync(scopeDir);
   const fileCount = countFiles(scopeDir);
 
-  // Scopes that store items as directories (not files) at the top level
-  const DIR_BASED_SCOPES = new Set(["email-templates"]);
+  // Scopes that store items as directories (not files) at the top level.
+  // connector-mappings: each mapping lives in sync/mappings/<mapping-name>/
+  // email-templates:    each template is a dir with per-locale HTML files
+  const DIR_BASED_SCOPES = new Set(["email-templates", "connector-mappings"]);
 
   let items: AuditItem[];
   if (isNameFlag || isFilenameFilter || DIR_BASED_SCOPES.has(scope)) {

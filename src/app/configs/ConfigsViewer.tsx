@@ -620,7 +620,7 @@ function SectionsView({
                         </span>
                       ) : entry && (
                         <span className="text-[10px] tabular-nums text-slate-400 shrink-0">
-                          {entry.selectable ? count : entry.fileCount}
+                          {count}
                         </span>
                       )}
                     </button>
@@ -650,7 +650,10 @@ function SectionsView({
               </p>
               {scopeEntry && (
                 <p className="text-[10px] text-slate-400 mt-0.5">
-                  {scopeEntry.selectable ? `${scopeEntry.items.length} item${scopeEntry.items.length !== 1 ? "s" : ""}` : `${scopeEntry.fileCount} file${scopeEntry.fileCount !== 1 ? "s" : ""}`}
+                  {scopeEntry.items.length} item{scopeEntry.items.length !== 1 ? "s" : ""}
+                  {scopeEntry.items.length !== scopeEntry.fileCount && (
+                    <span className="ml-1">· {scopeEntry.fileCount} file{scopeEntry.fileCount !== 1 ? "s" : ""}</span>
+                  )}
                 </p>
               )}
             </div>
