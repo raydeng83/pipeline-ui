@@ -170,9 +170,12 @@ const Row = memo(function Row({
           ))
         )}
         {isFolded && foldEnd != null && (
-          <span className="ml-2 text-slate-500 italic text-[10px]">
-            … {foldEnd - ln} line{foldEnd - ln === 1 ? "" : "s"} folded
-          </span>
+          <>
+            <span className="ml-2 text-slate-500 italic text-[10px]">
+              … {foldEnd - ln} line{foldEnd - ln === 1 ? "" : "s"} folded
+            </span>
+            <span className="ml-2 text-slate-400">{"}"}</span>
+          </>
         )}
         {overlay != null && (
           <span className="ml-3 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
