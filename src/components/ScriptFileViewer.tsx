@@ -508,7 +508,6 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     setLastCommit(relPath && environment ? "loading" : null);
   }
 
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!relPath || !environment) return;
@@ -544,18 +543,14 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const currentMatchLine = matches.length > 0 ? matches[clampedIdx] : currentLine;
   const matchLineSet = useMemo(() => new Set(matches), [matches]);
 
-  // Scroll to a line (used by outline / goto / find).
-  const scrollToLine = useCallback((ln: number) => {
-    setTimeout(() => {
-      const el = scrollRef.current?.querySelector(`[data-ln="${ln}"]`);
-      if (el) (el as HTMLElement).scrollIntoView({ block: "center", behavior: "smooth" });
-    }, 30);
+  // Imperative scroll plumbing — bumped any time goto/outline/find wants the
+  // viewer to reveal a line. FileContentViewer watches this prop and drives
+  // the virtualizer, which is necessary because the target line may not be
+  // currently mounted in the DOM.
+  const [scrollRequest, setScrollRequest] = useState<{ line: number; nonce: number } | null>(null);
+  const requestScrollTo = useCallback((ln: number) => {
+    setScrollRequest({ line: ln, nonce: Date.now() });
   }, []);
-
-  // Scroll current match into view when idx changes.
-  useEffect(() => {
-    if (matches.length > 0) scrollToLine(matches[clampedIdx]);
-  }, [matches, clampedIdx, scrollToLine]);
 
   // Unfold any ancestor region that would hide a target line.
   const unfoldAncestors = useCallback((ln: number) => {
@@ -575,14 +570,14 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     if (!Number.isFinite(n) || n <= 0) return;
     unfoldAncestors(n);
     setCurrentLine(n);
-    scrollToLine(n);
-  }, [gotoLine, unfoldAncestors, scrollToLine]);
+    requestScrollTo(n);
+  }, [gotoLine, unfoldAncestors, requestScrollTo]);
 
   const goTo = useCallback((ln: number) => {
     unfoldAncestors(ln);
     setCurrentLine(ln);
-    scrollToLine(ln);
-  }, [unfoldAncestors, scrollToLine]);
+    requestScrollTo(ln);
+  }, [unfoldAncestors, requestScrollTo]);
 
   const toggleFold = useCallback((startLine: number) => {
     setFoldedStartLines((prev) => {
@@ -867,7 +862,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
 
       {/* Content + Outline/References sidebar */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        <div ref={scrollRef} className="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col">
+        <div className="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col">
           {currentScope && topVisibleLine != null && topVisibleLine > currentScope.line && (
             <div className="flex items-center gap-2 px-4 py-0.5 border-b border-slate-800 bg-slate-900/95 backdrop-blur text-[11px] text-slate-400 shrink-0">
               <span className="text-slate-500 text-[10px] uppercase tracking-wider">in</span>
@@ -896,8 +891,8 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
               lineOverlays={lineOverlays}
               hiddenLines={hiddenLines}
               indentGuides
-              onLineClick={(ln) => setCurrentLine(ln)}
               onScroll={handleViewerScroll}
+              scrollRequest={scrollRequest ?? undefined}
             />
           </div>
         </div>

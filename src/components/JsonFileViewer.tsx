@@ -394,13 +394,14 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
     }, 30);
   }, []);
 
+  // Raw mode scroll — FileContentViewer virtualizes rows so we can't rely on
+  // querySelector finding the target. Bump a request object instead; the
+  // viewer reads it in an effect and asks the virtualizer to scroll.
+  const [rawScrollRequest, setRawScrollRequest] = useState<{ line: number; nonce: number } | null>(null);
   const scrollRawToPath = useCallback((path: string) => {
     const ln = prettyRaw.pathByLine.findIndex((p) => p === path);
     if (ln < 0) return;
-    setTimeout(() => {
-      const el = contentScrollRef.current?.querySelector(`[data-ln="${ln + 1}"]`);
-      if (el) (el as HTMLElement).scrollIntoView({ block: "center", behavior: "smooth" });
-    }, 30);
+    setRawScrollRequest({ line: ln + 1, nonce: Date.now() });
   }, [prettyRaw.pathByLine]);
 
   const goToPath = useCallback(
@@ -627,6 +628,7 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
               highlightLine={currentMatchLine}
               matchLines={matchLineSet}
               wrap={wrap}
+              scrollRequest={rawScrollRequest ?? undefined}
               onLineClick={(ln) => {
                 const p = prettyRaw.pathByLine[ln - 1];
                 if (p) setSelectedPath(p);
