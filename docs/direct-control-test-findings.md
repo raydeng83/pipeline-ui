@@ -811,3 +811,115 @@ The source connector's `objectTypes` should NOT be copied verbatim — let `crea
 | `lecsvtest2` | CSV File Connector | 3-step API flow (duplicated from lecsvtest) | ✅ Deleted |
 | `leadtest` | LDAP Connector (AD) | 3-step API flow (duplicated from kyexternalgov) | ✅ Deleted |
 
+---
+
+## Connector creation on controlled environments (DCC) — tested (2026-04-16)
+
+Date: 2026-04-16
+Tenants tested: `temp-dcc` (`openam-commkent-temp-dcc-test.forgeblocks.com`), `ide3` (`openam-commkentsb3-use1-sandbox.id.forgerock.io`)
+
+### Mutable header requirement
+
+On controlled environments, **all requests during a DCC session must include `X-Configuration-Type: mutable`** — this applies to both config writes (`PUT /openidm/config/*`) and system actions (`POST /openidm/system?_action=createFullConfig`). Without it, the tenant returns 403:
+
+```json
+{"code": 403, "message": "This configuration is editable only in your development environment: this environment is immutable."}
+```
+
+### Why connector JARs matter — the meta-data provider
+
+The critical difference between tenants that can create connectors via `fr-config-push` and those that can't is whether **connector JARs have been imported to the tenant**.
+
+**With imported connector JARs (e.g. ide3):**
+- The tenant has a **local meta-data provider** for the connector type
+- `fr-config-push connector-definitions` (plain PUT) succeeds for brand-new connectors
+- No RCS connectivity or live backend needed at creation time
+- Valid credentials are NOT required — dummy creds work; the connector registers in the runtime with `ok: false, "Invalid credentials"`
+
+**Without imported connector JARs (e.g. sandbox1, temp-dcc):**
+- The tenant has **no local meta-data provider**
+- `fr-config-push connector-definitions` stores the config but **does not register in the runtime** (sandbox1) or **returns 500** (temp-dcc controlled)
+- Must use the 3-step flow (`createFullConfig` → strip `operationOptions` → `PUT If-None-Match: "*"`) which queries the RCS for meta-data
+- The 3-step flow requires a live RCS with the LDAP/AD host reachable
+
+### Tested on ide3 — fr-config-push creates connectors
+
+Created `letest` on ide3 (non-controlled) by duplicating `kyinternalgov` with dummy credentials:
+
+```bash
+cd environments/ide3
+cat config/ide3/sync/connectors/kyinternalgov.json | jq '
+  ._id = "provisioner.openicf/letest" |
+  .configurationProperties.credentials = "dummypassword123" |
+  .configurationProperties.principal = "CN=DummyUser,OU=Test,DC=kyide,DC=dev,DC=ky,DC=gov"
+' > config/ide3/sync/connectors/letest.json
+
+fr-config-push connector-definitions -n letest
+# → "Updating connector letest" / "provisioner.openicf/letest updated"
+```
+
+Runtime check: `{"name":"letest","ok":false,"error":"Invalid credentials"}` — **registered in runtime**. Connector JARs on ide3 provide the local meta-data provider, so plain PUT works.
+
+### Tested on temp-dcc — all approaches fail during push phase (before apply)
+
+All errors occurred during the DCC push phase (`SESSION_INITIALISED`), **before `direct-control-apply` was called**.
+
+#### Test 1: `fr-config-push connector-definitions -C`
+
+Duplicated ide3's `kyexternalgov` with dummy credentials, pushed with `-C` flag:
+
+```bash
+fr-config-push connector-definitions -C -n letest
+```
+
+```json
+{"code": 500, "message": "No meta-data provider available yet to create and encrypt configuration for provisioner.openicf/letest, retry later."}
+```
+
+`fr-config-push` uses plain PUT with `X-Configuration-Type: mutable` but no `If-None-Match: "*"`. The tenant has no local connector JARs, so it has no meta-data provider to validate the new connector config.
+
+#### Test 2: `createFullConfig` with mutable header
+
+Tried both `rcs-cluster-external` (host `eide.extdev.ky.gov:636`) and `rcs-cluster-internal` (host `kyide.dev.ky.gov:636`):
+
+```json
+{"code": 503, "message": "The required service is not available"}
+```
+
+The RCS was connected (`testConnectorServers` reported `ok: true`) and LDAP connector bundles were registered (`availableConnectors` listed LDAP on both `rcs-cluster-external` and `rcs-cluster-internal`). The 503 indicates the RCS could not complete the schema discovery operation — either the LDAP host is not network-reachable from the RCS, or the RCS could not execute the connector operation for another reason.
+
+#### Test 3: Direct PUT with `If-None-Match` + mutable (skipping `createFullConfig`)
+
+Used the full connector config from ide3 (which already has `objectTypes` populated) to bypass schema discovery:
+
+```json
+{"code": 500, "message": "No meta-data provider available yet to create and encrypt configuration for provisioner.openicf/letest, retry later."}
+```
+
+Same 500 as Test 1 — the provisioner rejects the PUT regardless of `If-None-Match` because it has no meta-data provider (no local JARs, and the RCS can't serve the request).
+
+### RCS entry creation via DCC — works
+
+Separately tested pushing a new RCS entry (`rcs-le-test`) to temp-dcc via `fr-config-push remote-servers -C`. This succeeded: init → push → apply completed with the expected tenant restart (~11 minutes). The `remote-servers` scope is a monolithic file write that does not require a meta-data provider.
+
+### Summary: what's needed for connector creation on controlled environments
+
+| Approach | Requires imported JARs? | Requires live RCS + reachable backend? | Works on temp-dcc? |
+|---|---|---|---|
+| `fr-config-push -C` (plain PUT + mutable) | **Yes** | No | ❌ No JARs imported |
+| 3-step flow + mutable headers | No | **Yes** | ❌ LDAP hosts unreachable from RCS |
+| Admin console UI | **Yes** (assumed) | Likely yes | ❌ No JARs imported |
+
+**To unblock connector creation on temp-dcc, one of:**
+1. **Import connector JARs** to the temp-dcc tenant — enables `fr-config-push -C` and the admin console UI
+2. **Ensure LDAP hosts are network-reachable** from temp-dcc's RCS — enables the 3-step API flow
+3. **Both** — provides the most flexibility
+
+### Test artifacts (all cleaned up)
+
+| Connector | Tenant | Method | Result | Cleaned up |
+|---|---|---|---|---|
+| `letest` | ide3 | `fr-config-push` (dummy creds) | ✅ Created, runtime registered | ✅ Manually deleted |
+| `letest` | temp-dcc | `fr-config-push -C` | ❌ 500: No meta-data provider | N/A (never created) |
+| `rcs-le-test` | temp-dcc | `fr-config-push remote-servers -C` | ✅ Created via DCC | Still on tenant |
+
