@@ -85,6 +85,8 @@ interface RowProps {
   isMatch: boolean;
   foldEnd?: number;
   isFolded: boolean;
+  /** Text shown after the "N lines folded" hint. Defaults to `}`. Pass `})()` etc. to match IIFE openers. */
+  foldCloseText?: string;
   overlay?: ReactNode;
   indentGuides?: boolean;
   onToggleFold?: (startLine: number) => void;
@@ -101,6 +103,7 @@ const Row = memo(function Row({
   isMatch,
   foldEnd,
   isFolded,
+  foldCloseText,
   overlay,
   indentGuides,
   onToggleFold,
@@ -174,7 +177,7 @@ const Row = memo(function Row({
             <span className="ml-2 text-slate-500 italic text-[10px]">
               … {foldEnd - ln} line{foldEnd - ln === 1 ? "" : "s"} folded
             </span>
-            <span className="ml-2 text-slate-400">{"}"}</span>
+            <span className="ml-2 text-slate-400">{foldCloseText ?? "}"}</span>
           </>
         )}
         {overlay != null && (
@@ -236,16 +239,17 @@ export function FileContentViewer({
     return result;
   }, [displayContent, lang]);
 
-  // Per-line leading-space count, for indent guides. Based on the raw text
-  // (tokenizer preserves whitespace as plain text).
+  // Raw display lines — kept for leading-space counts (indent guides) and
+  // closing-line lookups (fold preview text).
+  const rawLines = useMemo(() => displayContent.split("\n"), [displayContent]);
+
   const leadingSpaces = useMemo(() => {
-    const rawLines = displayContent.split("\n");
     return rawLines.map((l) => {
       let n = 0;
       while (n < l.length && l[n] === " ") n++;
       return n;
     });
-  }, [displayContent]);
+  }, [rawLines]);
 
   // Flatten to the rows that will actually render — drop hidden lines and any
   // line sitting inside a currently-folded region. Doing this once here keeps
@@ -318,6 +322,10 @@ export function FileContentViewer({
           const isMatch = !isHighlighted && !isActive && (matchLines?.has(ln) ?? false);
           const foldEnd = foldRegions?.get(ln);
           const isFolded = foldEnd != null && (foldedStartLines?.has(ln) ?? false);
+          // Text to show at the end of a folded line — the trimmed content of
+          // the closing line so IIFE-style `})()` appears intact rather than
+          // being shorthanded to a single `}`.
+          const foldCloseText = isFolded && foldEnd != null ? rawLines[foldEnd - 1]?.trim() : undefined;
           return (
             <div
               key={virtualItem.key}
@@ -341,6 +349,7 @@ export function FileContentViewer({
                 isMatch={isMatch}
                 foldEnd={foldEnd}
                 isFolded={isFolded}
+                foldCloseText={foldCloseText}
                 overlay={lineOverlays?.get(ln)}
                 indentGuides={indentGuides}
                 onToggleFold={onToggleFold}

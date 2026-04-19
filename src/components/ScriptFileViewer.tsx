@@ -594,14 +594,11 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
       else next.add(startLine);
       return next;
     });
-    // Unfolding: bring the user to where they opened up — mark the header
-    // line as active and scroll it to the center so the newly-revealed body
-    // is visible under it.
-    if (wasFolded) {
-      setCurrentLine(startLine);
-      requestScrollTo(startLine);
-    }
-  }, [foldedStartLines, requestScrollTo]);
+    // Unfolding: highlight the header line so the user sees where the open-up
+    // happened — but don't scroll. The newly-revealed body pushes content
+    // down in place, which is less jarring than a sudden recenter.
+    if (wasFolded) setCurrentLine(startLine);
+  }, [foldedStartLines]);
 
   const foldAll = useCallback(() => setFoldedStartLines(new Set(foldRegions.keys())), [foldRegions]);
   const unfoldAll = useCallback(() => setFoldedStartLines(new Set()), []);
