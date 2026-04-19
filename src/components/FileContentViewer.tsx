@@ -119,7 +119,6 @@ const Row = memo(function Row({
         isHighlighted && "bg-amber-900/30",
         isActive && "bg-slate-800/60",
         isMatch && "bg-sky-900/25",
-        onLineClick && "cursor-pointer",
       )}
     >
       <div
