@@ -12,6 +12,7 @@ import fs from "fs";
 import { getConfigDir, getEnvFileContent, classifyBenign } from "./fr-config";
 import { parseEnvFile } from "./env-parser";
 import { dispatchFrConfig } from "./fr-config-dispatch";
+import { getAccessToken } from "./iga-api";
 
 const ENVIRONMENTS_DIR = path.join(process.cwd(), "environments");
 
@@ -72,6 +73,25 @@ export function spawnFrodo(options: {
 
       let anyFailed = false;
 
+      // Acquire one bearer token at the start of the run and reuse it for
+      // every scope. Tokens are valid for ~15 min. If the tenant returns
+      // 401/403, the inner retry loop passes force=true and we re-acquire.
+      let sharedToken: string | undefined;
+      const refreshToken = async (force = false): Promise<string | undefined> => {
+        if (!force && sharedToken) return sharedToken;
+        try {
+          sharedToken = await getAccessToken(
+            envVars as Record<string, string>,
+            (msg) => encode(`[token] ${msg}\n`, "stderr"),
+          );
+        } catch (err) {
+          encode(`token acquisition failed: ${err instanceof Error ? err.message : String(err)}\n`, "stderr");
+          sharedToken = undefined;
+        }
+        return sharedToken;
+      };
+      await refreshToken();
+
       for (const scope of scopes) {
         if (aborted) break;
         const cfg = FRODO_SCOPE_CONFIG[scope];
@@ -106,6 +126,11 @@ export function spawnFrodo(options: {
             await sleep(RETRY_DELAY_MS);
           }
 
+          // Only burn a fresh token when the previous attempt actually failed
+          // with 401/403. Other failures (400, 5xx, network) retry with same token.
+          const needsAuthRefresh = attempt > 0 &&
+            /status code (401|403)|\bHTTP\s*(401|403)\b/i.test(lastStderr);
+
           lastStderr = "";
           lastStdout = "";
           const captureEmit = (data: string, type: "stdout" | "stderr") => {
@@ -113,6 +138,8 @@ export function spawnFrodo(options: {
             else lastStderr += data;
             encode(data, type);
           };
+
+          const tokenForScope = await refreshToken(needsAuthRefresh);
 
           const dispatched = await dispatchFrConfig({
             command,
@@ -122,6 +149,7 @@ export function spawnFrodo(options: {
             extraArgs: [],
             extraEnv: {},
             emit: captureEmit,
+            token: tokenForScope,
           });
 
           if (dispatched.handled) {
