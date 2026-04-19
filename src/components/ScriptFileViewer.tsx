@@ -168,6 +168,190 @@ function detectReferences(content: string): Reference[] {
   return refs;
 }
 
+// ── Comment analysis ─────────────────────────────────────────────────────────
+
+interface CommentSpan {
+  startLine: number;
+  endLine: number;
+  body: string;
+  isBlock: boolean;
+  /** Code exists on startLine before the comment marker. */
+  startHasCode: boolean;
+  /** Code exists on endLine after the closing block marker (block only). */
+  endHasCode: boolean;
+}
+
+// Walk content char-by-char, extracting every comment span and tracking
+// whether the start/end line has code outside the comment. Handles string
+// literals and escapes so `//` or `/*` inside a string aren't treated as
+// comment openers.
+function extractCommentSpans(content: string): CommentSpan[] {
+  const spans: CommentSpan[] = [];
+  let state: "code" | "line" | "block" | "str1" | "str2" | "tmpl" = "code";
+  let i = 0;
+  let line = 1;
+  let beforeCommentCode = ""; // non-comment text seen on the current line so far
+  let body = "";
+  let startLine = -1;
+  let startHasCode = false;
+
+  while (i < content.length) {
+    const c = content[i];
+    const n = content[i + 1];
+
+    if (state === "code") {
+      if (c === "\n") { beforeCommentCode = ""; line++; i++; continue; }
+      if (c === "/" && n === "/") {
+        startLine = line;
+        startHasCode = beforeCommentCode.trim() !== "";
+        body = "";
+        state = "line";
+        i += 2; continue;
+      }
+      if (c === "/" && n === "*") {
+        startLine = line;
+        startHasCode = beforeCommentCode.trim() !== "";
+        body = "";
+        state = "block";
+        i += 2; continue;
+      }
+      if (c === '"') { state = "str1"; beforeCommentCode += c; i++; continue; }
+      if (c === "'") { state = "str2"; beforeCommentCode += c; i++; continue; }
+      if (c === "`") { state = "tmpl"; beforeCommentCode += c; i++; continue; }
+      beforeCommentCode += c;
+      i++; continue;
+    }
+
+    if (state === "line") {
+      if (c === "\n") {
+        spans.push({ startLine, endLine: startLine, body, isBlock: false, startHasCode, endHasCode: false });
+        beforeCommentCode = "";
+        line++;
+        state = "code";
+        i++; continue;
+      }
+      body += c;
+      i++; continue;
+    }
+
+    if (state === "block") {
+      if (c === "*" && n === "/") {
+        // Peek the rest of the end line to determine if code follows `*/`.
+        let p = i + 2;
+        let after = "";
+        while (p < content.length && content[p] !== "\n") { after += content[p]; p++; }
+        const endHasCode = after.trim() !== "";
+        spans.push({ startLine, endLine: line, body, isBlock: true, startHasCode, endHasCode });
+        // Reset line-level accumulation so anything after `*/` on this line is treated as fresh code.
+        beforeCommentCode = "";
+        state = "code";
+        i += 2;
+        continue;
+      }
+      if (c === "\n") { body += "\n"; line++; }
+      else body += c;
+      i++; continue;
+    }
+
+    if (state === "str1") {
+      if (c === "\\" && n != null) { beforeCommentCode += c + n; i += 2; continue; }
+      if (c === '"') { state = "code"; beforeCommentCode += c; i++; continue; }
+      if (c === "\n") { line++; }
+      beforeCommentCode += c; i++; continue;
+    }
+    if (state === "str2") {
+      if (c === "\\" && n != null) { beforeCommentCode += c + n; i += 2; continue; }
+      if (c === "'") { state = "code"; beforeCommentCode += c; i++; continue; }
+      if (c === "\n") { line++; }
+      beforeCommentCode += c; i++; continue;
+    }
+    if (state === "tmpl") {
+      if (c === "\\" && n != null) { beforeCommentCode += c + n; i += 2; continue; }
+      if (c === "`") { state = "code"; beforeCommentCode += c; i++; continue; }
+      if (c === "\n") { line++; }
+      beforeCommentCode += c; i++; continue;
+    }
+  }
+
+  // EOF while still inside a comment — close it off.
+  if (state === "line" && startLine > 0) {
+    spans.push({ startLine, endLine: startLine, body, isBlock: false, startHasCode, endHasCode: false });
+  } else if (state === "block" && startLine > 0) {
+    spans.push({ startLine, endLine: line, body, isBlock: true, startHasCode, endHasCode: false });
+  }
+
+  return spans;
+}
+
+function fullyCommentLines(span: CommentSpan): number[] {
+  const out: number[] = [];
+  for (let ln = span.startLine; ln <= span.endLine; ln++) {
+    if (ln === span.startLine && span.startHasCode) continue;
+    if (ln === span.endLine && span.endHasCode && ln !== span.startLine) continue;
+    if (span.startLine === span.endLine && (span.startHasCode || span.endHasCode)) continue;
+    out.push(ln);
+  }
+  return out;
+}
+
+const PROSE_PREFIX = /^\s*(TODO|FIXME|XXX|HACK|NOTE|WARN|WARNING|BUG|OPTIMI[SZ]E|REVIEW|IMPORTANT|DESC|DESCRIPTION|DEPRECATED)\b/;
+const JSDOC_TAG = /@(param|returns?|throws|example|see|since|type|author|link|description|deprecated|todo)\b/i;
+const CODE_KEYWORDS = /^\s*(var|let|const|function|return|if|else|for|while|switch|case|break|continue|try|catch|finally|throw|import|export|class|new|yield|await|do)\b/;
+
+/**
+ * Classify a comment as "code" (commented-out code) vs "prose" (human-readable
+ * comment). Heuristic — designed to err toward "prose" when uncertain so we
+ * never hide a comment the author actually wants read.
+ */
+function classifyComment(span: CommentSpan): "code" | "prose" {
+  // JSDoc block: opened with /** or has * -prefixed lines
+  if (span.isBlock) {
+    const firstNonEmpty = span.body.split("\n").find((l) => l.trim() !== "") ?? "";
+    if (firstNonEmpty.trim().startsWith("*")) return "prose";
+  }
+
+  const rawLines = span.body.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (rawLines.length === 0) return "prose";
+
+  // Strong prose markers at any line → prose
+  for (const l of rawLines) {
+    if (PROSE_PREFIX.test(l)) return "prose";
+    if (JSDOC_TAG.test(l)) return "prose";
+    if (l.startsWith("*")) return "prose";
+  }
+
+  let codeVotes = 0;
+  let proseVotes = 0;
+  for (const l of rawLines) {
+    if (CODE_KEYWORDS.test(l)) { codeVotes++; continue; }
+    if (/[;{}](\s*)$/.test(l)) { codeVotes++; continue; }
+    if (/=>/.test(l) || /===|!==|!=|\|\||&&/.test(l)) { codeVotes++; continue; }
+    if (/^[\w$.]+\s*=\s*[^=]/.test(l) && !/^[A-Z][a-z]+\s/.test(l)) { codeVotes++; continue; }
+    if (/^[\w$]+\s*\([^)]*\)\s*[;,{]?/.test(l)) { codeVotes++; continue; }
+    // Prose signals
+    const words = l.split(/\s+/).filter((w) => /^[A-Za-z][A-Za-z']*$/.test(w));
+    if (/[.!?]$/.test(l) && words.length >= 2) { proseVotes++; continue; }
+    if (/^[A-Z][a-z]+\s+[a-z]+/.test(l) && words.length >= 3) { proseVotes++; continue; }
+    const letters = (l.match(/[A-Za-z]/g) || []).length;
+    const symbols = l.length - letters - (l.match(/\s/g) || []).length;
+    if (words.length >= 3 && letters > symbols * 2) { proseVotes++; continue; }
+  }
+
+  return codeVotes > proseVotes ? "code" : "prose";
+}
+
+type CommentMode = "all" | "hideCode" | "hideAll";
+
+function computeHiddenByCommentMode(spans: CommentSpan[], mode: CommentMode): Set<number> {
+  if (mode === "all") return new Set();
+  const out = new Set<number>();
+  for (const span of spans) {
+    if (mode === "hideCode" && classifyComment(span) !== "code") continue;
+    for (const ln of fullyCommentLines(span)) out.add(ln);
+  }
+  return out;
+}
+
 // ── Fold region detection ────────────────────────────────────────────────────
 
 function computeFoldRegions(content: string): Map<number, number> {
@@ -202,6 +386,9 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const symbols = useMemo(() => detectSymbols(content, language), [content, language]);
   const references = useMemo(() => detectReferences(content), [content]);
   const foldRegions = useMemo(() => computeFoldRegions(content), [content]);
+  const commentSpans = useMemo(() => extractCommentSpans(content), [content]);
+  const hasAnyComment = commentSpans.length > 0;
+  const hasHideableCodeComments = useMemo(() => commentSpans.some((s) => classifyComment(s) === "code"), [commentSpans]);
 
   const [wrap, setWrap] = useState(true);
   const [findQuery, setFindQuery] = useState("");
@@ -209,6 +396,12 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const [gotoLine, setGotoLine] = useState("");
   const [foldedStartLines, setFoldedStartLines] = useState<Set<number>>(new Set());
   const [currentLine, setCurrentLine] = useState<number | undefined>(highlightLine);
+  const [commentMode, setCommentMode] = useState<CommentMode>("all");
+
+  const hiddenLines = useMemo(
+    () => computeHiddenByCommentMode(commentSpans, commentMode),
+    [commentSpans, commentMode],
+  );
 
   // Resetting last-commit to "loading" happens via render-time prop compare so
   // it doesn't trip `react-hooks/set-state-in-effect`; the actual fetch lives
@@ -425,6 +618,58 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
           </div>
         )}
 
+        {/* Comment visibility — three-state segmented control */}
+        {hasAnyComment && (
+          <div className="flex items-center gap-0.5 bg-slate-800 rounded px-1.5 py-0.5">
+            <span className="text-[10px] uppercase tracking-wider text-slate-500 pr-1">Comments</span>
+            <button
+              type="button"
+              onClick={() => setCommentMode("all")}
+              aria-pressed={commentMode === "all"}
+              title="Show every comment"
+              className={cn(
+                "px-1.5 rounded",
+                commentMode === "all"
+                  ? "bg-sky-900/60 text-sky-200"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-700",
+              )}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => setCommentMode("hideCode")}
+              aria-pressed={commentMode === "hideCode"}
+              disabled={!hasHideableCodeComments}
+              title={hasHideableCodeComments ? "Hide only lines that look like commented-out code" : "No code-out comments detected"}
+              className={cn(
+                "px-1.5 rounded",
+                !hasHideableCodeComments
+                  ? "text-slate-600 cursor-not-allowed"
+                  : commentMode === "hideCode"
+                    ? "bg-sky-900/60 text-sky-200"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-700",
+              )}
+            >
+              Hide code-outs
+            </button>
+            <button
+              type="button"
+              onClick={() => setCommentMode("hideAll")}
+              aria-pressed={commentMode === "hideAll"}
+              title="Hide every comment-only line"
+              className={cn(
+                "px-1.5 rounded",
+                commentMode === "hideAll"
+                  ? "bg-sky-900/60 text-sky-200"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-700",
+              )}
+            >
+              Hide all
+            </button>
+          </div>
+        )}
+
         {/* Wrap */}
         <button
           type="button"
@@ -468,6 +713,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
             foldedStartLines={foldedStartLines}
             onToggleFold={toggleFold}
             lineOverlays={lineOverlays}
+            hiddenLines={hiddenLines}
           />
         </div>
 

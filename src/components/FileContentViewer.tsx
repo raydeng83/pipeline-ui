@@ -28,6 +28,8 @@ interface Props {
   onToggleFold?: (startLine: number) => void;
   /** Per-line content appended after the tokens (reference link badges, etc.). */
   lineOverlays?: Map<number, ReactNode>;
+  /** Lines (1-indexed) to hide from rendering entirely. Independent of folding. */
+  hiddenLines?: Set<number>;
 }
 
 function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" | "text" {
@@ -51,6 +53,7 @@ export function FileContentViewer({
   foldedStartLines,
   onToggleFold,
   lineOverlays,
+  hiddenLines,
 }: Props) {
   const lang = language ?? detectLanguage(fileName);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -98,6 +101,7 @@ export function FileContentViewer({
         <tbody>
           {lines.map((tokens, i) => {
             const ln = i + 1;
+            if (hiddenLines?.has(ln)) return null;
             // Skip lines hidden by a folded ancestor.
             if (foldRegions && foldedStartLines) {
               for (const startLine of foldedStartLines) {
