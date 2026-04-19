@@ -93,7 +93,7 @@ export function FileContentViewer({
     <div
       ref={containerRef}
       className={cn(
-        "h-full overflow-auto bg-slate-900 text-slate-300 font-mono text-xs leading-relaxed",
+        "h-full overflow-auto bg-slate-900 text-slate-300 code-mono text-[13px] leading-[1.55] scrollbar-thin",
         className,
       )}
     >

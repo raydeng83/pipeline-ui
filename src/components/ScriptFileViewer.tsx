@@ -896,7 +896,7 @@ function Sidebar({
   return (
     <aside
       style={{ width }}
-      className="shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto"
+      className="shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto scrollbar-thin"
     >
       <div className="flex items-center gap-1 px-2 py-1 border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur z-10 text-[10px]">
         <button

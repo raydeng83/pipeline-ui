@@ -608,7 +608,7 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <div
           ref={contentScrollRef}
-          className={cn("flex-1 min-w-0 min-h-0", mode === "tree" ? "overflow-auto" : "overflow-hidden")}
+          className={cn("flex-1 min-w-0 min-h-0 scrollbar-thin", mode === "tree" ? "overflow-auto" : "overflow-hidden")}
         >
           {mode === "tree" ? (
             <TreeView
@@ -646,7 +646,7 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
             />
           <aside
             style={{ width: sidebarWidth }}
-            className="shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto"
+            className="shrink-0 border-l border-slate-800 bg-slate-900/70 overflow-auto scrollbar-thin"
           >
             <div className="px-3 py-1.5 text-[10px] uppercase text-slate-500 font-semibold tracking-wider border-b border-slate-800 sticky top-0 bg-slate-900/90 backdrop-blur">
               Outline
@@ -703,7 +703,7 @@ function TreeView({
   query: string;
 }) {
   return (
-    <div className="font-mono text-xs py-2 min-w-full">
+    <div className="code-mono text-[13px] leading-[1.55] py-2 min-w-full">
       {rows.map((row, i) => {
         const isSelected =
           selectedPath === row.path && (row.kind === "open" || row.kind === "collapsed" || row.kind === "leaf");
