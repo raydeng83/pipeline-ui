@@ -163,6 +163,7 @@ export function FileContentViewer({
                 data-ln={ln}
                 onClick={onLineClick ? () => onLineClick(ln) : undefined}
                 className={cn(
+                  "group",
                   isHighlighted && "bg-amber-900/30",
                   isActive && "bg-slate-800/60",
                   isMatch && "bg-sky-900/25",
@@ -230,7 +231,11 @@ export function FileContentViewer({
                       … {foldEnd - ln} line{foldEnd - ln === 1 ? "" : "s"} folded
                     </span>
                   )}
-                  {overlay != null && <span className="ml-3">{overlay}</span>}
+                  {overlay != null && (
+                    <span className="ml-3 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                      {overlay}
+                    </span>
+                  )}
                 </td>
               </tr>
             );
