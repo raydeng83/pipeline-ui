@@ -171,81 +171,218 @@ export interface HighlightToken {
   bold?: boolean;
 }
 
+// Color palette — kept as named constants so highlightJs and highlightJsTokens
+// stay in sync if one changes. Rough scheme: cool hues for structural tokens,
+// warm hues for values/literals.
+const C_COMMENT  = "#6b7280";
+const C_KEYWORD  = "#c084fc";
+const C_BUILTIN  = "#f87171";
+const C_STRING   = "#86efac";
+const C_NUMBER   = "#fbbf24";
+const C_REGEX    = "#f59e0b";
+const C_FN_CALL  = "#38bdf8";
+const C_PROPERTY = "#22d3ee";
+const C_OPERATOR = "#94a3b8";
+const C_PUNCT    = "#64748b";
+const C_INTERP   = "#fb923c";
+
+// Characters that form (possibly multi-char) operators when clustered.
+// `.` is excluded — treated as punctuation — so `a?.b` renders as `?` op + `.` punct.
+const OP_CHARS = /[=+\-*/%<>!&|^~?:]/;
+const PUNCT_CHARS = /[()[\]{},;.]/;
+
+// Tokenize the expression body inside a `${ ... }` template interpolation,
+// tracking balanced braces and respecting nested strings/regex/comments so
+// a `}` inside a nested string or regex doesn't close the interpolation early.
+function findTemplateExprEnd(code: string, start: number): number {
+  let i = start;
+  let depth = 1;
+  while (i < code.length) {
+    const c = code[i];
+    if (c === '"' || c === "'") {
+      const q = c;
+      let j = i + 1;
+      while (j < code.length && code[j] !== q) { if (code[j] === "\\") j++; j++; }
+      i = j + 1; continue;
+    }
+    if (c === "`") {
+      let j = i + 1;
+      while (j < code.length && code[j] !== "`") {
+        if (code[j] === "\\") { j += 2; continue; }
+        if (code[j] === "$" && code[j + 1] === "{") { j = findTemplateExprEnd(code, j + 2) + 1; continue; }
+        j++;
+      }
+      i = j + 1; continue;
+    }
+    if (c === "/" && code[i + 1] === "/") {
+      const end = code.indexOf("\n", i);
+      i = end === -1 ? code.length : end; continue;
+    }
+    if (c === "/" && code[i + 1] === "*") {
+      const end = code.indexOf("*/", i + 2);
+      i = end === -1 ? code.length : end + 2; continue;
+    }
+    if (c === "{") { depth++; i++; continue; }
+    if (c === "}") { depth--; if (depth === 0) return i; i++; continue; }
+    i++;
+  }
+  return code.length;
+}
+
 export function highlightJsTokens(code: string): HighlightToken[] {
   const out: HighlightToken[] = [];
   let i = 0;
-  let plain = "";
-  // Tracks whether a `/` at position i should be parsed as a regex literal
-  // (true) or a division operator (false). Flipped by what came just before.
+  // Regex context tracker — see parseRegexLiteral comment above.
   let canBeRegex = true;
-  const flushPlain = () => {
-    if (plain.length > 0) { out.push({ text: plain }); plain = ""; }
+  // Last emitted meaningful character (skipping whitespace) — lets us colour
+  // identifiers as property access when preceded by `.`.
+  let lastNonWsChar = "";
+
+  const pushTok = (text: string, color?: string, bold?: boolean) => {
+    out.push({ text, color, bold });
   };
+
+  // Peek forward past whitespace/line comments from `from` and return the first
+  // significant character (or "" at EOF). Used to decide if an identifier is a
+  // call target.
+  const peekNonWs = (from: number): string => {
+    let k = from;
+    while (k < code.length && /\s/.test(code[k])) k++;
+    return code[k] ?? "";
+  };
+
   while (i < code.length) {
     const c = code[i];
+
+    // Line comment
     if (c === "/" && code[i + 1] === "/") {
-      flushPlain();
       const end = code.indexOf("\n", i);
       const text = end === -1 ? code.slice(i) : code.slice(i, end);
-      out.push({ text, color: "#6b7280" });
+      pushTok(text, C_COMMENT);
       i += text.length;
-      // Comments are whitespace-equivalent for regex-context tracking.
-    } else if (c === "/" && code[i + 1] === "*") {
-      flushPlain();
+      continue;
+    }
+    // Block comment
+    if (c === "/" && code[i + 1] === "*") {
       const end = code.indexOf("*/", i + 2);
       const text = end === -1 ? code.slice(i) : code.slice(i, end + 2);
-      out.push({ text, color: "#6b7280" });
+      pushTok(text, C_COMMENT);
       i += text.length;
-    } else if (c === "/" && canBeRegex) {
+      continue;
+    }
+    // Regex literal
+    if (c === "/" && canBeRegex) {
       const re = parseRegexLiteral(code, i);
       if (re) {
-        flushPlain();
-        out.push({ text: re.text, color: "#f59e0b" });
+        pushTok(re.text, C_REGEX);
         i = re.end;
         canBeRegex = false;
+        lastNonWsChar = "/";
         continue;
       }
-      plain += c;
+    }
+    // Template literal — tokenize string segments + recurse into `${...}`
+    if (c === "`") {
+      pushTok("`", C_STRING);
       i++;
-      // A lone `/` in expression position is odd but treat it as an operator.
-      canBeRegex = true;
-    } else if (c === '"' || c === "'" || c === "`") {
-      flushPlain();
+      let chunk = "";
+      while (i < code.length) {
+        const ch = code[i];
+        if (ch === "\\" && i + 1 < code.length) {
+          chunk += code.slice(i, i + 2);
+          i += 2;
+          continue;
+        }
+        if (ch === "`") {
+          if (chunk) pushTok(chunk, C_STRING);
+          pushTok("`", C_STRING);
+          i++;
+          break;
+        }
+        if (ch === "$" && code[i + 1] === "{") {
+          if (chunk) { pushTok(chunk, C_STRING); chunk = ""; }
+          pushTok("${", C_INTERP);
+          const exprEnd = findTemplateExprEnd(code, i + 2);
+          const exprText = code.slice(i + 2, exprEnd);
+          for (const t of highlightJsTokens(exprText)) out.push(t);
+          pushTok("}", C_INTERP);
+          i = exprEnd + 1;
+          continue;
+        }
+        chunk += ch;
+        i++;
+      }
+      canBeRegex = false;
+      lastNonWsChar = "`";
+      continue;
+    }
+    // Plain string
+    if (c === '"' || c === "'") {
       const q = c;
       let j = i + 1;
-      while (j < code.length && code[j] !== q) {
-        if (code[j] === "\\") j++;
-        j++;
-      }
-      out.push({ text: code.slice(i, j + 1), color: "#86efac" });
+      while (j < code.length && code[j] !== q) { if (code[j] === "\\") j++; j++; }
+      pushTok(code.slice(i, j + 1), C_STRING);
       i = j + 1;
       canBeRegex = false;
-    } else if (/[a-zA-Z_$]/.test(c)) {
+      lastNonWsChar = q;
+      continue;
+    }
+    // Identifier / keyword / builtin / property / function call
+    if (/[a-zA-Z_$]/.test(c)) {
       let j = i + 1;
       while (j < code.length && /[a-zA-Z0-9_$]/.test(code[j])) j++;
       const word = code.slice(i, j);
-      if (JS_KEYWORDS.has(word))      { flushPlain(); out.push({ text: word, color: "#c084fc", bold: true }); }
-      else if (JS_BUILTINS.has(word)) { flushPlain(); out.push({ text: word, color: "#f87171" }); }
-      else                            { plain += word; }
+      if (JS_KEYWORDS.has(word)) {
+        pushTok(word, C_KEYWORD, true);
+      } else if (JS_BUILTINS.has(word)) {
+        pushTok(word, C_BUILTIN);
+      } else if (peekNonWs(j) === "(") {
+        pushTok(word, C_FN_CALL);
+      } else if (lastNonWsChar === ".") {
+        pushTok(word, C_PROPERTY);
+      } else {
+        pushTok(word);
+      }
       i = j;
-      // Most keywords force regex context; identifiers/builtins don't.
       canBeRegex = REGEX_CONTEXT_KEYWORDS.has(word);
-    } else if (/[0-9]/.test(c)) {
-      flushPlain();
+      lastNonWsChar = word[word.length - 1];
+      continue;
+    }
+    // Number
+    if (/[0-9]/.test(c)) {
       let j = i + 1;
       while (j < code.length && /[0-9._xXeEbBoO]/.test(code[j])) j++;
-      out.push({ text: code.slice(i, j), color: "#fbbf24" });
+      pushTok(code.slice(i, j), C_NUMBER);
       i = j;
       canBeRegex = false;
-    } else {
-      plain += c;
-      i++;
-      if (c === ")" || c === "]" || c === "}") canBeRegex = false;
-      else if (!/\s/.test(c)) canBeRegex = true;
-      // whitespace: leave canBeRegex unchanged.
+      lastNonWsChar = code[j - 1];
+      continue;
     }
+    // Operator (possibly multi-char)
+    if (OP_CHARS.test(c)) {
+      let j = i + 1;
+      while (j < code.length && OP_CHARS.test(code[j])) j++;
+      pushTok(code.slice(i, j), C_OPERATOR);
+      i = j;
+      canBeRegex = true;
+      lastNonWsChar = code[j - 1];
+      continue;
+    }
+    // Punctuation
+    if (PUNCT_CHARS.test(c)) {
+      pushTok(c, C_PUNCT);
+      if (c === ")" || c === "]" || c === "}") canBeRegex = false;
+      else canBeRegex = true;
+      lastNonWsChar = c;
+      i++;
+      continue;
+    }
+    // Whitespace and anything else — keep uncoloured so the row reflows naturally.
+    pushTok(c);
+    if (!/\s/.test(c)) lastNonWsChar = c;
+    i++;
   }
-  flushPlain();
+
   return out;
 }
 
