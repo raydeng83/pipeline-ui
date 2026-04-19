@@ -827,6 +827,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
             content={effectiveContent}
             fileName={fileName}
             highlightLine={currentMatchLine}
+            activeLine={currentLine}
             matchLines={matchLineSet}
             wrap={wrap}
             foldRegions={foldRegions}
@@ -834,6 +835,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
             onToggleFold={toggleFold}
             lineOverlays={lineOverlays}
             hiddenLines={hiddenLines}
+            onLineClick={(ln) => setCurrentLine(ln)}
           />
         </div>
 

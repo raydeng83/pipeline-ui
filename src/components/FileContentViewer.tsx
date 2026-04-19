@@ -30,6 +30,8 @@ interface Props {
   lineOverlays?: Map<number, ReactNode>;
   /** Lines (1-indexed) to hide from rendering entirely. Independent of folding. */
   hiddenLines?: Set<number>;
+  /** The "current" line (last clicked/selected). Rendered as a subtle row background with a left accent — distinct from highlightLine which is the strong find-match focus. */
+  activeLine?: number;
 }
 
 function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" | "text" {
@@ -54,6 +56,7 @@ export function FileContentViewer({
   onToggleFold,
   lineOverlays,
   hiddenLines,
+  activeLine,
 }: Props) {
   const lang = language ?? detectLanguage(fileName);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -110,7 +113,8 @@ export function FileContentViewer({
               }
             }
             const isHighlighted = highlightLine === ln;
-            const isMatch = !isHighlighted && matchLines?.has(ln);
+            const isActive = !isHighlighted && activeLine === ln;
+            const isMatch = !isHighlighted && !isActive && matchLines?.has(ln);
             const foldEnd = foldRegions?.get(ln);
             const isFoldable = foldEnd != null;
             const isFolded = isFoldable && foldedStartLines?.has(ln);
@@ -122,6 +126,7 @@ export function FileContentViewer({
                 onClick={onLineClick ? () => onLineClick(ln) : undefined}
                 className={cn(
                   isHighlighted && "bg-amber-900/30",
+                  isActive && "bg-slate-800/60",
                   isMatch && "bg-sky-900/25",
                   onLineClick && "cursor-pointer",
                 )}
@@ -131,6 +136,7 @@ export function FileContentViewer({
                   className={cn(
                     "sticky left-0 bg-slate-900 select-none text-right pl-4 pr-3 text-slate-600 border-r border-slate-800 tabular-nums whitespace-nowrap align-top",
                     isHighlighted && "bg-amber-900/40 text-amber-300 font-semibold",
+                    isActive && "bg-slate-800/80 text-slate-300 border-l-2 border-l-sky-400 pl-[14px]",
                   )}
                 >
                   {isFoldable && onToggleFold ? (
