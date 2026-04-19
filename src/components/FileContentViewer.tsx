@@ -14,6 +14,12 @@ interface Props {
   className?: string;
   /** Optional line to highlight (1-indexed) */
   highlightLine?: number;
+  /** When true, long lines wrap instead of overflowing horizontally. */
+  wrap?: boolean;
+  /** Lines (1-indexed) to mark with a subtle background — used for search matches. */
+  matchLines?: Set<number>;
+  /** Called when a line is clicked. Used for path-at-cursor in JSON raw view. */
+  onLineClick?: (line: number) => void;
 }
 
 function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" | "text" {
@@ -24,7 +30,7 @@ function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" 
   return "text";
 }
 
-export function FileContentViewer({ content, fileName, language, className, highlightLine }: Props) {
+export function FileContentViewer({ content, fileName, language, className, highlightLine, wrap, matchLines, onLineClick }: Props) {
   const lang = language ?? detectLanguage(fileName);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -67,13 +73,23 @@ export function FileContentViewer({ content, fileName, language, className, high
         className,
       )}
     >
-      <table className="border-collapse">
+      <table className={cn("border-collapse", wrap && "w-full")}>
         <tbody>
           {lines.map((tokens, i) => {
             const ln = i + 1;
             const isHighlighted = highlightLine === ln;
+            const isMatch = !isHighlighted && matchLines?.has(ln);
             return (
-              <tr key={i} data-ln={ln} className={cn(isHighlighted && "bg-amber-900/30")}>
+              <tr
+                key={i}
+                data-ln={ln}
+                onClick={onLineClick ? () => onLineClick(ln) : undefined}
+                className={cn(
+                  isHighlighted && "bg-amber-900/30",
+                  isMatch && "bg-sky-900/25",
+                  onLineClick && "cursor-pointer",
+                )}
+              >
                 <td
                   aria-hidden
                   className={cn(
@@ -83,7 +99,7 @@ export function FileContentViewer({ content, fileName, language, className, high
                 >
                   {ln}
                 </td>
-                <td className="pl-4 pr-4 whitespace-pre">
+                <td className={cn("pl-4 pr-4", wrap ? "whitespace-pre-wrap break-words" : "whitespace-pre")}>
                   {tokens.length === 0 ? (
                     <span> </span>
                   ) : (

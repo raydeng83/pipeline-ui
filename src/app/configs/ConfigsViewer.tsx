@@ -8,6 +8,7 @@ import type { AuditItem } from "@/app/api/push/audit/route";
 import type { EndpointUsageRef } from "@/app/api/analyze/endpoint-usage/route";
 import { cn } from "@/lib/utils";
 import { FileContentViewer } from "@/components/FileContentViewer";
+import { JsonFileViewer } from "@/components/JsonFileViewer";
 import { JourneyGraph } from "./JourneyGraph";
 import { WorkflowGraph } from "./WorkflowGraph";
 
@@ -37,8 +38,27 @@ function FullscreenButton({ fullscreen, onToggle, dark }: { fullscreen: boolean;
   );
 }
 
-function FileContent({ content, fileName, highlightLine }: { content: string; fileName: string; highlightLine?: number }) {
-  return <FileContentViewer content={content} fileName={fileName} highlightLine={highlightLine} />;
+function FileContent({ content, fileName, highlightLine, wrap }: { content: string; fileName: string; highlightLine?: number; wrap?: boolean }) {
+  return <FileContentViewer content={content} fileName={fileName} highlightLine={highlightLine} wrap={wrap} />;
+}
+
+function WrapButton({ wrap, onToggle }: { wrap: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      title={wrap ? "Disable line wrap" : "Enable line wrap"}
+      aria-pressed={wrap}
+      className={cn(
+        "shrink-0 px-2 py-0.5 text-[10px] font-medium rounded transition-colors",
+        wrap
+          ? "bg-sky-900/40 text-sky-300 hover:bg-sky-900/60"
+          : "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+      )}
+    >
+      Wrap
+    </button>
+  );
 }
 
 /** Derive the ESV name (e.g. "ad-external-basedn") from an esvs/{variables|secrets}/... path. */
@@ -366,6 +386,7 @@ function SectionsView({
   const [itemFilter, setItemFilter] = useState("");
   const [scopeFilter, setScopeFilter] = useState("");
   const [fullscreen, setFullscreen] = useState(false);
+  const [wrapScripts, setWrapScripts] = useState(true);
   const [copied, setCopied] = useState(false);
   const [col1Width, setCol1Width] = useState(192);
   const [col2Width, setCol2Width] = useState(224);
@@ -833,6 +854,9 @@ function SectionsView({
                   Find Usage
                 </button>
               )}
+              {(selectedScope === "scripts" || selectedScope === "endpoints") && (
+                <WrapButton wrap={wrapScripts} onToggle={() => setWrapScripts((w) => !w)} />
+              )}
               <FullscreenButton
                 fullscreen={fullscreen}
                 onToggle={() => setFullscreen((f) => !f)}
@@ -1057,9 +1081,25 @@ function SectionsView({
                 </div>
               )}
               {!fileLoading && activeFile && selectedScope !== "journeys" && selectedScope !== "iga-workflows" && (
-                <div className="overflow-auto h-full">
-                  <FileContent content={activeFile.content} fileName={activeFile.name} highlightLine={highlightLine} />
-                </div>
+                activeFile.name.toLowerCase().endsWith(".json") ? (
+                  <div className="h-full min-h-0 overflow-hidden">
+                    <JsonFileViewer
+                      key={`${selectedItem?.id ?? ""}:${activeFile.name}`}
+                      content={activeFile.content}
+                      fileName={activeFile.name}
+                      highlightLine={highlightLine}
+                    />
+                  </div>
+                ) : (
+                  <div className="overflow-auto h-full">
+                    <FileContent
+                      content={activeFile.content}
+                      fileName={activeFile.name}
+                      highlightLine={highlightLine}
+                      wrap={(selectedScope === "scripts" || selectedScope === "endpoints") && wrapScripts}
+                    />
+                  </div>
+                )
               )}
             </div>
           </>
