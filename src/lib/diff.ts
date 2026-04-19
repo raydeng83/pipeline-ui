@@ -441,6 +441,7 @@ function buildJourneyTree(
   targetDir: string,
   changedJourneys: Map<string, FileDiff["status"]>,
   changedScripts: Map<string, FileDiff["status"]>,
+  changedScriptNames: Map<string, FileDiff["status"]>,  // script name → status (UUID-independent)
   changedNodeFiles: Map<string, FileDiff["status"]>,  // "journeyName/nodeUUID" → status
   forceIncludeJourneys?: Set<string>,  // Always include these in the tree, even if unchanged
 ): JourneyTreeNode[] {
@@ -482,37 +483,64 @@ function buildJourneyTree(
     const status = changedJourneys.get(name) ?? "unchanged";
     const isEntry = !meta?.innerTreeOnly && !(calledBy.get(name)?.length);
 
-    // Resolve scripts for this journey
+    // Resolve scripts for this journey. Name-based lookup so a script renamed
+    // to a different UUID across envs still resolves correctly.
     const scripts: JourneyScript[] = [];
     const nodes: JourneyNodeInfo[] = [];
     if (meta) {
       for (const uuid of meta.scriptUUIDs) {
         const scriptName = scriptNames.get(uuid) ?? uuid;
-        const scriptStatus = changedScripts.get(uuid) ?? "unchanged";
+        const scriptStatus = changedScriptNames.get(scriptName)
+          ?? changedScripts.get(uuid)
+          ?? "unchanged";
         scripts.push({ uuid, name: scriptName, status: scriptStatus });
       }
       scripts.sort((a, b) => a.name.localeCompare(b.name));
 
-      // Resolve all node statuses
+      // For each node: a node may reference an independent resource (a script
+      // or sub-journey). When it does, the node's visible status should reflect
+      // that resource's own compare state — not blindly inherit "added"/"removed"
+      // from the parent journey, since the resource may exist in the other env.
+      const mergeRefStatus = (
+        nodeFile: FileDiff["status"],
+        ref: FileDiff["status"],
+      ): FileDiff["status"] => {
+        // If the node file itself differs (config change on the node), that
+        // wins — the referenced resource's status is only the fallback.
+        if (nodeFile === "modified") return "modified";
+        return ref;
+      };
+
       for (const nm of meta.allNodes) {
-        let nodeStatus = changedNodeFiles.get(`${name}/${nm.uuid}`) ?? "unchanged";
+        const nodeFileStatus = changedNodeFiles.get(`${name}/${nm.uuid}`) ?? "unchanged";
+        let nodeStatus: FileDiff["status"] = nodeFileStatus;
         let modifiedReason: "script" | "subjourney" | undefined;
-        // ScriptedDecisionNode: mark modified if its referenced script changed
-        if (nodeStatus === "unchanged") {
-          const scriptUuid = meta.nodeScripts.get(nm.uuid);
-          if (scriptUuid && changedScripts.has(scriptUuid)) {
-            nodeStatus = "modified";
+
+        const scriptUuid = meta.nodeScripts.get(nm.uuid);
+        const subJourneyName = meta.nodeSubJourneys.get(nm.uuid);
+
+        if (scriptUuid) {
+          const scriptName = scriptNames.get(scriptUuid);
+          const refStatus: FileDiff["status"] = scriptName
+            ? (changedScriptNames.get(scriptName) ?? changedScripts.get(scriptUuid) ?? "unchanged")
+            : "unchanged";
+          nodeStatus = mergeRefStatus(nodeFileStatus, refStatus);
+          if (nodeStatus === "modified" && refStatus === "modified" && nodeFileStatus !== "modified") {
             modifiedReason = "script";
           }
-        }
-        // InnerTreeEvaluatorNode: mark modified if its sub-journey has changes
-        if (nodeStatus === "unchanged") {
-          const subJourneyName = meta.nodeSubJourneys.get(nm.uuid);
-          if (subJourneyName && hasChangedDescendant(subJourneyName, new Set())) {
-            nodeStatus = "modified";
+        } else if (subJourneyName) {
+          let refStatus: FileDiff["status"] = changedJourneys.get(subJourneyName) ?? "unchanged";
+          // Sub-journey unchanged itself but has changed descendants: treat
+          // as modified so the node signals that something deeper shifted.
+          if (refStatus === "unchanged" && hasChangedDescendant(subJourneyName, new Set())) {
+            refStatus = "modified";
+          }
+          nodeStatus = mergeRefStatus(nodeFileStatus, refStatus);
+          if (nodeStatus === "modified" && refStatus === "modified" && nodeFileStatus !== "modified") {
             modifiedReason = "subjourney";
           }
         }
+
         nodes.push({ uuid: nm.uuid, name: nm.name, nodeType: nm.nodeType, status: nodeStatus, modifiedReason });
       }
       nodes.sort((a, b) => a.name.localeCompare(b.name));
@@ -621,7 +649,7 @@ export function buildReport(
 
   let journeyTree: JourneyTreeNode[] | undefined;
   try {
-    journeyTree = buildJourneyTree(sourceDir, targetDir, changedJourneys, changedScripts, changedNodeFiles, forceIncludeJourneys);
+    journeyTree = buildJourneyTree(sourceDir, targetDir, changedJourneys, changedScripts, changedScriptNames, changedNodeFiles, forceIncludeJourneys);
   } catch { /* ignore */ }
 
   const semanticJourneys = loadSemanticJourneys(sourceDir, targetDir, scopes ?? []);
