@@ -81,18 +81,22 @@ function detectSymbols(content: string, language: "js" | "groovy"): Symbol[] {
   const lines = scan.split("\n");
   const out: Symbol[] = [];
   const FN = /^\s*(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/;
-  const VAR = /^\s*(?:export\s+)?(const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/;
+  const VAR = /^\s*(?:export\s+)?(const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(.*)$/;
   const GROOVY_DEF = /^\s*(?:private|public|protected|static|final|def)\s+(?:\w[\w<>?,\s]*\s+)?([A-Za-z_$][\w$]*)\s*\(/;
   const METHOD = /^\s*([A-Za-z_$][\w$]*)\s*(?::|=)\s*function\b/;
+  // RHS patterns that mean "this binding is a function value" — normal
+  // function expressions, arrow functions (with or without params).
+  const FN_VALUE = /^(?:async\s+)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (language === "js") {
       let m: RegExpMatchArray | null;
       if ((m = line.match(FN))) { out.push({ line: i + 1, name: m[1], kind: "function" }); continue; }
       if ((m = line.match(VAR))) {
-        // Skip if the variable initializer is a primitive and the file has many top-level vars.
-        const kind = m[1] as "const" | "let" | "var";
-        out.push({ line: i + 1, name: m[2], kind });
+        const declKind = m[1] as "const" | "let" | "var";
+        const rhs = m[3]?.trim() ?? "";
+        const isFn = FN_VALUE.test(rhs);
+        out.push({ line: i + 1, name: m[2], kind: isFn ? "function" : declKind });
         continue;
       }
       if ((m = line.match(METHOD))) { out.push({ line: i + 1, name: m[1], kind: "method" }); continue; }
@@ -580,13 +584,21 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   }, [unfoldAncestors, requestScrollTo]);
 
   const toggleFold = useCallback((startLine: number) => {
+    const wasFolded = foldedStartLines.has(startLine);
     setFoldedStartLines((prev) => {
       const next = new Set(prev);
       if (next.has(startLine)) next.delete(startLine);
       else next.add(startLine);
       return next;
     });
-  }, []);
+    // Unfolding: bring the user to where they opened up — mark the header
+    // line as active and scroll it to the center so the newly-revealed body
+    // is visible under it.
+    if (wasFolded) {
+      setCurrentLine(startLine);
+      requestScrollTo(startLine);
+    }
+  }, [foldedStartLines, requestScrollTo]);
 
   const foldAll = useCallback(() => setFoldedStartLines(new Set(foldRegions.keys())), [foldRegions]);
   const unfoldAll = useCallback(() => setFoldedStartLines(new Set()), []);
@@ -617,16 +629,46 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   // immediately. Fall back to the topmost visible line when nothing is active.
   const scopeFocusLine = currentLine ?? topVisibleLine;
 
+  // Candidate scopes = named functions + unnamed function-like brace regions.
+  // Object literals, if-blocks, and anything else that isn't function-shaped
+  // don't appear here so the scope header never shows `var config = {...}`.
+  const scopes = useMemo(() => {
+    type Scope = { line: number; endLine: number; name: string; anonymous: boolean };
+    const result: Scope[] = [];
+    for (const r of symbolRanges) {
+      if ((r.kind === "function" || r.kind === "method") && r.endLine > r.line) {
+        result.push({ line: r.line, endLine: r.endLine, name: r.name, anonymous: false });
+      }
+    }
+    const contentLines = effectiveContent.split("\n");
+    const claimedStartLines = new Set<number>();
+    for (const r of result) {
+      claimedStartLines.add(r.line);
+      claimedStartLines.add(r.line + 1);
+    }
+    for (const [start, end] of foldRegions) {
+      if (end <= start) continue;
+      if (claimedStartLines.has(start)) continue;
+      const text = contentLines[start - 1] ?? "";
+      if (/\bfunction\s*\*?\s*\(/.test(text)) {
+        result.push({ line: start, endLine: end, name: "anonymous function", anonymous: true });
+      } else if (/\([^)]*\)\s*=>\s*\{?\s*$/.test(text) || /\bkeys?\s*:\s*async\s*\([^)]*\)\s*=>/.test(text)) {
+        result.push({ line: start, endLine: end, name: "arrow function", anonymous: true });
+      }
+    }
+    return result;
+  }, [symbolRanges, foldRegions, effectiveContent]);
+
   const currentScope = useMemo(() => {
     if (scopeFocusLine == null) return null;
-    let best: (typeof symbolRanges)[number] | null = null;
-    for (const r of symbolRanges) {
-      if (scopeFocusLine >= r.line && scopeFocusLine <= r.endLine && r.endLine > r.line) {
-        if (!best || r.line > best.line) best = r;
+    let best: (typeof scopes)[number] | null = null;
+    for (const s of scopes) {
+      if (scopeFocusLine >= s.line && scopeFocusLine <= s.endLine) {
+        if (!best || s.line > best.line) best = s;
       }
     }
     return best;
-  }, [symbolRanges, scopeFocusLine]);
+  }, [scopes, scopeFocusLine]);
 
   // Throttle scroll handling via rAF; find the first visible, non-folded row
   // and remember its line number.
@@ -868,20 +910,28 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
       {/* Content + Outline/References sidebar */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         <div className="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col">
-          {currentScope && (
-            <div className="flex items-center gap-2 px-4 py-0.5 border-b border-slate-800 bg-slate-900/95 backdrop-blur text-[11px] text-slate-400 shrink-0">
-              <span className="text-slate-500 text-[10px] uppercase tracking-wider">in</span>
-              <button
-                type="button"
-                onClick={() => goTo(currentScope.line)}
-                className="code-mono text-sky-300 hover:text-sky-200 truncate"
-                title={`Jump to line ${currentScope.line}`}
-              >
-                {currentScope.name}
-              </button>
-              <span className="text-slate-600 tabular-nums">:{currentScope.line}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 px-4 py-0.5 border-b border-slate-800 bg-slate-900/95 backdrop-blur text-[11px] text-slate-400 shrink-0">
+            <span className="text-slate-500 text-[10px] uppercase tracking-wider">in</span>
+            {currentScope ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => goTo(currentScope.line)}
+                  className={cn(
+                    "code-mono truncate",
+                    currentScope.anonymous ? "text-slate-400 italic hover:text-slate-200" : "text-sky-300 hover:text-sky-200",
+                  )}
+                  title={`Jump to line ${currentScope.line}`}
+                >
+                  {currentScope.anonymous ? `(${currentScope.name})` : `${currentScope.name}()`}
+                </button>
+                <span className="text-slate-600 tabular-nums">:{currentScope.line}</span>
+              </>
+            ) : (
+              <span className="text-slate-500 italic">(top level)</span>
+            )}
+          </div>
+
           <div className="flex-1 min-h-0">
             <FileContentViewer
               content={effectiveContent}
@@ -983,7 +1033,10 @@ function Sidebar({
         </button>
       </div>
 
-      {symbolGroups.map((g) => (
+      {symbolGroups.map((g) => {
+        const accent = symbolAccent(g.id);
+        const isCallable = g.id === "sym:function";
+        return (
         <GroupSection
           key={g.id}
           id={g.id}
@@ -991,7 +1044,7 @@ function Sidebar({
           count={g.items.length}
           collapsed={collapsedGroups.has(g.id)}
           onToggle={onToggleGroup}
-          accent={symbolAccent(g.id)}
+          accent={accent}
         >
           {g.items.map((s, i) => (
             <button
@@ -1002,18 +1055,22 @@ function Sidebar({
                 "flex items-baseline gap-2 w-full text-left px-3 py-0.5 text-xs font-mono truncate transition-colors",
                 currentLine === s.line
                   ? "bg-sky-900/40 text-sky-200"
-                  : "text-slate-300 hover:text-slate-100 hover:bg-slate-800",
+                  : "hover:text-slate-100 hover:bg-slate-800",
+                currentLine !== s.line && (accent ?? "text-slate-300"),
               )}
               title={`Line ${s.line}`}
             >
-              <span className="truncate">{s.name}</span>
+              <span className="truncate">{isCallable ? `${s.name}()` : s.name}</span>
               <span className="ml-auto text-[10px] text-slate-500 tabular-nums shrink-0">{s.line}</span>
             </button>
           ))}
         </GroupSection>
-      ))}
+        );
+      })}
 
-      {referenceGroups.map((g) => (
+      {referenceGroups.map((g) => {
+        const accent = refAccent(g.id);
+        return (
         <GroupSection
           key={g.id}
           id={g.id}
@@ -1021,14 +1078,17 @@ function Sidebar({
           count={g.items.length}
           collapsed={collapsedGroups.has(g.id)}
           onToggle={onToggleGroup}
-          accent={refAccent(g.id)}
+          accent={accent}
         >
           {g.items.map((r, i) => (
             <button
               key={`${r.kind}-${r.label}-${r.line}-${i}`}
               type="button"
               onClick={() => onOpenRef(r)}
-              className="flex items-baseline gap-2 w-full text-left px-3 py-0.5 text-xs font-mono truncate text-slate-300 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+              className={cn(
+                "flex items-baseline gap-2 w-full text-left px-3 py-0.5 text-xs font-mono truncate hover:text-slate-100 hover:bg-slate-800 transition-colors",
+                accent ?? "text-slate-300",
+              )}
               title={`Line ${r.line} · Open ${r.kind}`}
             >
               <span className="truncate">{r.label}</span>
@@ -1036,7 +1096,8 @@ function Sidebar({
             </button>
           ))}
         </GroupSection>
-      ))}
+        );
+      })}
     </aside>
   );
 }
