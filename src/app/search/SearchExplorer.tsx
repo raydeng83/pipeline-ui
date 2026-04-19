@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import type { SearchResponse, SearchFileResult } from "@/app/search/types";
 import { useWorkingEnv } from "@/hooks/useWorkingEnv";
 
+const DEFAULT_GLOB = "**/*.{js,groovy,json}";
+
 const GLOB_PRESETS: { label: string; value: string }[] = [
   { label: "All",                 value: "" },
   { label: "JS",                  value: "**/*.js" },
@@ -67,7 +69,7 @@ export function SearchExplorer({ environments }: Props) {
   const [regex, setRegex] = useState(persisted.regex ?? false);
   const [matchCase, setMatchCase] = useState(persisted.matchCase ?? false);
   const [wholeWord, setWholeWord] = useState(persisted.wholeWord ?? false);
-  const [glob, setGlob] = useState(persisted.glob ?? "**/*.{js,groovy,json}");
+  const [glob, setGlob] = useState(persisted.glob ?? DEFAULT_GLOB);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -300,6 +302,16 @@ export function SearchExplorer({ environments }: Props) {
             placeholder="File glob (e.g. **/*.js)"
             className="flex-1 min-w-[200px] px-3 py-1.5 rounded border border-slate-300 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
+          {glob !== DEFAULT_GLOB && (
+            <button
+              type="button"
+              onClick={() => setGlob(DEFAULT_GLOB)}
+              title={`Reset to default (${DEFAULT_GLOB})`}
+              className="px-2 py-1 text-[11px] rounded border border-slate-300 text-slate-600 bg-white hover:bg-slate-50 transition-colors shrink-0"
+            >
+              Reset
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
