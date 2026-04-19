@@ -6,11 +6,11 @@ import { SyncForm } from "./SyncForm";
 export default function SyncPage() {
   const environments = getEnvironments();
   const history = readHistoryMerged({ type: "pull", limit: 500 });
-  // Build last-pull map: env name → ISO timestamp
-  const lastPullMap: Record<string, string> = {};
+  // Build last-pull map: env name → { completedAt, scopes from that pull }.
+  const lastPullMap: Record<string, { at: string; scopes: string[] }> = {};
   for (const r of history) {
     if (r.type === "pull" && r.environment && !lastPullMap[r.environment]) {
-      lastPullMap[r.environment] = r.completedAt;
+      lastPullMap[r.environment] = { at: r.completedAt, scopes: r.scopes };
     }
   }
   return (

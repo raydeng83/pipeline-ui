@@ -234,7 +234,7 @@ export function SyncForm({
   lastPullMap,
 }: {
   environments: Environment[];
-  lastPullMap: Record<string, string>;
+  lastPullMap: Record<string, { at: string; scopes: string[] }>;
 }) {
   const [selectedEnvs, setSelectedEnvs] = useState<Set<string>>(new Set());
   const [scopes, setScopes] = useState<ConfigScope[]>([]);
@@ -420,7 +420,21 @@ export function SyncForm({
                         <span className="text-[10px] text-slate-400 font-mono">{env.name}</span>
                       </div>
                       <div className="text-[10px] text-slate-400 mt-0.5">
-                        {lastPull ? `Last pull: ${mounted ? timeAgo(lastPull) : "…"}` : "Never pulled"}
+                        {lastPull ? (
+                          <>
+                            Last pull: {mounted ? timeAgo(lastPull.at) : "…"}
+                            {lastPull.scopes.length > 0 && (
+                              <span
+                                className="ml-1 text-slate-500"
+                                title={lastPull.scopes.join(", ")}
+                              >
+                                · {lastPull.scopes.length} scope{lastPull.scopes.length !== 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          "Never pulled"
+                        )}
                       </div>
                       {job?.status === "running" && (() => {
                         const cur = getScopeStateForEnv(env.name).current;

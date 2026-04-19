@@ -7,8 +7,8 @@ export type EnvHealth = "healthy" | "stale" | "locked" | "error";
 export interface EnvCardProps {
   env: Environment & { baseUrl?: string };
   health: EnvHealth;
-  lastPull: { at: string; status: "success" | "failed" } | null;
-  lastPush: { at: string; status: "success" | "failed" } | null;
+  lastPull: { at: string; status: "success" | "failed"; scopes?: string[] } | null;
+  lastPush: { at: string; status: "success" | "failed"; scopes?: string[] } | null;
   onClick?: () => void;
 }
 
@@ -58,17 +58,33 @@ export function EnvCard({ env, health, lastPull, lastPush, onClick }: EnvCardPro
         <div className="text-[11px] text-slate-500 font-mono truncate mb-3">{env.baseUrl}</div>
       )}
       <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[11px]">
-        <div>
+        <div className="min-w-0">
           <div className="text-slate-400">Last pull</div>
           <div className={cn("font-medium", lastPull?.status === "failed" ? "text-rose-600" : "text-slate-700")}>
             {lastPull ? timeAgo(lastPull.at) : "—"}
           </div>
+          {lastPull && lastPull.scopes && lastPull.scopes.length > 0 && (
+            <div
+              className="text-[10px] text-slate-500 truncate"
+              title={lastPull.scopes.join(", ")}
+            >
+              {lastPull.scopes.length} scope{lastPull.scopes.length !== 1 ? "s" : ""}
+            </div>
+          )}
         </div>
-        <div className="text-right">
+        <div className="text-right min-w-0">
           <div className="text-slate-400">Last push</div>
           <div className={cn("font-medium", lastPush?.status === "failed" ? "text-rose-600" : "text-slate-700")}>
             {lastPush ? timeAgo(lastPush.at) : "—"}
           </div>
+          {lastPush && lastPush.scopes && lastPush.scopes.length > 0 && (
+            <div
+              className="text-[10px] text-slate-500 truncate"
+              title={lastPush.scopes.join(", ")}
+            >
+              {lastPush.scopes.length} scope{lastPush.scopes.length !== 1 ? "s" : ""}
+            </div>
+          )}
         </div>
       </div>
     </button>

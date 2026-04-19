@@ -29,8 +29,8 @@ export default function DashboardPage() {
     return {
       env,
       health: deriveHealth(lastPull, lastPush),
-      lastPull: lastPull && { at: lastPull.completedAt, status: lastPull.status },
-      lastPush: lastPush && { at: lastPush.completedAt, status: lastPush.status },
+      lastPull: lastPull && { at: lastPull.completedAt, status: lastPull.status, scopes: lastPull.scopes },
+      lastPush: lastPush && { at: lastPush.completedAt, status: lastPush.status, scopes: lastPush.scopes },
     };
   });
 
