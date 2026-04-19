@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { StatusPill } from "@/components/ui/StatusPill";
+import { ScopesBadge } from "@/components/LastPullModal";
 import type { Environment } from "@/lib/fr-config";
 
 export type EnvHealth = "healthy" | "stale" | "locked" | "error";
@@ -39,11 +40,14 @@ export function EnvCard({ env, health, lastPull, lastPush, onClick }: EnvCardPro
     : <StatusPill tone="danger">error</StatusPill>;
 
   return (
-    <button
-      type="button"
+    <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
+      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
       className={cn(
         "card-padded text-left transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.06)]",
+        onClick && "cursor-pointer",
         health === "error" && "border-rose-200"
       )}
     >
@@ -64,11 +68,8 @@ export function EnvCard({ env, health, lastPull, lastPush, onClick }: EnvCardPro
             {lastPull ? timeAgo(lastPull.at) : "—"}
           </div>
           {lastPull && lastPull.scopes && lastPull.scopes.length > 0 && (
-            <div
-              className="text-[10px] text-slate-500 truncate"
-              title={lastPull.scopes.join(", ")}
-            >
-              {lastPull.scopes.length} scope{lastPull.scopes.length !== 1 ? "s" : ""}
+            <div className="text-[10px] truncate">
+              <ScopesBadge env={env.name} scopes={lastPull.scopes} timestamp={lastPull.at} />
             </div>
           )}
         </div>
@@ -87,6 +88,6 @@ export function EnvCard({ env, health, lastPull, lastPush, onClick }: EnvCardPro
           )}
         </div>
       </div>
-    </button>
+    </div>
   );
 }

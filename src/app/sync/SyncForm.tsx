@@ -5,6 +5,7 @@ import { ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogViewer } from "@/components/LogViewer";
 import { ScopeSelector } from "@/components/ScopeSelector";
+import { ScopesBadge } from "@/components/LastPullModal";
 import { useStreamingLogs, type LogEntry } from "@/hooks/useStreamingLogs";
 import { useBusyState } from "@/hooks/useBusyState";
 import type { Environment } from "@/lib/fr-config-types";
@@ -424,12 +425,14 @@ export function SyncForm({
                           <>
                             Last pull: {mounted ? timeAgo(lastPull.at) : "…"}
                             {lastPull.scopes.length > 0 && (
-                              <span
-                                className="ml-1 text-slate-500"
-                                title={lastPull.scopes.join(", ")}
-                              >
-                                · {lastPull.scopes.length} scope{lastPull.scopes.length !== 1 ? "s" : ""}
-                              </span>
+                              <>
+                                <span className="mx-1 text-slate-400">·</span>
+                                <ScopesBadge
+                                  env={env.name}
+                                  scopes={lastPull.scopes}
+                                  timestamp={lastPull.at}
+                                />
+                              </>
                             )}
                           </>
                         ) : (
