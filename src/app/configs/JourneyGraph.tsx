@@ -1025,7 +1025,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const [isCompact,      setIsCompact]       = useState(false);
   const [collapseChainsOn, setCollapseChainsOn] = useState(true);
   const [expandedChainIds, setExpandedChainIds] = useState<Set<string>>(new Set());
-  const [layoutEngine,   setLayoutEngine]    = useState<"dagre" | "elk">("dagre");
+  const [layoutEngine, _setLayoutEngine] = useState<"dagre" | "elk">("elk");
   const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   // "control" = trace the outcome graph (default). "data" = trace shared-state
   // dependencies derived from every node's `inputs` / `outputs` arrays.
@@ -1747,28 +1747,6 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
                 d="M6 12h.01M12 12h.01M18 12h.01M3 6h18M3 18h18" />
             </svg>
             Fold runs{collapsedChains.length > 0 ? ` (${collapsedChains.length})` : ""}
-          </button>
-
-          {/* Layout engine */}
-          <button
-            type="button"
-            onClick={() => {
-              shouldAdjustViewport.current = true;
-              setLayoutEngine((e) => (e === "dagre" ? "elk" : "dagre"));
-            }}
-            title={
-              layoutEngine === "elk"
-                ? "Using ELK layered layout with aspect-ratio hint (balances width vs. height). Click to switch back to dagre."
-                : "Switch to ELK layered layout — uses canvas aspect ratio to pull branches into unused vertical space."
-            }
-            className={cn(
-              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1 uppercase font-semibold tracking-wider",
-              layoutEngine === "elk"
-                ? "bg-sky-600 text-white border-sky-600"
-                : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
-            )}
-          >
-            {layoutEngine === "elk" ? "ELK" : "Dagre"}
           </button>
 
           {/* Compact layout */}
