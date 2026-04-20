@@ -851,11 +851,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   // "control" = trace the outcome graph (default). "data" = trace shared-state
   // dependencies derived from every node's `inputs` / `outputs` arrays.
-  const [traceMode,      setTraceMode]       = useState<"neighbors" | "upstream" | "downstream" | "control" | "data">("control");
-  // dataIO[nodeUuid] = { inputs, outputs } from the node file. Fetched lazily
-  // the first time the user switches to data-trace mode.
-  const [dataIO, setDataIO] = useState<Map<string, { inputs: string[]; outputs: string[] }>>(new Map());
-  const [dataIOLoading, setDataIOLoading] = useState(false);
+  const [traceMode,      setTraceMode]       = useState<"neighbors" | "upstream" | "downstream" | "data">("data");
 
   // ── Inner-tree navigation stack ───────────────────────────────────────────
   const [navStack,   setNavStack]   = useState<{ journeyId: string; json: string; sourceNodeId: string }[]>([]);
@@ -1201,116 +1197,10 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     setSearchIndex((i) => (i + 1) % searchMatchList.length),
     [searchMatchList.length]);
 
-  // Ids of all top-level nodes in the active journey — used both to
-  // bulk-fetch data-IO and to cap BFS when tracing.
-  const topLevelNodeIds = useMemo(
-    () => rfNodes.filter((n) => !n.parentId).map((n) => n.id),
-    [rfNodes],
-  );
-
-  // Lazily fetch every node's inputs/outputs the first time the user switches
-  // to "data" trace mode. Only runs once per journey; switching back to
-  // control mode doesn't tear the cache down.
-  useEffect(() => {
-    if (traceMode !== "data") return;
-    if (!environment || !activeJourneyId) return;
-    if (dataIO.size > 0 || dataIOLoading) return;
-    setDataIOLoading(true);
-    Promise.all(
-      topLevelNodeIds.map(async (nodeId) => {
-        const params = new URLSearchParams({ environment, journey: activeJourneyId, nodeId });
-        try {
-          const res = await fetch(`/api/push/journey-node?${params}`);
-          if (!res.ok) return null;
-          const d = await res.json() as { file?: { content?: string } };
-          if (!d.file?.content) return null;
-          const body = JSON.parse(d.file.content) as Record<string, unknown>;
-          const inputs  = Array.isArray(body.inputs)  ? (body.inputs  as unknown[]).filter((x): x is string => typeof x === "string") : [];
-          const outputs = Array.isArray(body.outputs) ? (body.outputs as unknown[]).filter((x): x is string => typeof x === "string") : [];
-          return [nodeId, { inputs, outputs }] as const;
-        } catch { return null; }
-      }),
-    ).then((entries) => {
-      setDataIO(new Map(entries.filter((e): e is [string, { inputs: string[]; outputs: string[] }] => e !== null)));
-      setDataIOLoading(false);
-    });
-  }, [traceMode, environment, activeJourneyId, topLevelNodeIds, dataIO.size, dataIOLoading]);
-
-  // Reset the data-IO cache when the user navigates into / out of an inner
-  // journey so we re-fetch against the new tree.
-  useEffect(() => {
-    setDataIO(new Map());
-  }, [activeJourneyId]);
-
-  // Data-flow edge list. A writes key K → A → every B that reads K.
-  //
-  // ForgeRock's convention has most Scripted Decision Nodes declaring
-  // `inputs: ["*"]` and `outputs: ["*"]` — "I read and write whatever is in
-  // shared state". If we only connected key-to-key matches we'd produce
-  // zero edges on an all-wildcard journey and the trace would light up
-  // only the clicked node (the bug the user reported). Treat wildcards
-  // symmetrically: a wildcard writer may write any key, and a wildcard
-  // reader may consume any key, so they connect to every counterpart —
-  // including each other when both sides are wildcards.
-  const dataEdges = useMemo<Edge[]>(() => {
-    if (traceMode !== "data" || dataIO.size === 0) return [];
-    const writersOf = new Map<string, Set<string>>();
-    const readersOf = new Map<string, Set<string>>();
-    const wildcardWriters = new Set<string>();
-    const wildcardReaders = new Set<string>();
-    for (const [nodeId, io] of dataIO) {
-      for (const k of io.outputs) {
-        if (k === "*") wildcardWriters.add(nodeId);
-        else (writersOf.get(k) ?? writersOf.set(k, new Set()).get(k)!).add(nodeId);
-      }
-      for (const k of io.inputs) {
-        if (k === "*") wildcardReaders.add(nodeId);
-        else (readersOf.get(k) ?? readersOf.set(k, new Set()).get(k)!).add(nodeId);
-      }
-    }
-
-    const edges: Edge[] = [];
-    const seen = new Set<string>();
-    const add = (src: string, tgt: string) => {
-      if (src === tgt) return;
-      const id = `data:${src}->${tgt}`;
-      if (seen.has(id)) return;
-      seen.add(id);
-      edges.push({ id, source: src, target: tgt });
-    };
-
-    // explicit ↔ explicit: match by key
-    for (const [key, writers] of writersOf) {
-      const readers = readersOf.get(key);
-      if (!readers) continue;
-      for (const src of writers) for (const tgt of readers) add(src, tgt);
-    }
-    // wildcard writer → explicit reader (wildcard writer may write any key)
-    for (const src of wildcardWriters) {
-      for (const readers of readersOf.values()) {
-        for (const tgt of readers) add(src, tgt);
-      }
-    }
-    // explicit writer → wildcard reader (wildcard reader may consume any key)
-    for (const writers of writersOf.values()) {
-      for (const src of writers) {
-        for (const tgt of wildcardReaders) add(src, tgt);
-      }
-    }
-    // wildcard writer → wildcard reader (both opaque; still a possible path)
-    for (const src of wildcardWriters) {
-      for (const tgt of wildcardReaders) add(src, tgt);
-    }
-    return edges;
-  }, [traceMode, dataIO]);
-
   // Path tracing (top-level nodes only; edges only reference top-level IDs).
-  // Trace mode dispatches to one of five behaviors:
-  //   neighbors  → only the nodes directly wired in and out of the clicked one
-  //   upstream   → every start→clicked path (ancestors only)
-  //   downstream → every clicked→end path (descendants only)
-  //   control    → union of upstream + downstream
-  //   data       → full closure over the synthetic data-flow graph
+  // Trace mode dispatches to one of four behaviors — all over the control
+  // (wiring) graph. "Data" == the full start→clicked→end closure; Upstream
+  // and Downstream are the individual halves; Neighbors is the 1-hop set.
   const { ancestors, descendants } = useMemo(() => {
     if (!selectedNodeId) return { ancestors: new Set<string>(), descendants: new Set<string>() };
     if (traceMode === "neighbors") {
@@ -1322,12 +1212,11 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
       }
       return { ancestors: prev, descendants: next };
     }
-    const edges = traceMode === "data" && dataEdges.length > 0 ? dataEdges : baseEdges;
-    const full = getConnected(selectedNodeId, edges);
+    const full = getConnected(selectedNodeId, baseEdges);
     if (traceMode === "upstream")   return { ancestors: full.ancestors, descendants: new Set<string>() };
     if (traceMode === "downstream") return { ancestors: new Set<string>(), descendants: full.descendants };
     return full;
-  }, [selectedNodeId, baseEdges, dataEdges, traceMode]);
+  }, [selectedNodeId, baseEdges, traceMode]);
 
   // Control-flow reachability sets, computed once per journey. These drive
   // the trace-highlight filter regardless of trace mode (control / data /
@@ -1401,7 +1290,19 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
       const isHovered = e.id === hoveredEdgeId;
       const isPinned  = e.id === pinnedEdgeId;
       const isActive  = e.id === activeEdgeId;
-      const onPath    = highlighted ? (highlighted.has(e.source) && highlighted.has(e.target)) : true;
+      // Strict on-path check: an edge is only on a start→clicked→end path if
+      // it sits in one of these four positions. "Both endpoints highlighted"
+      // is too permissive — it would light up a shortcut from an ancestor
+      // straight to a descendant that bypasses the clicked node, or a
+      // cycle back-edge from a descendant to an ancestor.
+      const onPath = !highlighted ? true : (
+        selectedNodeId != null && (
+          (ancestors.has(e.source)   && ancestors.has(e.target))   ||   // upstream interior
+          (ancestors.has(e.source)   && e.target === selectedNodeId) || // last edge into clicked
+          (e.source === selectedNodeId && descendants.has(e.target)) || // first edge out of clicked
+          (descendants.has(e.source) && descendants.has(e.target))      // downstream interior
+        )
+      );
 
       let opacity = 1;
       if (activeEdgeId)     opacity = isActive ? 1 : 0.25;
@@ -1563,22 +1464,19 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
         {displayView === "graph" && (<>
           {/* Trace mode toggle */}
           <div className="flex rounded border border-slate-200 overflow-hidden text-[11px] shrink-0">
-            {(["neighbors", "upstream", "downstream", "control", "data"] as const).map((m) => {
+            {(["neighbors", "upstream", "downstream", "data"] as const).map((m) => {
               const label = m === "neighbors"
                 ? "Neighbors"
                 : m === "upstream"
                   ? "Upstream"
                   : m === "downstream"
                     ? "Downstream"
-                    : m === "control"
-                      ? "Control"
-                      : dataIOLoading ? "Data…" : "Data";
+                    : "Data";
               const title =
-                m === "neighbors"  ? "Highlight only the nodes directly connected to the clicked node (1 hop)"
-                : m === "upstream"    ? "Highlight every path from a start node into the clicked node"
-                : m === "downstream"  ? "Highlight every path from the clicked node to a terminal (Success / Failure)"
-                : m === "control"     ? "Trace outcome (control-flow) edges — full start→clicked→end paths"
-                                      : "Trace shared-state data flow — nodes connected by inputs/outputs keys";
+                m === "neighbors"   ? "Highlight only the nodes directly connected to the clicked node (1 hop)"
+                : m === "upstream"  ? "Highlight every path from a start node into the clicked node"
+                : m === "downstream"? "Highlight every path from the clicked node to a terminal (Success / Failure)"
+                                    : "Highlight every start→clicked→end path — the full wiring trace through the clicked node";
               return (
                 <button
                   key={m}
