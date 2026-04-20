@@ -160,6 +160,7 @@ async function* paginateCursor(
     }
 
     const res = await authedFetch(url.toString());
+    if (res.status === 404) return;
     if (!res.ok) throw new Error(`IGA API ${res.status}: ${endpoint}`);
 
     const data = await res.json() as {
@@ -190,6 +191,7 @@ async function* paginateOffset(
     url.searchParams.set("_queryFilter", "true");
 
     const res = await authedFetch(url.toString());
+    if (res.status === 404) return;
     if (!res.ok) throw new Error(`IGA API ${res.status}: ${endpoint}`);
 
     const data = await res.json() as {
