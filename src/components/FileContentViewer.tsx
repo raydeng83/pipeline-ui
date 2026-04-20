@@ -124,32 +124,38 @@ const Row = memo(function Row({
         isMatch && "bg-sky-900/25",
       )}
     >
+      {/* Arrow and number live in separate columns so the digits always
+          right-align at the same x regardless of whether the row has a fold
+          arrow. Everything else (colors, sticky, borders) carried over. */}
       <div
         aria-hidden
         className={cn(
-          "sticky left-0 z-10 bg-slate-900 select-none text-right pl-4 pr-3 text-slate-600 border-r border-slate-800 tabular-nums whitespace-nowrap shrink-0",
-          isHighlighted && "bg-amber-900/40 text-amber-300 font-semibold",
-          isActive && "bg-slate-800/80 text-slate-300 border-l-2 border-l-sky-400 pl-[14px]",
+          "sticky left-0 z-10 bg-slate-900 select-none flex items-center pl-2 pr-3 border-r border-slate-800 shrink-0",
+          isHighlighted && "bg-amber-900/40 font-semibold",
+          isActive && "bg-slate-800/80 border-l-2 border-l-sky-400 pl-[6px]",
         )}
         style={{ minWidth: "5ch" }}
       >
-        {/* Always reserve the arrow slot so foldable and non-foldable rows
-            right-align their line numbers at the same column — otherwise
-            the digits zig-zag depending on whether a row has a fold arrow. */}
-        <span className="inline-flex items-center gap-1 justify-end">
-          <span className="w-3 text-[10px] leading-none shrink-0 inline-flex items-center justify-center">
-            {isFoldable && onToggleFold ? (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onToggleFold(ln); }}
-                className="text-slate-500 hover:text-slate-200"
-                title={isFolded ? "Unfold" : "Fold"}
-              >
-                {isFolded ? "▶" : "▼"}
-              </button>
-            ) : null}
-          </span>
-          <span>{ln}</span>
+        <span className="w-3 text-[10px] leading-none shrink-0 inline-flex items-center justify-center">
+          {isFoldable && onToggleFold ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onToggleFold(ln); }}
+              className="text-slate-500 hover:text-slate-200"
+              title={isFolded ? "Unfold" : "Fold"}
+            >
+              {isFolded ? "▶" : "▼"}
+            </button>
+          ) : null}
+        </span>
+        <span
+          className={cn(
+            "flex-1 text-right tabular-nums whitespace-nowrap pl-1 text-slate-600",
+            isHighlighted && "text-amber-300",
+            isActive && "text-slate-300",
+          )}
+        >
+          {ln}
         </span>
       </div>
       <div className={cn("pl-4 pr-4", wrap ? "whitespace-pre-wrap break-words flex-1 min-w-0" : "whitespace-pre")}>

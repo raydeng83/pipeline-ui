@@ -430,6 +430,38 @@ function computeFoldRegions(content: string): Map<number, number> {
   return out;
 }
 
+// ── Persisted viewer config ──────────────────────────────────────────────────
+//
+// Each view control (format toggle, wrap, comment mode, sidebar width) lives
+// under its own localStorage key so one user's preference for one control
+// doesn't get clobbered by a write from another. Hydration happens in an
+// effect after mount to avoid SSR/CSR divergence — until that completes we
+// return the `initial` value so the server and the first client render agree.
+
+const CONFIG_PREFIX = "aic:script-view:";
+
+function useLocalConfig<T>(name: string, initial: T): [T, (next: T | ((cur: T) => T)) => void] {
+  const key = CONFIG_PREFIX + name;
+  const [value, setValue] = useState<T>(initial);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (raw != null) setValue(JSON.parse(raw) as T);
+    } catch { /* ignore parse / access errors */ }
+    setHydrated(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try { window.localStorage.setItem(key, JSON.stringify(value)); } catch { /* quota */ }
+  }, [hydrated, key, value]);
+
+  return [value, setValue];
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 interface LastCommit {
@@ -448,7 +480,8 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   // Default formatting on for JS so poorly-indented source (common with
   // pulled ForgeRock scripts) renders with Prettier's normalized layout.
   // Users can still toggle off to see the raw file exactly as on disk.
-  const [formatEnabled, setFormatEnabled] = useState(canFormat);
+  const [formatEnabledRaw, setFormatEnabled] = useLocalConfig("formatEnabled", canFormat);
+  const formatEnabled = canFormat && formatEnabledRaw;
   const [formatted, setFormatted] = useState<string | null>(null);
   const [formatLoading, setFormatLoading] = useState(false);
   const [formatError, setFormatError] = useState<string | null>(null);
@@ -476,13 +509,17 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
 
   const formattedOrRaw = formatEnabled && formatted != null ? formatted : content;
 
-  const [wrap, setWrap] = useState(true);
+  // Persist view configs across viewer remounts (tab switches, file switches
+  // via parent remounts) so the user doesn't re-toggle format / wrap / comment
+  // mode every time. Fold state is per-mount — it's tied to specific line
+  // numbers which differ between files.
+  const [wrap, setWrap] = useLocalConfig("wrap", true);
+  const [commentMode, setCommentMode] = useLocalConfig<CommentMode>("commentMode", "hideAll");
   const [findQuery, setFindQuery] = useState("");
   const [findIdx, setFindIdx] = useState(0);
   const [gotoLine, setGotoLine] = useState("");
   const [foldedStartLines, setFoldedStartLines] = useState<Set<number>>(new Set());
   const [currentLine, setCurrentLine] = useState<number | undefined>(highlightLine);
-  const [commentMode, setCommentMode] = useState<CommentMode>("all");
 
   // When "Hide comments" is on, render a stripped copy instead of hiding lines
   // so line numbers stay consecutive and copy-paste produces clean code. All
@@ -506,7 +543,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     () => extractCommentSpans(formattedOrRaw).length > 0,
     [formattedOrRaw],
   );
-  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const [sidebarWidth, setSidebarWidth] = useLocalConfig("sidebarWidth", 240);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [topVisibleLine, setTopVisibleLine] = useState<number | null>(null);
 
@@ -677,15 +714,27 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     const wasFolded = foldedStartLines.has(startLine);
     setFoldedStartLines((prev) => {
       const next = new Set(prev);
-      if (next.has(startLine)) next.delete(startLine);
-      else next.add(startLine);
+      if (next.has(startLine)) {
+        // Cascade: unfolding an outer block also reveals every nested block
+        // inside it, so the user sees the full function in one click rather
+        // than having to peel off each inner fold individually.
+        const end = foldRegions.get(startLine);
+        next.delete(startLine);
+        if (end != null) {
+          for (const other of prev) {
+            if (other > startLine && other <= end) next.delete(other);
+          }
+        }
+      } else {
+        next.add(startLine);
+      }
       return next;
     });
     // Unfolding: highlight the header line so the user sees where the open-up
     // happened — but don't scroll. The newly-revealed body pushes content
     // down in place, which is less jarring than a sudden recenter.
     if (wasFolded) setCurrentLine(startLine);
-  }, [foldedStartLines]);
+  }, [foldedStartLines, foldRegions]);
 
   const foldAll = useCallback(() => setFoldedStartLines(new Set(foldRegions.keys())), [foldRegions]);
   const unfoldAll = useCallback(() => setFoldedStartLines(new Set()), []);
