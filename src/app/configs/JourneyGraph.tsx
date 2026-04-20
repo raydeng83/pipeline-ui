@@ -380,24 +380,68 @@ function applyDagreLayout(nodes: Node[], edges: Edge[], compact = false): Node[]
 
 // ── Path tracing ──────────────────────────────────────────────────────────────
 
+/**
+ * Trace-path highlight set: every node on at least one complete
+ * start → clicked → terminal path. Nodes that can reach `nodeId` but aren't
+ * reachable from a source (orphans above), and nodes `nodeId` can reach but
+ * which never terminate (orphans below), are excluded. Returns the usual
+ * `{ ancestors, descendants }` shape so existing render code can stay.
+ *
+ * Sources: nodes with no incoming edges. Sinks: nodes with no outgoing edges.
+ * In ForgeRock auth trees these are typically `startNode` and the synthetic
+ * Success / Failure terminals, but the shape works for any DAG.
+ */
 function getConnected(nodeId: string, edges: Edge[]) {
+  // Build node set + in/out degree.
+  const nodes = new Set<string>();
+  const hasIn = new Set<string>();
+  const hasOut = new Set<string>();
+  for (const e of edges) {
+    nodes.add(e.source); nodes.add(e.target);
+    hasOut.add(e.source); hasIn.add(e.target);
+  }
+  const sources: string[] = [];
+  const sinks: string[] = [];
+  for (const n of nodes) {
+    if (!hasIn.has(n)) sources.push(n);
+    if (!hasOut.has(n)) sinks.push(n);
+  }
+
+  // Forward BFS from each source → every node reachable from any source.
+  const reachableFromSource = bfs(sources, edges, "forward");
+  // Backward BFS from each sink → every node that can reach any sink.
+  const canReachSink = bfs(sinks, edges, "backward");
+
+  // Ancestors (BFS backwards from nodeId) restricted to those that the
+  // sources can reach — i.e. upstream nodes on a live start→nodeId path.
+  const ancestorsAll = bfs([nodeId], edges, "backward");
+  ancestorsAll.delete(nodeId);
   const ancestors = new Set<string>();
+  for (const n of ancestorsAll) if (reachableFromSource.has(n)) ancestors.add(n);
+
+  // Descendants (BFS forwards from nodeId) restricted to those that can
+  // reach some sink — i.e. downstream nodes on a live nodeId→terminal path.
+  const descendantsAll = bfs([nodeId], edges, "forward");
+  descendantsAll.delete(nodeId);
   const descendants = new Set<string>();
-  let queue = [nodeId];
-  while (queue.length) {
-    const cur = queue.shift()!;
-    for (const e of edges) {
-      if (e.target === cur && !ancestors.has(e.source)) { ancestors.add(e.source); queue.push(e.source); }
-    }
-  }
-  queue = [nodeId];
-  while (queue.length) {
-    const cur = queue.shift()!;
-    for (const e of edges) {
-      if (e.source === cur && !descendants.has(e.target)) { descendants.add(e.target); queue.push(e.target); }
-    }
-  }
+  for (const n of descendantsAll) if (canReachSink.has(n)) descendants.add(n);
+
   return { ancestors, descendants };
+}
+
+function bfs(starts: string[], edges: Edge[], direction: "forward" | "backward"): Set<string> {
+  const seen = new Set<string>(starts);
+  const queue = [...starts];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    for (const e of edges) {
+      const next = direction === "forward"
+        ? (e.source === cur ? e.target : null)
+        : (e.target === cur ? e.source : null);
+      if (next && !seen.has(next)) { seen.add(next); queue.push(next); }
+    }
+  }
+  return seen;
 }
 
 // ── Legend ────────────────────────────────────────────────────────────────────
