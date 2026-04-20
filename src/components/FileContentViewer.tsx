@@ -133,21 +133,24 @@ const Row = memo(function Row({
         )}
         style={{ minWidth: "5ch" }}
       >
-        {isFoldable && onToggleFold ? (
-          <span className="inline-flex items-center gap-1 justify-end">
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onToggleFold(ln); }}
-              className="text-slate-500 hover:text-slate-200 w-3 text-[10px] leading-none"
-              title={isFolded ? "Unfold" : "Fold"}
-            >
-              {isFolded ? "▶" : "▼"}
-            </button>
-            <span>{ln}</span>
+        {/* Always reserve the arrow slot so foldable and non-foldable rows
+            right-align their line numbers at the same column — otherwise
+            the digits zig-zag depending on whether a row has a fold arrow. */}
+        <span className="inline-flex items-center gap-1 justify-end">
+          <span className="w-3 text-[10px] leading-none shrink-0 inline-flex items-center justify-center">
+            {isFoldable && onToggleFold ? (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onToggleFold(ln); }}
+                className="text-slate-500 hover:text-slate-200"
+                title={isFolded ? "Unfold" : "Fold"}
+              >
+                {isFolded ? "▶" : "▼"}
+              </button>
+            ) : null}
           </span>
-        ) : (
-          ln
-        )}
+          <span>{ln}</span>
+        </span>
       </div>
       <div className={cn("pl-4 pr-4", wrap ? "whitespace-pre-wrap break-words flex-1 min-w-0" : "whitespace-pre")}>
         {guideLevels > 0 && (
