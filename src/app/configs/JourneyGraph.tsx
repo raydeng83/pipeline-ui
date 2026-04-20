@@ -851,7 +851,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   // "control" = trace the outcome graph (default). "data" = trace shared-state
   // dependencies derived from every node's `inputs` / `outputs` arrays.
-  const [traceMode,      setTraceMode]       = useState<"control" | "data">("control");
+  const [traceMode,      setTraceMode]       = useState<"control" | "data" | "neighbors">("control");
   // dataIO[nodeUuid] = { inputs, outputs } from the node file. Fetched lazily
   // the first time the user switches to data-trace mode.
   const [dataIO, setDataIO] = useState<Map<string, { inputs: string[]; outputs: string[] }>>(new Map());
@@ -1305,10 +1305,21 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   }, [traceMode, dataIO]);
 
   // Path tracing (top-level nodes only; edges only reference top-level IDs).
-  // When traceMode is "data" and the IO map is populated, trace over the
-  // synthetic dataEdges instead of control-flow edges.
+  // Trace mode dispatches to one of three behaviors:
+  //   neighbors → only the nodes directly wired in and out of the clicked one
+  //   data      → full closure over the synthetic data-flow graph
+  //   control   → full closure over the outcome (control-flow) graph
   const { ancestors, descendants } = useMemo(() => {
     if (!selectedNodeId) return { ancestors: new Set<string>(), descendants: new Set<string>() };
+    if (traceMode === "neighbors") {
+      const prev = new Set<string>();
+      const next = new Set<string>();
+      for (const e of baseEdges) {
+        if (e.target === selectedNodeId) prev.add(e.source);
+        if (e.source === selectedNodeId) next.add(e.target);
+      }
+      return { ancestors: prev, descendants: next };
+    }
     const edges = traceMode === "data" && dataEdges.length > 0 ? dataEdges : baseEdges;
     return getConnected(selectedNodeId, edges);
   }, [selectedNodeId, baseEdges, dataEdges, traceMode]);
@@ -1509,22 +1520,28 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
         {displayView === "graph" && (<>
           {/* Trace mode toggle */}
           <div className="flex rounded border border-slate-200 overflow-hidden text-[11px] shrink-0">
-            {(["control", "data"] as const).map((m) => (
+            {(["neighbors", "control", "data"] as const).map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setTraceMode(m)}
                 title={
-                  m === "control"
-                    ? "Trace outcome (control-flow) edges when a node is clicked"
-                    : "Trace shared-state data flow — nodes connected by inputs/outputs keys"
+                  m === "neighbors"
+                    ? "Highlight only the nodes directly connected to the clicked node (1 hop)"
+                    : m === "control"
+                      ? "Trace outcome (control-flow) edges — full start→end paths through the clicked node"
+                      : "Trace shared-state data flow — nodes connected by inputs/outputs keys"
                 }
                 className={cn(
                   "px-2 py-1 transition-colors",
                   traceMode === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100",
                 )}
               >
-                {m === "control" ? "Control" : dataIOLoading ? "Data…" : "Data"}
+                {m === "neighbors"
+                  ? "Neighbors"
+                  : m === "control"
+                    ? "Control"
+                    : dataIOLoading ? "Data…" : "Data"}
               </button>
             ))}
           </div>
