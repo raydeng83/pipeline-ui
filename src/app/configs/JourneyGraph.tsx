@@ -1329,33 +1329,48 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     return full;
   }, [selectedNodeId, baseEdges, dataEdges, traceMode]);
 
-  // Set of nodes reachable from any control-flow source (no-incoming-edge).
-  // Anything outside this set is dead code — the journey can never execute
-  // it — so trace highlights should never include those nodes, regardless
-  // of mode. Built once from baseEdges and reused.
-  const reachableFromStart = useMemo(() => {
+  // Control-flow reachability sets, computed once per journey. These drive
+  // the trace-highlight filter regardless of trace mode (control / data /
+  // neighbors / upstream / downstream) because dead-code determination is a
+  // property of the control graph: a node only runs if the journey's
+  // execution can reach it from start AND exit it toward a terminal.
+  //   reachableFromStart — nodes any start→clicked path might touch
+  //   reachableToEnd     — nodes any clicked→terminal path might touch
+  const { reachableFromStart, reachableToEnd } = useMemo(() => {
     const nodes = new Set<string>();
     const hasIn = new Set<string>();
+    const hasOut = new Set<string>();
     for (const e of baseEdges) {
       nodes.add(e.source); nodes.add(e.target);
-      hasIn.add(e.target);
+      hasIn.add(e.target); hasOut.add(e.source);
     }
     const sources = [...nodes].filter((n) => !hasIn.has(n));
-    return bfs(sources, baseEdges, "forward");
+    const sinks   = [...nodes].filter((n) => !hasOut.has(n));
+    return {
+      reachableFromStart: bfs(sources, baseEdges, "forward"),
+      reachableToEnd:     bfs(sinks,   baseEdges, "backward"),
+    };
   }, [baseEdges]);
 
   const highlighted = useMemo(() => {
     if (!selectedNodeId) return null;
-    // Orphan click: if the clicked node itself isn't reachable from any
-    // start, the journey can never run through it, so the trace is
-    // meaningless — skip the highlight entirely so the graph stays at
-    // full opacity (same as no-selection state).
+    // Orphan click: the clicked node itself isn't reachable from any start
+    // AND / OR can't reach any end. Either way the journey can't run through
+    // it, so the trace would be meaningless — skip the highlight entirely
+    // (same visual as no-selection).
     if (!reachableFromStart.has(selectedNodeId)) return null;
-    const raw = new Set([selectedNodeId, ...ancestors, ...descendants]);
-    const filtered = new Set<string>();
-    for (const n of raw) if (reachableFromStart.has(n)) filtered.add(n);
+    if (!reachableToEnd.has(selectedNodeId))     return null;
+    // Upstream nodes are only kept if the journey could actually reach them
+    // from a start; downstream nodes only if they can actually exit toward
+    // a terminal. This second half is what data-mode was missing — the
+    // data graph of an all-wildcard journey has no pure sinks, so the
+    // getConnected filter fell back to "no filter" and dead-end data
+    // descendants stayed highlighted.
+    const filtered = new Set<string>([selectedNodeId]);
+    for (const n of ancestors)   if (reachableFromStart.has(n)) filtered.add(n);
+    for (const n of descendants) if (reachableToEnd.has(n))     filtered.add(n);
     return filtered;
-  }, [selectedNodeId, ancestors, descendants, reachableFromStart]);
+  }, [selectedNodeId, ancestors, descendants, reachableFromStart, reachableToEnd]);
 
   // Styled nodes — children inherit parent opacity
   const displayNodes = useMemo<Node[]>(() => {
