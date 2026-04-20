@@ -51,26 +51,6 @@ function detectLanguage(fileName: string | undefined): "js" | "groovy" | "json" 
 
 type Token = { text: string; color?: string; bold?: boolean };
 
-/** Drop up to `count` leading space characters from the start of a token list. */
-function stripLeadingSpaces(tokens: Token[], count: number): Token[] {
-  const out: Token[] = [];
-  let remaining = count;
-  let consumed = false;
-  for (const t of tokens) {
-    if (consumed) { out.push(t); continue; }
-    if (remaining <= 0) { out.push(t); consumed = true; continue; }
-    let k = 0;
-    while (k < t.text.length && t.text[k] === " " && remaining > 0) { k++; remaining--; }
-    if (k === t.text.length) {
-      if (remaining > 0) continue;
-      continue;
-    }
-    out.push({ ...t, text: t.text.slice(k) });
-    consumed = true;
-  }
-  return out;
-}
-
 // ── Single row ───────────────────────────────────────────────────────────────
 //
 // Pulled out + memoized so scrolling the parent doesn't re-render every row.
@@ -114,7 +94,10 @@ const Row = memo(function Row({
 }: RowProps) {
   const isFoldable = foldEnd != null;
   const guideLevels = indentGuides ? Math.floor(leadingSpaces / 2) : 0;
-  const displayTokens = guideLevels > 0 ? stripLeadingSpaces(tokens, guideLevels * 2) : tokens;
+  // Keep the original leading spaces in the token stream so Ctrl/Cmd+C
+  // captures real indentation. The indent-guide glyphs live in a separate
+  // non-selectable overlay below.
+  const displayTokens = tokens;
 
   return (
     <div
@@ -162,14 +145,18 @@ const Row = memo(function Row({
           {ln}
         </span>
       </div>
-      <div className={cn("pl-4 pr-4", wrap ? "whitespace-pre-wrap break-words flex-1 min-w-0" : "whitespace-pre")}>
+      <div className={cn("relative pl-4 pr-4", wrap ? "whitespace-pre-wrap break-words flex-1 min-w-0" : "whitespace-pre")}>
         {guideLevels > 0 && (
-          <span aria-hidden className="select-none">
+          // Non-selectable overlay of │ glyphs on top of the leading spaces.
+          // The spaces stay in the real token stream (so copy-paste gets the
+          // right indentation); this layer only provides the visual guide and
+          // is excluded from selections via select-none + pointer-events-none.
+          <span
+            aria-hidden
+            className="absolute inset-y-0 left-4 flex items-center select-none pointer-events-none"
+            style={{ userSelect: "none" }}
+          >
             {Array.from({ length: guideLevels }, (_, k) => (
-              // Force 2ch width per guide so the U+2502 char (often rendered
-              // narrower than an ASCII space) doesn't shift the rest of the
-              // line left. Without this, every level of indent loses a
-              // fraction of a cell and the code column looks misaligned.
               <span
                 key={k}
                 className="text-slate-700 inline-block text-center"
