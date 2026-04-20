@@ -1339,7 +1339,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     const parentOpacity = new Map<string, number>();
     rfNodes.forEach((n) => {
       if (!n.parentId) {
-        parentOpacity.set(n.id, highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1);
+        parentOpacity.set(n.id, highlighted ? (highlighted.has(n.id) ? 1 : 0.4) : 1);
       }
     });
 
@@ -1351,7 +1351,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
       return {
         ...n,
         data: { ...n.data, isSelected: n.id === selectedNodeId, isSearchMatch: searchMatches.has(n.id), isFlashing: n.id === flashNodeId },
-        style: { ...n.style, opacity: highlighted ? (highlighted.has(n.id) ? 1 : 0.15) : 1, transition: "opacity 0.2s" },
+        style: { ...n.style, opacity: highlighted ? (highlighted.has(n.id) ? 1 : 0.4) : 1, transition: "opacity 0.2s" },
       };
     });
   }, [rfNodes, selectedNodeId, highlighted, searchMatches, flashNodeId]);
@@ -1366,8 +1366,8 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
       const onPath    = highlighted ? (highlighted.has(e.source) && highlighted.has(e.target)) : true;
 
       let opacity = 1;
-      if (activeEdgeId)     opacity = isActive ? 1 : 0.06;
-      else if (highlighted) opacity = onPath ? 1 : 0.06;
+      if (activeEdgeId)     opacity = isActive ? 1 : 0.25;
+      else if (highlighted) opacity = onPath ? 1 : 0.25;
 
       const baseStroke = (e.style?.stroke as string | undefined) ?? "#64748b";
       const stroke = isHovered ? "#3b82f6" : isPinned ? "#7c3aed" : baseStroke;
