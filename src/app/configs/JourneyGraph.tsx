@@ -851,7 +851,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   // "control" = trace the outcome graph (default). "data" = trace shared-state
   // dependencies derived from every node's `inputs` / `outputs` arrays.
-  const [traceMode,      setTraceMode]       = useState<"control" | "data" | "neighbors">("control");
+  const [traceMode,      setTraceMode]       = useState<"neighbors" | "upstream" | "downstream" | "control" | "data">("control");
   // dataIO[nodeUuid] = { inputs, outputs } from the node file. Fetched lazily
   // the first time the user switches to data-trace mode.
   const [dataIO, setDataIO] = useState<Map<string, { inputs: string[]; outputs: string[] }>>(new Map());
@@ -1305,10 +1305,12 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   }, [traceMode, dataIO]);
 
   // Path tracing (top-level nodes only; edges only reference top-level IDs).
-  // Trace mode dispatches to one of three behaviors:
-  //   neighbors → only the nodes directly wired in and out of the clicked one
-  //   data      → full closure over the synthetic data-flow graph
-  //   control   → full closure over the outcome (control-flow) graph
+  // Trace mode dispatches to one of five behaviors:
+  //   neighbors  → only the nodes directly wired in and out of the clicked one
+  //   upstream   → every start→clicked path (ancestors only)
+  //   downstream → every clicked→end path (descendants only)
+  //   control    → union of upstream + downstream
+  //   data       → full closure over the synthetic data-flow graph
   const { ancestors, descendants } = useMemo(() => {
     if (!selectedNodeId) return { ancestors: new Set<string>(), descendants: new Set<string>() };
     if (traceMode === "neighbors") {
@@ -1321,7 +1323,10 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
       return { ancestors: prev, descendants: next };
     }
     const edges = traceMode === "data" && dataEdges.length > 0 ? dataEdges : baseEdges;
-    return getConnected(selectedNodeId, edges);
+    const full = getConnected(selectedNodeId, edges);
+    if (traceMode === "upstream")   return { ancestors: full.ancestors, descendants: new Set<string>() };
+    if (traceMode === "downstream") return { ancestors: new Set<string>(), descendants: full.descendants };
+    return full;
   }, [selectedNodeId, baseEdges, dataEdges, traceMode]);
 
   const highlighted = useMemo(() => {
@@ -1520,30 +1525,37 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
         {displayView === "graph" && (<>
           {/* Trace mode toggle */}
           <div className="flex rounded border border-slate-200 overflow-hidden text-[11px] shrink-0">
-            {(["neighbors", "control", "data"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setTraceMode(m)}
-                title={
-                  m === "neighbors"
-                    ? "Highlight only the nodes directly connected to the clicked node (1 hop)"
+            {(["neighbors", "upstream", "downstream", "control", "data"] as const).map((m) => {
+              const label = m === "neighbors"
+                ? "Neighbors"
+                : m === "upstream"
+                  ? "Upstream"
+                  : m === "downstream"
+                    ? "Downstream"
                     : m === "control"
-                      ? "Trace outcome (control-flow) edges — full start→end paths through the clicked node"
-                      : "Trace shared-state data flow — nodes connected by inputs/outputs keys"
-                }
-                className={cn(
-                  "px-2 py-1 transition-colors",
-                  traceMode === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100",
-                )}
-              >
-                {m === "neighbors"
-                  ? "Neighbors"
-                  : m === "control"
-                    ? "Control"
-                    : dataIOLoading ? "Data…" : "Data"}
-              </button>
-            ))}
+                      ? "Control"
+                      : dataIOLoading ? "Data…" : "Data";
+              const title =
+                m === "neighbors"  ? "Highlight only the nodes directly connected to the clicked node (1 hop)"
+                : m === "upstream"    ? "Highlight every path from a start node into the clicked node"
+                : m === "downstream"  ? "Highlight every path from the clicked node to a terminal (Success / Failure)"
+                : m === "control"     ? "Trace outcome (control-flow) edges — full start→clicked→end paths"
+                                      : "Trace shared-state data flow — nodes connected by inputs/outputs keys";
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setTraceMode(m)}
+                  title={title}
+                  className={cn(
+                    "px-2 py-1 transition-colors",
+                    traceMode === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100",
+                  )}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Reset layout */}
