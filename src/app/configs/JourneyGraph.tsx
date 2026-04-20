@@ -1234,53 +1234,64 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     setDataIO(new Map());
   }, [activeJourneyId]);
 
-  // Data-flow edge list. A writes key K → A is source of an edge to every
-  // B that reads K (B.inputs contains K). "*" in outputs is treated as
-  // "writes everything the downstream might read" — covers the common
-  // wildcard case without creating a fully-connected graph. Keys not
-  // declared by any writer are considered to come from outside the tree
-  // (login form, request context) and produce no edges.
+  // Data-flow edge list. A writes key K → A → every B that reads K.
+  //
+  // ForgeRock's convention has most Scripted Decision Nodes declaring
+  // `inputs: ["*"]` and `outputs: ["*"]` — "I read and write whatever is in
+  // shared state". If we only connected key-to-key matches we'd produce
+  // zero edges on an all-wildcard journey and the trace would light up
+  // only the clicked node (the bug the user reported). Treat wildcards
+  // symmetrically: a wildcard writer may write any key, and a wildcard
+  // reader may consume any key, so they connect to every counterpart —
+  // including each other when both sides are wildcards.
   const dataEdges = useMemo<Edge[]>(() => {
     if (traceMode !== "data" || dataIO.size === 0) return [];
-    // Map key → { writers: nodeIds, readers: nodeIds }
     const writersOf = new Map<string, Set<string>>();
     const readersOf = new Map<string, Set<string>>();
-    const wildcards = new Set<string>(); // nodes whose outputs include "*"
+    const wildcardWriters = new Set<string>();
+    const wildcardReaders = new Set<string>();
     for (const [nodeId, io] of dataIO) {
       for (const k of io.outputs) {
-        if (k === "*") { wildcards.add(nodeId); continue; }
-        (writersOf.get(k) ?? writersOf.set(k, new Set()).get(k)!).add(nodeId);
+        if (k === "*") wildcardWriters.add(nodeId);
+        else (writersOf.get(k) ?? writersOf.set(k, new Set()).get(k)!).add(nodeId);
       }
       for (const k of io.inputs) {
-        (readersOf.get(k) ?? readersOf.set(k, new Set()).get(k)!).add(nodeId);
+        if (k === "*") wildcardReaders.add(nodeId);
+        else (readersOf.get(k) ?? readersOf.set(k, new Set()).get(k)!).add(nodeId);
       }
     }
+
     const edges: Edge[] = [];
     const seen = new Set<string>();
+    const add = (src: string, tgt: string) => {
+      if (src === tgt) return;
+      const id = `data:${src}->${tgt}`;
+      if (seen.has(id)) return;
+      seen.add(id);
+      edges.push({ id, source: src, target: tgt });
+    };
+
+    // explicit ↔ explicit: match by key
     for (const [key, writers] of writersOf) {
       const readers = readersOf.get(key);
       if (!readers) continue;
-      for (const src of writers) {
-        for (const tgt of readers) {
-          if (src === tgt) continue;
-          const id = `data:${src}->${tgt}`;
-          if (seen.has(id)) continue;
-          seen.add(id);
-          edges.push({ id, source: src, target: tgt });
-        }
+      for (const src of writers) for (const tgt of readers) add(src, tgt);
+    }
+    // wildcard writer → explicit reader (wildcard writer may write any key)
+    for (const src of wildcardWriters) {
+      for (const readers of readersOf.values()) {
+        for (const tgt of readers) add(src, tgt);
       }
     }
-    // Wildcard writers connect to every reader of every key.
-    for (const src of wildcards) {
-      for (const readers of readersOf.values()) {
-        for (const tgt of readers) {
-          if (src === tgt) continue;
-          const id = `data:${src}->${tgt}`;
-          if (seen.has(id)) continue;
-          seen.add(id);
-          edges.push({ id, source: src, target: tgt });
-        }
+    // explicit writer → wildcard reader (wildcard reader may consume any key)
+    for (const writers of writersOf.values()) {
+      for (const src of writers) {
+        for (const tgt of wildcardReaders) add(src, tgt);
       }
+    }
+    // wildcard writer → wildcard reader (both opaque; still a possible path)
+    for (const src of wildcardWriters) {
+      for (const tgt of wildcardReaders) add(src, tgt);
     }
     return edges;
   }, [traceMode, dataIO]);
