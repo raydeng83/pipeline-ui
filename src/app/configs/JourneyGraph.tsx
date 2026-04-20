@@ -28,6 +28,7 @@ import { withLineNumbers } from "@/lib/highlight";
 import { JourneyOutlineView  } from "./JourneyOutlineView";
 import { JourneyTableView    } from "./JourneyTableView";
 import { JourneySwimLaneView } from "./JourneySwimLaneView";
+import { JourneyLegendModal } from "@/components/JourneyLegendModal";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -631,22 +632,7 @@ function bfs(starts: string[], edges: Edge[], direction: "forward" | "backward")
 // ── Legend ────────────────────────────────────────────────────────────────────
 
 function Legend() {
-  return (
-    <div className="bg-white border border-slate-200 rounded-lg shadow-md px-3 py-2 text-[10px] text-slate-500 space-y-1.5">
-      <p className="font-semibold text-slate-600 text-[11px]">Legend</p>
-      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-slate-500 inline-block" /><span>Transition</span></div>
-      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-emerald-400 inline-block" /><span>→ Success</span></div>
-      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-red-400 inline-block" /><span>→ Failure</span></div>
-      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-blue-500 inline-block" /><span>Hover edge</span></div>
-      <div className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-violet-500 inline-block" /><span>Pinned edge</span></div>
-      <div className="flex items-center gap-1.5">
-        <span className="w-4 h-3.5 border-2 border-violet-400 rounded inline-block" />
-        <span>Page node</span>
-      </div>
-      <p className="pt-1 border-t border-slate-100 text-slate-400">Click node → trace path</p>
-      <p className="text-slate-400">Drag node → rearrange</p>
-    </div>
-  );
+  return <JourneyLegendModal variant="normal" />;
 }
 
 // ── Node info drawer ─────────────────────────────────────────────────────────

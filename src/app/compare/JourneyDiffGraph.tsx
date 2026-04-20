@@ -17,6 +17,7 @@ import { js_beautify } from "js-beautify";
 import { ScriptOverlay } from "../configs/ScriptOverlay";
 import { DiffMinimap } from "./DiffMinimap";
 import { DiffGraphCanvas } from "@/components/diff-graph/DiffGraphCanvas";
+import { JourneyLegendModal } from "@/components/JourneyLegendModal";
 import {
   parseMergedDiffGraph,
   parseSingleSideGraph,
@@ -476,22 +477,7 @@ function applyCompactLayout(nodes: Node[], edges: Edge[]): Node[] {
 // ── Legend ────────────────────────────────────────────────────────────────────
 
 function DiffLegend() {
-  return (
-    <div className="bg-white/95 border border-slate-200 rounded-lg px-3 py-2 flex items-center gap-3 text-[10px] text-slate-600 shadow-sm backdrop-blur-sm">
-      {([
-        { label: "Added",     border: "border-emerald-400", bg: "bg-emerald-50" },
-        { label: "Removed",   border: "border-red-400",     bg: "bg-red-50 border-dashed" },
-        { label: "Modified",  border: "border-amber-400",   bg: "bg-amber-50" },
-        { label: "Unchanged", border: "border-slate-300",   bg: "bg-white" },
-        { label: "Inner",     border: "border-amber-300 border-dashed", bg: "bg-amber-50" },
-      ] as const).map(({ label, border, bg }) => (
-        <div key={label} className="flex items-center gap-1.5">
-          <span className={cn("inline-block w-3.5 h-3.5 rounded border", border, bg)} />
-          {label}
-        </div>
-      ))}
-    </div>
-  );
+  return <JourneyLegendModal variant="diff" />;
 }
 
 // ── Unchanged script viewer ───────────────────────────────────────────────────
