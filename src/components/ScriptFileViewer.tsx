@@ -187,8 +187,12 @@ const RE_REQUEST_LIB = /requestLibraryScript\(\s*['"]([^'"]+)['"]/g;
 const RE_OPENIDM_ACTION = /openidm\.(?:action|read|create|update|patch|delete|query)\(\s*['"]endpoint\/([^'"]+)['"]/g;
 
 function detectReferences(content: string): Reference[] {
-  const scan = stripNonCode(content);
-  const lines = scan.split("\n");
+  // All reference patterns have their target inside a string literal. Because
+  // stripNonCode blanks string contents, running the regexes against the
+  // stripped scan would capture whitespace instead of the actual ESV / script
+  // / endpoint name. Use the original lines here; false positives from
+  // occurrences inside comments are acceptable because the patterns all
+  // require a specific function-call wrapper that doesn't appear in prose.
   const origLines = content.split("\n");
   const refs: Reference[] = [];
 
@@ -198,29 +202,26 @@ function detectReferences(content: string): Reference[] {
     refs.push({ line: lineIdx + 1, kind, label, target });
   };
 
-  for (let i = 0; i < lines.length; i++) {
-    const scanLine = lines[i];
-    const origLine = origLines[i] ?? "";
+  for (let i = 0; i < origLines.length; i++) {
+    const line = origLines[i];
 
-    for (const m of scanLine.matchAll(RE_SYSTEMENV)) {
+    for (const m of line.matchAll(RE_SYSTEMENV)) {
       const name = normalizeEsvName(m[1] ?? m[2] ?? "");
       if (name) push(i, "esv", name, { scope: "variables", esvName: name });
     }
-    // Placeholder form in strings is harder post-strip (we blanked strings).
-    // Run it on the original line.
-    for (const m of origLine.matchAll(RE_PLACEHOLDER)) {
+    for (const m of line.matchAll(RE_PLACEHOLDER)) {
       const name = normalizeEsvName(m[1]);
       if (name) push(i, "esv", name, { scope: "variables", esvName: name });
     }
-    for (const m of scanLine.matchAll(RE_CALL_GLOBAL)) {
+    for (const m of line.matchAll(RE_CALL_GLOBAL)) {
       const name = m[1];
       if (name) push(i, "library", name, { scope: "scripts", scriptName: name });
     }
-    for (const m of scanLine.matchAll(RE_REQUEST_LIB)) {
+    for (const m of line.matchAll(RE_REQUEST_LIB)) {
       const name = m[1];
       if (name) push(i, "library", name, { scope: "scripts", scriptName: name });
     }
-    for (const m of scanLine.matchAll(RE_OPENIDM_ACTION)) {
+    for (const m of line.matchAll(RE_OPENIDM_ACTION)) {
       const name = m[1];
       if (name) push(i, "endpoint", name, { scope: "endpoints", endpointName: name });
     }
