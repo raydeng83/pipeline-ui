@@ -1098,12 +1098,13 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (previewModal) { setPreviewModal(null); e.stopPropagation(); return; }
-        if (nodePanel) { setNodePanel(null); setSelectedNodeId(null); e.stopPropagation(); }
+        if (nodePanel) { setNodePanel(null); e.stopPropagation(); return; }
+        if (selectedNodeId) { setSelectedNodeId(null); setPinnedEdgeId(null); e.stopPropagation(); }
       }
     };
     document.addEventListener("keydown", handler, true);
     return () => document.removeEventListener("keydown", handler, true);
-  }, [nodePanel, previewModal]);
+  }, [nodePanel, previewModal, selectedNodeId]);
 
   // Map nodeId → display label (for resolving outcome targets)
   const nodeDisplayMap = useMemo(() => {
@@ -1362,7 +1363,13 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const handleEdgeMouseEnter: EdgeMouseHandler = useCallback((_e, edge) => setHoveredEdgeId(edge.id), []);
   const handleEdgeMouseLeave: EdgeMouseHandler = useCallback(() => setHoveredEdgeId(null), []);
   const handleEdgeClick: EdgeMouseHandler      = useCallback((_e, edge) => setPinnedEdgeId((p) => p === edge.id ? null : edge.id), []);
-  const handlePaneClick = useCallback(() => { setSelectedNodeId(null); setPinnedEdgeId(null); setNodePanel(null); }, []);
+  // Two-stage pane click: first click closes drawer (keeps trace highlight);
+  // next click clears selection + pinned edge (drops highlight).
+  const handlePaneClick = useCallback(() => {
+    if (nodePanel) { setNodePanel(null); return; }
+    setSelectedNodeId(null);
+    setPinnedEdgeId(null);
+  }, [nodePanel]);
 
   if (rfNodes.length === 0 && dagreNodes.length === 0) {
     return <div className="flex items-center justify-center h-full text-sm text-slate-400">Unable to parse journey data</div>;
@@ -1604,7 +1611,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
           environment={environment}
           journeyId={activeJourneyId}
           onNavigate={navigateToTree}
-          onClose={() => { setNodePanel(null); setSelectedNodeId(null); }}
+          onClose={() => setNodePanel(null)}
         />
       </div>
 
