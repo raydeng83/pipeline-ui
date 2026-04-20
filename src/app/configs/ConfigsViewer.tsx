@@ -799,8 +799,10 @@ function SectionsView({
                 : "border-slate-700 bg-slate-800"
             )}>
               <span className={cn(
-                "text-xs font-medium truncate flex-1",
-                selectedScope === "journeys" ? "text-slate-700" : "text-slate-300"
+                "truncate flex-1",
+                selectedScope === "journeys"
+                  ? "text-sm font-bold text-slate-800"
+                  : "text-xs font-medium text-slate-300"
               )}>
                 {selectedItem.label}
               </span>

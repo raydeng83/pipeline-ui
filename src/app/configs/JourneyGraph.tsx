@@ -6,6 +6,7 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
+  ControlButton,
   MiniMap,
   Panel,
   Handle,
@@ -1589,18 +1590,19 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
       {/* ── Header bar ──────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-slate-200 shrink-0">
 
-        {/* Breadcrumb / title */}
+        {/* Inner-tree breadcrumb (journey name lives in the parent header bar) */}
         <div className="flex-1 min-w-0">
-          {navStack.length === 0 ? (
-            <span className="text-sm font-semibold text-slate-800 truncate">{journeyId ?? "Journey"}</span>
-          ) : (
+          {navStack.length > 0 && (
             <nav className="flex items-center gap-1 text-sm min-w-0">
               <button
                 type="button"
                 onClick={() => goToIndex(-1)}
-                className="text-sky-600 hover:text-sky-800 font-semibold truncate max-w-[160px] shrink-0"
+                title="Back to top-level journey"
+                className="text-slate-400 hover:text-sky-600 shrink-0"
               >
-                {journeyId ?? "Journey"}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12 12 2.25 21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
               </button>
               {navStack.map((entry, i) => (
                 <Fragment key={`${entry.journeyId}-${i}`}>
@@ -1768,18 +1770,6 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
             Compact
           </button>
 
-          {/* Fit view */}
-          <button
-            type="button"
-            onClick={() => { shouldAdjustViewport.current = true; fitView({ duration: 400, padding: 0.25 }); }}
-            title="Fit view"
-            className="text-slate-400 hover:text-sky-600 transition-colors shrink-0"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-            </svg>
-          </button>
         </>)}
 
       </div>
@@ -1825,7 +1815,16 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
               </Panel>
             )}
             <Background color="#e2e8f0" gap={20} size={1} />
-            <Controls showInteractive={false} showFitView={false} />
+            <Controls showInteractive={false} showFitView={false}>
+              <ControlButton
+                onClick={() => { shouldAdjustViewport.current = true; fitView({ duration: 400, padding: 0.25 }); }}
+                title="Fit view"
+              >
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              </ControlButton>
+            </Controls>
             {!compact && (
               <MiniMap
                 nodeColor={(n) =>
