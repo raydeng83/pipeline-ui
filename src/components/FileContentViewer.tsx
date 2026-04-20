@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, ReactNode, memo, useEffect, useMemo, useRef } from "react";
+import { Fragment, ReactNode, memo, useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
 import { highlightTokens } from "@/lib/highlight";
@@ -294,12 +294,35 @@ export function FileContentViewer({
   }, [lines, hiddenLines, foldedStartLines, foldRegions]);
 
   // Virtualizer — only mount rows near the viewport. Size estimate tuned to
-  // code-mono at 13px / 1.55 line-height ≈ 20px.
+  // code-mono at 13px / 1.55 line-height ≈ 20px. When the user is actively
+  // selecting (mouse button down) we balloon the overscan so rows that have
+  // already been selected don't unmount as the user scrolls past them — the
+  // browser's native Selection anchors to DOM nodes, and losing them
+  // mid-drag collapses the selection in odd ways.
+  const [selecting, setSelecting] = useState(false);
+  useEffect(() => {
+    const onMouseDown = (e: MouseEvent) => {
+      // Only react to primary-button presses inside the content container.
+      if (e.button !== 0) return;
+      const el = containerRef.current;
+      if (el && el.contains(e.target as Node)) setSelecting(true);
+    };
+    const onMouseUp = () => setSelecting(false);
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
   const virtualizer = useVirtualizer({
     count: visibleLines.length,
     getScrollElement: () => containerRef.current,
     estimateSize: () => 20,
-    overscan: 24,
+    // Ordinary scrolling: 24 rows of slack above/below (~480px each side).
+    // Active selection: mount effectively every row so anchors don't drop.
+    overscan: selecting ? visibleLines.length : 24,
   });
 
   // Scroll a highlighted line into view (find-match focus).
