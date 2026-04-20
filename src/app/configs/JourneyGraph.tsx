@@ -1329,10 +1329,33 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     return full;
   }, [selectedNodeId, baseEdges, dataEdges, traceMode]);
 
+  // Set of nodes reachable from any control-flow source (no-incoming-edge).
+  // Anything outside this set is dead code — the journey can never execute
+  // it — so trace highlights should never include those nodes, regardless
+  // of mode. Built once from baseEdges and reused.
+  const reachableFromStart = useMemo(() => {
+    const nodes = new Set<string>();
+    const hasIn = new Set<string>();
+    for (const e of baseEdges) {
+      nodes.add(e.source); nodes.add(e.target);
+      hasIn.add(e.target);
+    }
+    const sources = [...nodes].filter((n) => !hasIn.has(n));
+    return bfs(sources, baseEdges, "forward");
+  }, [baseEdges]);
+
   const highlighted = useMemo(() => {
     if (!selectedNodeId) return null;
-    return new Set([selectedNodeId, ...ancestors, ...descendants]);
-  }, [selectedNodeId, ancestors, descendants]);
+    // Orphan click: if the clicked node itself isn't reachable from any
+    // start, the journey can never run through it, so the trace is
+    // meaningless — skip the highlight entirely so the graph stays at
+    // full opacity (same as no-selection state).
+    if (!reachableFromStart.has(selectedNodeId)) return null;
+    const raw = new Set([selectedNodeId, ...ancestors, ...descendants]);
+    const filtered = new Set<string>();
+    for (const n of raw) if (reachableFromStart.has(n)) filtered.add(n);
+    return filtered;
+  }, [selectedNodeId, ancestors, descendants, reachableFromStart]);
 
   // Styled nodes — children inherit parent opacity
   const displayNodes = useMemo<Node[]>(() => {
