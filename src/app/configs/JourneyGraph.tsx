@@ -20,6 +20,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
+import ELK from "elkjs/lib/elk.bundled.js";
 import { cn } from "@/lib/utils";
 import { highlightJs, ScriptOverlay } from "./ScriptOverlay";
 import { withLineNumbers } from "@/lib/highlight";
@@ -403,6 +404,53 @@ function applyDagreLayout(nodes: Node[], edges: Edge[], compact = false): Node[]
     if (!pos) return n;
     const [w, h] = getNodeDims(n);
     return { ...n, position: { x: pos.x - w / 2, y: pos.y - h / 2 } };
+  });
+}
+
+// ── ELK layout ───────────────────────────────────────────────────────────────
+
+const elk = new ELK();
+
+/**
+ * Layered layout via elkjs. Same visual grammar as dagre (ranks, LR flow) but
+ * with a stronger crossing minimizer and an `aspectRatio` hint so wide-shallow
+ * journeys pull their branches into unused vertical space instead of sprawling
+ * further right. `considerModelOrder` keeps outcome order stable across runs;
+ * SPLINES routing matches dagre's smooth edges.
+ */
+async function applyElkLayout(nodes: Node[], edges: Edge[], compact = false): Promise<Node[]> {
+  const nodesep = compact ? 25 : 60;
+  const ranksep = compact ? 60 : 160;
+  const topLevel = nodes.filter((n) => !n.parentId);
+
+  const elkGraph = {
+    id: "root",
+    layoutOptions: {
+      "elk.algorithm": "layered",
+      "elk.direction": "RIGHT",
+      "elk.edgeRouting": "SPLINES",
+      "elk.aspectRatio": "1.6",
+      "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
+      "elk.spacing.nodeNode": String(nodesep),
+      "elk.layered.spacing.nodeNodeBetweenLayers": String(ranksep),
+    },
+    children: topLevel.map((n) => {
+      const [w, h] = getNodeDims(n);
+      return { id: n.id, width: w, height: h };
+    }),
+    edges: edges.map((e) => ({ id: e.id, sources: [e.source], targets: [e.target] })),
+  };
+
+  const laid = await elk.layout(elkGraph);
+  const posMap = new Map<string, { x: number; y: number }>();
+  for (const c of laid.children ?? []) {
+    if (c.id) posMap.set(c.id, { x: c.x ?? 0, y: c.y ?? 0 });
+  }
+
+  return nodes.map((n) => {
+    if (n.parentId) return n;
+    const p = posMap.get(n.id);
+    return p ? { ...n, position: p } : n;
   });
 }
 
@@ -977,6 +1025,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const [isCompact,      setIsCompact]       = useState(false);
   const [collapseChainsOn, setCollapseChainsOn] = useState(true);
   const [expandedChainIds, setExpandedChainIds] = useState<Set<string>>(new Set());
+  const [layoutEngine,   setLayoutEngine]    = useState<"dagre" | "elk">("dagre");
   const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   // "control" = trace the outcome graph (default). "data" = trace shared-state
   // dependencies derived from every node's `inputs` / `outputs` arrays.
@@ -1185,38 +1234,62 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     return () => { cancelled = true; };
   }, [environment, activeJourneyId, scriptNodeIds]);
 
-  const { dagreNodes, baseEdges, collapsedChains } = useMemo(() => {
+  const { rawNodes, baseEdges, collapsedChains } = useMemo(() => {
     const parsed = parseJourney(activeJson, pageConfigs.size > 0 ? pageConfigs : undefined);
-    const { nodes, edges, chains } = collapseChainsOn
+    const col = collapseChainsOn
       ? collapseChains(parsed.nodes, parsed.edges, expandedChainIds, CHAIN_MIN_LEN)
       : { nodes: parsed.nodes, edges: parsed.edges, chains: [] };
-    return { dagreNodes: applyDagreLayout(nodes, edges, isCompact), baseEdges: edges, collapsedChains: chains };
-  }, [activeJson, layoutKey, pageConfigs, isCompact, collapseChainsOn, expandedChainIds]);
+    return { rawNodes: col.nodes, baseEdges: col.edges, collapsedChains: col.chains };
+  }, [activeJson, pageConfigs, collapseChainsOn, expandedChainIds]);
 
-  // Reset to dagre positions when layout changes, then fit or restore viewport.
-  // Only adjusts viewport when an explicit navigation/layout action set shouldAdjustViewport;
-  // pageConfigs loading also changes dagreNodes but must not override the viewport.
+  const dagreNodes = useMemo(
+    () => applyDagreLayout(rawNodes, baseEdges, isCompact),
+    [rawNodes, baseEdges, isCompact, layoutKey],
+  );
+
+  // Helper: fit the current rfNodes or restore a saved viewport (once per
+  // shouldAdjustViewport latch). Factored out because dagre and ELK effects
+  // both consume the latch after laying out.
+  const applyPendingViewport = useCallback(() => {
+    if (!shouldAdjustViewport.current) return;
+    shouldAdjustViewport.current = false;
+    const vp = pendingViewport.current;
+    pendingViewport.current = null;
+    if (vp) setTimeout(() => setViewport(vp, { duration: 300 }), 80);
+    else    setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 80);
+  }, [fitView, setViewport]);
+
+  // Reset UI state whenever the graph shape changes (new journey, chain toggle,
+  // compact toggle, layout-key bump). Engine toggle keeps selection.
   useEffect(() => {
-    setRfNodes(dagreNodes);
     setSelectedNodeId(null);
     setSearchQuery("");
     setHoveredEdgeId(null);
     setPinnedEdgeId(null);
     setNodePanel(null);
-    if (!shouldAdjustViewport.current) return;
-    shouldAdjustViewport.current = false;
-    const vp = pendingViewport.current;
-    pendingViewport.current = null;
-    // No cleanup return: pageConfigs loading causes a second dagreNodes change
-    // that would cancel the timeout via cleanup before it fires.
-    // The action fires once after the first trigger and is harmless if the
-    // component re-renders again before the 80ms elapses.
-    if (vp) {
-      setTimeout(() => setViewport(vp, { duration: 300 }), 80);
-    } else {
-      setTimeout(() => fitView({ duration: 400, padding: 0.25 }), 80);
-    }
-  }, [dagreNodes, setRfNodes]);
+  }, [dagreNodes]);
+
+  // Apply dagre positions immediately. When ELK is the active engine, the
+  // async ELK effect below will overwrite the positions once it resolves; we
+  // still write dagre first so the graph shows up without a blank frame.
+  useEffect(() => {
+    setRfNodes(dagreNodes);
+    if (layoutEngine === "elk") return; // ELK effect consumes the viewport latch
+    applyPendingViewport();
+  }, [dagreNodes, setRfNodes, layoutEngine, applyPendingViewport]);
+
+  // ELK runs asynchronously; it overrides dagre positions once the layered
+  // layout with aspectRatio returns, then consumes the viewport latch.
+  useEffect(() => {
+    if (layoutEngine !== "elk") return;
+    let cancelled = false;
+    applyElkLayout(rawNodes, baseEdges, isCompact).then((positioned) => {
+      if (cancelled) return;
+      setRfNodes(positioned);
+      applyPendingViewport();
+    });
+    return () => { cancelled = true; };
+  }, [rawNodes, baseEdges, isCompact, layoutEngine, layoutKey, setRfNodes, applyPendingViewport]);
 
   // Clear flash after animation completes
   useEffect(() => {
@@ -1674,6 +1747,28 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
                 d="M6 12h.01M12 12h.01M18 12h.01M3 6h18M3 18h18" />
             </svg>
             Fold runs{collapsedChains.length > 0 ? ` (${collapsedChains.length})` : ""}
+          </button>
+
+          {/* Layout engine */}
+          <button
+            type="button"
+            onClick={() => {
+              shouldAdjustViewport.current = true;
+              setLayoutEngine((e) => (e === "dagre" ? "elk" : "dagre"));
+            }}
+            title={
+              layoutEngine === "elk"
+                ? "Using ELK layered layout with aspect-ratio hint (balances width vs. height). Click to switch back to dagre."
+                : "Switch to ELK layered layout — uses canvas aspect ratio to pull branches into unused vertical space."
+            }
+            className={cn(
+              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1 uppercase font-semibold tracking-wider",
+              layoutEngine === "elk"
+                ? "bg-sky-600 text-white border-sky-600"
+                : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+            )}
+          >
+            {layoutEngine === "elk" ? "ELK" : "Dagre"}
           </button>
 
           {/* Compact layout */}
