@@ -35,19 +35,57 @@ interface Symbol {
 // counting and regex-based symbol detection don't false-match content inside
 // them. Not a full parser — good enough for FR auth/endpoint scripts.
 function stripNonCode(src: string): string {
+  // After these tokens a leading `/` is a regex literal; after an identifier,
+  // number, `)`, or `]` it's division. Whitespace is transparent — we look at
+  // the last non-whitespace code char emitted so far.
+  const REGEX_CTX_RE = /[=({[,;:!&|+*%<>?^~]/;
+  const isRegexContext = (last: string): boolean => !last || last === "\n" || REGEX_CTX_RE.test(last);
+
   const out: string[] = [];
   let i = 0;
   let state: "code" | "line" | "block" | "str1" | "str2" | "tmpl" = "code";
+  let lastCodeChar = "";
   while (i < src.length) {
     const c = src[i];
     const n = src[i + 1];
     if (state === "code") {
       if (c === "/" && n === "/") { state = "line"; out.push("  "); i += 2; continue; }
       if (c === "/" && n === "*") { state = "block"; out.push("  "); i += 2; continue; }
+      if (c === "/" && isRegexContext(lastCodeChar)) {
+        // Scan ahead for the regex-closing `/`, respecting escapes and char
+        // classes. If no close on this line, fall through to division — a
+        // real regex literal is single-line in practice, and this guard
+        // keeps us from swallowing the whole file when `/` is just operator.
+        let j = i + 1;
+        let inClass = false;
+        let end = -1;
+        while (j < src.length) {
+          const cc = src[j];
+          if (cc === "\n") break;
+          if (cc === "\\" && j + 1 < src.length) { j += 2; continue; }
+          if (cc === "[" && !inClass) { inClass = true; j++; continue; }
+          if (cc === "]" && inClass) { inClass = false; j++; continue; }
+          if (cc === "/" && !inClass) { end = j; break; }
+          j++;
+        }
+        if (end >= 0) {
+          out.push("/");
+          for (let k = i + 1; k < end; k++) out.push(src[k] === "\n" ? "\n" : " ");
+          out.push("/");
+          i = end + 1;
+          while (i < src.length && /[a-z]/i.test(src[i])) { out.push(src[i]); i++; }
+          lastCodeChar = "/";
+          continue;
+        }
+        // no close found — treat `/` as division, fall through.
+      }
       if (c === '"') { state = "str1"; out.push('"'); i++; continue; }
       if (c === "'") { state = "str2"; out.push("'"); i++; continue; }
       if (c === "`") { state = "tmpl"; out.push("`"); i++; continue; }
-      out.push(c); i++; continue;
+      out.push(c);
+      if (c !== " " && c !== "\t") lastCodeChar = c;
+      i++;
+      continue;
     }
     if (state === "line") {
       if (c === "\n") { state = "code"; out.push("\n"); i++; continue; }
@@ -59,17 +97,17 @@ function stripNonCode(src: string): string {
     }
     if (state === "str1") {
       if (c === "\\" && n != null) { out.push("  "); i += 2; continue; }
-      if (c === '"') { state = "code"; out.push('"'); i++; continue; }
+      if (c === '"') { state = "code"; out.push('"'); lastCodeChar = '"'; i++; continue; }
       out.push(c === "\n" ? "\n" : " "); i++; continue;
     }
     if (state === "str2") {
       if (c === "\\" && n != null) { out.push("  "); i += 2; continue; }
-      if (c === "'") { state = "code"; out.push("'"); i++; continue; }
+      if (c === "'") { state = "code"; out.push("'"); lastCodeChar = "'"; i++; continue; }
       out.push(c === "\n" ? "\n" : " "); i++; continue;
     }
     if (state === "tmpl") {
       if (c === "\\" && n != null) { out.push("  "); i += 2; continue; }
-      if (c === "`") { state = "code"; out.push("`"); i++; continue; }
+      if (c === "`") { state = "code"; out.push("`"); lastCodeChar = "`"; i++; continue; }
       out.push(c === "\n" ? "\n" : " "); i++; continue;
     }
   }
