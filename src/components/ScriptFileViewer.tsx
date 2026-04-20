@@ -122,6 +122,13 @@ function detectSymbols(content: string, language: "js" | "groovy"): Symbol[] {
   const VAR = /^\s*(?:export\s+)?(const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(.*)$/;
   const GROOVY_DEF = /^\s*(?:private|public|protected|static|final|def)\s+(?:\w[\w<>?,\s]*\s+)?([A-Za-z_$][\w$]*)\s*\(/;
   const METHOD = /^\s*([A-Za-z_$][\w$]*)\s*(?::|=)\s*function\b/;
+  // IIFEs — paren-wrapped function expressions invoked immediately. Common in
+  // ForgeRock auth scripts that wrap the whole body in `(function () { ... })()`.
+  // Matches (function …), (async function …), ((…) => …), preceded by the
+  // optional unary/punctuation that minifiers sometimes use (!+~;).
+  const IIFE_NAMED = /^\s*[!+~;]?\s*\(\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/;
+  const IIFE_ANON  = /^\s*[!+~;]?\s*\(\s*(?:async\s+)?function\s*\(/;
+  const IIFE_ARROW = /^\s*[!+~;]?\s*\(\s*(?:async\s+)?\([^)]*\)\s*=>/;
   // RHS patterns that mean "this binding is a function value" — normal
   // function expressions, arrow functions (with or without params).
   const FN_VALUE = /^(?:async\s+)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/;
@@ -129,6 +136,13 @@ function detectSymbols(content: string, language: "js" | "groovy"): Symbol[] {
     const line = lines[i];
     if (language === "js") {
       let m: RegExpMatchArray | null;
+      // IIFE detection runs first so a named IIFE isn't also matched by FN.
+      if ((m = line.match(IIFE_NAMED))) {
+        out.push({ line: i + 1, name: `(IIFE ${m[1]})`, kind: "function" });
+        continue;
+      }
+      if (IIFE_ANON.test(line))  { out.push({ line: i + 1, name: "(IIFE)",  kind: "function" }); continue; }
+      if (IIFE_ARROW.test(line)) { out.push({ line: i + 1, name: "(IIFE →)", kind: "function" }); continue; }
       if ((m = line.match(FN))) { out.push({ line: i + 1, name: m[1], kind: "function" }); continue; }
       if ((m = line.match(VAR))) {
         const declKind = m[1] as "const" | "let" | "var";
@@ -1234,7 +1248,7 @@ function Sidebar({
               )}
               title={`Line ${s.line}`}
             >
-              <span className="truncate">{isCallable ? `${s.name}()` : s.name}</span>
+              <span className="truncate">{isCallable && !s.name.startsWith("(") ? `${s.name}()` : s.name}</span>
               <span className="ml-auto text-[10px] text-slate-500 tabular-nums shrink-0">{s.line}</span>
             </button>
           ))}
