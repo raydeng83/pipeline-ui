@@ -1098,7 +1098,7 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (previewModal) { setPreviewModal(null); e.stopPropagation(); return; }
-        if (nodePanel) { setNodePanel(null); e.stopPropagation(); }
+        if (nodePanel) { setNodePanel(null); setSelectedNodeId(null); e.stopPropagation(); }
       }
     };
     document.addEventListener("keydown", handler, true);
