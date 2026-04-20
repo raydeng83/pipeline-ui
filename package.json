@@ -1,8 +1,18 @@
 {
-  "name": "pipeline-ui",
+  "name": "pinghub",
   "version": "0.1.0",
   "private": true,
   "license": "Apache-2.0",
+  "description": "A web UI for managing Ping Advanced Identity Cloud (AIC) tenant configurations — pull, push, and promote configs across environments.",
+  "author": "Boston Identity",
+  "homepage": "https://github.com/bostonidentity/PingHub#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bostonidentity/PingHub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bostonidentity/PingHub/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
