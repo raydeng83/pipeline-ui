@@ -137,12 +137,15 @@ function detectSymbols(content: string, language: "js" | "groovy"): Symbol[] {
     if (language === "js") {
       let m: RegExpMatchArray | null;
       // IIFE detection runs first so a named IIFE isn't also matched by FN.
+      // Named IIFEs use the function's own name; anonymous forms get a
+      // keyword-style placeholder so the outline appends "()" and the row
+      // reads like a call: "function()" or "arrow()".
       if ((m = line.match(IIFE_NAMED))) {
-        out.push({ line: i + 1, name: `(IIFE ${m[1]})`, kind: "function" });
+        out.push({ line: i + 1, name: m[1], kind: "function" });
         continue;
       }
-      if (IIFE_ANON.test(line))  { out.push({ line: i + 1, name: "(IIFE)",  kind: "function" }); continue; }
-      if (IIFE_ARROW.test(line)) { out.push({ line: i + 1, name: "(IIFE →)", kind: "function" }); continue; }
+      if (IIFE_ANON.test(line))  { out.push({ line: i + 1, name: "function", kind: "function" }); continue; }
+      if (IIFE_ARROW.test(line)) { out.push({ line: i + 1, name: "arrow", kind: "function" }); continue; }
       if ((m = line.match(FN))) { out.push({ line: i + 1, name: m[1], kind: "function" }); continue; }
       if ((m = line.match(VAR))) {
         const declKind = m[1] as "const" | "let" | "var";
