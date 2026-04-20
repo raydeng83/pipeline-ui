@@ -621,6 +621,46 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const expandAllGroups = useCallback(() => setCollapsedGroups(new Set()), []);
   const collapseAllGroups = useCallback(() => setCollapsedGroups(new Set(allGroupIds)), [allGroupIds]);
 
+  // Ctrl/Cmd+A while the pointer is inside the viewer: select just the script
+  // content (not the whole page) and copy the full effective content to the
+  // clipboard — because the viewer is virtualized, a raw DOM selection would
+  // only cover the rows currently mounted, so the follow-up Ctrl/Cmd+C would
+  // miss off-screen code. Writing the cleaned text to the clipboard here means
+  // a subsequent paste picks up the complete file regardless of scroll pos.
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "a" && e.key !== "A") return;
+      if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+      const container = containerRef.current;
+      if (!container) return;
+      // Skip when the focus is in an input/textarea — users expect the
+      // native select-all in those fields (search box, goto-line, etc.).
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (!container.contains(target)) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      try { void navigator.clipboard.writeText(effectiveContent); } catch { /* clipboard blocked */ }
+
+      // Visual feedback: select whatever content rows the virtualizer has
+      // mounted. Good enough for "I can see it's selected" even though the
+      // clipboard already has the full file.
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(container);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [effectiveContent]);
+
   // Resetting last-commit to "loading" happens via render-time prop compare so
   // it doesn't trip `react-hooks/set-state-in-effect`; the actual fetch lives
   // in useEffect below.
@@ -893,7 +933,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900 text-slate-300 min-h-0">
+    <div ref={containerRef} className="h-full flex flex-col bg-slate-900 text-slate-300 min-h-0">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slate-800 shrink-0 text-[11px]">
         {/* Find */}
