@@ -1185,21 +1185,29 @@ function SectionsView({
 const ENV_STORAGE_KEY = "aic:configs:env";
 
 export function ConfigsViewer({ environments }: { environments: Environment[] }) {
-  // Persist the env picker across reloads. Fall back to the first env if the
-  // stored value no longer exists in the environments list (e.g. tenant was
-  // renamed or removed).
-  const [selectedEnv, setSelectedEnv] = useState(() => {
-    if (typeof window === "undefined") return environments[0]?.name ?? "";
+  // Start with the first env so SSR and the client's first render agree.
+  // A post-mount effect then swaps in the persisted choice (if any) — also
+  // runs before the URL-param hydration below so a deep-link env wins.
+  const [selectedEnv, setSelectedEnv] = useState(environments[0]?.name ?? "");
+  const [envHydrated, setEnvHydrated] = useState(false);
+
+  useEffect(() => {
     try {
       const saved = window.localStorage.getItem(ENV_STORAGE_KEY);
-      if (saved && environments.some((e) => e.name === saved)) return saved;
+      if (saved && environments.some((e) => e.name === saved) && saved !== selectedEnv) {
+        setSelectedEnv(saved);
+      }
     } catch { /* ignore */ }
-    return environments[0]?.name ?? "";
-  });
+    setEnvHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist after hydration so the initial render doesn't overwrite the
+  // saved value with environments[0] before the effect above runs.
   useEffect(() => {
-    if (!selectedEnv) return;
+    if (!envHydrated || !selectedEnv) return;
     try { window.localStorage.setItem(ENV_STORAGE_KEY, selectedEnv); } catch { /* ignore */ }
-  }, [selectedEnv]);
+  }, [envHydrated, selectedEnv]);
   const [view, setView] = useState<"tree" | "sections">("sections");
   // Hint that SectionsView uses for initial selection; cleared after first apply.
   const [preselect, setPreselect] = useState<{
