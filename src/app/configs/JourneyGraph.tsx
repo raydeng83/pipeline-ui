@@ -44,6 +44,11 @@ const PAGE_GROUP_TOP = 42;  // header height
 const PAGE_GROUP_PAD = 12;
 const PAGE_CHILD_GAP = 6;
 
+// Collapsed passthrough-chain pill (replaces a linear run of single-in / single-out nodes)
+const CHAIN_W = 170;
+const CHAIN_H = 48;
+const CHAIN_MIN_LEN = 3; // minimum run length that will be collapsed
+
 function journeyNodeHeight(outcomeCount: number): number {
   return Math.max(NODE_H, outcomeCount * 22 + 28);
 }
@@ -64,9 +69,10 @@ function getNodeDims(node: Node): [number, number] {
     const children = (node.data.children as PageChildConfig[] | undefined) ?? [];
     return [PAGE_GROUP_W, pageGroupHeight(children.length)];
   }
-  if (node.type === "startNode")   return [START_SIZE, START_SIZE];
-  if (node.type === "successNode") return [TERM_SIZE,  TERM_SIZE];
-  if (node.type === "failureNode") return [TERM_SIZE,  TERM_SIZE];
+  if (node.type === "startNode")     return [START_SIZE, START_SIZE];
+  if (node.type === "successNode")   return [TERM_SIZE,  TERM_SIZE];
+  if (node.type === "failureNode")   return [TERM_SIZE,  TERM_SIZE];
+  if (node.type === "chainCollapsed") return [CHAIN_W,    CHAIN_H];
   return [NODE_W, NODE_H];
 }
 
@@ -255,13 +261,35 @@ function FailureNodeComponent({ data }: NodeProps) {
   );
 }
 
+function ChainCollapsedNodeComponent({ data }: NodeProps) {
+  const d = data as { count: number; typesSummary: string; isSelected?: boolean };
+  return (
+    <div
+      className={cn(
+        "border border-dashed rounded-lg shadow-sm bg-slate-50 transition-all cursor-pointer active:cursor-grabbing",
+        d.isSelected ? "border-sky-500 ring-2 ring-sky-300" : "border-slate-300 hover:border-slate-400"
+      )}
+      style={{ width: CHAIN_W, height: CHAIN_H, position: "relative" }}
+      title="Click to expand chain"
+    >
+      <Handle type="target" position={Position.Left} style={{ top: "50%", background: "#94a3b8" }} />
+      <div className="px-3 py-1 flex flex-col justify-center h-full">
+        <p className="text-[11px] font-medium text-slate-700 leading-tight">⋯ {d.count} steps</p>
+        <p className="text-[9px] text-slate-400 truncate">{d.typesSummary}</p>
+      </div>
+      <Handle type="source" position={Position.Right} style={{ top: "50%", background: "#94a3b8" }} />
+    </div>
+  );
+}
+
 const nodeTypes = {
-  journeyNode: JourneyNodeComponent,
-  pageGroup:   PageGroupNodeComponent,
-  pageChild:   PageChildNodeComponent,
-  startNode:   StartNodeComponent,
-  successNode: SuccessNodeComponent,
-  failureNode: FailureNodeComponent,
+  journeyNode:    JourneyNodeComponent,
+  pageGroup:      PageGroupNodeComponent,
+  pageChild:      PageChildNodeComponent,
+  startNode:      StartNodeComponent,
+  successNode:    SuccessNodeComponent,
+  failureNode:    FailureNodeComponent,
+  chainCollapsed: ChainCollapsedNodeComponent,
 };
 
 // ── Parser ────────────────────────────────────────────────────────────────────
@@ -376,6 +404,105 @@ function applyDagreLayout(nodes: Node[], edges: Edge[], compact = false): Node[]
     const [w, h] = getNodeDims(n);
     return { ...n, position: { x: pos.x - w / 2, y: pos.y - h / 2 } };
   });
+}
+
+// ── Passthrough-chain collapse ────────────────────────────────────────────────
+
+/**
+ * Fold linear runs of single-in/single-out journeyNodes into a single pill.
+ * A chain member has: type === "journeyNode", exactly one outcome, exactly one
+ * incoming edge, and no parentId. Maximal runs of ≥ `minLen` members are
+ * replaced with a `chainCollapsed` pseudo-node; the boundary edges are
+ * rerouted through it so upstream/downstream highlighting still works.
+ * Chains whose id appears in `expandedIds` are left alone so the user can
+ * drill into a specific run.
+ */
+function collapseChains(
+  nodes: Node[],
+  edges: Edge[],
+  expandedIds: Set<string>,
+  minLen: number,
+): { nodes: Node[]; edges: Edge[]; chains: Array<{ id: string; memberIds: string[] }> } {
+  const nodeMap   = new Map(nodes.map((n) => [n.id, n]));
+  const inCount   = new Map<string, number>();
+  const outEdgeBy = new Map<string, Edge[]>();
+  const inEdgeBy  = new Map<string, Edge[]>();
+  for (const e of edges) {
+    inCount.set(e.target, (inCount.get(e.target) ?? 0) + 1);
+    (outEdgeBy.get(e.source) ?? outEdgeBy.set(e.source, []).get(e.source)!).push(e);
+    (inEdgeBy.get(e.target)  ?? inEdgeBy.set(e.target,  []).get(e.target)!).push(e);
+  }
+
+  const isChainMember = (id: string): boolean => {
+    const n = nodeMap.get(id);
+    if (!n || n.type !== "journeyNode" || n.parentId) return false;
+    const outs = (n.data as { outcomes?: string[] }).outcomes ?? [];
+    return outs.length === 1 && (inCount.get(id) ?? 0) === 1;
+  };
+
+  const visited = new Set<string>();
+  const chains: Array<{ id: string; memberIds: string[]; inEdge: Edge; outEdge: Edge }> = [];
+
+  for (const n of nodes) {
+    if (visited.has(n.id) || !isChainMember(n.id)) continue;
+    // Only start walks at chain-heads: predecessor exists but isn't a member.
+    const predEdges = inEdgeBy.get(n.id);
+    if (!predEdges || predEdges.length !== 1 || isChainMember(predEdges[0].source)) continue;
+
+    const members: string[] = [];
+    let cur = n.id;
+    while (isChainMember(cur) && !visited.has(cur)) {
+      members.push(cur);
+      visited.add(cur);
+      const outE = outEdgeBy.get(cur);
+      if (!outE || outE.length !== 1) break;
+      if (!isChainMember(outE[0].target)) break;
+      cur = outE[0].target;
+    }
+    if (members.length < minLen) continue;
+
+    chains.push({
+      id: `__chain__${members[0]}`,
+      memberIds: members,
+      inEdge:  inEdgeBy.get(members[0])![0],
+      outEdge: outEdgeBy.get(members[members.length - 1])![0],
+    });
+  }
+
+  const activeChains  = chains.filter((c) => !expandedIds.has(c.id));
+  const activeMembers = new Set(activeChains.flatMap((c) => c.memberIds));
+  const removedEdges  = new Set<string>();
+  for (const c of activeChains) {
+    for (const m of c.memberIds) {
+      for (const e of outEdgeBy.get(m) ?? []) removedEdges.add(e.id);
+      for (const e of inEdgeBy.get(m)  ?? []) removedEdges.add(e.id);
+    }
+  }
+
+  const newNodes: Node[] = nodes.filter((n) => !activeMembers.has(n.id));
+  for (const c of activeChains) {
+    const types = c.memberIds.map((id) => {
+      const d = nodeMap.get(id)?.data as { nodeType?: string } | undefined;
+      return (d?.nodeType ?? "Node").replace(/Node$/, "");
+    });
+    const unique = Array.from(new Set(types));
+    const typesSummary = unique.slice(0, 3).join(" · ") + (unique.length > 3 ? ` +${unique.length - 3}` : "");
+    newNodes.push({
+      id: c.id, type: "chainCollapsed", position: { x: 0, y: 0 },
+      data: { count: c.memberIds.length, typesSummary, memberIds: c.memberIds },
+    });
+  }
+
+  const newEdges: Edge[] = edges.filter((e) => !removedEdges.has(e.id));
+  for (const c of activeChains) {
+    // Reroute: prev → chain (keep source handle / style / label), then chain → next
+    // (drop source handle so ReactFlow uses the pill's default right-side handle).
+    newEdges.push({ ...c.inEdge, id: `${c.inEdge.id}__to_${c.id}`, target: c.id });
+    const { sourceHandle: _sh, ...rest } = c.outEdge;
+    newEdges.push({ ...rest, id: `${c.id}__out_${c.outEdge.target}`, source: c.id, label: undefined });
+  }
+
+  return { nodes: newNodes, edges: newEdges, chains: chains.map((c) => ({ id: c.id, memberIds: c.memberIds })) };
 }
 
 // ── Path tracing ──────────────────────────────────────────────────────────────
@@ -848,6 +975,8 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const [nodePanel,      setNodePanel]       = useState<NodePanelData | null>(null);
   const [pageConfigs,    setPageConfigs]     = useState<Map<string, PageNodeConfig>>(new Map());
   const [isCompact,      setIsCompact]       = useState(false);
+  const [collapseChainsOn, setCollapseChainsOn] = useState(true);
+  const [expandedChainIds, setExpandedChainIds] = useState<Set<string>>(new Set());
   const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
   // "control" = trace the outcome graph (default). "data" = trace shared-state
   // dependencies derived from every node's `inputs` / `outputs` arrays.
@@ -1056,10 +1185,13 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     return () => { cancelled = true; };
   }, [environment, activeJourneyId, scriptNodeIds]);
 
-  const { dagreNodes, baseEdges } = useMemo(() => {
-    const { nodes, edges } = parseJourney(activeJson, pageConfigs.size > 0 ? pageConfigs : undefined);
-    return { dagreNodes: applyDagreLayout(nodes, edges, isCompact), baseEdges: edges };
-  }, [activeJson, layoutKey, pageConfigs, isCompact]);
+  const { dagreNodes, baseEdges, collapsedChains } = useMemo(() => {
+    const parsed = parseJourney(activeJson, pageConfigs.size > 0 ? pageConfigs : undefined);
+    const { nodes, edges, chains } = collapseChainsOn
+      ? collapseChains(parsed.nodes, parsed.edges, expandedChainIds, CHAIN_MIN_LEN)
+      : { nodes: parsed.nodes, edges: parsed.edges, chains: [] };
+    return { dagreNodes: applyDagreLayout(nodes, edges, isCompact), baseEdges: edges, collapsedChains: chains };
+  }, [activeJson, layoutKey, pageConfigs, isCompact, collapseChainsOn, expandedChainIds]);
 
   // Reset to dagre positions when layout changes, then fit or restore viewport.
   // Only adjusts viewport when an explicit navigation/layout action set shouldAdjustViewport;
@@ -1326,6 +1458,10 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
 
   const handleNodeClick: NodeMouseHandler = useCallback((_e, node) => {
     if (node.parentId) return; // ignore clicks on page child nodes
+    if (node.type === "chainCollapsed") {
+      setExpandedChainIds((prev) => { const next = new Set(prev); next.add(node.id); return next; });
+      return;
+    }
     const d = node.data as { label: string; nodeType?: string; outcomes?: string[] };
 
     const isSame = selectedNodeId === node.id;
@@ -1511,6 +1647,33 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
+          </button>
+
+          {/* Collapse passthrough chains */}
+          <button
+            type="button"
+            onClick={() => {
+              shouldAdjustViewport.current = true;
+              setCollapseChainsOn((v) => !v);
+              setExpandedChainIds(new Set());
+            }}
+            title={
+              collapseChainsOn
+                ? `Showing collapsed chains (≥ ${CHAIN_MIN_LEN} linear steps folded into one pill). Click to show all nodes.`
+                : "Fold linear runs of single-step nodes into collapsible pills."
+            }
+            className={cn(
+              "px-2.5 py-1 text-[11px] rounded border transition-colors shrink-0 flex items-center gap-1",
+              collapseChainsOn
+                ? "bg-sky-600 text-white border-sky-600"
+                : "text-slate-500 border-slate-300 hover:text-slate-700 hover:border-slate-400",
+            )}
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M6 12h.01M12 12h.01M18 12h.01M3 6h18M3 18h18" />
+            </svg>
+            Fold runs{collapsedChains.length > 0 ? ` (${collapsedChains.length})` : ""}
           </button>
 
           {/* Compact layout */}
