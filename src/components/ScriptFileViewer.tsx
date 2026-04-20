@@ -1069,6 +1069,32 @@ function Sidebar({
   onGoTo: (line: number) => void;
   onOpenRef: (r: Reference) => void;
 }) {
+  const [search, setSearch] = useState("");
+  const q = search.trim().toLowerCase();
+
+  // Filter groups by symbol / reference name (case-insensitive). Empty groups
+  // are dropped so the sidebar shrinks to only matching sections.
+  const filteredSymbolGroups = useMemo(() => {
+    if (!q) return symbolGroups;
+    return symbolGroups
+      .map((g) => ({ ...g, items: g.items.filter((s) => s.name.toLowerCase().includes(q)) }))
+      .filter((g) => g.items.length > 0);
+  }, [symbolGroups, q]);
+
+  const filteredReferenceGroups = useMemo(() => {
+    if (!q) return referenceGroups;
+    return referenceGroups
+      .map((g) => ({ ...g, items: g.items.filter((r) => r.label.toLowerCase().includes(q)) }))
+      .filter((g) => g.items.length > 0);
+  }, [referenceGroups, q]);
+
+  // While a query is active, force-open every group so matches aren't hidden
+  // behind collapsed sections — the user has obviously asked for them.
+  const effectiveCollapsed = q ? new Set<string>() : collapsedGroups;
+
+  const totalMatches = filteredSymbolGroups.reduce((n, g) => n + g.items.length, 0)
+    + filteredReferenceGroups.reduce((n, g) => n + g.items.length, 0);
+
   return (
     <aside
       style={{ width }}
@@ -1093,7 +1119,37 @@ function Sidebar({
         </button>
       </div>
 
-      {symbolGroups.map((g) => {
+      <div className="sticky top-[25px] bg-slate-900/95 backdrop-blur z-10 border-b border-slate-800 px-2 py-1 flex items-center gap-1">
+        <svg className="w-3 h-3 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+        </svg>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Filter outline…"
+          className="bg-transparent outline-none flex-1 min-w-0 text-[11px] text-slate-200 placeholder-slate-500"
+        />
+        {search && (
+          <>
+            <span className="text-[10px] text-slate-500 tabular-nums shrink-0">{totalMatches}</span>
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              title="Clear filter"
+              className="text-slate-500 hover:text-slate-200 text-[11px] leading-none"
+            >
+              ✕
+            </button>
+          </>
+        )}
+      </div>
+
+      {search && totalMatches === 0 && (
+        <div className="px-3 py-2 text-[11px] text-slate-500 italic">No outline items match.</div>
+      )}
+
+      {filteredSymbolGroups.map((g) => {
         const accent = symbolAccent(g.id);
         const isCallable = g.id === "sym:function";
         return (
@@ -1102,7 +1158,7 @@ function Sidebar({
           id={g.id}
           label={g.label}
           count={g.items.length}
-          collapsed={collapsedGroups.has(g.id)}
+          collapsed={effectiveCollapsed.has(g.id)}
           onToggle={onToggleGroup}
           accent={accent}
         >
@@ -1128,7 +1184,7 @@ function Sidebar({
         );
       })}
 
-      {referenceGroups.map((g) => {
+      {filteredReferenceGroups.map((g) => {
         const accent = refAccent(g.id);
         return (
         <GroupSection
@@ -1136,7 +1192,7 @@ function Sidebar({
           id={g.id}
           label={g.label}
           count={g.items.length}
-          collapsed={collapsedGroups.has(g.id)}
+          collapsed={effectiveCollapsed.has(g.id)}
           onToggle={onToggleGroup}
           accent={accent}
         >
