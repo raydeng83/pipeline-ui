@@ -498,7 +498,14 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const references = useMemo(() => detectReferences(effectiveContent), [effectiveContent]);
   const foldRegions = useMemo(() => computeFoldRegions(effectiveContent), [effectiveContent]);
   const commentSpans = useMemo(() => extractCommentSpans(effectiveContent), [effectiveContent]);
-  const hasAnyComment = commentSpans.length > 0;
+  // Drive the All / Hide-all toggle visibility off the pre-strip content so
+  // the buttons remain in place after the user hides comments — otherwise the
+  // stripped view has no comments, hasAnyComment goes false, and the toggle
+  // disappears with no way back.
+  const hasAnyComment = useMemo(
+    () => extractCommentSpans(formattedOrRaw).length > 0,
+    [formattedOrRaw],
+  );
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [topVisibleLine, setTopVisibleLine] = useState<number | null>(null);
