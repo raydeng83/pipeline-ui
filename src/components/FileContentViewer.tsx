@@ -321,8 +321,12 @@ export function FileContentViewer({
     getScrollElement: () => containerRef.current,
     estimateSize: () => 20,
     // Ordinary scrolling: 24 rows of slack above/below (~480px each side).
-    // Active selection: mount effectively every row so anchors don't drop.
-    overscan: selecting ? visibleLines.length : 24,
+    // During an active selection we bump overscan so rows the user has
+    // already anchored don't unmount as they scroll, BUT we cap it so a
+    // mousedown on a 5 000-line file doesn't stall rendering the moment
+    // the user clicks. 500 rows of slack each way covers ~10 000px of
+    // scroll — more than enough for the vast majority of drag selects.
+    overscan: selecting ? Math.min(visibleLines.length, 500) : 24,
   });
 
   // Scroll a highlighted line into view (find-match focus).
