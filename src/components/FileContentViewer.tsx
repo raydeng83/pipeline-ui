@@ -89,6 +89,8 @@ interface RowProps {
   foldCloseText?: string;
   overlay?: ReactNode;
   indentGuides?: boolean;
+  /** Fixed gutter width in ch units, sized off the file's largest line number. */
+  gutterWidthCh: number;
   onToggleFold?: (startLine: number) => void;
   onLineClick?: (line: number) => void;
 }
@@ -106,6 +108,7 @@ const Row = memo(function Row({
   foldCloseText,
   overlay,
   indentGuides,
+  gutterWidthCh,
   onToggleFold,
   onLineClick,
 }: RowProps) {
@@ -126,7 +129,8 @@ const Row = memo(function Row({
     >
       {/* Arrow and number live in separate columns so the digits always
           right-align at the same x regardless of whether the row has a fold
-          arrow. Everything else (colors, sticky, borders) carried over. */}
+          arrow. Width is FIXED (not min-width) so rows with 3-digit numbers
+          don't push the digits further right than rows with 1-digit ones. */}
       <div
         aria-hidden
         className={cn(
@@ -134,7 +138,7 @@ const Row = memo(function Row({
           isHighlighted && "bg-amber-900/40 font-semibold",
           isActive && "bg-slate-800/80 border-l-2 border-l-sky-400 pl-[6px]",
         )}
-        style={{ minWidth: "5ch" }}
+        style={{ width: `${gutterWidthCh}ch` }}
       >
         <span className="w-3 text-[10px] leading-none shrink-0 inline-flex items-center justify-center">
           {isFoldable && onToggleFold ? (
@@ -262,6 +266,15 @@ export function FileContentViewer({
   // closing-line lookups (fold preview text).
   const rawLines = useMemo(() => displayContent.split("\n"), [displayContent]);
 
+  // Fixed gutter width sized to the file's largest line number. This guarantees
+  // every row's number sits at the same x, so digits line up by position (the
+  // "1" in line 1, the "4" in line 34, and the "7" in line 127 all in the same
+  // column). Extra slack for the arrow slot + padding.
+  const gutterWidthCh = useMemo(() => {
+    const digits = Math.max(2, String(rawLines.length).length);
+    return digits + 4; // ~3ch arrow slot + 1ch padding
+  }, [rawLines.length]);
+
   const leadingSpaces = useMemo(() => {
     return rawLines.map((l) => {
       let n = 0;
@@ -371,6 +384,7 @@ export function FileContentViewer({
                 foldCloseText={foldCloseText}
                 overlay={lineOverlays?.get(ln)}
                 indentGuides={indentGuides}
+                gutterWidthCh={gutterWidthCh}
                 onToggleFold={onToggleFold}
                 onLineClick={onLineClick}
               />
