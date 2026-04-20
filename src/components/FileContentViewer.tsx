@@ -153,7 +153,17 @@ const Row = memo(function Row({
         {guideLevels > 0 && (
           <span aria-hidden className="select-none">
             {Array.from({ length: guideLevels }, (_, k) => (
-              <span key={k} className="text-slate-700">│ </span>
+              // Force 2ch width per guide so the U+2502 char (often rendered
+              // narrower than an ASCII space) doesn't shift the rest of the
+              // line left. Without this, every level of indent loses a
+              // fraction of a cell and the code column looks misaligned.
+              <span
+                key={k}
+                className="text-slate-700 inline-block text-center"
+                style={{ width: "2ch" }}
+              >
+                │
+              </span>
             ))}
           </span>
         )}
