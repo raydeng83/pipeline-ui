@@ -621,13 +621,14 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const expandAllGroups = useCallback(() => setCollapsedGroups(new Set()), []);
   const collapseAllGroups = useCallback(() => setCollapsedGroups(new Set(allGroupIds)), [allGroupIds]);
 
-  // Ctrl/Cmd+A while the pointer is inside the viewer: select just the script
-  // content (not the whole page) and copy the full effective content to the
-  // clipboard — because the viewer is virtualized, a raw DOM selection would
-  // only cover the rows currently mounted, so the follow-up Ctrl/Cmd+C would
-  // miss off-screen code. Writing the cleaned text to the clipboard here means
-  // a subsequent paste picks up the complete file regardless of scroll pos.
+  // Ctrl/Cmd+A inside the viewer: scope the select-all to the script content
+  // and copy the full effective content to the clipboard. The viewer is
+  // read-only (no input focus), so we can't rely on `contains(event.target)`
+  // alone — if the user simply hovers and presses the shortcut, the target is
+  // document.body. Track hover with a ref and also check focus-within, so the
+  // handler fires whenever the viewer is "active".
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const hoveredRef = useRef(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -635,11 +636,14 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
       if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
       const container = containerRef.current;
       if (!container) return;
+      const target = e.target as HTMLElement | null;
       // Skip when the focus is in an input/textarea — users expect the
       // native select-all in those fields (search box, goto-line, etc.).
-      const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
-      if (!container.contains(target)) return;
+      // "Inside the viewer" = hovering, OR the event originated from a
+      // descendant (e.g. a clicked gutter button).
+      const inside = hoveredRef.current || (!!target && container.contains(target));
+      if (!inside) return;
 
       e.preventDefault();
       e.stopPropagation();
@@ -657,8 +661,9 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
         sel.addRange(range);
       }
     };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    // Capture phase so we run before the browser's default select-all dispatch.
+    document.addEventListener("keydown", handler, true);
+    return () => document.removeEventListener("keydown", handler, true);
   }, [effectiveContent]);
 
   // Resetting last-commit to "loading" happens via render-time prop compare so
@@ -933,7 +938,12 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   };
 
   return (
-    <div ref={containerRef} className="h-full flex flex-col bg-slate-900 text-slate-300 min-h-0">
+    <div
+      ref={containerRef}
+      onMouseEnter={() => { hoveredRef.current = true; }}
+      onMouseLeave={() => { hoveredRef.current = false; }}
+      className="h-full flex flex-col bg-slate-900 text-slate-300 min-h-0"
+    >
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slate-800 shrink-0 text-[11px]">
         {/* Find */}
