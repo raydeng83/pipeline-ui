@@ -408,23 +408,31 @@ function getConnected(nodeId: string, edges: Edge[]) {
   }
 
   // Forward BFS from each source → every node reachable from any source.
-  const reachableFromSource = bfs(sources, edges, "forward");
+  // If the graph has no pure sources (e.g. the data-flow graph where every
+  // wildcard node both reads and writes) fall back to "no filter" — use the
+  // raw ancestor closure. The alternative is the filter dropping everything
+  // and the trace highlighting only the clicked node.
+  const reachableFromSource = sources.length > 0 ? bfs(sources, edges, "forward") : null;
   // Backward BFS from each sink → every node that can reach any sink.
-  const canReachSink = bfs(sinks, edges, "backward");
+  const canReachSink = sinks.length > 0 ? bfs(sinks, edges, "backward") : null;
 
   // Ancestors (BFS backwards from nodeId) restricted to those that the
   // sources can reach — i.e. upstream nodes on a live start→nodeId path.
   const ancestorsAll = bfs([nodeId], edges, "backward");
   ancestorsAll.delete(nodeId);
   const ancestors = new Set<string>();
-  for (const n of ancestorsAll) if (reachableFromSource.has(n)) ancestors.add(n);
+  for (const n of ancestorsAll) {
+    if (!reachableFromSource || reachableFromSource.has(n)) ancestors.add(n);
+  }
 
   // Descendants (BFS forwards from nodeId) restricted to those that can
   // reach some sink — i.e. downstream nodes on a live nodeId→terminal path.
   const descendantsAll = bfs([nodeId], edges, "forward");
   descendantsAll.delete(nodeId);
   const descendants = new Set<string>();
-  for (const n of descendantsAll) if (canReachSink.has(n)) descendants.add(n);
+  for (const n of descendantsAll) {
+    if (!canReachSink || canReachSink.has(n)) descendants.add(n);
+  }
 
   return { ancestors, descendants };
 }
