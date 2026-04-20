@@ -841,6 +841,13 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
   const [pageConfigs,    setPageConfigs]     = useState<Map<string, PageNodeConfig>>(new Map());
   const [isCompact,      setIsCompact]       = useState(false);
   const [displayView,    setDisplayView]     = useState<"graph" | "outline" | "table" | "swimlane" | "json">("graph");
+  // "control" = trace the outcome graph (default). "data" = trace shared-state
+  // dependencies derived from every node's `inputs` / `outputs` arrays.
+  const [traceMode,      setTraceMode]       = useState<"control" | "data">("control");
+  // dataIO[nodeUuid] = { inputs, outputs } from the node file. Fetched lazily
+  // the first time the user switches to data-trace mode.
+  const [dataIO, setDataIO] = useState<Map<string, { inputs: string[]; outputs: string[] }>>(new Map());
+  const [dataIOLoading, setDataIOLoading] = useState(false);
 
   // ── Inner-tree navigation stack ───────────────────────────────────────────
   const [navStack,   setNavStack]   = useState<{ journeyId: string; json: string; sourceNodeId: string }[]>([]);
@@ -1186,11 +1193,106 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
     setSearchIndex((i) => (i + 1) % searchMatchList.length),
     [searchMatchList.length]);
 
-  // Path tracing (top-level nodes only; edges only reference top-level IDs)
+  // Ids of all top-level nodes in the active journey — used both to
+  // bulk-fetch data-IO and to cap BFS when tracing.
+  const topLevelNodeIds = useMemo(
+    () => rfNodes.filter((n) => !n.parentId).map((n) => n.id),
+    [rfNodes],
+  );
+
+  // Lazily fetch every node's inputs/outputs the first time the user switches
+  // to "data" trace mode. Only runs once per journey; switching back to
+  // control mode doesn't tear the cache down.
+  useEffect(() => {
+    if (traceMode !== "data") return;
+    if (!environment || !activeJourneyId) return;
+    if (dataIO.size > 0 || dataIOLoading) return;
+    setDataIOLoading(true);
+    Promise.all(
+      topLevelNodeIds.map(async (nodeId) => {
+        const params = new URLSearchParams({ environment, journey: activeJourneyId, nodeId });
+        try {
+          const res = await fetch(`/api/push/journey-node?${params}`);
+          if (!res.ok) return null;
+          const d = await res.json() as { file?: { content?: string } };
+          if (!d.file?.content) return null;
+          const body = JSON.parse(d.file.content) as Record<string, unknown>;
+          const inputs  = Array.isArray(body.inputs)  ? (body.inputs  as unknown[]).filter((x): x is string => typeof x === "string") : [];
+          const outputs = Array.isArray(body.outputs) ? (body.outputs as unknown[]).filter((x): x is string => typeof x === "string") : [];
+          return [nodeId, { inputs, outputs }] as const;
+        } catch { return null; }
+      }),
+    ).then((entries) => {
+      setDataIO(new Map(entries.filter((e): e is [string, { inputs: string[]; outputs: string[] }] => e !== null)));
+      setDataIOLoading(false);
+    });
+  }, [traceMode, environment, activeJourneyId, topLevelNodeIds, dataIO.size, dataIOLoading]);
+
+  // Reset the data-IO cache when the user navigates into / out of an inner
+  // journey so we re-fetch against the new tree.
+  useEffect(() => {
+    setDataIO(new Map());
+  }, [activeJourneyId]);
+
+  // Data-flow edge list. A writes key K → A is source of an edge to every
+  // B that reads K (B.inputs contains K). "*" in outputs is treated as
+  // "writes everything the downstream might read" — covers the common
+  // wildcard case without creating a fully-connected graph. Keys not
+  // declared by any writer are considered to come from outside the tree
+  // (login form, request context) and produce no edges.
+  const dataEdges = useMemo<Edge[]>(() => {
+    if (traceMode !== "data" || dataIO.size === 0) return [];
+    // Map key → { writers: nodeIds, readers: nodeIds }
+    const writersOf = new Map<string, Set<string>>();
+    const readersOf = new Map<string, Set<string>>();
+    const wildcards = new Set<string>(); // nodes whose outputs include "*"
+    for (const [nodeId, io] of dataIO) {
+      for (const k of io.outputs) {
+        if (k === "*") { wildcards.add(nodeId); continue; }
+        (writersOf.get(k) ?? writersOf.set(k, new Set()).get(k)!).add(nodeId);
+      }
+      for (const k of io.inputs) {
+        (readersOf.get(k) ?? readersOf.set(k, new Set()).get(k)!).add(nodeId);
+      }
+    }
+    const edges: Edge[] = [];
+    const seen = new Set<string>();
+    for (const [key, writers] of writersOf) {
+      const readers = readersOf.get(key);
+      if (!readers) continue;
+      for (const src of writers) {
+        for (const tgt of readers) {
+          if (src === tgt) continue;
+          const id = `data:${src}->${tgt}`;
+          if (seen.has(id)) continue;
+          seen.add(id);
+          edges.push({ id, source: src, target: tgt });
+        }
+      }
+    }
+    // Wildcard writers connect to every reader of every key.
+    for (const src of wildcards) {
+      for (const readers of readersOf.values()) {
+        for (const tgt of readers) {
+          if (src === tgt) continue;
+          const id = `data:${src}->${tgt}`;
+          if (seen.has(id)) continue;
+          seen.add(id);
+          edges.push({ id, source: src, target: tgt });
+        }
+      }
+    }
+    return edges;
+  }, [traceMode, dataIO]);
+
+  // Path tracing (top-level nodes only; edges only reference top-level IDs).
+  // When traceMode is "data" and the IO map is populated, trace over the
+  // synthetic dataEdges instead of control-flow edges.
   const { ancestors, descendants } = useMemo(() => {
     if (!selectedNodeId) return { ancestors: new Set<string>(), descendants: new Set<string>() };
-    return getConnected(selectedNodeId, baseEdges);
-  }, [selectedNodeId, baseEdges]);
+    const edges = traceMode === "data" && dataEdges.length > 0 ? dataEdges : baseEdges;
+    return getConnected(selectedNodeId, edges);
+  }, [selectedNodeId, baseEdges, dataEdges, traceMode]);
 
   const highlighted = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -1386,6 +1488,28 @@ function JourneyGraphInner({ json, fitViewKey, environment, journeyId, focusNode
 
         {/* Graph-only controls */}
         {displayView === "graph" && (<>
+          {/* Trace mode toggle */}
+          <div className="flex rounded border border-slate-200 overflow-hidden text-[11px] shrink-0">
+            {(["control", "data"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setTraceMode(m)}
+                title={
+                  m === "control"
+                    ? "Trace outcome (control-flow) edges when a node is clicked"
+                    : "Trace shared-state data flow — nodes connected by inputs/outputs keys"
+                }
+                className={cn(
+                  "px-2 py-1 transition-colors",
+                  traceMode === m ? "bg-sky-600 text-white" : "text-slate-500 hover:bg-slate-100",
+                )}
+              >
+                {m === "control" ? "Control" : dataIOLoading ? "Data…" : "Data"}
+              </button>
+            ))}
+          </div>
+
           {/* Reset layout */}
           <button
             type="button"
