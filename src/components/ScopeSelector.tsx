@@ -145,12 +145,13 @@ export function ScopeSelector({ selected, onChange, disabled, action }: ScopeSel
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {selected.length > 0 && (
+          {(selected.length > 0 || query) && (
             <button
               type="button"
-              onClick={() => onChange([])}
+              onClick={() => { onChange([]); setQuery(""); }}
               disabled={disabled}
               className="text-xs text-slate-500 hover:text-slate-700 disabled:opacity-40"
+              title="Clear selected scopes and the filter input"
             >
               Clear
             </button>
