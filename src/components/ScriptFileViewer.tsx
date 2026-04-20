@@ -337,62 +337,78 @@ function fullyCommentLines(span: CommentSpan): number[] {
   return out;
 }
 
-const PROSE_PREFIX = /^\s*(TODO|FIXME|XXX|HACK|NOTE|WARN|WARNING|BUG|OPTIMI[SZ]E|REVIEW|IMPORTANT|DESC|DESCRIPTION|DEPRECATED)\b/;
-const JSDOC_TAG = /@(param|returns?|throws|example|see|since|type|author|link|description|deprecated|todo)\b/i;
-const CODE_KEYWORDS = /^\s*(var|let|const|function|return|if|else|for|while|switch|case|break|continue|try|catch|finally|throw|import|export|class|new|yield|await|do)\b/;
+
+type CommentMode = "all" | "hideAll";
 
 /**
- * Classify a comment as "code" (commented-out code) vs "prose" (human-readable
- * comment). Heuristic — designed to err toward "prose" when uncertain so we
- * never hide a comment the author actually wants read.
+ * Produce a copy of `content` with comments removed. Fully-commented lines are
+ * dropped (so line numbers stay consecutive and copy-paste into another editor
+ * Just Works); comments inline with code are blanked out with trailing
+ * whitespace trimmed. Runs of 2+ blank lines left over from block comments are
+ * collapsed to at most one. The input `spans` is the output of
+ * `extractCommentSpans` against the same content.
  */
-function classifyComment(span: CommentSpan): "code" | "prose" {
-  // JSDoc block: opened with /** or has * -prefixed lines
-  if (span.isBlock) {
-    const firstNonEmpty = span.body.split("\n").find((l) => l.trim() !== "") ?? "";
-    if (firstNonEmpty.trim().startsWith("*")) return "prose";
-  }
+function stripCommentsFromContent(content: string, spans: CommentSpan[]): string {
+  if (spans.length === 0) return content;
+  const lines = content.split("\n");
+  const dropLines = new Set<number>();
+  // per-line inline comment char ranges: [startColInclusive, endColExclusive]
+  const inlineRanges = new Map<number, Array<[number, number]>>();
 
-  const rawLines = span.body.split("\n").map((l) => l.trim()).filter(Boolean);
-  if (rawLines.length === 0) return "prose";
-
-  // Strong prose markers at any line → prose
-  for (const l of rawLines) {
-    if (PROSE_PREFIX.test(l)) return "prose";
-    if (JSDOC_TAG.test(l)) return "prose";
-    if (l.startsWith("*")) return "prose";
-  }
-
-  let codeVotes = 0;
-  let proseVotes = 0;
-  for (const l of rawLines) {
-    if (CODE_KEYWORDS.test(l)) { codeVotes++; continue; }
-    if (/[;{}](\s*)$/.test(l)) { codeVotes++; continue; }
-    if (/=>/.test(l) || /===|!==|!=|\|\||&&/.test(l)) { codeVotes++; continue; }
-    if (/^[\w$.]+\s*=\s*[^=]/.test(l) && !/^[A-Z][a-z]+\s/.test(l)) { codeVotes++; continue; }
-    if (/^[\w$]+\s*\([^)]*\)\s*[;,{]?/.test(l)) { codeVotes++; continue; }
-    // Prose signals
-    const words = l.split(/\s+/).filter((w) => /^[A-Za-z][A-Za-z']*$/.test(w));
-    if (/[.!?]$/.test(l) && words.length >= 2) { proseVotes++; continue; }
-    if (/^[A-Z][a-z]+\s+[a-z]+/.test(l) && words.length >= 3) { proseVotes++; continue; }
-    const letters = (l.match(/[A-Za-z]/g) || []).length;
-    const symbols = l.length - letters - (l.match(/\s/g) || []).length;
-    if (words.length >= 3 && letters > symbols * 2) { proseVotes++; continue; }
-  }
-
-  return codeVotes > proseVotes ? "code" : "prose";
-}
-
-type CommentMode = "all" | "hideCode" | "hideAll";
-
-function computeHiddenByCommentMode(spans: CommentSpan[], mode: CommentMode): Set<number> {
-  if (mode === "all") return new Set();
-  const out = new Set<number>();
   for (const span of spans) {
-    if (mode === "hideCode" && classifyComment(span) !== "code") continue;
-    for (const ln of fullyCommentLines(span)) out.add(ln);
+    const whole = fullyCommentLines(span);
+    for (const ln of whole) dropLines.add(ln);
+
+    // Inline (code-on-same-line) comments: compute the column range for the
+    // start / end line of the span, but only for lines not already in drop.
+    const wholeSet = new Set(whole);
+    const headLine = lines[span.startLine - 1] ?? "";
+    if (!wholeSet.has(span.startLine) && span.startHasCode) {
+      const marker = span.isBlock ? "/*" : "//";
+      const col = headLine.lastIndexOf(marker);
+      if (col >= 0) {
+        const end = span.isBlock && span.endLine === span.startLine
+          ? (headLine.indexOf("*/", col) + 2 || headLine.length)
+          : headLine.length;
+        (inlineRanges.get(span.startLine) ?? inlineRanges.set(span.startLine, []).get(span.startLine))!
+          .push([col, end]);
+      }
+    }
+    if (span.isBlock && span.endLine !== span.startLine && span.endHasCode) {
+      const tailLine = lines[span.endLine - 1] ?? "";
+      const closeAt = tailLine.indexOf("*/");
+      if (closeAt >= 0) {
+        (inlineRanges.get(span.endLine) ?? inlineRanges.set(span.endLine, []).get(span.endLine))!
+          .push([0, closeAt + 2]);
+      }
+    }
   }
-  return out;
+
+  const out: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const ln = i + 1;
+    if (dropLines.has(ln)) continue;
+    let text = lines[i];
+    const ranges = inlineRanges.get(ln);
+    if (ranges && ranges.length > 0) {
+      // Apply removals right-to-left so earlier indices stay valid.
+      ranges.sort((a, b) => b[0] - a[0]);
+      for (const [s, e] of ranges) text = text.slice(0, s) + text.slice(e);
+      text = text.replace(/[ \t]+$/, "");
+    }
+    out.push(text);
+  }
+
+  // Collapse runs of 2+ blank lines to a single blank.
+  const collapsed: string[] = [];
+  let prevBlank = false;
+  for (const line of out) {
+    const blank = line.trim() === "";
+    if (blank && prevBlank) continue;
+    collapsed.push(line);
+    prevBlank = blank;
+  }
+  return collapsed.join("\n");
 }
 
 // ── Fold region detection ────────────────────────────────────────────────────
@@ -458,14 +474,7 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     return () => { cancelled = true; };
   }, [formatEnabled, content]);
 
-  const effectiveContent = formatEnabled && formatted != null ? formatted : content;
-
-  const symbols = useMemo(() => detectSymbols(effectiveContent, language), [effectiveContent, language]);
-  const references = useMemo(() => detectReferences(effectiveContent), [effectiveContent]);
-  const foldRegions = useMemo(() => computeFoldRegions(effectiveContent), [effectiveContent]);
-  const commentSpans = useMemo(() => extractCommentSpans(effectiveContent), [effectiveContent]);
-  const hasAnyComment = commentSpans.length > 0;
-  const hasHideableCodeComments = useMemo(() => commentSpans.some((s) => classifyComment(s) === "code"), [commentSpans]);
+  const formattedOrRaw = formatEnabled && formatted != null ? formatted : content;
 
   const [wrap, setWrap] = useState(true);
   const [findQuery, setFindQuery] = useState("");
@@ -474,6 +483,22 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
   const [foldedStartLines, setFoldedStartLines] = useState<Set<number>>(new Set());
   const [currentLine, setCurrentLine] = useState<number | undefined>(highlightLine);
   const [commentMode, setCommentMode] = useState<CommentMode>("all");
+
+  // When "Hide comments" is on, render a stripped copy instead of hiding lines
+  // so line numbers stay consecutive and copy-paste produces clean code. All
+  // downstream analyses (symbols, refs, folds) run on the same content the
+  // user actually sees.
+  const effectiveContent = useMemo(() => {
+    if (commentMode !== "hideAll") return formattedOrRaw;
+    const spans = extractCommentSpans(formattedOrRaw);
+    return stripCommentsFromContent(formattedOrRaw, spans);
+  }, [formattedOrRaw, commentMode]);
+
+  const symbols = useMemo(() => detectSymbols(effectiveContent, language), [effectiveContent, language]);
+  const references = useMemo(() => detectReferences(effectiveContent), [effectiveContent]);
+  const foldRegions = useMemo(() => computeFoldRegions(effectiveContent), [effectiveContent]);
+  const commentSpans = useMemo(() => extractCommentSpans(effectiveContent), [effectiveContent]);
+  const hasAnyComment = commentSpans.length > 0;
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [topVisibleLine, setTopVisibleLine] = useState<number | null>(null);
@@ -495,11 +520,6 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
   }, [sidebarWidth]);
-
-  const hiddenLines = useMemo(
-    () => computeHiddenByCommentMode(commentSpans, commentMode),
-    [commentSpans, commentMode],
-  );
 
   const symbolGroups = useMemo<SymbolGroup[]>(() => {
     const defs: { id: string; label: string; match: (s: Symbol) => boolean }[] = [
@@ -876,26 +896,9 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
             </button>
             <button
               type="button"
-              onClick={() => setCommentMode("hideCode")}
-              aria-pressed={commentMode === "hideCode"}
-              disabled={!hasHideableCodeComments}
-              title={hasHideableCodeComments ? "Hide only lines that look like commented-out code" : "No code-out comments detected"}
-              className={cn(
-                "px-1.5 rounded",
-                !hasHideableCodeComments
-                  ? "text-slate-600 cursor-not-allowed"
-                  : commentMode === "hideCode"
-                    ? "bg-sky-900/60 text-sky-200"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-700",
-              )}
-            >
-              Hide code-outs
-            </button>
-            <button
-              type="button"
               onClick={() => setCommentMode("hideAll")}
               aria-pressed={commentMode === "hideAll"}
-              title="Hide every comment-only line"
+              title="Remove all comments and show the cleaned source (copy-paste-friendly)"
               className={cn(
                 "px-1.5 rounded",
                 commentMode === "hideAll"
@@ -1004,7 +1007,6 @@ export function ScriptFileViewer({ content, fileName, environment, relPath, high
               foldedStartLines={foldedStartLines}
               onToggleFold={toggleFold}
               lineOverlays={lineOverlays}
-              hiddenLines={hiddenLines}
               indentGuides
               onScroll={handleViewerScroll}
               scrollRequest={scrollRequest ?? undefined}
