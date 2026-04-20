@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pipeline UI
 
-## Getting Started
+A web UI for managing Ping Advanced Identity Cloud (AIC) tenant configurations — pull config from a tenant, push it back, and promote it across environments (dev → staging → prod) with a guided diff-review workflow.
 
-First, run the development server:
+Built on top of a vendored subset of [`fr-config-manager`](https://github.com/ForgeRock/fr-config-manager) so teams can drive the pull/push/promote lifecycle from a browser instead of the CLI.
+
+## Features
+
+- **Pull** — stream live CLI output while fetching config for any scope (journeys, scripts, IDM managed objects, endpoints, IGA applications/entitlements, SAML, CSP, themes, and more — 40+ scopes).
+- **Push** — apply local config back to a tenant, with a production-only confirmation step.
+- **Promote** — multi-phase workflow: lock → dry-run diff → review → promote → verify → unlock, with rollback.
+- **Journey viewer** — browse journeys as an interactive ReactFlow graph, outline, table, swim-lane, or raw JSON. Inline node details, script overlay, search, trace upstream/downstream/data paths, fold passthrough chains, ELK or dagre layouts.
+- **Semantic journey diff** — compare journeys across environments with a canvas that highlights added / removed / modified / unchanged nodes, side-by-side script diffs, and inner-tree navigation.
+- **Environments manager** — add tenants through a guided wizard; raw `.env` editor and tenant connection test.
+- **Search / analyze** — global search across scopes, "find usage" for scripts, endpoints, and inner journeys.
+
+## Requirements
+
+- Node.js 20+ (project uses Next.js 16 / React 19).
+- npm (lock file is `package-lock.json`).
+- Access to one or more Ping AIC tenants and a service account with the scopes you want to manage.
+- A local working directory for each tenant's config files (the `CONFIG_DIR` referenced below).
+
+## Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/<your-org>/pipeline-ui.git
+cd pipeline-ui
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configure tenants
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Each tenant is described by:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. An entry in `environments/environments.json`:
+   ```json
+   [
+     {
+       "name": "dev",
+       "label": "Development",
+       "color": "#22c55e",
+       "envFile": "dev.env"
+     }
+   ]
+   ```
+2. A matching `.env` file in `environments/` (gitignored by default). Minimum fields:
+   ```
+   TENANT_BASE_URL=https://openam-<tenant>.forgeblocks.com
+   SERVICE_ACCOUNT_ID=<uuid>
+   SERVICE_ACCOUNT_KEY={"kty":"RSA",...}   # JWK, single line
+   CONFIG_DIR=/absolute/path/to/tenant-config
+   REALMS=alpha
+   SCRIPT_PREFIXES=MyPrefix_
+   ```
+   Optional fields cover agents, SAML, policies, managed objects, raw endpoints, CSP, and more — see `src/lib/env-parser.ts` for the full list.
 
-## Learn More
+The environments wizard in the UI will create/edit these files for you — the above is mainly useful if you're bootstrapping from the command line.
 
-To learn more about Next.js, take a look at the following resources:
+> `.env*` and `environments/` are gitignored. Keep service-account keys out of any public fork.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Run
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev        # development at http://localhost:3000
+npm run build      # production build
+npm run start      # production server
+```
 
-## Deploy on Vercel
+## Tests
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm test           # one-shot (vitest)
+npm run test:watch # watch mode
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project layout
+
+```
+src/
+  app/
+    api/           # Next.js API routes (pull, push, promote, compare, ...)
+    configs/       # Browse / viewer (journeys, scripts, endpoints, ...)
+    compare/       # Journey + workflow diff canvas
+    promote/       # Promotion workflow UI
+    environments/  # Environment manager + wizard
+    analyze/       # Usage / analysis views
+  components/      # Shared UI (legend modal, log viewer, diff graph, ...)
+  lib/             # CLI spawning, env parsing, diff, semantic compare
+  vendor/
+    fr-config-manager/  # Vendored MIT-licensed upstream — see LICENSE inside
+```
+
+## Contributing
+
+Pull requests are welcome. Please:
+
+- Open an issue first for anything larger than a small fix.
+- Keep PRs focused — one logical change per PR.
+- Run `npm run lint` and `npm test` before submitting.
+- By submitting a contribution you agree it is licensed under Apache 2.0 (see LICENSE).
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full text and [NOTICE](./NOTICE) for attribution.
+
+The vendored `src/vendor/fr-config-manager/` directory is MIT-licensed (Copyright (c) 2019 – 2024 ForgeRock); its original license is preserved in that directory.
