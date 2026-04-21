@@ -27,7 +27,6 @@ export type DataPullJob = {
 
 export type DisplayFields = {
   title: string;
-  subtitle?: string;
   searchFields: string[];
 };
 
@@ -40,7 +39,6 @@ export type SnapshotType = {
 export type SnapshotRecordListItem = {
   id: string;
   title: string;
-  subtitle?: string;
 };
 
 export type SnapshotRecordPage = {
@@ -48,4 +46,6 @@ export type SnapshotRecordPage = {
   page: number;
   limit: number;
   records: SnapshotRecordListItem[];
+  /** Union of top-level keys sampled from the snapshot (for the display picker). */
+  fields: string[];
 };

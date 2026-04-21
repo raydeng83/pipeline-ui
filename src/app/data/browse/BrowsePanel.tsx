@@ -8,11 +8,33 @@ import { useSnapshotRecords } from "@/hooks/useSnapshotRecords";
 import { RecordDetailPane } from "./RecordDetailPane";
 import { cn } from "@/lib/utils";
 
+// Per-(env,type) user preference for which record attribute drives the list
+// column. Stored in localStorage so it survives reloads. Empty string means
+// "use the server default".
+const TITLE_PREF_KEY = "data-browse-title-pref-v1";
+function loadTitlePrefs(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(TITLE_PREF_KEY);
+    return raw ? JSON.parse(raw) as Record<string, string> : {};
+  } catch { return {}; }
+}
+function saveTitlePrefs(prefs: Record<string, string>): void {
+  try { localStorage.setItem(TITLE_PREF_KEY, JSON.stringify(prefs)); } catch { /* quota */ }
+}
+const prefKey = (env: string, type: string) => `${env}::${type}`;
+
 export function BrowsePanel({ environments }: { environments: Environment[] }) {
   const [env, setEnv] = useState(environments[0]?.name ?? "");
   const [types, setTypes] = useState<SnapshotType[]>([]);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [titlePrefs, setTitlePrefs] = useState<Record<string, string>>({});
+
+  // Rehydrate display-attribute preferences after mount. Kept out of the
+  // useState initializer so server and client renders agree before hydration.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setTitlePrefs(loadTitlePrefs()); }, []);
 
   useEffect(() => {
     if (!env) return;
@@ -25,7 +47,15 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
       .catch(() => setTypes([]));
   }, [env]);
 
-  const { q, setQ, page, setPage, data, loading } = useSnapshotRecords(env, selectedType);
+  const titleField = selectedType ? (titlePrefs[prefKey(env, selectedType)] || undefined) : undefined;
+  const { q, setQ, page, setPage, data, loading } = useSnapshotRecords(env, selectedType, titleField);
+
+  function setTitleFieldForCurrent(field: string) {
+    if (!selectedType) return;
+    const next = { ...titlePrefs, [prefKey(env, selectedType)]: field };
+    setTitlePrefs(next);
+    saveTitlePrefs(next);
+  }
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
 
   const exportUrl = useMemo(() => {
@@ -79,14 +109,30 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
 
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-4">
             <div className="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col min-h-[500px] max-h-[calc(100vh-280px)]">
-              <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2">
+              <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2 flex-wrap">
                 <input
                   type="text"
                   value={q}
                   onChange={(e) => { setQ(e.target.value); setPage(1); }}
-                  placeholder="Search records…"
-                  className="flex-1 text-xs rounded border border-slate-300 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                  placeholder="Search anywhere in each record…"
+                  className="flex-1 min-w-[160px] text-xs rounded border border-slate-300 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sky-400"
                 />
+                {data && data.fields.length > 0 && (
+                  <label className="flex items-center gap-1 text-[10px] text-slate-500">
+                    <span>Display:</span>
+                    <select
+                      value={titleField ?? ""}
+                      onChange={(e) => setTitleFieldForCurrent(e.target.value)}
+                      className="text-[11px] rounded border border-slate-300 bg-white px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-sky-400"
+                      title="Attribute used as the row title"
+                    >
+                      <option value="">default</option>
+                      {data.fields.map((f) => (
+                        <option key={f} value={f}>{f}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 {exportUrl && (
                   <>
                     <a href={exportUrl("json")} className="text-[11px] text-sky-600 hover:underline">JSON</a>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { SnapshotRecordPage } from "@/lib/data/types";
 
-export function useSnapshotRecords(env: string, type: string | null) {
+export function useSnapshotRecords(env: string, type: string | null, titleField?: string) {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(50);
@@ -22,6 +22,7 @@ export function useSnapshotRecords(env: string, type: string | null) {
       setLoading(true);
       try {
         const params = new URLSearchParams({ q, page: String(page), limit: String(limit) });
+        if (titleField) params.set("titleField", titleField);
         const res = await fetch(`/api/data/records/${env}/${type}?${params.toString()}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
@@ -40,7 +41,7 @@ export function useSnapshotRecords(env: string, type: string | null) {
       cancelled = true;
       if (debounce.current) clearTimeout(debounce.current);
     };
-  }, [env, type, q, page, limit]);
+  }, [env, type, q, page, limit, titleField]);
 
   return { q, setQ, page, setPage, limit, data, loading, error };
 }

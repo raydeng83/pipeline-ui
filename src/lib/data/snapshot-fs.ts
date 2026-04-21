@@ -59,18 +59,32 @@ function findKeyCI(record: Record<string, unknown>, wanted: string): string | un
   return Object.keys(record).find((k) => k.toLowerCase() === lc);
 }
 
+const FIELD_SAMPLE_SIZE = 20;
+
 export function listRecords(
   envsRoot: string, env: string, type: string, opts: ListOpts,
 ): SnapshotRecordPage {
   const dir = path.join(managedDataDir(envsRoot, env), type);
   if (!fs.existsSync(dir)) {
-    return { total: 0, page: opts.page, limit: opts.limit, records: [] };
+    return { total: 0, page: opts.page, limit: opts.limit, records: [], fields: [] };
   }
 
   const q = opts.q.trim().toLowerCase();
   const files = fs.readdirSync(dir)
     .filter((f) => f.endsWith(".json") && f !== "_manifest.json")
     .sort();
+
+  // Field union: sample the first N records regardless of search so the
+  // display-attribute picker stays populated even when the query matches
+  // nothing.
+  const fieldSet = new Set<string>();
+  for (const f of files.slice(0, FIELD_SAMPLE_SIZE)) {
+    try {
+      const record = JSON.parse(fs.readFileSync(path.join(dir, f), "utf-8")) as Record<string, unknown>;
+      for (const k of Object.keys(record)) fieldSet.add(k);
+    } catch { /* skip */ }
+  }
+  const fields = [...fieldSet].sort();
 
   const matching: { id: string; record: Record<string, unknown> }[] = [];
   for (const f of files) {
@@ -99,6 +113,7 @@ export function listRecords(
     total,
     page: opts.page,
     limit: opts.limit,
+    fields,
     records: slice.map(({ id, record }) => {
       const key = findKeyCI(record, titleField);
       const title = (key && stringOrEmpty(record[key])) || id;
