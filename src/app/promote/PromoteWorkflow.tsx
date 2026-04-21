@@ -243,7 +243,10 @@ function TaskForm({
         <FullscreenToggle fullscreen={fullscreen} onToggle={onToggleFullscreen} />
       </div>
 
-      <div className={cn("p-4 space-y-4 overflow-y-auto", fullscreen ? "flex-1" : "max-h-[calc(100vh-260px)]")}>
+      {/* Embedded: no inner scroll — let the page handle vertical overflow so
+          we don't get a nested scrollbar inside the card. Fullscreen keeps its
+          own scroll because the whole form is pinned inside a fixed overlay. */}
+      <div className={cn("p-4 space-y-4", fullscreen && "flex-1 overflow-y-auto")}>
         {/* Name */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-700">
