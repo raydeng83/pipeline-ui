@@ -1,9 +1,10 @@
 // src/app/data/browse/BrowsePanel.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Environment } from "@/lib/fr-config";
 import type { SnapshotType } from "@/lib/data/types";
+import type { GlobalSearchHit, GlobalSearchResponse } from "@/app/api/data/search/[env]/route";
 import { useSnapshotRecords } from "@/hooks/useSnapshotRecords";
 import { RecordDetailPane } from "./RecordDetailPane";
 import { cn } from "@/lib/utils";
@@ -33,7 +34,6 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
 
   // Rehydrate display-attribute preferences after mount. Kept out of the
   // useState initializer so server and client renders agree before hydration.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setTitlePrefs(loadTitlePrefs()); }, []);
 
   useEffect(() => {
@@ -56,6 +56,66 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
     setTitlePrefs(next);
     saveTitlePrefs(next);
   }
+
+  // ── Global search (across all types) ─────────────────────────────────────
+  const [globalQ, setGlobalQ] = useState("");
+  const [globalRegex, setGlobalRegex] = useState(false);
+  const [globalCaseSensitive, setGlobalCaseSensitive] = useState(false);
+  const [globalHits, setGlobalHits] = useState<GlobalSearchHit[]>([]);
+  const [globalTruncated, setGlobalTruncated] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
+  const [globalLoading, setGlobalLoading] = useState(false);
+  const globalDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!env || !globalQ.trim()) {
+      setGlobalHits([]); setGlobalTruncated(false); setGlobalError(null);
+      return;
+    }
+    let cancelled = false;
+    if (globalDebounceRef.current) clearTimeout(globalDebounceRef.current);
+    globalDebounceRef.current = setTimeout(async () => {
+      if (cancelled) return;
+      setGlobalLoading(true);
+      try {
+        const params = new URLSearchParams({ q: globalQ });
+        if (globalRegex) params.set("regex", "true");
+        if (globalCaseSensitive) params.set("caseSensitive", "true");
+        const res = await fetch(`/api/data/search/${env}?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json() as GlobalSearchResponse;
+        if (!cancelled) {
+          setGlobalHits(json.hits);
+          setGlobalTruncated(json.truncated);
+          setGlobalError(json.error ?? null);
+        }
+      } catch (e) {
+        if (!cancelled) setGlobalError((e as Error).message);
+      } finally {
+        if (!cancelled) setGlobalLoading(false);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      if (globalDebounceRef.current) clearTimeout(globalDebounceRef.current);
+    };
+  }, [env, globalQ, globalRegex, globalCaseSensitive]);
+
+  const globalHitsByType = useMemo(() => {
+    const m = new Map<string, GlobalSearchHit[]>();
+    for (const h of globalHits) {
+      if (!m.has(h.type)) m.set(h.type, []);
+      m.get(h.type)!.push(h);
+    }
+    return m;
+  }, [globalHits]);
+
+  function jumpTo(type: string, id: string) {
+    setSelectedType(type);
+    setSelectedId(id);
+    setPage(1);
+    setQ("");
+  }
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
 
   const exportUrl = useMemo(() => {
@@ -65,9 +125,11 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
       `/api/data/export/${env}/${selectedType}?${params.toString()}&format=${format}`;
   }, [env, selectedType, q]);
 
+  const globalActive = globalQ.trim().length > 0;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-end gap-3 flex-wrap">
         <div className="flex flex-col gap-1">
           <label className="text-xs text-slate-500 font-medium">Environment</label>
           <select
@@ -80,7 +142,76 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
             ))}
           </select>
         </div>
+        <div className="flex-1 min-w-[240px] flex flex-col gap-1">
+          <label className="text-xs text-slate-500 font-medium">
+            Search all types
+            {globalLoading && <span className="ml-2 text-slate-400">loading…</span>}
+            {globalError && <span className="ml-2 text-rose-600">{globalError}</span>}
+            {!globalError && globalActive && !globalLoading && (
+              <span className="ml-2 text-slate-400">
+                {globalHits.length} hit{globalHits.length === 1 ? "" : "s"}{globalTruncated ? " (capped)" : ""}
+              </span>
+            )}
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={globalQ}
+              onChange={(e) => setGlobalQ(e.target.value)}
+              placeholder={globalRegex ? "Regex, e.g. ^alice\\d+" : "Substring to match anywhere in any record…"}
+              className="flex-1 text-sm rounded border border-slate-300 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-sky-400"
+            />
+            <label className="flex items-center gap-1 text-xs text-slate-600 cursor-pointer select-none">
+              <input type="checkbox" checked={globalRegex} onChange={(e) => setGlobalRegex(e.target.checked)} className="accent-sky-600" />
+              regex
+            </label>
+            <label className="flex items-center gap-1 text-xs text-slate-600 cursor-pointer select-none">
+              <input type="checkbox" checked={globalCaseSensitive} onChange={(e) => setGlobalCaseSensitive(e.target.checked)} className="accent-sky-600" />
+              Aa
+            </label>
+            {globalQ && (
+              <button type="button" onClick={() => setGlobalQ("")} className="text-xs text-slate-400 hover:text-slate-600" title="Clear">✕</button>
+            )}
+          </div>
+        </div>
       </div>
+
+      {globalActive && (
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="px-3 py-2 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            Global results
+          </div>
+          {globalHits.length === 0 && !globalLoading && !globalError ? (
+            <div className="p-4 text-xs text-slate-400 italic">No matches across any type.</div>
+          ) : (
+            <div className="max-h-[40vh] overflow-y-auto divide-y divide-slate-100">
+              {[...globalHitsByType.entries()].map(([type, hits]) => (
+                <div key={type}>
+                  <div className="px-3 py-1 bg-slate-50 border-b border-slate-100 flex items-center gap-2 text-[11px] text-slate-500">
+                    <span className="font-mono text-slate-700">{type}</span>
+                    <span className="text-slate-400">{hits.length}</span>
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    {hits.map((h) => (
+                      <button
+                        key={`${h.type}/${h.id}`}
+                        type="button"
+                        onClick={() => jumpTo(h.type, h.id)}
+                        className="w-full text-left px-3 py-1.5 hover:bg-sky-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-slate-800 truncate font-mono">{h.id}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-mono truncate">{h.preview}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {types.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-lg p-6 text-center text-sm text-slate-500">
