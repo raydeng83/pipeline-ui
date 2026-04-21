@@ -15,10 +15,15 @@ export function PullPanel({
 }) {
   const [env, setEnv] = useState(environments[0]?.name ?? "");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const { jobs, start, abort } = useDataPullJobs({ pollMs: 2000, includeFinished: true });
-  const types = typesByEnv[env] ?? [];
+  const types = useMemo(() => typesByEnv[env] ?? [], [typesByEnv, env]);
+  const visibleTypes = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    return q ? types.filter((t) => t.toLowerCase().includes(q)) : types;
+  }, [types, filter]);
   const active = useMemo(
     () => jobs.find((j) => j.env === env && (j.status === "running" || j.status === "queued" || j.status === "aborting")),
     [jobs, env],
@@ -29,8 +34,18 @@ export function PullPanel({
     if (next.has(t)) next.delete(t); else next.add(t);
     return next;
   });
-  const selectAll = () => setSelected(new Set(types));
-  const deselectAll = () => setSelected(new Set());
+  // Select/Deselect "all" operates on the currently-visible (filtered) types,
+  // so narrowing the filter first lets the user act on a subset.
+  const selectAll = () => setSelected((prev) => {
+    const next = new Set(prev);
+    for (const t of visibleTypes) next.add(t);
+    return next;
+  });
+  const deselectAll = () => setSelected((prev) => {
+    const next = new Set(prev);
+    for (const t of visibleTypes) next.delete(t);
+    return next;
+  });
 
   const canStart = !active && selected.size > 0;
 
@@ -52,7 +67,7 @@ export function PullPanel({
             <label className="text-xs text-slate-500 font-medium">Environment</label>
             <select
               value={env}
-              onChange={(e) => { setEnv(e.target.value); setSelected(new Set()); }}
+              onChange={(e) => { setEnv(e.target.value); setSelected(new Set()); setFilter(""); }}
               className="px-3 py-1.5 text-sm border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               {environments.map((e) => (
@@ -83,11 +98,42 @@ export function PullPanel({
           </button>
         </div>
 
+        {types.length > 0 && (
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 max-w-sm">
+              <input
+                type="text"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Filter types by name…"
+                className="w-full pl-7 pr-6 py-1 text-xs rounded border border-slate-300 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-400"
+              />
+              <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+              {filter && (
+                <button
+                  type="button"
+                  onClick={() => setFilter("")}
+                  title="Clear filter"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px]"
+                >✕</button>
+              )}
+            </div>
+            <span className="text-[11px] text-slate-400 tabular-nums">
+              {visibleTypes.length} / {types.length}
+            </span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
           {types.length === 0 && (
             <p className="text-xs text-slate-400 italic">No managed object schema found for this env.</p>
           )}
-          {types.map((t) => (
+          {types.length > 0 && visibleTypes.length === 0 && (
+            <p className="text-xs text-slate-400 italic">No types match the filter.</p>
+          )}
+          {visibleTypes.map((t) => (
             <label key={t} className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
