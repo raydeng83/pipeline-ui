@@ -10,6 +10,8 @@ export const dynamic = "force-dynamic";
 
 export interface CountResponse {
   counts: Record<string, number | null>;
+  /** Per-type explanation when count is null (HTTP status, "totalPagedResults=-1", etc.). */
+  reasons: Record<string, string>;
   error?: string;
 }
 
@@ -21,34 +23,47 @@ function envVarsFor(env: string): Record<string, string> | null {
   return parseEnvFile(fs.readFileSync(envFile, "utf-8")) as Record<string, string>;
 }
 
+type ProbeResult = { count: number } | { count: null; reason: string };
+
 async function probe(
   tenantUrl: string,
   type: string,
   token: string,
-  policy: "EXACT" | "ESTIMATE",
-): Promise<number | null> {
+  policy: "EXACT" | "ESTIMATE" | "NONE",
+): Promise<ProbeResult> {
   const url = new URL(`${tenantUrl}/openidm/managed/${type}`);
   url.searchParams.set("_queryFilter", "true");
-  url.searchParams.set("_countPolicy", policy);
+  if (policy !== "NONE") url.searchParams.set("_countPolicy", policy);
   url.searchParams.set("_pageSize", "1");
   try {
     const res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      const snippet = body.slice(0, 120).replace(/\s+/g, " ").trim();
+      return { count: null, reason: `${policy} → HTTP ${res.status}${snippet ? `: ${snippet}` : ""}` };
+    }
     const data = await res.json() as { totalPagedResults?: number };
-    return typeof data.totalPagedResults === "number" && data.totalPagedResults >= 0
-      ? data.totalPagedResults
-      : null;
-  } catch {
-    return null;
+    if (typeof data.totalPagedResults !== "number") {
+      return { count: null, reason: `${policy} → response had no totalPagedResults` };
+    }
+    if (data.totalPagedResults < 0) {
+      return { count: null, reason: `${policy} → totalPagedResults=${data.totalPagedResults}` };
+    }
+    return { count: data.totalPagedResults };
+  } catch (e) {
+    return { count: null, reason: `${policy} → ${(e as Error).message}` };
   }
 }
 
-async function probeWithFallback(tenantUrl: string, type: string, token: string): Promise<number | null> {
+async function probeWithFallback(tenantUrl: string, type: string, token: string): Promise<ProbeResult> {
   const exact = await probe(tenantUrl, type, token, "EXACT");
-  if (exact !== null) return exact;
-  return probe(tenantUrl, type, token, "ESTIMATE");
+  if (exact.count !== null) return exact;
+  const estimate = await probe(tenantUrl, type, token, "ESTIMATE");
+  if (estimate.count !== null) return estimate;
+  // Join both reasons so the user sees why neither policy produced a count.
+  return { count: null, reason: `${exact.reason}; ${estimate.reason}` };
 }
 
 export async function POST(
@@ -62,18 +77,18 @@ export async function POST(
     : [];
 
   if (types.length === 0) {
-    return NextResponse.json({ counts: {} } satisfies CountResponse);
+    return NextResponse.json({ counts: {}, reasons: {} } satisfies CountResponse);
   }
 
   const envVars = envVarsFor(env);
-  if (!envVars) return NextResponse.json({ error: "env not found", counts: {} } satisfies CountResponse, { status: 404 });
+  if (!envVars) return NextResponse.json({ error: "env not found", counts: {}, reasons: {} } satisfies CountResponse, { status: 404 });
 
   let token: string;
   try {
     token = await getAccessToken(envVars);
   } catch (e) {
     return NextResponse.json(
-      { error: (e as Error).message, counts: {} } satisfies CountResponse,
+      { error: (e as Error).message, counts: {}, reasons: {} } satisfies CountResponse,
       { status: 502 },
     );
   }
@@ -84,6 +99,10 @@ export async function POST(
   );
 
   const counts: Record<string, number | null> = {};
-  for (const [t, n] of results) counts[t] = n;
-  return NextResponse.json({ counts } satisfies CountResponse);
+  const reasons: Record<string, string> = {};
+  for (const [t, r] of results) {
+    counts[t] = r.count;
+    if (r.count === null) reasons[t] = r.reason;
+  }
+  return NextResponse.json({ counts, reasons } satisfies CountResponse);
 }

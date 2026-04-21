@@ -20,6 +20,7 @@ export function PullPanel({
   // Counts are sparse: undefined = never probed, null = probed but tenant
   // declined to count, number = real count. Keyed by type within the current env.
   const [counts, setCounts] = useState<Record<string, number | null>>({});
+  const [countReasons, setCountReasons] = useState<Record<string, string>>({});
   const [probing, setProbing] = useState(false);
   const [probeError, setProbeError] = useState<string | null>(null);
 
@@ -62,12 +63,13 @@ export function PullPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ types }),
       });
-      const body = await res.json() as { counts?: Record<string, number | null>; error?: string };
+      const body = await res.json() as { counts?: Record<string, number | null>; reasons?: Record<string, string>; error?: string };
       if (!res.ok || body.error) {
         setProbeError(body.error ?? `Probe failed (${res.status}).`);
         return;
       }
       setCounts(body.counts ?? {});
+      setCountReasons(body.reasons ?? {});
     } catch (e) {
       setProbeError((e as Error).message);
     } finally {
@@ -100,6 +102,7 @@ export function PullPanel({
                 setSelected(new Set());
                 setFilter("");
                 setCounts({});
+                setCountReasons({});
                 setProbeError(null);
               }}
               className="px-3 py-1.5 text-sm border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
@@ -188,8 +191,8 @@ export function PullPanel({
                 <span className="font-mono text-slate-700 flex-1 truncate">{t}</span>
                 {has && (
                   <span
-                    className={c === null ? "text-[10px] text-slate-400 italic" : "text-[10px] text-slate-500 font-mono tabular-nums"}
-                    title={c === null ? "Tenant declined to report a count" : `${c} records`}
+                    className={c === null ? "text-[10px] text-slate-400 italic cursor-help" : "text-[10px] text-slate-500 font-mono tabular-nums"}
+                    title={c === null ? (countReasons[t] ?? "Tenant declined to report a count") : `${c} records`}
                   >
                     {c === null ? "unknown" : c.toLocaleString()}
                   </span>
