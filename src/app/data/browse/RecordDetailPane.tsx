@@ -10,6 +10,7 @@ export function RecordDetailPane({ env, type, id }: { env: string; type: string 
 
   useEffect(() => {
     if (!type || !id) return;
+    let cancelled = false;
     // Flag the loading state before kicking off the fetch so the spinner
     // appears immediately; the disable is for a genuine async-loading case
     // the lint rule doesn't model.
@@ -17,9 +18,10 @@ export function RecordDetailPane({ env, type, id }: { env: string; type: string 
     setLoading(true);
     fetch(`/api/data/records/${env}/${type}/${id}`)
       .then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
-      .then((d) => setRecord(d.record))
-      .catch(() => setRecord(null))
-      .finally(() => setLoading(false));
+      .then((d) => { if (!cancelled) setRecord(d.record); })
+      .catch(() => { if (!cancelled) setRecord(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [env, type, id]);
 
   return (

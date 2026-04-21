@@ -64,9 +64,12 @@ export async function GET(
     try {
       const record = JSON.parse(fs.readFileSync(path.join(dir, f), "utf-8")) as Record<string, unknown>;
       if (q) {
+        // Must match snapshot-fs.listRecords' search semantics so Browse
+        // and Export return the same rows for a given query.
         const hit = searchFields.some((field) => {
           const v = record[field];
-          return typeof v === "string" && v.toLowerCase().includes(q);
+          const s = typeof v === "string" ? v : v == null ? "" : String(v);
+          return s.toLowerCase().includes(q);
         });
         if (!hit) continue;
       }

@@ -14,22 +14,32 @@ export function useSnapshotRecords(env: string, type: string | null) {
 
   useEffect(() => {
     if (!type) { setData(null); return; }
+    let cancelled = false;
 
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(async () => {
+      if (cancelled) return;
       setLoading(true);
       try {
         const params = new URLSearchParams({ q, page: String(page), limit: String(limit) });
         const res = await fetch(`/api/data/records/${env}/${type}?${params.toString()}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setData(await res.json());
-        setError(null);
+        const json = await res.json();
+        if (!cancelled) {
+          setData(json);
+          setError(null);
+        }
       } catch (e) {
-        setError((e as Error).message);
+        if (!cancelled) setError((e as Error).message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }, 200);
+
+    return () => {
+      cancelled = true;
+      if (debounce.current) clearTimeout(debounce.current);
+    };
   }, [env, type, q, page, limit]);
 
   return { q, setQ, page, setPage, limit, data, loading, error };
