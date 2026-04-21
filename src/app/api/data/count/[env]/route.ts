@@ -1,5 +1,5 @@
 // src/app/api/data/count/[env]/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import path from "path";
 import fs from "fs";
 import { cwd } from "process";
@@ -8,14 +8,25 @@ import { getAccessToken } from "@/lib/iga-api";
 
 export const dynamic = "force-dynamic";
 
-export interface CountResponse {
-  counts: Record<string, number | null>;
-  /** Per-type explanation when count is null (HTTP status, "totalPagedResults=-1", etc.). */
-  reasons: Record<string, string>;
-  error?: string;
-}
+/**
+ * NDJSON streaming endpoint. One JSON object per line:
+ *   {"event":"start","type":"alpha_user"}
+ *   {"event":"progress","type":"alpha_user","fetched":1000,"pages":1}
+ *   {"event":"done","type":"alpha_user","count":8214}
+ *   {"event":"done","type":"alpha_role","count":null,"reason":"…"}
+ *   {"event":"fatal","error":"Token error: …"}   ← ends stream
+ *   {"event":"end"}                              ← normal completion
+ */
+export type ProbeEvent =
+  | { event: "start"; type: string }
+  | { event: "progress"; type: string; fetched: number; pages: number }
+  | { event: "done"; type: string; count: number | null; reason?: string }
+  | { event: "fatal"; error: string }
+  | { event: "end" };
 
 const MAX_TYPES = 80;
+const ID_PAGE_SIZE = 1000;
+const PAGINATION_COUNT_CAP = 200_000;
 
 function envVarsFor(env: string): Record<string, string> | null {
   const envFile = path.join(cwd(), "environments", env, ".env");
@@ -25,20 +36,18 @@ function envVarsFor(env: string): Record<string, string> | null {
 
 type ProbeResult = { count: number } | { count: null; reason: string };
 
-async function probe(
+async function probePolicy(
   tenantUrl: string,
   type: string,
   token: string,
-  policy: "EXACT" | "ESTIMATE" | "NONE",
+  policy: "EXACT" | "ESTIMATE",
 ): Promise<ProbeResult> {
   const url = new URL(`${tenantUrl}/openidm/managed/${type}`);
   url.searchParams.set("_queryFilter", "true");
-  if (policy !== "NONE") url.searchParams.set("_countPolicy", policy);
+  url.searchParams.set("_countPolicy", policy);
   url.searchParams.set("_pageSize", "1");
   try {
-    const res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       const snippet = body.slice(0, 120).replace(/\s+/g, " ").trim();
@@ -57,19 +66,18 @@ async function probe(
   }
 }
 
-// Some AIC tenants reject _countPolicy outright (HTTP 400 "unrecognized
-// parameter"). Fallback: paginate with _fields=_id so each page's payload is
-// tiny (just ids), counting as we go. Bounded by PAGINATION_COUNT_CAP to
-// keep the probe responsive even for huge types — result is suffixed with
-// "+" in the reason when we capped out.
-const ID_PAGE_SIZE = 1000;
-const PAGINATION_COUNT_CAP = 200_000;
-
-async function countByIdPagination(
+async function probeType(
   tenantUrl: string,
   type: string,
   token: string,
+  emit: (ev: ProbeEvent) => void,
 ): Promise<ProbeResult> {
+  const exact = await probePolicy(tenantUrl, type, token, "EXACT");
+  if (exact.count !== null) return exact;
+  const estimate = await probePolicy(tenantUrl, type, token, "ESTIMATE");
+  if (estimate.count !== null) return estimate;
+
+  // Paginated ID-only count fallback. Progress events fire after each page.
   let cookie: string | null = null;
   let total = 0;
   let pages = 0;
@@ -80,41 +88,27 @@ async function countByIdPagination(
     url.searchParams.set("_pageSize", String(ID_PAGE_SIZE));
     if (cookie) url.searchParams.set("_pagedResultsCookie", cookie);
     try {
-      const res = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) {
         const body = await res.text().catch(() => "");
         const snippet = body.slice(0, 120).replace(/\s+/g, " ").trim();
-        return { count: null, reason: `pagination → HTTP ${res.status}${snippet ? `: ${snippet}` : ""}` };
+        return { count: null, reason: `${exact.reason}; ${estimate.reason}; pagination → HTTP ${res.status}${snippet ? `: ${snippet}` : ""}` };
       }
       const data = await res.json() as { result?: unknown[]; pagedResultsCookie?: string | null };
       const n = Array.isArray(data.result) ? data.result.length : 0;
       total += n;
       pages++;
+      emit({ event: "progress", type, fetched: total, pages });
       cookie = data.pagedResultsCookie ?? null;
       if (!cookie) break;
       if (total >= PAGINATION_COUNT_CAP) {
-        return { count: null, reason: `pagination → >${PAGINATION_COUNT_CAP.toLocaleString()} (too many to count, capped after ${pages} pages)` };
+        return { count: null, reason: `${exact.reason}; ${estimate.reason}; pagination → >${PAGINATION_COUNT_CAP.toLocaleString()} (capped after ${pages} pages)` };
       }
     } catch (e) {
-      return { count: null, reason: `pagination → ${(e as Error).message}` };
+      return { count: null, reason: `${exact.reason}; ${estimate.reason}; pagination → ${(e as Error).message}` };
     }
   }
   return { count: total };
-}
-
-async function probeWithFallback(tenantUrl: string, type: string, token: string): Promise<ProbeResult> {
-  const exact = await probe(tenantUrl, type, token, "EXACT");
-  if (exact.count !== null) return exact;
-  const estimate = await probe(tenantUrl, type, token, "ESTIMATE");
-  if (estimate.count !== null) return estimate;
-  // Both policies failed. If both responses were rejected with "unrecognized
-  // parameter" (this AIC doesn't support _countPolicy at all), skip the
-  // second attempt next time by starting from pagination.
-  const paginated = await countByIdPagination(tenantUrl, type, token);
-  if (paginated.count !== null) return paginated;
-  return { count: null, reason: `${exact.reason}; ${estimate.reason}; ${paginated.reason}` };
 }
 
 export async function POST(
@@ -123,37 +117,60 @@ export async function POST(
 ) {
   const { env } = await params;
   const body = await req.json().catch(() => ({}));
-  const types = Array.isArray(body.types)
+  const typesRaw = Array.isArray(body.types)
     ? body.types.filter((t: unknown) => typeof t === "string").slice(0, MAX_TYPES)
     : [];
+  const types: string[] = typesRaw;
 
-  if (types.length === 0) {
-    return NextResponse.json({ counts: {}, reasons: {} } satisfies CountResponse);
-  }
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const emit = (ev: ProbeEvent) => {
+        controller.enqueue(encoder.encode(JSON.stringify(ev) + "\n"));
+      };
 
-  const envVars = envVarsFor(env);
-  if (!envVars) return NextResponse.json({ error: "env not found", counts: {}, reasons: {} } satisfies CountResponse, { status: 404 });
+      if (types.length === 0) {
+        emit({ event: "end" });
+        controller.close();
+        return;
+      }
 
-  let token: string;
-  try {
-    token = await getAccessToken(envVars);
-  } catch (e) {
-    return NextResponse.json(
-      { error: (e as Error).message, counts: {}, reasons: {} } satisfies CountResponse,
-      { status: 502 },
-    );
-  }
+      const envVars = envVarsFor(env);
+      if (!envVars) {
+        emit({ event: "fatal", error: "env not found" });
+        controller.close();
+        return;
+      }
 
-  const tenantUrl = envVars.TENANT_BASE_URL ?? "";
-  const results = await Promise.all(
-    (types as string[]).map(async (t) => [t, await probeWithFallback(tenantUrl, t, token)] as const),
-  );
+      let token: string;
+      try {
+        token = await getAccessToken(envVars);
+      } catch (e) {
+        emit({ event: "fatal", error: (e as Error).message });
+        controller.close();
+        return;
+      }
 
-  const counts: Record<string, number | null> = {};
-  const reasons: Record<string, string> = {};
-  for (const [t, r] of results) {
-    counts[t] = r.count;
-    if (r.count === null) reasons[t] = r.reason;
-  }
-  return NextResponse.json({ counts, reasons } satisfies CountResponse);
+      const tenantUrl = envVars.TENANT_BASE_URL ?? "";
+
+      // Sequential so the UI can highlight one type at a time. Probing types
+      // one after another also avoids hammering the tenant with concurrent
+      // count queries.
+      for (const type of types) {
+        emit({ event: "start", type });
+        const r = await probeType(tenantUrl, type, token, emit);
+        emit({ event: "done", type, count: r.count, reason: r.count === null ? (r as { reason: string }).reason : undefined });
+      }
+
+      emit({ event: "end" });
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/x-ndjson",
+      "Cache-Control": "no-cache",
+    },
+  });
 }

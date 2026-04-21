@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 import { useDataPullJobs } from "@/hooks/useDataPullJobs";
 import { JobCard } from "./JobCard";
 import type { Environment } from "@/lib/fr-config";
+import { cn } from "@/lib/utils";
 
 export function PullPanel({
   environments,
@@ -23,6 +24,9 @@ export function PullPanel({
   const [countReasons, setCountReasons] = useState<Record<string, string>>({});
   const [probing, setProbing] = useState(false);
   const [probeError, setProbeError] = useState<string | null>(null);
+  const [currentlyProbing, setCurrentlyProbing] = useState<string | null>(null);
+  // Live pagination progress per type (only populated while pagination fallback runs).
+  const [probeProgress, setProbeProgress] = useState<Record<string, { fetched: number; pages: number }>>({});
 
   const { jobs, start, abort } = useDataPullJobs({ pollMs: 2000, includeFinished: true });
   const types = useMemo(() => typesByEnv[env] ?? [], [typesByEnv, env]);
@@ -53,29 +57,73 @@ export function PullPanel({
     return next;
   });
 
+  type ProbeEvent =
+    | { event: "start"; type: string }
+    | { event: "progress"; type: string; fetched: number; pages: number }
+    | { event: "done"; type: string; count: number | null; reason?: string }
+    | { event: "fatal"; error: string }
+    | { event: "end" };
+
   const probeCounts = async () => {
     if (!env || selected.size === 0 || probing) return;
     const typesToProbe = [...selected];
     setProbing(true);
     setProbeError(null);
+    // Drop stale progress for the types we're about to re-probe.
+    setProbeProgress((prev) => {
+      const next = { ...prev };
+      for (const t of typesToProbe) delete next[t];
+      return next;
+    });
+
     try {
       const res = await fetch(`/api/data/count/${env}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ types: typesToProbe }),
       });
-      const body = await res.json() as { counts?: Record<string, number | null>; reasons?: Record<string, string>; error?: string };
-      if (!res.ok || body.error) {
-        setProbeError(body.error ?? `Probe failed (${res.status}).`);
+      if (!res.ok || !res.body) {
+        setProbeError(`Probe failed (${res.status}).`);
         return;
       }
-      // Merge into existing counts so previous probes stay visible.
-      setCounts((prev) => ({ ...prev, ...(body.counts ?? {}) }));
-      setCountReasons((prev) => ({ ...prev, ...(body.reasons ?? {}) }));
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) >= 0) {
+          const line = buffer.slice(0, idx).trim();
+          buffer = buffer.slice(idx + 1);
+          if (!line) continue;
+          try {
+            const ev = JSON.parse(line) as ProbeEvent;
+            if (ev.event === "start") {
+              setCurrentlyProbing(ev.type);
+            } else if (ev.event === "progress") {
+              setProbeProgress((prev) => ({ ...prev, [ev.type]: { fetched: ev.fetched, pages: ev.pages } }));
+            } else if (ev.event === "done") {
+              setCounts((prev) => ({ ...prev, [ev.type]: ev.count }));
+              setCountReasons((prev) => {
+                const next = { ...prev };
+                if (ev.reason) next[ev.type] = ev.reason;
+                else delete next[ev.type];
+                return next;
+              });
+            } else if (ev.event === "fatal") {
+              setProbeError(ev.error);
+            }
+          } catch { /* ignore malformed line */ }
+        }
+      }
     } catch (e) {
       setProbeError((e as Error).message);
     } finally {
       setProbing(false);
+      setCurrentlyProbing(null);
     }
   };
 
@@ -105,6 +153,7 @@ export function PullPanel({
                 setFilter("");
                 setCounts({});
                 setCountReasons({});
+                setProbeProgress({});
                 setProbeError(null);
               }}
               className="px-3 py-1.5 text-sm border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
@@ -188,8 +237,16 @@ export function PullPanel({
           {visibleTypes.map((t) => {
             const has = Object.prototype.hasOwnProperty.call(counts, t);
             const c = counts[t];
+            const isProbing = currentlyProbing === t;
+            const prog = probeProgress[t];
             return (
-              <label key={t} className="flex items-center gap-2 text-sm">
+              <label
+                key={t}
+                className={cn(
+                  "flex items-center gap-2 text-sm rounded px-1 transition-colors",
+                  isProbing && "bg-sky-50 ring-1 ring-inset ring-sky-200",
+                )}
+              >
                 <input
                   type="checkbox"
                   checked={selected.has(t)}
@@ -197,14 +254,20 @@ export function PullPanel({
                   className="accent-sky-600"
                 />
                 <span className="font-mono text-slate-700 flex-1 truncate">{t}</span>
-                {has && (
+                {isProbing ? (
+                  <span className="text-[10px] text-sky-700 font-mono tabular-nums">
+                    {prog
+                      ? <>probing… {prog.fetched.toLocaleString()}<span className="text-sky-400">/p{prog.pages}</span></>
+                      : "probing…"}
+                  </span>
+                ) : has ? (
                   <span
                     className={c === null ? "text-[10px] text-slate-400 italic cursor-help" : "text-[10px] text-slate-500 font-mono tabular-nums"}
                     title={c === null ? (countReasons[t] ?? "Tenant declined to report a count") : `${c} records`}
                   >
                     {c === null ? "unknown" : c.toLocaleString()}
                   </span>
-                )}
+                ) : null}
               </label>
             );
           })}
