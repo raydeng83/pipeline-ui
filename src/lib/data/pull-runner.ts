@@ -49,17 +49,18 @@ export async function runPull(opts: RunPullOpts): Promise<void> {
 
   let anyFailed = false;
 
-  // Preflight: ask AIC for an exact count before paginating, so the progress
-  // bar renders a real denominator from the first update. Default tenant
-  // behavior returns totalPagedResults = -1 (cheap, no count); _countPolicy
-  // EXACT is a one-off cost acceptable here because the subsequent pull
-  // dwarfs it.
+  // Preflight: ask AIC for a count before paginating, so the progress bar
+  // renders a real denominator from the first update. Default tenant behavior
+  // returns totalPagedResults = -1 (cheap, no count). EXACT is authoritative
+  // but expensive; some types (audit-like / very large) reject it or still
+  // return -1. ESTIMATE is much cheaper and usually honored. Try EXACT, fall
+  // back to ESTIMATE; give up on null if both yield no count.
   const preflightCount = opts.preflightCount ?? defaultPreflightCount;
 
-  async function defaultPreflightCount(type: string, bearer: string): Promise<number | null> {
+  async function tryCount(type: string, bearer: string, policy: "EXACT" | "ESTIMATE"): Promise<number | null> {
     const url = new URL(`${tenantUrl}/openidm/managed/${type}`);
     url.searchParams.set("_queryFilter", "true");
-    url.searchParams.set("_countPolicy", "EXACT");
+    url.searchParams.set("_countPolicy", policy);
     url.searchParams.set("_pageSize", "1");
     try {
       let res = await fetchFn(url.toString(), {
@@ -81,6 +82,12 @@ export async function runPull(opts: RunPullOpts): Promise<void> {
     } catch {
       return null;
     }
+  }
+
+  async function defaultPreflightCount(type: string, bearer: string): Promise<number | null> {
+    const exact = await tryCount(type, bearer, "EXACT");
+    if (exact !== null) return exact;
+    return tryCount(type, bearer, "ESTIMATE");
   }
 
   outer:
