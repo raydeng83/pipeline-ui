@@ -24,6 +24,13 @@ function scopeLabel(s: string) {
   return CONFIG_SCOPES.find((c) => c.value === s)?.label ?? s;
 }
 
+function scopeGroup(s: string): string {
+  return CONFIG_SCOPES.find((c) => c.value === s)?.group ?? "Other";
+}
+
+// Insertion-order-preserving unique groups as they appear in CONFIG_SCOPES.
+const SCOPE_GROUPS = Array.from(new Set(CONFIG_SCOPES.map((c) => c.group)));
+
 function toSelections(items: ScopeSelection[]): Selections {
   const rec: Selections = {};
   for (const { scope, items: si } of items) rec[scope] = si ?? null;
@@ -378,12 +385,17 @@ export function PromotionItemPicker({
     onChange(fromSelections({ ...selections, [scope]: allNowSelected ? null : [...currentSet] }));
   };
 
-  // Selected scopes float to the top; order within each group preserved
+  // Order matches CONFIG_SCOPES (i.e. groups appear in their defined order, and
+  // scopes within each group keep their natural order). The left-nav group
+  // headers and the right-content scope rows use this same ordering, so
+  // clicking a nav entry always scrolls to a predictable position.
   const sortedAuditData = auditData
     ? [...auditData].sort((a, b) => {
-        const aHas = Object.prototype.hasOwnProperty.call(selections, a.scope) ? 0 : 1;
-        const bHas = Object.prototype.hasOwnProperty.call(selections, b.scope) ? 0 : 1;
-        return aHas - bHas;
+        const orderOf = (s: string) => {
+          const i = CONFIG_SCOPES.findIndex((c) => c.value === s);
+          return i < 0 ? Number.MAX_SAFE_INTEGER : i;
+        };
+        return orderOf(a.scope) - orderOf(b.scope);
       })
     : null;
 
@@ -463,39 +475,61 @@ export function PromotionItemPicker({
               />
             </div>
             <div className="overflow-y-auto flex-1">
-              {loading
-                ? Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="h-7 mx-2 my-1 rounded bg-slate-200 animate-pulse" />
-                  ))
-                : (sortedAuditData ?? [])
-                    .filter((entry) => {
-                      if (!searchQuery.trim()) return true;
-                      const q = searchQuery.toLowerCase();
-                      // Match scope label or any item label/id
-                      if (scopeLabel(entry.scope).toLowerCase().includes(q)) return true;
-                      return entry.items.some((i) => i.label.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
-                    })
-                    .map((entry) => {
-                      const included = Object.prototype.hasOwnProperty.call(selections, entry.scope);
-                      return (
-                        <button
-                          key={entry.scope}
-                          type="button"
-                          onClick={() => scrollToScope(entry.scope)}
-                          className={cn(
-                            "w-full text-left px-2.5 py-1.5 text-[11px] leading-tight transition-colors border-l-2",
-                            activeScope === entry.scope
-                              ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
-                              : included
-                                ? "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-700"
-                                : "border-transparent text-slate-400 hover:bg-slate-100 hover:text-slate-500"
-                          )}
-                        >
-                          {scopeLabel(entry.scope)}
-                        </button>
-                      );
-                    })
-              }
+              {loading ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="h-7 mx-2 my-1 rounded bg-slate-200 animate-pulse" />
+                ))
+              ) : (() => {
+                // Filter the audit entries by the active search query, then
+                // bucket by CONFIG_SCOPES group so the nav mirrors the Browse
+                // tab's grouped layout (small uppercase heading per group,
+                // scope buttons underneath).
+                const q = searchQuery.trim().toLowerCase();
+                const visible = (sortedAuditData ?? []).filter((entry) => {
+                  if (!q) return true;
+                  if (scopeLabel(entry.scope).toLowerCase().includes(q)) return true;
+                  return entry.items.some((i) => i.label.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
+                });
+                const byGroup = new Map<string, AuditEntry[]>();
+                for (const entry of visible) {
+                  const g = scopeGroup(entry.scope);
+                  if (!byGroup.has(g)) byGroup.set(g, []);
+                  byGroup.get(g)!.push(entry);
+                }
+                return SCOPE_GROUPS.filter((g) => byGroup.has(g)).map((group) => {
+                  const entries = byGroup.get(group)!;
+                  return (
+                    <div key={group}>
+                      <p className="px-2 pt-2 pb-0.5 text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
+                        {group}
+                      </p>
+                      {entries.map((entry) => {
+                        const included = Object.prototype.hasOwnProperty.call(selections, entry.scope);
+                        return (
+                          <button
+                            key={entry.scope}
+                            type="button"
+                            onClick={() => scrollToScope(entry.scope)}
+                            className={cn(
+                              "w-full text-left px-2.5 py-1.5 text-[11px] leading-tight transition-colors border-l-2 flex items-center justify-between gap-1.5",
+                              activeScope === entry.scope
+                                ? "border-sky-500 bg-sky-50 text-sky-700 font-medium"
+                                : included
+                                  ? "border-transparent text-slate-700 hover:bg-slate-100"
+                                  : "border-transparent text-slate-400 hover:bg-slate-100 hover:text-slate-500"
+                            )}
+                          >
+                            <span className="truncate">{scopeLabel(entry.scope)}</span>
+                            {included && (
+                              <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-indigo-500" title="Included in this task" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
 
