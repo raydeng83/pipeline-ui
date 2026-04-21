@@ -1,39 +1,29 @@
 import type { DisplayFields } from "./types";
 
-const TITLE_CANDIDATES = ["userName", "name", "_title", "displayName"];
-const SUBTITLE_CANDIDATES = ["mail", "description", "sn", "givenName"];
-const SCALAR_TYPES = new Set(["string", "number", "boolean"]);
-
 type Schema = {
   schema?: {
     properties?: Record<string, { type?: string; searchable?: boolean }>;
   };
 };
 
+function findNameKey(keys: string[]): string | undefined {
+  return keys.find((k) => k.toLowerCase() === "name");
+}
+
+// Rule: if a "name" attribute exists (case-insensitive), use it; else "_id".
+// searchFields is retained on the type for backward compatibility but list
+// search is now full-JSON (see snapshot-fs.listRecords), so it is no longer
+// consulted by the browse search path. It still seeds export's search-field
+// derivation as a fallback when no sample is available.
 export function deriveDisplayFields(schema: Schema): DisplayFields {
   const props = schema.schema?.properties ?? {};
   const keys = Object.keys(props);
-
-  const title = TITLE_CANDIDATES.find((c) => c in props) ?? "_id";
-  const subtitle = SUBTITLE_CANDIDATES.find((c) => c in props && c !== title);
-
-  const searchable = keys.filter(
-    (k) => props[k].searchable === true && SCALAR_TYPES.has(props[k].type ?? ""),
-  );
-  const searchFields = searchable.length > 0
-    ? searchable
-    : [title, ...(subtitle ? [subtitle] : [])];
-
-  return { title, subtitle, searchFields };
+  const title = findNameKey(keys) ?? "_id";
+  return { title, searchFields: [title] };
 }
 
 export function fallbackDisplayFields(record: Record<string, unknown>): DisplayFields {
-  const firstString = Object.entries(record).find(
-    ([k, v]) => k !== "_id" && typeof v === "string",
-  )?.[0];
-  return {
-    title: "_id",
-    subtitle: firstString,
-    searchFields: firstString ? ["_id", firstString] : ["_id"],
-  };
+  const nameKey = findNameKey(Object.keys(record));
+  const title = nameKey ?? "_id";
+  return { title, searchFields: [title] };
 }

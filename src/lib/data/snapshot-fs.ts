@@ -48,6 +48,15 @@ interface ListOpts {
   page: number;
   limit: number;
   display: DisplayFields;
+  /** Override the display.title field with a user-chosen attribute (e.g. "userName"). */
+  titleField?: string;
+}
+
+// Match the record key case-insensitively — users configure attributes by
+// their natural casing but records may vary.
+function findKeyCI(record: Record<string, unknown>, wanted: string): string | undefined {
+  const lc = wanted.toLowerCase();
+  return Object.keys(record).find((k) => k.toLowerCase() === lc);
 }
 
 export function listRecords(
@@ -72,10 +81,12 @@ export function listRecords(
         matching.push({ id: f.replace(/\.json$/, ""), record });
         continue;
       }
-      const hit = opts.display.searchFields.some((field) =>
-        stringOrEmpty(record[field]).toLowerCase().includes(q),
-      );
-      if (hit) matching.push({ id: f.replace(/\.json$/, ""), record });
+      // Full-JSON substring: match on any key or value anywhere in the record.
+      // Structural characters may create false positives, acceptable trade for
+      // "find anything" ergonomics.
+      if (raw.toLowerCase().includes(q)) {
+        matching.push({ id: f.replace(/\.json$/, ""), record });
+      }
     } catch { /* skip unreadable file */ }
   }
 
@@ -83,17 +94,15 @@ export function listRecords(
   const start = (opts.page - 1) * opts.limit;
   const slice = matching.slice(start, start + opts.limit);
 
+  const titleField = opts.titleField ?? opts.display.title;
   return {
     total,
     page: opts.page,
     limit: opts.limit,
     records: slice.map(({ id, record }) => {
-      const titleField = opts.display.title;
-      const title = stringOrEmpty(record[titleField]) || id;
-      const subtitle = opts.display.subtitle
-        ? stringOrEmpty(record[opts.display.subtitle]) || undefined
-        : undefined;
-      return { id, title, subtitle };
+      const key = findKeyCI(record, titleField);
+      const title = (key && stringOrEmpty(record[key])) || id;
+      return { id, title };
     }),
   };
 }

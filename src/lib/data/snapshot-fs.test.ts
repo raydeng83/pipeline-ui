@@ -70,9 +70,9 @@ describe("readRecord", () => {
 describe("listRecords", () => {
   beforeEach(() => {
     writeManifest("alpha_user", 3);
-    writeRecord("alpha_user", "u1", { _id: "u1", userName: "alice",   mail: "alice@x.co" });
-    writeRecord("alpha_user", "u2", { _id: "u2", userName: "bob",     mail: "bob@x.co" });
-    writeRecord("alpha_user", "u3", { _id: "u3", userName: "charlie", mail: "alice@y.co" });
+    writeRecord("alpha_user", "u1", { _id: "u1", name: "alice",   mail: "alice@x.co" });
+    writeRecord("alpha_user", "u2", { _id: "u2", name: "bob",     mail: "bob@x.co" });
+    writeRecord("alpha_user", "u3", { _id: "u3", name: "charlie", mail: "alice@y.co" });
   });
 
   it("returns all records paginated by id order", () => {
@@ -80,51 +80,66 @@ describe("listRecords", () => {
       q: "",
       page: 1,
       limit: 10,
-      display: { title: "userName", subtitle: "mail", searchFields: ["userName", "mail"] },
+      display: { title: "name", searchFields: ["name"] },
     });
     expect(page.total).toBe(3);
     expect(page.records.map((r) => r.id)).toEqual(["u1", "u2", "u3"]);
-    expect(page.records[0]).toEqual({ id: "u1", title: "alice", subtitle: "alice@x.co" });
+    expect(page.records[0]).toEqual({ id: "u1", title: "alice" });
   });
 
-  it("server-side substring search across searchFields", () => {
+  it("full-JSON search matches any key or value in the record", () => {
     const page = listRecords(tmpDir, ENV, "alpha_user", {
       q: "alice",
       page: 1,
       limit: 10,
-      display: { title: "userName", subtitle: "mail", searchFields: ["userName", "mail"] },
+      display: { title: "name", searchFields: [] },
     });
+    // u1 matches on both name and mail; u3 matches on mail only.
     expect(page.total).toBe(2);
     expect(page.records.map((r) => r.id).sort()).toEqual(["u1", "u3"]);
   });
 
+  it("full-JSON search matches on keys too", () => {
+    // "mail" is a key in every record.
+    const page = listRecords(tmpDir, ENV, "alpha_user", {
+      q: "mail",
+      page: 1,
+      limit: 10,
+      display: { title: "name", searchFields: [] },
+    });
+    expect(page.total).toBe(3);
+  });
+
   it("paginates with limit and page", () => {
     const first = listRecords(tmpDir, ENV, "alpha_user", {
-      q: "",
-      page: 1,
-      limit: 2,
-      display: { title: "userName", searchFields: ["userName"] },
+      q: "", page: 1, limit: 2,
+      display: { title: "name", searchFields: [] },
     });
     expect(first.records.map((r) => r.id)).toEqual(["u1", "u2"]);
-
     const second = listRecords(tmpDir, ENV, "alpha_user", {
-      q: "",
-      page: 2,
-      limit: 2,
-      display: { title: "userName", searchFields: ["userName"] },
+      q: "", page: 2, limit: 2,
+      display: { title: "name", searchFields: [] },
     });
     expect(second.records.map((r) => r.id)).toEqual(["u3"]);
   });
 
-  it("handles missing fields gracefully", () => {
-    writeRecord("alpha_user", "u4", { _id: "u4" }); // no userName
+  it("falls back to id when the title field is missing", () => {
+    writeRecord("alpha_user", "u4", { _id: "u4" });
     const page = listRecords(tmpDir, ENV, "alpha_user", {
-      q: "",
-      page: 1,
-      limit: 10,
-      display: { title: "userName", searchFields: ["userName"] },
+      q: "", page: 1, limit: 10,
+      display: { title: "name", searchFields: [] },
     });
-    const u4 = page.records.find((r) => r.id === "u4");
-    expect(u4?.title).toBe("u4"); // falls back to id
+    expect(page.records.find((r) => r.id === "u4")?.title).toBe("u4");
+  });
+
+  it("honors titleField override and matches case-insensitively", () => {
+    // Record uses capital-N Name; override asks for lower-case "name".
+    writeRecord("alpha_user", "u5", { _id: "u5", Name: "Overridden" });
+    const page = listRecords(tmpDir, ENV, "alpha_user", {
+      q: "", page: 1, limit: 10,
+      display: { title: "_id", searchFields: [] },
+      titleField: "name",
+    });
+    expect(page.records.find((r) => r.id === "u5")?.title).toBe("Overridden");
   });
 });

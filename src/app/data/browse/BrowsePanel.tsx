@@ -108,7 +108,6 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
                     )}
                   >
                     <div className="text-xs font-medium text-slate-800 truncate">{r.title}</div>
-                    {r.subtitle && <div className="text-[11px] text-slate-500 truncate">{r.subtitle}</div>}
                   </button>
                 ))}
                 {data && data.records.length === 0 && (

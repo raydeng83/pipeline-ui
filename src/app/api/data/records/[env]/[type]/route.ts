@@ -25,9 +25,9 @@ export async function GET(
   const q = url.searchParams.get("q") ?? "";
   const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
   const limit = Math.min(500, Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10)));
+  const titleField = url.searchParams.get("titleField")?.trim() || undefined;
 
   const schema = loadSchema(env, type);
-  // Sample a record for fallback when schema is missing.
   const envsRoot = path.join(cwd(), "environments");
   let display;
   if (schema) {
@@ -43,6 +43,6 @@ export async function GET(
     display = fallbackDisplayFields(sample);
   }
 
-  const result = listRecords(envsRoot, env, type, { q, page, limit, display });
+  const result = listRecords(envsRoot, env, type, { q, page, limit, display, titleField });
   return NextResponse.json(result);
 }

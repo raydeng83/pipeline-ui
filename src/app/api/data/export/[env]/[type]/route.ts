@@ -3,32 +3,8 @@ import { NextRequest } from "next/server";
 import path from "path";
 import fs from "fs";
 import { cwd } from "process";
-import { getConfigDir } from "@/lib/fr-config";
-import { deriveDisplayFields, fallbackDisplayFields } from "@/lib/data/display-fields";
 
 export const dynamic = "force-dynamic";
-
-function loadSearchFields(env: string, type: string, sampleDir: string): string[] {
-  const configDir = getConfigDir(env);
-  const schemaPath = configDir
-    ? path.join(configDir, "managed-objects", type, `${type}.json`)
-    : "";
-  if (schemaPath && fs.existsSync(schemaPath)) {
-    try {
-      return deriveDisplayFields(JSON.parse(fs.readFileSync(schemaPath, "utf-8"))).searchFields;
-    } catch { /* fall through */ }
-  }
-  if (fs.existsSync(sampleDir)) {
-    const f = fs.readdirSync(sampleDir).find((n) => n.endsWith(".json") && n !== "_manifest.json");
-    if (f) {
-      try {
-        const sample = JSON.parse(fs.readFileSync(path.join(sampleDir, f), "utf-8"));
-        return fallbackDisplayFields(sample).searchFields;
-      } catch { /* ignore */ }
-    }
-  }
-  return ["_id"];
-}
 
 function csvCell(v: unknown): string {
   if (v == null) return "";
@@ -53,7 +29,6 @@ export async function GET(
   const dir = path.join(envsRoot, env, "managed-data", type);
   if (!fs.existsSync(dir)) return new Response("snapshot not found", { status: 404 });
 
-  const searchFields = loadSearchFields(env, type, dir);
   const files = fs.readdirSync(dir)
     .filter((f) => f.endsWith(".json") && f !== "_manifest.json")
     .sort();
@@ -62,17 +37,9 @@ export async function GET(
   const scalarKeys = new Set<string>();
   for (const f of files) {
     try {
-      const record = JSON.parse(fs.readFileSync(path.join(dir, f), "utf-8")) as Record<string, unknown>;
-      if (q) {
-        // Must match snapshot-fs.listRecords' search semantics so Browse
-        // and Export return the same rows for a given query.
-        const hit = searchFields.some((field) => {
-          const v = record[field];
-          const s = typeof v === "string" ? v : v == null ? "" : String(v);
-          return s.toLowerCase().includes(q);
-        });
-        if (!hit) continue;
-      }
+      const raw = fs.readFileSync(path.join(dir, f), "utf-8");
+      if (q && !raw.toLowerCase().includes(q)) continue;
+      const record = JSON.parse(raw) as Record<string, unknown>;
       matching.push(record);
       if (format === "csv") {
         for (const [k, v] of Object.entries(record)) {
