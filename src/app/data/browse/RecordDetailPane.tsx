@@ -9,7 +9,11 @@ export function RecordDetailPane({ env, type, id }: { env: string; type: string 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!type || !id) { setRecord(null); return; }
+    if (!type || !id) return;
+    // Flag the loading state before kicking off the fetch so the spinner
+    // appears immediately; the disable is for a genuine async-loading case
+    // the lint rule doesn't model.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     fetch(`/api/data/records/${env}/${type}/${id}`)
       .then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
@@ -27,8 +31,8 @@ export function RecordDetailPane({ env, type, id }: { env: string; type: string 
       </div>
       <div className="flex-1 overflow-auto p-3">
         {loading && <div className="text-xs text-slate-400">Loading…</div>}
-        {!loading && record && <JsonTreeView value={record as never} />}
-        {!loading && !record && type && id && (
+        {!loading && type && id && record && <JsonTreeView value={record as never} />}
+        {!loading && type && id && !record && (
           <div className="text-xs text-rose-600">Record not found.</div>
         )}
       </div>

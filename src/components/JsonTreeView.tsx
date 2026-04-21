@@ -15,20 +15,21 @@ export function JsonTreeView({ value, initialDepth = 2 }: { value: Json; initial
 }
 
 function Node({ k, v, depth, openUntil }: { k: string | null; v: Json; depth: number; openUntil: number }) {
+  const [open, setOpen] = useState(depth < openUntil);
+
   if (v === null) return <Line k={k}><span className="text-slate-400">null</span></Line>;
-  if (typeof v === "string") return <Line k={k}><span className="text-emerald-700">"{v}"</span></Line>;
+  if (typeof v === "string") return <Line k={k}><span className="text-emerald-700">{`"${v}"`}</span></Line>;
   if (typeof v === "number") return <Line k={k}><span className="text-sky-700">{v}</span></Line>;
   if (typeof v === "boolean") return <Line k={k}><span className="text-amber-700">{String(v)}</span></Line>;
 
   const isArray = Array.isArray(v);
   const entries = isArray ? v.map((x, i) => [String(i), x] as const) : Object.entries(v);
-  const [open, setOpen] = useState(depth < openUntil);
 
   const brackets = isArray ? ["[", "]"] : ["{", "}"];
   return (
     <div>
       <div className="flex items-center">
-        {k !== null && <span className="text-slate-500 mr-1">"{k}":</span>}
+        {k !== null && <span className="text-slate-500 mr-1">{`"${k}":`}</span>}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -54,7 +55,7 @@ function Node({ k, v, depth, openUntil }: { k: string | null; v: Json; depth: nu
 function Line({ k, children }: { k: string | null; children: React.ReactNode }) {
   return (
     <div className="flex items-center">
-      {k !== null && <span className="text-slate-500 mr-1">"{k}":</span>}
+      {k !== null && <span className="text-slate-500 mr-1">{`"${k}":`}</span>}
       {children}
     </div>
   );

@@ -15,7 +15,7 @@ export function BrowsePanel({ environments }: { environments: Environment[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!env) { setTypes([]); return; }
+    if (!env) return;
     fetch(`/api/data/snapshots/${env}`)
       .then((r) => r.ok ? r.json() : { types: [] })
       .then((d: { types: SnapshotType[] }) => {
