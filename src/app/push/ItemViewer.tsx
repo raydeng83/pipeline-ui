@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import type { ViewableFile } from "@/app/api/push/item/route";
 import { FileContentViewer } from "@/components/FileContentViewer";
+import { JourneyGraph } from "@/app/configs/JourneyGraph";
+import { WorkflowGraph } from "@/app/configs/WorkflowGraph";
 import { cn } from "@/lib/utils";
 
 interface AuditItem {
@@ -60,6 +62,15 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
   }, [handleKeyDown]);
 
   const activeFile = files?.[activeTab];
+
+  // Canvas view for journeys / IGA workflows. The graphs already expose
+  // their own script-inspection affordances so the raw-file tabs aren't
+  // needed at this level.
+  const isJourney = scope === "journeys";
+  const isWorkflow = scope === "iga-workflows";
+  const treeJsonFile = files?.find((f) => f.language === "json");
+  const showCanvas = (isJourney && !!treeJsonFile) || (isWorkflow && !!files && files.length > 0);
+  const showTabs = !showCanvas;
 
   const handleCopy = () => {
     if (!activeFile) return;
@@ -146,8 +157,8 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
           </button>
         </div>
 
-        {/* Tabs (only when multiple files) */}
-        {files && files.length > 1 && (
+        {/* Tabs (only when multiple files AND we're not in canvas view) */}
+        {showTabs && files && files.length > 1 && (
           <div className="flex gap-0 border-b border-slate-800 bg-slate-900 shrink-0 overflow-x-auto">
             {files.map((f, i) => (
               <button
@@ -179,7 +190,22 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
               {error}
             </div>
           )}
-          {activeFile && (
+          {isJourney && treeJsonFile && (
+            <div className="h-full">
+              <JourneyGraph
+                json={treeJsonFile.content}
+                fitViewKey={fullscreen ? 1 : 0}
+                environment={environment}
+                journeyId={item.id}
+              />
+            </div>
+          )}
+          {isWorkflow && files && files.length > 0 && (
+            <div className="h-full">
+              <WorkflowGraph files={files} workflowId={item.id} />
+            </div>
+          )}
+          {!showCanvas && activeFile && (
             <FileContentViewer
               content={activeFile.content}
               fileName={activeFile.name}
@@ -195,11 +221,19 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
         </div>
 
         {/* Footer */}
-        {activeFile && (
+        {(activeFile || showCanvas) && (
           <div className="flex items-center gap-2 px-4 py-2 border-t border-slate-800 bg-slate-900 shrink-0">
-            <span className="text-[10px] text-slate-500 font-mono">{activeFile.name}</span>
-            <span className="text-[10px] text-slate-700">·</span>
-            <span className="text-[10px] text-slate-500">{activeFile.language}</span>
+            {showCanvas ? (
+              <span className="text-[10px] text-slate-500">
+                {isJourney ? "Journey canvas" : "Workflow canvas"}
+              </span>
+            ) : activeFile ? (
+              <>
+                <span className="text-[10px] text-slate-500 font-mono">{activeFile.name}</span>
+                <span className="text-[10px] text-slate-700">·</span>
+                <span className="text-[10px] text-slate-500">{activeFile.language}</span>
+              </>
+            ) : null}
             <span className="text-[10px] text-slate-600 ml-auto">ESC to {fullscreen ? "exit fullscreen" : "close"}</span>
           </div>
         )}
