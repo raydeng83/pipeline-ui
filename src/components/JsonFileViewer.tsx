@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FileContentViewer } from "./FileContentViewer";
 
@@ -521,22 +522,20 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
           </div>
         )}
 
-        {mode === "raw" && (
-          <button
-            type="button"
-            onClick={() => setWrap((w) => !w)}
-            aria-pressed={wrap}
-            title={wrap ? "Disable line wrap" : "Enable line wrap"}
-            className={cn(
-              "px-2 py-0.5 rounded transition-colors",
-              wrap
-                ? "bg-sky-900/40 text-sky-300 hover:bg-sky-900/60"
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800",
-            )}
-          >
-            Wrap
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setWrap((w) => !w)}
+          aria-pressed={wrap}
+          title={wrap ? "Disable line wrap (raw mode)" : "Enable line wrap (raw mode)"}
+          className={cn(
+            "px-2 py-0.5 rounded transition-colors",
+            wrap
+              ? "bg-sky-900/40 text-sky-300 hover:bg-sky-900/60"
+              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800",
+          )}
+        >
+          Wrap
+        </button>
 
         <div className="flex items-center gap-1 bg-slate-800 rounded px-2 py-0.5">
           <svg className="w-3 h-3 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -610,15 +609,9 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
             fullscreen && "bg-sky-900/40 text-sky-300 hover:bg-sky-900/60",
           )}
         >
-          {fullscreen ? (
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4H4m16 0h-5v5M4 15h5v5m11-5v5h-5" />
-            </svg>
-          ) : (
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4m12 0h-4v0M4 16v4h4m12 0h-4m4 0v-4M4 4l6 6m10-6l-6 6M4 20l6-6m10 6l-6-6" />
-            </svg>
-          )}
+          {fullscreen
+            ? <Minimize2 className="w-3.5 h-3.5" strokeWidth={2} />
+            : <Maximize2 className="w-3.5 h-3.5" strokeWidth={2} />}
         </button>
       </div>
 
