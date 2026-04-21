@@ -92,22 +92,25 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
         className={cn(
           "relative flex flex-col overflow-hidden",
           fullscreen
-            ? "w-full h-full bg-slate-950"
-            : "bg-slate-950 rounded-lg shadow-xl w-[840px] max-w-[95vw] max-h-[85vh]"
+            ? "w-full h-full bg-white"
+            // h-[85vh] (fixed) rather than max-h-[85vh] (cap) so the canvas
+            // children — JourneyGraph / WorkflowGraph — that ask for h-full
+            // actually get a defined height to resolve against.
+            : "bg-white rounded-lg shadow-xl w-[1040px] max-w-[95vw] h-[85vh]"
         )}
       >
         {/* Header */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-800 bg-slate-900 shrink-0">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide">{scope}</p>
-            <p className="text-sm font-mono font-medium text-slate-200 truncate">{item.label}</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-wide">{scope}</p>
+            <p className="text-sm font-mono font-medium text-slate-800 truncate">{item.label}</p>
           </div>
 
           {/* Copy button */}
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors shrink-0"
           >
             {copied ? (
               <>
@@ -131,7 +134,7 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
             type="button"
             onClick={() => setFullscreen((f) => !f)}
             title={fullscreen ? "Exit fullscreen" : "Fullscreen"}
-            className="text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+            className="text-slate-500 hover:text-slate-800 transition-colors shrink-0"
           >
             {fullscreen ? (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -149,7 +152,7 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
             type="button"
             onClick={fullscreen ? () => setFullscreen(false) : onClose}
             title="Close (Esc)"
-            className="text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+            className="text-slate-500 hover:text-slate-800 transition-colors shrink-0"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -159,7 +162,7 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
 
         {/* Tabs (only when multiple files AND we're not in canvas view) */}
         {showTabs && files && files.length > 1 && (
-          <div className="flex gap-0 border-b border-slate-800 bg-slate-900 shrink-0 overflow-x-auto">
+          <div className="flex gap-0 border-b border-slate-200 bg-slate-50 shrink-0 overflow-x-auto">
             {files.map((f, i) => (
               <button
                 key={f.name}
@@ -168,8 +171,8 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
                 className={cn(
                   "px-4 py-2 text-xs font-mono shrink-0 border-b-2 transition-colors",
                   i === activeTab
-                    ? "text-sky-400 border-sky-500"
-                    : "text-slate-500 hover:text-slate-300 border-transparent"
+                    ? "text-sky-700 border-sky-500 bg-white"
+                    : "text-slate-500 hover:text-slate-700 border-transparent"
                 )}
               >
                 {f.name}
@@ -179,19 +182,19 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-auto min-h-0">
+        <div className="flex-1 min-h-0 flex flex-col">
           {loading && (
-            <div className="flex items-center justify-center h-40 text-sm text-slate-500">
+            <div className="flex items-center justify-center flex-1 text-sm text-slate-500">
               Loading…
             </div>
           )}
           {error && (
-            <div className="flex items-center justify-center h-40 text-sm text-red-400">
+            <div className="flex items-center justify-center flex-1 text-sm text-rose-600">
               {error}
             </div>
           )}
           {isJourney && treeJsonFile && (
-            <div className="h-full">
+            <div className="flex-1 min-h-0">
               <JourneyGraph
                 json={treeJsonFile.content}
                 fitViewKey={fullscreen ? 1 : 0}
@@ -201,28 +204,30 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
             </div>
           )}
           {isWorkflow && files && files.length > 0 && (
-            <div className="h-full">
+            <div className="flex-1 min-h-0">
               <WorkflowGraph files={files} workflowId={item.id} />
             </div>
           )}
           {!showCanvas && activeFile && (
-            <FileContentViewer
-              content={activeFile.content}
-              fileName={activeFile.name}
-              language={
-                activeFile.language === "json" ? "json"
-                : activeFile.language === "javascript" ? "js"
-                : activeFile.language === "groovy" ? "groovy"
-                : "text"
-              }
-              className="min-h-full"
-            />
+            <div className="flex-1 min-h-0 overflow-auto">
+              <FileContentViewer
+                content={activeFile.content}
+                fileName={activeFile.name}
+                language={
+                  activeFile.language === "json" ? "json"
+                  : activeFile.language === "javascript" ? "js"
+                  : activeFile.language === "groovy" ? "groovy"
+                  : "text"
+                }
+                className="min-h-full"
+              />
+            </div>
           )}
         </div>
 
         {/* Footer */}
         {(activeFile || showCanvas) && (
-          <div className="flex items-center gap-2 px-4 py-2 border-t border-slate-800 bg-slate-900 shrink-0">
+          <div className="flex items-center gap-2 px-4 py-2 border-t border-slate-200 bg-slate-50 shrink-0">
             {showCanvas ? (
               <span className="text-[10px] text-slate-500">
                 {isJourney ? "Journey canvas" : "Workflow canvas"}
@@ -230,11 +235,11 @@ export function ItemViewer({ environment, scope, item, onClose }: ItemViewerProp
             ) : activeFile ? (
               <>
                 <span className="text-[10px] text-slate-500 font-mono">{activeFile.name}</span>
-                <span className="text-[10px] text-slate-700">·</span>
+                <span className="text-[10px] text-slate-300">·</span>
                 <span className="text-[10px] text-slate-500">{activeFile.language}</span>
               </>
             ) : null}
-            <span className="text-[10px] text-slate-600 ml-auto">ESC to {fullscreen ? "exit fullscreen" : "close"}</span>
+            <span className="text-[10px] text-slate-400 ml-auto">ESC to {fullscreen ? "exit fullscreen" : "close"}</span>
           </div>
         )}
       </div>
