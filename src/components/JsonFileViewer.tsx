@@ -265,6 +265,18 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
   const [pathCopied, setPathCopied] = useState(false);
   const [wrap, setWrap] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(192);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // Escape exits fullscreen. Registered only while active so we don't
+  // swallow Escape in the (far more common) embedded mode.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [fullscreen]);
 
   const startSidebarDrag = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -442,7 +454,7 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
 
   if (!parsed.ok) {
     return (
-      <div className="h-full flex flex-col bg-slate-900">
+      <div className={cn("flex flex-col bg-slate-900", fullscreen ? "fixed inset-0 z-50" : "h-full")}>
         <div className="px-3 py-1.5 text-[11px] text-amber-300 bg-amber-900/30 border-b border-amber-800/50 shrink-0">
           Unable to parse JSON ({parsed.error}). Showing raw contents.
         </div>
@@ -458,7 +470,7 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
   const matchLineSet = mode === "raw" ? new Set(matchesRaw) : undefined;
 
   return (
-    <div className="h-full flex flex-col bg-slate-900 text-slate-300 min-h-0">
+    <div className={cn("flex flex-col bg-slate-900 text-slate-300 min-h-0", fullscreen ? "fixed inset-0 z-50" : "h-full")}>
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slate-800 shrink-0 text-[11px]">
         <div className="flex rounded bg-slate-800 overflow-hidden">
@@ -587,6 +599,27 @@ export function JsonFileViewer({ content, fileName, highlightLine }: Props) {
             className="bg-transparent outline-none w-28 text-slate-200 placeholder-slate-500"
           />
         </div>
+
+        <button
+          type="button"
+          onClick={() => setFullscreen((f) => !f)}
+          aria-pressed={fullscreen}
+          title={fullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+          className={cn(
+            "ml-auto px-1.5 py-0.5 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors",
+            fullscreen && "bg-sky-900/40 text-sky-300 hover:bg-sky-900/60",
+          )}
+        >
+          {fullscreen ? (
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4H4m16 0h-5v5M4 15h5v5m11-5v5h-5" />
+            </svg>
+          ) : (
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4m12 0h-4v0M4 16v4h4m12 0h-4m4 0v-4M4 4l6 6m10-6l-6 6M4 20l6-6m10 6l-6-6" />
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Path breadcrumb */}
