@@ -17,6 +17,11 @@ export function PullPanel({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Counts are sparse: undefined = never probed, null = probed but tenant
+  // declined to count, number = real count. Keyed by type within the current env.
+  const [counts, setCounts] = useState<Record<string, number | null>>({});
+  const [probing, setProbing] = useState(false);
+  const [probeError, setProbeError] = useState<string | null>(null);
 
   const { jobs, start, abort } = useDataPullJobs({ pollMs: 2000, includeFinished: true });
   const types = useMemo(() => typesByEnv[env] ?? [], [typesByEnv, env]);
@@ -47,6 +52,29 @@ export function PullPanel({
     return next;
   });
 
+  const probeCounts = async () => {
+    if (!env || types.length === 0 || probing) return;
+    setProbing(true);
+    setProbeError(null);
+    try {
+      const res = await fetch(`/api/data/count/${env}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ types }),
+      });
+      const body = await res.json() as { counts?: Record<string, number | null>; error?: string };
+      if (!res.ok || body.error) {
+        setProbeError(body.error ?? `Probe failed (${res.status}).`);
+        return;
+      }
+      setCounts(body.counts ?? {});
+    } catch (e) {
+      setProbeError((e as Error).message);
+    } finally {
+      setProbing(false);
+    }
+  };
+
   const canStart = !active && selected.size > 0;
 
   const onStart = async () => {
@@ -67,7 +95,13 @@ export function PullPanel({
             <label className="text-xs text-slate-500 font-medium">Environment</label>
             <select
               value={env}
-              onChange={(e) => { setEnv(e.target.value); setSelected(new Set()); setFilter(""); }}
+              onChange={(e) => {
+                setEnv(e.target.value);
+                setSelected(new Set());
+                setFilter("");
+                setCounts({});
+                setProbeError(null);
+              }}
               className="px-3 py-1.5 text-sm border border-slate-300 rounded bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               {environments.map((e) => (
@@ -86,6 +120,13 @@ export function PullPanel({
               onClick={deselectAll}
               className="px-2 py-1 text-xs border border-slate-300 rounded bg-white text-slate-700 hover:bg-slate-50"
             >Deselect all</button>
+            <button
+              type="button"
+              onClick={probeCounts}
+              disabled={probing || types.length === 0}
+              title="Query each type's total record count (EXACT, with ESTIMATE fallback) without starting a pull"
+              className="px-2 py-1 text-xs border border-slate-300 rounded bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >{probing ? "Probing…" : "Probe counts"}</button>
           </div>
           <button
             type="button"
@@ -133,22 +174,39 @@ export function PullPanel({
           {types.length > 0 && visibleTypes.length === 0 && (
             <p className="text-xs text-slate-400 italic">No types match the filter.</p>
           )}
-          {visibleTypes.map((t) => (
-            <label key={t} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={selected.has(t)}
-                onChange={() => toggle(t)}
-                className="accent-sky-600"
-              />
-              <span className="font-mono text-slate-700">{t}</span>
-            </label>
-          ))}
+          {visibleTypes.map((t) => {
+            const has = Object.prototype.hasOwnProperty.call(counts, t);
+            const c = counts[t];
+            return (
+              <label key={t} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selected.has(t)}
+                  onChange={() => toggle(t)}
+                  className="accent-sky-600"
+                />
+                <span className="font-mono text-slate-700 flex-1 truncate">{t}</span>
+                {has && (
+                  <span
+                    className={c === null ? "text-[10px] text-slate-400 italic" : "text-[10px] text-slate-500 font-mono tabular-nums"}
+                    title={c === null ? "Tenant declined to report a count" : `${c} records`}
+                  >
+                    {c === null ? "unknown" : c.toLocaleString()}
+                  </span>
+                )}
+              </label>
+            );
+          })}
         </div>
 
         {error && (
           <div className="px-3 py-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded">
             {error}
+          </div>
+        )}
+        {probeError && (
+          <div className="px-3 py-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded">
+            Probe error: {probeError}
           </div>
         )}
       </div>
