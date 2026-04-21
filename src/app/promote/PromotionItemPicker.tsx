@@ -464,7 +464,7 @@ export function PromotionItemPicker({
         {/* Body */}
         <div className="flex overflow-hidden" style={{ maxHeight: 460 }}>
           {/* Left nav */}
-          <div className="w-32 shrink-0 border-r border-slate-200 flex flex-col bg-slate-50">
+          <div className="w-52 shrink-0 border-r border-slate-200 flex flex-col bg-slate-50">
             <div className="px-2 py-1.5 border-b border-slate-200">
               <input
                 type="text"
