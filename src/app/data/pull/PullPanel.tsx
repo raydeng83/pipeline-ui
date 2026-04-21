@@ -1,11 +1,26 @@
 // src/app/data/pull/PullPanel.tsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDataPullJobs } from "@/hooks/useDataPullJobs";
 import { JobCard } from "./JobCard";
 import type { Environment } from "@/lib/fr-config";
 import { cn } from "@/lib/utils";
+
+// Probe results persist across reloads, keyed by "<env>::<type>".
+const PROBE_STORE_KEY = "data-probe-counts-v1";
+type ProbedEntry = { count: number | null; reason?: string };
+function loadProbes(): Record<string, ProbedEntry> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(PROBE_STORE_KEY);
+    return raw ? JSON.parse(raw) as Record<string, ProbedEntry> : {};
+  } catch { return {}; }
+}
+function saveProbes(store: Record<string, ProbedEntry>): void {
+  try { localStorage.setItem(PROBE_STORE_KEY, JSON.stringify(store)); } catch { /* quota */ }
+}
+const probeKey = (env: string, type: string) => `${env}::${type}`;
 
 export function PullPanel({
   environments,
@@ -20,12 +35,43 @@ export function PullPanel({
   const [error, setError] = useState<string | null>(null);
   // Counts are sparse: undefined = never probed, null = probed but tenant
   // declined to count, number = real count. Keyed by type within the current env.
-  const [counts, setCounts] = useState<Record<string, number | null>>({});
-  const [countReasons, setCountReasons] = useState<Record<string, string>>({});
+  // All probed counts across envs, mirrored to localStorage so they survive reloads.
+  const [allProbes, setAllProbes] = useState<Record<string, ProbedEntry>>({});
+  // Rehydrate after mount (avoid SSR/CSR mismatch).
+  useEffect(() => { setAllProbes(loadProbes()); }, []);
+
+  // Derive per-env views from the store for the current env.
+  const counts = useMemo(() => {
+    const m: Record<string, number | null> = {};
+    for (const [key, entry] of Object.entries(allProbes)) {
+      const sep = key.indexOf("::");
+      if (sep < 0) continue;
+      if (key.slice(0, sep) === env) m[key.slice(sep + 2)] = entry.count;
+    }
+    return m;
+  }, [allProbes, env]);
+  const countReasons = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const [key, entry] of Object.entries(allProbes)) {
+      const sep = key.indexOf("::");
+      if (sep < 0) continue;
+      if (key.slice(0, sep) === env && entry.reason) m[key.slice(sep + 2)] = entry.reason;
+    }
+    return m;
+  }, [allProbes, env]);
+
+  function recordProbe(t: string, count: number | null, reason?: string): void {
+    setAllProbes((prev) => {
+      const next = { ...prev, [probeKey(env, t)]: reason ? { count, reason } : { count } };
+      saveProbes(next);
+      return next;
+    });
+  }
+
   const [probing, setProbing] = useState(false);
   const [probeError, setProbeError] = useState<string | null>(null);
   const [currentlyProbing, setCurrentlyProbing] = useState<string | null>(null);
-  // Live pagination progress per type (only populated while pagination fallback runs).
+  // Live pagination progress per type (ephemeral, only populated during active probe).
   const [probeProgress, setProbeProgress] = useState<Record<string, { fetched: number; pages: number }>>({});
 
   const { jobs, start, abort } = useDataPullJobs({ pollMs: 2000, includeFinished: true });
@@ -106,13 +152,7 @@ export function PullPanel({
             } else if (ev.event === "progress") {
               setProbeProgress((prev) => ({ ...prev, [ev.type]: { fetched: ev.fetched, pages: ev.pages } }));
             } else if (ev.event === "done") {
-              setCounts((prev) => ({ ...prev, [ev.type]: ev.count }));
-              setCountReasons((prev) => {
-                const next = { ...prev };
-                if (ev.reason) next[ev.type] = ev.reason;
-                else delete next[ev.type];
-                return next;
-              });
+              recordProbe(ev.type, ev.count, ev.reason);
             } else if (ev.event === "fatal") {
               setProbeError(ev.error);
             }
@@ -151,8 +191,6 @@ export function PullPanel({
                 setEnv(e.target.value);
                 setSelected(new Set());
                 setFilter("");
-                setCounts({});
-                setCountReasons({});
                 setProbeProgress({});
                 setProbeError(null);
               }}
