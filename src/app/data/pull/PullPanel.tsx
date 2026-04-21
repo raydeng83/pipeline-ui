@@ -54,22 +54,24 @@ export function PullPanel({
   });
 
   const probeCounts = async () => {
-    if (!env || types.length === 0 || probing) return;
+    if (!env || selected.size === 0 || probing) return;
+    const typesToProbe = [...selected];
     setProbing(true);
     setProbeError(null);
     try {
       const res = await fetch(`/api/data/count/${env}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ types }),
+        body: JSON.stringify({ types: typesToProbe }),
       });
       const body = await res.json() as { counts?: Record<string, number | null>; reasons?: Record<string, string>; error?: string };
       if (!res.ok || body.error) {
         setProbeError(body.error ?? `Probe failed (${res.status}).`);
         return;
       }
-      setCounts(body.counts ?? {});
-      setCountReasons(body.reasons ?? {});
+      // Merge into existing counts so previous probes stay visible.
+      setCounts((prev) => ({ ...prev, ...(body.counts ?? {}) }));
+      setCountReasons((prev) => ({ ...prev, ...(body.reasons ?? {}) }));
     } catch (e) {
       setProbeError((e as Error).message);
     } finally {
@@ -126,10 +128,16 @@ export function PullPanel({
             <button
               type="button"
               onClick={probeCounts}
-              disabled={probing || types.length === 0}
-              title="Query each type's total record count (EXACT, with ESTIMATE fallback) without starting a pull"
+              disabled={probing || selected.size === 0}
+              title={
+                selected.size === 0
+                  ? "Check one or more types above to probe"
+                  : `Query the ${selected.size} selected type${selected.size === 1 ? "" : "s"}' record counts without starting a pull`
+              }
               className="px-2 py-1 text-xs border border-slate-300 rounded bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >{probing ? "Probing…" : "Probe counts"}</button>
+            >
+              {probing ? "Probing…" : `Probe counts${selected.size > 0 ? ` (${selected.size})` : ""}`}
+            </button>
           </div>
           <button
             type="button"
