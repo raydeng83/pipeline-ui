@@ -56,6 +56,7 @@ describe("runPull: happy path", () => {
       envVars: ENV_VARS,
       mintToken: async () => "tok",
       fetchFn: fetchMock,
+      preflightCount: async () => null,
       signal: new AbortController().signal,
     });
 
@@ -86,6 +87,7 @@ describe("runPull: auth refresh on 401", () => {
     await runPull({
       job, registry, envsRoot: tmpDir, envVars: ENV_VARS,
       mintToken, fetchFn: fetchMock,
+      preflightCount: async () => null,
       signal: new AbortController().signal,
     });
 
@@ -106,6 +108,7 @@ describe("runPull: transient 5xx retries, then fails", () => {
     await runPull({
       job, registry, envsRoot: tmpDir, envVars: ENV_VARS,
       mintToken: async () => "tok", fetchFn: fetchMock,
+      preflightCount: async () => null,
       signal: new AbortController().signal,
       retryDelayMs: 0,
     });
@@ -130,6 +133,7 @@ describe("runPull: abort mid-pull", () => {
     await runPull({
       job, registry, envsRoot: tmpDir, envVars: ENV_VARS,
       mintToken: async () => "tok", fetchFn: fetchMock,
+      preflightCount: async () => null,
       signal: ctl.signal,
     });
 
@@ -159,10 +163,58 @@ describe("runPull: preserves previous snapshot on failure", () => {
     await runPull({
       job, registry, envsRoot: tmpDir, envVars: ENV_VARS,
       mintToken: async () => "tok", fetchFn: fetchMock,
+      preflightCount: async () => null,
       signal: new AbortController().signal,
       retryDelayMs: 0,
     });
 
     expect(fs.readdirSync(typeDir).sort()).toEqual(["_manifest.json", "old.json"]);
+  });
+});
+
+describe("runPull: preflight count", () => {
+  it("seeds progress.total from preflightCount before paginating", async () => {
+    const fetchMock = mockFetchSequence([
+      { status: 200, body: {
+        result: [{ _id: "u1" }, { _id: "u2" }],
+        pagedResultsCookie: null,
+      }},
+    ]);
+
+    const job = registry.startJob("uat", ["alpha_user"]);
+    // Assert that preflight runs before pagination by checking progress total
+    // arrives non-null, and by spying that preflightCount is invoked.
+    const preflightSpy = vi.fn(async () => 42);
+    await runPull({
+      job, registry, envsRoot: tmpDir, envVars: ENV_VARS,
+      mintToken: async () => "tok", fetchFn: fetchMock,
+      preflightCount: preflightSpy,
+      signal: new AbortController().signal,
+    });
+
+    expect(preflightSpy).toHaveBeenCalledWith("alpha_user", "tok");
+    const after = registry.getJob(job.id)!;
+    expect(after.status).toBe("completed");
+    expect(after.progress[0].total).toBe(42);
+    expect(after.progress[0].fetched).toBe(2);
+  });
+
+  it("leaves total null when preflight returns null", async () => {
+    const fetchMock = mockFetchSequence([
+      { status: 200, body: {
+        result: [{ _id: "u1" }],
+        pagedResultsCookie: null,
+      }},
+    ]);
+    const job = registry.startJob("uat", ["alpha_user"]);
+    await runPull({
+      job, registry, envsRoot: tmpDir, envVars: ENV_VARS,
+      mintToken: async () => "tok", fetchFn: fetchMock,
+      preflightCount: async () => null,
+      signal: new AbortController().signal,
+    });
+    const after = registry.getJob(job.id)!;
+    expect(after.status).toBe("completed");
+    expect(after.progress[0].total).toBeNull();
   });
 });

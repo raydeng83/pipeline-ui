@@ -11,6 +11,8 @@ vi.mock("@/lib/iga-api", () => ({
 
 // Give global fetch a deterministic two-page response.
 const pages = [
+  // Preflight (_countPolicy=EXACT&_pageSize=1): returns just the count.
+  { status: 200, body: { result: [], pagedResultsCookie: null, totalPagedResults: 3 } },
   { status: 200, body: {
     result: [{ _id: "u1", userName: "alice" }, { _id: "u2", userName: "bob" }],
     pagedResultsCookie: "c1", totalPagedResults: 3,

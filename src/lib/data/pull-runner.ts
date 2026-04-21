@@ -18,6 +18,13 @@ export interface RunPullOpts {
   fetchFn?: typeof fetch;
   signal: AbortSignal;
   retryDelayMs?: number;
+  /**
+   * Optional preflight count source. Returns the total records expected for
+   * a type, or null if unknown. Default implementation queries the tenant
+   * with _countPolicy=EXACT. Tests typically pass a no-op to avoid having
+   * to mock the preflight HTTP call.
+   */
+  preflightCount?: (type: string, token: string) => Promise<number | null>;
 }
 
 export async function runPull(opts: RunPullOpts): Promise<void> {
@@ -42,6 +49,40 @@ export async function runPull(opts: RunPullOpts): Promise<void> {
 
   let anyFailed = false;
 
+  // Preflight: ask AIC for an exact count before paginating, so the progress
+  // bar renders a real denominator from the first update. Default tenant
+  // behavior returns totalPagedResults = -1 (cheap, no count); _countPolicy
+  // EXACT is a one-off cost acceptable here because the subsequent pull
+  // dwarfs it.
+  const preflightCount = opts.preflightCount ?? defaultPreflightCount;
+
+  async function defaultPreflightCount(type: string, bearer: string): Promise<number | null> {
+    const url = new URL(`${tenantUrl}/openidm/managed/${type}`);
+    url.searchParams.set("_queryFilter", "true");
+    url.searchParams.set("_countPolicy", "EXACT");
+    url.searchParams.set("_pageSize", "1");
+    try {
+      let res = await fetchFn(url.toString(), {
+        headers: { Authorization: `Bearer ${bearer}` },
+        signal,
+      });
+      if (res.status === 401 || res.status === 403) {
+        token = await mintToken(envVars);
+        res = await fetchFn(url.toString(), {
+          headers: { Authorization: `Bearer ${token}` },
+          signal,
+        });
+      }
+      if (!res.ok) return null;
+      const data = await res.json() as { totalPagedResults?: number };
+      return typeof data.totalPagedResults === "number" && data.totalPagedResults >= 0
+        ? data.totalPagedResults
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
   outer:
   for (const type of job.types) {
     if (signal.aborted) break;
@@ -51,9 +92,12 @@ export async function runPull(opts: RunPullOpts): Promise<void> {
     fs.mkdirSync(typePullingDir, { recursive: true });
 
     let cookie: string | null = null;
-    let total: number | null = null;
+    let total: number | null = await preflightCount(type, token);
     let fetched = 0;
     let typeFailed = false;
+    if (total !== null) {
+      registry.updateProgress(job.id, type, { fetched: 0, total });
+    }
 
     pages:
     while (true) {
@@ -123,7 +167,11 @@ export async function runPull(opts: RunPullOpts): Promise<void> {
             fs.writeFileSync(path.join(typePullingDir, `${id}.json`), JSON.stringify(item, null, 2));
             fetched++;
           }
-          if (typeof data.totalPagedResults === "number") total = data.totalPagedResults;
+          // Only accept a non-negative total. Default tenant behavior returns
+          // -1 ("unknown"); accepting it would make the UI show `N / -1`.
+          if (typeof data.totalPagedResults === "number" && data.totalPagedResults >= 0) {
+            total = data.totalPagedResults;
+          }
 
           registry.updateProgress(job.id, type, { fetched, total });
 
